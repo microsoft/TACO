@@ -1,0 +1,10 @@
+{
+  "name": "TSCWrapper",
+  "version": "0.0.0",
+  "description": "TSCWrapper",
+  "main": "ts-compile-hook.js",
+  "author": {
+    "name": "dalebu",
+    "email": ""
+  }
+}
