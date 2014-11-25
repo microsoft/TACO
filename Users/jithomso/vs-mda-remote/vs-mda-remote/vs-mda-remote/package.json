@@ -1,0 +1,50 @@
+{
+  "name": "vs-mda-remote",
+  "description": "OSX agent to remotely build, run, and debug iOS apps created using Visual Studio Tools for Apache Cordova.",
+  "version": "0.2.5",
+  "author": {
+    "name": "Microsoft Corporation",
+    "email": "multidevicehybridapp@microsoft.com"
+  },
+  "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
+  "main": "./lib/server.js",
+  "bin": {
+    "vs-mda-remote": "./bin/vs-mda-remote"
+  },
+  "os" : ["darwin"],
+  "preferGlobal": true,
+  "dependencies": {
+    "cordova": "4.0.0",
+    "express": "3.4.8",
+    "request": "2.36.0",
+    "tar": "0.1.20",
+    "fstream": "0.1.28",
+    "zip-stream": "0.2.3",
+    "nconf": "0.6.9",
+    "q": "1.0.1",
+    "elementtree": "0.1.6",
+    "semver": "2.3.1",
+    "optimist": "0.6.1",
+    "rimraf": "2.2.6",
+    "mkdirp": "0.3.5",
+    "ncp": "0.5.1",
+    "plist-with-patches": "0.5.1",
+    "ios-sim": "2.0.1",
+    "readline-sync":  "0.4.9"
+  },
+  "devDependencies": {
+    "nodeunit": "0.8.7",
+    "assert":  "1.1.1"
+  },
+  "scripts": {
+    "test": "nodeunit test",
+    "preinstall": "echo \"Enabling Developer mode on Mac. Enter an administrator password if prompted.\" && (DevToolsSecurity -enable || true)"
+  },
+  "directories": {
+    "lib": "lib",
+    "doc": ".",
+    "test": "test",
+    "example": "examples"
+  },
+  "readmeFilename": "README.md"
+}
