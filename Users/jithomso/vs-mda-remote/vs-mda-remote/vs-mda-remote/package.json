@@ -38,7 +38,8 @@
   },
   "scripts": {
     "test": "nodeunit test",
-    "preinstall": "echo \"Enabling Developer mode on Mac. Enter an administrator password if prompted.\" && (DevToolsSecurity -enable || true)"
+	"preinstall": "echo \"Enabling Developer mode on Mac. Enter an administrator password if prompted.\" && (DevToolsSecurity -enable || true)",
+	"prepublish": "node_modules/typescript/bin/tsc --module commonjs lib/*.ts Scripts/typings/*/*.d.ts"
   },
   "directories": {
     "lib": "lib",
