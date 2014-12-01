@@ -6,15 +6,17 @@
 "use strict";
 
 import express = require('express');
-import buildManager = require('./buildManager');
-import bi = require('./buildInfo');
-import resources = require('./resources');
-import util = require('./util');
+import fs = require('fs');
 import http = require('http');
 import https = require('https');
-import fs = require('fs');
 import path = require('path');
+
+import bi = require('./buildInfo');
+import buildManager = require('./buildManager');
 import OSSpecifics = require('./OSSpecifics');
+import resources = require('./resources');
+import util = require('./util');
+
 var osSpecifics = OSSpecifics.osSpecifics;
 
 module Server {

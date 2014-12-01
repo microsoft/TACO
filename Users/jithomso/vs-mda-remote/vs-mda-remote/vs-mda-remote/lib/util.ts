@@ -6,9 +6,10 @@
 "use strict";
 
 import fs = require('fs');
+import mkdirp = require('mkdirp');
 import ncp = require('ncp');
 import path = require('path');
-import mkdirp = require('mkdirp');
+
 
 module Util {
     export function createDirectoryIfNecessary(dir: string) : boolean {

@@ -5,18 +5,19 @@
 ********************************************************/
 "use strict";
 
-import path = require('path');
-import Q = require('q');
-import resources = require('resources');
-import OSSpecifics = require('./OSSpecifics');
-import certs = require('./darwinCerts');
+import child_process = require('child_process');
+import express = require('express');
 import fs = require('fs');
 import nconf = require('nconf');
-import child_process = require('child_process');
+import path = require('path');
+import Q = require('q');
 import readline = require('readline');
-import bi = require('./buildInfo');
-import express = require('express');
+import resources = require('resources');
 import packer = require('zip-stream');
+
+import bi = require('./buildInfo');
+import certs = require('./darwinCerts');
+import OSSpecifics = require('./OSSpecifics');
 
 /// <reference path="../Scripts/typings/Q/Q-extensions.d.ts"/>
 

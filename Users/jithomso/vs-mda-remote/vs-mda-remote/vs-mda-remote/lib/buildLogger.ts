@@ -5,9 +5,9 @@
 ********************************************************/
 "use strict";
 
+import child_process = require('child_process');
 import fs = require('fs');
 import path = require('path');
-import child_process = require('child_process');
 
 class BuildLogger {
     stream: fs.WriteStream;

@@ -5,10 +5,11 @@
 ********************************************************/
 "use strict";
 
-import os = require('os');
-import Q = require('q');
 import child_process = require('child_process');
 import express = require('express');
+import os = require('os');
+import Q = require('q');
+
 import bi = require('./buildInfo');
 
 module OsSpecifics {

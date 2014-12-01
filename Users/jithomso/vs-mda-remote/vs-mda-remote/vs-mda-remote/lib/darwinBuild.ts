@@ -5,17 +5,19 @@
 ********************************************************/
 "use strict";
 
-import bi = require('./buildInfo');
-import resources = require('./resources');
-import CordovaConfig = require('./cordovaConfig');
-import util = require('./util');
+import child_process = require('child_process');
 import cordova = require('cordova');
+import fs = require('fs');
 import path = require('path');
 import Q = require('q');
-import fs = require('fs');
-import plist = require('./plist');
 import rimraf = require('rimraf');
-import child_process = require('child_process');
+
+import bi = require('./buildInfo');
+import CordovaConfig = require('./cordovaConfig');
+import resources = require('./resources');
+import plist = require('./plist');
+import util = require('./util');
+
 
 cordova.on('results', console.info);
 cordova.on('log', console.info);

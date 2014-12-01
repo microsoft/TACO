@@ -4,14 +4,16 @@
 *                                                       *
 ********************************************************/
 "use strict";
-import path = require('path');
-import nconf = require('nconf');
+
 import fs = require('fs');
+import nconf = require('nconf');
+import path = require('path');
 import Q = require('q');
+
+import OSSpecifics = require('./OSSpecifics');
 import resources = require('./resources');
 import server = require('./server');
 
-import OSSpecifics = require('OSSpecifics');
 var osSpecifics = OSSpecifics.osSpecifics;
 
 module VsMdaRemoteCli {

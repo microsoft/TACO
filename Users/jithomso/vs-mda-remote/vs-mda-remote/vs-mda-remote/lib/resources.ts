@@ -7,6 +7,7 @@
 
 import fs = require('fs');
 import path = require('path');
+
 import util = require('./util');
 
 module Resources {

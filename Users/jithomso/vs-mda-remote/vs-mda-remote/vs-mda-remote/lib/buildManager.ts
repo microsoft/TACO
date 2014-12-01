@@ -5,22 +5,23 @@
 ********************************************************/
 "use strict";
 
-import path = require('path');
-import util = require('./util');
-import buildRetention = require('./buildRetention');
-import bi = require('./buildInfo');
-import resources = require('./resources');
+import child_process = require('child_process');
 import express = require('express');
-import nconf = require('nconf');
 import fs = require('fs');
+import nconf = require('nconf');
+import path = require('path');
+import semver = require('semver');
 import tar = require('tar');
 import zlib = require('zlib');
-import semver = require('semver');
-import child_process = require('child_process');
-import buildLogger = require('./buildLogger');
-import CordovaConfig = require('./cordovaConfig');
 
-import OSSpecifics = require('OSSpecifics');
+import bi = require('./buildInfo');
+import buildLogger = require('./buildLogger');
+import buildRetention = require('./buildRetention');
+import CordovaConfig = require('./cordovaConfig');
+import OSSpecifics = require('./OSSpecifics');
+import resources = require('./resources');
+import util = require('./util');
+
 var osSpecifics = OSSpecifics.osSpecifics;
 
 module BuildManager {

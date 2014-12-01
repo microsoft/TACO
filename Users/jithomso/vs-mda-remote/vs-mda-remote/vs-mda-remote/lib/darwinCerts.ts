@@ -5,15 +5,17 @@
 ********************************************************/
 "use strict";
 
-import path = require("path");
-import readline = require("readline");
-import fs = require("fs");
-import Q = require("q");
-import os = require("os");
-import rimraf = require("rimraf");
-import util = require("./util");
-import res = require("./resources");
 import child_process = require("child_process");
+import fs = require("fs");
+import os = require("os");
+import path = require("path");
+import Q = require("q");
+import readline = require("readline");
+import rimraf = require("rimraf");
+
+import res = require("./resources");
+import util = require("./util");
+
 var exec = child_process.exec;
 
 module Certs {

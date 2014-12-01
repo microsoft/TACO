@@ -5,9 +5,11 @@
 ********************************************************/
 "use strict";
 
-import pl = require('plist-with-patches');
+
 import fs = require('fs');
 import path = require('path');
+import pl = require('plist-with-patches');
+
 import CordovaConfig = require('./cordovaConfig');
 import util = require('./util');
 

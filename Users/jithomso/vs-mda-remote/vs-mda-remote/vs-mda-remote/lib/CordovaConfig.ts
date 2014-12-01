@@ -7,6 +7,7 @@
 
 import et = require('elementtree');
 import path = require('path');
+
 import util = require('./util');
 
 class CordovaConfig {
