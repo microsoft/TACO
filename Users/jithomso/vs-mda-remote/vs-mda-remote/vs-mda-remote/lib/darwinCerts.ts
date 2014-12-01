@@ -29,7 +29,7 @@ module Certs {
         get(key: string): any
     }
 
-    export function resetServerCert(conf: Conf, yesOrNoHandler?: any) : Q.IPromise<any> {
+    export function resetServerCert(conf: Conf, yesOrNoHandler?: any) : Q.Promise<any> {
         var certsDir = path.join(conf.get('serverDir'), 'certs');
 
         if (!fs.existsSync(certsDir)) {
@@ -61,13 +61,13 @@ module Certs {
             });
     };
 
-    export function generateClientCert(conf: Conf) : Q.IPromise<number> {
+    export function generateClientCert(conf: Conf) : Q.Promise<number> {
         var certsDir = path.join(conf.get('serverDir'), 'certs');
         var caKeyPath = path.join(certsDir, 'ca-key.pem');
         var caCertPath = path.join(certsDir, 'ca-cert.pem');
         if (!fs.existsSync(caKeyPath) || !fs.existsSync(caCertPath)) {
             var error = res.getString(conf.get("lang"), "CAFilesNotFound", caKeyPath, caCertPath);
-            return Q({}).thenReject(error);
+            return Q(0).thenReject(error);
         }
         return makeClientPinAndSslCert(caKeyPath, caCertPath, certsDir, certOptionsFromConf(conf), conf).
             then(function (pin) {
@@ -79,7 +79,7 @@ module Certs {
             });
     };
 
-    export function initializeServerCerts(conf: Conf) : Q.IPromise<any>{
+    export function initializeServerCerts(conf: Conf) : Q.Promise<any>{
         var certsDir = path.join(conf.get('serverDir'), 'certs');
         var certPaths = {
             certsDir: certsDir,
@@ -122,7 +122,7 @@ module Certs {
     }
 
 
-    export function isExpired(certPath: string) {
+    export function isExpired(certPath: string) : Q.Promise<boolean> {
         return displayCert(certPath, ['dates']).
             then(function (output) {
                 var notAfter = new Date(output.stdout.substring(output.stdout.indexOf('notAfter=') + 9, output.stdout.length - 1));
@@ -131,7 +131,7 @@ module Certs {
     };
 
     // display fields an array of any of these: 'subject', 'issuer', 'dates', etc. (see https://www.openssl.org/docs/apps/x509.html)
-    export function displayCert(certPath: string, displayFields: string[]): Q.IPromise<{ stdout: string; stderr: string }>{
+    export function displayCert(certPath: string, displayFields: string[]): Q.Promise<{ stdout: string; stderr: string }>{
         //openssl x509 -noout -in selfsigned-cert.pem -subject -issuer -dates
         var args = 'x509 -noout -in ' + certPath;
         (displayFields || []).forEach(function (f) {
@@ -140,8 +140,15 @@ module Certs {
         return openSslPromise(args);
     };
 
-    function openSslPromise(args): Q.IPromise<{ stdout: string; stderr: string}>{
-        var deferred = Q.defer();
+    export function removeAllCertsSync(conf: Conf): void {
+        var certsDir = path.join(conf.get('serverDir'), 'certs');
+        if (fs.existsSync(certsDir)) {
+            rimraf.sync(certsDir);
+        }
+    }
+
+    function openSslPromise(args): Q.Promise<{ stdout: string; stderr: string}>{
+        var deferred = Q.defer<{ stdout: string; stderr: string}>();
 
         exec('openssl ' + args, function (error, stdout, stderr) {
             if (verbose) {
@@ -152,7 +159,7 @@ module Certs {
             if (error !== null) {
                 deferred.reject(error);
             } else {
-                deferred.resolve({ stdout: stdout, stderr: stderr });
+                deferred.resolve({ stdout: stdout.toString(), stderr: stderr.toString() });
             }
         });
 
@@ -170,7 +177,7 @@ module Certs {
     }
 
     // Makes a CA cert that will be used for self-signing our server and client certs.
-    function makeSelfSigningCACert(caKeyPath: string, caCertPath: string, options?: any) {
+    function makeSelfSigningCACert(caKeyPath: string, caCertPath: string, options?: any): Q.Promise<{ stdout: string; stderr: string }> {
         options = options || {};
         var days = options.days || CERT_DEFAULTS.DAYS;
         var country = options.country || CERT_DEFAULTS.COUNTRY;
@@ -218,7 +225,7 @@ module Certs {
         fs.writeFileSync(cnfPath, cnf);
     }
 
-    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: any, conf: Conf) : Q.IPromise<number> {
+    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: any, conf: Conf) : Q.Promise<number> {
         options = options || {};
         options.cn = 'vs-mda-remote-client';
         var clientCertsPath = path.join(certsDir, 'client');

@@ -10,14 +10,15 @@ import path = require('path');
 import util = require('./util');
 
 module Resources {
-    interface IResourceHashMap {
-        [key: string]: any;
-    }
-    var resources: IResourceHashMap = null;
+    var resources: { [key: string]: any; } = null;
     var supportedLanguages: string[] = null;
     var defaultLang = 'en';
 
     export function init(resourcesDir?: string) {
+        if (resources) {
+            // If we have already been initialized then don't re-init
+            return;
+        }
         if (!resourcesDir) {
             resourcesDir = path.join(__dirname, '..', 'resources');
         }
@@ -49,7 +50,7 @@ module Resources {
             s = s.join('\n');
         }
 
-        var args: any[] = getOptionalArgsArrayFromFunctionCall(arguments, 2);
+        var args: any[] = util.getOptionalArgsArrayFromFunctionCall(arguments, 2);
         if (args != null) {
             for (var i: number = 0; i < args.length; ++i) {
                 s = s.replace('{' + i + '}', args[i]);
@@ -105,16 +106,6 @@ module Resources {
     function loadLanguage(dir: string, language: string): any {
         var resourcesPath = path.join(dir, language, 'resources.json');
         return require(resourcesPath);
-    }
-
-    function getOptionalArgsArrayFromFunctionCall(functionArguments: IArguments, startFrom: number): any[] {
-        if (functionArguments.length <= startFrom) {
-            return null;
-        }
-        if (Array.isArray(functionArguments[startFrom])) {
-            return functionArguments[startFrom];
-        }
-        return Array.prototype.slice.apply(functionArguments, [startFrom]);
     }
 }
 

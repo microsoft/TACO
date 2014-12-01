@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 
 if (process.argv.length > 2 && process.argv[2] === 'test') {
     // if issued with test command, runs a selftest

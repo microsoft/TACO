@@ -8,7 +8,7 @@ import path = require('path');
 import nconf = require('nconf');
 import fs = require('fs');
 import Q = require('q');
-import resources = require('resources');
+import resources = require('./resources');
 import server = require('./server');
 
 import OSSpecifics = require('OSSpecifics');

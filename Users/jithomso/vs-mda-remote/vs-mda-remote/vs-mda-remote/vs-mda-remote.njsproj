@@ -38,9 +38,16 @@
     <Content Include="README.md" />
     <Content Include="resources\en\resources.json" />
     <Content Include="RESTAPI.md" />
+    <TypeScriptCompile Include="lib\darwinBuild.ts" />
+    <TypeScriptCompile Include="lib\buildInfo.ts" />
+    <TypeScriptCompile Include="lib\buildLogger.ts" />
+    <TypeScriptCompile Include="lib\buildManager.ts" />
+    <TypeScriptCompile Include="lib\buildRetention.ts" />
+    <TypeScriptCompile Include="lib\cordovaConfig.ts" />
     <TypeScriptCompile Include="lib\darwinCerts.ts" />
     <TypeScriptCompile Include="lib\cli.ts" />
-    <TypeScriptCompile Include="lib\darwin_specifics.ts" />
+    <TypeScriptCompile Include="lib\darwinSpecifics.ts" />
+    <TypeScriptCompile Include="lib\plist.ts" />
     <TypeScriptCompile Include="lib\resources.ts" />
     <TypeScriptCompile Include="lib\OSSpecifics.ts" />
     <TypeScriptCompile Include="lib\server.ts" />
@@ -65,18 +72,25 @@
     <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Splashscreen.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Vibration.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\cordova\plugins\WebSQL.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\elementtree\elementtree.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\express\express-extensions.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\express\express.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\form-data\form-data.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\fstream\fstream.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\mkdirp\mkdirp.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\nconf\nconf.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\ncp\ncp.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\node\node-extensions.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\plist-with-patches\plist-with-patches.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\q\Q-extensions.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\q\Q.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\request\request.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\rimraf\rimraf.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\semver\semver.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\tar\tar.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\zip-stream\zip-stream.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
@@ -87,16 +101,21 @@
     <Folder Include="Scripts\typings\" />
     <Folder Include="Scripts\typings\cordova\" />
     <Folder Include="Scripts\typings\cordova\plugins\" />
+    <Folder Include="Scripts\typings\express\" />
     <Folder Include="Scripts\typings\form-data\" />
     <Folder Include="Scripts\typings\fstream\" />
     <Folder Include="Scripts\typings\jquery\" />
     <Folder Include="Scripts\typings\mkdirp\" />
     <Folder Include="Scripts\typings\nconf\" />
     <Folder Include="Scripts\typings\ncp\" />
+    <Folder Include="Scripts\typings\elementtree\" />
+    <Folder Include="Scripts\typings\zip-stream\" />
+    <Folder Include="Scripts\typings\plist-with-patches\" />
     <Folder Include="Scripts\typings\node\" />
     <Folder Include="Scripts\typings\q\" />
     <Folder Include="Scripts\typings\request\" />
     <Folder Include="Scripts\typings\rimraf\" />
+    <Folder Include="Scripts\typings\semver\" />
     <Folder Include="Scripts\typings\tar\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />

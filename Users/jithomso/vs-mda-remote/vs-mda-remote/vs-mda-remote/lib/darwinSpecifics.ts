@@ -9,11 +9,14 @@ import path = require('path');
 import Q = require('q');
 import resources = require('resources');
 import OSSpecifics = require('./OSSpecifics');
-import certs = require('darwinCerts');
+import certs = require('./darwinCerts');
 import fs = require('fs');
 import nconf = require('nconf');
 import child_process = require('child_process');
 import readline = require('readline');
+import bi = require('./buildInfo');
+import express = require('express');
+import packer = require('zip-stream');
 
 /// <reference path="../Scripts/typings/Q/Q-extensions.d.ts"/>
 
@@ -38,8 +41,12 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
         return base;
     }
 
-    // TODO: acquire ios-sim at this point as well rather than listing it as a dependency
-    initialize(): Q.IPromise<any> {
+    // TODO: acquire ios-sim and any other ios-specific dependencies at this point as well rather than listing it as a dependency
+    initialize(): Q.Promise<any> {
+        if (process.getuid() === 0) {
+            console.warn(resources.getString(nconf.get("lang"), "NotRunAsRoot"));
+            process.exit(1);
+        }
         var firstRunPath = path.join(process.env.HOME, ".vs-mda-remote")
         var isFirstRun = !fs.existsSync(firstRunPath);
         var deferred = Q.defer();
@@ -81,8 +88,8 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
                         // Install these packages if they do not exist.
                         // We need to check first since the install will fail if an older version is already installed.
                         // ideviceinstaller and ios-webkit-debug-proxy will install libimobiledevice if required
-                        return Q.denodeify(child_process.exec)("(brew list ideviceinstaller > /dev/null || brew install ideviceinstaller) && \
-                                                            (brew list ios-webkit-debug-proxy > /dev/null || brew install ios-webkit-debug-proxy)");
+                        return Q.denodeify(child_process.exec)("(brew list ideviceinstaller | grep ideviceinstaller > /dev/null || brew install ideviceinstaller) && \
+                                                            (brew list ios-webkit-debug-proxy | grep ios-webkit-debug-proxy > /dev/null || brew install ios-webkit-debug-proxy)");
                     }).then(function (success) {
                             // Verify that both of these can run.
                             Q.denodeify(child_process.exec)("ideviceinstaller -h > /dev/null && ios_webkit_debug_proxy -h > /dev/null")
@@ -118,12 +125,60 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
         console.info(resources.getString(language, "UsageInformation"));
     }
 
-    resetServerCert(conf: OSSpecifics.Conf): Q.IPromise<any> {
+    resetServerCert(conf: OSSpecifics.Conf): Q.Promise<any> {
         return certs.resetServerCert(conf);
     }
 
-    generateClientCert(conf: OSSpecifics.Conf): Q.IPromise<any> {
+    generateClientCert(conf: OSSpecifics.Conf): Q.Promise<number> {
         return certs.generateClientCert(conf);
+    }
+
+    initializeServerCerts(conf: OSSpecifics.Conf): Q.Promise<any> {
+        return certs.initializeServerCerts(conf);
+    }
+
+    removeAllCertsSync(conf: OSSpecifics.Conf): void {
+        certs.removeAllCertsSync(conf);
+    }
+
+    createBuildProcess(): child_process.ChildProcess {
+        return child_process.fork(path.join(__dirname, 'darwinBuild.js'), [], { silent: true });
+    }
+
+    downloadBuild(buildInfo: bi.BuildInfo, req: express.Request, res: express.Response, callback: Function): void {
+        var platformOutputDir = path.join(buildInfo.appDir, 'platforms', 'ios', 'build', 'device');
+        var pathToPlistFile = path.join(platformOutputDir, buildInfo.appName + '.plist');
+        var pathToIpaFile = path.join(platformOutputDir, buildInfo.appName + '.ipa');
+        if (!fs.existsSync(pathToPlistFile) || !fs.existsSync(pathToIpaFile)) {
+            var msg = 'One or both of expected build outputs ' + pathToPlistFile + ' and ' + pathToIpaFile + ' are missing on file system.';
+            console.info(msg);
+            callback(msg, buildInfo);
+            return;
+        }
+
+        var archive = new packer();
+        archive.on('error', function (err) {
+            console.error('Error from archiving ' + err.message, err);
+            callback(err, buildInfo);
+        });
+        res.set({ 'Content-Type': 'application/zip' });
+        archive.pipe(res);
+        archive.entry(fs.createReadStream(pathToPlistFile), { name: buildInfo.appName + '.plist' }, function (err, file) {
+            if (err) {
+                console.error('Error from archiving plist file ' + err.message, err);
+                callback(err, buildInfo);
+                return;
+            }
+            archive.entry(fs.createReadStream(pathToIpaFile), { name: buildInfo.appName + '.ipa' }, function (err, file) {
+                if (err) {
+                    console.error('Error from archiving ipa file ' + err.message, err);
+                    callback(err, buildInfo);
+                    return;
+                }
+                archive.finalize();
+                callback(null, buildInfo);
+            });
+        });
     }
 }
 
