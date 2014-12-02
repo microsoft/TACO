@@ -58,6 +58,7 @@ module BuildManager {
         maxBuildsInQueue = conf.get('maxBuildsInQueue');
         deleteBuildsOnShutdown = util.argToBool(conf.get('deleteBuildsOnShutdown'));
 
+        /*
         // TODO: Move these to an OS-specific section? Need to decide what we support cross-platform
         allowsEmulate = util.argToBool(conf.get('allowsEmulate'));
         nativeDebugProxyPort = conf.get('nativeDebugProxyPort');
@@ -67,6 +68,7 @@ module BuildManager {
         if (allowsEmulate === true) {
             require('./emulate').init();
         }
+        */
 
         buildRetention.init(baseBuildDir, conf);
         // For now, using process startup pid as the initial build number is good enough to avoid collisions with prior server runs against 

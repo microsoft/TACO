@@ -12,12 +12,12 @@ import nconf = require('nconf');
 import path = require('path');
 import Q = require('q');
 import readline = require('readline');
-import resources = require('resources');
 import packer = require('zip-stream');
 
 import bi = require('./buildInfo');
 import certs = require('./darwinCerts');
 import OSSpecifics = require('./OSSpecifics');
+import resources = require('./resources');
 
 /// <reference path="../Scripts/typings/Q/Q-extensions.d.ts"/>
 
@@ -31,7 +31,7 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
             'webDebugProxyRangeMin': 9222,
             'webDebugProxyRangeMax': 9322,
             'writePidToFile': false,
-            'lang': process.env.LANG.replace(/_.*/, ""), // Convert "en_US.UTF8" to "en", similarly for other locales
+            'lang': process.env.LANG && process.env.LANG.replace(/_.*/, "") || "en", // Convert "en_US.UTF8" to "en", similarly for other locales
             'suppressVisualStudioMessage': false,
         };
         for (var key in osxdefaults) {
@@ -182,5 +182,5 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
         });
     }
 }
-
-export = DarwinSpecifics
+var darwinSpecifics: OSSpecifics.IOsSpecifics = new DarwinSpecifics();
+export = darwinSpecifics;

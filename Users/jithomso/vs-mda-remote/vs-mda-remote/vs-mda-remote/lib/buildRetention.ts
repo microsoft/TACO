@@ -57,14 +57,15 @@ module BuildRetention {
 
     function deleteBuilds(builds: { [idx: string]: bi.BuildInfo }, toDelete: string[], sync?:boolean): void {
         for (var i = 0; i < toDelete.length; ++i) {
-            var buildInfo = builds[i];
+            var idx = toDelete[i];
+            var buildInfo = builds[idx];
             console.info(resources.getString(conf.get('lang'), "BuildRetentionDelete"), buildInfo.buildNumber, buildInfo.buildDir);
             if (sync) {
                 rimraf.sync(buildInfo.buildDir);
             } else {
                 deleteBuildDirectory(buildInfo.buildDir);
             }
-            delete builds[builds[i].buildNumber];
+            delete builds[idx];
         }
     }
 

@@ -34,7 +34,7 @@ module OsSpecifics {
     export var osSpecifics: IOsSpecifics ;
     if (osSpecifics === undefined) {
         var platform: string = os.platform();
-        osSpecifics = require(platform + "Specifics");
+        osSpecifics = require("./" + platform + "Specifics");
     }
 }
 

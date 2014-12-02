@@ -10,6 +10,7 @@ import fs = require('fs');
 import http = require('http');
 import https = require('https');
 import path = require('path');
+import Q = require('q');
 
 import bi = require('./buildInfo');
 import buildManager = require('./buildManager');
