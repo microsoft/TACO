@@ -1,4 +1,8 @@
-﻿/// <reference path="..\Scripts\typings\node\node.d.ts" />
+﻿/// <reference path='..\scripts\typings\node.d.ts' />
+var child_process = require('child_process');
+var path = require('path');
+var fs = require('fs');
+
 var CordovaTools;
 (function (CordovaTools) {
     
@@ -12,14 +16,12 @@ var CordovaTools;
         /**
         * Compiles the typescript files found in the project.
         */
-        TSCInvoker.prototype.compileTypescript = function () {
-            var exec = require('child_process').exec;
-
+        TSCInvoker.prototype.compileTypescriptShell = function () {
             var tsCompileCommand = this.composeCompileCommand();
             console.log('\nInvoking typescript compiler...');
             console.log(tsCompileCommand);
 
-            exec(tsCompileCommand, function (error, stdout, stderr) {
+            child_process.exec(tsCompileCommand, function (error, stdout, stderr) {
                 if (stdout) {
                     console.log('\n' + stdout);
                 }
@@ -36,38 +38,42 @@ var CordovaTools;
             });
         };
 
+        //public compileTypescriptInternal() {
+        ////var ts = require(path.join(process.argv[2], TSCInvoker.TYPESCRIPT_INTERNAL_COMPILER_PATH));
+        //var ts = require(path.join(process.argv[2], ".\\hooks\\typescript\\tsc.js"));
+        //ts.executeCommandLine(["c:\\Users\\dalebu\\Desktop\\tscordova\\sampleproject\\www\\js\\index.ts"]);
+        //}
         /**
         * Composes the typescript compiler command.
         */
         TSCInvoker.prototype.composeCompileCommand = function () {
-            var path = require('path');
             var configuration = this.readConfiguration();
 
-            var compilerOptions = "";
+            var compilerOptions = '';
             var sourceFiles = [];
             var projectDirectory = process.argv[2];
 
             /* Add the compiler options. */
             if (configuration && configuration.options) {
                 for (var option in configuration.options) {
-                    compilerOptions += " --" + option;
-                    if (configuration.options[option] !== "") {
-                        compilerOptions += " " + configuration.options[option];
+                    compilerOptions += ' --' + option;
+                    if (configuration.options[option] !== '') {
+                        compilerOptions += ' ' + configuration.options[option];
                     }
                 }
             }
 
             /* Add the source files. */
             var sourceLocations = (configuration && configuration.filesRoot) ? configuration.filesRoot : TSCInvoker.DEFAULT_SOURCE_DIRECTORIES;
-            console.log("\nSearching for typescript source files...");
-            console.log("Searching the following location(s): " + sourceLocations);
+            console.log('\nSearching for typescript source files...');
+            console.log('Searching the following location(s): ' + sourceLocations);
 
             var filesRootDirectories = sourceLocations.split(';');
             for (var i = 0; i < filesRootDirectories.length; i++) {
                 this.getProjectTypescriptFiles(path.join(projectDirectory, filesRootDirectories[i]), sourceFiles);
             }
 
-            console.log("Found typescript sources:");
+            console.log('Found typescript sources:');
 
             var filesArgument = '';
             for (var i = 0; i < sourceFiles.length; i++) {
@@ -85,8 +91,6 @@ var CordovaTools;
             var result = null;
 
             /* try to read the adjacent configuration file */
-            var fs = require('fs');
-
             if (fs.existsSync(TSCInvoker.CONFIGURATION_FILE_PATH)) {
                 var buffer = fs.readFileSync(TSCInvoker.CONFIGURATION_FILE_PATH);
                 if (buffer) {
@@ -101,16 +105,13 @@ var CordovaTools;
         * Recursively finds all the typescript files under the filesRoot path.
         */
         TSCInvoker.prototype.getProjectTypescriptFiles = function (filesRoot, result) {
-            var fileSystem = require('fs');
-            var path = require('path');
-
-            if (fileSystem.existsSync(filesRoot)) {
-                var files = fileSystem.readdirSync(filesRoot);
+            if (fs.existsSync(filesRoot)) {
+                var files = fs.readdirSync(filesRoot);
                 for (var i = 0; i < files.length; i++) {
                     var currentPath = path.join(filesRoot, files[i]);
-                    if (!fileSystem.statSync(currentPath).isDirectory()) {
+                    if (!fs.statSync(currentPath).isDirectory()) {
                         /* push the typescript files */
-                        if (path.extname(currentPath) === ".ts") {
+                        if (path.extname(currentPath) === '.ts') {
                             result.push(currentPath);
                         }
                     } else {
@@ -122,20 +123,18 @@ var CordovaTools;
 
             return result;
         };
-        TSCInvoker.DEFAULT_SOURCE_DIRECTORIES = "www;merges";
-        TSCInvoker.CONFIGURATION_FILE_PATH = '.\\hooks\\ts-compile-hook\\tsc-config.json';
+        TSCInvoker.DEFAULT_SOURCE_DIRECTORIES = 'www;merges';
+        TSCInvoker.CONFIGURATION_FILE_PATH = '.\\hooks\\compile-typescript\\tsc-config.json';
         return TSCInvoker;
     })();
     CordovaTools.TSCInvoker = TSCInvoker;
 })(CordovaTools || (CordovaTools = {}));
 
-/* Export the functionality. */
-module.exports.compileTypescript = function () {
-    try  {
-        var compiler = new CordovaTools.TSCInvoker();
-        compiler.compileTypescript();
-    } catch (e) {
-        console.log("\nAn error occurred while compiling the typescript files: " + e);
-        process.exit(1);
-    }
-};
+try  {
+    var compiler = new CordovaTools.TSCInvoker();
+    compiler.compileTypescriptShell();
+} catch (e) {
+    console.log('\nAn error occurred while compiling the typescript files: ' + e);
+    process.exit(1);
+}
+//};
