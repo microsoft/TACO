@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+if (process.argv.length > 2 && process.argv[2] === 'test') {
+    // if issued with test command, runs a selftest
+    var selftest = require('./../test/selftest');
+    selftest();
+} else {
+    // Main usage - starts the server
+    var cli = require('./../lib/cli');
+    cli();
+}

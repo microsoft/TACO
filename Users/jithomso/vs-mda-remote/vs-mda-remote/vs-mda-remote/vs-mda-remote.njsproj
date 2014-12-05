@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>vs-mda-remote</Name>
+    <RootNamespace>vs-mda-remote</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>3c0025a2-a5b5-44b9-ba1b-ea1634e52f33</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>app.js</StartupFile>
+    <StartWebBrowser>False</StartWebBrowser>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <ProjectView>ShowAllFiles</ProjectView>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+    <EnableTypeScript>true</EnableTypeScript>
+    <StartWebBrowser>false</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="bin\vs-mda-remote" />
+    <Content Include="package.json" />
+    <Content Include="README.md" />
+    <Content Include="resources\en\resources.json" />
+    <Content Include="RESTAPI.md" />
+    <TypeScriptCompile Include="lib\darwinBuild.ts" />
+    <TypeScriptCompile Include="lib\buildInfo.ts" />
+    <TypeScriptCompile Include="lib\buildLogger.ts" />
+    <TypeScriptCompile Include="lib\buildManager.ts" />
+    <TypeScriptCompile Include="lib\buildRetention.ts" />
+    <TypeScriptCompile Include="lib\cordovaConfig.ts" />
+    <TypeScriptCompile Include="lib\darwinCerts.ts" />
+    <TypeScriptCompile Include="lib\cli.ts" />
+    <TypeScriptCompile Include="lib\darwinSpecifics.ts" />
+    <TypeScriptCompile Include="lib\plist.ts" />
+    <TypeScriptCompile Include="lib\resources.ts" />
+    <TypeScriptCompile Include="lib\OSSpecifics.ts" />
+    <TypeScriptCompile Include="lib\server.ts" />
+    <TypeScriptCompile Include="lib\util.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\cordova.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\BatteryStatus.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Camera.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Contacts.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\cordova-extensions.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Device.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\DeviceMotion.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\DeviceOrientation.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Dialogs.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\FileSystem.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\FileTransfer.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Globalization.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\InAppBrowser.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Media.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\MediaCapture.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\NetworkInformation.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Push.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Splashscreen.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\Vibration.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\cordova\plugins\WebSQL.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\elementtree\elementtree.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\express\express-extensions.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\express\express.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\form-data\form-data.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\fstream\fstream.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\mkdirp\mkdirp.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\nconf\nconf.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\ncp\ncp.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\node\node-extensions.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\plist-with-patches\plist-with-patches.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\q\Q-extensions.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\q\Q.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\request\request.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\rimraf\rimraf.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\semver\semver.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\tar\tar.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\zip-stream\zip-stream.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\" />
+    <Folder Include="lib\" />
+    <Folder Include="resources\" />
+    <Folder Include="resources\en\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Scripts\typings\" />
+    <Folder Include="Scripts\typings\cordova\" />
+    <Folder Include="Scripts\typings\cordova\plugins\" />
+    <Folder Include="Scripts\typings\express\" />
+    <Folder Include="Scripts\typings\form-data\" />
+    <Folder Include="Scripts\typings\fstream\" />
+    <Folder Include="Scripts\typings\jquery\" />
+    <Folder Include="Scripts\typings\mkdirp\" />
+    <Folder Include="Scripts\typings\nconf\" />
+    <Folder Include="Scripts\typings\ncp\" />
+    <Folder Include="Scripts\typings\elementtree\" />
+    <Folder Include="Scripts\typings\zip-stream\" />
+    <Folder Include="Scripts\typings\plist-with-patches\" />
+    <Folder Include="Scripts\typings\node\" />
+    <Folder Include="Scripts\typings\q\" />
+    <Folder Include="Scripts\typings\request\" />
+    <Folder Include="Scripts\typings\rimraf\" />
+    <Folder Include="Scripts\typings\semver\" />
+    <Folder Include="Scripts\typings\tar\" />
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
