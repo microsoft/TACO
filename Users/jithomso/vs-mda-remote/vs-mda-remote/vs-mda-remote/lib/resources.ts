@@ -80,7 +80,7 @@ module Resources {
         if (typeof requestOrAcceptLangs === 'string') {
             langString = requestOrAcceptLangs;
         } else if (requestOrAcceptLangs.header) {
-            langString = requestOrAcceptLangs.headers['accept-language'];
+            langString = requestOrAcceptLangs.headers['accept-language'] || "";
         } else {
             throw new Error('Unsupported type of argument for acceptLangs: ' + (typeof requestOrAcceptLangs));
         }

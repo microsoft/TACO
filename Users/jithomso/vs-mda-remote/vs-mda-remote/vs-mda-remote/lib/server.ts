@@ -216,7 +216,7 @@ module Server {
         }, function (err) {
             res.set({ 'Content-Type': 'application/json' });
             res.send(err.code || 400, { status: resources.getString(req, 'InvalidBuildRequest'), errors: err });
-        });
+        }).done();
     }
 
     // Queries on the status of a build task, used by a client to poll

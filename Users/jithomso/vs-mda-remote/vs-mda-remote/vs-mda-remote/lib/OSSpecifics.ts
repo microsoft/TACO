@@ -45,11 +45,17 @@ module OsSpecifics {
         getDebugPort(req: express.Request, res: express.Response): void;
     }
 
-    export var osSpecifics: IOsSpecifics ;
-    if (osSpecifics === undefined) {
-        var platform: string = os.platform();
-        osSpecifics = require("./"+platform+"/"+platform+"Specifics");
-    }
+    export var osSpecifics: IOsSpecifics;
+    var cachedSpecifics: IOsSpecifics;
+    Object.defineProperty(OsSpecifics, 'osSpecifics', {
+        get: function () {
+            if (!cachedSpecifics) {
+                var platform: string = os.platform();
+                cachedSpecifics = require("./" + platform + "/" + platform + "Specifics");
+            }
+            return cachedSpecifics;
+        }
+    });
 }
 
 export = OsSpecifics;

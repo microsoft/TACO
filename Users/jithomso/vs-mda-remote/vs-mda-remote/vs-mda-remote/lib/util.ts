@@ -9,6 +9,7 @@ import fs = require('fs');
 import mkdirp = require('mkdirp');
 import ncp = require('ncp');
 import path = require('path');
+import Q = require('q');
 
 
 module Util {

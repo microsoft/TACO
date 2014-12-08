@@ -46,6 +46,8 @@ process.on('message', function (buildRequest: { buildInfo: bi.BuildInfo; languag
         process.exit(1);
     }
 
+    currentBuild = buildInfo;
+
     language = buildRequest.language;
 
     build(buildInfo, function (resultBuildInfo: bi.BuildInfo) {
@@ -73,10 +75,10 @@ function build(currentBuild: bi.BuildInfo, callback: Function) {
     var isDeviceBuild = currentBuild.options.indexOf('--device') !== -1;
 
     try {
-    Q.fcall(change_directory)
+    Q.fcall(change_directory, currentBuild)
         .then(add_ios)
         .then(isDeviceBuild ? setupSigning : noOp)
-        .fcall(applyPreferencesToBuildConfig, cfg)
+        .then(function () { applyPreferencesToBuildConfig(cfg); })
         .then(prepareIconsAndSplashscreens)
         .then(prepareResFiles)
         .then(updateAppPlistBuildNumber)
@@ -102,8 +104,9 @@ function build(currentBuild: bi.BuildInfo, callback: Function) {
     
 }
 
-function change_directory() {
+function change_directory(currentBuild: bi.BuildInfo): any {
     process.chdir(currentBuild.appDir);
+    return {};
 }
 
 function add_ios() : Q.Promise<any>{
