@@ -67,6 +67,7 @@
     <Content Include="README.md" />
     <Content Include="resources\en\resources.json" />
     <Content Include="RESTAPI.md" />
+    <Content Include="templates\EnterpriseApp.plist" />
     <TypeScriptCompile Include="lib\darwin\darwinAppRunner.ts" />
     <TypeScriptCompile Include="lib\darwin\darwinBuild.ts" />
     <TypeScriptCompile Include="lib\buildInfo.ts" />
@@ -153,6 +154,7 @@
     <Folder Include="lib\" />
     <Folder Include="lib\darwin\" />
     <Folder Include="lib\win32\" />
+    <Folder Include="templates\" />
     <Folder Include="Scripts\typings\mocha\" />
     <Folder Include="Scripts\typings\should\" />
     <Folder Include="test\" />

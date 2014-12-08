@@ -31,12 +31,11 @@ process.on('message', function (emulateRequest) {
     Q.fcall(emulate, emulateRequest)
         .then(function (result) {
             process.send(result);
-        });
+        }).done();
 });
 
 function emulate(emulateRequest: { appDir: string; appName: string; target: string}): Q.Promise<{ status: string; messageId: string; messageArgs?: any }>{
-    return
-    Q.fcall(cdToAppDir, emulateRequest)
+    return Q.fcall(cdToAppDir, emulateRequest)
         .then(cordovaEmulate)
         .then(function success() {
             return { status: 'emulated', messageId: 'EmulateSuccess' };

@@ -53,9 +53,7 @@ module Resources {
 
         var args: any[] = util.getOptionalArgsArrayFromFunctionCall(arguments, 2);
         if (args != null) {
-            console.info("\t" + s);
             for (var i: number = 0; i < args.length; ++i) {
-                console.info("{" + i + "} = " + args[i]);
                 s = s.replace('{' + i + '}', args[i]);
             }
         }

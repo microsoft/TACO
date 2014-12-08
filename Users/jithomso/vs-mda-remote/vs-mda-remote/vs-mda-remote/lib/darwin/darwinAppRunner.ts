@@ -59,8 +59,8 @@ module AppRunner {
                 var imagemounter = child_process.spawn('ideviceimagemounter', [path]);
                 var deferred = Q.defer();
                 var stdout = ''
-                imagemounter.stdout.on('data', function (data: string) {
-                    stdout += data;
+                imagemounter.stdout.on('data', function (data: any) {
+                    stdout += data.toString();
                 });
                 imagemounter.on('close', function (code) {
                     if (code !== 0) {
@@ -98,8 +98,9 @@ module AppRunner {
             var find = child_process.spawn('find', [sdkpath, '-path', '*' + version + '*', '-name', 'DeveloperDiskImage.dmg']);
             var deferred = Q.defer<string>();
 
-            find.stdout.on('data', function (data: string) {
-                var path = data.split("\n")[0].trim()
+            find.stdout.on('data', function (data: any) {
+                var dataStr: string = data.toString();
+                var path = dataStr.split("\n")[0].trim()
                 if (!path) {
                     deferred.reject('FailedFindDeveloperDiskImage');
                 } else {

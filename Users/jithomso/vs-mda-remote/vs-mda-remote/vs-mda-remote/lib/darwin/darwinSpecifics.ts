@@ -247,7 +247,11 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
 
         emulateProcess.on('message', function (result) {
             buildInfo.updateStatus(result.status, result.messageId, result.messageArgs);
-            res.send(200, buildInfo.localize(req));
+            if (result.status !== bi.ERROR) {
+                res.send(200, buildInfo.localize(req));
+            } else {
+                res.send(404, buildInfo.localize(req));
+            }
             emulateProcess.kill();
             emulateLogger.end();
         });
@@ -265,17 +269,19 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
         var ideviceinstaller = child_process.spawn('ideviceinstaller', ['-i', pathToIpaFile]);
         var stdout: string = "";
         var stderr: string = "";
-        ideviceinstaller.stdout.on('data', function (data: string) {
-            if (data.indexOf("ApplicationVerificationFailed") !== -1) {
+        ideviceinstaller.stdout.on('data', function (data: any) {
+            var dataStr: String = data.toString();
+            if (dataStr.indexOf("ApplicationVerificationFailed") !== -1) {
                 res.send(404, resources.getString(req, "ProvisioningFailed"));
             }
-            stdout += data;
+            stdout += dataStr;
         });
-        ideviceinstaller.stderr.on('data', function (data: string) {
-            if (data.toLowerCase().indexOf("error") !== -1) {
-                res.send(404, data);
+        ideviceinstaller.stderr.on('data', function (data: any) {
+            var dataStr : string = data.toString();
+            if (dataStr.toLowerCase().indexOf("error") !== -1) {
+                res.send(404, dataStr);
             }
-            stderr += data;
+            stderr += dataStr;
         });
         ideviceinstaller.on('close', function (code: number) {
             if (code !== 0) {
