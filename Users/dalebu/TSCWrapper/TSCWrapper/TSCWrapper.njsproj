@@ -37,19 +37,19 @@
   <ItemGroup>
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <Content Include="ts-compile-hook\tsc-config.json" />
-    <TypeScriptCompile Include="ts-compile-hook\tsc-invoker.ts" />
-    <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
+    <Content Include="src\tsc-config.json" />
+    <TypeScriptCompile Include="scripts\typings\node.d.ts" />
+    <TypeScriptCompile Include="src\tsc-invoker.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="before_prepare\" />
-    <Folder Include="ts-compile-hook\" />
-    <Folder Include="Scripts\" />
-    <Folder Include="Scripts\typings\" />
-    <Folder Include="Scripts\typings\node\" />
+    <Folder Include="src\" />
+    <Folder Include="scripts\typescript\" />
+    <Folder Include="scripts\" />
+    <Folder Include="scripts\typings\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="before_prepare\ts-compile-hook.js" />
+    <Compile Include="gulpfile.js" />
+    <Compile Include="src\ts-compile-hook.js" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
   <ProjectExtensions>
