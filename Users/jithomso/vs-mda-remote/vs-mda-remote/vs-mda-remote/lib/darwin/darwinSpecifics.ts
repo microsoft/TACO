@@ -208,16 +208,18 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
     }
 
     downloadClientCerts(req: express.Request, res: express.Response): void {
-        Q.fcall<string>(certs.downloadClientCerts, req.params.pin).then(function (pfxFile) {
+        Q.fcall<string>(certs.downloadClientCerts, req.params.pin).catch<string>(function (error) {
+            if (error.code) {
+                res.send(error.code, resources.getString(req, error.id));
+            } else {
+                res.send(404, error);
+            }
+            throw error;
+            return "";
+        }).then(function (pfxFile) {
             res.sendfile(pfxFile);
-        }).fcall(certs.invalidatePIN, req.params.pin)
-            .catch(function (error) {
-                if (error.code) {
-                    res.send(error.code, resources.getString(req, error.id));
-                } else {
-                    res.send(404, error);
-                }
-            });
+        }).then(function () { certs.invalidatePIN(req.params.pin);}).done();
+            
     }
 
     emulateBuild(req: express.Request, res: express.Response): void {

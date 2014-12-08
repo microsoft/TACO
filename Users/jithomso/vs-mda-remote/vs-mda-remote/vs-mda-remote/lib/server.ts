@@ -18,8 +18,6 @@ import OSSpecifics = require('./OSSpecifics');
 import resources = require('./resources');
 import util = require('./util');
 
-var osSpecifics = OSSpecifics.osSpecifics;
-
 module Server {
     export interface Conf {
         get(prop: string): any;
@@ -61,11 +59,11 @@ module Server {
         app.get('/build/:id', getBuildStatus);
         app.get('/build/:id/download', downloadBuild);
 
-        app.get('/build/:id/emulate', osSpecifics.emulateBuild);
-        app.get('/build/:id/deploy', osSpecifics.deployBuild);
-        app.get('/build/:id/run', osSpecifics.runBuild);
-        app.get('/build/:id/debug', osSpecifics.debugBuild);
-        app.get('/debugPort', osSpecifics.getDebugPort);
+        app.get('/build/:id/emulate', OSSpecifics.osSpecifics.emulateBuild);
+        app.get('/build/:id/deploy', OSSpecifics.osSpecifics.deployBuild);
+        app.get('/build/:id/run', OSSpecifics.osSpecifics.runBuild);
+        app.get('/build/:id/debug', OSSpecifics.osSpecifics.debugBuild);
+        app.get('/debugPort', OSSpecifics.osSpecifics.getDebugPort);
 
         app.get('/certs/:pin', downloadClientCerts);
         //app.get('/resources/:lang', getResources);
@@ -91,11 +89,11 @@ module Server {
     }
 
     export function resetServerCert(conf: Conf): Q.IPromise<any> {
-        return osSpecifics.resetServerCert(conf);
+        return OSSpecifics.osSpecifics.resetServerCert(conf);
     }
 
     export function generateClientCert(conf: Conf): Q.IPromise<any> {
-        return osSpecifics.generateClientCert(conf);
+        return OSSpecifics.osSpecifics.generateClientCert(conf);
     }
 
     function startupServer(conf: Conf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
@@ -124,12 +122,12 @@ module Server {
     function startupHttpsServer(conf: Conf, app: express.Application) : Q.Promise<https.Server> {
         var generatedNewCerts = false;
         var generatedClientPin;
-        return osSpecifics.initializeServerCerts(conf).
+        return OSSpecifics.osSpecifics.initializeServerCerts(conf).
             then(function (certStore) {
                 if (certStore.newCerts === true) {
                     generatedNewCerts = true;
                     conf.set('suppressVisualStudioMessage',true);
-                    return osSpecifics.generateClientCert(conf).
+                    return OSSpecifics.osSpecifics.generateClientCert(conf).
                         then(function (pin) {
                             generatedClientPin = pin;
                             return certStore;
@@ -151,7 +149,7 @@ module Server {
                 var deferred = Q.defer<https.Server>();
                 svr.on('error', function (err) {
                     if (generatedNewCerts === true) {
-                        osSpecifics.removeAllCertsSync(conf);
+                        OSSpecifics.osSpecifics.removeAllCertsSync(conf);
                     }
                     deferred.reject(friendlyServerListenError(err, conf));
                 });
@@ -264,7 +262,7 @@ module Server {
 
     // Downloads client SSL certs (pfx format) for pin specified in request
     function downloadClientCerts(req: express.Request, res: express.Response) {
-        osSpecifics.downloadClientCerts(req, res);
+        OSSpecifics.osSpecifics.downloadClientCerts(req, res);
     }
 }
 

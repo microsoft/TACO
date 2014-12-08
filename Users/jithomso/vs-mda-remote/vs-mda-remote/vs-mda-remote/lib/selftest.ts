@@ -18,13 +18,11 @@ import zlib = require('zlib');
 
 import OSSpecifics = require('./OSSpecifics');
 
-var osSpecifics = OSSpecifics.osSpecifics;
-
 function selfTest() {
     nconf.argv();
     nconf.defaults({
         'server': 'https://' + os.hostname() + ':3000',
-        'serverDir': osSpecifics.defaults({}).serverDir,
+        'serverDir': OSSpecifics.osSpecifics.defaults({}).serverDir,
         'wait': true,
         'download': false,
         'cordovaApp': path.resolve(__dirname, '../examples/cordovaApp/helloCordova'),
@@ -116,7 +114,7 @@ function initialize(serverUrl: string, serverDir: string) : Q.Promise<void>{
 
     if (serverUrl.indexOf('https:') === 0) {
         console.info('Initializing self test for https');
-        return osSpecifics.generateClientCert(nconf).
+        return OSSpecifics.osSpecifics.generateClientCert(nconf).
             then(function (pin) {
                 console.info('downloading cert for pin %d', pin);
                 return downloadClientCert(serverUrl, serverDir, pin);

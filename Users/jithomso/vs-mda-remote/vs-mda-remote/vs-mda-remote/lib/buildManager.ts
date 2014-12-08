@@ -22,8 +22,6 @@ import OSSpecifics = require('./OSSpecifics');
 import resources = require('./resources');
 import util = require('./util');
 
-var osSpecifics = OSSpecifics.osSpecifics;
-
 module BuildManager {
     export interface Conf {
         get(prop: string): any;
@@ -179,7 +177,7 @@ module BuildManager {
             callback(resources.getString(req,"BuildNotReadyForDownload", buildInfo.status), buildInfo);
             return;
         }
-        osSpecifics.downloadBuild(buildInfo, req, res, function (err, succ) {
+        OSSpecifics.osSpecifics.downloadBuild(buildInfo, req, res, function (err, succ) {
             if (!err) {
                 buildMetrics.downloaded++;
                 buildInfo.updateStatus(bi.DOWNLOADED);
@@ -349,7 +347,7 @@ module BuildManager {
 
         // Fork off to a child build process. This allows us to save off all stdout for that build to it's own log file. And in future we can 
         // have multiple builds in parallel by forking multiple child processes (with some max limit.)
-        var buildProcess = osSpecifics.createBuildProcess();
+        var buildProcess = OSSpecifics.osSpecifics.createBuildProcess();
         var buildLogger = new BuildLogger();
         buildLogger.begin(buildInfo.buildDir, 'build.log', buildProcess);
 
