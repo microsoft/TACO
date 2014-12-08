@@ -14,10 +14,10 @@ import util = require('../util');
 
 module Emulate {
     export function init(): void {
-        process.env['PATH'] = path.resolve(__dirname, path.join('..', 'node_modules', 'ios-sim', 'build', 'release')) + ':' + process.env['PATH'];
+        process.env['PATH'] = path.resolve(__dirname, path.join('..', '..', 'node_modules', 'ios-sim', 'build', 'release')) + ':' + process.env['PATH'];
         child_process.exec('which ios-sim', function (err, stdout, stderr) {
             if (err !== null) {
-                console.error(require('./resources').getString(require('nconf').get('lang'), "IOSSimNotFound"));
+                console.error(require('../resources').getString(require('nconf').get('lang'), "IOSSimNotFound"));
             } else {
                 //console.info('ios-sim is installed on path at: %s', stdout);
             }

@@ -209,7 +209,7 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
 
     downloadClientCerts(req: express.Request, res: express.Response): void {
         Q.fcall<string>(certs.downloadClientCerts, req.params.pin).then(function (pfxFile) {
-            res.sendFile(pfxFile);
+            res.sendfile(pfxFile);
         }).fcall(certs.invalidatePIN, req.params.pin)
             .catch(function (error) {
                 if (error.code) {

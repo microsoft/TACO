@@ -43,7 +43,7 @@
 
 	"scripts": {
 		"test": "nodeunit test",
-		"prepublish": "node_modules/typescript/bin/tsc --module commonjs lib/*.ts Scripts/typings/*/*.d.ts"
+		"prepublish": "node_modules/typescript/bin/tsc --module commonjs lib/*.ts lib/*/*.ts Scripts/typings/*/*.d.ts"
 	},
 	"directories": {
 		"lib": "lib",
