@@ -16,6 +16,13 @@ module OsSpecifics {
     export interface Conf {
         get(key: string): any
     }
+    export interface ICertStore {
+        newCerts: boolean;
+        getKey: () => any;
+        getCert: () => any;
+        getCA: () => any;
+    }
+
     export interface IOsSpecifics {
         defaults(base: any): any;
         initialize(): Q.Promise<any>;
@@ -23,18 +30,25 @@ module OsSpecifics {
 
         resetServerCert(conf: Conf): Q.Promise<any>;
         generateClientCert(conf: Conf): Q.Promise<number>
-        initializeServerCerts(conf: Conf): Q.Promise<any>;
+        initializeServerCerts(conf: Conf): Q.Promise<ICertStore>;
         removeAllCertsSync(conf: Conf): void;
+        downloadClientCerts(request: express.Request, response: express.Response): void;
 
         createBuildProcess(): child_process.ChildProcess;
 
         downloadBuild(buildInfo: bi.BuildInfo, request: express.Request, response: express.Response, callback: Function): void;
+
+        emulateBuild(req: express.Request, res: express.Response): void;
+        deployBuild(req: express.Request, res: express.Response): void;
+        runBuild(req: express.Request, res: express.Response): void;
+        debugBuild(req: express.Request, res: express.Response): void;
+        getDebugPort(req: express.Request, res: express.Response): void;
     }
 
     export var osSpecifics: IOsSpecifics ;
     if (osSpecifics === undefined) {
         var platform: string = os.platform();
-        osSpecifics = require("./" + platform + "Specifics");
+        osSpecifics = require("./"+platform+"/"+platform+"Specifics");
     }
 }
 

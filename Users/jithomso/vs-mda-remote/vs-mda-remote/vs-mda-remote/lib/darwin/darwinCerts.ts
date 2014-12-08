@@ -7,14 +7,15 @@
 
 import child_process = require("child_process");
 import fs = require("fs");
+import nconf = require("nconf");
 import os = require("os");
 import path = require("path");
 import Q = require("q");
 import readline = require("readline");
 import rimraf = require("rimraf");
 
-import res = require("./resources");
-import util = require("./util");
+import resources = require("../resources");
+import util = require("../util");
 
 var exec = child_process.exec;
 
@@ -31,7 +32,7 @@ module Certs {
         get(key: string): any
     }
 
-    export function resetServerCert(conf: Conf, yesOrNoHandler?: any) : Q.Promise<any> {
+    export function resetServerCert(conf: Conf, yesOrNoHandler?: any): Q.Promise<any> {
         var certsDir = path.join(conf.get('serverDir'), 'certs');
 
         if (!fs.existsSync(certsDir)) {
@@ -63,12 +64,12 @@ module Certs {
             });
     };
 
-    export function generateClientCert(conf: Conf) : Q.Promise<number> {
+    export function generateClientCert(conf: Conf): Q.Promise<number> {
         var certsDir = path.join(conf.get('serverDir'), 'certs');
         var caKeyPath = path.join(certsDir, 'ca-key.pem');
         var caCertPath = path.join(certsDir, 'ca-cert.pem');
         if (!fs.existsSync(caKeyPath) || !fs.existsSync(caCertPath)) {
-            var error = res.getString(conf.get("lang"), "CAFilesNotFound", caKeyPath, caCertPath);
+            var error = resources.getString(conf.get("lang"), "CAFilesNotFound", caKeyPath, caCertPath);
             return Q(0).thenReject(error);
         }
         return makeClientPinAndSslCert(caKeyPath, caCertPath, certsDir, certOptionsFromConf(conf), conf).
@@ -81,7 +82,7 @@ module Certs {
             });
     };
 
-    export function initializeServerCerts(conf: Conf) : Q.Promise<any>{
+    export function initializeServerCerts(conf: Conf): Q.Promise<any> {
         var certsDir = path.join(conf.get('serverDir'), 'certs');
         var certPaths = {
             certsDir: certsDir,
@@ -118,13 +119,19 @@ module Certs {
                     certPaths.newCerts = true;
                 });
         }).then(function () {
-                return certPaths;
+            return {
+                    newCerts: certPaths.newCerts,
+                    getKey: function () { return fs.readFileSync(certPaths.serverKeyPath); },
+                    getCert: function () { return fs.readFileSync(certPaths.serverCertPath); },
+                    getCA: function () { return fs.readFileSync(certPaths.caCertPath); }
+                }
+
             });
         return promise;
     }
 
 
-    export function isExpired(certPath: string) : Q.Promise<boolean> {
+    export function isExpired(certPath: string): Q.Promise<boolean> {
         return displayCert(certPath, ['dates']).
             then(function (output) {
                 var notAfter = new Date(output.stdout.substring(output.stdout.indexOf('notAfter=') + 9, output.stdout.length - 1));
@@ -133,7 +140,7 @@ module Certs {
     };
 
     // display fields an array of any of these: 'subject', 'issuer', 'dates', etc. (see https://www.openssl.org/docs/apps/x509.html)
-    export function displayCert(certPath: string, displayFields: string[]): Q.Promise<{ stdout: string; stderr: string }>{
+    export function displayCert(certPath: string, displayFields: string[]): Q.Promise<{ stdout: string; stderr: string }> {
         //openssl x509 -noout -in selfsigned-cert.pem -subject -issuer -dates
         var args = 'x509 -noout -in ' + certPath;
         (displayFields || []).forEach(function (f) {
@@ -149,8 +156,31 @@ module Certs {
         }
     }
 
-    function openSslPromise(args): Q.Promise<{ stdout: string; stderr: string}>{
-        var deferred = Q.defer<{ stdout: string; stderr: string}>();
+    export function downloadClientCerts(pinString: string): string {
+        purgeExpiredPinBasedClientCertsSync();
+        var clientCertsDir = path.join(nconf.get('serverDir'), 'certs', 'client');
+
+        var pin = parseInt(pinString);
+        if (isNaN(pin)) {
+            throw { code: 400, id: 'InvalidPin' };
+        }
+
+        var pinDir = path.join(clientCertsDir, '' + pin);
+        var pfx = path.join(pinDir, 'client.pfx');
+        if (!fs.existsSync(pfx)) {
+            throw { code: 404, id: 'ClientCertNotFoundForPIN' }
+        }
+
+        return pfx;
+    }
+
+    export function invalidatePIN(pinString: string): void {
+        var pinDir = path.join(nconf.get('serverDir'), 'certs', 'client', '' + parseInt(pinString));
+        rimraf(pinDir, function () { });
+    }
+
+    function openSslPromise(args): Q.Promise<{ stdout: string; stderr: string }> {
+        var deferred = Q.defer<{ stdout: string; stderr: string }>();
 
         exec('openssl ' + args, function (error, stdout, stderr) {
             if (verbose) {
@@ -210,7 +240,7 @@ module Certs {
             });
     };
 
-    function writeConfigFile(cnfPath: any) : void {
+    function writeConfigFile(cnfPath: any): void {
         var net = os.networkInterfaces();
         var cnf = '[req]\ndistinguished_name = req_distinguished_name\nreq_extensions = v3_req\n[req_distinguished_name]\nC_default = US\n[ v3_req ]\nbasicConstraints = CA:FALSE\nkeyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names\n[alt_names]\nDNS.1 = ' + os.hostname() + '\n';
         var count = 1;
@@ -227,7 +257,7 @@ module Certs {
         fs.writeFileSync(cnfPath, cnf);
     }
 
-    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: any, conf: Conf) : Q.Promise<number> {
+    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: any, conf: Conf): Q.Promise<number> {
         options = options || {};
         options.cn = 'vs-mda-remote-client';
         var clientCertsPath = path.join(certsDir, 'client');
@@ -282,6 +312,21 @@ module Certs {
         }
         console.info('vs-mda-remote generateClientCert');
         console.info('');
+    };
+
+    function purgeExpiredPinBasedClientCertsSync(): void {
+        var clientCertsDir = path.join(nconf.get('serverDir'), 'certs', 'client');
+        if (!fs.existsSync(clientCertsDir)) {
+            return;
+        }
+        var pinTimeoutInMinutes = nconf.get('pinTimeout');
+        var expiredIfOlderThan = new Date().getTime() - (pinTimeoutInMinutes * 60 * 1000);
+        fs.readdirSync(clientCertsDir).forEach(function (f) {
+            var pfx = path.join(clientCertsDir, f, 'client.pfx');
+            if (fs.existsSync(pfx) && fs.statSync(pfx).mtime.getTime() < expiredIfOlderThan) {
+                rimraf.sync(path.join(clientCertsDir, f));
+            }
+        });
     };
 }
 export = Certs;

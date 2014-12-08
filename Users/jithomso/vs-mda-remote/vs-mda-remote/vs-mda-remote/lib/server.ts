@@ -61,19 +61,18 @@ module Server {
         app.get('/build/:id', getBuildStatus);
         app.get('/build/:id/download', downloadBuild);
 
-        /*
-        app.get('/build/:id/emulate', emulateBuild);
-        app.get('/build/:id/deploy', deployBuild);
-        app.get('/build/:id/run', runBuild);
-        app.get('/build/:id/debug', debugBuild);
-        app.get('/debugPort', getDebugPort);
+        app.get('/build/:id/emulate', osSpecifics.emulateBuild);
+        app.get('/build/:id/deploy', osSpecifics.deployBuild);
+        app.get('/build/:id/run', osSpecifics.runBuild);
+        app.get('/build/:id/debug', osSpecifics.debugBuild);
+        app.get('/debugPort', osSpecifics.getDebugPort);
 
         app.get('/certs/:pin', downloadClientCerts);
-        app.get('/resources/:lang', getResources);
+        //app.get('/resources/:lang', getResources);
 
-        app.use('/files', (<any>express).directory(buildmgr.getBaseBuildDir()));
-        app.use('/files', express.static(buildmgr.getBaseBuildDir()));
-*/
+        app.use('/files', (<any>express).directory(buildManager.getBaseBuildDir()));
+        app.use('/files', express.static(buildManager.getBaseBuildDir()));
+
 
         return startupServer(conf, app).
             then(registerShutdownHooks).
@@ -126,23 +125,23 @@ module Server {
         var generatedNewCerts = false;
         var generatedClientPin;
         return osSpecifics.initializeServerCerts(conf).
-            then(function (certPaths) {
-                if (certPaths.newCerts === true) {
+            then(function (certStore) {
+                if (certStore.newCerts === true) {
                     generatedNewCerts = true;
                     conf.set('suppressVisualStudioMessage',true);
                     return osSpecifics.generateClientCert(conf).
                         then(function (pin) {
                             generatedClientPin = pin;
-                            return certPaths;
+                            return certStore;
                         });
                 }
-                return certPaths;
+                return Q(certStore);
             }).
-            then(function (certPaths) {
+            then(function (certStore) {
                 var sslSettings = {
-                    key: fs.readFileSync(certPaths.serverKeyPath),
-                    cert: fs.readFileSync(certPaths.serverCertPath),
-                    ca: fs.readFileSync(certPaths.caCertPath),
+                    key: certStore.getKey(),
+                    cert: certStore.getCert(),
+                    ca: certStore.getCA(),
                     requestCert: true,
                     rejectUnauthorized: false
                 };
@@ -196,6 +195,7 @@ module Server {
         // Opportunity to clean up builds on exit
         var shutdown = function () {
             console.info(resources.getString(lang, "ServerShutdown"));
+            // BUG: Currently if buildManager.shutdown() is called while a build log is being written, rimraf will throw an exception on windows
             buildManager.shutdown();
             serverInstance.close();
             process.exit(0);
@@ -260,6 +260,11 @@ module Server {
                 res.send(404, err);
             }
         });
+    }
+
+    // Downloads client SSL certs (pfx format) for pin specified in request
+    function downloadClientCerts(req: express.Request, res: express.Response) {
+        osSpecifics.downloadClientCerts(req, res);
     }
 }
 

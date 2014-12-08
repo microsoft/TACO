@@ -53,7 +53,9 @@ module Resources {
 
         var args: any[] = util.getOptionalArgsArrayFromFunctionCall(arguments, 2);
         if (args != null) {
+            console.info("\t" + s);
             for (var i: number = 0; i < args.length; ++i) {
+                console.info("{" + i + "} = " + args[i]);
                 s = s.replace('{' + i + '}', args[i]);
             }
         }
@@ -78,11 +80,10 @@ module Resources {
         if (typeof requestOrAcceptLangs === 'string') {
             langString = requestOrAcceptLangs;
         } else if (requestOrAcceptLangs.header) {
-            langString = requestOrAcceptLangs.header['accept-language'];
+            langString = requestOrAcceptLangs.headers['accept-language'];
         } else {
             throw new Error('Unsupported type of argument for acceptLangs: ' + (typeof requestOrAcceptLangs));
         }
-
         return getBestLanguageFromArray(langString.split(',').map(function (l) { return l.split(';')[0]; }));
     }
 
