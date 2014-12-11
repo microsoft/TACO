@@ -14,12 +14,25 @@ import Q = require('q');
 import readline = require('readline');
 import packer = require('zip-stream');
 
-import bi = require('./buildInfo');
+import bi = require('../buildInfo');
+import BuildLogger = require('../buildLogger');
+import buildManager = require('../buildManager');
+import CordovaConfig = require('../cordovaConfig');
+import appRunner = require('./darwinAppRunner');
 import certs = require('./darwinCerts');
-import OSSpecifics = require('./OSSpecifics');
-import resources = require('./resources');
+import OSSpecifics = require('../OSSpecifics');
+import resources = require('../resources');
+import util = require('../util');
 
 /// <reference path="../Scripts/typings/Q/Q-extensions.d.ts"/>
+
+var allowsEmulate: boolean;
+var nativeDebugProxyPort: number;
+var webDebugProxyDevicePort: number;
+var webDebugProxyPortMin: number;
+var webDebugProxyPortMax: number;
+
+var webProxyInstance: child_process.ChildProcess = null;
 
 class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
     defaults(base: any): any {
@@ -112,14 +125,26 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
             });
 
             deferred2.promise.then(function (shouldInstall) {
-                // Write to the file. We don't read the contents, but it may help with user discoverability if they change their mind
-                fs.writeFileSync(firstRunPath, "installHomebrew = " + (shouldInstall ? "yes" : "no") + "\n");
-                deferred.resolve({});
+                child_process.exec("(DevToolsSecurity -enable || true)", function () {
+                    // Write to the file. We don't read the contents, but it may help with user discoverability if they change their mind
+                    fs.writeFileSync(firstRunPath, "installHomebrew = " + (shouldInstall ? "yes" : "no") + "\n");
+                    deferred.resolve({});
+                });
             })
         } else {
             deferred.resolve({});
         }
-        return deferred.promise;
+        return deferred.promise.then(function () {
+            allowsEmulate = util.argToBool(nconf.get('allowsEmulate'));
+            nativeDebugProxyPort = nconf.get('nativeDebugProxyPort');
+            webDebugProxyDevicePort = nconf.get('webDebugProxyDevicePort');
+            webDebugProxyPortMin = nconf.get('webDebugProxyRangeMin');
+            webDebugProxyPortMax = nconf.get('webDebugProxyRangeMax');
+
+            if (allowsEmulate === true) {
+                require('./darwinEmulate').init();
+            }
+        });
     }
 
     printUsage(language: string): void {
@@ -134,7 +159,7 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
         return certs.generateClientCert(conf);
     }
 
-    initializeServerCerts(conf: OSSpecifics.Conf): Q.Promise<any> {
+    initializeServerCerts(conf: OSSpecifics.Conf): Q.Promise<OSSpecifics.ICertStore> {
         return certs.initializeServerCerts(conf);
     }
 
@@ -181,6 +206,144 @@ class DarwinSpecifics implements OSSpecifics.IOsSpecifics {
             });
         });
     }
+
+    downloadClientCerts(req: express.Request, res: express.Response): void {
+        Q.fcall<string>(certs.downloadClientCerts, req.params.pin).catch<string>(function (error) {
+            if (error.code) {
+                res.send(error.code, resources.getString(req, error.id));
+            } else {
+                res.send(404, error);
+            }
+            throw error;
+            return "";
+        }).then(function (pfxFile) {
+            res.sendfile(pfxFile);
+        }).then(function () { certs.invalidatePIN(req.params.pin);}).done();
+            
+    }
+
+    emulateBuild(req: express.Request, res: express.Response): void {
+        var buildInfo = buildManager.getBuildInfo(req.params.id);
+        if (buildInfo === null) {
+            res.send(404, resources.getString(req, 'BuildNotFound', req.params.id));
+            return;
+        }
+        if (nconf.get('allowsEmulate') === false) {
+            res.send(403, resources.getString(req, 'EmulateDisabled'));
+            return;
+        }
+
+        var cfg = new CordovaConfig(path.join(buildInfo.appDir, 'config.xml'));
+        var cordovaAppDir = path.join(buildInfo.buildDir, 'cordovaApp');
+        if (!fs.existsSync(cordovaAppDir)) {
+            res.send(404, resources.getString(req, 'BuildNotFound', req.params.id));
+            return;
+        }
+
+        var emulateProcess = child_process.fork(path.join(__dirname, 'darwinEmulate.js'), [], { silent: true });
+        var emulateLogger = new BuildLogger();
+        emulateLogger.begin(buildInfo.buildDir, 'emulate.log', emulateProcess);
+        emulateProcess.send({ appDir: cordovaAppDir, appName: cfg.id(), target: req.query.target }, undefined);
+
+        emulateProcess.on('message', function (result) {
+            buildInfo.updateStatus(result.status, result.messageId, result.messageArgs);
+            if (result.status !== bi.ERROR) {
+                res.send(200, buildInfo.localize(req));
+            } else {
+                res.send(404, buildInfo.localize(req));
+            }
+            emulateProcess.kill();
+            emulateLogger.end();
+        });
+    }
+
+    deployBuild(req: express.Request, res: express.Response): void {
+        var buildInfo = buildManager.getBuildInfo(req.params.id);
+        if (buildInfo === null) {
+            res.send(404, resources.getString(req, 'BuildNotFound', req.params.id));
+            return;
+        }
+
+        var pathToIpaFile = path.join(buildInfo.appDir, 'platforms', 'ios', 'build', 'device', buildInfo.appName + '.ipa');
+
+        var ideviceinstaller = child_process.spawn('ideviceinstaller', ['-i', pathToIpaFile]);
+        var stdout: string = "";
+        var stderr: string = "";
+        ideviceinstaller.stdout.on('data', function (data: any) {
+            var dataStr: String = data.toString();
+            if (dataStr.indexOf("ApplicationVerificationFailed") !== -1) {
+                res.send(404, resources.getString(req, "ProvisioningFailed"));
+            }
+            stdout += dataStr;
+        });
+        ideviceinstaller.stderr.on('data', function (data: any) {
+            var dataStr : string = data.toString();
+            if (dataStr.toLowerCase().indexOf("error") !== -1) {
+                res.send(404, dataStr);
+            }
+            stderr += dataStr;
+        });
+        ideviceinstaller.on('close', function (code: number) {
+            if (code !== 0) {
+                res.json(404, { stdout: stdout, stderr: stderr, code: code });
+            } else {
+                buildInfo.updateStatus(bi.INSTALLED, 'InstallSuccess');
+                res.json(200, buildInfo.localize(req));
+            }
+        });
+    }
+
+    runBuild(req: express.Request, res: express.Response): void {
+        var buildInfo = buildManager.getBuildInfo(req.params.id);
+        if (buildInfo === null) {
+            res.send(404, resources.getString(req, 'BuildNotFound', req.params.id));
+            return;
+        }
+
+        var cfg = new CordovaConfig(path.join(buildInfo.appDir, 'config.xml'));
+        appRunner.startDebugProxy(nativeDebugProxyPort)
+            .then(function (nativeProxyProcess) {
+                return appRunner.startApp(cfg.id(), nativeDebugProxyPort);
+            })
+            .then(function (debugSocket) {
+                res.send(200, buildInfo.localize(req));
+            }, function (failure) {
+                if (failure instanceof Error) {
+                    res.send(404, resources.getString(req, failure.message));
+                } else {
+                    res.send(404, resources.getString(req, failure));
+                }
+            });
+    }
+
+    debugBuild(req: express.Request, res: express.Response): void {
+        var buildInfo = buildManager.getBuildInfo(req.params.id);
+        if (buildInfo === null) {
+            res.send(404, resources.getString(req, 'BuildNotFound', req.params.id));
+            return;
+        }
+
+        if (webProxyInstance !== null) {
+            webProxyInstance.kill();
+            webProxyInstance = null;
+        }
+
+        var portRange = "null:" + webDebugProxyDevicePort + ",:" + webDebugProxyPortMin + "-" + webDebugProxyPortMax;
+        try {
+            webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
+        } catch (e) {
+            res.send(404, resources.getString(req, "UnableToDebug"));
+            return;
+        }
+        buildInfo.webDebugProxyPort = webDebugProxyDevicePort;
+        buildInfo.updateStatus(bi.DEBUGGING, 'DebugSuccess');
+        res.send(200, buildInfo.localize(req));
+    }
+
+    getDebugPort(req: express.Request, res: express.Response): void {
+        res.json(200, [{ 'webDebugPort': webDebugProxyDevicePort }]);
+    }
 }
+
 var darwinSpecifics: OSSpecifics.IOsSpecifics = new DarwinSpecifics();
 export = darwinSpecifics;

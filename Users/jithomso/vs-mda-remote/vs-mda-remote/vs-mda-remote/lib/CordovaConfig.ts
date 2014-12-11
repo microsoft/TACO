@@ -14,7 +14,7 @@ class CordovaConfig {
     doc: et.ElementTree;
 
     constructor(configXmlPath: string) {
-        var contents = util.readFileContentsSync(configXmlPath, 'urf-e');
+        var contents = util.readFileContentsSync(configXmlPath, 'utf-8');
         this.doc = new et.ElementTree(et.XML(contents));
     }
 

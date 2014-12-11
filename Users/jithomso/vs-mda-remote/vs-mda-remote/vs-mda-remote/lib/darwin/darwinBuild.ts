@@ -12,11 +12,11 @@ import path = require('path');
 import Q = require('q');
 import rimraf = require('rimraf');
 
-import bi = require('./buildInfo');
-import CordovaConfig = require('./cordovaConfig');
-import resources = require('./resources');
-import plist = require('./plist');
-import util = require('./util');
+import bi = require('../buildInfo');
+import CordovaConfig = require('../cordovaConfig');
+import resources = require('../resources');
+import plist = require('../plist');
+import util = require('../util');
 
 
 cordova.on('results', console.info);
@@ -39,16 +39,18 @@ var cfg: CordovaConfig = null;
 var language: string = null;
 
 process.on('message', function (buildRequest: { buildInfo: bi.BuildInfo; language: string }) {
+    var buildInfo = bi.createNewBuildInfoFromDataObject(buildRequest.buildInfo);
     if (currentBuild !== null) {
-        var buildInfo = buildRequest.buildInfo;
         buildInfo.updateStatus(bi.ERROR,'BuildInvokedTwice');
         process.send(buildInfo);
         process.exit(1);
     }
 
+    currentBuild = buildInfo;
+
     language = buildRequest.language;
 
-    build(buildRequest.buildInfo, function (resultBuildInfo: bi.BuildInfo) {
+    build(buildInfo, function (resultBuildInfo: bi.BuildInfo) {
         process.send(resultBuildInfo);
     });
 });
@@ -66,18 +68,17 @@ function afterCompile(data) {
     cordova.emit('after_build', data);
 }
 
-function build(buildInfoData: bi.BuildInfo, callback: Function) {
-    currentBuild = bi.createNewBuildInfoFromDataObject(buildInfoData);
+function build(currentBuild: bi.BuildInfo, callback: Function) {
     cfg = new CordovaConfig(path.join(currentBuild.appDir, 'config.xml'));
 
     var noOp: () => void = function () { }
     var isDeviceBuild = currentBuild.options.indexOf('--device') !== -1;
 
     try {
-    Q.fcall(change_directory)
+    Q.fcall(change_directory, currentBuild)
         .then(add_ios)
         .then(isDeviceBuild ? setupSigning : noOp)
-        .fcall(applyPreferencesToBuildConfig, cfg)
+        .then(function () { applyPreferencesToBuildConfig(cfg); })
         .then(prepareIconsAndSplashscreens)
         .then(prepareResFiles)
         .then(updateAppPlistBuildNumber)
@@ -103,8 +104,9 @@ function build(buildInfoData: bi.BuildInfo, callback: Function) {
     
 }
 
-function change_directory() {
+function change_directory(currentBuild: bi.BuildInfo): any {
     process.chdir(currentBuild.appDir);
+    return {};
 }
 
 function add_ios() : Q.Promise<any>{

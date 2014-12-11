@@ -78,11 +78,10 @@ module Resources {
         if (typeof requestOrAcceptLangs === 'string') {
             langString = requestOrAcceptLangs;
         } else if (requestOrAcceptLangs.header) {
-            langString = requestOrAcceptLangs.header['accept-language'];
+            langString = requestOrAcceptLangs.headers['accept-language'] || "";
         } else {
             throw new Error('Unsupported type of argument for acceptLangs: ' + (typeof requestOrAcceptLangs));
         }
-
         return getBestLanguageFromArray(langString.split(',').map(function (l) { return l.split(';')[0]; }));
     }
 

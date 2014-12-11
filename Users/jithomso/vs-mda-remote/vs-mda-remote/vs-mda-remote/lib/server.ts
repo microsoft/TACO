@@ -18,8 +18,6 @@ import OSSpecifics = require('./OSSpecifics');
 import resources = require('./resources');
 import util = require('./util');
 
-var osSpecifics = OSSpecifics.osSpecifics;
-
 module Server {
     export interface Conf {
         get(prop: string): any;
@@ -61,19 +59,18 @@ module Server {
         app.get('/build/:id', getBuildStatus);
         app.get('/build/:id/download', downloadBuild);
 
-        /*
-        app.get('/build/:id/emulate', emulateBuild);
-        app.get('/build/:id/deploy', deployBuild);
-        app.get('/build/:id/run', runBuild);
-        app.get('/build/:id/debug', debugBuild);
-        app.get('/debugPort', getDebugPort);
+        app.get('/build/:id/emulate', OSSpecifics.osSpecifics.emulateBuild);
+        app.get('/build/:id/deploy', OSSpecifics.osSpecifics.deployBuild);
+        app.get('/build/:id/run', OSSpecifics.osSpecifics.runBuild);
+        app.get('/build/:id/debug', OSSpecifics.osSpecifics.debugBuild);
+        app.get('/debugPort', OSSpecifics.osSpecifics.getDebugPort);
 
         app.get('/certs/:pin', downloadClientCerts);
-        app.get('/resources/:lang', getResources);
+        //app.get('/resources/:lang', getResources);
 
-        app.use('/files', (<any>express).directory(buildmgr.getBaseBuildDir()));
-        app.use('/files', express.static(buildmgr.getBaseBuildDir()));
-*/
+        app.use('/files', (<any>express).directory(buildManager.getBaseBuildDir()));
+        app.use('/files', express.static(buildManager.getBaseBuildDir()));
+
 
         return startupServer(conf, app).
             then(registerShutdownHooks).
@@ -92,11 +89,11 @@ module Server {
     }
 
     export function resetServerCert(conf: Conf): Q.IPromise<any> {
-        return osSpecifics.resetServerCert(conf);
+        return OSSpecifics.osSpecifics.resetServerCert(conf);
     }
 
     export function generateClientCert(conf: Conf): Q.IPromise<any> {
-        return osSpecifics.generateClientCert(conf);
+        return OSSpecifics.osSpecifics.generateClientCert(conf);
     }
 
     function startupServer(conf: Conf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
@@ -125,24 +122,24 @@ module Server {
     function startupHttpsServer(conf: Conf, app: express.Application) : Q.Promise<https.Server> {
         var generatedNewCerts = false;
         var generatedClientPin;
-        return osSpecifics.initializeServerCerts(conf).
-            then(function (certPaths) {
-                if (certPaths.newCerts === true) {
+        return OSSpecifics.osSpecifics.initializeServerCerts(conf).
+            then(function (certStore) {
+                if (certStore.newCerts === true) {
                     generatedNewCerts = true;
                     conf.set('suppressVisualStudioMessage',true);
-                    return osSpecifics.generateClientCert(conf).
+                    return OSSpecifics.osSpecifics.generateClientCert(conf).
                         then(function (pin) {
                             generatedClientPin = pin;
-                            return certPaths;
+                            return certStore;
                         });
                 }
-                return certPaths;
+                return Q(certStore);
             }).
-            then(function (certPaths) {
+            then(function (certStore) {
                 var sslSettings = {
-                    key: fs.readFileSync(certPaths.serverKeyPath),
-                    cert: fs.readFileSync(certPaths.serverCertPath),
-                    ca: fs.readFileSync(certPaths.caCertPath),
+                    key: certStore.getKey(),
+                    cert: certStore.getCert(),
+                    ca: certStore.getCA(),
                     requestCert: true,
                     rejectUnauthorized: false
                 };
@@ -152,7 +149,7 @@ module Server {
                 var deferred = Q.defer<https.Server>();
                 svr.on('error', function (err) {
                     if (generatedNewCerts === true) {
-                        osSpecifics.removeAllCertsSync(conf);
+                        OSSpecifics.osSpecifics.removeAllCertsSync(conf);
                     }
                     deferred.reject(friendlyServerListenError(err, conf));
                 });
@@ -196,6 +193,7 @@ module Server {
         // Opportunity to clean up builds on exit
         var shutdown = function () {
             console.info(resources.getString(lang, "ServerShutdown"));
+            // BUG: Currently if buildManager.shutdown() is called while a build log is being written, rimraf will throw an exception on windows
             buildManager.shutdown();
             serverInstance.close();
             process.exit(0);
@@ -218,7 +216,7 @@ module Server {
         }, function (err) {
             res.set({ 'Content-Type': 'application/json' });
             res.send(err.code || 400, { status: resources.getString(req, 'InvalidBuildRequest'), errors: err });
-        });
+        }).done();
     }
 
     // Queries on the status of a build task, used by a client to poll
@@ -260,6 +258,11 @@ module Server {
                 res.send(404, err);
             }
         });
+    }
+
+    // Downloads client SSL certs (pfx format) for pin specified in request
+    function downloadClientCerts(req: express.Request, res: express.Response) {
+        OSSpecifics.osSpecifics.downloadClientCerts(req, res);
     }
 }
 

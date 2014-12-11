@@ -16,7 +16,7 @@ class BuildLogger {
         this.stream = null;
     }
 
-    begin(buildDir: string, logFileName: string, buildProcess: child_process.ChildProcess) : void {
+    begin(buildDir: string, logFileName: string, buildProcess: child_process.ChildProcess): void {
         var pathToBuildLog = path.join(buildDir, logFileName);
         this.stream = fs.createWriteStream(pathToBuildLog);
         this.stream.on('error', function (err) {

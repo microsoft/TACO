@@ -15,14 +15,12 @@ import tar = require('tar');
 import zlib = require('zlib');
 
 import bi = require('./buildInfo');
-import buildLogger = require('./buildLogger');
+import BuildLogger = require('./buildLogger');
 import buildRetention = require('./buildRetention');
 import CordovaConfig = require('./cordovaConfig');
 import OSSpecifics = require('./OSSpecifics');
 import resources = require('./resources');
 import util = require('./util');
-
-var osSpecifics = OSSpecifics.osSpecifics;
 
 module BuildManager {
     export interface Conf {
@@ -46,29 +44,12 @@ module BuildManager {
             downloaded: number;
         };
 
-    var allowsEmulate,
-        nativeDebugProxyPort,
-        webDebugProxyDevicePort,
-        webDebugProxyPortMin,
-        webDebugProxyPortMax;
-
     export function init(conf: Conf): void {
         baseBuildDir = path.resolve(process.cwd(), conf.get('serverDir'), 'builds');
         util.createDirectoryIfNecessary(baseBuildDir);
         maxBuildsInQueue = conf.get('maxBuildsInQueue');
         deleteBuildsOnShutdown = util.argToBool(conf.get('deleteBuildsOnShutdown'));
-
-        /*
-        // TODO: Move these to an OS-specific section? Need to decide what we support cross-platform
-        allowsEmulate = util.argToBool(conf.get('allowsEmulate'));
-        nativeDebugProxyPort = conf.get('nativeDebugProxyPort');
-        webDebugProxyDevicePort = conf.get('webDebugProxyDevicePort');
-        webDebugProxyPortMin = conf.get('webDebugProxyRangeMin');
-        webDebugProxyPortMax = conf.get('webDebugProxyRangeMax');
-        if (allowsEmulate === true) {
-            require('./emulate').init();
-        }
-        */
+        var allowsEmulate = util.argToBool(nconf.get('allowsEmulate'));
 
         buildRetention.init(baseBuildDir, conf);
         // For now, using process startup pid as the initial build number is good enough to avoid collisions with prior server runs against 
@@ -196,7 +177,7 @@ module BuildManager {
             callback(resources.getString(req,"BuildNotReadyForDownload", buildInfo.status), buildInfo);
             return;
         }
-        osSpecifics.downloadBuild(buildInfo, req, res, function (err, succ) {
+        OSSpecifics.osSpecifics.downloadBuild(buildInfo, req, res, function (err, succ) {
             if (!err) {
                 buildMetrics.downloaded++;
                 buildInfo.updateStatus(bi.DOWNLOADED);
@@ -204,6 +185,10 @@ module BuildManager {
             callback(err, succ);
         });
     };
+
+    export function getBaseBuildDir(): string {
+        return baseBuildDir;
+    }
 
     function validateBuildRequest(acceptLangsHeader: string, cordovaVersion: string, buildCommand: string, configuration: string) : string[]{
         var errors : string[] = [];
@@ -362,10 +347,10 @@ module BuildManager {
 
         // Fork off to a child build process. This allows us to save off all stdout for that build to it's own log file. And in future we can 
         // have multiple builds in parallel by forking multiple child processes (with some max limit.)
-        var buildProcess = osSpecifics.createBuildProcess();
-        var buildLogger = new buildLogger.BuildLogger();
+        var buildProcess = OSSpecifics.osSpecifics.createBuildProcess();
+        var buildLogger = new BuildLogger();
         buildLogger.begin(buildInfo.buildDir, 'build.log', buildProcess);
-        buildProcess.send({ buildInfo: buildInfo, language: nconf.get('lang')}, undefined);
+
         buildProcess.on('message', function (resultBuildInfo: bi.BuildInfo) {
             buildInfo.updateStatus(resultBuildInfo.status, resultBuildInfo.messageId, resultBuildInfo.messageArgs);
             console.info('Done building %d : %s %s', buildInfo.buildNumber, buildInfo.status, buildInfo.messageId, buildInfo.messageArgs);
@@ -386,6 +371,7 @@ module BuildManager {
                 dequeueNextBuild();
             }
         });
+        buildProcess.send({ buildInfo: buildInfo, language: nconf.get('lang') }, undefined);
     }
 
     // This is basic validation. The build itself will fail if config.xml is not valid, or more detailed problems with the submission.

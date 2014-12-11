@@ -19,6 +19,7 @@ module BuildInfo {
     export var EMULATED = 'emulated';
     export var RUNNING = 'running';
     export var INSTALLED = 'installed';
+    export var DEBUGGING = 'debugging';
     export var DOWNLOADED = 'downloaded';
     export var DELETED = 'deleted';
     export var ERROR = 'error';
@@ -51,6 +52,8 @@ module BuildInfo {
         tgzFilePath: string;
         appDir: string;
         appName: string;
+
+        webDebugProxyPort: number;
 
         constructor(buildNumber?: number, status?: string, cordovaVersion?: string, buildCommand?: string, configuration?: string, options?: any, buildDir?: string) {
             this.buildNumber = buildNumber;

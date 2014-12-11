@@ -14,8 +14,6 @@ import OSSpecifics = require('./OSSpecifics');
 import resources = require('./resources');
 import server = require('./server');
 
-var osSpecifics = OSSpecifics.osSpecifics;
-
 function cli() {
     console.info('vs-mda-remote');
     console.info('Copyright (C) 2014 Microsoft Corporation. All rights reserved.');
@@ -39,13 +37,13 @@ function cli() {
         'pinTimeout': 10
     };
 
-    defaults = osSpecifics.defaults(defaults);
+    defaults = OSSpecifics.osSpecifics.defaults(defaults);
     nconf.defaults(defaults);
     // Initialize localization resources
     resources.init();
 
     if (nconf.get('help') || nconf.get('h') || nconf.get('?') || !nconf.get('serverDir')) {
-        osSpecifics.printUsage(nconf.get('lang'));
+        OSSpecifics.osSpecifics.printUsage(nconf.get('lang'));
         process.exit(0);
     }
 
@@ -57,7 +55,7 @@ function cli() {
         Q(task.execute()).done();
     } else {
         console.info(resources.getString(nconf.get('lang'), 'UnknownCommand'), command);
-        osSpecifics.printUsage(nconf.get('lang'));
+        OSSpecifics.osSpecifics.printUsage(nconf.get('lang'));
         process.exit(0);
     }
 }
@@ -66,7 +64,7 @@ var tasks: { [key: string]: { execute(): Q.IPromise<any>; } };
 tasks = {
     'start': {
         execute: function () {
-            return osSpecifics.initialize()
+            return OSSpecifics.osSpecifics.initialize()
                 .then(function () { server.start(nconf) });
         }
     },

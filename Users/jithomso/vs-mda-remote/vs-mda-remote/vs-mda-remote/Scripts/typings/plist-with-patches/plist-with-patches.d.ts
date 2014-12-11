@@ -1,7 +1,7 @@
 ﻿// Barebones typing for plist-with-patches, added as-needed
 
 declare module "plist-with-patches" {
-    export function parseFileSync(filename: string): Buffer;
+    export function parseFileSync(filename: string): any;
 
     /** 
     * generate an XML plist string from the input object 
