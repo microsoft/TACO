@@ -1,0 +1,7 @@
+﻿{
+    autoCorrect: false,
+    rules: [
+        // Add/uncomment rules to suppress globally, e.g.
+        //"-SA9014", // Comparing against null
+    ]
+}

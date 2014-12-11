@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build;MergeOutput" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <TargetFrameworkProfile />
+    <UseIISExpress>false</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <TypeScriptToolsVersion>1.0</TypeScriptToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IntermediateOutputPath>..\obj</IntermediateOutputPath>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{23BA4A54-7B89-4124-B7D4-0B7FCB674EE4}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <OutputPath>bin</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <TypeScriptOutFile>.\bin\RuleEngineMerged.js</TypeScriptOutFile>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TypeScriptResolveReferenceTags>true</TypeScriptResolveReferenceTags>
+    <GenerateMergedOutput>true</GenerateMergedOutput>
+    <RootNamespace>RuleEngine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptModuleKind>commonjs</TypeScriptModuleKind>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+  <ItemGroup>
+    <TypeScriptCompile Include="RuleEngine.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1000_KeywordsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="IStyleRule.ts" />
+    <TypeScriptCompile Include="Typings\node.d.ts" />
+    <TypeScriptCompile Include="Utils.ts" />
+    <TypeScriptCompile Include="TypeScript\tsc.d.ts" />
+    <TypeScriptCompile Include="RuleContext.ts" />
+    <TypeScriptCompile Include="IStyleSettings.ts" />
+    <TypeScriptCompile Include="Rules\RuleHelpers.ts" />
+    <TypeScriptCompile Include="Rules\Design\CA1044_PropertiesShouldNotBeWriteOnly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SpacingHelpers.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1001_CommasMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1002_SemicolonsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1003_SymbolsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1004_JSDocMustBeFormattedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1005_SingleLineCommentsMustBeginWithSingleSpace.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1008_OpeningParenthesisMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1020_IncrementDecrementSymbolsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1021_NegativeSignsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1022_PositiveSignsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1027_TabsMustNotBeUsed.ts" />
+    <TypeScriptCompile Include="Rules\Naming\SA1300_ElementMustBeginWithUpperCaseLetter.ts" />
+    <TypeScriptCompile Include="Rules\Naming\SA1301_ElementMustBeginWithLowerCaseLetter.ts" />
+    <TypeScriptCompile Include="Rules\Naming\SA1302_InterfaceNamesMustBeginWithI.ts" />
+    <TypeScriptCompile Include="Rules\Maintainability\SA1400_AccessModifierMustBeDeclared.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1500_CurlyBracketsMustBeOnCorrectLine.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1503_CurlyBracketsMustNotBeOmitted.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1505_OpeningCurlyBracketsMustNotBeFollowedByBlankLine.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1507_CodeMustNotContainMultipleBlankLinesInARow.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1508_ClosingCurlyBracketsMustNotBePrecededByBlankLine.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1512_SingleLineCommentsMustNotBeFollowedByBlankLine.ts" />
+    <TypeScriptCompile Include="Rules\Layout\SA1513_ClosingCurlyBracketMustBeFollowedByBlankLine.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9001_ParametersMustHaveTypeAnnotation.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9002_FunctionsMustHaveReturnTypeAnnotation.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9003_UnassignedVariablesMustHaveTypeAnnotation.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9004_StringLiteralsMustUseDoubleQuotes.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9005_ComparisonOperatorsMustBeStrict.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9006_DoNotUseAutomaticSemicolons.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9008_PropertiesMustHaveTypeAnnotation.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9009_PrivateFieldsMustBeginWithUnderscore.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9010_DoNotUseXmlDocs.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9011_ObjectLiteralExpressionMustBeLaidOutCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9012_ObjectLiteralsDontUseQuotesForNames.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9013_DoNotUseParameterPropertyDeclarations.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9014_DoNotCompareAgainstNull.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9015_DoNotCompareAgainstTrueOrFalse.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9016_EnumMembersMustBePascalCase.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9017_NoUnquotedUndefined.ts" />
+    <TypeScriptCompile Include="Rules\TypeScript\SA9018_DoNotLeaveDebuggerStatementsInCode.ts" />
+    <TypeScriptCompile Include="Rules\Spacing\SA1012_OpeningCurlyBracketsMustBeSpacedCorrectly.ts" />
+    <TypeScriptCompile Include="Rules\Ordering\SA1201_ElementsMustAppearInTheCorrectOrder.ts" />
+    <TypeScriptCompile Include="Rules\Documentation\IDocumentation.d.ts" />
+    <TypeScriptCompile Include="Rules\Documentation\DocumentationHelpers.ts" />
+    <TypeScriptCompile Include="App.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="IScriptHostAPI.ts" />
+    <Content Include="TypeScript\tsc.js" />
+  </ItemGroup>
+  <PropertyGroup>
+    <OutputPath>bin</OutputPath>
+  </PropertyGroup>
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>39074</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="MergeOutput">
+    <ReadLinesFromFile File="$(OutputPath)\RuleEngineMerged.js">
+      <Output TaskParameter="Lines" ItemName="RuleEngineLines" />
+    </ReadLinesFromFile>
+    <ReadLinesFromFile File="TypeScript\tsc.js">
+      <Output TaskParameter="Lines" ItemName="TSCLines" />
+    </ReadLinesFromFile>
+    <WriteLinesToFile File="$(OutputPath)\TSStyleCop.js" Lines="@(TSCLines)" Overwrite="true" />
+    <WriteLinesToFile File="$(OutputPath)\TSStyleCop.js" Lines="@(RuleEngineLines)" />
+  </Target>
+  <!--Target Name="RunOnSelf">
+    <Exec Command="cscript /NoLogo $(OutputPath)\TSStyleCop.js -analyze @(TypeScriptCompile->'%(Identity)', ' ') -exclude tsc.d.ts" IgnoreExitCode="true" />
+  </Target-->
+  <PropertyGroup>
+    <CompileDependsOn>$(CompileDependsOn);MergeOutput</CompileDependsOn>
+  </PropertyGroup>
+</Project>
