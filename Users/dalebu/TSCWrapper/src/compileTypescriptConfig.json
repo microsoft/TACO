@@ -1,7 +1,7 @@
 {
     "filesRoot": "www;merges",
     "options": {
-        "target": "ES5",
-        "removeComments" :  ""
+        "target": 1,
+        "module": 1
     }
 }

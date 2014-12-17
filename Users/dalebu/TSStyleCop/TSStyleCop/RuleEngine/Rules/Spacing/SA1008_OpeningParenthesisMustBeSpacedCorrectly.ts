@@ -24,6 +24,7 @@ module TSStyleCop.Rules {
                 case TypeScript.SyntaxKind.TypeOfKeyword:
                 case TypeScript.SyntaxKind.EqualsGreaterThanToken:
                 case TypeScript.SyntaxKind.OpenBraceToken:
+                case TypeScript.SyntaxKind.RequireKeyword:
                     break;
                 default:
                     if (!TypeScript.SyntaxFacts.isBinaryExpressionOperatorToken(prevToken.tokenKind)) {
