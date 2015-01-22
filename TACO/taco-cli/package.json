@@ -1,0 +1,32 @@
+{
+  "name": "taco-compile",
+  "version": "0.0.1",
+  "description": "taco-compile",
+  "author": "Microsoft Corp.",
+  "main": "./bin/compile/src/hookInstaller.js",
+  "bin": {
+    "taco-compile": "./bin/compile/src/taco-compile"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "preferGlobal": true,
+  "dependencies" : {
+    "typescript": ">=1.4.1"
+  },
+  "devDependencies": {
+    "del": "^1.0.0",
+    "event-stream": "^3.1.7",
+    "gulp": "^3.8.10",
+    "gulp-concat": "^2.4.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "taco",
+    "compile",
+    "typescript"
+  ],
+  "license": "ISC"
+}
