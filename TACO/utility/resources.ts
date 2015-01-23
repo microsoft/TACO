@@ -1,9 +1,4 @@
-﻿/********************************************************
-*                                                       *
-*   Copyright (C) Microsoft. All rights reserved.       *
-*                                                       *
-********************************************************/
-"use strict";
+﻿"use strict";
 import fs = require ("fs");
 import path = require ("path");
 

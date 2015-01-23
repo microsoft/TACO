@@ -1,0 +1,26 @@
+{
+    "name": "taco-cli-utility",
+    "author": {
+        "name": "Microsoft Corp."
+    },
+    "description": "strictly internal use to enable require in utility folder",
+    "homepage": "",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://xxxxxxxxxxgithub.com/Microsoft/taco-cli.git"
+    },
+    "keywords": [
+        "Cordova",
+        "Microsoft",
+        "taco",
+        "Apache",
+        "cross-platform"
+    ],
+    
+    "dependencies" : {
+        "typescript": ">=1.4.1"
+    },
+    "devDependencies": {
+    }
+}

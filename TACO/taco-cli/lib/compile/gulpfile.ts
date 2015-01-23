@@ -55,7 +55,6 @@ gulp.task("compilerClean", function (cb: Function): void {
 /* Runs style cop on the sources. */
 gulp.task("compilerStyleCop", /*["compilerMerge"],*/ function (cb: Function): void {
     var styleCop = new styleCopUtil.CordovaTools.StyleCopUtil();
-    console.log(path.resolve(compilerPath.src));
     styleCop.runCop(compilerPath.src, "../../Internal/TSStyleCop/TSStyleCop.js", cb);
 });
 
