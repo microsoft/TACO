@@ -1,0 +1,7 @@
+{
+    "filesRoot": "www;merges",
+    "options": {
+        "target": 1,
+        "module": 1
+    }
+}

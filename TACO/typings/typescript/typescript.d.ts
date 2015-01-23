@@ -1403,7 +1403,7 @@ declare module "typescript" {
         /**
          * Gets the TextChangeRange that describe how the text changed between this text and
          * an older version.  This information is used by the incremental parser to determine
-         * what sections of the script need to be re-parsed.  'undefined' can be returned if the
+         * what sections of the script need to be re-parsed.  "undefined" can be returned if the
          * change range cannot be determined.  However, in that case, incremental parsing will
          * not happen and the entire document will be re - parsed.
          */
@@ -1677,7 +1677,7 @@ declare module "typescript" {
      * The id is used for subsequent calls into the language service to ask questions about the
      * signature help item in the context of any documents that have been updated.  i.e. after
      * an edit has happened, while signature help is still active, the host can ask important
-     * questions like 'what parameter is the user currently contained within?'.
+     * questions like "what parameter is the user currently contained within?".
      */
     interface SignatureHelpItem {
         isVariadic: boolean;
@@ -1722,7 +1722,7 @@ declare module "typescript" {
         bannerText: string;
         /**
           * Whether or not this region should be automatically collapsed when
-          * the 'Collapse to Definitions' command is invoked.
+          * the "Collapse to Definitions" command is invoked.
           */
         autoCollapse: boolean;
     }

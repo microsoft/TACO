@@ -3,7 +3,7 @@
 // Definitions by: Drew Noakes <https://drewnoakes.com>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path="node.d.ts" />
+/// <reference path="../node/node.d.ts" />
 
 declare module gulp {
 
@@ -58,7 +58,7 @@ declare module gulp {
         mark?: boolean;
 
         /**
-         * Don't sort the results.
+         * Don"t sort the results.
          */
         nosort?: boolean;
 
@@ -150,7 +150,7 @@ declare module gulp {
         interval?: number;
         /** Delay for events called in succession for the same file/event. */
         debounceDelay?: number;
-        /** Force the watch mode. Either 'auto' (default), 'watch' (force native events), or 'poll' (force stat polling). */
+        /** Force the watch mode. Either "auto" (default), "watch" (force native events), or "poll" (force stat polling). */
         mode?: string;
         /** The current working directory to base file patterns from. Default is process.cwd().. */
         cwd?: string;
@@ -188,7 +188,7 @@ declare module gulp {
          * Define a task.
          *
          * @param name the name of the task. Tasks that you want to run from the command line should not have spaces in them.
-         * @param fn the function that performs the task's operations. Generally this takes the form of gulp.src().pipe(someplugin()).
+         * @param fn the function that performs the task"s operations. Generally this takes the form of gulp.src().pipe(someplugin()).
          */
         task(name:string, fn:ITaskCallback): any;
 
@@ -197,7 +197,7 @@ declare module gulp {
          *
          * @param name the name of the task. Tasks that you want to run from the command line should not have spaces in them.
          * @param dep an array of tasks to be executed and completed before your task will run.
-         * @param fn the function that performs the task's operations. Generally this takes the form of gulp.src().pipe(someplugin()).
+         * @param fn the function that performs the task"s operations. Generally this takes the form of gulp.src().pipe(someplugin()).
          */
         task(name:string, dep:string[], fn?:ITaskCallback): any;
 
@@ -219,7 +219,7 @@ declare module gulp {
 
         /**
          * Can be piped to and it will write files. Re-emits all data passed to it so you can pipe to multiple folders.
-         * Folders that don't exist will be created.
+         * Folders that don"t exist will be created.
          *
          * @param outFolder the path (output folder) to write files to.
          * @param opt
@@ -228,7 +228,7 @@ declare module gulp {
 
         /**
          * Can be piped to and it will write files. Re-emits all data passed to it so you can pipe to multiple folders.
-         * Folders that don't exist will be created.
+         * Folders that don"t exist will be created.
          *
          * @param outFolder a function that converts a vinyl File instance into an output path
          * @param opt

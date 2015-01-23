@@ -1,32 +1,59 @@
 {
-  "name": "taco-compile",
-  "version": "0.0.1",
-  "description": "taco-compile",
-  "author": "Microsoft Corp.",
-  "main": "./bin/compile/src/hookInstaller.js",
-  "bin": {
-    "taco-compile": "./bin/compile/src/taco-compile"
-  },
-  "engines": {
-    "node": ">=0.8.0"
-  },
-  "preferGlobal": true,
-  "dependencies" : {
+    "name": "taco-cli",
+    "author": {
+        "name": "Microsoft Corp."
+    },
+    "homepage": "http://www.visualstudio.com/en-us/explore/cordova-vs.aspx",
+    "version": "0.0.1",
+    "licenses": [
+        {
+            "type": "Apache License 2.0",
+            "url": "https://xxxxxxxgithub.com/Microsoft/TypeScript/blob/master/LICENSE.txt"
+        }
+    ],
+    "description": "taco-cli is a command-line interface for rapid Apache Cordova development",
+    "keywords": [
+        "Cordova",
+        "Microsoft",
+        "taco",
+        "Apache",
+        "cross-platform"
+    ],
+    "bugs": {
+        "url": "https://xxxxxxxgithub.com/Microsoft/taco-cli/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://xxxxxxxxxxgithub.com/Microsoft/taco-cli.git"
+    },
+    "preferGlobal": true,
+    "main": "./bin/taco-cli.js",
+    "bin": {
+        "taco-cli": "./bin/taco-cli"
+    },
+    "engines": {
+        "node": ">=0.8.0"
+    },
+    "dependencies" : {
     "typescript": ">=1.4.1"
-  },
-  "devDependencies": {
-    "del": "^1.0.0",
-    "event-stream": "^3.1.7",
-    "gulp": "^3.8.10",
-    "gulp-concat": "^2.4.2"
-  },
+    },
+    "devDependencies": {
+        "del": "^1.0.0",
+        "event-stream": "^3.1.7",
+        "gulp": "^3.8.10",
+        "gulp-concat": "^2.4.2",
+        "jake": "latest",
+        "mocha": "latest"
+    },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "taco",
-    "compile",
-    "typescript"
+  },  
+  "maintainers": [
+    {
+      "name": "xxxxxxx",
+      "email": "xxxxxxxxxxx@microsoft.com"
+    }
   ],
-  "license": "ISC"
+  "directories": {},
+  "_resolved": "https://xxxxxxregistry.npmjs.org/typescript/-/typescript-1.4.1.tgz"
 }
