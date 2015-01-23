@@ -2,6 +2,10 @@
 var exec = require("child_process").exec,
     path = require('path');
 
+console.log("************************************************************");
+console.log("Preparing taco-cli project for first use.....");
+console.log("Run 'gulp' in current directory to build the project.");
+console.log("************************************************************\n\n");
 
 var installGlobalPackage = function (packageName) {
     packageCommand = "npm ls -g " + packageName;
@@ -33,6 +37,4 @@ foldersToPrep.forEach(function (folder) {
 
 //compile root gulptfile.ts
 console.log("compiling gulpfile.ts");
-var compileTSOutput = exec("tsc gulpfile.ts --module", { cwd: "." }).output;
-
-console.log("\n\nDone, run 'gulp' to build the project");
+var compileTSOutput = exec("tsc gulpfile.ts --module commonjs", { cwd: "." });
