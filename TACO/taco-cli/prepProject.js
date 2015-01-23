@@ -36,5 +36,5 @@ foldersToPrep.forEach(function (folder) {
 });
 
 //compile root gulptfile.ts
-console.log("compiling gulpfile.ts");
+console.log("---compiling gulpfile.ts");
 var compileTSOutput = exec("tsc gulpfile.ts --module commonjs", { cwd: "." });
