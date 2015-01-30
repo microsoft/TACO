@@ -1,3 +1,4 @@
+/*starter gulpfile, bootstraps compiling gulp-compile.ts and runs it*/
 var exec = require("child_process").exec,
     fs = require("fs"),
     path = require('path'),
@@ -7,17 +8,17 @@ var exec = require("child_process").exec,
 gulp.task("default", ["runCompiledGulp"], function (cb) {
     console.log("************************************************************");
     console.log("Prepared taco-cli project for first use.....");
-    console.log("Run 'gulp' in current folder or  'gulp --gulpfile gulp-compile.js' in ../build/src for subsequent builds");
+    console.log("Run 'gulp' in current folder or  'gulp fast-compile --gulpfile gulp-compile.js' in ../build/src for incremental builds");
     console.log("************************************************************\n\n");
 });
 
-/* Runs style cop on the sources. */
+/* Runs the compiled gulp file */
 gulp.task("runCompiledGulp", ["compileTSGulpFiles"], function (cb) {
     exec("gulp --gulpfile gulp-compile.js", { cwd: "../build/src" }, cb);
 });
 
-/* Runs style cop on the sources. */
-gulp.task("compileTSGulpFiles", ["installRootFolderGulp", "installRootFolderTypeScript", "installRootFolderDel"], function (cb) {
+/* compile the gulp-compile.ts file into JS */
+gulp.task("compileTSGulpFiles", ["installRootFolderGulp", "installRootFolderTypeScript", "installRootFolderDel", "installRootFolderNcp"], function (cb) {
     exec("tsc gulp-compile.ts --outdir ../build --module commonjs", { cwd: "." }, cb);
 });
 
@@ -31,9 +32,14 @@ gulp.task("installRootFolderTypeScript", function (cb) {
     exec("npm install typescript", { cwd: ".." }, cb);
 });
 
-/* install typescript in root folder */
+/* install del in root folder */
 gulp.task("installRootFolderDel", function (cb) {
     exec("npm install del", { cwd: ".." }, cb);
+});
+
+/* install del in root folder */
+gulp.task("installRootFolderNcp", function (cb) {
+    exec("npm install ncp", { cwd: ".." }, cb);
 });
 
 module.exports = gulp;

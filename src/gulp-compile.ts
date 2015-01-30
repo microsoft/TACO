@@ -7,6 +7,7 @@ var exec = require("child_process").exec;
 import typescriptUtil = require("../tools/typescript-util");
 import styleCopUtil = require("../tools/stylecop-util");
 var del = require("del");
+var ncp = require("ncp");
 
 var compilerPath = {
     src: "../../src",  // gulp task compiles all source under "taco-cli" source folder
@@ -18,9 +19,9 @@ var compilerPath = {
 ///////////////////////
 
 /* Default task for compiler - runs clean, compile, combine. */
-gulp.task("default", ["installBinDependencies", "styleCop"]);
+gulp.task("default", ["installBinDependencies", "styleCop", "copyResources"]);
 
-/* Compiles the typescript files in the project. */
+/* Compiles the typescript files in the project, for fast iterative use */
 gulp.task("fast-compile", function (cb: Function): void {
     var tsUtil = new typescriptUtil.TacoUtils.TypescriptServices();
     console.log("compilerPath.src:  " + path.resolve(compilerPath.src));
@@ -28,6 +29,7 @@ gulp.task("fast-compile", function (cb: Function): void {
     tsUtil.compileDirectory(compilerPath.src, compilerPath.bin, cb);
 });
 
+/* full clean build */
 gulp.task("compile", ["clean"], function (cb: Function): void {
     var tsUtil = new typescriptUtil.TacoUtils.TypescriptServices();
     console.log("compilerPath.src:  " + path.resolve(compilerPath.src));
@@ -60,6 +62,12 @@ gulp.task("copyPackageJSON", ["compile"], function (cb: Function): void {
     cb();
 });
 
+/* copy package.json files from source to bin */
+gulp.task("copyResources", ["compile"], function (cb: Function): void {
+    ncp("../../src/taco-cli/resources", "../../bin/taco-cli/resources", {clobber: true}, cb)
+});
+
+/* with package.json files setup in Bin folder, call npm install */
 gulp.task("installBinDependencies", ["copyPackageJSON"], function (cb: Function): void {
     exec("npm install", { cwd: "../../bin/taco-cli" }, cb);
 });
