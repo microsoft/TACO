@@ -2,7 +2,7 @@
 import fs = require ("fs");
 import path = require ("path");
 
-export module CordovaTools {
+export module TacoUtils {
     /**
      * Utility for launching TS style cop as a child process.
      */

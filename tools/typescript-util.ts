@@ -1,10 +1,10 @@
-﻿/// <reference path="../typings/typescript/typescript.d.ts" />
+﻿/// <reference path="../src/typings/typescript.d.ts" />
 
 import ts = require ("typescript");
 import fs = require ("fs");
 import path = require ("path");
 
-export module CordovaTools {
+export module TacoUtils {
     export class TypescriptServices {
         private static FailureMessage = "Typescript compilation failed.";
 
@@ -46,7 +46,8 @@ export module CordovaTools {
                         /* push the typescript files */
                         if (path.extname(currentPath) === ".ts" &&
                             !currentPath.match("d.ts$") &&
-                            !currentPath.match("gulpfile.ts")) {
+                            !currentPath.match("gulpfile.ts") &&
+                            !currentPath.match("gulp-compile.ts")) {
                             result.push(currentPath);
                         }
                     } else {
@@ -62,7 +63,7 @@ export module CordovaTools {
         /**
          * Compiles a diectory using the default settings, and the given source and destination location.
          */
-        public compileDirectory(sourceDirectory: string, outputDirectory: string, cb: Function): void {
+        public compileDirectory(sourceDirectory: string, outputDirectory: string, cb: Function): void {            
             var sourceFiles = this.getProjectTypescriptFiles(sourceDirectory, []);                    
 
             this.compileTypescript({

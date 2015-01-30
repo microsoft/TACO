@@ -38,8 +38,10 @@
         "cordova": "^4.2.0",
         "nconf": "^0.7.1",
         "nopt": "^3.0.1",
-        "q": "^1.1.2"
+        "q": "^1.1.2",
+        "taco-utility": "file:../taco-utility"
     },
+    "bundledDependencies": ["taco-utility"],
     "devDependencies": {
         "typescript": ">=1.4.1",
         "del": "^1.0.0",
