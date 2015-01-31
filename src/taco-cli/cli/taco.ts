@@ -1,20 +1,21 @@
-///<reference path="../../typings/taco-utility.d.ts"/>
+///<reference path="../../typings/taco-utils.d.ts"/>
 ///<reference path="../../typings/node.d.ts"/>
 ///<reference path="../../typings/nopt.d.ts"/>
 
-import tacoUtility = require("taco-utility");
+import tacoUtility = require("taco-utils");
 import nopt = require("nopt");
 import path = require("path");
 
 
 class Taco {
-    tacoResources: tacoUtility.Resources;
+    resources: tacoUtility.ResourcesManager;
     constructor() {
-	var resourcePath : string = path.resolve("../resources");
-        this.tacoResources = new tacoUtility.Resources("en", resourcePath);
+        var resourcePath: string = path.resolve("../resources");
+        this.resources = tacoUtility.ResourcesManager.getInstance();
+        this.resources.init("en", resourcePath);
     }
     run(): void {
-        console.log(this.tacoResources.getString("usage"));
+        console.log(this.resources.getString("usage"));
     }
 }
 

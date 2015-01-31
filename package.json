@@ -19,18 +19,13 @@
     ],
     "main": "utility.js",
     "dependencies": {
-        "cordova": "^4.2.0",
-        "nconf": "^0.7.1",
-        "nopt": "^3.0.1",
-        "q": "^1.1.2"      
-    },    
+    },  
+    "private":   true,
     "devDependencies": {
         "typescript": ">=1.4.1",
         "del": "^1.0.0",
-        "event-stream": "^3.1.7",
         "gulp": "^3.8.10",
-        "gulp-concat": "^2.4.2",
-        "jake": "latest",
-        "mocha": "latest"
+        "ncp": "^1.0.1",
+        "q": "^1.1.2"
     }
 }

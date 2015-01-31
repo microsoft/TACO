@@ -1,3 +1,4 @@
-{    
-  "usage":    "Usage:  taco-cli command args"
+{
+    "usage": "Usage:  taco-cli command args",
+    "_usage.comment":    "Usage string shown on first use in CLI"
 }

@@ -8,5 +8,5 @@
 * [Node.js](http://nodejs.org/)
 
 # Development
-To get started, run "node PreProject.js from taco-cli folder"
+To get started, run "gulp" from /src folder
 

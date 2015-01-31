@@ -1,5 +1,5 @@
 {
-    "name": "taco-utility",
+    "name": "taco-utils",
     "author": {
         "name": "Microsoft Corp."
     },
@@ -17,10 +17,11 @@
         "Apache",
         "cross-platform"
     ],
-    "main": "taco-utility.js",
-    "dependencies" : {
-        "typescript": ">=1.4.1"
+    "main": "taco-utils.js",
+    "dependencies": {
     },
+    "private": true,
     "devDependencies": {
+        "typescript": ">=1.4.1"
     }
 }

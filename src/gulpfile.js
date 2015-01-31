@@ -5,7 +5,7 @@ var exec = require("child_process").exec,
     gulp = require("gulp");
 
 /*default task*/
-gulp.task("default", ["runCompiledGulp"], function (cb) {
+gulp.task("default", ["run-compiled-gulp"], function (callback) {
     console.log("************************************************************");
     console.log("Prepared taco-cli project for first use.....");
     console.log("Run 'gulp' in current folder or  'gulp fast-compile --gulpfile gulp-compile.js' in ../build/src for incremental builds");
@@ -13,33 +13,24 @@ gulp.task("default", ["runCompiledGulp"], function (cb) {
 });
 
 /* Runs the compiled gulp file */
-gulp.task("runCompiledGulp", ["compileTSGulpFiles"], function (cb) {
-    exec("gulp --gulpfile gulp-compile.js", { cwd: "../build/src" }, cb);
+gulp.task("run-compiled-gulp", ["compile-gulpmain"], function (callback) {
+    var arg = process.argv.slice(2);
+    var gulpOption = "";
+    if (arg && arg[0])
+        gulpOption = arg[0].replace("--", "");
+    var gulpCommand = "gulp " + gulpOption + " --gulpfile gulpmain.js";
+    console.log("---executing:  " + gulpCommand);
+    exec(gulpCommand, { cwd: "../build" }, callback);
 });
 
 /* compile the gulp-compile.ts file into JS */
-gulp.task("compileTSGulpFiles", ["installRootFolderGulp", "installRootFolderTypeScript", "installRootFolderDel", "installRootFolderNcp"], function (cb) {
-    exec("tsc gulp-compile.ts --outdir ../build --module commonjs", { cwd: "." }, cb);
+gulp.task("compile-gulpmain", ["install-root-folder-packages"], function (callback) {
+    exec("tsc gulpmain.ts --outdir ../build --module commonjs", { cwd: "." }, callback);
 });
 
 /* install gulp in root folder */
-gulp.task("installRootFolderGulp", function (cb) {
-    exec("npm install gulp", { cwd: ".." }, cb);    
-});
-
-/* install typescript in root folder */
-gulp.task("installRootFolderTypeScript", function (cb) {
-    exec("npm install typescript", { cwd: ".." }, cb);
-});
-
-/* install del in root folder */
-gulp.task("installRootFolderDel", function (cb) {
-    exec("npm install del", { cwd: ".." }, cb);
-});
-
-/* install del in root folder */
-gulp.task("installRootFolderNcp", function (cb) {
-    exec("npm install ncp", { cwd: ".." }, cb);
+gulp.task("install-root-folder-packages", function (callback) {
+    exec("npm install", { cwd: ".." }, callback);    
 });
 
 module.exports = gulp;

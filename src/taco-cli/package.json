@@ -8,7 +8,7 @@
     "licenses": [
         {
             "type": "Apache License 2.0",
-            "url": "https://xxxxxxxgithub.com/Microsoft/TypeScript/blob/master/LICENSE.txt"
+            "url": "https://xxxxxgithub.com/Microsoft/TypeScript/blob/master/LICENSE.txt"
         }
     ],
     "description": "taco-cli is a command-line interface for rapid Apache Cordova development",
@@ -20,11 +20,11 @@
         "cross-platform"
     ],
     "bugs": {
-        "url": "https://xxxxxxxgithub.com/Microsoft/taco-cli/issues"
+        "url": "https://xxxxxgithub.com/Microsoft/taco-cli/issues"
     },
     "repository": {
         "type": "git",
-        "url": "https://xxxxxxxxxxgithub.com/Microsoft/taco-cli.git"
+        "url": "https://xxxxxgithub.com/Microsoft/taco-cli.git"
     },
     "preferGlobal": true,
     "main": "./bin/taco-cli.js",
@@ -39,9 +39,9 @@
         "nconf": "^0.7.1",
         "nopt": "^3.0.1",
         "q": "^1.1.2",
-        "taco-utility": "file:../taco-utility"
+        "taco-utils": "file:../taco-utils"
     },
-    "bundledDependencies": ["taco-utility"],
+    "bundledDependencies": ["taco-utils"],
     "devDependencies": {
         "typescript": ">=1.4.1",
         "del": "^1.0.0",
@@ -53,13 +53,5 @@
     },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },  
-  "maintainers": [
-    {
-      "name": "xxxxxxx",
-      "email": "xxxxxxxxxxx@microsoft.com"
-    }
-  ],
-  "directories": {},
-  "_resolved": "https://xxxxxxregistry.npmjs.org/typescript/-/typescript-1.4.1.tgz"
+  }
 }
