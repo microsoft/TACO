@@ -7,14 +7,14 @@ var path = require("path");
 var exec = require("child_process").exec;
 import stylecopUtil = require("./taco-cli/compile/stylecop-util");
 import tsUtil = require("./taco-cli/compile/typescript-util");
-import dtsUtil = require("./taco-cli/compile/tsdefinition-util");
+import dtsUtil = require("../tools/tsdefinition-util");
 var del = require("del");
 var ncp = require("ncp");
 var Q = require("q");
 
 var compilerPath = {
-    src: "../src",  // gulp task compiles all source under "taco-cli" source folder
-    bin: "../bin",
+    src: "../../src",  // gulp task compiles all source under "taco-cli" source folder
+    bin: "../../bin",
 };
 var copFile = path.join(compilerPath.src, "taco-cli/compile/TSStyleCop/TSStyleCop.js");
 

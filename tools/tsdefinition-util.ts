@@ -1,5 +1,5 @@
-/// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/q.d.ts" />
+/// <reference path="../src/typings/node.d.ts" />
+/// <reference path="../src/typings/q.d.ts" />
 
 var exec = require("child_process").exec;
 var fs = require("fs");

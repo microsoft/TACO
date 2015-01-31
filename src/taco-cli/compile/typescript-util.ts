@@ -46,7 +46,7 @@ export class TypeScriptServices {
                     if (path.extname(currentPath) === ".ts" &&
                         !currentPath.match("d.ts$") &&
                         !currentPath.match("gulpfile.ts") &&
-                        !currentPath.match("gulp-compile.ts")) {
+                        !currentPath.match("gulpmain.ts")) {
                         result.push(currentPath);
                     }
                 } else {

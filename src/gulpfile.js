@@ -20,7 +20,7 @@ gulp.task("run-compiled-gulp", ["compile-gulpmain"], function (callback) {
         gulpOption = arg[0].replace("--", "");
     var gulpCommand = "gulp " + gulpOption + " --gulpfile gulpmain.js";
     console.log("---executing:  " + gulpCommand);
-    exec(gulpCommand, { cwd: "../build" }, callback);
+    exec(gulpCommand, { cwd: "../build/src" }, callback);
 });
 
 /* compile the gulp-compile.ts file into JS */
