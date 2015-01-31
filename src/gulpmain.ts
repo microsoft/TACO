@@ -7,6 +7,7 @@ var path = require("path");
 var exec = require("child_process").exec;
 import stylecopUtil = require("./taco-cli/compile/stylecop-util");
 import tsUtil = require("./taco-cli/compile/typescript-util");
+import dtsUtil = require("./taco-cli/compile/tsdefinition-util");
 var del = require("del");
 var ncp = require("ncp");
 var Q = require("q");
@@ -25,12 +26,12 @@ var copFile = path.join(compilerPath.src, "taco-cli/compile/TSStyleCop/TSStyleCo
 gulp.task("default", ["copy-package-json", "rebuild", "run-stylecop", "copy-resources"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
-gulp.task("compile", function (callback: Function): void {
+gulp.task("compile", ["generate-utility-dts"],  function (callback: Function): void {
     compileTS(callback);
 });
 
 /* full clean build */
-gulp.task("rebuild", ["clean"], function (callback: Function): void {
+gulp.task("rebuild", ["clean", "generate-utility-dts"], function (callback: Function): void {
     compileTS(callback);
 });
 
@@ -46,7 +47,7 @@ gulp.task("run-stylecop", function (callback: Function): void {
 
 /* Cleans up the bin location. */
 gulp.task("clean", function (callback: Function): void {
-    del([compilerPath.bin + "**"], { force: true }, callback);
+    del([compilerPath.bin + "/**"], { force: true }, callback);
 });
 
 /* copy package.json files from source to bin */
@@ -74,6 +75,18 @@ function compileTS(callback: Function) {
     console.log("compilerPath.bin:  " + path.resolve(compilerPath.bin));
     tsCompiler.compileDirectory(compilerPath.src, compilerPath.bin, callback);
 }
+
+/* auto-generate taco-utils.d.ts*/
+gulp.task("generate-utility-dts", function (cb: Function): void {
+    var tacoUtils: string = "taco-utils";
+    dtsUtil.DefinitionServices.generateTSExportDefinition(
+        tacoUtils,
+        path.join(compilerPath.src, tacoUtils),
+        path.join(compilerPath.src, "typings"),
+        "TacoUtility",
+        tacoUtils);
+    cb();
+});
 
 /* Task to generate NPM package */
 

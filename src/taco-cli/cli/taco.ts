@@ -8,14 +8,12 @@ import path = require("path");
 
 
 class Taco {
-    resources: tacoUtility.ResourcesManager;
     constructor() {
         var resourcePath: string = path.resolve("../resources");
-        this.resources = tacoUtility.ResourcesManager.getInstance();
-        this.resources.init("en", resourcePath);
+        tacoUtility.ResourcesManager.init("en", resourcePath);
     }
     run(): void {
-        console.log(this.resources.getString("usage"));
+        console.log(tacoUtility.ResourcesManager.getString("usage"));
     }
 }
 
