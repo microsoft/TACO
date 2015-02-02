@@ -16,7 +16,7 @@ var compilerPath = {
     src: ".",  // gulp task compiles all source under "taco-cli" source folder
     bin: "../bin",
 };
-var copFile = path.join(compilerPath.src, "taco-cli/compile/TSStyleCop/TSStyleCop.js");
+var copFile = path.join(compilerPath.src, "../tools/internal/TSStyleCop/TSStyleCop.js");
 
 ////////////////// to add additional gulp tasks, add gulpfile in folder and reference it below
 // for example:  require('./src/compile/gulpfile');
