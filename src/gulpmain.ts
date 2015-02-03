@@ -31,8 +31,7 @@ gulp.task("build", ["compile"], function (callback: Function): void {
 
 /* full clean build */
 gulp.task("rebuild", ["clean"], function (callback: Function): void {
-    gulp.run("compile");
-    gulp.run("copy");
+    gulp.run("build");
 });
 
 /* Runs style cop on the sources. */
