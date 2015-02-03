@@ -45,7 +45,7 @@ module TacoUtility {
 
         public static bestLanguageMatchOrDefault(language: string, resourcesDir: string): string {
             if (!language) {
-                return this.defaultLanguage;
+                return this.DefaultLanguage;
             }
 
             var supportedLanguages: string[] = [];
@@ -68,7 +68,7 @@ module TacoUtility {
                 return primaryLang;
             }
 
-            return this.defaultLanguage;
+            return this.DefaultLanguage;
         }
 
         public static loadLanguage(language: string, resourcesDir: string): any {
