@@ -3,5 +3,5 @@
     "compiledGulp": "../build",
     "bin": "../build/src",
     "tools": "../build/tools",
-    "copPath":  "../tools/internal/TSStyleCop.js"
+    "copPath":  "../tools/internal/TSStyleCop/TSStyleCop.js"
 }

@@ -1,32 +1,31 @@
-///<reference path="../typings/node.d.ts"/>
+/// <reference path="../typings/node.d.ts" />
 "use strict";
 
-import fs = require("fs");
-import path = require("path");
+import fs = require ("fs");
+import path = require ("path");
 
 module TacoUtility {
-
-    //put more classes here, known limitation that classes in external modules CANNOT span multiple files    
+    // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
     export class ResourcesManager {        
-        static resources: any = null;
-        static defaultLanguage: string = "en";        
+        private static Resources: any = null;
+        private static DefaultLanguage: string = "en";        
 
-        static init(language: string, resourcesDir?: string) {            
+        public static init(language: string, resourcesDir?: string): void {            
             if (!resourcesDir) {
                 resourcesDir = path.join(__dirname, "..", "resources");
             }
 
             var lang = this.bestLanguageMatchOrDefault(language, resourcesDir);
-            this.resources = this.loadLanguage(lang, resourcesDir);
+            this.Resources = this.loadLanguage(lang, resourcesDir);
         }
 
-        /**** ...optionalArgs is only there for typings, function rest params***/
-        static getString(id: string, ...optionalArgs: any[]): string {
-            if (!this.resources) {
+        /* ...optionalArgs is only there for typings, function rest params */
+        public static getString(id: string, ...optionalArgs: any[]): string {
+            if (!this.Resources) {
                 throw new Error("Resources have not been loaded");
             }
 
-            var s = this.resources[id];
+            var s = this.Resources[id];
             if (!s) {
                 return s;
             }
@@ -44,7 +43,7 @@ module TacoUtility {
             return s;
         }
 
-        static bestLanguageMatchOrDefault(language: string, resourcesDir: string): string {
+        public static bestLanguageMatchOrDefault(language: string, resourcesDir: string): string {
             if (!language) {
                 return this.defaultLanguage;
             }
@@ -72,12 +71,12 @@ module TacoUtility {
             return this.defaultLanguage;
         }
 
-        static loadLanguage(language: string, resourcesDir: string): any {
+        public static loadLanguage(language: string, resourcesDir: string): any {
             var resourcesPath = path.join(resourcesDir, language, "resources.json");
             return require(resourcesPath);
         }
 
-        static getOptionalArgsArrayFromFunctionCall(functionArguments: IArguments, startFrom: number): any[] {
+        public static getOptionalArgsArrayFromFunctionCall(functionArguments: IArguments, startFrom: number): any[] {
             if (functionArguments.length <= startFrom) {
                 return null;
             }
@@ -92,9 +91,3 @@ module TacoUtility {
 }
 
 export = TacoUtility;
-
-
-
-
-
-

@@ -1,15 +1,14 @@
 /// <reference path="typings/node.d.ts" />
 /// <reference path="typings/q.d.ts" />
 
-
 var fs = require("fs");
 var gulp = require("gulp");
 var del = require("del");
 var path = require("path");
 var exec = require("child_process").exec;
-import dtsUtil = require("../tools/tsdefinition-util");
-import stylecopUtil = require("../tools/stylecop-util");
-import tsUtil = require("./taco-cli/compile/typescript-util");
+import dtsUtil = require ("../tools/tsdefinition-util");
+import stylecopUtil = require ("../tools/stylecop-util");
+import tsUtil = require ("./taco-cli/compile/typescript-util");
 var buildConfig = require("../../src/build_config.json");
 
 /* Default task for building /src folder into /bin */
@@ -28,17 +27,16 @@ gulp.task("build", ["compile"], function (callback: Function): void {
     gulp.run("copy");
 });
 
-
 /* full clean build */
 gulp.task("rebuild", ["clean"], function (callback: Function): void {
     gulp.run("build");
 });
 
 /* Runs style cop on the sources. */
-gulp.task("run-stylecop", ["clean-build"], function (callback: Function): void {    
-    if (fs.existsSync("copFile")) {
+gulp.task("run-stylecop", function (callback: Function): void {            
+    if (fs.existsSync(buildConfig.copPath)) {        
         var styleCop = new stylecopUtil.StyleCopUtil();
-        styleCop.runCop(buildConfig.src, buildConfig.copFile, callback);
+        styleCop.runCop(buildConfig.src, buildConfig.copPath, callback);
     } else {
         callback();
     }
