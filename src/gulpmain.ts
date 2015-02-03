@@ -5,7 +5,7 @@ var fs = require("fs");
 var gulp = require("gulp");
 var path = require("path");
 var exec = require("child_process").exec;
-import stylecopUtil = require("./taco-cli/compile/stylecop-util");
+import stylecopUtil = require("../tools/stylecop-util");
 import tsUtil = require("./taco-cli/compile/typescript-util");
 import dtsUtil = require("../tools/tsdefinition-util");
 var del = require("del");
@@ -16,7 +16,7 @@ var compilerPath = {
     src: ".",  // gulp task compiles all source under "taco-cli" source folder
     bin: "../bin",
 };
-var copFile = path.join(compilerPath.src, "taco-cli/compile/TSStyleCop/TSStyleCop.js");
+var copFile = path.join(compilerPath.src, "../tools/internal/TSStyleCop.js");
 
 ////////////////// to add additional gulp tasks, add gulpfile in folder and reference it below
 // for example:  require('./src/compile/gulpfile');
