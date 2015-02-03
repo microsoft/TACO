@@ -25,10 +25,7 @@ gulp.task("install", function (callback) {
 
 var gulpMain = "../bin/src/gulpmain.js";
 if (fs.existsSync(gulpMain)) {
-    console.log("found");
     require(gulpMain);
 }
-else {
-    console.log("not found:  "  + path.resolve(gulpMain));
-}
+
 module.exports = gulp;
