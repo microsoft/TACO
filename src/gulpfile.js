@@ -9,16 +9,21 @@ gulp.on("task_not_found", function (err) {
 });
 
 /* compile the gulp-compile.ts file into JS */
-gulp.task("prep", ["get-packages"], function (callback) {
-    exec("tsc gulpmain.ts --outdir ../build --module commonjs", { cwd: "." }, callback);
+gulp.task("prep", ["install"], function (callback) {
+    exec("tsc gulpmain.ts --outdir ../bin --module commonjs", { cwd: "." }, callback);
 });
 
 /* install gulp in root folder */
-gulp.task("get-packages", function (callback) {
-    exec("npm install", { cwd: ".." }, callback);    
+gulp.task("install", function (callback) {
+    var modules = ["del", "gulp", "typescript", "ncp", "q"];
+    for (var i in modules)
+    {
+        exec("npm install " + modules[i], { cwd: ".." });
+    }    
+    callback();
 });
 
-var gulpMain = "../build/src/gulpmain.js";
+var gulpMain = "../bin/src/gulpmain.js";
 if (fs.existsSync(gulpMain)) {
     console.log("found");
     require(gulpMain);

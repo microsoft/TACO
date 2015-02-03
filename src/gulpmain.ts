@@ -16,7 +16,7 @@ var compilerPath = {
     src: ".",  // gulp task compiles all source under "taco-cli" source folder
     bin: "../bin",
 };
-var copFile = path.join(compilerPath.src, "../tools/internal/TSStyleCop/TSStyleCop.js");
+var copFile = path.join(compilerPath.src, "taco-cli/compile/TSStyleCop/TSStyleCop.js");
 
 ////////////////// to add additional gulp tasks, add gulpfile in folder and reference it below
 // for example:  require('./src/compile/gulpfile');
@@ -52,7 +52,8 @@ gulp.task("run-stylecop", ["clean-build"], function (callback: Function): void {
 
 /* Cleans up the bin location. */
 gulp.task("clean", function (callback: Function): void {
-    del([compilerPath.bin + "/**"], { force: true }, callback);
+    //del([compilerPath.bin + "/**"], { force: true }, callback);
+    console.log("abc");
 });
 
 /* copy package.json files from source to bin */
