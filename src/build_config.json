@@ -1,0 +1,7 @@
+{
+    "src": ".",
+    "compiledGulp": "../build",
+    "bin": "../build/src",
+    "tools": "../build/tools",
+    "copPath":  "../tools/internal/TSStyleCop.js"
+}

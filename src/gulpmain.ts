@@ -7,34 +7,30 @@ var gulp = require("gulp");
 var del = require("del");
 var path = require("path");
 var exec = require("child_process").exec;
+import dtsUtil = require("../tools/tsdefinition-util");
 import stylecopUtil = require("../tools/stylecop-util");
 import tsUtil = require("./taco-cli/compile/typescript-util");
-import dtsUtil = require("../tools/tsdefinition-util");
-
-var compilerPath = {
-    src: ".",  // gulp task compiles all source under "taco-cli" source folder
-    bin: "../bin/src",
-    tools:  "../bin/tools"
-};
-var copFile = path.join(compilerPath.src, "../tools/internal/TSStyleCop.js");
-
-////////////////// to add additional gulp tasks, add gulpfile in folder and reference it below
-// for example:  require('./src/compile/gulpfile');
-///////////////////////
+var buildConfig = require("../../src/build_config.json");
 
 /* Default task for building /src folder into /bin */
-gulp.task("default", ["rebuild"]);
+gulp.task("default", ["build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
 gulp.task("compile", function (callback: Function): void {
     var tsCompiler = new tsUtil.TypeScriptServices();
-    console.log("compilerPath.src:  " + path.resolve(compilerPath.src));
-    console.log("compilerPath.bin:  " + path.resolve(compilerPath.bin));
-    tsCompiler.compileDirectory(compilerPath.src, compilerPath.bin, callback);
+    console.log("buildConfig.src:  " + path.resolve(buildConfig.src));
+    console.log("buildConfig.bin:  " + path.resolve(buildConfig.bin));
+    tsCompiler.compileDirectory(buildConfig.src, buildConfig.bin, callback);
 });
 
+/* compile + copy */
+gulp.task("build", ["compile"], function (callback: Function): void {
+    gulp.run("copy");
+});
+
+
 /* full clean build */
-gulp.task("build", ["clean"], function (callback: Function): void {
+gulp.task("rebuild", ["clean"], function (callback: Function): void {
     gulp.run("compile");
     gulp.run("copy");
 });
@@ -43,7 +39,7 @@ gulp.task("build", ["clean"], function (callback: Function): void {
 gulp.task("run-stylecop", ["clean-build"], function (callback: Function): void {    
     if (fs.existsSync("copFile")) {
         var styleCop = new stylecopUtil.StyleCopUtil();
-        styleCop.runCop(compilerPath.src, copFile, callback);
+        styleCop.runCop(buildConfig.src, buildConfig.copFile, callback);
     } else {
         callback();
     }
@@ -51,13 +47,13 @@ gulp.task("run-stylecop", ["clean-build"], function (callback: Function): void {
 
 /* Cleans up the bin location, will have to call "gulp prep" again */
 gulp.task("clean", function (callback: Function): void {
-    del([compilerPath.bin + "/../**"], { force: true }, callback);    
+    del([buildConfig.bin + "/../**"], { force: true }, callback);    
 });
 
-/* copy package.json files from source to bin */
+/* copy package.json and resources.json files from source to bin */
 gulp.task("copy", function (callback: Function): void {    
-    gulp.src(path.join(compilerPath.src, "/**/package.json")).pipe(gulp.dest(compilerPath.bin));
-    gulp.src(path.join(compilerPath.src, "/**/resources.json")).pipe(gulp.dest(compilerPath.bin));
+    gulp.src(path.join(buildConfig.src, "/**/package.json")).pipe(gulp.dest(buildConfig.bin));
+    gulp.src(path.join(buildConfig.src, "/**/resources.json")).pipe(gulp.dest(buildConfig.bin));
 });
 
 /* auto-generate taco-utils.d.ts*/
@@ -65,8 +61,8 @@ gulp.task("generate-dts", function (cb: Function): void {
     var tacoUtils: string = "taco-utils";
     dtsUtil.DefinitionServices.generateTSExportDefinition(
         tacoUtils,
-        path.join(compilerPath.src, tacoUtils),
-        path.join(compilerPath.src, "typings"),
+        path.join(buildConfig.src, tacoUtils),
+        path.join(buildConfig.src, "typings"),
         "TacoUtility",
         tacoUtils);
     cb();
