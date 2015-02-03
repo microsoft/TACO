@@ -34,7 +34,7 @@ gulp.task("compile", function (callback: Function): void {
 });
 
 /* full clean build */
-gulp.task("rebuild", ["clean"], function (callback: Function): void {
+gulp.task("build", ["clean"], function (callback: Function): void {
     gulp.run("compile");
     gulp.run("copy");
 });
