@@ -2,7 +2,6 @@
 import fs = require ("fs");
 import path = require ("path");
 
-
     /**
      * Utility for launching TS style cop as a child process.
      */

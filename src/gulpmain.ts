@@ -36,7 +36,7 @@ gulp.task("rebuild", ["clean"], function (callback: Function): void {
 gulp.task("run-stylecop", function (callback: Function): void {            
     if (fs.existsSync(buildConfig.copPath)) {        
         var styleCop = new stylecopUtil.StyleCopUtil();
-        styleCop.runCop(buildConfig.src, buildConfig.copPath, callback);
+        styleCop.runCop(path.join(buildConfig.src, ".."), buildConfig.copPath, callback);
     } else {
         callback();
     }
