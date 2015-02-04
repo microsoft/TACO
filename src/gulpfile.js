@@ -1,4 +1,4 @@
-/*starter gulpfile, bootstraps compiling gulp-compile.ts and runs it*/
+﻿/* starter gulpfile, bootstraps compiling gulp-compile.ts and runs it */
 var exec = require("child_process").exec,
     fs = require("fs"),
     path = require('path'),
@@ -23,9 +23,11 @@ gulp.task("install", function (callback) {
     callback();
 });
 
-////////////////// to add additional gulp tasks, add gulpfile in folder and reference it below
-// for example:  require('./src/compile/gulpfile');
-///////////////////////
+
+/*  
+ to add additional gulp tasks, add gulpfile in folder and reference it below
+ for example:  require('./src/compile/gulpfile');
+*/
 var gulpMain = path.join(buildConfig.bin, "gulpmain.js");
 if (fs.existsSync(gulpMain)) {
     require(gulpMain);
