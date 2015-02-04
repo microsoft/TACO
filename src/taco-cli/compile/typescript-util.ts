@@ -44,7 +44,6 @@ export class TypeScriptServices {
                 if (!fs.statSync(currentPath).isDirectory()) {
                     /* push the typescript files */
                     if (path.extname(currentPath) === ".ts" &&
-                        !currentPath.match("d.ts$") &&
                         !currentPath.match("gulpfile.ts") &&
                         !currentPath.match("gulpmain.ts")) {
                         result.push(currentPath);
@@ -79,8 +78,12 @@ export class TypeScriptServices {
      */
     private logDiagnosticMessage(diagnostic: ts.Diagnostic): void {
         var sourceFile = diagnostic.file;
-        var lineAndCharacter = sourceFile.getLineAndCharacterFromPosition(diagnostic.start);
-        console.warn(sourceFile.filename + "(" + lineAndCharacter.line + "," + lineAndCharacter.character + "): " + diagnostic.messageText);
+        if (sourceFile) {
+            var lineAndCharacter = sourceFile.getLineAndCharacterFromPosition(diagnostic.start);
+            console.warn(sourceFile.filename + "(" + lineAndCharacter.line + "," + lineAndCharacter.character + "): " + diagnostic.messageText);
+        } else {
+            console.warn(diagnostic.messageText);
+        }
     }
 }
 

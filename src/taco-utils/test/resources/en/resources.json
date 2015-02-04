@@ -1,0 +1,4 @@
+﻿{
+    "SimpleMessage": "Hello",
+    "MessageWithArgs": "Hello {0} {1}"
+}
