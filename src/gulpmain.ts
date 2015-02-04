@@ -1,4 +1,4 @@
-/// <reference path="typings/node.d.ts" />
+﻿/// <reference path="typings/node.d.ts" />
 /// <reference path="typings/q.d.ts" />
 
 var fs = require("fs");
@@ -64,8 +64,6 @@ gulp.task("generate-dts", function (cb: Function): void {
         tacoUtils);
     cb();
 });
-
-/* Task to generate NPM package */
 
 /* Task to run tests */
 module.exports = gulp;
