@@ -7,72 +7,57 @@ import tacoUtility = require("taco-utils");
 import nopt = require("nopt");
 import fs = require("fs");
 import path = require("path");
-import cordova = require("cordova");
-import commands = require("./command");
 
 class Taco {
     constructor() {
         var resourcePath: string = path.resolve("../resources");
-        tacoUtility.ResourcesManager.init("en", resourcePath);
-
+        tacoUtility.ResourcesManager.init("en", resourcePath);        
     }
 
     public run(): void {
-        CommandFactory.init("./commands.json");
-        CommandFactory.getTask("create");
-        //console.log(tacoUtility.ResourcesManager.getString("usage"));
-        //cordova.cli(["a", "b"]);
-        //var commandListings = require("./commands.json");
-        //console.log(commandListings["help"]["module"]);
-        
-        //if (process.argv[2]) {
-        //    console.log("found");
-        //    console.log("argv[2]: " + process.argv[2]);
-        //} else {
-        //    console.log("not found");
-        //}
+        tacoUtility.Commands.CommandFactory.init("./commands.json");
+        tacoUtility.Commands.CommandFactory.getTask("info").run();
     }
 }
 
-class CommandFactory {
-    private static Listings: any;
-    private static Instance: commands.Command;
+//class CommandFactory {
+//    private static Listings: any;
+//    private static Instance: commands.Command;
 
-    //private static info: commands.CommandInfo;
-    public static init(commandsInfoPath: string) {
-        if (!fs.existsSync(commandsInfoPath)) {
-            throw new Error("Cannot find commands listing file");
-        }
+//    // initialize with json file containing commands
+//    public static init(commandsInfoPath: string) {
+//        if (!fs.existsSync(commandsInfoPath)) {
+//            throw new Error("Cannot find commands listing file");
+//        }
 
-        CommandFactory.Listings = require(commandsInfoPath);
-        var modulePath: string = CommandFactory.Listings["create"]["modulePath"];
-        console.log("modulePath:  " + modulePath);
-    }
+//        CommandFactory.Listings = require(commandsInfoPath);        
+//    }
 
-    public static getTask(name: string): commands.Command {
-        if (!name || !CommandFactory.Listings) {
-            throw new Error("Cannot find command listing");
-        }
+//    // get specific task object, given task name
+//    public static getTask(name: string): commands.Command {
+//        if (!name || !CommandFactory.Listings) {
+//            throw new Error("Cannot find command listing file");
+//        }
 
-        if (CommandFactory.Instance) {
-            return CommandFactory.Instance;
-        }
+//        if (CommandFactory.Instance) {
+//            return CommandFactory.Instance;
+//        }
 
-        var modulePath: string = CommandFactory.Listings[name]["modulePath"];
-        console.log(modulePath);
-        //if (!fs.existsSync(modulePath)) {
-        //    throw new Error("Cannot find command module:  " + modulePath);
-        //}
+//        var moduleInfo: commands.CommandInfo = CommandFactory.Listings[name];
+//        var modulePath: string = moduleInfo.modulePath;
+//        if (!fs.existsSync(modulePath + ".js")) {
+//            throw new Error("Cannot find command module");
+//        }
 
-        //var commandMod: typeof commands.Command = require(modulePath);      
-        //CommandFactory.Instance = new commandMod();
-        //if (!CommandFactory.Instance) {
-        //    throw new Error("Can't build command instance");
-        //}  
+//        var commandMod: typeof commands.Command = require(modulePath);
+//        CommandFactory.Instance = new commandMod(moduleInfo);
+//        if (!CommandFactory.Instance) {
+//            throw new Error("Can't build command instance");
+//        }  
         
-        //CommandFactory.Instance.run();
-    }
-}
+//        CommandFactory.Instance.run();
+//    }
+//}
 
 var taco = new Taco();
 taco.run();

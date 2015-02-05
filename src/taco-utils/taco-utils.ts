@@ -5,11 +5,68 @@ import fs = require ("fs");
 import path = require ("path");
 
 module TacoUtility {
-    //export class CommandsManager {
-    //    public static init() {
-            
-    //    }
-    //}
+    export module Commands {
+        export interface nameDescription {
+            name: string;
+            description: string;
+        }
+
+        export interface CommandInfo {
+            modulePath: string;
+            description: string;
+            args: nameDescription[];
+            options: nameDescription[];
+        }
+
+        export class Command {
+            info: CommandInfo;
+            constructor(input: CommandInfo) {
+                this.info = input;                
+            }
+            public run() {
+            }
+        }
+
+        export class CommandFactory {
+            private static Listings: any;
+            private static Instance: Command;
+
+            // initialize with json file containing commands
+            public static init(commandsInfoPath: string) {
+                commandsInfoPath = path.resolve(commandsInfoPath);
+                if (!fs.existsSync(commandsInfoPath)) {
+                    throw new Error("Cannot find commands listing file");
+                }
+
+                CommandFactory.Listings = require(commandsInfoPath);
+            }
+
+            // get specific task object, given task name
+            public static getTask(name: string): Command {
+                if (!name || !CommandFactory.Listings) {
+                    throw new Error("Cannot find command listing file");
+                }
+
+                if (CommandFactory.Instance) {
+                    return CommandFactory.Instance;
+                }
+
+                var moduleInfo: CommandInfo = CommandFactory.Listings[name];
+                var modulePath: string = path.resolve(moduleInfo.modulePath);
+                if (!fs.existsSync(modulePath + ".js")) {
+                    throw new Error("Cannot find command module");
+                }
+
+                var commandMod: typeof Command = require(modulePath);
+                CommandFactory.Instance = new commandMod(moduleInfo);
+                if (!CommandFactory.Instance) {
+                    throw new Error("Can't build command instance");
+                }
+
+                return CommandFactory.Instance;
+            }
+        }
+    }
 
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
     export class ResourcesManager {        

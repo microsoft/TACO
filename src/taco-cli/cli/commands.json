@@ -2,24 +2,30 @@
     "create": {
         "modulePath": "./create",
         "description": "Create a project",
-        "args": {
-            "[options]": "",
-            "<PLATFORM>": ""
-        },
-        "options": {
-            "--template": "generate template"
-        }
+        "args": [
+            { "name": "arg1", "description": "d1" },
+            { "name": "arg2", "description": "d2" }
+        ],
+        "options": [
+            { "name": "opt1", "description": "d1" },
+            { "name": "opt2", "description": "d2" }
+        ]
     },
     "help": {
         "modulePath": "./help",
-        "description": "Get help for a command",
-        "args": {
-            "[command]": "Command you want more info on"
-        }
+        "description": "Get help for a command"
     },
     "info": {
         "modulePath": "./cordova",
-        "description": "Generate project information"
+        "description": "Generate project information",
+        "args": [
+            { "name": "arg1", "description": "d1" },
+            { "name": "arg2", "description": "d2" }
+        ],
+        "options": [
+            { "name": "opt1", "description": "d1" },
+            { "name": "opt2", "description": "d2" }
+        ]
     },
     "platform": {
         "modulePath": "./cordova",
