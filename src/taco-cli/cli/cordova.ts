@@ -2,17 +2,19 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordova.d.ts" />
 
-import cordova = require("cordova");
+import cordova = require ("cordova");
 import tacoUtility = require("taco-utils");
-
-/**
-* dfdf
-*/
-class Cordova extends tacoUtility.Commands.Command {
-    run() {
+/*
+ * Cordova
+ *
+ * Command class handling passthroughs to CordovaCLI
+ */
+class Cordova extends tacoUtility.Commands.Command {    
+    public run(): void {        
         console.log("Cordova!!!");
-        console.log("args:  " + this.info.args.length);
-        console.log("options:  " + this.info.args.length);
+        //console.log("args:  " + this.info.args.length);
+        //console.log("options:  " + this.info.options.length);
+        console.log(this.cliArgs);
         cordova.cli(["cc", "dd"]);
     }
 }

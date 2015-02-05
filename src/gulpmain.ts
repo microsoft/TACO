@@ -51,6 +51,7 @@ gulp.task("copy", function (callback: Function): void {
     gulp.src(path.join(buildConfig.src, "/**/package.json")).pipe(gulp.dest(buildConfig.bin));
     gulp.src(path.join(buildConfig.src, "/**/resources.json")).pipe(gulp.dest(buildConfig.bin));
     gulp.src(path.join(buildConfig.src, "/**/commands.json")).pipe(gulp.dest(buildConfig.bin));
+    gulp.src(path.join(buildConfig.src, "/**/bin/**")).pipe(gulp.dest(buildConfig.bin));
 });
 
 /* auto-generate taco-utils.d.ts*/

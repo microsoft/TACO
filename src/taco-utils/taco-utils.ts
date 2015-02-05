@@ -6,23 +6,26 @@ import path = require ("path");
 
 module TacoUtility {
     export module Commands {
-        export interface nameDescription {
+        export interface INameDescription {
             name: string;
             description: string;
         }
 
-        export interface CommandInfo {
+        export interface ICommandInfo {
             modulePath: string;
             description: string;
-            args: nameDescription[];
-            options: nameDescription[];
+            args: INameDescription[];
+            options: INameDescription[];
         }
 
         export class Command {
-            info: CommandInfo;
-            constructor(input: CommandInfo) {
-                this.info = input;                
+            info: ICommandInfo;
+            cliArgs: string[];
+            constructor(info: ICommandInfo) {
+                this.info = info;
+                this.cliArgs = process.argv.slice(2);
             }
+
             public run() {
             }
         }
@@ -30,6 +33,7 @@ module TacoUtility {
         export class CommandFactory {
             private static Listings: any;
             private static Instance: Command;
+            public static CommandsInfoFile: string;
 
             // initialize with json file containing commands
             public static init(commandsInfoPath: string) {
@@ -38,6 +42,7 @@ module TacoUtility {
                     throw new Error("Cannot find commands listing file");
                 }
 
+                CommandFactory.CommandsInfoFile = commandsInfoPath;
                 CommandFactory.Listings = require(commandsInfoPath);
             }
 
@@ -45,14 +50,10 @@ module TacoUtility {
             public static getTask(name: string): Command {
                 if (!name || !CommandFactory.Listings) {
                     throw new Error("Cannot find command listing file");
-                }
+                }                
 
-                if (CommandFactory.Instance) {
-                    return CommandFactory.Instance;
-                }
-
-                var moduleInfo: CommandInfo = CommandFactory.Listings[name];
-                var modulePath: string = path.resolve(moduleInfo.modulePath);
+                var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
+                var modulePath = path.resolve(moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
                     throw new Error("Cannot find command module");
                 }
@@ -64,6 +65,19 @@ module TacoUtility {
                 }
 
                 return CommandFactory.Instance;
+            }
+
+            public static runTask() {
+                var input: string = process.argv[2];
+                var command: Command = null;
+
+                if (input) {
+                    command = CommandFactory.getTask(input);
+                } else {
+                    command = CommandFactory.getTask("help");
+                }
+
+                command.run();
             }
         }
     }

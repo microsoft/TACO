@@ -1,26 +1,29 @@
 /// <reference path="../typings/node.d.ts" />
 declare module TacoUtility {
     module Commands {
-        interface nameDescription {
+        interface INameDescription {
             name: string;
             description: string;
         }
-        interface CommandInfo {
+        interface ICommandInfo {
             modulePath: string;
             description: string;
-            args: nameDescription[];
-            options: nameDescription[];
+            args: INameDescription[];
+            options: INameDescription[];
         }
         class Command {
-            info: CommandInfo;
-            constructor(input: CommandInfo);
+            info: ICommandInfo;
+            cliArgs: string[];
+            constructor(info: ICommandInfo);
             run(): void;
         }
         class CommandFactory {
             private static Listings;
             private static Instance;
+            static CommandsInfoFile: string;
             static init(commandsInfoPath: string): void;
             static getTask(name: string): Command;
+            static runTask(): void;
         }
     }
     class ResourcesManager {

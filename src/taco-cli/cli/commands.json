@@ -1,54 +1,56 @@
 {
     "create": {
-        "modulePath": "./create",
+        "modulePath": "../cli/create",
         "description": "Create a project",
         "args": [
-            { "name": "arg1", "description": "d1" },
-            { "name": "arg2", "description": "d2" }
+            { "name": "<PATH>", "description": "Where to create the project" },
+            { "name": "[ID]", "description": "reverse-domain-style package name - used in <widget id>" },
+            { "name": "[NAME]", "description": "human readable field" },
+            { "name": "[options]", "description": "" }
         ],
         "options": [
-            { "name": "opt1", "description": "d1" },
-            { "name": "opt2", "description": "d2" }
+            { "name": "template", "description": "template name" },
+            { "name": "kit", "description": "kit version" }
+        ]
+    },
+    "plugin": {
+        "modulePath": "../cli/cordova",
+        "description": "Add/remove a plugin",
+        "args": [
+            { "name": "[command]", "description": "add or remove" },
+            { "name": "<plugin>", "description": "name of the plugin" }
         ]
     },
     "help": {
-        "modulePath": "./help",
+        "modulePath": "../cli/help",
         "description": "Get help for a command"
     },
     "info": {
-        "modulePath": "./cordova",
-        "description": "Generate project information",
-        "args": [
-            { "name": "arg1", "description": "d1" },
-            { "name": "arg2", "description": "d2" }
-        ],
-        "options": [
-            { "name": "opt1", "description": "d1" },
-            { "name": "opt2", "description": "d2" }
-        ]
+        "modulePath": "../cli/cordova",
+        "description": "Generate project information"
     },
     "platform": {
-        "modulePath": "./cordova",
+        "modulePath": "../cli/cordova",
         "description": "Manage project platforms"
     },
     "plugin": {
-        "modulePath": "./cordova",
+        "modulePath": "../cli/cordova",
         "description": "Manage project plugins"
     },
     "prepare": {
-        "modulePath": "./cordova",
+        "modulePath": "../cli/cordova",
         "description": "Copy files into platform(s) for building"
     },
     "compile": {
-        "modulePath": "./cordova",
+        "modulePath": "../cli/cordova",
         "description": "Build platform(s)"
     },
     "run": {
-        "modulePath": "./cordova",
+        "modulePath": "../cli/cordova",
         "description": "Run project (including prepare && compile)"
     },
     "serve": {
-        "modulePath": "./cordova",
+        "modulePath": "../cli/cordova",
         "description": "Run project with a local webserver (including prepare)"
     }
 }
