@@ -5,11 +5,10 @@ var fs = require("fs");
 var gulp = require("gulp");
 var del = require("del");
 var path = require("path");
-var exec = require("child_process").exec;
 import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
 import tsUtil = require ("./taco-cli/compile/typescript-util");
-var buildConfig = require("../../src/build_config.json");
+var buildConfig = require ("../../src/build_config.json");
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["build"]);
@@ -51,6 +50,7 @@ gulp.task("clean", function (callback: Function): void {
 gulp.task("copy", function (callback: Function): void {    
     gulp.src(path.join(buildConfig.src, "/**/package.json")).pipe(gulp.dest(buildConfig.bin));
     gulp.src(path.join(buildConfig.src, "/**/resources.json")).pipe(gulp.dest(buildConfig.bin));
+    gulp.src(path.join(buildConfig.src, "/**/commands.json")).pipe(gulp.dest(buildConfig.bin));
 });
 
 /* auto-generate taco-utils.d.ts*/

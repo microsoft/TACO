@@ -5,6 +5,12 @@ import fs = require ("fs");
 import path = require ("path");
 
 module TacoUtility {
+    //export class CommandsManager {
+    //    public static init() {
+            
+    //    }
+    //}
+
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
     export class ResourcesManager {        
         private static Resources: any = null;

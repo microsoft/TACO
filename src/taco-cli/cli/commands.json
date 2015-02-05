@@ -1,0 +1,48 @@
+{
+    "create": {
+        "modulePath": "./create",
+        "description": "Create a project",
+        "args": {
+            "[options]": "",
+            "<PLATFORM>": ""
+        },
+        "options": {
+            "--template": "generate template"
+        }
+    },
+    "help": {
+        "modulePath": "./help",
+        "description": "Get help for a command",
+        "args": {
+            "[command]": "Command you want more info on"
+        }
+    },
+    "info": {
+        "modulePath": "./cordova",
+        "description": "Generate project information"
+    },
+    "platform": {
+        "modulePath": "./cordova",
+        "description": "Manage project platforms"
+    },
+    "plugin": {
+        "modulePath": "./cordova",
+        "description": "Manage project plugins"
+    },
+    "prepare": {
+        "modulePath": "./cordova",
+        "description": "Copy files into platform(s) for building"
+    },
+    "compile": {
+        "modulePath": "./cordova",
+        "description": "Build platform(s)"
+    },
+    "run": {
+        "modulePath": "./cordova",
+        "description": "Run project (including prepare && compile)"
+    },
+    "serve": {
+        "modulePath": "./cordova",
+        "description": "Run project with a local webserver (including prepare)"
+    }
+}

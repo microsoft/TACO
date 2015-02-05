@@ -34,7 +34,8 @@ declare module "cordova" {
         export function on(event: string, ...args: any[]) : void;
         export function off(event: string, ...args: any[]) : void;
         export function emit(event: string, ...args: any[]) : void;
-        export function trigger(event: string, ...args: any[]) : void;
+        export function trigger(event: string, ...args: any[]): void;
+        export function cli(args: string[]): void;
         export var raw: ICordovaRaw;
     }
 
