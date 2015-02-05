@@ -17,10 +17,20 @@ gulp.task("prep", ["install"], function (callback) {
 /* install gulp in root folder */
 gulp.task("install", function (callback) {
     var modules = ["del", "gulp", "typescript", "ncp", "q"];
-    for (var i in modules){
-        exec("npm install " + modules[i], { cwd: ".." });
-    }    
-    callback();
+    var asyncLoop = function(idx) {
+	if (idx < modules.length) {
+	    exec("npm install" + modules[idx], { cwd: ".."}, function(error, stdout, stderr) {
+		if (!error) {
+		    asyncLoop(idx + 1);
+		} else {
+		    callback(error);
+		}
+	    })
+	} else {
+	    callback();
+	}
+    }
+    asyncLoop(0);
 });
 
 

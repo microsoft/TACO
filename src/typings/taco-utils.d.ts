@@ -1,12 +1,13 @@
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/elementtree.d.ts" />
 /// <reference path="../typings/unorm.d.ts" />
-declare module TacoUtility {
+declare module "taco-utils" {
+module TacoUtility {
     class ResourcesManager {
         private static Resources;
         private static SupportedLanguages;
         private static DefaultLanguage;
-        static init(language: string, resourcesDir?: string): void;
+        static init(language: string, resourcesDir: string): void;
         static teardown(): void;
         /** ...optionalArgs is only there for typings, function rest params */
         static getString(id: string, ...optionalArgs: any[]): string;
@@ -99,6 +100,6 @@ declare module TacoUtility {
         localize(req: any): BuildInfo;
     }
 }
-declare module "taco-utils"{
 export = TacoUtility;
+
 }

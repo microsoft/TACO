@@ -15,11 +15,7 @@ module TacoUtility {
         private static SupportedLanguages: string[] = null;
         private static DefaultLanguage: string = "en";
 
-        public static init(language: string, resourcesDir?: string): void {
-            if (!resourcesDir) {
-                resourcesDir = path.join(__dirname, "..", "resources");
-            }
-
+        public static init(language: string, resourcesDir: string): void {
             ResourcesManager.Resources = {};
             ResourcesManager.SupportedLanguages = [];
             fs.readdirSync(resourcesDir).forEach(function (filename: string): void {

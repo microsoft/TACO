@@ -55,15 +55,14 @@ gulp.task("copy", function (callback: Function): void {
 });
 
 /* auto-generate taco-utils.d.ts*/
-gulp.task("generate-dts", function (cb: Function): void {
+gulp.task("generate-dts", function (): Q.Promise<any> {
     var tacoUtils: string = "taco-utils";
-    dtsUtil.DefinitionServices.generateTSExportDefinition(
+    return dtsUtil.DefinitionServices.generateTSExportDefinition(
         tacoUtils,
         path.join(buildConfig.src, tacoUtils),
         path.join(buildConfig.src, "typings"),
         "TacoUtility",
         tacoUtils);
-    cb();
 });
 
 /* Task to run tests */
