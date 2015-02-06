@@ -20,6 +20,9 @@ class Help extends tacoUtility.Commands.Command {
     private charsToDescription: number = 35;
     private maxRight = 70;
 
+    /**
+     * entry point for printing helper
+     */ 
     run() {
         this.printHeader();
         if (this.cliArgs.length == 0) {
@@ -29,14 +32,24 @@ class Help extends tacoUtility.Commands.Command {
         }
     }
 
+    /**
+     * prints out Microsoft header
+     */
     public printHeader(): void {
         logger.logNewLine("\n=================================================================", level.Normal);
     }
 
+    /**
+     * prints out general usage of all support TACO commands
+     */
     public printGeneralUsage(): void {      
-        console.log("General Help!!");
+        logger.logNewLine("\nGeneral Usage", level.Normal);
     }
 
+    /**
+     * prints out specific usage, i.e. TACO help create
+     * @param {string} command - TACO command being inquired
+     */
     public printCommandUsage(command: string): void {
         if (!commandsFactory.Listings || !commandsFactory.Listings[command]) {
             this.printGeneralUsage();
@@ -52,6 +65,11 @@ class Help extends tacoUtility.Commands.Command {
         this.printCommandTable(list.options, this.indent + this.indent);
     }
 
+    /**
+     * helper function to print out [name --- description] pairs for args and options
+     * @param {INameDescription[]} nameValuePairs - name-value pairs
+     * @param {string} indentFromLeft - string to insert from left
+     */
     public printCommandTable(nameValuePairs: tacoUtility.Commands.INameDescription[], indentFromLeft: string) {
         nameValuePairs.forEach(nvp => {
             logger.log(indentFromLeft + nvp.name, level.Warn);

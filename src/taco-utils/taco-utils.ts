@@ -6,11 +6,18 @@ import fs = require("fs");
 var colors = require("colors");
 import path = require ("path");
 
-module TacoUtility {
+module TacoUtility {    
     export module Logger {
+        /**
+         * Warning levels
+         */
         export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
-        export function colorize(msg: string, level: Level): string {
-            //not yet possible to combine themes yet so still need to wrap this:  https://github.com/Marak/colors.js/issues/72
+
+        /**
+         * returns colorized string
+         * wrapping "colors" module because not yet possible to combine themes, i.e. ["yellow", "bold"]:  https://github.com/Marak/colors.js/issues/72
+         */
+        export function colorize(msg: string, level: Level): string {            
             colors.setTheme({
                 error: "red",
                 warn: "yellow",
@@ -34,8 +41,7 @@ module TacoUtility {
         }
 
         /**
-         * 
-         *
+         * log
          */
         export function log(msg: string, level: Level): void {
             msg = colorize(msg, level);
@@ -69,6 +75,9 @@ module TacoUtility {
             options: INameDescription[];
         }
 
+        /**
+         * Base command class, all other commands inherit from this
+         */
         export class Command {
             info: ICommandInfo;
             cliArgs: string[];
@@ -81,11 +90,17 @@ module TacoUtility {
             }
         }
 
+        /**
+         * Factory to create new Commands classes
+         */
         export class CommandFactory {
             public static Listings: any;
             private static Instance: Command;
 
-            // initialize with json file containing commands
+            /**
+             * Factory to create new Commands classes
+             * initialize with json file containing commands
+             */
             public static init(commandsInfoPath: string) {
                 commandsInfoPath = path.resolve(commandsInfoPath);
                 if (!fs.existsSync(commandsInfoPath)) {
@@ -95,7 +110,9 @@ module TacoUtility {
                 CommandFactory.Listings = require(commandsInfoPath);
             }
 
-            // get specific task object, given task name
+            /**            
+             * get specific task object, given task name
+             */            
             public static getTask(name: string): Command {
                 if (!name || !CommandFactory.Listings) {
                     throw new Error("Cannot find command listing file");
@@ -116,6 +133,9 @@ module TacoUtility {
                 return CommandFactory.Instance;
             }
 
+            /**            
+             * run specific task, based on what's fed to the CLI
+             */
             public static runTask() {
                 var input: string = process.argv[2];
                 var command: Command = null;

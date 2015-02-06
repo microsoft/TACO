@@ -9,9 +9,13 @@ import tacoUtility = require("taco-utils");
  *
  * Command class handling passthroughs to CordovaCLI
  */
-class Cordova extends tacoUtility.Commands.Command {    
+class Cordova extends tacoUtility.Commands.Command {  
+    
+    /**
+     * Handles direct routing to Cordova CLI
+     */  
     public run(): void {        
-        cordova.cli(this.cliArgs);  //call into Cordova CLI
+        cordova.cli(this.cliArgs);  
     }
 }
 

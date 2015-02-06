@@ -14,8 +14,10 @@ import level = logger.Level;
  * handles "Taco Create"
  */
 class Create extends cordovaCommand {
+    /**
+     * Sample only, shows processing specific taco commands, and passing remaining ones to Cordova CLI
+     */  
     run() {
-        console.log("create!!!");
         var knownOpts: any = {
             "template": String
         };
@@ -28,9 +30,9 @@ class Create extends cordovaCommand {
         //sample getting args specific to taco
         logger.logNewLine("Creating new project using template : " + args.template, level.Success);
 
-        //sample routing remaining args to Cordova
+        //sample routing remaining args to Cordova, stripped out template
         this.cliArgs = args.argv.remain;
-        super.run();
+        super.run();  //take this out if we don't need to route to Cordova CLI
     }
 }
 
