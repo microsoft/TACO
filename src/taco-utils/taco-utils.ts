@@ -1,10 +1,60 @@
 /// <reference path="../typings/node.d.ts" />
-"use strict";
+/// <reference path="../typings/colors.d.ts" />
 
-import fs = require ("fs");
+"use strict";
+import fs = require("fs");
+var colors = require("colors");
 import path = require ("path");
 
 module TacoUtility {
+    export module Logger {
+        export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
+        export function colorize(msg: string, level: Level): string {
+            //not yet possible to combine themes yet so still need to wrap this:  https://github.com/Marak/colors.js/issues/72
+            colors.setTheme({
+                error: "red",
+                warn: "yellow",
+                link: "blue",
+                normalBold: "bold",
+                success: "green"
+            });
+
+            switch (level) {
+                case Level.Error: return msg.error.bold;
+                case Level.Warn: return msg.warn.bold;
+                case Level.Link: return msg.link.underline;
+                case Level.Normal: return msg;
+                case Level.NormalBold: return msg.normalBold;
+                case Level.Success: return msg.success.bold;
+            }
+        }   
+        
+        export function logNewLine(msg: string, level: Level): void {
+            log(msg + "\n", level);
+        }
+
+        /**
+         * 
+         *
+         */
+        export function log(msg: string, level: Level): void {
+            msg = colorize(msg, level);
+            switch (level) {
+                case Level.Error:
+                case Level.Warn:
+                    process.stderr.write(msg);
+                    return;
+
+                case Level.Link: 
+                case Level.Success:
+                case Level.Normal:
+                case Level.NormalBold:
+                    process.stdout.write(msg);
+                    break;
+            }
+        }   
+    }
+
     export module Commands {
         export interface INameDescription {
             name: string;
@@ -12,6 +62,7 @@ module TacoUtility {
         }
 
         export interface ICommandInfo {
+            synopsis: string;
             modulePath: string;
             description: string;
             args: INameDescription[];
@@ -23,7 +74,7 @@ module TacoUtility {
             cliArgs: string[];
             constructor(info: ICommandInfo) {
                 this.info = info;
-                this.cliArgs = process.argv.slice(2);
+                this.cliArgs = process.argv.slice(3);
             }
 
             public run() {
@@ -31,9 +82,8 @@ module TacoUtility {
         }
 
         export class CommandFactory {
-            private static Listings: any;
+            public static Listings: any;
             private static Instance: Command;
-            public static CommandsInfoFile: string;
 
             // initialize with json file containing commands
             public static init(commandsInfoPath: string) {
@@ -42,7 +92,6 @@ module TacoUtility {
                     throw new Error("Cannot find commands listing file");
                 }
 
-                CommandFactory.CommandsInfoFile = commandsInfoPath;
                 CommandFactory.Listings = require(commandsInfoPath);
             }
 

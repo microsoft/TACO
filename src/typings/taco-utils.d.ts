@@ -1,11 +1,30 @@
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/colors.d.ts" />
 declare module TacoUtility {
+    module Logger {
+        enum Level {
+            Warn = 0,
+            Error = 1,
+            Link = 2,
+            Normal = 3,
+            Success = 4,
+            NormalBold = 5,
+        }
+        function colorize(msg: string, level: Level): string;
+        function logNewLine(msg: string, level: Level): void;
+        /**
+         *
+         *
+         */
+        function log(msg: string, level: Level): void;
+    }
     module Commands {
         interface INameDescription {
             name: string;
             description: string;
         }
         interface ICommandInfo {
+            synopsis: string;
             modulePath: string;
             description: string;
             args: INameDescription[];
@@ -18,9 +37,8 @@ declare module TacoUtility {
             run(): void;
         }
         class CommandFactory {
-            private static Listings;
+            static Listings: any;
             private static Instance;
-            static CommandsInfoFile: string;
             static init(commandsInfoPath: string): void;
             static getTask(name: string): Command;
             static runTask(): void;

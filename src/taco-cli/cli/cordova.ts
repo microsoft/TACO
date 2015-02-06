@@ -11,11 +11,7 @@ import tacoUtility = require("taco-utils");
  */
 class Cordova extends tacoUtility.Commands.Command {    
     public run(): void {        
-        console.log("Cordova!!!");
-        //console.log("args:  " + this.info.args.length);
-        //console.log("options:  " + this.info.options.length);
-        console.log(this.cliArgs);
-        cordova.cli(["cc", "dd"]);
+        cordova.cli(this.cliArgs);  //call into Cordova CLI
     }
 }
 

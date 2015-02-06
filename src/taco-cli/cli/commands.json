@@ -1,19 +1,23 @@
 {
     "create": {
+        "synopsis": "<PATH> [ID] [NAME] [options]",
         "modulePath": "../cli/create",
-        "description": "Create a project",
+        "description": "Create a Cordova project",
         "args": [
-            { "name": "<PATH>", "description": "Where to create the project" },
-            { "name": "[ID]", "description": "reverse-domain-style package name - used in <widget id>" },
-            { "name": "[NAME]", "description": "human readable field" },
-            { "name": "[options]", "description": "" }
+            { "name": "PATH", "description": "Where to create the project" },
+            { "name": "ID", "description": "Package ID for the project" },
+            { "name": "NAME", "description": "Human readable app name" }
         ],
         "options": [
-            { "name": "template", "description": "template name" },
-            { "name": "kit", "description": "kit version" }
+            { "name": "--kit <NAME>", "description": "Use the specified Cordova Dev Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits." },
+            { "name": "--template <NAME>", "description": "Use an alternate project template instead of blank." },
+            { "name": "--cli <VERSION>", "description": "Use a version of the Cordova CLI rather than a Cordova Dev Kit." },
+            { "name": "--copy-from|src <PATH>", "description": "Use custom www assets instead using a template." },
+            { "name": "--link-to <PATH>", "description": "Symlink to custom www assets without creating a copy." }
         ]
     },
     "plugin": {
+        "Synopsis" : "",
         "modulePath": "../cli/cordova",
         "description": "Add/remove a plugin",
         "args": [
