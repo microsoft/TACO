@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
 var taco = require('./../cli/taco');
-taco();
+taco.run();

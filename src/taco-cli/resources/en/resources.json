@@ -1,4 +1,13 @@
 {
-    "usage": "Usage:  taco-cli command args",
-    "_usage.comment":    "Usage string shown on first use in CLI"
+    "[command.create.description]": "Create a Cordova project",
+    "[command.create.args.path]": "Where to create the project",
+    "[command.create.args.id]": "Package ID for the project",
+    "[command.create.args.name]": "Human readable app name",
+    "[command.create.options.kit]": "Use the specified Cordova Dev Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits.",
+    "[command.create.options.template]": "Use an alternate project template instead of blank.",
+    "[command.create.options.cli]": "Use a version of the Cordova CLI rather than a Cordova Dev Kit.",
+    "[command.create.options.copy]": "Use custom www assets instead using a template.",
+    "[command.create.options.linkto]":  "Symlink to custom www assets without creating a copy.",
+    "[command.help.description]": "Get help for a command",
+    "command.help.badcomand": "%s is not a valid command"
 }

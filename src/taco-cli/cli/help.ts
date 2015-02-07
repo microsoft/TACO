@@ -8,6 +8,8 @@ import nopt = require("nopt");
 var colors = require("colors");
 import tacoUtility = require("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;
+import resourcesManager = tacoUtility.ResourcesManager;
+import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
 /*
@@ -15,20 +17,29 @@ import level = logger.Level;
  *
  * handles "Taco Help"
  */
-class Help extends tacoUtility.Commands.Command { 
-    private indent: string = "   ";
-    private charsToDescription: number = 35;
-    private maxRight = 70;
+class Help implements commands.ICommand { 
+    public info: commands.ICommandInfo;
+    private indentWidth: number = 3; //indent string
+    private indent: string;
+    private charsToDescription: number = 35;  //number of characters from start of line to description text
+    private maxRight = 80;  //maximum characters we're allowing in each line
+    private tacoString = "taco";
+
+    public canHandleArgs(args: string[]): boolean {
+        return true;
+    }
 
     /**
      * entry point for printing helper
      */ 
-    run() {
+    run(args: string[]) {
+        this.indent = this.generateSpaces(this.indentWidth);
         this.printHeader();
-        if (this.cliArgs.length == 0) {
+        args = args.splice(3);
+        if (args.length == 0) {
             this.printGeneralUsage();            
-        } else if (this.cliArgs.length == 1) {
-            this.printCommandUsage(this.cliArgs[0])            
+        } else if (args.length == 1) {
+            this.printCommandUsage(args[0])            
         }
     }
 
@@ -36,14 +47,14 @@ class Help extends tacoUtility.Commands.Command {
      * prints out Microsoft header
      */
     public printHeader(): void {
-        logger.logNewLine("\n=================================================================", level.Normal);
+        logger.logLine("\n=================================================================", level.Normal);
     }
 
     /**
      * prints out general usage of all support TACO commands
      */
     public printGeneralUsage(): void {      
-        logger.logNewLine("\nGeneral Usage", level.Normal);
+        logger.logLine("\nGeneral Usage", level.Normal);
     }
 
     /**
@@ -52,22 +63,23 @@ class Help extends tacoUtility.Commands.Command {
      */
     public printCommandUsage(command: string): void {
         if (!commandsFactory.Listings || !commandsFactory.Listings[command]) {
+            logger.logErrorLine("command.help.badcomand");
             this.printGeneralUsage();
             return;
         }
 
         var list: tacoUtility.Commands.ICommandInfo = commandsFactory.Listings[command];
-        logger.logNewLine("Synopsis\n", level.NormalBold);
-        logger.logNewLine(this.indent + list.synopsis + "\n", level.Success);
-        logger.logNewLine(list.description + "\n", level.NormalBold);
+        logger.logLine("Synopsis\n", level.NormalBold);
+        logger.logLine(this.indent + this.tacoString + " " + command + " " + list.synopsis + "\n", level.Success);
+        logger.logLine(this.getString(list.description) + "\n", level.NormalBold);
         this.printCommandTable(list.args, this.indent);        
-        logger.logNewLine("\n" + this.indent + "Options:\n", level.NormalBold);
+        logger.logLine("\n" + this.indent + "Options:\n", level.NormalBold);
         this.printCommandTable(list.options, this.indent + this.indent);
     }
 
     /**
      * helper function to print out [name --- description] pairs for args and options
-     * @param {INameDescription[]} nameValuePairs - name-value pairs
+     * @param {INameDescription[]} nameValuePairs - array of name-value pairs
      * @param {string} indentFromLeft - string to insert from left
      */
     public printCommandTable(nameValuePairs: tacoUtility.Commands.INameDescription[], indentFromLeft: string) {
@@ -79,10 +91,21 @@ class Help extends tacoUtility.Commands.Command {
                 logger.log(".", level.Normal);
             }
 
-            if (this.charsToDescription + nvp.description.length > this.maxRight) {
-            }
-            logger.log(" " + nvp.description + "\n", level.Normal);
+            logger.log(" " + this.getString(nvp.description) + "\n", level.Normal);
         });
+    }
+
+    private generateSpaces(numSpaces: number): string {
+        var spaces: string = "";        
+        for (var i: number = 0; i < numSpaces; i++){
+            spaces = spaces + " ";
+        }
+
+        return spaces;
+    }
+
+    private getString(id: string): string {
+        return resourcesManager.getString(id);
     }
 }
 

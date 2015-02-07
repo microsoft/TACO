@@ -2,59 +2,23 @@
     "create": {
         "synopsis": "<PATH> [ID] [NAME] [options]",
         "modulePath": "../cli/create",
-        "description": "Create a Cordova project",
+        "description": "[command.create.description]",
         "args": [
-            { "name": "PATH", "description": "Where to create the project" },
-            { "name": "ID", "description": "Package ID for the project" },
-            { "name": "NAME", "description": "Human readable app name" }
+            { "name": "PATH", "description": "[command.create.description]" },
+            { "name": "ID", "description": "[command.create.args.path]" },
+            { "name": "NAME", "description": "[command.create.args.name]" }
         ],
         "options": [
-            { "name": "--kit <NAME>", "description": "Use the specified Cordova Dev Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits." },
-            { "name": "--template <NAME>", "description": "Use an alternate project template instead of blank." },
-            { "name": "--cli <VERSION>", "description": "Use a version of the Cordova CLI rather than a Cordova Dev Kit." },
-            { "name": "--copy-from|src <PATH>", "description": "Use custom www assets instead using a template." },
-            { "name": "--link-to <PATH>", "description": "Symlink to custom www assets without creating a copy." }
-        ]
-    },
-    "plugin": {
-        "Synopsis" : "",
-        "modulePath": "../cli/cordova",
-        "description": "Add/remove a plugin",
-        "args": [
-            { "name": "[command]", "description": "add or remove" },
-            { "name": "<plugin>", "description": "name of the plugin" }
+            { "name": "--kit <NAME>", "description": "[command.create.options.kit]" },
+            { "name": "--template <NAME>", "description": "[command.create.options.template]" },
+            { "name": "--cli <VERSION>", "description": "[command.create.options.cli]" },
+            { "name": "--copy-from|src <PATH>", "description": "[command.create.options.copy]" },
+            { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" }
         ]
     },
     "help": {
+        "synopsis": "[COMMAND]",
         "modulePath": "../cli/help",
-        "description": "Get help for a command"
-    },
-    "info": {
-        "modulePath": "../cli/cordova",
-        "description": "Generate project information"
-    },
-    "platform": {
-        "modulePath": "../cli/cordova",
-        "description": "Manage project platforms"
-    },
-    "plugin": {
-        "modulePath": "../cli/cordova",
-        "description": "Manage project plugins"
-    },
-    "prepare": {
-        "modulePath": "../cli/cordova",
-        "description": "Copy files into platform(s) for building"
-    },
-    "compile": {
-        "modulePath": "../cli/cordova",
-        "description": "Build platform(s)"
-    },
-    "run": {
-        "modulePath": "../cli/cordova",
-        "description": "Run project (including prepare && compile)"
-    },
-    "serve": {
-        "modulePath": "../cli/cordova",
-        "description": "Run project with a local webserver (including prepare)"
+        "description": "[command.help.description]"
     }
 }

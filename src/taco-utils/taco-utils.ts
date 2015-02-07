@@ -34,11 +34,7 @@ module TacoUtility {
                 case Level.NormalBold: return msg.normalBold;
                 case Level.Success: return msg.success.bold;
             }
-        }   
-        
-        export function logNewLine(msg: string, level: Level): void {
-            log(msg + "\n", level);
-        }
+        }          
 
         /**
          * log
@@ -58,6 +54,37 @@ module TacoUtility {
                     process.stdout.write(msg);
                     break;
             }
+        }
+        
+        /** 
+         * for quick logging use
+         */ 
+        export function logLine(msg: string, level: Level): void {
+            log(msg + "\n", level);
+        }
+
+        export function logErrorLine(msg: string) {
+            logLine(msg, Level.Error);
+        }
+
+        export function logWarnLine(msg: string) {
+            logLine(msg, Level.Warn);
+        }
+
+        export function logLinkLine(msg: string) {
+            logLine(msg, Level.Link);
+        }
+
+        export function logNormalLine(msg: string) {
+            logLine(msg, Level.Normal);
+        }
+
+        export function logNormalBoldLine(msg: string) {
+            logLine(msg, Level.NormalBold);
+        }
+
+        export function logSuccessLine(msg: string) {
+            logLine(msg, Level.Success);
         }   
     }
 
@@ -78,24 +105,19 @@ module TacoUtility {
         /**
          * Base command class, all other commands inherit from this
          */
-        export class Command {
+        export interface ICommand {
             info: ICommandInfo;
-            cliArgs: string[];
-            constructor(info: ICommandInfo) {
-                this.info = info;
-                this.cliArgs = process.argv.slice(3);
-            }
-
-            public run() {
-            }
+            run(args: string[]): void;
+            canHandleArgs(args: string[]): boolean;
         }
 
         /**
          * Factory to create new Commands classes
          */
         export class CommandFactory {
+            private static args: any[];
             public static Listings: any;
-            private static Instance: Command;
+            private static Instance: ICommand;
 
             /**
              * Factory to create new Commands classes
@@ -113,41 +135,31 @@ module TacoUtility {
             /**            
              * get specific task object, given task name
              */            
-            public static getTask(name: string): Command {
+            public static getTask(name: string, inputArgs: string[]): ICommand {
                 if (!name || !CommandFactory.Listings) {
                     throw new Error("Cannot find command listing file");
                 }                
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
+                if (!moduleInfo) {
+                    return null;
+                }
+
                 var modulePath = path.resolve(moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
                     throw new Error("Cannot find command module");
                 }
 
-                var commandMod: typeof Command = require(modulePath);
-                CommandFactory.Instance = new commandMod(moduleInfo);
-                if (!CommandFactory.Instance) {
-                    throw new Error("Can't build command instance");
-                }
+                var commandMod: any = require(modulePath);
+                CommandFactory.Instance = new commandMod();
+                CommandFactory.Instance.info = moduleInfo;
 
-                return CommandFactory.Instance;
-            }
-
-            /**            
-             * run specific task, based on what's fed to the CLI
-             */
-            public static runTask() {
-                var input: string = process.argv[2];
-                var command: Command = null;
-
-                if (input) {
-                    command = CommandFactory.getTask(input);
+                if (CommandFactory.Instance && CommandFactory.Instance.canHandleArgs(inputArgs)) {
+                    return CommandFactory.Instance;
                 } else {
-                    command = CommandFactory.getTask("help");
+                    return null;
                 }
-
-                command.run();
-            }
+            }            
         }
     }
 
