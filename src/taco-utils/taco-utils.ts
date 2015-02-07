@@ -126,7 +126,7 @@ module TacoUtility {
             public static init(commandsInfoPath: string) {
                 commandsInfoPath = path.resolve(commandsInfoPath);
                 if (!fs.existsSync(commandsInfoPath)) {
-                    throw new Error("Cannot find commands listing file");
+                    throw new Error(ResourcesManager.getString("taco-utils.exception.listingfile"));
                 }
 
                 CommandFactory.Listings = require(commandsInfoPath);
@@ -137,7 +137,7 @@ module TacoUtility {
              */            
             public static getTask(name: string, inputArgs: string[]): ICommand {
                 if (!name || !CommandFactory.Listings) {
-                    throw new Error("Cannot find command listing file");
+                    throw new Error(ResourcesManager.getString("taco-utils.exception.listingfile"));
                 }                
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
@@ -147,7 +147,7 @@ module TacoUtility {
 
                 var modulePath = path.resolve(moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error("Cannot find command module");
+                    throw new Error(ResourcesManager.getString("taco-utils.exception.missingcommand"));
                 }
 
                 var commandMod: any = require(modulePath);

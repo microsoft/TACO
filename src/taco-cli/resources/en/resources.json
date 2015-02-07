@@ -9,5 +9,16 @@
     "[command.create.options.copy]": "Use custom www assets instead using a template.",
     "[command.create.options.linkto]":  "Symlink to custom www assets without creating a copy.",
     "[command.help.description]": "Get help for a command",
-    "command.help.badcomand": "%s is not a valid command"
+    "command.help.usage.synopsis": "Synopsis",
+    "_command.help.usage.synopsis.comment": "synopsis header when user types 'taco help'",
+    "command.help.usage.options": "Options:",
+    "_command.help.usage.options.comment": "options header when user types 'taco help'",
+    "command.help.badcomand": "{0} is not a valid command",
+    "_command.help.badcomand.comment": "message shown when user enters invalid taco cli command",
+    "command.help.taco.usage": "taco command [options]",
+    "_command.help.taco.usage.comment": "CLI pattern shown in taco help",
+    "taco-utils.exception.listingfile": "Cannot find command listing file",
+    "_taco-utils.exception.listingfile.comment": "error finding commands.json, shouldn't happen",
+    "taco-utils.exception.missingcommand": "Cannot find command module",
+    "_taco-utils.exception.missingcommand.comment": "can find commands.json, but cannot find module referenced i.e. create.js, shouldn't happen"
 }

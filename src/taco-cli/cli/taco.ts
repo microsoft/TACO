@@ -34,9 +34,9 @@ class Taco {
             command = commandsFactory.getTask("help", process.argv);
         }          
         
-        // if no command found that can handle these args, route directly to Cordova
+        // if no command found that can handle these args, route args directly to Cordova
         if (!command) {
-            cordova.cli(process.argv.splice(1));
+            cordova.cli(process.argv);
             return;
         }
 

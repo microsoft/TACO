@@ -51,10 +51,18 @@ class Help implements commands.ICommand {
     }
 
     /**
-     * prints out general usage of all support TACO commands
+     * prints out general usage of all support TACO commands, iterates through commands and their descriptions
      */
     public printGeneralUsage(): void {      
-        logger.logLine("\nGeneral Usage", level.Normal);
+        logger.logLine(resourcesManager.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
+        logger.logLine(this.indent + resourcesManager.getString("command.help.taco.usage") + "\n", level.Success);
+
+        var nameValuePairs: tacoUtility.Commands.INameDescription[] = new Array();
+        for (var i in commandsFactory.Listings) {
+            nameValuePairs.push({ name: i, description: commandsFactory.Listings[i].description});
+        }
+
+        this.printCommandTable(nameValuePairs, this.indent); 
     }
 
     /**
@@ -63,17 +71,17 @@ class Help implements commands.ICommand {
      */
     public printCommandUsage(command: string): void {
         if (!commandsFactory.Listings || !commandsFactory.Listings[command]) {
-            logger.logErrorLine("command.help.badcomand");
+            logger.logErrorLine(resourcesManager.getString("command.help.badcomand", "'" + command + "'") + "\n");
             this.printGeneralUsage();
             return;
         }
 
         var list: tacoUtility.Commands.ICommandInfo = commandsFactory.Listings[command];
-        logger.logLine("Synopsis\n", level.NormalBold);
+        logger.logLine(resourcesManager.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
         logger.logLine(this.indent + this.tacoString + " " + command + " " + list.synopsis + "\n", level.Success);
         logger.logLine(this.getString(list.description) + "\n", level.NormalBold);
         this.printCommandTable(list.args, this.indent);        
-        logger.logLine("\n" + this.indent + "Options:\n", level.NormalBold);
+        logger.logLine("\n" + this.indent + resourcesManager.getString("command.help.usage.options") + "\n", level.NormalBold);
         this.printCommandTable(list.options, this.indent + this.indent);
     }
 
