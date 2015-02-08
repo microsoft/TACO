@@ -22,7 +22,7 @@ class Help implements commands.ICommand {
     private indentWidth: number = 3; //indent string
     private indent: string;
     private charsToDescription: number = 35;  //number of characters from start of line to description text
-    private maxRight = 80;  //maximum characters we're allowing in each line
+    private maxRight = 85;  //maximum characters we're allowing in each line
     private tacoString = "taco";
 
     public canHandleArgs(args: string[]): boolean {
@@ -99,7 +99,32 @@ class Help implements commands.ICommand {
                 logger.log(".", level.Normal);
             }
 
-            logger.log(" " + this.getString(nvp.description) + "\n", level.Normal);
+            //if it exceeded maxRight, start new line at charsToDescription
+            var i = this.charsToDescription;
+            var spaces = this.generateSpaces(this.charsToDescription - 1);
+            var words: string[] = this.getString(nvp.description).split(" ");
+            var multipleLines: boolean = false;
+            while (words.length > 0) {
+                while (i < this.maxRight && words.length > 0) {
+                    var currentWord = words.shift();
+                    logger.log(" ", level.Normal);
+                    logger.log(currentWord, level.Normal);
+                    i += currentWord.length + 1;
+                }
+                if (words.length > 0) {
+                    logger.log("\n" + spaces, level.Normal);
+                    i = this.charsToDescription;
+                }
+            }
+            logger.log("\n", level.Normal);
+
+            //if (this.charsToDescription + nvp.description.length < this.maxRight) {
+            //    var i = 0;
+                
+            //}
+
+
+            //logger.log(" " + this.getString(nvp.description) + "\n", level.Normal);
         });
     }
 
