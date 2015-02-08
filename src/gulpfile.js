@@ -19,10 +19,12 @@ gulp.task("install", function (callback) {
     var modules = ["del", "gulp", "typescript", "ncp", "q"];
     var asyncLoop = function(idx) {
 	if (idx < modules.length) {
-	    exec("npm install" + modules[idx], { cwd: ".."}, function(error, stdout, stderr) {
+	    exec("npm install " + modules[idx], { cwd: ".."}, function(error, stdout, stderr) {
 		if (!error) {
 		    asyncLoop(idx + 1);
 		} else {
+			console.warn(stdout);
+			console.warn(stderr);
 		    callback(error);
 		}
 	    })
