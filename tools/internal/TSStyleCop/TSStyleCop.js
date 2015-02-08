@@ -48030,31 +48030,31 @@ var Rules = TSStyleCop.Rules;
 })(TSStyleCop || (TSStyleCop = {}));
 /// <reference path="../../IStyleRule.ts" />
 /// <reference path="../RuleHelpers.ts" />
-var TSStyleCop;
-(function (TSStyleCop) {
-(function (Rules) {
-var PrivateFieldsMustBeginWithUnderscore = (function () {
-function PrivateFieldsMustBeginWithUnderscore() {
-this.code = "SA9009";
-this.name = "PrivateFieldsMustBeginWithUnderscore";
-this.filter = [TypeScript.SyntaxKind.MemberVariableDeclaration];
-}
-PrivateFieldsMustBeginWithUnderscore.prototype.checkElement = function (node, context) {
-var modifiers = node.modifiers;
-if (Rules.RuleHelpers.listContains(modifiers, TypeScript.SyntaxKind.PrivateKeyword) && !Rules.RuleHelpers.listContains(modifiers, TypeScript.SyntaxKind.StaticKeyword)) {
-var nameToken = node.variableDeclarator.identifier;
-var name = nameToken.text();
-if (name.charAt(0) !== "_") {
-context.reportError(nameToken, this.name, this.code);
-}
-}
-};
-return PrivateFieldsMustBeginWithUnderscore;
-})();
-Rules.PrivateFieldsMustBeginWithUnderscore = PrivateFieldsMustBeginWithUnderscore;
-})(TSStyleCop.Rules || (TSStyleCop.Rules = {}));
-var Rules = TSStyleCop.Rules;
-})(TSStyleCop || (TSStyleCop = {}));
+//var TSStyleCop;
+//(function (TSStyleCop) {
+//(function (Rules) {
+//var PrivateFieldsMustBeginWithUnderscore = (function () {
+//function PrivateFieldsMustBeginWithUnderscore() {
+//this.code = "SA9009";
+//this.name = "PrivateFieldsMustBeginWithUnderscore";
+//this.filter = [TypeScript.SyntaxKind.MemberVariableDeclaration];
+//}
+//PrivateFieldsMustBeginWithUnderscore.prototype.checkElement = function (node, context) {
+//var modifiers = node.modifiers;
+//if (Rules.RuleHelpers.listContains(modifiers, TypeScript.SyntaxKind.PrivateKeyword) && !Rules.RuleHelpers.listContains(modifiers, TypeScript.SyntaxKind.StaticKeyword)) {
+//var nameToken = node.variableDeclarator.identifier;
+//var name = nameToken.text();
+//if (name.charAt(0) !== "_") {
+//context.reportError(nameToken, this.name, this.code);
+//}
+//}
+//};
+//return PrivateFieldsMustBeginWithUnderscore;
+//})();
+//Rules.PrivateFieldsMustBeginWithUnderscore = PrivateFieldsMustBeginWithUnderscore;
+//})(TSStyleCop.Rules || (TSStyleCop.Rules = {}));
+//var Rules = TSStyleCop.Rules;
+//})(TSStyleCop || (TSStyleCop = {}));
 /// <reference path="IDocumentation.d.ts" />
 /// <reference path="../../TypeScript/tsc.d.ts" />
 /// <reference path="../../RuleContext.ts" />

@@ -3,12 +3,13 @@
 /// <reference path="../../typings/cordova.d.ts" />
 /// <reference path="../../typings/cordova.d.ts" />
 
-import tacoUtility = require("taco-utils");
+import tacoUtility = require ("taco-utils");
 import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
 import commandsFactory = commands.CommandFactory;
-import path = require("path");
+import path = require ("path");
 var cordova = require("cordova");
+
 /*
  * Taco
  *

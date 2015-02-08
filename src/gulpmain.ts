@@ -8,7 +8,7 @@ var path = require("path");
 import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
 import tsUtil = require ("./taco-cli/compile/typescript-util");
-var buildConfig = require ("../../src/build_config.json");
+var buildConfig = require("../../src/build_config.json");
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["build"]);

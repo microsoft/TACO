@@ -2,9 +2,9 @@
 /// <reference path="../typings/colors.d.ts" />
 
 "use strict";
-import fs = require("fs");
-var colors = require("colors");
 import path = require ("path");
+import fs = require ("fs");
+var colors = require("colors");
 
 module TacoUtility {    
     export module Logger {
@@ -63,27 +63,27 @@ module TacoUtility {
             log(msg + "\n", level);
         }
 
-        export function logErrorLine(msg: string) {
+        export function logErrorLine(msg: string): void {
             logLine(msg, Level.Error);
         }
 
-        export function logWarnLine(msg: string) {
+        export function logWarnLine(msg: string): void {
             logLine(msg, Level.Warn);
         }
 
-        export function logLinkLine(msg: string) {
+        export function logLinkLine(msg: string): void {
             logLine(msg, Level.Link);
         }
 
-        export function logNormalLine(msg: string) {
+        export function logNormalLine(msg: string): void {
             logLine(msg, Level.Normal);
         }
 
-        export function logNormalBoldLine(msg: string) {
+        export function logNormalBoldLine(msg: string): void {
             logLine(msg, Level.NormalBold);
         }
 
-        export function logSuccessLine(msg: string) {
+        export function logSuccessLine(msg: string): void {
             logLine(msg, Level.Success);
         }   
     }
@@ -114,10 +114,9 @@ module TacoUtility {
         /**
          * Factory to create new Commands classes
          */
-        export class CommandFactory {
-            private static args: any[];
-            public static Listings: any;
+        export class CommandFactory {          
             private static Instance: ICommand;
+            public static Listings: any;
 
             /**
              * Factory to create new Commands classes

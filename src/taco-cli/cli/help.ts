@@ -3,10 +3,9 @@
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 
-
-import nopt = require("nopt");
+import nopt = require ("nopt");
 var colors = require("colors");
-import tacoUtility = require("taco-utils");
+import tacoUtility = require ("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;
 import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
@@ -18,12 +17,12 @@ import level = logger.Level;
  * handles "Taco Help"
  */
 class Help implements commands.ICommand { 
-    public info: commands.ICommandInfo;
-    private indentWidth: number = 3; //indent string
+    private indentWidth: number = 3; // indent string
     private indent: string;
-    private charsToDescription: number = 35;  //number of characters from start of line to description text
-    private maxRight = 85;  //maximum characters we're allowing in each line
+    private charsToDescription: number = 35;  // number of characters from start of line to description text
+    private maxRight = 85;  // maximum characters we're allowing in each line
     private tacoString = "taco";
+    public info: commands.ICommandInfo;
 
     public canHandleArgs(args: string[]): boolean {
         return true;
@@ -32,14 +31,14 @@ class Help implements commands.ICommand {
     /**
      * entry point for printing helper
      */ 
-    run(args: string[]) {
+    public run(args: string[]): void {
         this.indent = this.generateSpaces(this.indentWidth);
         this.printHeader();
         args = args.splice(3);
-        if (args.length == 0) {
+        if (args.length === 0) {
             this.printGeneralUsage();            
-        } else if (args.length == 1) {
-            this.printCommandUsage(args[0])            
+        } else if (args.length === 1) {
+            this.printCommandUsage(args[0]);            
         }
     }
 
@@ -59,7 +58,10 @@ class Help implements commands.ICommand {
 
         var nameValuePairs: tacoUtility.Commands.INameDescription[] = new Array();
         for (var i in commandsFactory.Listings) {
-            nameValuePairs.push({ name: i, description: commandsFactory.Listings[i].description});
+            nameValuePairs.push({
+                name: i,
+                description: commandsFactory.Listings[i].description
+            });
         }
 
         this.printCommandTable(nameValuePairs, this.indent); 
@@ -90,7 +92,7 @@ class Help implements commands.ICommand {
      * @param {INameDescription[]} nameValuePairs - array of name-value pairs
      * @param {string} indentFromLeft - string to insert from left
      */
-    public printCommandTable(nameValuePairs: tacoUtility.Commands.INameDescription[], indentFromLeft: string) {
+    public printCommandTable(nameValuePairs: tacoUtility.Commands.INameDescription[], indentFromLeft: string): void {
         nameValuePairs.forEach(nvp => {
             logger.log(indentFromLeft + nvp.name, level.Warn);
             logger.log(" ", level.Normal);
@@ -99,7 +101,7 @@ class Help implements commands.ICommand {
                 logger.log(".", level.Normal);
             }
 
-            //if it exceeded maxRight, start new line at charsToDescription
+            // if it exceeded maxRight, start new line at charsToDescription
             var i = this.charsToDescription;
             var spaces = this.generateSpaces(this.charsToDescription - 1);
             var words: string[] = this.getString(nvp.description).split(" ");
@@ -111,32 +113,34 @@ class Help implements commands.ICommand {
                     logger.log(currentWord, level.Normal);
                     i += currentWord.length + 1;
                 }
+
                 if (words.length > 0) {
                     logger.log("\n" + spaces, level.Normal);
                     i = this.charsToDescription;
                 }
             }
+
             logger.log("\n", level.Normal);
-
-            //if (this.charsToDescription + nvp.description.length < this.maxRight) {
-            //    var i = 0;
-                
-            //}
-
-
-            //logger.log(" " + this.getString(nvp.description) + "\n", level.Normal);
         });
     }
 
+    /**
+     * helper function to generate spaces and intendations needed for printing usage
+     * @param {number} numSpaces - number of spaces to generate
+     */
     private generateSpaces(numSpaces: number): string {
         var spaces: string = "";        
-        for (var i: number = 0; i < numSpaces; i++){
+        for (var i: number = 0; i < numSpaces; i++) {
             spaces = spaces + " ";
         }
 
         return spaces;
     }
 
+    /**
+     * helper function to get string from resources.json
+     * @param {string} id - string to get
+     */
     private getString(id: string): string {
         return resourcesManager.getString(id);
     }
