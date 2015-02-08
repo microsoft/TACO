@@ -56,7 +56,7 @@ module TacoUtility {
             }
         }
         
-        /** 
+        /**
          * for quick logging use
          */ 
         export function logLine(msg: string, level: Level): void {
@@ -122,7 +122,7 @@ module TacoUtility {
              * Factory to create new Commands classes
              * initialize with json file containing commands
              */
-            public static init(commandsInfoPath: string) {
+            public static init(commandsInfoPath: string): void {
                 commandsInfoPath = path.resolve(commandsInfoPath);
                 if (!fs.existsSync(commandsInfoPath)) {
                     throw new Error(ResourcesManager.getString("taco-utils.exception.listingfile"));
@@ -131,7 +131,7 @@ module TacoUtility {
                 CommandFactory.Listings = require(commandsInfoPath);
             }
 
-            /**            
+            /**
              * get specific task object, given task name
              */            
             public static getTask(name: string, inputArgs: string[]): ICommand {
