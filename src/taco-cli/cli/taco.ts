@@ -29,19 +29,23 @@ class Taco {
         var command: commands.ICommand = null;
 
         // get appropriate task
-        if (input) {
-            command = commandsFactory.getTask(input, process.argv);
-        } else {
-            command = commandsFactory.getTask("help", process.argv);
-        }          
-        
-        // if no command found that can handle these args, route args directly to Cordova
-        if (!command) {
-            cordova.cli(process.argv);
-            return;
+        if (!input) {
+            input = "help";
+        }         
+
+        var argsToCommand: string[] = new Array();  //strip out commands specific to args
+        for (var i: number = 3; i < process.argv.length; i++) {
+            argsToCommand.push(process.argv[i]);
         }
 
-        command.run(process.argv);
+        command = commandsFactory.getTask(input, argsToCommand);        
+
+        // if no command found that can handle these args, route args directly to Cordova
+        if (command) {
+            command.run(argsToCommand);
+        } else {
+            cordova.cli(process.argv);            
+        }
     }
 }
 

@@ -2,9 +2,6 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
-
-import nopt = require ("nopt");
-var colors = require("colors");
 import tacoUtility = require ("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;
 import resourcesManager = tacoUtility.ResourcesManager;
@@ -25,7 +22,11 @@ class Help implements commands.ICommand {
     public info: commands.ICommandInfo;
 
     public canHandleArgs(args: string[]): boolean {
-        return true;
+        if (!args || args.length === 0){
+            return true;
+        }
+
+        return this.commandExists(args[0]);
     }
 
     /**
@@ -34,11 +35,10 @@ class Help implements commands.ICommand {
     public run(args: string[]): void {
         this.indent = this.generateSpaces(this.indentWidth);
         this.printHeader();
-        args = args.splice(3);
-        if (args.length === 0) {
+        if (args && args.length > 0 && this.commandExists(args[0])) {
+            this.printCommandUsage(args[0]);  
+        } else {
             this.printGeneralUsage();            
-        } else if (args.length === 1) {
-            this.printCommandUsage(args[0]);            
         }
     }
 
@@ -81,7 +81,7 @@ class Help implements commands.ICommand {
         var list: tacoUtility.Commands.ICommandInfo = commandsFactory.Listings[command];
         logger.logLine(resourcesManager.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
         logger.logLine(this.indent + this.tacoString + " " + command + " " + list.synopsis + "\n", level.Success);
-        logger.logLine(this.getString(list.description) + "\n", level.NormalBold);
+        logger.logLine(this.getDescriptionString(list.description) + "\n", level.NormalBold);
         this.printCommandTable(list.args, this.indent);        
         logger.logLine("\n" + this.indent + resourcesManager.getString("command.help.usage.options") + "\n", level.NormalBold);
         this.printCommandTable(list.options, this.indent + this.indent);
@@ -104,7 +104,7 @@ class Help implements commands.ICommand {
             // if it exceeded maxRight, start new line at charsToDescription
             var i = this.charsToDescription;
             var spaces = this.generateSpaces(this.charsToDescription - 1);
-            var words: string[] = this.getString(nvp.description).split(" ");
+            var words: string[] = this.getDescriptionString(nvp.description).split(" ");
             var multipleLines: boolean = false;
             while (words.length > 0) {
                 while (i < this.maxRight && words.length > 0) {
@@ -125,7 +125,7 @@ class Help implements commands.ICommand {
     }
 
     /**
-     * helper function to generate spaces and intendations needed for printing usage
+     * helper function to generate spaces and indentations needed for printing usage
      * @param {number} numSpaces - number of spaces to generate
      */
     private generateSpaces(numSpaces: number): string {
@@ -143,6 +143,35 @@ class Help implements commands.ICommand {
      */
     private getString(id: string): string {
         return resourcesManager.getString(id);
+    }
+
+    /**
+     * helper function to strip out square brackets from  ["abc"] and get string from resources.json
+     * if no bracket, just return the string
+     * @param {string} id - string to get
+     */
+    private getDescriptionString(id: string): string { 
+        var found: any = id.match("\\[.*\\]");
+        if (found) {
+            id = id.slice(1, id.length - 1);
+            return this.getString(id);
+        } else {
+            return id;
+        }        
+    }
+
+    /**
+     * looks up commands.json and see if command is authored as supported
+     * @param {string} id - command to query
+     */
+    private commandExists(command: string): boolean {
+        for (var i in commandsFactory.Listings) {
+            if (i === command) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

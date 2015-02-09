@@ -146,7 +146,7 @@ module TacoUtility {
 
                 var modulePath = path.resolve(moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error(ResourcesManager.getString("taco-utils.exception.missingcommand"));
+                    throw new Error(ResourcesManager.getString("taco-utils.exception.missingcommand", name));
                 }
 
                 var commandMod: any = require(modulePath);

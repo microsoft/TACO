@@ -19,19 +19,7 @@ class Create implements commands.ICommand {
      * Sample only, shows processing specific taco commands, and passing remaining ones to Cordova CLI
      */  
     public run(args: string[]): void {
-        var knownOpts: any = {
-            template: String
-        };
-        var shortHands: any = {
-            t: ["--template"]
-        };
-
-        var createArgs = nopt(knownOpts, shortHands, args, 2);
-
-        // sample getting args specific to taco
-        logger.logLine("Creating new project using template : " + createArgs.template, level.Success);
-
-        // sample routing remaining args to Cordova, stripped out template
+        logger.logErrorLine("Create not yet implemented");
     }
 
     /**
