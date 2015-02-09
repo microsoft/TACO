@@ -43,8 +43,29 @@ declare module TacoUtility {
             buildLang?: string;
             buildPlatform?: string;
         });
+        /**
+         * Create a new BuildInfo object out of a raw JS object.
+         *
+         * @param {Object} buildInfoData An object to convert to a BuildInfo object
+         *
+         * @returns an instance of BuildInfo with the same keys and values as the input object
+         */
         static createNewBuildInfoFromDataObject(buildInfoData: any): BuildInfo;
+        /**
+         * Set the status of the BuildInfo object, along with an optional message
+         *
+         * @param {string} status The status to set
+         * @param {string} messageId Optional message identifier
+         * @param {any[]} messageArgs Optional message arguments
+         */
         updateStatus(status: string, messageId?: string, ...messageArgs: any[]): void;
+        /**
+         * Localize the message of the BuildInfo according to the specified language
+         *
+         * @param {string or express.Request} req The request or language to localize for
+         *
+         * @returns This object, after setting the message in the appropriate language.
+         */
         localize(req: any): BuildInfo;
     }
 }

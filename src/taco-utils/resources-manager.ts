@@ -8,6 +8,12 @@ module TacoUtility {
         private static SupportedLanguages: string[] = null;
         private static DefaultLanguage: string = "en";
 
+        /**
+         * Initialize the Resource Manager
+         *
+         * @param {string} language The default language to look up via getString
+         * @param {string} resourcesDir The location to look for resources. The expectation is that this location has subfolders such as "en" and "it-ch" which contain "resources.json"
+         */
         public static init(language: string, resourcesDir: string): void {
             ResourcesManager.Resources = {};
             ResourcesManager.SupportedLanguages = [];

@@ -1,5 +1,4 @@
-﻿
-import resourcesManager = require("./resources-manager");
+﻿import resourcesManager = require("./resources-manager");
 import ResourcesManager = resourcesManager.ResourcesManager;
 
 import utilHelper = require("./util-helper");
@@ -57,6 +56,13 @@ module TacoUtility {
             this.changeList = null;
         }
 
+        /**
+         * Create a new BuildInfo object out of a raw JS object.
+         * 
+         * @param {Object} buildInfoData An object to convert to a BuildInfo object
+         *
+         * @returns an instance of BuildInfo with the same keys and values as the input object
+         */
         public static createNewBuildInfoFromDataObject(buildInfoData: any): BuildInfo {
             var bi: any = new BuildInfo(buildInfoData);
             Object.keys(buildInfoData).forEach(function (k: string): void {
@@ -65,6 +71,13 @@ module TacoUtility {
             return bi;
         }
 
+        /**
+         * Set the status of the BuildInfo object, along with an optional message
+         * 
+         * @param {string} status The status to set
+         * @param {string} messageId Optional message identifier
+         * @param {any[]} messageArgs Optional message arguments
+         */
         public updateStatus(status: string, messageId?: string, ...messageArgs: any[]): void {
             this.status = status;
             this.messageId = messageId;
@@ -75,6 +88,13 @@ module TacoUtility {
             this.statusTime = new Date();
         }
 
+        /**
+         * Localize the message of the BuildInfo according to the specified language
+         * 
+         * @param {string or express.Request} req The request or language to localize for
+         * 
+         * @returns This object, after setting the message in the appropriate language.
+         */
         public localize(req: any): BuildInfo {
             if (this.messageId) {
                 this.message = ResourcesManager.getStringForLanguage(req, this.messageId, this.messageArgs);
