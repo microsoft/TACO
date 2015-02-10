@@ -1,0 +1,4 @@
+﻿{
+    "SimpleMessage": "Ciao it-CH",
+    "MessageWithArgs": "Ciao {0} {1} it-CH"
+}
