@@ -10,5 +10,5 @@
 // that file does for the type's namespace. See util-helper for how it uses Q
 
 declare module "taco-utils" {
-	export = TacoUtility;
+export = TacoUtility;
 }
