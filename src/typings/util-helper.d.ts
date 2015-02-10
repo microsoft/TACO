@@ -3,7 +3,8 @@
 declare module TacoUtility {
     class UtilHelper {
         private static InvalidAppNameChars;
-        /** Converts an untyped argument into a boolean in a "sensible" way, treating only the string "true" as true rather than any non-empty string
+        /**
+         * Converts an untyped argument into a boolean in a "sensible" way, treating only the string "true" as true rather than any non-empty string
          *
          * @param {any} input Any object that we want to determine its truthiness
          *
@@ -11,7 +12,7 @@ declare module TacoUtility {
          */
         static argToBool(input: any): boolean;
         static readFileContentsSync(filename: string, encoding?: string): string;
-        static copyFile(from: string, to: string, encoding?: string): Q.Promise<{}>;
+        static copyFile(from: string, to: string, encoding?: string): Q.Promise<any>;
         /**
          * Extract optional arguments from an arguments array.
          *

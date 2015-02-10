@@ -1,11 +1,11 @@
-﻿import resourcesManager = require("./resources-manager");
+﻿import resourcesManager = require ("./resources-manager");
 import ResourcesManager = resourcesManager.ResourcesManager;
 
-import utilHelper = require("./util-helper");
+import utilHelper = require ("./util-helper");
 import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
-	export class BuildInfo {
+    export class BuildInfo {
         public status: string;
         /**
          * BuildInfo holds relevant information about a particular build, including its identifier, what kind of build was requested, and the status of the build

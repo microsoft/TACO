@@ -1,7 +1,7 @@
 ﻿/// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
-import fs = require("fs");
-import Q = require("q");
+import fs = require ("fs");
+import Q = require ("q");
 
 module TacoUtility {
     export class UtilHelper {
@@ -13,7 +13,8 @@ module TacoUtility {
             60: "<",
             92: "\\"
         };
-        /** Converts an untyped argument into a boolean in a "sensible" way, treating only the string "true" as true rather than any non-empty string 
+        /**
+         * Converts an untyped argument into a boolean in a "sensible" way, treating only the string "true" as true rather than any non-empty string
          *
          * @param {any} input Any object that we want to determine its truthiness
          *
@@ -28,7 +29,7 @@ module TacoUtility {
         }
 
         public static readFileContentsSync(filename: string, encoding?: string): string {
-            var contents = fs.readFileSync(filename,(encoding || "utf-8"));
+            var contents = fs.readFileSync(filename, (encoding || "utf-8"));
             if (contents) {
                 contents = contents.replace(/^\uFEFF/, ""); // Windows is the BOM
             }
@@ -36,7 +37,7 @@ module TacoUtility {
             return contents;
         }
 
-        public static copyFile(from: string, to: string, encoding?: string): Q.Promise<{}> {
+        public static copyFile(from: string, to: string, encoding?: string): Q.Promise<any> {
             var deferred = Q.defer();
             var newFile = fs.createWriteStream(to, { encoding: encoding });
             var oldFile = fs.createReadStream(from, { encoding: encoding });
@@ -57,7 +58,6 @@ module TacoUtility {
                 fs.writeFileSync(to, contents, { encoding: encoding });
         */
         }
-
 
         /**
          * Extract optional arguments from an arguments array.
@@ -80,4 +80,5 @@ module TacoUtility {
         }
     }
 }
+
 export = TacoUtility;

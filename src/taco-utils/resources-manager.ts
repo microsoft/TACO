@@ -1,9 +1,9 @@
 ﻿/// <reference path="../typings/node.d.ts" />
-import fs = require("fs");
-import path = require("path");
+import fs = require ("fs");
+import path = require ("path");
 
 module TacoUtility {
-	export class ResourcesManager {
+    export class ResourcesManager {
         private static Resources: { [key: string]: any; } = null;
         private static SupportedLanguages: string[] = null;
         private static DefaultLanguage: string = "en";
@@ -149,4 +149,5 @@ module TacoUtility {
         }
     }
 }
+
 export = TacoUtility;
