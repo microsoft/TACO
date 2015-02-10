@@ -2,6 +2,8 @@
 /// <reference path="../typings/build-info.d.ts" />
 /// <reference path="../typings/cordova-config.d.ts" />
 /// <reference path="../typings/util-helper.d.ts" />
+/// <reference path="../typings/logger.d.ts" />
+/// <reference path="../typings/commands.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoUtility namespace,
 // include a reference to the d.ts file that is generated (as above), and make sure

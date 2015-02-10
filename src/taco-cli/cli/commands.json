@@ -1,7 +1,7 @@
 {
     "create": {
         "synopsis": "<PATH> [ID] [NAME] [options]",
-        "modulePath": "../cli/create",
+        "modulePath": "./create",
         "description": "[command.create.description]",
         "args": [
             { "name": "PATH", "description": "[command.create.description]" },

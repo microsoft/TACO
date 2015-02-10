@@ -34,7 +34,7 @@ declare module TacoUtility {
             /**
              * get specific task object, given task name
              */
-            static getTask(name: string, inputArgs: string[]): ICommand;
+            static getTask(name: string, inputArgs: string[], commandsModulePath: string): ICommand;
         }
     }
 }

@@ -20,9 +20,9 @@ class Taco {
      * Initialize all other config classes, Invoke task to be run
      */
     public static run(): void {
-        var resourcePath: string = path.resolve("../resources");
+        var resourcePath: string = path.join(__dirname, "../resources");
         resourcesManager.init("en", resourcePath);
-        commandsFactory.init("../cli/commands.json");
+        commandsFactory.init(path.join(__dirname, "../cli/commands.json"));
         
         // parse taco command
         var input: string = process.argv[2];
@@ -31,20 +31,17 @@ class Taco {
         // get appropriate task
         if (!input) {
             input = "help";
-        }         
+        }                 
 
-        var argsToCommand: string[] = new Array();  // strip out commands specific to args
-        for (var i: number = 3; i < process.argv.length; i++) {
-            argsToCommand.push(process.argv[i]);
-        }
-
-        command = commandsFactory.getTask(input, argsToCommand);        
+        var cordovaCliArgs = process.argv;
+        var commandArgs = process.argv.slice(3);
+        command = commandsFactory.getTask(input, commandArgs, __dirname);        
 
         // if no command found that can handle these args, route args directly to Cordova
         if (command) {
-            command.run(argsToCommand);
+            command.run(commandArgs);
         } else {
-            cordova.cli(process.argv);            
+            cordova.cli(cordovaCliArgs);            
         }
     }
 }

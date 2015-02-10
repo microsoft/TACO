@@ -1,4 +1,5 @@
-﻿import child_process = require ("child_process");
+﻿/// <reference path="../src/typings/node.d.ts" />
+import child_process = require("child_process");
 import fs = require ("fs");
 import path = require ("path");
 
@@ -8,7 +9,7 @@ import path = require ("path");
 export class StyleCopUtil {
     private _errorMessage: string = "Style cop validation failed.";
 
-    public runCop(srcPath: string, copPath: string, cb: Function): void {
+    public runCop(srcPath: string, copPath: string, copConfig: string, cb: Function): void {
         var childProcessCallback = (error: Error, stdout: Buffer, stderr: Buffer): void => {
             if (stdout) {
                 console.log(stdout);
@@ -32,7 +33,7 @@ export class StyleCopUtil {
 
         var excludedFiles = this.getProjectTypescriptDefinitionFiles(srcPath, []);
 
-        var styleCopCommand = "node " + copPath + " -analyze " + srcPath + (excludedFiles ? " -exclude " + excludedFiles.join(" ") : "");
+        var styleCopCommand = "node " + copPath + " -analyze " + srcPath + (excludedFiles ? " -exclude " + excludedFiles.join(" ") : "") + " -config " + copConfig;
         child_process.exec(styleCopCommand, childProcessCallback);
     }
 

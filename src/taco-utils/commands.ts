@@ -40,7 +40,7 @@ module TacoUtility {
              * initialize with json file containing commands
              */
             public static init(commandsInfoPath: string): void {
-                commandsInfoPath = path.resolve(commandsInfoPath);
+                commandsInfoPath = commandsInfoPath;
                 if (!fs.existsSync(commandsInfoPath)) {
                     throw new Error(resourcesManager.getString("taco-utils.exception.listingfile"));
                 }
@@ -51,7 +51,7 @@ module TacoUtility {
             /**
              * get specific task object, given task name
              */
-            public static getTask(name: string, inputArgs: string[]): ICommand {
+            public static getTask(name: string, inputArgs: string[], commandsModulePath: string): ICommand {
                 if (!name || !CommandFactory.Listings) {
                     throw new Error(resourcesManager.getString("taco-utils.exception.listingfile"));
                 }
@@ -61,7 +61,7 @@ module TacoUtility {
                     return null;
                 }
 
-                var modulePath = path.resolve(moduleInfo.modulePath);
+                var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
                     throw new Error(resourcesManager.getString("taco-utils.exception.missingcommand", name));
                 }
