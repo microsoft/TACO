@@ -33,7 +33,7 @@ class Taco {
             input = "help";
         }         
 
-        var argsToCommand: string[] = new Array();  //strip out commands specific to args
+        var argsToCommand: string[] = new Array();  // strip out commands specific to args
         for (var i: number = 3; i < process.argv.length; i++) {
             argsToCommand.push(process.argv[i]);
         }

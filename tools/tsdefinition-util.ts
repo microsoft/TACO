@@ -11,12 +11,11 @@ var ncp = require("ncp");
 
 /*utility to generate .d.ts file*/
 export module DefinitionServices {
-    export function generateTSExportDefinition(fileName: string, srcFolderPath: string, destFolderPath: string, moduleName: string, moduleString: string): void {
+    export function generateTSExportDefinition(fileName: string, srcFolderPath: string, destFolderPath: string, moduleName: string, moduleString: string): Q.Promise<any> {
         var destDtsFile: string = path.join(destFolderPath, fileName + ".d.ts");
-        Q(compileDeclarationFile(fileName, srcFolderPath)).
+        return Q(compileDeclarationFile(fileName, srcFolderPath)).
             then(function (): void { copyDTSTypings(fileName, srcFolderPath, destFolderPath); }).
-            then(function (): void { addExportsInTypings(destDtsFile, "TacoUtility", "taco-utils"); }).
-            done();
+            then(function (): void { addExportsInTypings(destDtsFile, moduleName, moduleString); });
     }
 
     /*call tsc --d, only option is to generate it in same folder as .ts*/
@@ -46,19 +45,18 @@ export module DefinitionServices {
         del([srcJSFilePath], { force: true });        
     }
 
-    /*add wrap "export = moduleName" with "declare module "moduleString"{}"*/
-    function addExportsInTypings(dtsPath: string, moduleName: string, moduleString: string): Q.Promise<any> {
-        var d = Q.defer();
+
+    /*add wrap everything except ///<reference>s with "declare module "moduleString"{}"*/
+    function addExportsInTypings(dtsPath: string, moduleName: string, moduleString: string): void {
         console.log("---processing:  " + dtsPath);
-        var buf: any = fs.readFileSync(dtsPath, "utf8");
-        var regex: string = "export.*=.*" + moduleName + ".*;";
+        var buf: string = fs.readFileSync(dtsPath, "utf8");
+        var result: string= buf.replace("declare module " + moduleName, "module " + moduleName);
+        var regex: string = "(module " + moduleName + ")|(import)";
         var match: string[] = buf.match(regex);
         if (match && match[0]) {
             var foundMatch = match[0];
-            var result = buf.replace(foundMatch, "declare module \"" + moduleString + "\"{\n" + foundMatch + "\n}");
-            fs.writeFileSync(dtsPath, result, "utf8");
+            result = result.replace(foundMatch, "declare module \"" + moduleString + "\" {\n" + foundMatch) + "\n}\n";
         }
-
-        return d.promise;
+        fs.writeFileSync(dtsPath, result, "utf8");
     }
 }

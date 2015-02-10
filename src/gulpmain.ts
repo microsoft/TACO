@@ -1,4 +1,4 @@
-/// <reference path="typings/node.d.ts" />
+﻿/// <reference path="typings/node.d.ts" />
 /// <reference path="typings/q.d.ts" />
 
 var fs = require("fs");
@@ -35,7 +35,7 @@ gulp.task("rebuild", ["clean"], function (callback: Function): void {
 gulp.task("run-stylecop", function (callback: Function): void {            
     if (fs.existsSync(buildConfig.copPath)) {        
         var styleCop = new stylecopUtil.StyleCopUtil();
-        styleCop.runCop(path.join(buildConfig.src, ".."), buildConfig.copPath, callback);
+        styleCop.runCop(buildConfig.src, buildConfig.copPath, callback);
     } else {
         callback();
     }
@@ -50,23 +50,21 @@ gulp.task("clean", function (callback: Function): void {
 gulp.task("copy", function (callback: Function): void {    
     gulp.src(path.join(buildConfig.src, "/**/package.json")).pipe(gulp.dest(buildConfig.bin));
     gulp.src(path.join(buildConfig.src, "/**/resources.json")).pipe(gulp.dest(buildConfig.bin));
+    gulp.src(path.join(buildConfig.src, "/**/test/**")).pipe(gulp.dest(buildConfig.bin));
     gulp.src(path.join(buildConfig.src, "/**/commands.json")).pipe(gulp.dest(buildConfig.bin));
     gulp.src(path.join(buildConfig.src, "/**/bin/**")).pipe(gulp.dest(buildConfig.bin));
 });
 
 /* auto-generate taco-utils.d.ts*/
-gulp.task("generate-dts", function (cb: Function): void {
+gulp.task("generate-dts", function (): Q.Promise<any> {
     var tacoUtils: string = "taco-utils";
-    dtsUtil.DefinitionServices.generateTSExportDefinition(
+    return dtsUtil.DefinitionServices.generateTSExportDefinition(
         tacoUtils,
         path.join(buildConfig.src, tacoUtils),
         path.join(buildConfig.src, "typings"),
         "TacoUtility",
         tacoUtils);
-    cb();
 });
-
-/* Task to generate NPM package */
 
 /* Task to run tests */
 module.exports = gulp;

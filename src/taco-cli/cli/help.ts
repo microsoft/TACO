@@ -22,7 +22,7 @@ class Help implements commands.ICommand {
     public info: commands.ICommandInfo;
 
     public canHandleArgs(args: string[]): boolean {
-        if (!args || args.length === 0){
+        if (!args || args.length === 0) {
             return true;
         }
 

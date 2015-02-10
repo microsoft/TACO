@@ -29,7 +29,7 @@
     "preferGlobal": true,
     "main": "./bin/taco-cli.js",
     "bin": {
-        "taco-cli": "./bin/taco-cli"
+        "taco-cli": "./bin/taco"
     },
     "engines": {
         "node": ">=0.8.0"
