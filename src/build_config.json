@@ -1,8 +1,7 @@
 {
     "src": ".",
-    "compiledGulp": "../build",
-    "bin": "../build/src",
-    "tools": "../build/tools",
-    "copPath": "../tools/internal/TSStyleCop/TSStyleCop.js",
+    "build": "../build",
+    "buildSrc": "../build/src",
+    "copPath":  "../tools/internal/TSStyleCop/TSStyleCop.js",    
     "copConfig":  "../tools/internal/TSStyleCop/TSStyleAllRules.json"
 }
