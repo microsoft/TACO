@@ -1,5 +1,5 @@
 ﻿/// <reference path="typings/node.d.ts" />
-/// <reference path="typings/q.d.ts" />
+/// <reference path="typings/Q.d.ts" />
 
 var fs = require("fs");
 var gulp = require("gulp");
@@ -40,7 +40,7 @@ gulp.task("install-build", ["build"], function (callback) {
     var npmUtil = require (path.join(process.cwd(), "../tools/npm-installer-util"));
     npmUtil.installPackages(tacoPackagesFolder, function (){
         var binpath = path.join(process.cwd(), "../node_modules/.bin");
-        if (process.env["PATH"].split(";").indexOf(binpath) <= -1){
+        if (process.env.PATH.split(path.delimiter).indexOf(binpath) <= -1){
             callback("taco packages not in path. You should add '"+binpath+ "' to PATH");
         } else {
             callback();
@@ -59,9 +59,12 @@ gulp.task("run-stylecop", function (callback: Function): void {
     }
 }); 
 
-/* Cleans up the bin location, will have to call "gulp prep" again */
+/* Cleans up the build location, will have to call "gulp prep" again */
 gulp.task("clean", function (callback: Function): void {
-    del([buildConfig.bin + "/../**"], { force: true }, callback);    
+    var util = require('util');
+    var buildPath = path.join(process.cwd(), buildConfig.build);
+    console.warn(util.format('Deleting %s', buildPath));
+    del([buildPath + "/**"], { force: true }, callback);
 });
 
 /* copy package.json and resources.json files from source to bin */

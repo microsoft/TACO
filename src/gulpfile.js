@@ -1,4 +1,4 @@
-﻿/* starter gulpfile, bootstraps compiling gulp-compile.ts and runs it */
+﻿/* starter gulpfile, bootstraps compiling gulpmain.ts and runs it */
 var exec = require("child_process").exec,
     fs = require("fs"),
     path = require('path'),
@@ -10,7 +10,7 @@ gulp.on("task_not_found", function (err) {
     console.error("\nPlease run 'gulp prep' to prepare project\n");
 });
 
-/* compile the gulp-compile.ts file into JS */
+/* compile the gulpmain.ts file into JS */
 gulp.task("prep", ["install"], function (callback) {
     exec("tsc gulpmain.ts --outdir " + buildConfig.build + " --module commonjs", function (error, stdout, stderr) {
         // Emit typscript compilation errors on command line
