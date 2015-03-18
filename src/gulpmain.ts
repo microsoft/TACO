@@ -43,9 +43,6 @@ gulp.task("install-build", ["build"], function (callback) {
         var binpath = path.join(process.cwd(), "../node_modules/.bin");
         if (process.env.PATH.split(path.delimiter).indexOf(binpath) <= -1 &&
 	    process.env.PATH.split(path.delimiter).indexOf(binpath + path.sep) <= -1){
-	    console.log(binpath);
-	    console.log(binpath + path.sep);
-	    console.log(process.env.PATH);
             callback("taco packages not in path. You should add '"+binpath+ "' to PATH");
         } else {
             callback();
