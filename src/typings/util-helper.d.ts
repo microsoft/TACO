@@ -22,5 +22,7 @@ declare module TacoUtility {
          * @returns {any[]} If functionArguments[startFrom] is an array, then that is returned. Otherwise the functionArguments array except for the first startFrom elements.
          */
         static getOptionalArgsArrayFromFunctionCall(functionArguments: IArguments, startFrom: number): any[];
+
+        static parseArguments(knownOptions: any, shortHands?: any, args?: string[], slice?: number): any;
     }
 }
