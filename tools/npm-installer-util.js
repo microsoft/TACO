@@ -11,9 +11,8 @@ function installPackage(pkg, callback) {
     }
     else {
         console.info("Installing "+pkg);
-        exec("npm install " + pkg, { cwd: ".." }, function (error, stdout, stderr) {
-            callback(error);
-        });
+        exec("npm install " + pkg, { cwd: ".." });
+	callback();
     }
 };
 

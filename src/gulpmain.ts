@@ -32,7 +32,8 @@ gulp.task("rebuild", function (callback: Function): void {
 
 /* build the source and install all the packages locally */
 gulp.task("install-build", ["build"], function (callback) {
-	var tacoPackages = ["taco-cli"];
+    
+    var tacoPackages = ["taco-cli"];
     var tacoPackagesFolder = tacoPackages.map(function(pkg) { 
         return path.join(process.cwd(), buildConfig.buildSrc, pkg); 
     });
@@ -40,7 +41,11 @@ gulp.task("install-build", ["build"], function (callback) {
     var npmUtil = require (path.join(process.cwd(), "../tools/npm-installer-util"));
     npmUtil.installPackages(tacoPackagesFolder, function (){
         var binpath = path.join(process.cwd(), "../node_modules/.bin");
-        if (process.env.PATH.split(path.delimiter).indexOf(binpath) <= -1){
+        if (process.env.PATH.split(path.delimiter).indexOf(binpath) <= -1 &&
+	    process.env.PATH.split(path.delimiter).indexOf(binpath + path.sep) <= -1){
+	    console.log(binpath);
+	    console.log(binpath + path.sep);
+	    console.log(process.env.PATH);
             callback("taco packages not in path. You should add '"+binpath+ "' to PATH");
         } else {
             callback();
