@@ -1,9 +1,10 @@
-/// <reference path="../typings/node.d.ts" />
+
 declare module TacoUtility {
     class ResourcesManager {
         private static Resources;
         private static SupportedLanguages;
         private static DefaultLanguage;
+        public static UnitTest: boolean;
         /**
          * Initialize the Resource Manager
          *
@@ -34,6 +35,5 @@ declare module TacoUtility {
          */
         private static getBestLanguageFromArray(acceptLangs);
         private static loadLanguage(language, resourcesDir);
-        private static getOptionalArgsArrayFromFunctionCall(functionArguments, startFrom);
     }
 }

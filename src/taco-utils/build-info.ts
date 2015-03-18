@@ -1,11 +1,21 @@
-﻿import resourcesManager = require ("./resources-manager");
-import ResourcesManager = resourcesManager.ResourcesManager;
-
-import utilHelper = require ("./util-helper");
+﻿import utilHelper = require ("./util-helper");
 import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
     export class BuildInfo {
+        public static UPLOADING = "uploading";
+        public static UPLOADED = "uploaded";
+        public static EXTRACTED = "extracted";
+        public static INVALID = "invalid";
+        public static BUILDING = "building";
+        public static COMPLETE = "complete";
+        public static EMULATED = "emulated";
+        public static RUNNING = "running";
+        public static INSTALLED = "installed";
+        public static DEBUGGING = "debugging";
+        public static DOWNLOADED = "downloaded";
+        public static ERROR = "error";
+
         public status: string;
         /**
          * BuildInfo holds relevant information about a particular build, including its identifier, what kind of build was requested, and the status of the build
@@ -22,7 +32,6 @@ module TacoUtility {
             deletedPluginsIos: string[];
         };
         public statusTime: Date;
-        public cordovaVersion: string;
         public buildCommand: string;
         public configuration: string;
         public options: any;
@@ -31,6 +40,7 @@ module TacoUtility {
         public buildPlatform: string;
         public submissionTime: Date;
         public buildNumber: number;
+        public buildSuccessful: boolean;
 
         public messageId: string;
         public messageArgs: any[];
@@ -38,14 +48,14 @@ module TacoUtility {
 
         public tgzFilePath: string;
         public appDir: string;
-        public appName: string;
 
-        public webDebugProxyPort: number;
-
-        constructor(params: { buildNumber?: number; status?: string; cordovaVersion?: string; buildCommand?: string; configuration?: string; options?: any; buildDir?: string; buildLang?: string; buildPlatform?: string }) {
+        constructor(params: { buildNumber?: number; status?: string; buildCommand?: string; configuration?: string; options?: any; buildDir?: string; buildLang?: string; buildPlatform?: string; [index: string]: any }) {
+            var self = this;
+            Object.keys(params).forEach(function (key: string): void {
+                self[key] = params[key];
+            });
             this.buildNumber = params.buildNumber;
             this.status = params.status;
-            this.cordovaVersion = params.cordovaVersion;
             this.buildCommand = params.buildCommand;
             this.configuration = params.configuration;
             this.options = params.options;
@@ -54,7 +64,15 @@ module TacoUtility {
             this.buildPlatform = params.buildPlatform;
             this.submissionTime = new Date();
             this.changeList = null;
+            this.buildSuccessful = false;
+            this.messageId = null;
+            this.messageArgs = null;
+            this.message = null;
+            this.tgzFilePath = null;
+            this.appDir = null;
         }
+
+        [index: string]: any;
 
         /**
          * Create a new BuildInfo object out of a raw JS object.
@@ -95,11 +113,11 @@ module TacoUtility {
          * 
          * @returns This object, after setting the message in the appropriate language.
          */
-        public localize(req: any): BuildInfo {
+        public localize(req: any, resources: { getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string }): BuildInfo {
             if (this.messageId) {
-                this.message = ResourcesManager.getStringForLanguage(req, this.messageId, this.messageArgs);
+                this.message = resources.getStringForLanguage(req, this.messageId, this.messageArgs);
             } else {
-                this.message = ResourcesManager.getStringForLanguage(req, "Build-" + this.status);
+                this.message = resources.getStringForLanguage(req, "Build-" + this.status);
             }
 
             return this;

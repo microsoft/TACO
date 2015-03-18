@@ -2,6 +2,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;
 import resourcesManager = tacoUtility.ResourcesManager;
@@ -13,33 +14,36 @@ import level = logger.Level;
  *
  * handles "Taco Help"
  */
-class Help implements commands.ICommand { 
+class Help implements commands.IDocumentedCommand { 
     private indentWidth: number = 3; // indent string
     private indent: string;
     private charsToDescription: number = 35;  // number of characters from start of line to description text
     private maxRight = 85;  // maximum characters we're allowing in each line
     private tacoString = "taco";
+
     public info: commands.ICommandInfo;
 
-    public canHandleArgs(args: string[]): boolean {
-        if (!args || args.length === 0) {
+    public canHandleArgs(data: commands.ICommandData): boolean {
+        if (!data.original || data.original.length === 0) {
             return true;
         }
 
-        return this.commandExists(args[0]);
+        return this.commandExists(data.original[0]);
     }
 
     /**
      * entry point for printing helper
      */ 
-    public run(args: string[]): void {
+    public run(data: commands.ICommandData): Q.Promise<any> {
         this.indent = this.generateSpaces(this.indentWidth);
         this.printHeader();
-        if (args && args.length > 0 && this.commandExists(args[0])) {
-            this.printCommandUsage(args[0]);  
+        if (data.original && data.original.length > 0 && this.commandExists(data.original[0])) {
+            this.printCommandUsage(data.original[0]);
         } else {
-            this.printGeneralUsage();            
+            this.printGeneralUsage();
         }
+
+        return Q({});
     }
 
     /**

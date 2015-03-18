@@ -47514,7 +47514,7 @@ AccessModifierMustBeDeclared.prototype.checkElement = function (classNode, conte
 var elements = classNode.classElements;
 for (var i = 0; i < elements.childCount(); i++) {
 var element = elements.childAt(i);
-if (element.kind() !== TypeScript.SyntaxKind.ConstructorDeclaration) {
+    if (element.kind() !== TypeScript.SyntaxKind.ConstructorDeclaration && element.kind() !== TypeScript.SyntaxKind.IndexSignature) {
 if (!element.modifiers || element.modifiers.childCount() === 0) {
 context.reportError(element, this.name, this.code);
 } else {
@@ -48443,7 +48443,8 @@ this.filter = [TypeScript.SyntaxKind.OpenBraceToken];
 }
 OpeningCurlyBracketsMustBeSpacedCorrectly.prototype.checkElement = function (openBrace, context) {
 var prevToken = context.getPreviousToken(openBrace);
-if (prevToken.tokenKind === TypeScript.SyntaxKind.GreaterThanToken && context.getParent(prevToken).kind() === TypeScript.SyntaxKind.CastExpression) {
+if ((prevToken.tokenKind === TypeScript.SyntaxKind.GreaterThanToken && context.getParent(prevToken).kind() === TypeScript.SyntaxKind.CastExpression)
+||  (prevToken.tokenKind === TypeScript.SyntaxKind.LessThanToken && context.getParent(prevToken).kind() === TypeScript.SyntaxKind.TypeArgumentList)){
 Rules.SpacingHelpers.errorIfLeadingWhitespace(openBrace, context, this.name, this.code, false);
 } else {
 Rules.SpacingHelpers.errorIfNotLeadingWhitespace(openBrace, context, this.name, this.code, true, true);
@@ -48542,6 +48543,7 @@ type = "field";
 break;
 case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
 case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
+case TypeScript.SyntaxKind.IndexSignature:
 type = "property";
 break;
 case TypeScript.SyntaxKind.ConstructorDeclaration:

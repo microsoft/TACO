@@ -91,4 +91,12 @@ describe("resources", function (): void {
         var expected = expectedResources["UnicodeMessage"];
         actual.should.equal(expected);
     });
+
+    it("should replace all placeholders correctly", function (): void {
+        var actual = resources.getStringForLanguage("en", "MessageWithRepeatedArgs", "X");
+        actual.indexOf("{0}").should.be.equal(-1);
+        var expectedResources = require(path.join(__dirname, "/resources/en/resources.json"));
+        var expected = expectedResources["MessageWithRepeatedArgs"];
+        expected.replace(/\{0\}/g, "X").should.equal(actual);
+    });
 });

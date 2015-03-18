@@ -45,7 +45,6 @@ export module DefinitionServices {
         del([srcJSFilePath], { force: true });        
     }
 
-
     /*add wrap everything except ///<reference>s with "declare module "moduleString"{}"*/
     function addExportsInTypings(dtsPath: string, moduleName: string, moduleString: string): void {
         console.log("---processing:  " + dtsPath);

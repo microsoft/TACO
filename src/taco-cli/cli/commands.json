@@ -20,5 +20,46 @@
         "synopsis": "[COMMAND]",
         "modulePath": "../cli/help",
         "description": "[command.help.description]"
+    },
+    "setup": {
+        "synopsis": "remote [PLATFORM]",
+        "modulePath": "./setup",
+        "description": "[command.setup.description]",
+        "args": [
+            { "name": "PLATFORM", "description": "[command.setup.options.platform]" }
+        ]
+    },
+    "build": {
+        "synopsis": "[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]",
+        "modulePath": "./build",
+        "description": "[command.build.description]",
+        "args": [
+            { "name": "PLATFORM", "description": "[command.build.platform.description]" },
+            { "name": "--remote", "description": "[command.build.remote.description]" },
+            { "name": "--local", "description": "[command.build.local.description]" },
+            { "name": "--clean", "description": "[command.build.clean.description]" },
+            { "name": "--debug", "description": "[command.build.debug.description]" },
+            { "name": "--release", "description": "[command.build.release.description]" },
+            { "name": "--device", "description": "[command.build.device.description]" },
+            { "name": "--emulator", "description": "[command.build.emulator.description]" },
+            { "name": "--target", "description": "[command.build.target.description]" }
+        ]
+    },
+    "run": {
+        "synopsis": "[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | -- release] [--device | --emulator | --target=TARGET]",
+        "modulePath": "./run",
+        "description": "[command.run.description]",
+        "args": [
+            { "name": "PLATFORM", "description": "[command.run.platform.description]" },
+            { "name": "--remote", "description": "[command.run.remote.description]" },
+            { "name": "--local", "description": "[command.run.local.description]" },
+            { "name": "--nobuild", "description": "[command.run.nobuild.description]" },
+            { "name": "--debuginfo", "description": "[command.run.json.description]" },
+            { "name": "--debug", "description": "[command.run.debug.description]" },
+            { "name": "--release", "description": "[command.run.release.description]" },
+            { "name": "--device", "description": "[command.run.device.description]" },
+            { "name": "--emulator", "description": "[command.run.emulator.description]" },
+            { "name": "--target", "description": "[command.run.target.description]" }
+        ]
     }
 }

@@ -1,4 +1,5 @@
 ﻿{
     "SimpleMessage": "Hello",
-    "MessageWithArgs": "Hello {0} {1}"
+    "MessageWithArgs": "Hello {0} {1}",
+    "MessageWithRepeatedArgs": "Hello {0} {0}"
 }

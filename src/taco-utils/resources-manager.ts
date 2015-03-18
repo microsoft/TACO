@@ -1,12 +1,16 @@
 ﻿/// <reference path="../typings/node.d.ts" />
 import fs = require ("fs");
 import path = require ("path");
+import tacoUtility = require ("./util-helper");
+import UtilHelper = tacoUtility.UtilHelper;
 
 module TacoUtility {
     export class ResourcesManager {
-        private static Resources: { [key: string]: any; } = null;
-        private static SupportedLanguages: string[] = null;
+        private static Resources: { [key: string]: any; } = {};
+        private static SupportedLanguages: string[] = [];
         private static DefaultLanguage: string = "en";
+
+        public static UnitTest: boolean = false;
 
         /**
          * Initialize the Resource Manager
@@ -15,34 +19,35 @@ module TacoUtility {
          * @param {string} resourcesDir The location to look for resources. The expectation is that this location has subfolders such as "en" and "it-ch" which contain "resources.json"
          */
         public static init(language: string, resourcesDir: string): void {
-            ResourcesManager.Resources = {};
-            ResourcesManager.SupportedLanguages = [];
-            fs.readdirSync(resourcesDir).forEach(function (filename: string): void {
-                try {
-                    ResourcesManager.Resources[filename.toLowerCase()] = ResourcesManager.loadLanguage(filename, resourcesDir);
-                    ResourcesManager.SupportedLanguages.push(filename.toLowerCase());
-                } catch (e) {
-                    // Folder was not a valid resource; ignore it
-                }
-            });
+            if (ResourcesManager.SupportedLanguages.length === 0) {
+                // Initialize the resources for this package the first time we are initialized
+                ResourcesManager.loadFolder(path.join(__dirname, "resources"));
+            }
+
+            ResourcesManager.loadFolder(resourcesDir);
 
             ResourcesManager.DefaultLanguage = ResourcesManager.bestLanguageMatchOrDefault(language);
         }
 
         // For unit tests
         public static teardown(): void {
-            ResourcesManager.Resources = null;
-            ResourcesManager.SupportedLanguages = null;
+            ResourcesManager.Resources = {};
+            ResourcesManager.SupportedLanguages = [];
         }
 
         /** ...optionalArgs is only there for typings, function rest params */
         public static getString(id: string, ...optionalArgs: any[]): string {
-            var args = ResourcesManager.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             return ResourcesManager.getStringForLanguage(ResourcesManager.DefaultLanguage, id, args);
         }
 
         /** ** ...optionalArgs is only there for typings, function rest params** */
         public static getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
+            if (ResourcesManager.UnitTest) {
+                // Mock out resources for unit tests
+                return id;
+            }
+
             if (!ResourcesManager.Resources) {
                 throw new Error("Resources have not been loaded");
             }
@@ -57,17 +62,18 @@ module TacoUtility {
                 s = s.join("\n");
             }
 
+            var result: string = s;
             /*All args passed to current function:
             you can call getString('foo', 'bar', 'baz') or getString('foo',['bar', 'baz']) 
             and the utility function will extract ['bar', 'baz'] as args in both cases*/
-            var args = ResourcesManager.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
             if (args) {
                 for (var i: number = 0; i < args.length; i++) {
-                    s = s.replace("{" + i + "}", args[i]);
+                    result = result.replace(new RegExp("\\{" + i + "\\}", "g"), args[i]);
                 }
             }
 
-            return s;
+            return result;
         }
 
         private static bestLanguageMatchOrDefault(requestOrAcceptLangs: any): string {
@@ -131,21 +137,28 @@ module TacoUtility {
             return primaryLanguageMatch;
         }
 
+        private static loadFolder(resourcesDir: string): void {
+            fs.readdirSync(resourcesDir).forEach(function (filename: string): void {
+                try {
+                    var res = ResourcesManager.loadLanguage(filename, resourcesDir);
+                    if (ResourcesManager.Resources[filename.toLowerCase()]) {
+                        Object.keys(res).forEach(function (key: string): void {
+                            ResourcesManager.Resources[filename.toLowerCase()][key] = ResourcesManager.Resources[filename.toLowerCase()][key] || res[key];
+                        });
+                    } else {
+                        ResourcesManager.Resources[filename.toLowerCase()] = res;
+                    }
+
+                    ResourcesManager.SupportedLanguages.push(filename.toLowerCase());
+                } catch (e) {
+                    // Folder was not a valid resource; ignore it
+                }
+            });
+        }
+
         private static loadLanguage(language: string, resourcesDir: string): any {
             var resourcesPath = path.join(resourcesDir, language, "resources.json");
             return require(resourcesPath);
-        }
-
-        private static getOptionalArgsArrayFromFunctionCall(functionArguments: IArguments, startFrom: number): any[] {
-            if (functionArguments.length <= startFrom) {
-                return null;
-            }
-
-            if (Array.isArray(functionArguments[startFrom])) {
-                return functionArguments[startFrom];
-            }
-
-            return Array.prototype.slice.apply(functionArguments, [startFrom]);
         }
     }
 }

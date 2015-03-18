@@ -13,7 +13,7 @@ declare module Nopt {
         }
     }
     interface CommandData {
-        [key: string]: string
+        [key: string]: Object[]|Object
     }
 
     interface TypeDefs {

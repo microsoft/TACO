@@ -1,8 +1,13 @@
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/Q.d.ts" />
 import fs = require ("fs");
 import path = require ("path");
 import tacoUtility = require ("./resources-manager");
 import resourcesManager = tacoUtility.ResourcesManager;
+import utilHelper = require ("./util-helper");
+import UtilHelper = utilHelper.UtilHelper;
+import logger = require ("./logger");
+import Q = require ("q");
 
 module TacoUtility {
     export module Commands {
@@ -19,20 +24,30 @@ module TacoUtility {
             options: INameDescription[];
         }
 
+        export interface ICommandData {
+            options: {
+                [flag: string]: any;
+            };
+            original: string[];
+            remain: string[];
+        };
+
         /**
          * Base command class, all other commands inherit from this
          */
         export interface ICommand {
+            run(data: ICommandData): Q.Promise<any>;
+            canHandleArgs(data: ICommandData): boolean;
+        }
+        export interface IDocumentedCommand extends ICommand {
             info: ICommandInfo;
-            run(args: string[]): void;
-            canHandleArgs(args: string[]): boolean;
         }
 
         /**
          * Factory to create new Commands classes
          */
         export class CommandFactory {
-            private static Instance: ICommand;
+            private static Instance: IDocumentedCommand;
             public static Listings: any;
 
             /**
@@ -51,7 +66,7 @@ module TacoUtility {
             /**
              * get specific task object, given task name
              */
-            public static getTask(name: string, inputArgs: string[], commandsModulePath: string): ICommand {
+            public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
                 if (!name || !CommandFactory.Listings) {
                     throw new Error(resourcesManager.getString("taco-utils.exception.listingfile"));
                 }
@@ -70,11 +85,67 @@ module TacoUtility {
                 CommandFactory.Instance = new commandMod();
                 CommandFactory.Instance.info = moduleInfo;
 
-                if (CommandFactory.Instance && CommandFactory.Instance.canHandleArgs(inputArgs)) {
+                var commandData: ICommandData = {
+                    options: {},
+                    original: inputArgs,
+                    remain: inputArgs
+                };
+
+                if (CommandFactory.Instance && CommandFactory.Instance.canHandleArgs(commandData)) {
                     return CommandFactory.Instance;
                 } else {
                     return null;
                 }
+            }
+        }
+
+        export class TacoCommandBase implements ICommand {
+            public name: string;
+            public subcommands: ICommand[];
+            public info: ICommandInfo;
+
+            /**
+             * Abstract method to be implemented by derived class.
+             * Convert command line arguments into an appropriate format to determine what action to take
+             */
+            public parseArgs(args: string[]): ICommandData {
+                throw new Error("AbstractMethod");
+            }
+
+            /**
+             * Abstract method to be implemented by derived class.
+             * Sanity check on arguments to determine whether to pass through to cordova
+             */
+            public canHandleArgs(data: ICommandData): boolean {
+                throw new Error("AbstractMethod");
+            }
+
+            /**
+             * Concrete implementation of ICommand's run
+             * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
+             */
+            public run(data: ICommandData): Q.Promise<any> {
+                var commandData = this.parseArgs(data.original);
+
+                // Determine which build subcommand we are doing
+                var subcommand = this.getSubCommand(commandData);
+                if (subcommand) {
+                    return subcommand.run(commandData);
+                } else {
+                    logger.Logger.logErrorLine(resourcesManager.getString("command.badArguments", this.name, commandData.original.toString()));
+                    return Q.reject(new Error("command.badArguments"));
+                }
+            }
+
+            private getSubCommand(options: ICommandData): ICommand {
+                for (var i = 0; i < this.subcommands.length; ++i) {
+                    var subCommand = this.subcommands[i];
+                    if (subCommand.canHandleArgs(options)) {
+                        return subCommand;
+                    }
+                }
+
+                return null;
             }
         }
     }

@@ -1,5 +1,17 @@
 declare module TacoUtility {
     class BuildInfo {
+        static UPLOADING: string;
+        static UPLOADED: string;
+        static EXTRACTED: string;
+        static INVALID: string;
+        static BUILDING: string;
+        static COMPLETE: string;
+        static EMULATED: string;
+        static RUNNING: string;
+        static INSTALLED: string;
+        static DEBUGGING: string;
+        static DOWNLOADED: string;
+        static ERROR: string;
         status: string;
         /**
          * BuildInfo holds relevant information about a particular build, including its identifier, what kind of build was requested, and the status of the build
@@ -16,7 +28,6 @@ declare module TacoUtility {
             deletedPluginsIos: string[];
         };
         statusTime: Date;
-        cordovaVersion: string;
         buildCommand: string;
         configuration: string;
         options: any;
@@ -25,24 +36,24 @@ declare module TacoUtility {
         buildPlatform: string;
         submissionTime: Date;
         buildNumber: number;
+        buildSuccessful: boolean;
         messageId: string;
         messageArgs: any[];
         message: string;
         tgzFilePath: string;
         appDir: string;
-        appName: string;
-        webDebugProxyPort: number;
         constructor(params: {
             buildNumber?: number;
             status?: string;
-            cordovaVersion?: string;
             buildCommand?: string;
             configuration?: string;
             options?: any;
             buildDir?: string;
             buildLang?: string;
             buildPlatform?: string;
+            [index: string]: any;
         });
+        [index: string]: any;
         /**
          * Create a new BuildInfo object out of a raw JS object.
          *
@@ -66,6 +77,6 @@ declare module TacoUtility {
          *
          * @returns This object, after setting the message in the appropriate language.
          */
-        localize(req: any): BuildInfo;
+        localize(req: any, resources: { getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string }): BuildInfo;
     }
 }

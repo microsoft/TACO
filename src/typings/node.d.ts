@@ -254,7 +254,7 @@ declare module "querystring" {
     export function unescape(): any;
 }
 
-declare module "events" {
+declare module NodeJSEvents {
     export class EventEmitter implements NodeJS.EventEmitter {
         static listenerCount(emitter: EventEmitter, event: string): number;
 
@@ -266,15 +266,14 @@ declare module "events" {
         setMaxListeners(n: number): void;
         listeners(event: string): Function[];
         emit(event: string, ...args: any[]): boolean;
-   }
+    }
+}
+declare module "events" {
+    export = NodeJSEvents;
 }
 
-declare module "http" {
-    import events = require("events");
-    import net = require("net");
-    import stream = require("stream");
-
-    export interface Server extends events.EventEmitter {
+declare module NodeJSHttp {
+    export interface Server extends NodeJSEvents.EventEmitter {
         listen(port: number, hostname?: string, backlog?: number, callback?: Function): Server;
         listen(path: string, callback?: Function): Server;
         listen(handle: any, listeningListener?: Function): Server;
@@ -282,7 +281,7 @@ declare module "http" {
         address(): { port: number; family: string; address: string; };
         maxHeadersCount: number;
     }
-    export interface ServerRequest extends events.EventEmitter, stream.Readable {
+    export interface ServerRequest extends NodeJSEvents.EventEmitter, NodeJSStream.Readable {
         method: string;
         url: string;
         headers: any;
@@ -291,9 +290,9 @@ declare module "http" {
         setEncoding(encoding?: string): void;
         pause(): void;
         resume(): void;
-        connection: net.Socket;
+        connection: NodeJSNet.Socket;
     }
-    export interface ServerResponse extends events.EventEmitter, stream.Writable {
+    export interface ServerResponse extends NodeJSEvents.EventEmitter, NodeJSStream.Writable {
         // Extended base methods
         write(buffer: Buffer): boolean;
         write(buffer: Buffer, cb?: Function): boolean;
@@ -319,7 +318,7 @@ declare module "http" {
         end(str: string, encoding?: string, cb?: Function): void;
         end(data?: any, encoding?: string): void;
     }
-    export interface ClientRequest extends events.EventEmitter, stream.Writable {
+    export interface ClientRequest extends NodeJSEvents.EventEmitter, NodeJSStream.Writable {
         // Extended base methods
         write(buffer: Buffer): boolean;
         write(buffer: Buffer, cb?: Function): boolean;
@@ -340,7 +339,7 @@ declare module "http" {
         end(str: string, encoding?: string, cb?: Function): void;
         end(data?: any, encoding?: string): void;
     }
-    export interface ClientResponse extends events.EventEmitter, stream.Readable {
+    export interface ClientResponse extends NodeJSEvents.EventEmitter, NodeJSStream.Readable {
         statusCode: number;
         httpVersion: string;
         headers: any;
@@ -360,6 +359,10 @@ declare module "http" {
     export function request(options: any, callback?: Function): ClientRequest;
     export function get(options: any, callback?: Function): ClientRequest;
     export var globalAgent: Agent;
+}
+
+declare module "http" {
+    export = NodeJSHttp;
 }
 
 declare module "cluster" {
@@ -599,18 +602,26 @@ declare module "vm" {
     export function createScript(code: string, filename?: string): Script;
 }
 
-declare module "child_process" {
-    import events = require("events");
-    import stream = require("stream");
-
-    export interface ChildProcess extends events.EventEmitter {
-        stdin:  stream.Writable;
-        stdout: stream.Readable;
-        stderr: stream.Readable;
+declare module NodeJSChildProcess {
+    export interface ChildProcess extends NodeJSEvents.EventEmitter {
+        stdin:  NodeJSStream.Writable;
+        stdout: NodeJSStream.Readable;
+        stderr: NodeJSStream.Readable;
         pid: number;
         kill(signal?: string): void;
         send(message: any, sendHandle: any): void;
         disconnect(): void;
+    }
+
+    export interface IExecOptions {
+        cwd?: string;
+        stdio?: any;
+        customFds?: any;
+        env?: any;
+        encoding?: string;
+        timeout?: number;
+        maxBuffer?: number;
+        killSignal?: string;
     }
 
     export function spawn(command: string, args?: string[], options?: {
@@ -620,16 +631,7 @@ declare module "child_process" {
         env?: any;
         detached?: boolean;
     }): ChildProcess;
-    export function exec(command: string, options: {
-        cwd?: string;
-        stdio?: any;
-        customFds?: any;
-        env?: any;
-        encoding?: string;
-        timeout?: number;
-        maxBuffer?: number;
-        killSignal?: string;
-    }, callback: (error: Error, stdout: Buffer, stderr: Buffer) =>void ): ChildProcess;
+    export function exec(command: string, options: IExecOptions , callback: (error: Error, stdout: Buffer, stderr: Buffer) =>void ): ChildProcess;
     export function exec(command: string, callback: (error: Error, stdout: Buffer, stderr: Buffer) =>void ): ChildProcess;
     export function execFile(file: string,
         callback?: (error: Error, stdout: Buffer, stderr: Buffer) =>void ): ChildProcess;
@@ -650,6 +652,9 @@ declare module "child_process" {
         env?: any;
         encoding?: string;
     }): ChildProcess;
+}
+declare module "child_process" {
+    export = NodeJSChildProcess;
 }
 
 declare module "url" {
@@ -701,10 +706,8 @@ declare module "dns" {
     export function reverse(ip: string, callback: (err: Error, domains: string[]) =>void ): string[];
 }
 
-declare module "net" {
-    import stream = require("stream");
-
-    export interface Socket extends stream.Duplex {
+declare module NodeJSNet {
+    export interface Socket extends NodeJSStream.Duplex {
         // Extended base methods
         write(buffer: Buffer): boolean;
         write(buffer: Buffer, cb?: Function): boolean;
@@ -764,6 +767,10 @@ declare module "net" {
     export function isIP(input: string): number;
     export function isIPv4(input: string): boolean;
     export function isIPv6(input: string): boolean;
+}
+
+declare module "net" {
+    export = NodeJSNet;
 }
 
 declare module "dgram" {
@@ -961,6 +968,7 @@ declare module "path" {
     export function basename(p: string, ext?: string): string;
     export function extname(p: string): string;
     export var sep: string;
+	export var delimiter: string;
 }
 
 declare module "string_decoder" {
@@ -1133,10 +1141,8 @@ declare module "crypto" {
     export function pseudoRandomBytes(size: number, callback: (err: Error, buf: Buffer) =>void ): void;
 }
 
-declare module "stream" {
-    import events = require("events");
-
-    export interface Stream extends events.EventEmitter {
+declare module NodeJSStream {
+    export interface Stream extends NodeJSEvents.EventEmitter {
         pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean; }): T;
     }
 
@@ -1146,7 +1152,7 @@ declare module "stream" {
         objectMode?: boolean;
     }
 
-    export class Readable extends events.EventEmitter implements NodeJS.ReadableStream {
+    export class Readable extends NodeJSEvents.EventEmitter implements NodeJS.ReadableStream {
         readable: boolean;
         constructor(opts?: ReadableOptions);
         _read(size: number): void;
@@ -1167,7 +1173,7 @@ declare module "stream" {
         decodeStrings?: boolean;
     }
 
-    export class Writable extends events.EventEmitter implements NodeJS.WritableStream {
+    export class Writable extends NodeJSEvents.EventEmitter implements NodeJS.WritableStream {
         writable: boolean;
         constructor(opts?: WritableOptions);
         _write(data: Buffer, encoding: string, callback: Function): void;
@@ -1203,7 +1209,7 @@ declare module "stream" {
     export interface TransformOptions extends ReadableOptions, WritableOptions {}
 
     // Note: Transform lacks the _read and _write methods of Readable/Writable.
-    export class Transform extends events.EventEmitter implements NodeJS.ReadWriteStream {
+    export class Transform extends NodeJSEvents.EventEmitter implements NodeJS.ReadWriteStream {
         readable: boolean;
         writable: boolean;
         constructor(opts?: TransformOptions);
@@ -1230,6 +1236,9 @@ declare module "stream" {
     }
 
     export class PassThrough extends Transform {}
+}
+declare module "stream" {
+    export = NodeJSStream;
 }
 
 declare module "util" {
