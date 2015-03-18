@@ -30,7 +30,7 @@ module TacoUtility {
         }
 
         public static readFileContentsSync(filename: string, encoding?: string): string {
-            var contents = fs.readFileSync(filename,(encoding || "utf-8"));
+            var contents = fs.readFileSync(filename, (encoding || "utf-8"));
             if (contents) {
                 contents = contents.replace(/^\uFEFF/, ""); // Windows is the BOM
             }
