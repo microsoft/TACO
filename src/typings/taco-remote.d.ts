@@ -5,8 +5,16 @@ declare module TacoRemote {
         get(prop: string): any;
         set(prop: string, value: any): void
     }
+    interface ICertStore {
+        getKey: () => Buffer;
+        getCert: () => Buffer;
+        getCA: () => Buffer;
+    }
+    interface IServerCapabilities {
+        certStore?: ICertStore;
+    }
     interface IServerModuleFactory {
-        create(conf: IDict, modPath: string): Q.Promise<TacoRemote.IServerModule>;
+        create(conf: IDict, modPath: string, serverCapabilities: IServerCapabilities): Q.Promise<TacoRemote.IServerModule>;
     }
     interface IServerModule {
         getRouter(): Express.Router;

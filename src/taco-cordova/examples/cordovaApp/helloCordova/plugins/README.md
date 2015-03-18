@@ -1,0 +1,1 @@
+Plugins install in this directory. This file is here to preserve the directory when npm installs from a tgz. Self-test needs a plugins/.
