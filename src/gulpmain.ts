@@ -31,8 +31,7 @@ gulp.task("rebuild", function (callback: Function): void {
 });
 
 /* build the source and install all the packages locally */
-gulp.task("install-build", ["build"], function (callback) {
-    
+gulp.task("install-build", ["build"], function (callback: Function) {    
     var tacoPackages = ["taco-cli"];
     var tacoPackagesFolder = tacoPackages.map(function(pkg) { 
         return path.join(process.cwd(), buildConfig.buildSrc, pkg); 
@@ -40,13 +39,7 @@ gulp.task("install-build", ["build"], function (callback) {
 
     var npmUtil = require (path.join(process.cwd(), "../tools/npm-installer-util"));
     npmUtil.installPackages(tacoPackagesFolder, function (){
-        var binpath = path.join(process.cwd(), "../node_modules/.bin");
-        if (process.env.PATH.split(path.delimiter).indexOf(binpath) <= -1 &&
-	    process.env.PATH.split(path.delimiter).indexOf(binpath + path.sep) <= -1){
-            callback("taco packages not in path. You should add '"+binpath+ "' to PATH");
-        } else {
-            callback();
-        }
+        EnsureTacoInPath(callback);
     });
 });
 
@@ -89,6 +82,29 @@ gulp.task("generate-dts", function (): Q.Promise<any> {
         "TacoUtility",
         tacoUtils);
 });
+
+function TrimEnd(str: string, chars:string[]): string {
+    // Trim "/" from the end
+    var index: number = str.length - 1;
+    while (chars.indexOf(str[index]) > -1) {
+        index--;
+    }
+    return str.substring(0, index+1);
+}
+
+function EnsureTacoInPath(callback: Function) {
+    var binpath = path.join(process.cwd(), "../node_modules/.bin");
+    var pathsInPATH: string[] = process.env.PATH.split(path.delimiter);
+    for (var i: number = 0; i < pathsInPATH.length; i++) { 
+        // Trim "/" from the end
+        if (TrimEnd(pathsInPATH[i], [path.sep, "/"]) == binpath) {
+            callback();
+            return;
+        }
+    }
+    callback("taco packages not in path. You should add '"+binpath+ "' to PATH");
+}
+
 
 /* Task to run tests */
 module.exports = gulp;
