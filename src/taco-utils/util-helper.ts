@@ -1,5 +1,6 @@
 ﻿/// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
+/// <reference path="../typings/nopt.d.ts" />
 import fs = require("fs");
 import Q = require("q");
 import nopt = require("nopt");
@@ -94,83 +95,75 @@ module TacoUtility {
          * 
          * parsedArgs = { "template": undefined, "kit": "4.0.0-Kit", "argv": { "remain": [ "path" ] } }
          * 
-         * @param {any} the map of known options
-         * @param {any} the known shorthands for the options
+         * @param {Nopt.FlagTypeMap} the map of known options
+         * @param {Nopt.ShortFlags} the known shorthands for the options
          * @param {string[]} the arguments to parse
          * @param {number} the amount of args to slice from the beginning of the the knownOptions array
          *
-         * @returns {any} Returns the nopt parsed object directly
+         * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
-        public static parseArguments(knownOptions: any, shortHands?: any, args?: string[], slice?: number): any {
-            var argsToParse: any = args;
-
-            if (!argsToParse) {
-                return;
-            }
-
+        public static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): Nopt.OptionsParsed {
             var undefinedToken: string = "$TACO_CLI_UNDEFINED_TOKEN$";
-            var doneParsing: boolean = false;
-            var parsedOpts: any;
-            var savedArgv: any;
+            var argsClone: string[];
 
-            // Parse the arguments over several iterations, because if flagB was originally consumed as flagA's value, then flagB's value would be dumped into 
-            // argv.remain, so after we move flagB to the flags we need to reparse the arguments to properly assign flagB's value
-            while (!doneParsing) {
-                parsedOpts = nopt(knownOptions, shortHands, argsToParse, slice);
+            if (args) {
+                // Clone args so we don't modify the caller's args array
+                argsClone = args.slice(0);
 
-                // The first time we parse the args, save the resulting argv object so that we can later restore it to avoid polluting the results with our tokens
-                if (!savedArgv) {
-                    // We want to clone (deep copy) the argument arrays; we use slice for that
-                    savedArgv = {};
-                    savedArgv.original = parsedOpts.argv.original.slice(0);
-                    savedArgv.cooked = parsedOpts.argv.cooked.slice(0);
-                }
-
-                // Iterate through found flags and insert an undefined token after flags that have another flag as a value
-                var mustReparse: boolean = false;
-
-                for (var property in parsedOpts) {
-                    // Determine whether property is a flag
-                    if (parsedOpts.hasOwnProperty(property) && property !== "argv") {
-                        // This is one of the parsed flags; check if its value starts with --
-                        if (typeof parsedOpts[property] === "string" && parsedOpts[property].indexOf("--") === 0) {
-                            // This flag has a value starting with "--", so insert an undefined token in the original args after the current flag it; it 
-                            // might have been entered as an abbreviation, so find the index of the abbreviation if necessary
-                            var flagIndex: number = -1;
-                            var flagName: string = property;
-
-                            while (flagIndex === -1) {
-                                // If flagName wasn't found, shorten the flag name by 1 character and try again until the abbreviated flag is found
-                                flagIndex = argsToParse.indexOf("--" + flagName);
-                                flagName = flagName.substr(0, flagName.length - 1);
-                            }
-
-                            // Add the undefined token after the matched flag
-                            argsToParse.splice(flagIndex + 1, 0, undefinedToken);
-                            mustReparse = true;
-                        }
+                // Look for consecutive entries that start with "--" and insert an undefinedToken between them
+                var i: number = 0;
+                while (i < argsClone.length - 1) {
+                    if (argsClone[i].indexOf("--") === 0 && argsClone[i + 1].indexOf("--") === 0) {
+                        argsClone.splice(i + 1, 0, undefinedToken);
                     }
+                    ++i;
                 }
-
-                doneParsing = !mustReparse;
             }
 
-            // Replace undefined tokens with the actual undefined value
-            for (var property in parsedOpts) {
+            // Parse args with nopt
+            var parsedOptions: Nopt.OptionsParsed = nopt(knownOptions, shortHands, argsClone ? argsClone : args, slice);
+
+            // Replace the value for flags that have the undefined token with the actual undefined value
+            for (var property in parsedOptions) {
                 // Determine whether property is a flag
-                if (parsedOpts.hasOwnProperty(property) && property !== "argv") {
+                if (parsedOptions.hasOwnProperty(property) && property !== "argv") {
                     // This is one of the parsed flags; check if it has the undefined token as a value
-                    if (parsedOpts[property] === undefinedToken) {
+                    if (parsedOptions[property] === undefinedToken) {
                         // Set the value to undefined
-                        parsedOpts[property] = undefined;
+                        parsedOptions[property] = undefined;
                     }
                 }
             }
 
-            // Make sure we don't pollute the original and cooked arg arrays with our tokens
-            parsedOpts.argv.original = savedArgv.original;
-            parsedOpts.argv.cooked = savedArgv.cooked;
-            return parsedOpts;
+            // Clean up argv.original, argv.cooked and argv.remain of any remaining undefined tokens
+            parsedOptions.argv.cooked = UtilHelper.removeAllOccurences(parsedOptions.argv.cooked, undefinedToken);
+            parsedOptions.argv.original = UtilHelper.removeAllOccurences(parsedOptions.argv.original, undefinedToken);
+            parsedOptions.argv.remain = UtilHelper.removeAllOccurences(parsedOptions.argv.remain, undefinedToken);
+
+            return parsedOptions;
+        }
+
+        /**
+         * Removes all occurences of the specified value from the specified array, and returns a new array containing the resulting elements. Doesn't modify
+         * the original array. The triple equal (===) operator is used as the comparator.
+         * 
+         * @param {any[]} the array of elements
+         * @param {any} the value to remove
+         *
+         * @returns {any[]} a new array where all occurences of the value are gone
+         */
+        public static removeAllOccurences(elements: any[], value: any): any[] {
+            var newArray: any[] = [];
+
+            if (elements) {
+                for (var e in elements) {
+                    if (elements[e] !== value) {
+                        newArray.push(elements[e]);
+                    }
+                }
+            }
+
+            return newArray;
         }
     }
 }
