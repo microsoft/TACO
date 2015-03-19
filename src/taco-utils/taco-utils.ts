@@ -4,7 +4,7 @@ import cordovaConfig = require ("./cordova-config");
 import resourcesManager = require ("./resources-manager");
 import utilHelper = require ("./util-helper");
 import commands = require ("./commands");
-import logger = require("./logger");
+import logger = require ("./logger");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    

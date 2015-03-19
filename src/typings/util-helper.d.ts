@@ -46,15 +46,5 @@ declare module TacoUtility {
          * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
         static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): Nopt.OptionsParsed;
-
-        /**
-         * Returns a new array where all occurences of a value were removed. Doesn't modify the original array.
-         * 
-         * @param {any[]} the array of elements
-         * @param {any} the value to remove
-         *
-         * @returns {any[]} a new array where all occurences of the value are gone
-         */
-        static removeAllOccurences(elements: any[], value: any): any[];
     }
 }

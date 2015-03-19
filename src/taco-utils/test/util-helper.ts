@@ -120,26 +120,4 @@ describe("UtilHelper", function (): void {
             parsed["kaz"].should.equal("4.0.0");
         });
     });
-
-    describe("removeAllOccurences()", function (): void {
-        it("shouldn't throw errors for empty parameters", function (): void {
-            utils.UtilHelper.removeAllOccurences(undefined, undefined);
-            utils.UtilHelper.removeAllOccurences(undefined, {});
-            utils.UtilHelper.removeAllOccurences(undefined, "foo");
-
-            utils.UtilHelper.removeAllOccurences([], undefined);
-            utils.UtilHelper.removeAllOccurences([], {});
-            utils.UtilHelper.removeAllOccurences([], "foo");
-
-            utils.UtilHelper.removeAllOccurences(["foo", "bar", "baz"], {});
-            utils.UtilHelper.removeAllOccurences(["foo", "bar", "baz"], undefined);
-        });
-
-        it("should remove elements correctly", function (): void {
-            var result: any[] = utils.UtilHelper.removeAllOccurences(["foo", "bar", "baz", "foo", { "foo": "foo" }, true, "foo"], "foo");
-
-            // Use JSON.stringify to compare actual and expected arrays
-            JSON.stringify(result).should.equal(JSON.stringify(["bar", "baz", { "foo": "foo" }, true]));
-        });
-    });
 });

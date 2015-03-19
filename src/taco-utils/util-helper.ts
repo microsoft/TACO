@@ -135,35 +135,16 @@ module TacoUtility {
                 }
             }
 
-            // Clean up argv.original, argv.cooked and argv.remain of any remaining undefined tokens
-            parsedOptions.argv.cooked = UtilHelper.removeAllOccurences(parsedOptions.argv.cooked, undefinedToken);
-            parsedOptions.argv.original = UtilHelper.removeAllOccurences(parsedOptions.argv.original, undefinedToken);
-            parsedOptions.argv.remain = UtilHelper.removeAllOccurences(parsedOptions.argv.remain, undefinedToken);
-
-            return parsedOptions;
-        }
-
-        /**
-         * Removes all occurences of the specified value from the specified array, and returns a new array containing the resulting elements. Doesn't modify
-         * the original array. The triple equal (===) operator is used as the comparator.
-         * 
-         * @param {any[]} the array of elements
-         * @param {any} the value to remove
-         *
-         * @returns {any[]} a new array where all occurences of the value are gone
-         */
-        public static removeAllOccurences(elements: any[], value: any): any[] {
-            var newArray: any[] = [];
-
-            if (elements) {
-                for (var e in elements) {
-                    if (elements[e] !== value) {
-                        newArray.push(elements[e]);
-                    }
-                }
+            function filterFunc(element: any): boolean {
+                return element !== undefinedToken;
             }
 
-            return newArray;
+            // Clean up argv.original, argv.cooked and argv.remain of any remaining undefined tokens
+            parsedOptions.argv.cooked = parsedOptions.argv.cooked.filter(filterFunc);
+            parsedOptions.argv.original = parsedOptions.argv.original.filter(filterFunc);
+            parsedOptions.argv.remain = parsedOptions.argv.remain.filter(filterFunc);
+
+            return parsedOptions;
         }
     }
 }
