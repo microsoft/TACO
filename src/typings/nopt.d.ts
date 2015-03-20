@@ -1,11 +1,45 @@
-﻿// Type definitions for nopt
+﻿// Type definitions for nopt 3.0.1
+// Project: https://github.com/npm/nopt
+// Definitions by: jbondc <https://github.com/jbondc>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path="node.d.ts" />
 declare module Nopt {
-    export function nopt(types: any, shorthands: any, args: any, slice?: any): any;
-    export function clean(data: any, types: any, typeDefs: any[]): any;
+    interface OptionsParsed {
+        [k: string]: any
+        argv: {
+            remain: string[]
+            cooked: string[]
+            original: string[]
+        }
+    }
+    interface CommandData {
+        [key: string]: string
+    }
+
+    interface TypeDefs {
+        [key: string]: TypeInfo
+    }
+
+    interface TypeInfo {
+        type: Object
+        validate: (data: CommandData, k: string, val: string) => boolean
+    }
+    interface FlagTypeMap {
+        [k: string]: Object
+    }
+
+    interface ShortFlags {
+        [k: string]: string[]|string
+    }
 }
 
 declare module "nopt" {
-    export = Nopt;
+    module nopt {
+        export function clean(data: Nopt.CommandData, types: Nopt.FlagTypeMap, typeDefs?: Nopt.TypeDefs): string
+        export var typeDefs: Nopt.TypeDefs
+    }
+
+    function nopt(types: Nopt.FlagTypeMap, shorthands?: Nopt.ShortFlags, args?: string[], slice?: number): Nopt.OptionsParsed
+
+    export = nopt
 }

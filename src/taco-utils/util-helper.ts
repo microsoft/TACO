@@ -6,6 +6,16 @@ import Q = require("q");
 import nopt = require("nopt");
 
 module TacoUtility {
+    export interface IParsedCommand {
+        original: string[];
+        remain: string[];
+        options: IOptions;
+    }
+
+    export interface IOptions {
+        [index: string]: any;
+    }
+
     export class UtilHelper {
         private static InvalidAppNameChars = {
             34: "\"",
@@ -102,7 +112,7 @@ module TacoUtility {
          *
          * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
-        public static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): Nopt.OptionsParsed {
+        public static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): TacoUtility.IParsedCommand {
             var undefinedToken: string = "$TACO_CLI_UNDEFINED_TOKEN$";
             var argsClone: string[];
 
@@ -113,7 +123,7 @@ module TacoUtility {
                 // Look for consecutive entries that start with "--" and insert an undefinedToken between them
                 var i: number = 0;
                 while (i < argsClone.length - 1) {
-                    if (argsClone[i].indexOf("--") === 0 && argsClone[i + 1].indexOf("--") === 0) {
+                    if (argsClone[i][0] === "-" && argsClone[i + 1][0] === "-") {
                         argsClone.splice(i + 1, 0, undefinedToken);
                     }
                     ++i;
@@ -121,30 +131,33 @@ module TacoUtility {
             }
 
             // Parse args with nopt
-            var parsedOptions: Nopt.OptionsParsed = nopt(knownOptions, shortHands, argsClone ? argsClone : args, slice);
+            var noptParsed: Nopt.OptionsParsed = nopt(knownOptions, shortHands, argsClone ? argsClone : args, slice);
 
-            // Replace the value for flags that have the undefined token with the actual undefined value
-            for (var property in parsedOptions) {
+            // Create the IParsedCommand object
+            var parsed: TacoUtility.IParsedCommand = { original: [], remain: [], options: {} };
+
+            for (var property in noptParsed) {
                 // Determine whether property is a flag
-                if (parsedOptions.hasOwnProperty(property) && property !== "argv") {
-                    // This is one of the parsed flags; check if it has the undefined token as a value
-                    if (parsedOptions[property] === undefinedToken) {
-                        // Set the value to undefined
-                        parsedOptions[property] = undefined;
+                if (noptParsed.hasOwnProperty(property) && property !== "argv") {
+                    // This is one of the parsed flags, so add it to our object
+                    parsed.options[property] = noptParsed[property];
+
+                    // If the value is the undefined token, set it to the actual undefined value
+                    if (parsed.options[property] === undefinedToken) {
+                        parsed.options[property] = undefined;
                     }
                 }
             }
 
+            // Assign original and remain to our IParsedCommand object, while cleaning any undefined tokens that are left
             function filterFunc(element: any): boolean {
                 return element !== undefinedToken;
             }
 
-            // Clean up argv.original, argv.cooked and argv.remain of any remaining undefined tokens
-            parsedOptions.argv.cooked = parsedOptions.argv.cooked.filter(filterFunc);
-            parsedOptions.argv.original = parsedOptions.argv.original.filter(filterFunc);
-            parsedOptions.argv.remain = parsedOptions.argv.remain.filter(filterFunc);
+            parsed.original = noptParsed.argv.original.filter(filterFunc);
+            parsed.remain = noptParsed.argv.remain.filter(filterFunc);
 
-            return parsedOptions;
+            return parsed;
         }
     }
 }

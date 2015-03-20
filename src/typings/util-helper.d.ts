@@ -2,6 +2,15 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/nopt.d.ts" />
 declare module TacoUtility {
+    interface IParsedCommand {
+        original: string[];
+        remain: string[];
+        options: IOptions;
+    }
+    interface IOptions {
+        [index: string]: any;
+    }
+
     class UtilHelper {
         private static InvalidAppNameChars;
         /**
@@ -45,6 +54,6 @@ declare module TacoUtility {
          *
          * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
-        static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): Nopt.OptionsParsed;
+        static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): IParsedCommand;
     }
 }
