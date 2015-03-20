@@ -8,7 +8,7 @@ var path = require("path");
 var runSequence = require('run-sequence');
 import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
-import tsUtil = require ("./taco-cli/compile/typescript-util");
+import tsUtil = require ("./taco/compile/typescript-util");
 var buildConfig = require("../../src/build_config.json");
 
 /* Default task for building /src folder into /bin */
@@ -32,7 +32,7 @@ gulp.task("rebuild", function (callback: Function): void {
 
 /* build the source and install all the packages locally */
 gulp.task("install-build", ["build"], function (callback: Function) {    
-    var tacoPackages = ["taco-cli"];
+    var tacoPackages = ["taco"];
     var tacoPackagesFolder = tacoPackages.map(function(pkg) { 
         return path.join(process.cwd(), buildConfig.buildSrc, pkg); 
     });
@@ -40,7 +40,7 @@ gulp.task("install-build", ["build"], function (callback: Function) {
     var npmUtil = require (path.join(process.cwd(), "../tools/npm-installer-util"));
     npmUtil.installPackages(tacoPackagesFolder, function (){
         EnsureTacoInPath(callback);
-    });
+    }, /* force */ true);
 });
 
 

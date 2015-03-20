@@ -5,8 +5,9 @@ var path = require("path");
 /**
  * Utility for installing npm packages asynchronously.
  */
-function installPackage(pkg, callback) {
-    if (isPackageInstalled(pkg)) {
+function installPackage(pkg, callback, force) {
+
+    if (isPackageInstalled(pkg) && !force) {
         callback();
     }
     else {
@@ -17,15 +18,20 @@ function installPackage(pkg, callback) {
     }
 };
 
-function isPackageInstalled  (pkg) {
-    var pkgJsonPath = path.join(pkg, "package.json");
-    if (pkg.indexOf(path.sep) > -1 && fs.existsSync(pkgJsonPath)) {
-        var pkgJson = require(pkgJsonPath);
-        return isPackageInstalled(pkgJson.name);
+function isPackageInstalled (pkg) {
+    try {
+        // for folder based pkg names, look up package.name
+        if (fs.existsSync(pkg)) {
+            var pkgJson = path.join(pkg, "package.json");
+            if (fs.existsSync(pkgJson)) {
+                pkg = require(pkgJson).name;
+            }
+        }
+        require(pkg);
+        return true;
+    } catch (e) {
     }
-    else {
-        return fs.existsSync(path.join("../node_modules", pkg));
-    }
+    return false;
 };
 
 module.exports.installPackages = function (modules, callback) {

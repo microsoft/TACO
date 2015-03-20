@@ -1,4 +1,4 @@
-﻿# taco-cli
+﻿# taco
 
 > The command-line tool to rapidly build, deploy, and manage [Cordova](http://cordova.io)-based applications across multiple platforms.
 
