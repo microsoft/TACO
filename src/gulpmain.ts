@@ -57,7 +57,7 @@ gulp.task("run-stylecop", function (callback: Function): void {
 /* Cleans up the build location, will have to call "gulp prep" again */
 gulp.task("clean", function (callback: Function): void {
     var util = require('util');
-    var buildPath = path.join(process.cwd(), buildConfig.build);
+    var buildPath = path.resolve(buildConfig.build);
     console.warn(util.format('Deleting %s', buildPath));
     del([buildPath + "/**"], { force: true }, callback);
 });
