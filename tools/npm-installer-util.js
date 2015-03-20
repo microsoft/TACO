@@ -6,8 +6,7 @@ var path = require("path");
  * Utility for installing npm packages asynchronously.
  */
 function installPackage(pkg, callback, force) {
-
-    if (isPackageInstalled(pkg) && !force) {
+    if (!force && isPackageInstalled(pkg)) {
         callback();
     }
     else {
@@ -34,7 +33,7 @@ function isPackageInstalled (pkg) {
     return false;
 };
 
-module.exports.installPackages = function (modules, callback) {
+module.exports.installPackages = function (modules, callback, force) {
     var asyncLoop = function (idx) {
         if (idx < modules.length) {
             installPackage(modules[idx], function (error) {
@@ -44,7 +43,7 @@ module.exports.installPackages = function (modules, callback) {
                 else {
                     callback(error);
                 }
-            });
+            }, force);
         }
         else {
             callback();
