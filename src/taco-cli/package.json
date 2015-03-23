@@ -27,7 +27,7 @@
         "url": "https://xxxxxgithub.com/Microsoft/taco-cli.git"
     },
     "preferGlobal": true,
-    "main": "taco",
+    "main": "./cli/taco.js",
     "bin": {
         "taco": "./bin/taco"
     },

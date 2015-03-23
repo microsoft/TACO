@@ -1,5 +1,5 @@
 /// <reference path="../src/typings/node.d.ts" />
-/// <reference path="../src/typings/q.d.ts" />
+/// <reference path="../src/typings/Q.d.ts" />
 /// <disable code="SA1301" justification="it is more standard to use 'Q'" />
 import Q = require ("q");
 /// <enable code="SA1301" />
