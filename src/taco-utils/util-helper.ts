@@ -120,7 +120,7 @@ module TacoUtility {
                 // Clone args so we don't modify the caller's args array
                 argsClone = args.slice(0);
 
-                // Look for consecutive entries that start with "--" and insert an undefinedToken between them
+                // Look for consecutive entries that start with "-" and insert an undefinedToken between them
                 var i: number = 0;
                 while (i < argsClone.length - 1) {
                     if (argsClone[i][0] === "-" && argsClone[i + 1][0] === "-") {
