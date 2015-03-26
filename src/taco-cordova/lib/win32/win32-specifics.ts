@@ -10,14 +10,14 @@
 /// <reference path="../../../typings/taco-utils.d.ts" />
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import nconf = require("nconf");
-import path = require("path");
-import Q = require("q");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import nconf = require ("nconf");
+import path = require ("path");
+import Q = require ("q");
 
-import HostSpecifics = require("../host-specifics");
-import utils = require("taco-utils");
+import HostSpecifics = require ("../host-specifics");
+import utils = require ("taco-utils");
 
 var resources = utils.ResourcesManager;
 

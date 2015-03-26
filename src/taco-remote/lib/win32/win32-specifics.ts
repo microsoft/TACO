@@ -27,9 +27,9 @@ var resources = utils.ResourcesManager;
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var win32defaults: { [key: string]: any } = {
-            serverDir: path.join(process.env.HOME, "remote-builds"),
+            serverDir: path.join(process.env.APPDATA, "remote-builds"),
             writePidToFile: false,
-            lang: "en", // TODO
+            lang: "en", // TODO: determine appropriate language on windows
             suppressVisualStudioMessage: false,
         };
         Object.keys(win32defaults).forEach(function (key: string): void {
@@ -42,12 +42,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
-    public initialize(): Q.Promise<any> {
-        if (process.getuid() === 0) {
-            console.warn(resources.getStringForLanguage(nconf.get("lang"), "NotRunAsRoot"));
-            process.exit(1);
-        }
-
+    public initialize(conf: HostSpecifics.IConf): Q.Promise<any> {
         return Q({});
     }
 
@@ -66,6 +61,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public initializeServerCerts(conf: HostSpecifics.IConf): Q.Promise<HostSpecifics.ICertStore> {
         return Q.reject<HostSpecifics.ICertStore>(new Error("Not Implemented"));
     }
+
     public getServerCerts(): Q.Promise<HostSpecifics.ICertStore> {
         return Q.reject<HostSpecifics.ICertStore>(new Error("Not Implemented"));
     }

@@ -2,16 +2,13 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/taco-utils.d.ts" />
 /// <reference path="../typings/express.d.ts" />
-/// <reference path="../typings/semver.d.ts" />
 /// <reference path="./IPlatform.d.ts" />
 "use strict";
 
 import child_process = require ("child_process");
-import express = require ("express");
 import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
-import semver = require ("semver");
 import utils = require ("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
@@ -24,6 +21,8 @@ module TacoRemoteLib {
     var language: string;
     var platforms: IPlatform[];
     var initialized = false;
+
+    export var locResources: resources.IResources = resources;
 
     export interface IReadOnlyConf {
         get(key: string): any;
@@ -46,6 +45,13 @@ module TacoRemoteLib {
     };
 
     /**
+     * Localize a buildInfo object using the resources of this package
+     */
+    export function localizeBuildInfo(buildInfo: BuildInfo, req: Express.Request): BuildInfo {
+        return buildInfo.localize(req, resources);
+    }
+
+    /**
      * Download a packaged app ready to be deployed to a device
      * 
      * @param {BuildInfo} buildInfo Information specifying the build
@@ -53,7 +59,7 @@ module TacoRemoteLib {
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      * @param {Function} callback A callback indicating whether any errors occurred so the build manager can keep track
      */
-    export function downloadBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response, callback: (err: any) => void): void {
+    export function downloadBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response, callback: (err: any) => void): void {
         var platform: IPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.downloadBuild(buildInfo, req, res, callback);
@@ -69,7 +75,7 @@ module TacoRemoteLib {
      * @param {express.Request} req The HTTP request being serviced
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
-    export function emulateBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
+    export function emulateBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
         var platform: IPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.emulateBuild(buildInfo, req, res);
@@ -85,7 +91,7 @@ module TacoRemoteLib {
      * @param {express.Request} req The HTTP request being serviced
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
-    export function deployBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
+    export function deployBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
         var platform: IPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.deployBuildToDevice(buildInfo, req, res);
@@ -101,7 +107,7 @@ module TacoRemoteLib {
      * @param {express.Request} req The HTTP request being serviced
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
-    export function runBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
+    export function runBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
         var platform: IPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.runOnDevice(buildInfo, req, res);
@@ -117,7 +123,7 @@ module TacoRemoteLib {
      * @param {express.Request} req The HTTP request being serviced
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
-    export function debugBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
+    export function debugBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
         var platform: IPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.debugBuild(buildInfo, req, res);
@@ -133,7 +139,7 @@ module TacoRemoteLib {
      * @param {string[]} errors A list of errors to append to that explain why this is not a valid request
      * @returns {boolean} True if the request is valid, false otherwise
      */
-    export function validateBuildRequest(request: express.Request, errors: string[]): boolean {
+    export function validateBuildRequest(request: Express.Request, errors: string[]): boolean {
         var cordovaVersion: string = request.query.vcordova || null;
         var buildCommand: string = request.query.command || "build";
         var configuration: string = request.query.cfg || "release";

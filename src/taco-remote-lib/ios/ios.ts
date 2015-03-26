@@ -6,7 +6,6 @@
 "use strict";
 
 import child_process = require ("child_process");
-import express = require ("express");
 import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
@@ -61,7 +60,7 @@ class IOSAgent implements IPlatform {
      * @param {express.Request} req The HTTP request being serviced
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
-    public runOnDevice(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
+    public runOnDevice(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
         var proxyPort = this.nativeDebugProxyPort;
         var cfg = new utils.CordovaConfig(path.join(buildInfo.appDir, "config.xml"));
         iosAppRunner.startDebugProxy(proxyPort)
@@ -78,7 +77,7 @@ class IOSAgent implements IPlatform {
             });
     }
 
-    public downloadBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response, callback: (err: any) => void): void {
+    public downloadBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response, callback: (err: any) => void): void {
         var platformOutputDir = path.join(buildInfo.appDir, "platforms", "ios", "build", "device");
         var pathToPlistFile = path.join(platformOutputDir, buildInfo["appName"] + ".plist");
         var pathToIpaFile = path.join(platformOutputDir, buildInfo["appName"] + ".ipa");
@@ -120,7 +119,7 @@ class IOSAgent implements IPlatform {
         });
     }
 
-    public emulateBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public emulateBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
         var cfg = new utils.CordovaConfig(path.join(buildInfo.appDir, "config.xml"));
         if (!fs.existsSync(buildInfo.appDir)) {
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
@@ -150,7 +149,7 @@ class IOSAgent implements IPlatform {
         });
     }
 
-    public deployBuildToDevice(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public deployBuildToDevice(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
         var pathToIpaFile = path.join(buildInfo.appDir, "platforms", "ios", "build", "device", buildInfo["appName"] + ".ipa");
 
         var ideviceinstaller = child_process.spawn("ideviceinstaller", ["-i", pathToIpaFile]);
@@ -186,7 +185,7 @@ class IOSAgent implements IPlatform {
         });
     }
 
-    public debugBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public debugBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
         if (this.webProxyInstance) {
             this.webProxyInstance.kill();
             this.webProxyInstance = null;

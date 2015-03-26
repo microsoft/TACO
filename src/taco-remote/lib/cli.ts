@@ -37,6 +37,8 @@ function cli(): void {
     if (nconf.get("config")) {
         nconf.file({ file: nconf.get("config") });
     } else {
+        // TODO: use a default config file location for user story 1129453
+        // Unless that file doesn't exist, in which case just use memory
         nconf.use("memory");
     };
     var defaults: any = {
@@ -72,7 +74,7 @@ var tasks: { [key: string]: { execute(): Q.IPromise<any>; } };
 tasks = {
     start: {
         execute: function (): Q.Promise<void> {
-            return HostSpecifics.hostSpecifics.initialize()
+            return HostSpecifics.hostSpecifics.initialize(nconf)
                 .then(function (): void { server.start(nconf); });
         }
     },

@@ -77,6 +77,7 @@ describe("Device functionality", function (): void {
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
+                        // Respond with empty output
                         client.write("$O#4F");
                         client.end();
                 }

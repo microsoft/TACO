@@ -19,16 +19,23 @@ import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
 import rimraf = require ("rimraf");
+import util = require ("util");
 
 import tacoUtils = require ("taco-utils");
 
 import resources = tacoUtils.ResourcesManager;
-import util = tacoUtils.UtilHelper;
+import utils = tacoUtils.UtilHelper;
 import HostSpecifics = require ("../host-specifics");
 
 var exec = child_process.exec;
 
 module Certs {
+    interface IOptions {
+        days?: number;
+        cn?: string;
+        country?: string;
+    };
+
     var debug = false;
     module CERT_DEFAULTS {
         export var days = 1825; // 5 years
@@ -40,7 +47,12 @@ module Certs {
 
     var certStore: HostSpecifics.ICertStore = null;
 
-    export function resetServerCert(conf: HostSpecifics.IConf, yesOrNoHandler?: any): Q.Promise<any> {
+    export interface ICliHandler {
+        question: (question: string, answerCallback: (answer: string) => void) => void;
+        close: () => void;
+    }
+
+    export function resetServerCert(conf: HostSpecifics.IConf, yesOrNoHandler?: ICliHandler): Q.Promise<any> {
         var certsDir = path.join(conf.get("serverDir"), "certs");
 
         if (!fs.existsSync(certsDir)) {
@@ -85,7 +97,7 @@ module Certs {
 
         return makeClientPinAndSslCert(caKeyPath, caCertPath, certsDir, certOptionsFromConf(conf), conf).
             then(function (pin: number): number {
-                if (util.argToBool(conf.get("suppressVisualStudioMessage"))) {
+                if (utils.argToBool(conf.get("suppressVisualStudioMessage"))) {
                     return pin;
                 }
 
@@ -126,7 +138,7 @@ module Certs {
                 return Q({});
             }
 
-            util.createDirectoryIfNecessary(certsDir);
+            utils.createDirectoryIfNecessary(certsDir);
             var options = certOptionsFromConf(conf);
             return makeSelfSigningCACert(certPaths.caKeyPath, certPaths.caCertPath, options).
                 then(function (): Q.Promise<void> {
@@ -220,7 +232,7 @@ module Certs {
     };
 
     // Makes a CA cert that will be used for self-signing our server and client certs.
-    export function makeSelfSigningCACert(caKeyPath: string, caCertPath: string, options?: any): Q.Promise<{ stdout: string; stderr: string }> {
+    export function makeSelfSigningCACert(caKeyPath: string, caCertPath: string, options?: IOptions): Q.Promise<{ stdout: string; stderr: string }> {
         options = options || {};
         var days = options.days || CERT_DEFAULTS.days;
         var country = options.country || CERT_DEFAULTS.country;
@@ -229,14 +241,14 @@ module Certs {
     };
 
     // Makes a new private key and certificate signed with the CA.
-    export function makeSelfSignedCert(caKeyPath: string, caCertPath: string, outKeyPath: string, outCertPath: string, options: any, conf: HostSpecifics.IConf): Q.Promise<void> {
+    export function makeSelfSignedCert(caKeyPath: string, caCertPath: string, outKeyPath: string, outCertPath: string, options: IOptions, conf: HostSpecifics.IConf): Q.Promise<void> {
         options = options || {};
         var csrPath = path.join(path.dirname(outCertPath), "CSR-" + path.basename(outCertPath));
         var days = options.days || CERT_DEFAULTS.days;
         var cn = options.cn || os.hostname();
 
         var cnfPath = path.join(conf.get("serverDir"), "certs", "openssl.cnf");
-        writeConfigFile(cnfPath);
+        writeConfigFile(cnfPath, conf);
 
         return openSslPromise("genrsa -out " + outKeyPath + " 1024").
             then(function (): Q.Promise<{}> {
@@ -275,8 +287,8 @@ module Certs {
         return deferred.promise;
     }
 
-    function certOptionsFromConf(conf: HostSpecifics.IConf): any {
-        var options: any = {};
+    function certOptionsFromConf(conf: HostSpecifics.IConf): IOptions {
+        var options: IOptions = {};
         if (conf.get("certExpirationdays") < 1) {
             console.info(resources.getString("CertExpirationInvalid", conf.get("certExpirationdays"), CERT_DEFAULTS.days));
         } else {
@@ -286,16 +298,20 @@ module Certs {
         return options;
     }
 
-    function writeConfigFile(cnfPath: any): void {
+    function writeConfigFile(cnfPath: string, conf: HostSpecifics.IConf): void {
         var net = os.networkInterfaces();
-        var cnf = "[req]\ndistinguished_name = req_distinguished_name\nreq_extensions = v3_req\n[req_distinguished_name]\nC_default = US\n[ v3_req ]\nbasicConstraints = CA:FALSE\nkeyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names\n[alt_names]\nDNS.1 = " + os.hostname() + "\n";
-        var count = 1;
+        var cnf = "[req]\ndistinguished_name = req_distinguished_name\nreq_extensions = v3_req\n[req_distinguished_name]\nC_default = US\n[ v3_req ]\nbasicConstraints = CA:FALSE\nkeyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names\n[alt_names]\n";
+        
+        // If the user has provided a hostname then respect it
+        var hostname: string = conf.get("hostname") || os.hostname();
+        cnf += util.format("DNS.1 = %s\n", hostname);
 
+        var ipCount = 1;
         for (var key in net) {
             for (var i = 0; i < net[key].length; i++) {
                 if (net[key][i].address && !net[key][i].internal) {
-                    cnf += "IP." + count + " = " + net[key][i].address + "\n";
-                    count++;
+                    cnf += util.format("IP.%d = %s\n", ipCount, net[key][i].address);
+                    ipCount++;
                 }
             }
         }
@@ -303,11 +319,11 @@ module Certs {
         fs.writeFileSync(cnfPath, cnf);
     }
 
-    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: any, conf: HostSpecifics.IConf): Q.Promise<number> {
+    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: IOptions, conf: HostSpecifics.IConf): Q.Promise<number> {
         options = options || {};
         options.cn = CERT_DEFAULTS.client_cn;
         var clientCertsPath = path.join(certsDir, "client");
-        util.createDirectoryIfNecessary(clientCertsPath);
+        utils.createDirectoryIfNecessary(clientCertsPath);
         // 6 digit random pin (Math.random excludes 1.0)
         var pin = 100000 + Math.floor(Math.random() * 900000);
         var pinDir = path.join(clientCertsPath, "" + pin);
@@ -315,7 +331,7 @@ module Certs {
         var clientKeyPath = path.join(pinDir, "client-key.pem");
         var clientCertPath = path.join(pinDir, "client-cert.pem");
 
-        util.createDirectoryIfNecessary(pinDir);
+        utils.createDirectoryIfNecessary(pinDir);
         return makeSelfSignedCert(caKeyPath, caCertPath, clientKeyPath, clientCertPath, options, conf).
             then(function (): Q.Promise<{}> {
                 return makePfx(caCertPath, clientKeyPath, clientCertPath, pfxPath);
@@ -327,7 +343,7 @@ module Certs {
             });
     }
 
-    function makePfx(caCertPath: string, keyPath: string, certPath: string, outPfxPath: string, options?: any): Q.Promise<{ stdout: string; stderr: string }> {
+    function makePfx(caCertPath: string, keyPath: string, certPath: string, outPfxPath: string, options?: IOptions): Q.Promise<{ stdout: string; stderr: string }> {
         options = options || {};
         var name = CERT_DEFAULTS.pfx_name;
         return openSslPromise("pkcs12 -export -in " + certPath + " -inkey " + keyPath + " -certfile " + caCertPath + " -out " + outPfxPath +
@@ -335,6 +351,7 @@ module Certs {
     }
 
     // TODO: Make this explain how to configure taco-cli?
+    // TODO: How do we want this to work in the world where it is shared between VS and taco-cli?
     function printVisualStudioSetupToConsole(conf: HostSpecifics.IConf, pin: number): void {
         var host = conf.get("hostname") || os.hostname();
         var port = conf.get("port");

@@ -141,6 +141,10 @@ module BuildManager {
         params.buildNumber = buildNumber;
         params.options = options;
         var buildInfo = new utils.BuildInfo(params);
+        // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
+        Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
+        buildInfo["pkg"] = pkg;
+
         builds[buildNumber] = buildInfo;
 
         saveUploadedTgzFile(buildInfo, req, function (err: any, result: any): void {

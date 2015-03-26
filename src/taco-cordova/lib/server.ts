@@ -11,6 +11,7 @@
 /// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/express-extensions.d.ts" />
+/// <reference path="../../typings/taco-remote-lib.d.ts" />
 /// <reference path="../../typings/serve-index.d.ts" />
 "use strict";
 
@@ -108,7 +109,13 @@ class Server implements TacoRemote.IServerModule {
     private getBuildStatus(req: express.Request, res: express.Response): void {
         var buildInfo = buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
-            res.status(200).json(buildInfo.localize(req, resources));
+            buildInfo.localize(req, resources);
+            if (!buildInfo.message) {
+                // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
+                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib>buildInfo["pkg"]).locResources);
+            }
+
+            res.status(200).json(buildInfo);
         } else {
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }

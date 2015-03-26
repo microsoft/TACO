@@ -48,11 +48,18 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
-    public initialize(): Q.Promise<any> {
+    public initialize(conf: HostSpecifics.IConf): Q.Promise<any> {
         if (process.getuid() === 0) {
-            console.warn(resources.getStringForLanguage(nconf.get("lang"), "NotRunAsRoot"));
+            console.warn(resources.getStringForLanguage(conf.get("lang"), "NotRunAsRoot"));
             process.exit(1);
         }
+
+        // We don't get expansion of ~ or ~user by default
+        // To support the simple case of "my home directory" I'm doing the replacement here
+        // We only want to expand if the directory starts with ~/ not in cases such as /foo/~
+        // Ideally we would also cope with the case of ~user/ but that is harder to find and probably less common
+        var serverDir = conf.get("serverDir");
+        serverDir.replace(/^~(?=\/|^)/, process.env.HOME);
 
         return Q({});
     }

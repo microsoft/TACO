@@ -31,7 +31,7 @@ module HostSpecifics {
 
     export interface IHostSpecifics {
         defaults(base: { [key: string]: any }): { [key: string]: any };
-        initialize(): Q.Promise<any>;
+        initialize(conf: HostSpecifics.IConf): Q.Promise<any>;
         printUsage(language: string): void;
 
         resetServerCert(conf: IConf): Q.Promise<any>;

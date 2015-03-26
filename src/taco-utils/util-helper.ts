@@ -4,11 +4,11 @@
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
 "use strict";
-import child_process = require("child_process");
-import fs = require("fs");
-import mkdirp = require("mkdirp");
-import ncp = require("ncp");
-import nopt = require("nopt");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import mkdirp = require ("mkdirp");
+import ncp = require ("ncp");
+import nopt = require ("nopt");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
@@ -189,6 +189,7 @@ module TacoUtility {
                     if (argsClone[i][0] === "-" && argsClone[i + 1][0] === "-") {
                         argsClone.splice(i + 1, 0, undefinedToken);
                     }
+
                     ++i;
                 }
             }
