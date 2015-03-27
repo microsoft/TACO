@@ -10,14 +10,14 @@ trap
     exit $_.Exception.HResult
 }
 
-$X509Store = [System.Security.Cryptography.X509Certificates.X509Store]
-$X509FindType = [System.Security.Cryptography.X509Certificates.X509FindType]
-$X509ContentType = [System.Security.Cryptography.X509Certificates.X509ContentType]
-$X509StoreName = [System.Security.Cryptography.X509Certificates.StoreName]
-$X509StoreLocation = [System.Security.Cryptography.X509Certificates.StoreLocation]
-$X509OpenFlags = [System.Security.Cryptography.X509Certificates.OpenFlags]
-$X509Certificate2Collection = [System.Security.Cryptography.X509Certificates.X509Certificate2Collection]
-$X509KeyStorageFlags = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]
+$X509Store = [System.Security.Cryptography.X509Certificates.X509Store];
+$X509FindType = [System.Security.Cryptography.X509Certificates.X509FindType];
+$X509ContentType = [System.Security.Cryptography.X509Certificates.X509ContentType];
+$X509StoreName = [System.Security.Cryptography.X509Certificates.StoreName];
+$X509StoreLocation = [System.Security.Cryptography.X509Certificates.StoreLocation];
+$X509OpenFlags = [System.Security.Cryptography.X509Certificates.OpenFlags];
+$X509Certificate2Collection = [System.Security.Cryptography.X509Certificates.X509Certificate2Collection];
+$X509KeyStorageFlags = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags];
 
 $Store = New-Object $X509Store($X509StoreName::My, $X509StoreLocation::CurrentUser)
 
@@ -43,6 +43,8 @@ if ($Command -eq "get") {
     [string]$Password = ""
     [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]$KeyFlags = $X509KeyStorageFlags::UserKeySet -bor $X509KeyStorageFlags::PersistKeySet -bor $X509KeyStorageFlags::Exportable
     $newCertsToAdd.Import($CertBytes, $Password, $KeyFlags);
+
+    $Store.Open($X509OpenFlags::ReadWrite);
     # We want to cleanup any certs already in the store with the same name (from an old cert acquisition.)
     foreach ($cert in $newCertsToAdd) {
         $oldCertsToRemove.AddRange($Store.Certificates.Find($X509FindType::FindBySubjectDistinguishedName, $cert.Subject, $False));
@@ -52,7 +54,6 @@ if ($Command -eq "get") {
         }
     }
 
-    $Store.Open($X509OpenFlags::ReadWrite);
     $Store.RemoveRange($oldCertsToRemove);
     $Store.AddRange($newCertsToAdd);
     $Store.Close();
