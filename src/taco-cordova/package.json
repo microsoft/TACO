@@ -13,11 +13,7 @@
     "dependencies": {
         "express": "4.12.2",
         "serve-index": "1.6.2",
-        "request": "2.36.0",
         "tar": "0.1.20",
-        "fstream": "0.1.28",
-        "zip-stream": "0.2.3",
-        "nconf": "0.6.9",
         "q": "1.0.1",
         "rimraf": "2.2.6",
         "taco-utils": "file:../taco-utils",
@@ -27,7 +23,10 @@
         "typescript": "1.3.0",
         "mocha": "2.0.1",
         "mkdirp": "0.3.5",
-        "should": "4.3.0"
+        "should": "4.3.0",
+        "fstream": "0.1.28",
+        "nconf": "0.6.9",
+        "request": "2.36.0"
     },
     "bundledDependencies": [ "taco-utils" ],
 

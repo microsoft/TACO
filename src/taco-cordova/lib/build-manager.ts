@@ -6,7 +6,6 @@
 ﻿ *******************************************************
 ﻿ */
 /// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/taco-remote-lib.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
@@ -17,7 +16,6 @@
 import child_process = require ("child_process");
 import express = require ("express");
 import fs = require ("fs");
-import nconf = require ("nconf");
 import path = require ("path");
 import tar = require ("tar");
 import zlib = require ("zlib");
@@ -53,7 +51,7 @@ module BuildManager {
         utils.UtilHelper.createDirectoryIfNecessary(baseBuildDir);
         maxBuildsInQueue = conf.get("maxBuildsInQueue");
         deleteBuildsOnShutdown = utils.UtilHelper.argToBool(conf.get("deleteBuildsOnShutdown"));
-        var allowsEmulate = utils.UtilHelper.argToBool(nconf.get("allowsEmulate"));
+        var allowsEmulate = utils.UtilHelper.argToBool(conf.get("allowsEmulate"));
         
         try {
             requestRedirector = require(conf.get("redirector"));
@@ -87,14 +85,14 @@ module BuildManager {
     }
 
     export function submitNewBuild(req: express.Request, callback: Function): void {
-        console.info(resources.getStringForLanguage(nconf.get("lang"), "NewBuildSubmitted"));
+        console.info(resources.getStringForLanguage(serverConf.get("lang"), "NewBuildSubmitted"));
         console.info(req.url);
         console.info(req.headers);
 
         buildMetrics.submitted++;
 
         if (queuedBuilds.length === maxBuildsInQueue) {
-            var message = resources.getStringForLanguage(nconf.get("lang"), "BuildQueueFull", maxBuildsInQueue);
+            var message = resources.getStringForLanguage(serverConf.get("lang"), "BuildQueueFull", maxBuildsInQueue);
             var error: any = new Error(message);
             error.code = 503;
             throw error;
@@ -197,7 +195,7 @@ module BuildManager {
     // Downloads the requested build.
     export function downloadBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(nconf.get("lang"), "BuildNotCompleted", buildInfo.status));
+            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
             return;
         }
@@ -220,10 +218,10 @@ module BuildManager {
             // If we haven't built this request before, then we can't emulate it because we won't have the bits to emulate.
             // We could allow this by having the user provide their own pre-built bits, but this could be error prone if they aren't correct,
             // and if you can emulate then you must have xcode installed anyway and so you are likely able to build anyway
-            console.info(resources.getStringForLanguage(nconf.get("lang"), "BuildNotCompleted", buildInfo.status));
+            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
             return;
-        } else if (!utils.UtilHelper.argToBool(nconf.get("allowsEmulate"))) {
+        } else if (!utils.UtilHelper.argToBool(serverConf.get("allowsEmulate"))) {
             res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
             return;
         }
@@ -234,7 +232,7 @@ module BuildManager {
 
     export function deployBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(nconf.get("lang"), "BuildNotCompleted", buildInfo.status));
+            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
             return;
         }
@@ -245,7 +243,7 @@ module BuildManager {
 
     export function runBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(nconf.get("lang"), "BuildNotCompleted", buildInfo.status));
+            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
             return;
         }
@@ -256,7 +254,7 @@ module BuildManager {
 
     export function debugBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(nconf.get("lang"), "BuildNotCompleted", buildInfo.status));
+            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
             return;
         }
@@ -293,21 +291,21 @@ module BuildManager {
             }
         } catch (e) {
             buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
-            console.error(resources.getStringForLanguage(nconf.get("lang"), "FailedCreateDirectory", extractToDir, e.message));
+            console.error(resources.getStringForLanguage(serverConf.get("lang"), "FailedCreateDirectory", extractToDir, e.message));
             buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
             buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
-            console.error(resources.getStringForLanguage(nconf.get("lang"), "NoTgzFound", buildInfo.tgzFilePath));
+            console.error(resources.getStringForLanguage(serverConf.get("lang"), "NoTgzFound", buildInfo.tgzFilePath));
             buildMetrics.failed++;
             return;
         }
 
         var onError = function (err: Error): void {
             buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
-            console.info(resources.getStringForLanguage(nconf.get("lang"), "TgzExtractError", buildInfo.tgzFilePath, err.message));
+            console.info(resources.getStringForLanguage(serverConf.get("lang"), "TgzExtractError", buildInfo.tgzFilePath, err.message));
             buildMetrics.failed++;
         };
 

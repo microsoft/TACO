@@ -91,7 +91,7 @@ module Server {
 
     function initializeServerCapabilities(conf: TacoRemote.IDict): Q.Promise<TacoRemote.IServerCapabilities> {
         var serverCapPromises: Q.Promise<any>[] = [
-            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q({}),
+            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q(null),
             // More capabilities can be exposed here
         ];
         return Q.all(serverCapPromises).spread(function (certStore: HostSpecifics.ICertStore): TacoRemote.IServerCapabilities {

@@ -17,8 +17,6 @@
         "express": "4.12.2",
         "morgan": "1.5.1",
         "errorhandler": "1.3.4",
-        "request": "2.36.0",
-        "fstream": "0.1.28",
         "nconf": "0.6.9",
         "q": "1.0.1",
         "rimraf": "2.2.6",
@@ -29,6 +27,7 @@
         "mocha": "2.0.1",
         "mkdirp": "0.3.5",
         "should": "4.3.0",
+        "request": "2.36.0",
         "taco-cordova":  "file:../taco-cordova"
     },
     "bundledDependencies": [ "taco-utils" ],
