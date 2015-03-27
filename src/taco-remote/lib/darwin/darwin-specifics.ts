@@ -59,7 +59,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
         // We only want to expand if the directory starts with ~/ not in cases such as /foo/~
         // Ideally we would also cope with the case of ~user/ but that is harder to find and probably less common
         var serverDir = conf.get("serverDir");
-        serverDir.replace(/^~(?=\/|^)/, process.env.HOME);
+        conf.set("serverDir", serverDir.replace(/^~(?=\/|^)/, process.env.HOME));
 
         return Q({});
     }

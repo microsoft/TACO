@@ -62,7 +62,7 @@ function cli(): void {
 
     var task = tasks[command];
     if (task) {
-        Q(task.execute()).done();
+        HostSpecifics.hostSpecifics.initialize(nconf).then(task.execute).done();
     } else {
         console.info(resources.getStringForLanguage(nconf.get("lang"), "UnknownCommand"), command);
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
@@ -74,8 +74,7 @@ var tasks: { [key: string]: { execute(): Q.IPromise<any>; } };
 tasks = {
     start: {
         execute: function (): Q.Promise<void> {
-            return HostSpecifics.hostSpecifics.initialize(nconf)
-                .then(function (): void { server.start(nconf); });
+            return server.start(nconf);
         }
     },
     resetServerCert: {

@@ -206,9 +206,9 @@ module TacoUtility {
                     // This is one of the parsed flags, so add it to our object
                     parsed.options[property] = noptParsed[property];
 
-                    // If the value is the undefined token, set it to the actual undefined value
+                    // If the value is the undefined token, set it to a null value so we can detect that no argument was provided
                     if (parsed.options[property] === undefinedToken) {
-                        parsed.options[property] = undefined;
+                        parsed.options[property] = null;
                     }
                 }
             }

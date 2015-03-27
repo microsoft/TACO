@@ -92,6 +92,7 @@ module DarwinDependencies {
             deferred2.promise.then(function (shouldInstall: boolean): void {
                 child_process.exec("(DevToolsSecurity -enable || true)", function (): void {
                     // Write to the file. We don't read the contents, but it may help with user discoverability if they change their mind
+                    UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
                     fs.writeFileSync(firstRunPath, "installHomebrew = " + (shouldInstall ? "yes" : "no") + "\n");
                     deferred.resolve({});
                 });
