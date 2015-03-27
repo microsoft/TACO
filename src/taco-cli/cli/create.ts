@@ -35,13 +35,26 @@ class Create implements commands.IDocumentedCommand {
     private commandData: commands.ICommandData;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
+        var self = this;
         return this.parseArguments(data)
-            .then(this.verifyArguments)
-            .then(this.processKit)
-            .then(this.processTemplate)
-            .then(this.callCordovaCreate)
-            .then(this.copyRemainingTemplateItemsIfNeeded)
-            .then(this.processTemplateTokensIfNeeded);
+            .then(function () {
+            return self.verifyArguments()
+        })
+            .then(function () {
+            return self.processKit()
+        })
+            .then(function () {
+            return self.processTemplate()
+        })
+            .then(function () {
+            return self.callCordovaCreate()
+        })
+            .then(function () {
+            return self.copyRemainingTemplateItemsIfNeeded()
+        })
+            .then(function () {
+            return self.processTemplateTokensIfNeeded()
+        });
     }
 
     private parseArguments(args: commands.ICommandData): Q.Promise<commands.ICommandData> {
