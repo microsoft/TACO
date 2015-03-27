@@ -8,6 +8,14 @@
     "command.create.options.cli": "Use a version of the Cordova CLI rather than a Cordova Dev Kit.",
     "command.create.options.copy": "Use custom www assets instead using a template.",
     "command.create.options.linkto": "Symlink to custom www assets without creating a copy.",
+    // The following command.create.success.* are actually one message split into several parts because the different parts need different styles (bolding, color, etc)
+    "command.create.success.base": "Success!",
+    "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'.",
+    "command.create.success.readyForUse": "Your project is ready for use at",
+    "_command.create.success.readyForUse.comment": "This sentence follows the word 'Success!' when the create command succeeds.",
+    "command.create.success.path": "{0}",
+    "_command.create.success.path.comment": "This is the last part of the success message for the create command. {0} is the path where the project was created.",
+
     "command.help.description": "Get help for a command",
     "command.help.usage.synopsis": "Synopsis",
     "_command.help.usage.synopsis.comment": "synopsis header when user types 'taco help'",

@@ -36,24 +36,18 @@ class Create implements commands.IDocumentedCommand {
 
     public run(data: commands.ICommandData): Q.Promise<any> {
         var self = this;
-        return this.parseArguments(data)
-            .then(function () {
+        return this.parseArguments(data).then(function () {
             return self.verifyArguments()
-        })
-            .then(function () {
+        }).then(function () {
             return self.processKit()
-        })
-            .then(function () {
+        }).then(function () {
             return self.processTemplate()
-        })
-            .then(function () {
+        }).then(function () {
             return self.callCordovaCreate()
-        })
-            .then(function () {
-            return self.copyRemainingTemplateItemsIfNeeded()
-        })
-            .then(function () {
-            return self.processTemplateTokensIfNeeded()
+        }).then(function () {
+            return self.finishTemplateInstallationIfNeeded()
+        }).then(function () {
+            return self.finalizeCommand()
         });
     }
 
@@ -103,11 +97,16 @@ class Create implements commands.IDocumentedCommand {
         return cordovaWrapper.create(this.commandData.remain[0], this.commandData.remain[1], this.commandData.remain[2], this.commandData.remain[3], cfg);
     }
 
-    private copyRemainingTemplateItemsIfNeeded(): Q.Promise<any> {
+    private finishTemplateInstallationIfNeeded(): Q.Promise<any> {
         return Q.resolve(null);
     }
 
-    private processTemplateTokensIfNeeded(): Q.Promise<any> {
+    private finalizeCommand(): Q.Promise<any> {
+        // Report success over multiple logging for different styles
+        logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
+        logger.log(" " + resources.getString("command.create.success.readyForUse"), logger.Level.Normal);
+        logger.logLine(" " + resources.getString("command.create.success.path", this.commandData.remain[0]), logger.Level.NormalBold);
+
         return Q.resolve(null);
     }
 
