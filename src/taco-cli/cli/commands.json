@@ -1,12 +1,13 @@
 {
     "create": {
-        "synopsis": "<PATH> [ID] [NAME] [options]",
+        "synopsis": "<PATH> [ID [NAME [CONFIG]]] [options]",
         "modulePath": "./create",
         "description": "[command.create.description]",
         "args": [
-            { "name": "PATH", "description": "[command.create.description]" },
-            { "name": "ID", "description": "[command.create.args.path]" },
-            { "name": "NAME", "description": "[command.create.args.name]" }
+            { "name": "PATH", "description": "[command.create.path]" },
+            { "name": "ID", "description": "[command.create.args.id]" },
+            { "name": "NAME", "description": "[command.create.args.name]" },
+            { "name": "CONFIG", "description": "[command.create.args.config]" }
         ],
         "options": [
             { "name": "--kit <NAME>", "description": "[command.create.options.kit]" },

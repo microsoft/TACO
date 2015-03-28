@@ -7,6 +7,7 @@ import utils = tacoUtility.UtilHelper;
 import commands = tacoUtility.Commands;
 import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
+import templateHelper = tacoUtility.TemplateHelper;
 import cordovaWrapper = require("./utils/cordova-wrapper");
 import level = logger.Level;
 import nopt = require("nopt");
@@ -31,6 +32,9 @@ class Create implements commands.IDocumentedCommand {
         "copy-from": String,
         "link-to": String
     };
+
+    private static defaultAppName: string = "HelloTaco";
+    private static defaultAppId: string = "io.taco.myapp";
 
     private commandData: commands.ICommandData;
 
@@ -80,6 +84,39 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private processTemplate(): Q.Promise<any> {
+        // Determine whether we are in a kit project
+        var isKitProject: boolean = this.commandData.options["cli"];
+
+        // Determine whether we need to use templates
+        var mustUseTemplates: boolean = isKitProject && !this.commandData.options["copy-from"] && !this.commandData.options["link-to"];
+
+        if (mustUseTemplates) {
+            // Save the this reference to keep access to commandData in nested promises
+            var self = this;
+
+            // Get the specified template's path in the cache
+            if (!this.commandData.options.hasOwnProperty("template") || !this.commandData.options["template"]) {
+                this.commandData.options["template"] = "blank";
+            }
+
+            return templateHelper.getCachedTemplatePath(this.commandData.options["template"]).then(
+                function (cachedTemplatePath: string) {
+                    // The specified template is in the cache and we have its path; set the --copy-from flag to that path
+                    self.commandData.options["copy-from"] = cachedTemplatePath;
+                },
+                function (errorId: string) {
+                    if (errorId === "command.create.templateNotFound") {
+                        logger.logErrorLine(resources.getString("command.create.templateNotFound", this.commandData.options["template"]));
+                    } else {
+                        logger.logErrorLine(resources.getString(errorId));
+                    }
+
+                    // Rethrow; we do not want the taco create command to continue
+                    throw errorId;
+                });
+        }
+
+        // If we reach this, then we didn't need to install a template
         return Q.resolve(null);
     }
 
@@ -98,6 +135,19 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private finishTemplateInstallationIfNeeded(): Q.Promise<any> {
+        // If there is a --template option, it means a template was installed; finish its installation
+        if (this.commandData.options["template"]) {
+            var appId: string = this.commandData.remain[1] ? this.commandData.remain[1] : Create.defaultAppId;
+            var appName: string = this.commandData.remain[2] ? this.commandData.remain[2] : Create.defaultAppName;
+
+            var tokens: { [token: string]: string } = {
+                "\\$appid\\$": appId,
+                "\\$projectname\\$": appName
+            }
+
+            return templateHelper.finalizeTemplateInstallation(this.commandData.remain[0], this.commandData.options["copy-from"], tokens);
+        }
+
         return Q.resolve(null);
     }
 

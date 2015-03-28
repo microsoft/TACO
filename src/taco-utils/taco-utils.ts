@@ -6,7 +6,8 @@ import utilHelper = require ("./util-helper");
 import commands = require ("./commands");
 import logger = require ("./logger");
 import processLogger = require ("./process-logger");
-import tacoPackageLoader = require ("./taco-package-loader");
+import tacoPackageLoader = require("./taco-package-loader");
+import templateHelper = require("./template-helper");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
@@ -19,6 +20,7 @@ module TacoUtility {
     export var Logger = logger.Logger;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
+    export var TemplateHelper = templateHelper.TemplateHelper;
     /// <enable code="SA1301" />
 }
 
