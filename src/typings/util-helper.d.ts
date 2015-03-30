@@ -3,16 +3,8 @@
 /// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts" />
 /// <reference path="../typings/ncp.d.ts" />
-declare module TacoUtility {
-    interface IParsedCommand {
-        original: string[];
-        remain: string[];
-        options: IOptions;
-    }
-    interface IOptions {
-        [index: string]: any;
-    }
 
+declare module TacoUtility {
     class UtilHelper {
         private static InvalidAppNameChars;
 
@@ -80,7 +72,7 @@ declare module TacoUtility {
          *
          * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
-        static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): IParsedCommand;
+        static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): Commands.ICommandData;
         /**
          * Synchronously create a directory if it does not exist
          *

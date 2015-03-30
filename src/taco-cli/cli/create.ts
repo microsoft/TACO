@@ -2,16 +2,16 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 
-import tacoUtility = require("taco-utils");
+import tacoUtility = require ("taco-utils");
 import utils = tacoUtility.UtilHelper;
 import commands = tacoUtility.Commands;
 import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import templateHelper = tacoUtility.TemplateHelper;
-import cordovaWrapper = require("./utils/cordova-wrapper");
+import cordovaWrapper = require ("./utils/cordova-wrapper");
 import level = logger.Level;
-import nopt = require("nopt");
-import Q = require("q");
+import nopt = require ("nopt");
+import Q = require ("q");
 
 /*
  * Create
@@ -19,44 +19,48 @@ import Q = require("q");
  * handles "Taco Create"
  */
 class Create implements commands.IDocumentedCommand {
-    public info: commands.ICommandInfo;
-
-    private static tacoOnlyOptions: string[] = ["kit", "cli", "template"];
-    private static knownOptions: Nopt.FlagTypeMap = {
-        // taco-cli options
-        "kit": String,
-        "template": String,
-        "cli": String,
-
-        // Cordova options
+    private static TacoOnlyOptions: string[] = ["kit", "cli", "template"];
+    private static KnownOptions: Nopt.FlagTypeMap = {
+        kit: String,
+        template: String,
+        cli: String,
         "copy-from": String,
         "link-to": String
     };
 
-    private static defaultAppName: string = "HelloTaco";
-    private static defaultAppId: string = "io.taco.myapp";
+    private static DefaultAppName: string = "HelloTaco";
+    private static DefaultAppId: string = "io.taco.myapp";
 
     private commandData: commands.ICommandData;
 
+    public info: commands.ICommandInfo;
+
     public run(data: commands.ICommandData): Q.Promise<any> {
         var self = this;
-        return this.parseArguments(data).then(function () {
-            return self.verifyArguments()
-        }).then(function () {
-            return self.processKit()
-        }).then(function () {
-            return self.processTemplate()
-        }).then(function () {
-            return self.callCordovaCreate()
-        }).then(function () {
-            return self.finishTemplateInstallationIfNeeded()
-        }).then(function () {
-            return self.finalizeCommand()
+        return this.parseArguments(data).then(function (): Q.Promise<any> {
+            return self.verifyArguments();
+        }).then(function (): Q.Promise<any> {
+            return self.processKit();
+        }).then(function (): Q.Promise<any> {
+            return self.processTemplate();
+        }).then(function (): Q.Promise<any> {
+            return self.callCordovaCreate();
+        }).then(function (): Q.Promise<any> {
+            return self.finishTemplateInstallationIfNeeded();
+        }).then(function (): Q.Promise<any> {
+            return self.finalizeCommand();
         });
     }
 
-    private parseArguments(args: commands.ICommandData): Q.Promise<commands.ICommandData> {
-        this.commandData = utils.parseArguments(Create.knownOptions, {}, args.original, 0);
+    /**
+     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
+     */
+    public canHandleArgs(data: commands.ICommandData): boolean {
+        return true;
+    }
+
+    private parseArguments(args: commands.ICommandData): Q.Promise<any> {
+        this.commandData = utils.parseArguments(Create.KnownOptions, {}, args.original, 0);
         return Q.resolve<any>(null);
     }
 
@@ -100,11 +104,11 @@ class Create implements commands.IDocumentedCommand {
             }
 
             return templateHelper.getCachedTemplatePath(this.commandData.options["template"]).then(
-                function (cachedTemplatePath: string) {
+                function (cachedTemplatePath: string): void {
                     // The specified template is in the cache and we have its path; set the --copy-from flag to that path
                     self.commandData.options["copy-from"] = cachedTemplatePath;
                 },
-                function (errorId: string) {
+                function (errorId: string): void {
                     if (errorId === "command.create.templateNotFound") {
                         logger.logErrorLine(resources.getString("command.create.templateNotFound", this.commandData.options["template"]));
                     } else {
@@ -125,7 +129,7 @@ class Create implements commands.IDocumentedCommand {
         var cfg: { [flag: string]: any } = {};
 
         for (var option in this.commandData.options) {
-            if (Create.tacoOnlyOptions.indexOf(option) === -1) {
+            if (Create.TacoOnlyOptions.indexOf(option) === -1) {
                 // This is not an option we understand; pass it through to Cordova
                 cfg[option] = this.commandData.options[option];
             }
@@ -137,13 +141,13 @@ class Create implements commands.IDocumentedCommand {
     private finishTemplateInstallationIfNeeded(): Q.Promise<any> {
         // If there is a --template option, it means a template was installed; finish its installation
         if (this.commandData.options["template"]) {
-            var appId: string = this.commandData.remain[1] ? this.commandData.remain[1] : Create.defaultAppId;
-            var appName: string = this.commandData.remain[2] ? this.commandData.remain[2] : Create.defaultAppName;
+            var appId: string = this.commandData.remain[1] ? this.commandData.remain[1] : Create.DefaultAppId;
+            var appName: string = this.commandData.remain[2] ? this.commandData.remain[2] : Create.DefaultAppName;
 
             var tokens: { [token: string]: string } = {
                 "\\$appid\\$": appId,
                 "\\$projectname\\$": appName
-            }
+            };
 
             return templateHelper.finalizeTemplateInstallation(this.commandData.remain[0], this.commandData.options["copy-from"], tokens);
         }
@@ -158,13 +162,6 @@ class Create implements commands.IDocumentedCommand {
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandData.remain[0]), logger.Level.NormalBold);
 
         return Q.resolve(null);
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 }
 

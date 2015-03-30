@@ -18,9 +18,8 @@
     "_command.create.templateNotFound.comment": "Error shown when the user specifies an unknown template identifier. {0} is the template identifier that the user specified as parameter in the command line.",
     "command.create.noTypescript": "Error: This version of Cordova does not contain a TypeScript template",
     "_command.create.noTypescript.comment": "Error shown when the user specifies a TypeScript template, but there is no such template available for the selected kit.",
-    // The following command.create.success.* strings are actually one message split into several parts because the different parts need different styles (bolding, color, etc)
     "command.create.success.base": "Success!",
-    "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'.",
+    "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
     "command.create.success.readyForUse": "Your project is ready for use at",
     "_command.create.success.readyForUse.comment": "This sentence follows the word 'Success!' when the create command succeeds.",
     "command.create.success.path": "{0}",

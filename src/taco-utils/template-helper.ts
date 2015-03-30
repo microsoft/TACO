@@ -3,13 +3,13 @@
 /// <reference path="../typings/replace.d.ts" />
 
 "use strict";
-import Q = require("q");
-import path = require("path");
-import fs = require("fs");
-import admZip = require("adm-zip");
-import wrench = require("wrench");
-import replace = require("replace");
-import utils = require("./util-helper");
+import Q = require ("q");
+import path = require ("path");
+import fs = require ("fs");
+import admZip = require ("adm-zip");
+import wrench = require ("wrench");
+import replace = require ("replace");
+import utils = require ("./util-helper");
 
 module TacoUtility {
     export interface ITemplateMetaData {
@@ -40,7 +40,7 @@ module TacoUtility {
             // Acquire the templates metadata
             // Extract the template's cache info
             // Ensure the template is in the cache and return its cached path
-            return TemplateHelper.acquireTemplatesMetaData().then(function (templateMetaData: ITemplateMetaData) {
+            return TemplateHelper.acquireTemplatesMetaData().then(function (templateMetaData: ITemplateMetaData): Q.Promise<ITemplateCacheInfo> {
                 return TemplateHelper.extractTemplateCacheInfo(templateName, templateMetaData);
             }).then(TemplateHelper.ensureTemplateInCache);
         }
@@ -55,9 +55,9 @@ module TacoUtility {
          *
          * @return {Q.Promise<any>} An empty promise
          */
-        public static finalizeTemplateInstallation(projectPath: string, cachedTemplatePath: string, tokens: {[token: string]: string}): Q.Promise<any> {
-            return TemplateHelper.copyRemainingItems(projectPath, cachedTemplatePath).then(function (result) {
-                TemplateHelper.processTokenReplacement(projectPath, tokens);
+        public static finalizeTemplateInstallation(projectPath: string, cachedTemplatePath: string, tokens: { [token: string]: string }): Q.Promise<any> {
+            return TemplateHelper.copyRemainingItems(projectPath, cachedTemplatePath).then(function (): Q.Promise<any> {
+                return TemplateHelper.processTokenReplacement(projectPath, tokens);
             });
         }
 
@@ -65,30 +65,30 @@ module TacoUtility {
             // TODO
             // TEMP Until the kit-helper module is created, return some hard-coded metadata for the templates
             var data: ITemplateMetaData = {
-                "default": {
-                    "blank": {
-                        "name": "Blank template",
-                        "url": "templates/default/blank.zip"
+                default: {
+                    blank: {
+                        name: "Blank template",
+                        url: "templates/default/blank.zip"
                     },
-                    "typescript": {
-                        "name": "Blank TypeScript template",
-                        "url": "templates/default/typescript.zip"
+                    typescript: {
+                        name: "Blank TypeScript template",
+                        url: "templates/default/typescript.zip"
                     }
                 },
                 "4.0.0-Kit": {
-                    "blank": {
-                        "name": "Blank template",
-                        "url": "templates/4.0.0-kit/blank.zip"
+                    blank: {
+                        name: "Blank template",
+                        url: "templates/4.0.0-kit/blank.zip"
                     },
-                    "typescript": {
-                        "name": "Blank TypeScript template",
-                        "url": "templates/4.0.0-kit/typescript.zip"
+                    typescript: {
+                        name: "Blank TypeScript template",
+                        url: "templates/4.0.0-kit/typescript.zip"
                     }
                 },
                 "5.0.0-Kit": {
-                    "blank": {
-                        "name": "Blank template",
-                        "url": "templates/5.0.0-kit/blank.zip"
+                    blank: {
+                        name: "Blank template",
+                        url: "templates/5.0.0-kit/blank.zip"
                     }
                 }
             };
@@ -108,7 +108,7 @@ module TacoUtility {
                 id: templateName,
                 kitId: "",
                 url: ""
-            }
+            };
 
             if (templateMetaData[kitName]) {
                 // Found an override for the specified kit
@@ -168,13 +168,13 @@ module TacoUtility {
         }
 
         private static processTokenReplacement(projectPath: string, tokens: { [token: string]: string }): Q.Promise<any> {
-            var replaceParams = {
+            var replaceParams: Replace.IReplaceParameters = {
                 regex: "",
                 replacement: "",
                 paths: [path.resolve(projectPath)],
                 recursive: true,
                 silent: true
-            }
+            };
 
             for (var token in tokens) {
                 replaceParams.regex = token;

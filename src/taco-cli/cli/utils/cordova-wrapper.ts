@@ -1,5 +1,5 @@
-﻿import child_process = require("child_process");
-import Q = require("q");
+﻿import child_process = require ("child_process");
+import Q = require ("q");
 
 class CordovaWrapper {
     public static cli(args: string[]): Q.Promise<any> {
