@@ -26,8 +26,8 @@ Downloads build results back through the response in zip format, includes the si
 ### GET http://localhost:3000/mountLocation/build/tasks
 Returns JSON format information about all builds known to the build server, the current build, and any queued-up builds.
 
-### GET http://localhost:3000/mountLocation/build/tasks/<buildNumber>/log
-Returns plain text response with the build log for the <buildNumber>. If log is no longer available, an empty response.
+### GET http://localhost:3000/mountLocation/build/tasks/<buildNumber>/log?offset=<offset>
+Returns plain text response with the build log for the <buildNumber>. If log is no longer available, an empty response. If offset is specified, then returns the log starting at the specified byte
 
 ### GET http://localhost:3000/mountLocation/build/<buildNumber>/emulate
 Emulates the <buildNumber> and returns JSON format information with updated status.

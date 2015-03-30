@@ -160,7 +160,7 @@ module BuildManager {
     }
 
     // TODO: Does this localize builds appropriately?
-    export function downloadBuildLog(id: number, res: express.Response): void {
+    export function downloadBuildLog(id: number, offset: number, res: express.Response): void {
         var buildInfo = builds[id];
         if (!buildInfo) {
             res.end();
@@ -173,7 +173,7 @@ module BuildManager {
             return;
         }
 
-        var logStream = fs.createReadStream(buildLog);
+        var logStream = fs.createReadStream(buildLog, { start: offset });
         logStream.on("error", function (err: any): void {
             console.info(resources.getString("LogFileReadError"));
             console.info(err);

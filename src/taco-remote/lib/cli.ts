@@ -40,7 +40,7 @@ function cli(): void {
     } else {
         // Default to using TACO_HOME/TacoRemote.config
         // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
-        nconf.file({ file: path.join(UtilHelper.tacoHome, "TacoRemote.config")});
+        nconf.file({ file: path.join(UtilHelper.tacoHome, "TacoRemote.config") });
     };
     var defaults: any = {
         port: 3000,

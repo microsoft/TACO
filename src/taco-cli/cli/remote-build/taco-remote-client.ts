@@ -33,6 +33,7 @@ import Settings = require ("../utils/settings");
 import res = tacoUtils.ResourcesManager;
 import BuildInfo = tacoUtils.BuildInfo;
 import UtilHelper = tacoUtils.UtilHelper;
+import CountStream = tacoUtils.CountStream;
 
 class TacoRemoteClient {
     public static PingInterval: number = 5000;
@@ -436,7 +437,7 @@ class TacoRemoteClient {
     /*
      * Status progression: uploaded -> extracted -> building -> [complete|invalid|error] -> downloaded [if a device targeted build]
      */
-    private static pollForBuildComplete(settings: BuildSettings, buildingUrl: string, interval: number, attempts: number): Q.Promise<BuildInfo> {
+    private static pollForBuildComplete(settings: BuildSettings, buildingUrl: string, interval: number, attempts: number, logOffset?: number): Q.Promise<BuildInfo> {
         var thisAttempt = attempts + 1;
         console.info(res.getString("CheckingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
 
@@ -449,6 +450,7 @@ class TacoRemoteClient {
             var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
             console.info(buildInfo.status + " - " + buildInfo.message);
             if (buildInfo.status === "complete") {
+                buildInfo["logOffset"] = logOffset || 0;
                 return Q(buildInfo);
             } else if (buildInfo.status === "invalid") {
                 throw new Error(res.getString("InvalidRemoteBuild", buildInfo.message));
@@ -458,8 +460,10 @@ class TacoRemoteClient {
                 throw err;
             }
 
-            return Q.delay(interval).then(function (): Q.Promise<BuildInfo> {
-                return TacoRemoteClient.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt);
+            return TacoRemoteClient.logBuildOutput(buildInfo, settings).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+                return Q.delay(interval).then(function (): Q.Promise<BuildInfo> {
+                    return TacoRemoteClient.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt, buildInfo["logOffset"]);
+                });
             });
         });
     }
@@ -470,18 +474,22 @@ class TacoRemoteClient {
     private static logBuildOutput(buildInfo: BuildInfo, settings: BuildSettings): Q.Promise<BuildInfo> {
         var serverUrl = settings.buildServerUrl;
         var deferred = Q.defer<BuildInfo>();
+        var offset: number = buildInfo["logOffset"] || 0;
+        var logFlags = offset > 0 ? 'r+' : 'w';
         var buildNumber = buildInfo.buildNumber;
-        var downloadUrl = serverUrl + "/build/tasks/" + buildNumber + "/log";
+        var downloadUrl = util.format("%s/build/tasks/%d/log?offset=%d",serverUrl, buildNumber, offset);
         return TacoRemoteClient.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
             var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
-            var logStream = fs.createWriteStream(logPath);
+            var logStream = fs.createWriteStream(logPath, { start: offset, flags: logFlags });
+            var countStream = new CountStream();
             logStream.on("finish", function (): void {
                 console.info(res.getString("BuildLogWrittenTo", logPath));
             });
             req.on("end", function (): void {
+                buildInfo["logOffset"] = offset + countStream.count;
                 deferred.resolve(buildInfo);
-            }).pipe(logStream);
+            }).pipe(countStream).pipe(logStream);
             return deferred.promise;
         });
     }

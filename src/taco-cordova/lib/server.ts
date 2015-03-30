@@ -126,7 +126,7 @@ class Server implements TacoRemote.IServerModule {
         var buildInfo = buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             res.set("Content-Type", "text/plain");
-            buildManager.downloadBuildLog(req.params.id, res);
+            buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
         } else {
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
