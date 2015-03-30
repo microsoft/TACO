@@ -1,11 +1,11 @@
 "use strict";
-import buildInfo = require ("./build-info");
-import cordovaConfig = require ("./cordova-config");
-import resourcesManager = require ("./resources-manager");
-import utilHelper = require ("./util-helper");
-import commands = require ("./commands");
-import logger = require ("./logger");
-import processLogger = require ("./process-logger");
+import buildInfo = require("./build-info");
+import cordovaConfig = require("./cordova-config");
+import resourcesManager = require("./resources-manager");
+import utilHelper = require("./util-helper");
+import commands = require("./commands");
+import logger = require("./logger");
+import processLogger = require("./process-logger");
 import tacoPackageLoader = require("./taco-package-loader");
 import templateHelper = require("./template-helper");
 
