@@ -37,7 +37,7 @@ class IOSAgent implements IPlatform {
         this.nativeDebugProxyPort = config.get("nativeDebugProxyPort") || 3001;
         this.webDebugProxyDevicePort = config.get("webDebugProxyDevicePort") || 9221;
         this.webDebugProxyPortMin = config.get("webDebugProxyPortMin") || 9222;
-        this.webDebugProxyPortMax = config.get("webDebugPRoxyPortMax") || 9223;
+        this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9223;
 
         if (UtilHelper.argToBool(config.get("allowsEmulate"))) {
             process.env["PATH"] = path.resolve(__dirname, path.join("node_modules", "ios-sim", "build", "release")) + ":" + process.env["PATH"];

@@ -21,6 +21,7 @@ import utils = require ("taco-utils");
 import server = require ("./server");
 
 import resources = utils.ResourcesManager;
+import UtilHelper = utils.UtilHelper;
 
 function cli(): void {
     console.info("taco-remote");
@@ -37,9 +38,9 @@ function cli(): void {
     if (nconf.get("config")) {
         nconf.file({ file: nconf.get("config") });
     } else {
-        // TODO: use a default config file location for user story 1129453
-        // Unless that file doesn't exist, in which case just use memory
-        nconf.use("memory");
+        // Default to using TACO_HOME/TacoRemote.config
+        // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
+        nconf.file({ file: path.join(UtilHelper.tacoHome, "TacoRemote.config")});
     };
     var defaults: any = {
         port: 3000,
