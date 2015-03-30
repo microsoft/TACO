@@ -163,12 +163,8 @@ module TacoUtility {
         }
 
         private static copyRemainingItems(projectPath: string, cachedTemplatePath: string): Q.Promise<any> {
-            var options: any = {
-                preserveFiles: true
-            };
-
-            wrench.copyDirSyncRecursive(cachedTemplatePath, projectPath, options);
-            return Q.resolve(null);
+            var options: any = { clobber: false };
+            return utils.UtilHelper.copyRecursive(cachedTemplatePath, projectPath, options);
         }
 
         private static processTokenReplacement(projectPath: string, tokens: { [token: string]: string }): Q.Promise<any> {
@@ -183,6 +179,8 @@ module TacoUtility {
             for (var token in tokens) {
                 replaceParams.regex = token;
                 replaceParams.replacement = tokens[token];
+
+                replace(replaceParams);
             }
 
             return Q.resolve(null);

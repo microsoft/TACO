@@ -85,7 +85,7 @@ class Create implements commands.IDocumentedCommand {
 
     private processTemplate(): Q.Promise<any> {
         // Determine whether we are in a kit project
-        var isKitProject: boolean = this.commandData.options["cli"];
+        var isKitProject: boolean = !this.commandData.options["cli"];
 
         // Determine whether we need to use templates
         var mustUseTemplates: boolean = isKitProject && !this.commandData.options["copy-from"] && !this.commandData.options["link-to"];
