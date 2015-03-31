@@ -19,9 +19,9 @@ import packer = require ("zip-stream");
 
 import iosAppRunner = require ("./ios-app-runner");
 
-import IPlatform = require ("../IPlatform.d");
+import ITargetPlatform = require ("../ITargetPlatform.d");
 
-class IOSAgent implements IPlatform {
+class IOSAgent implements ITargetPlatform {
     private nativeDebugProxyPort: number;
     private webProxyInstance: child_process.ChildProcess = null;
     private webDebugProxyDevicePort: number;
@@ -37,7 +37,7 @@ class IOSAgent implements IPlatform {
         this.nativeDebugProxyPort = config.get("nativeDebugProxyPort") || 3001;
         this.webDebugProxyDevicePort = config.get("webDebugProxyDevicePort") || 9221;
         this.webDebugProxyPortMin = config.get("webDebugProxyPortMin") || 9222;
-        this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9223;
+        this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9322;
 
         if (UtilHelper.argToBool(config.get("allowsEmulate"))) {
             process.env["PATH"] = path.resolve(__dirname, path.join("node_modules", "ios-sim", "build", "release")) + ":" + process.env["PATH"];
@@ -61,26 +61,31 @@ class IOSAgent implements IPlatform {
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
     public runOnDevice(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
+        if (!fs.existsSync(buildInfo.appDir)) {
+            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            return;
+        }
+
         var proxyPort = this.nativeDebugProxyPort;
-        var cfg = new utils.CordovaConfig(path.join(buildInfo.appDir, "config.xml"));
+        var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
         iosAppRunner.startDebugProxy(proxyPort)
             .then(function (nativeProxyProcess: child_process.ChildProcess): Q.Promise<net.Socket> {
             return iosAppRunner.startApp(cfg.id(), proxyPort);
         }).then(function (success: net.Socket): void {
             res.status(200).send(buildInfo.localize(req, resources));
         }, function (failure: any): void {
-                if (failure instanceof Error) {
-                    res.status(404).send(resources.getStringForLanguage(req, failure.message));
-                } else {
-                    res.status(404).send(resources.getStringForLanguage(req, failure));
-                }
-            });
+            if (failure instanceof Error) {
+                res.status(404).send(resources.getStringForLanguage(req, failure.message));
+            } else {
+                res.status(404).send(resources.getStringForLanguage(req, failure));
+            }
+        });
     }
 
     public downloadBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response, callback: (err: any) => void): void {
-        var platformOutputDir = path.join(buildInfo.appDir, "platforms", "ios", "build", "device");
-        var pathToPlistFile = path.join(platformOutputDir, buildInfo["appName"] + ".plist");
-        var pathToIpaFile = path.join(platformOutputDir, buildInfo["appName"] + ".ipa");
+        var iosOutputDir = path.join(buildInfo.appDir, "platforms", "ios", "build", "device");
+        var pathToPlistFile = path.join(iosOutputDir, buildInfo["appName"] + ".plist");
+        var pathToIpaFile = path.join(iosOutputDir, buildInfo["appName"] + ".ipa");
         if (!fs.existsSync(pathToPlistFile) || !fs.existsSync(pathToIpaFile)) {
             var msg = resources.getString("DownloadInvalid", pathToPlistFile, pathToIpaFile);
             console.info(msg);
@@ -120,7 +125,6 @@ class IOSAgent implements IPlatform {
     }
 
     public emulateBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
-        var cfg = new utils.CordovaConfig(path.join(buildInfo.appDir, "config.xml"));
         if (!fs.existsSync(buildInfo.appDir)) {
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
             return;
@@ -130,6 +134,7 @@ class IOSAgent implements IPlatform {
             res.status(404).send(resources.getStringForLanguage(req, "NoTargetSpecified"));
             return;
         }
+        var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
 
         var emulateProcess = child_process.fork(path.join(__dirname, "ios-emulate.js"), [], { silent: true });
         var emulateLogger = new ProcessLogger();
@@ -151,6 +156,10 @@ class IOSAgent implements IPlatform {
 
     public deployBuildToDevice(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
         var pathToIpaFile = path.join(buildInfo.appDir, "platforms", "ios", "build", "device", buildInfo["appName"] + ".ipa");
+        if (!fs.existsSync(pathToIpaFile)) {
+            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            return;
+        }
 
         var ideviceinstaller = child_process.spawn("ideviceinstaller", ["-i", pathToIpaFile]);
         var stdout: string = "";
@@ -177,10 +186,10 @@ class IOSAgent implements IPlatform {
         });
         ideviceinstaller.on("close", function (code: number): void {
             if (code !== 0) {
-                res.json(404, { stdout: stdout, stderr: stderr, code: code });
+                res.status(404).json({ stdout: stdout, stderr: stderr, code: code });
             } else {
                 buildInfo.updateStatus(utils.BuildInfo.INSTALLED, "InstallSuccess");
-                res.json(200, buildInfo.localize(req, resources));
+                res.status(200).json(buildInfo.localize(req, resources));
             }
         });
     }

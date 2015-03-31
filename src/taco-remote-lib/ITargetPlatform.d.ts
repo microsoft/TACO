@@ -5,7 +5,7 @@ import child_process = require ("child_process");
 import utils = require ("taco-utils");
 import BuildInfo = utils.BuildInfo;
 
-interface IPlatform {
+interface ITargetPlatform {
     /**
      * Determine whether this class can service a particular build
      * 
@@ -68,4 +68,4 @@ interface IPlatform {
     createBuildProcess(): child_process.ChildProcess;
 }
 
-export = IPlatform;
+export = ITargetPlatform;

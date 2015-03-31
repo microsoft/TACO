@@ -81,7 +81,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
 
 class IOSBuild {
     public static build(currentBuild: BuildInfo, callback: Function): void {
-        cfg = new CordovaConfig(path.join(currentBuild.appDir, "config.xml"));
+        cfg = CordovaConfig.getCordovaConfig(currentBuild.appDir);
 
         var noOp: () => void = function (): void { };
         var isDeviceBuild = currentBuild.options.indexOf("--device") !== -1;

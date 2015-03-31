@@ -2,7 +2,7 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/taco-utils.d.ts" />
 /// <reference path="../typings/express.d.ts" />
-/// <reference path="./IPlatform.d.ts" />
+/// <reference path="./ITargetPlatform.d.ts" />
 "use strict";
 
 import child_process = require ("child_process");
@@ -15,11 +15,11 @@ import ProcessLogger = utils.ProcessLogger;
 import resources = utils.ResourcesManager;
 
 import IOSAgent = require ("./ios/ios");
-import IPlatform = require ("./IPlatform.d");
+import ITargetPlatform = require ("./ITargetPlatform.d");
 
 module TacoRemoteLib {
     var language: string;
-    var platforms: IPlatform[];
+    var platforms: ITargetPlatform[];
     var initialized = false;
 
     export var locResources: resources.IResources = resources;
@@ -60,7 +60,7 @@ module TacoRemoteLib {
      * @param {Function} callback A callback indicating whether any errors occurred so the build manager can keep track
      */
     export function downloadBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response, callback: (err: any) => void): void {
-        var platform: IPlatform = getPlatform(buildInfo);
+        var platform: ITargetPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.downloadBuild(buildInfo, req, res, callback);
         } else {
@@ -76,7 +76,7 @@ module TacoRemoteLib {
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
     export function emulateBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
-        var platform: IPlatform = getPlatform(buildInfo);
+        var platform: ITargetPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.emulateBuild(buildInfo, req, res);
         } else {
@@ -92,7 +92,7 @@ module TacoRemoteLib {
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
     export function deployBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
-        var platform: IPlatform = getPlatform(buildInfo);
+        var platform: ITargetPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.deployBuildToDevice(buildInfo, req, res);
         } else {
@@ -108,7 +108,7 @@ module TacoRemoteLib {
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
     export function runBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
-        var platform: IPlatform = getPlatform(buildInfo);
+        var platform: ITargetPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.runOnDevice(buildInfo, req, res);
         } else {
@@ -124,7 +124,7 @@ module TacoRemoteLib {
      * @param {express.Response} res The response to the HTTP request, which must be sent by this function
      */
     export function debugBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
-        var platform: IPlatform = getPlatform(buildInfo);
+        var platform: ITargetPlatform = getPlatform(buildInfo);
         if (platform) {
             platform.debugBuild(buildInfo, req, res);
         } else {
@@ -152,7 +152,10 @@ module TacoRemoteLib {
             errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedCommand", buildCommand));
         }
 
-        if (configuration !== "debug" && configuration !== "release") {
+        var supportedConfigurations: { [key: string]: boolean } = {};
+        supportedConfigurations["debug"] = true;
+        supportedConfigurations["release"] = true;
+        if (!supportedConfigurations[configuration]) {
             errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedConfiguration", configuration));
         }
 
@@ -166,7 +169,7 @@ module TacoRemoteLib {
      * @param {Function} callback A callback to pass back the successful or failed build
      */
     export function build(buildInfo: BuildInfo, callback: (resultBuildInfo: BuildInfo) => void): void {
-        var platform: IPlatform = getPlatform(buildInfo);
+        var platform: ITargetPlatform = getPlatform(buildInfo);
         if (!platform) {
             buildInfo.updateStatus(BuildInfo.INVALID, "UnsupportedPlatform");
             callback(buildInfo);
@@ -180,7 +183,7 @@ module TacoRemoteLib {
             return;
         }
 
-        var cfg = new utils.CordovaConfig(path.join(buildInfo.appDir, "config.xml"));
+        var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
         buildInfo["appName"] = cfg.name();
 
         buildInfo.updateStatus(BuildInfo.BUILDING);
@@ -221,12 +224,11 @@ module TacoRemoteLib {
         }
 
         try {
-            var cfg = new utils.CordovaConfig(path.join(buildInfo.appDir, "config.xml"));
+            var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
             var appName = cfg.name();
             if (!utils.UtilHelper.isValidCordovaAppName(appName)) {
                 return { id: "InvalidCordovaAppUnsupportedAppName", args: [appName, utils.UtilHelper.invalidAppNameCharacters()] };
             }
-            // TODO validate that start page exists (content src='index.html')
         } catch (e) {
             return { id: "InvalidCordovaAppBadConfigXml", args: e.message };
         }
@@ -238,9 +240,9 @@ module TacoRemoteLib {
         return null;
     }
 
-    function getPlatform(buildInfo: BuildInfo): IPlatform {
+    function getPlatform(buildInfo: BuildInfo): ITargetPlatform {
         for (var i = 0; i < platforms.length; ++i) {
-            var platform: IPlatform = platforms[i];
+            var platform: ITargetPlatform = platforms[i];
             if (platform.canServiceRequest(buildInfo)) {
                 return platform;
             }

@@ -5,6 +5,10 @@ declare module TacoUtility {
         private _doc;
         constructor(configXmlPath: string);
         /**
+         * Helper method to get a CordovaConfig object for a cordova project
+         */
+        static getCordovaConfig(cordovaDirPath: string): CordovaConfig;
+        /**
          * Get the package ID
          *
          * @returns {string} The packageID
