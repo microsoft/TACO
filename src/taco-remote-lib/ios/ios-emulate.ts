@@ -16,6 +16,8 @@ import Q = require ("q");
 
 import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
+import BuildInfo = tacoUtils.BuildInfo;
+
 // Note: this file is not intended to be loaded as a module, but rather in a separate process.
 process.on("message", function (emulateRequest: any): void {
     Q(emulate(emulateRequest))
@@ -28,7 +30,7 @@ function emulate(emulateRequest: { appDir: string; appName: string; target: stri
     return Q.fcall(cdToAppDir, emulateRequest)
         .then(cordovaEmulate)
         .then(function success(): { status: string; messageId: string; messageArgs?: any } {
-        return { status: "emulated", messageId: "EmulateSuccess" };
+        return { status: BuildInfo.EMULATED, messageId: "EmulateSuccess" };
     }, function fail(e: Error): { status: string; messageId: string; messageArgs?: any } {
             return { status: "error", messageId: "EmulateFailedWithError", messageArgs: e.message };
         });

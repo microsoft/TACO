@@ -192,11 +192,18 @@ module TacoRemoteLib {
         var buildLogger = new ProcessLogger();
         buildLogger.begin(buildInfo.buildDir, "build.log", buildInfo.buildLang, buildProcess);
 
+        var finalStatuses: { [idx: string]: any } = {};
+        finalStatuses[BuildInfo.COMPLETE] = true;
+        finalStatuses[BuildInfo.ERROR] = true;
+
         buildProcess.on("message", function (resultBuildInfo: BuildInfo): void {
             buildInfo.updateStatus(resultBuildInfo.status, resultBuildInfo.messageId, resultBuildInfo.messageArgs);
 
-            buildProcess.kill();
-            callback(buildInfo);
+            // If we get back a status that signals the end of a build, then terminate the process and call the callback.
+            if (finalStatuses[resultBuildInfo.status]) {
+                buildProcess.kill();
+                callback(buildInfo);
+            }
         });
         buildProcess.on("exit", function (exitCode: number): void {
             if (buildInfo.status === BuildInfo.BUILDING) {
