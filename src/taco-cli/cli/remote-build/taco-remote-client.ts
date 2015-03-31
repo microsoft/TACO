@@ -449,8 +449,8 @@ class TacoRemoteClient {
 
             var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
             console.info(buildInfo.status + " - " + buildInfo.message);
+            buildInfo["logOffset"] = logOffset || 0;
             if (buildInfo.status === "complete") {
-                buildInfo["logOffset"] = logOffset || 0;
                 return Q(buildInfo);
             } else if (buildInfo.status === "invalid") {
                 throw new Error(res.getString("InvalidRemoteBuild", buildInfo.message));

@@ -138,6 +138,15 @@ describe("taco build", function () {
                 waitForPayload: false
             },
             {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=0",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: "1",
+                waitForPayload: false
+            },
+            {
                 expectedUrl: "/cordova/build/tasks/" + buildNumber,
                 head: {
                     "Content-Type": "application/json"
@@ -150,12 +159,12 @@ describe("taco build", function () {
                 waitForPayload: false
             },
             {
-                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log",
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=1",
                 head: {
-                    "Content-Type": "text/plain"
+                    "Content-Type": "application/json"
                 },
                 statusCode: 200,
-                response: "Logfile contents",
+                response: "2",
                 waitForPayload: false
             },
             {
@@ -219,6 +228,15 @@ describe("taco build", function () {
                 }))
             },
             {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=0",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: "1",
+                waitForPayload: false
+            },
+            {
                 expectedUrl: "/cordova/build/tasks/" + buildNumber,
                 head: {
                     "Content-Type": "application/json"
@@ -230,7 +248,7 @@ describe("taco build", function () {
                 }))
             },
             {
-                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log",
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=1",
                 head: {
                     "Content-Type": "text/plain"
                 },
@@ -311,7 +329,7 @@ describe("taco build", function () {
                 }))
             },
             {
-                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log",
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=0",
                 head: {
                     "Content-Type": "text/plain"
                 },
