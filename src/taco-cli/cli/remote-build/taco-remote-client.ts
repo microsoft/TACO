@@ -475,9 +475,9 @@ class TacoRemoteClient {
         var serverUrl = settings.buildServerUrl;
         var deferred = Q.defer<BuildInfo>();
         var offset: number = buildInfo["logOffset"] || 0;
-        var logFlags = offset > 0 ? 'r+' : 'w';
+        var logFlags = offset > 0 ? "r+" : "w";
         var buildNumber = buildInfo.buildNumber;
-        var downloadUrl = util.format("%s/build/tasks/%d/log?offset=%d",serverUrl, buildNumber, offset);
+        var downloadUrl = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);
         return TacoRemoteClient.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
             var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);

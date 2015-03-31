@@ -15,7 +15,7 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
-import tacoUtils = require("taco-utils");
+import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import BuildInfo = tacoUtils.BuildInfo;
 
@@ -28,7 +28,7 @@ process.on("message", function (emulateRequest: { appDir: string; appName: strin
 });
 
 class IOSEmulate {
-    private static iosSimTargets: { [id: string]: string } = {
+    private static IOSSimTargets: { [id: string]: string } = {
         "iphone 4s": "--retina",
         "iphone 5": "--retina --tall",
         "iphone 5s": "--retina --tall --64bit",
@@ -68,7 +68,7 @@ class IOSEmulate {
 
     private static iosSimTarget(emulateRequestTarget: string): string {
         emulateRequestTarget = emulateRequestTarget.toLowerCase();
-        var iosSimTarget = IOSEmulate.iosSimTargets[emulateRequestTarget] || "--family iphone --retina";
+        var iosSimTarget = IOSEmulate.IOSSimTargets[emulateRequestTarget] || "--family iphone --retina";
         return iosSimTarget;
     }
 }

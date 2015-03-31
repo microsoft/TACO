@@ -131,9 +131,10 @@ class IOSAgent implements ITargetPlatform {
         }
 
         if (!req.query.target) {
-            // Emulate the iPhone 6 if not otherwise specified by the client.
+            // Emulate the iPhone 5 if not otherwise specified by the client.
             req.query.target = "iphone 5";
         }
+
         var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
 
         var emulateProcess = child_process.fork(path.join(__dirname, "ios-emulate.js"), [], { silent: true });

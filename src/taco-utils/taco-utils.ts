@@ -1,7 +1,7 @@
 "use strict";
 import buildInfo = require ("./build-info");
-import cordovaConfig = require("./cordova-config");
-import countStream = require("./count-stream");
+import cordovaConfig = require ("./cordova-config");
+import countStream = require ("./count-stream");
 import resourcesManager = require ("./resources-manager");
 import utilHelper = require ("./util-helper");
 import commands = require ("./commands");

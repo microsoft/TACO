@@ -23,8 +23,8 @@ module TacoRemoteLib {
     var initialized = false;
 
     var supportedBuildConfigurations: { [key: string]: boolean } = {
-        "debug": true,
-        "release": true
+        debug: true,
+        release: true
     };
 
     export var locResources: resources.IResources = resources;
