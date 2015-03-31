@@ -74,6 +74,14 @@
     "ErrorXcconfigDirNotFound": "Directory for build.xcconfig does not exist.",
     "_ErrorXcconfigDirNotFound.comment": "Message logged when we can't find the directory that build.xcconfig ",
 
-    "NoTargetSpecified": "No emulation target specified.",
-    "_NoTargetSpecified.comment": "Message reported when emulation is requested without specifying any targets"
+    "AcquiringCordova": "Acquiring cordova.",
+    "_AcquiringCordova.comment": "Status message returned when downloading and installing the requested version of cordova",
+    "UpdatingIOSPlatform": "Updating iOS platform.",
+    "_UpdatingIOSPlatform.comment": "Status message returned when doing a 'cordova platform add ios' or 'cordova prepare ios'",
+    "CopyingNativeOverrides": "Copying native overrides.",
+    "_CopyingNativeOverrides.comment": "Status message returned when copying data from /res/native",
+    "CordovaCompiling": "Compiling.",
+    "_CordovaCompiling.comment": "Status message returned when doing 'cordova compile ios'",
+    "PackagingNativeApp": "Packaging app.",
+    "_PackagingNativeApp.comment": "Status message returned when packaging the app for a device build"
 }

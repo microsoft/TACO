@@ -62,6 +62,8 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     currentBuild = buildInfo;
     language = buildRequest.language;
     var cordovaVersion: string = currentBuild["vcordova"];
+    buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
+    process.send(buildInfo);
     TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", cordovaVersion).done(function (pkg: Cordova.ICordova): void {
         cordova = pkg;
 
@@ -88,12 +90,16 @@ class IOSBuild {
 
         try {
             Q.fcall(IOSBuild.change_directory, currentBuild)
+            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform"); process.send(currentBuild); })
             .then(IOSBuild.addOrPrepareIOS)
             .then(function (): void { IOSBuild.applyPreferencesToBuildConfig(cfg); })
+            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(currentBuild); })
             .then(IOSBuild.prepareNativeOverrides)
             .then(IOSBuild.updateAppPlistBuildNumber)
+            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CordovaCompiling"); process.send(currentBuild); })
             .then(IOSBuild.build_ios)
             .then(IOSBuild.rename_app)
+            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(currentBuild); })
             .then(isDeviceBuild ? IOSBuild.package_ios : noOp)
             .then(function (): void {
                 console.info(resources.getString("DoneBuilding", currentBuild.buildNumber));

@@ -22,6 +22,11 @@ module TacoRemoteLib {
     var platforms: ITargetPlatform[];
     var initialized = false;
 
+    var supportedBuildConfigurations: { [key: string]: boolean } = {
+        "debug": true,
+        "release": true
+    };
+
     export var locResources: resources.IResources = resources;
 
     export interface IReadOnlyConf {
@@ -152,10 +157,7 @@ module TacoRemoteLib {
             errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedCommand", buildCommand));
         }
 
-        var supportedConfigurations: { [key: string]: boolean } = {};
-        supportedConfigurations["debug"] = true;
-        supportedConfigurations["release"] = true;
-        if (!supportedConfigurations[configuration]) {
+        if (!supportedBuildConfigurations[configuration]) {
             errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedConfiguration", configuration));
         }
 

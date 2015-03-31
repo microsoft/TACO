@@ -131,8 +131,8 @@ class IOSAgent implements ITargetPlatform {
         }
 
         if (!req.query.target) {
-            res.status(404).send(resources.getStringForLanguage(req, "NoTargetSpecified"));
-            return;
+            // Emulate the iPhone 6 if not otherwise specified by the client.
+            req.query.target = "iphone 5";
         }
         var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
 
