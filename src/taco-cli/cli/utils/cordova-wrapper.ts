@@ -18,7 +18,19 @@ class CordovaWrapper {
         return CordovaWrapper.cli(["build", platform]);
     }
 
-    public static create(path: string, id?: string, name?: string, cdvConfig?: string, cfg?: any): Q.Promise<any> {
+    /**
+     * Provides the path of the specified template in taco-home's template cache. If the specified template is not in the cache, then
+     * the template is fetched and cached before its path is returned.
+     *
+     * @param {string} The path of the project to create
+     * @param {string} The id of the app
+     * @param {string} The name of app
+     * @param {string} A JSON string whose key/value pairs will be added to the cordova config file in <project path>/.cordova/
+     * @param {any} Bag of option flags for the 'cordova create' command
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static create(path: string, id?: string, name?: string, cdvConfig?: string, options?: any): Q.Promise<any> {
         var command: string[] = ["create", path];
 
         if (id) {
@@ -34,12 +46,12 @@ class CordovaWrapper {
         }
 
         // Options
-        for (var option in cfg) {
+        for (var option in options) {
             command.push("--" + option);
 
             // If the property has a value that isn't boolean, also include its value in the command
-            if (cfg[option] && typeof cfg[option] !== "Boolean") {
-                command.push(cfg[option]);
+            if (options[option] && typeof options[option] !== "Boolean") {
+                command.push(options[option]);
             }
         }
 

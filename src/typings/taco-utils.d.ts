@@ -6,7 +6,6 @@
 /// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/process-logger.d.ts" />
 /// <reference path="../typings/taco-package-loader.d.ts" />
-/// <reference path="../typings/template-helper.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoUtility namespace,
 // include a reference to the d.ts file that is generated (as above), and make sure
