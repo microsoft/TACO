@@ -196,12 +196,6 @@ module BuildManager {
 
     // Downloads the requested build.
     export function downloadBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
-        if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
-            return;
-        }
-
         requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
             pkg.downloadBuild(buildInfo, req, res, function (err: any): void {
                 if (!err) {
@@ -217,14 +211,7 @@ module BuildManager {
     }
 
     export function emulateBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
-        if (!buildInfo.buildSuccessful) {
-            // If we haven't built this request before, then we can't emulate it because we won't have the bits to emulate.
-            // We could allow this by having the user provide their own pre-built bits, but this could be error prone if they aren't correct,
-            // and if you can emulate then you must have xcode installed anyway and so you are likely able to build anyway
-            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
-            return;
-        } else if (!utils.UtilHelper.argToBool(serverConf.get("allowsEmulate"))) {
+        if (!utils.UtilHelper.argToBool(serverConf.get("allowsEmulate"))) {
             res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
             return;
         }
