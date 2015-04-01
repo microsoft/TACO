@@ -11,6 +11,7 @@
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/express-extensions.d.ts" />
 /// <reference path="../../typings/tar.d.ts" />
+/// <reference path="./request-redirector.ts" />
 "use strict";
 
 import child_process = require ("child_process");
@@ -42,7 +43,7 @@ module BuildManager {
             succeeded: number;
             downloaded: number;
         },
-        requestRedirector: { getPackageToServeRequest(buildInfo: utils.BuildInfo, req: express.Request): TacoRemoteLib.IRemoteLib },
+        requestRedirector: TacoRemoteLib.IRequestRedirector,
         serverConf: TacoRemote.IDict;
 
     export function init(conf: TacoRemote.IDict): void {
@@ -106,53 +107,54 @@ module BuildManager {
         var buildPlatform: string = req.query.platform || "ios";
 
         // TODO: Check if any package can service the request
-        var pkg = requestRedirector.getPackageToServeRequest(null, req);
-        pkg.init(serverConf);
-        var errors: string[] = [];
-        if (!pkg.validateBuildRequest(req, errors)) {
-            callback(errors);
-            buildMetrics.rejected++;
-            return;
-        }
-
-        buildMetrics.accepted++;
-
-        if (!buildNumber) {
-            buildNumber = ++nextBuildNumber;
-        }
-
-        var buildDir = path.join(baseBuildDir, "" + buildNumber);
-        if (!fs.existsSync(buildDir)) {
-            fs.mkdirSync(buildDir);
-        }
-
-        console.info(resources.getString("BuildManagerDirInit", buildDir));
-
-        // Pass the build query to the buildInfo, for package-specific config options
-        var params = req.query;
-        params.status = utils.BuildInfo.UPLOADING;
-        params.buildCommand = buildCommand;
-        params.buildPlatform = buildPlatform;
-        params.configuration = configuration;
-        params.buildLang = req.headers["accept-language"];
-        params.buildDir = buildDir;
-        params.buildNumber = buildNumber;
-        params.options = options;
-        var buildInfo = new utils.BuildInfo(params);
-        // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
-        Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
-        buildInfo["pkg"] = pkg;
-
-        builds[buildNumber] = buildInfo;
-
-        saveUploadedTgzFile(buildInfo, req, function (err: any, result: any): void {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, buildInfo);
-                beginBuild(req, buildInfo);
+        requestRedirector.getPackageToServeRequest(null, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.init(serverConf);
+            var errors: string[] = [];
+            if (!pkg.validateBuildRequest(req, errors)) {
+                callback(errors);
+                buildMetrics.rejected++;
+                return;
             }
-        });
+
+            buildMetrics.accepted++;
+
+            if (!buildNumber) {
+                buildNumber = ++nextBuildNumber;
+            }
+
+            var buildDir = path.join(baseBuildDir, "" + buildNumber);
+            if (!fs.existsSync(buildDir)) {
+                fs.mkdirSync(buildDir);
+            }
+
+            console.info(resources.getString("BuildManagerDirInit", buildDir));
+
+            // Pass the build query to the buildInfo, for package-specific config options
+            var params = req.query;
+            params.status = utils.BuildInfo.UPLOADING;
+            params.buildCommand = buildCommand;
+            params.buildPlatform = buildPlatform;
+            params.configuration = configuration;
+            params.buildLang = req.headers["accept-language"];
+            params.buildDir = buildDir;
+            params.buildNumber = buildNumber;
+            params.options = options;
+            var buildInfo = new utils.BuildInfo(params);
+            // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
+            Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
+            buildInfo["pkg"] = pkg;
+
+            builds[buildNumber] = buildInfo;
+
+            saveUploadedTgzFile(buildInfo, req, function (err: any, result: any): void {
+                if (err) {
+                    callback(err);
+                } else {
+                    callback(null, buildInfo);
+                    beginBuild(req, buildInfo);
+                }
+            });
+        }).done();
     }
 
     export function getBuildInfo(id: number): utils.BuildInfo {
@@ -200,12 +202,13 @@ module BuildManager {
             return;
         }
 
-        var pkg = requestRedirector.getPackageToServeRequest(buildInfo, req);
-        pkg.downloadBuild(buildInfo, req, res, function (err: any): void {
-            if (!err) {
-                buildMetrics.downloaded++;
-                buildInfo.updateStatus(utils.BuildInfo.DOWNLOADED);
-            }
+        requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.downloadBuild(buildInfo, req, res, function (err: any): void {
+                if (!err) {
+                    buildMetrics.downloaded++;
+                    buildInfo.updateStatus(utils.BuildInfo.DOWNLOADED);
+                }
+            });
         });
     };
 
@@ -226,41 +229,27 @@ module BuildManager {
             return;
         }
 
-        var pkg = requestRedirector.getPackageToServeRequest(buildInfo, req);
-        pkg.emulateBuild(buildInfo, req, res);
+        requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.emulateBuild(buildInfo, req, res);
+        });
     }
 
     export function deployBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
-        if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
-            return;
-        }
-
-        var pkg = requestRedirector.getPackageToServeRequest(buildInfo, req);
-        pkg.deployBuild(buildInfo, req, res);
+        requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.deployBuild(buildInfo, req, res);
+        });
     }
 
     export function runBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
-        if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
-            return;
-        }
-
-        var pkg = requestRedirector.getPackageToServeRequest(buildInfo, req);
-        pkg.runBuild(buildInfo, req, res);
+        requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.runBuild(buildInfo, req, res);
+        });
     }
 
     export function debugBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
-        if (!buildInfo.buildSuccessful) {
-            console.info(resources.getStringForLanguage(serverConf.get("lang"), "BuildNotCompleted", buildInfo.status));
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
-            return;
-        }
-
-        var pkg = requestRedirector.getPackageToServeRequest(buildInfo, req);
-        pkg.debugBuild(buildInfo, req, res);
+        requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.debugBuild(buildInfo, req, res);
+        });
     }
 
     function saveUploadedTgzFile(buildInfo: utils.BuildInfo, req: express.Request, callback: Function): void {
@@ -375,19 +364,20 @@ module BuildManager {
             return;
         }
 
-        var pkg = requestRedirector.getPackageToServeRequest(buildInfo, null);
-        pkg.build(buildInfo, function (resultBuildInfo: utils.BuildInfo): void {
-            buildInfo.updateStatus(resultBuildInfo.status, resultBuildInfo.messageId, resultBuildInfo.messageArgs);
-            if (buildInfo.status === utils.BuildInfo.COMPLETE) {
-                buildMetrics.succeeded++;
-                buildInfo.buildSuccessful = true;
-            } else if (buildInfo.status === utils.BuildInfo.INVALID) {
-                buildMetrics.rejected++;
-            } else {
-                buildMetrics.failed++;
-            }
+        requestRedirector.getPackageToServeRequest(buildInfo, null).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
+            pkg.build(buildInfo, function (resultBuildInfo: utils.BuildInfo): void {
+                buildInfo.updateStatus(resultBuildInfo.status, resultBuildInfo.messageId, resultBuildInfo.messageArgs);
+                if (buildInfo.status === utils.BuildInfo.COMPLETE) {
+                    buildMetrics.succeeded++;
+                    buildInfo.buildSuccessful = true;
+                } else if (buildInfo.status === utils.BuildInfo.INVALID) {
+                    buildMetrics.rejected++;
+                } else {
+                    buildMetrics.failed++;
+                }
 
-            dequeueNextBuild();
+                dequeueNextBuild();
+            });
         });
     }
 

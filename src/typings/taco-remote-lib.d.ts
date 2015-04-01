@@ -6,6 +6,9 @@
 /// <reference path="../typings/taco-remote.d.ts" />
 
 declare module TacoRemoteLib {
+    interface IRequestRedirector {
+        getPackageToServeRequest(buildInfo: TacoUtility.BuildInfo, req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib>;
+    }
     interface IReadOnlyConf {
         get(prop: string): any;
     }

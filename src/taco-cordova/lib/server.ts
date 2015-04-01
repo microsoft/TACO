@@ -12,6 +12,7 @@
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/express-extensions.d.ts" />
 /// <reference path="../../typings/taco-remote-lib.d.ts" />
+/// <reference path="../../typings/taco-remote.d.ts" />
 /// <reference path="../../typings/serve-index.d.ts" />
 "use strict";
 
@@ -143,6 +144,11 @@ class Server implements TacoRemote.IServerModule {
             var buildInfo = buildManager.getBuildInfo(req.params.id);
             if (!buildInfo) {
                 res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+                return;
+            }
+
+            if (!buildInfo.buildSuccessful) {
+                res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
                 return;
             }
 

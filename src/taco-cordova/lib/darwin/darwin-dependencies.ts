@@ -74,7 +74,7 @@ module DarwinDependencies {
                         verifyPackagesInstalled()
                         .then(function (): void {
                             console.info(resources.getString("HomebrewInstallationSuccess"));
-                            deferred2.resolve(shouldInstall);
+                            deferred2.resolve(true);
                         }, function (error: Error): void {
                                 console.error(resources.getString("HomebrewPackageVerificationFailed", error));
                                 process.exit(1);
@@ -85,7 +85,7 @@ module DarwinDependencies {
                     });
                 } else {
                     console.info(resources.getString("HomebrewInstallationDeclined"));
-                    deferred2.resolve(shouldInstall);
+                    deferred2.resolve(false);
                 }
             });
 

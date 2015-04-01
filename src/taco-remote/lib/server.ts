@@ -51,9 +51,9 @@ module Server {
 
         return initializeServerCapabilities(conf).then(function (serverCapabilities: TacoRemote.IServerCapabilities): Q.Promise<any> {
             return loadServerModules(conf, app, serverCapabilities).then(function (): Q.Promise<any> {
-                return startupServer(conf, app).
-                    then(registerShutdownHooks).
-                    fail(function (err: any): void {
+                return startupServer(conf, app)
+                .then(registerShutdownHooks)
+                .fail(function (err: any): void {
                     console.error(resources.getStringForLanguage(conf.get("lang"), "ServerStartFailed"), err);
                     if (err.stack) {
                         console.error(err.stack);
