@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../../typings/wrench.d.ts" />
 /// <reference path="../../../typings/replace.d.ts" />
 /// <reference path="../../../typings/tar.d.ts" />
+/// <reference path="../../../typings/templates.d.ts" />
 
 "use strict";
 import Q = require ("q");
@@ -24,7 +25,7 @@ module TemplateHelper {
         /*
          * Template metadata is kept in a public static member for automated test purposes
          */
-        public static TemplateMetaData: TemplateHelper2.ITemplateMetaData = null;
+        public static TemplateMetaData: Templates.ITemplateMetaData = null;
 
         /*
          * Current project kit is kept in a public static member for automated test purposes

@@ -1,4 +1,4 @@
-﻿declare module TemplateHelper2 {
+﻿declare module Templates {
     interface ITemplateMetaData {
         [kitName: string]: {
             [templateName: string]: {

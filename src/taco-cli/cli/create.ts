@@ -124,7 +124,7 @@ class Create implements commands.IDocumentedCommand {
                 },
                 function (errorId: string): Q.Promise<any> {
                     if (errorId === "command.create.templateNotFound") {
-                        logger.logErrorLine(resources.getString("command.create.templateNotFound", this.commandData.options["template"]));
+                        logger.logErrorLine(resources.getString("command.create.templateNotFound", self.commandParameters.data.options["template"]));
                     } else {
                         logger.logErrorLine(resources.getString(errorId));
                     }
