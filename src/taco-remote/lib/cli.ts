@@ -78,6 +78,11 @@ tasks = {
             return server.start(nconf);
         }
     },
+    test: {
+        execute: function (): Q.Promise<void> {
+            return server.test(nconf);
+        }
+    },
     resetServerCert: {
         execute: function (): Q.Promise<void> {
             return server.resetServerCert(nconf);

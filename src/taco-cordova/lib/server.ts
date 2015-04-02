@@ -18,12 +18,14 @@
 
 import express = require ("express");
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import serveIndex = require ("serve-index");
 
 import buildManager = require ("./build-manager");
 import HostSpecifics = require ("./host-specifics");
+import selftest = require ("./selftest");
 import TacoCordovaConf = require ("./taco-cordova-conf");
 import utils = require ("taco-utils");
 import util = require ("util");
@@ -36,6 +38,13 @@ module ServerModule {
         return HostSpecifics.hostSpecifics.initialize(conf).then(function (): TacoRemote.IServerModule {
             return new Server(new TacoCordovaConf(conf), modPath);
         });
+    }
+
+    export function test(conf: TacoRemote.IDict, modPath: string): Q.Promise<any> {
+        var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.get("secure")) ? "s" : "", conf.get("hostname") || os.hostname, conf.get("port"));
+        var downloadDir = path.join(conf.get("serverDir"), "selftest", "taco-cordova");
+        utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
+        return selftest.test(host, modPath, downloadDir);
     }
 }
 

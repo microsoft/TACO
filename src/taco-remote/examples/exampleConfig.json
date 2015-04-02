@@ -1,21 +1,27 @@
-{
-    "serverDir": "~/remote-builds",
-    "port": 3000,
-    "secure": true,
-    "pinTimeout": 10,
-    "certExpirationDays": 1825,
-    "lang": "en",
-    "modules": {
-        "taco-cordova": {
-            "mountPath": "cordova",
-            "allowsEmulate": true,
-            "maxBuildsToKeep": 20,
-            "maxBuildsInQueue": 10,
-            "deleteBuildsOnShutdown": true,
+This is an example configuration file with comments describing the meaning. Since JSON does not allow comments, this file is not valid as it stands 
 
-            "nativeDebugProxyPort": 3001,
-            "webDebugProxyDevicePort": 9221,
-            "webDebugProxyPortMin": 9222,
+{
+    "serverDir": "~/remote-builds", // Where should taco-remote store its working data, including certificates and builds. Defaults to TACO_HOME/remote-builds
+    "port": 3000, // What port should the taco-remote server listen on
+    "secure": true, // Should the server use HTTPS and require paired certificates
+    "pinTimeout": 10, // How many minutes can pass between generating a client certificate and a client acquiring it
+    "certExpirationDays": 1825, // How many days is a generated certificate valid for
+    "lang": "en", // What language should console messages be printed in. 
+    "hostname": "localhost", // What hostname should the certificates be generated for. If this value is not specified, we default to os.hostname()
+    "suppressSetupMessage": false,
+    "writePidToFile": false,
+    "modules": { // What node modules (which must previously be npm-installed) should service requests made to the server
+        "taco-cordova": { // Example: use the taco-cordova node module, with the following configuration parameters
+            "mountPath": "cordova", // all modules must specify a mountPath. For example, requests made to localhost:3000/cordova will be serviced by taco-cordova
+            "allowsEmulate": true, // Do we allow clients to use emulators on the server?
+            "maxBuildsToKeep": 20, // How many builds to keep before deleting older ones
+            "maxBuildsInQueue": 10, // How many builds to allow in a queue before rejecting new submissions
+            "deleteBuildsOnShutdown": true, // Should builds be deleted when the server is shut down
+            "redirector": "/path/to/redirector/js/file", // This is a path to a js file along the lines of taco-cordova/lib/request-redirector.js (the default). When a build request is made, this file determines what package to use to handle the particular request. If you have non-standard builds, you may provide your own implementation along the lines of taco-remote-lib
+
+            "nativeDebugProxyPort": 3001, // What port should we attempt to open a debug channel to iOS devices on?
+            "webDebugProxyDevicePort": 9221, // What port should we expose ios-webkit-debug-proxy on
+            "webDebugProxyPortMin": 9222, // What port range should ios-webkit-debug-proxy assign devices and the simulator to
             "webDebugProxyPortMax": 9322
         }
     }

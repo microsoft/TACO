@@ -96,11 +96,11 @@ module Certs {
 
         return makeClientPinAndSslCert(caKeyPath, caCertPath, certsDir, certOptionsFromConf(conf), conf).
             then(function (pin: number): number {
-                if (utils.argToBool(conf.get("suppressVisualStudioMessage"))) {
+                if (utils.argToBool(conf.get("suppressSetupMessage"))) {
                     return pin;
                 }
 
-                printVisualStudioSetupToConsole(conf, pin);
+                printSetupInstructionsToConsole(conf, pin);
                 return pin;
             });
     };
@@ -351,7 +351,7 @@ module Certs {
 
     // TODO: Make this explain how to configure taco-cli?
     // TODO: How do we want this to work in the world where it is shared between VS and taco-cli?
-    function printVisualStudioSetupToConsole(conf: HostSpecifics.IConf, pin: number): void {
+    function printSetupInstructionsToConsole(conf: HostSpecifics.IConf, pin: number): void {
         var host = conf.get("hostname") || os.hostname();
         var port = conf.get("port");
         var pinTimeoutInMinutes = conf.get("pinTimeout");

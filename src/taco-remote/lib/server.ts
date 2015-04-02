@@ -81,6 +81,38 @@ module Server {
         }
     }
 
+    /**
+     * Attempt to test each of the server modules against a separate instance of taco-remote which is assumed to be running with the same configuration
+     */
+    export function test(conf: HostSpecifics.IConf): Q.Promise<any> {
+        var serverMods: { [mod: string]: { mountPath: string } } = conf.get("modules");
+        var promise: Q.Promise<any> = Q({});
+        if (serverMods) {
+            promise = Object.keys(serverMods).reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
+                try {
+                    var attachPath = serverMods[mod].mountPath;
+                    var modGen: TacoRemote.IServerModuleFactory = require(mod);
+                    return promise.then(function (): Q.Promise<any> {
+                        return modGen.test(conf, attachPath).then(function (): void {
+                            console.log(resources.getString("TestPassed", mod));
+                        }, function (err: Error): void {
+                            console.error(resources.getString("TestFailed", mod));
+                            console.error(err);
+                            throw err;
+                        });
+                    });
+                } catch (e) {
+                    console.error(e);
+                    return Q.reject(e);
+                }
+            }, promise);
+        } else {
+            console.warn(resources.getString("NoServerModulesSelected"));
+        }
+
+        return promise;
+    }
+
     export function resetServerCert(conf: HostSpecifics.IConf): Q.Promise<any> {
         return HostSpecifics.hostSpecifics.resetServerCert(conf);
     }
@@ -173,7 +205,6 @@ module Server {
             then(function (certStore: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
                 if (certStore.newCerts) {
                     generatedNewCerts = true;
-                    conf.set("suppressVisualStudioMessage", true);
                     return HostSpecifics.hostSpecifics.generateClientCert(conf).
                         then(function (pin: number): HostSpecifics.ICertStore {
                             generatedClientPin = pin;

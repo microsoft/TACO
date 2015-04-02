@@ -30,7 +30,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
             serverDir: path.join(utils.UtilHelper.tacoHome, "remote-builds"),
             writePidToFile: false,
             lang: "en", // TODO: determine appropriate language on windows
-            suppressVisualStudioMessage: false,
+            suppressSetupMessage: false,
         };
         Object.keys(win32defaults).forEach(function (key: string): void {
             if (!(key in base)) {

@@ -80,13 +80,18 @@
     "_UsageInformation.comment": "Usage information to be printed when the -h argument is specified, or unknown arguments are given. The entries are combined with newlines before printing",
 
     "OSXCertSetupInformation": [
-        "Use the following information under Tools, Options, Tools for Apache Cordova, Remote Agent Configuration to configure this agent:",
+        "Use the following information in Visual Studio under Tools, Options, Tools for Apache Cordova, Remote Agent Configuration to use this agent:",
         "",
         "Enable remote iOS processing: True",
         "Host: {0}",
         "Port: {1}",
         "Secure mode: True",
-        "Security PIN: {2}"
+        "Security PIN: {2}",
+        "",
+        "Alternately, use 'taco setup remote <platform>' to configure the taco CLI to use this build server for the chosen platform, specifying",
+        "Host: {0}",
+        "Port: {1}",
+        "PIN: {2}"
     ],
     "_OSXCertSetupInformation.comment": "{0} is the host name or IP address of the machine, {1} is the port number that the server is running on, {2} is the 6 digit generated PIN",
     "OSXCertSetupNoPinTimeout": "The security PIN is for one-time use. To generate additional PINs, use the following command:",
@@ -119,5 +124,10 @@
 	"UncaughtErrorShutdown": "****** Server will shutdown due to uncaught error ****** ",
 	"_UncaughtErrorShutdown.comment": "Message printed when an uncaught error is encountered",
 	"ServerShutdown": "****** Performing server shutdown procedures.",
-	"_ServerShutdown.comment": "Message printed when the server shuts down from an error or after the user requests it."
+    "_ServerShutdown.comment": "Message printed when the server shuts down from an error or after the user requests it.",
+
+    "TestFailed": "Error: {0} test failed.",
+    "_TestFailed.comment": "Message printed when a server module test fails. {0} is the name of the module",
+    "TestPassed": "{0} test passed.",
+    "_TestPassed.comment": "Message printed when a server module test succeeds. {0} is the name of the module"
 }

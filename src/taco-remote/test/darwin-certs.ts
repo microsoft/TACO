@@ -67,11 +67,11 @@ macOnly("Certs", function (): void {
     
     // Test that initializing server certificates does not re-create certificates if they already exist
     it("InitializeServerCertsWhenCertsAlreadyExist", function (done: MochaDone): void {
-        certs.initializeServerCerts(conf({ serverDir: serverDir, suppressVisualStudioMessage: true })).
+        certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true })).
             then(function (certPaths: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
             certPaths.newCerts.should.equal(true, "Expect newCerts true from first initializeServerCerts");
             testServerCertsExist();
-            return certs.initializeServerCerts(conf({ serverDir: serverDir, suppressVisualStudioMessage: true }));
+            return certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true }));
         }).
             then(function (certPaths: HostSpecifics.ICertStore): void {
             certPaths.newCerts.should.equal(false, "Expect newCerts false from second initializeServerCerts");
@@ -154,7 +154,7 @@ macOnly("Certs", function (): void {
             originalCertInode = fs.statSync(path.join(certsDir, "server-cert.pem")).ino;
         }).
             then(function (): Q.Promise<any> {
-            return certs.resetServerCert(conf({ serverDir: serverDir, suppressVisualStudioMessage: true }), yesHandler);
+            return certs.resetServerCert(conf({ serverDir: serverDir, suppressSetupMessage: true }), yesHandler);
         }).
             then(function (): void {
             fs.statSync(path.join(certsDir, "server-cert.pem")).ino.should.not.equal(originalCertInode,
@@ -171,7 +171,7 @@ macOnly("Certs", function (): void {
 
         certs.initializeServerCerts(conf({ serverDir: serverDir })).
             then(function (): Q.Promise<number> {
-            return certs.generateClientCert(conf({ serverDir: serverDir, suppressVisualStudioMessage: true }));
+            return certs.generateClientCert(conf({ serverDir: serverDir, suppressSetupMessage: true }));
         }).
             then(function (pin: number): void {
             should.assert(pin && pin >= 100000 && pin <= 999999, "pin should be a 6 digit number when client cert created");
@@ -187,7 +187,7 @@ macOnly("Certs", function (): void {
             should.assert(!fs.existsSync(path.join(clientCertsDir, "" + createdPin)), "client pin directory should no longer exist after purge with very quick timeout");
         }).
             then(function (): Q.Promise<number> {
-            return certs.generateClientCert(conf({ serverDir: serverDir, suppressVisualStudioMessage: true }));
+            return certs.generateClientCert(conf({ serverDir: serverDir, suppressSetupMessage: true }));
         }).
         // create another PIN and purge with a 10 minute timeout
             then(function (pin: number): void {

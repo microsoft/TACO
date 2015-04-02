@@ -30,13 +30,9 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var osxdefaults: { [key: string]: any } = {
             serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
-            nativeDebugProxyPort: 3001,
-            webDebugProxyDevicePort: 9221,
-            webDebugProxyRangeMin: 9222,
-            webDebugProxyRangeMax: 9322,
             writePidToFile: false,
             lang: process.env.LANG && process.env.LANG.replace(/_.*/, "") || "en", // Convert "en_US.UTF8" to "en", similarly for other locales
-            suppressVisualStudioMessage: false,
+            suppressSetupMessage: false,
         };
         Object.keys(osxdefaults).forEach(function (key: string): void {
             if (!(key in base)) {
