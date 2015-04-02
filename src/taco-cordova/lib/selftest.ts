@@ -41,7 +41,7 @@ module SelfTest {
             var i = 0;
             var ping = setInterval(function (): void {
                 i++;
-                request.get({url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
+                request.get({ url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
                     if (error) {
                         clearInterval(ping);
                         deferred.reject(error);

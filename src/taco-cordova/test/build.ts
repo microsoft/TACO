@@ -68,4 +68,4 @@ describe("taco-cordova", function (): void {
             mocha();
         }, mocha);
     });
-};)
+});
