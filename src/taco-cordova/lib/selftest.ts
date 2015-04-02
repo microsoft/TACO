@@ -1,6 +1,7 @@
 ﻿
 import fs = require ("fs");
 import fstream = require ("fstream");
+import https = require ("https");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
@@ -9,14 +10,14 @@ import util = require ("util");
 import zlib = require ("zlib");
 
 module SelfTest {
-    export function test(host: string, modMountPoint: string, downloadDir: string): Q.Promise<any> {
+    export function test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
         var cordovaApp = path.resolve(__dirname, "..", "examples", "cordovaApp", "helloCordova");
         var tping = 5000;
         var maxPings = 10;
         var vcordova = "4.3.0";
         var vcli = require("../package.json").version;
         var cfg = "debug";
-        var buildOptions = "--emulator";
+        var buildOptions = deviceBuild ? "--device" : "--emulator";
 
         var tgzProducingStream: NodeJS.ReadableStream = null;
         var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", mode: 777, filter: filterForTar });
@@ -25,7 +26,7 @@ module SelfTest {
         var deferred = Q.defer();
 
         var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
-        tgzProducingStream.pipe(request.post(buildUrl, function (error: any, response: any, body: any): void {
+        tgzProducingStream.pipe(request.post({ url: buildUrl, agent: agent }, function (error: any, response: any, body: any): void {
             if (error) {
                 deferred.reject(error);
                 return;
@@ -40,7 +41,7 @@ module SelfTest {
             var i = 0;
             var ping = setInterval(function (): void {
                 i++;
-                request.get(buildingUrl, function (error: any, response: any, body: any): void {
+                request.get({url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
                     if (error) {
                         clearInterval(ping);
                         deferred.reject(error);
@@ -52,18 +53,23 @@ module SelfTest {
                         deferred.reject(new Error("Build Failed: " + body));
                     } else if (build["status"] === "complete") {
                         clearInterval(ping);
-                        var downloadUrl = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
-                        var buildNumber = build["buildNumber"];
-                        var downloadFile = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
-                        var writeStream = fs.createWriteStream(downloadFile);
-                        writeStream.on("error", function (err: Error): void {
-                            deferred.reject(err);
-                        });
-                        request(downloadUrl).pipe(writeStream).on("finish", function (): void {
+
+                        if (deviceBuild) {
+                            var downloadUrl = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
+                            var buildNumber = build["buildNumber"];
+                            var downloadFile = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
+                            var writeStream = fs.createWriteStream(downloadFile);
+                            writeStream.on("error", function (err: Error): void {
+                                deferred.reject(err);
+                            });
+                            request({ url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
+                                deferred.resolve({});
+                            }).on("error", function (err: Error): void {
+                                deferred.reject(err);
+                            });
+                        } else {
                             deferred.resolve({});
-                        }).on("error", function (err: Error): void {
-                            deferred.reject(err);
-                        });
+                        }
                     } else if (i > maxPings) {
                         deferred.reject(new Error("Exceeded max # of pings: " + maxPings));
                         clearInterval(ping);

@@ -54,7 +54,7 @@ describe("taco-cordova", function (): void {
         // Building can take a while
         this.timeout(30000);
         var server = "http://" + os.hostname() + ":3000";
-        selftest.test(server, modMountPoint, downloadDir).done(function (): void {
+        selftest.test(server, modMountPoint, downloadDir,false,null).done(function (): void {
             mocha();
         }, mocha);
     });

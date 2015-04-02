@@ -15,6 +15,7 @@
 import child_process = require ("child_process");
 import express = require ("express");
 import fs = require ("fs");
+import https = require ("https");
 import nconf = require ("nconf");
 import path = require ("path");
 import Q = require ("q");
@@ -24,7 +25,7 @@ import HostSpecifics = require ("../host-specifics");
 import utils = require ("taco-utils");
 import UtilHelper = utils.UtilHelper;
 
-var resources = utils.ResourcesManager;
+import resources = utils.ResourcesManager;
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
@@ -94,6 +95,20 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
                 res.status(404).send(error);
             }
         }).finally(function (): void { certs.invalidatePIN(req.params.pin); }).done();
+    }
+
+    public getHttpsAgent(conf: HostSpecifics.IConf): Q.Promise<NodeJSHttp.Agent> {
+        if (UtilHelper.argToBool(conf.get("secure"))) {
+            conf.set("suppressSetupMessage", true);
+            return certs.generateClientCert(conf).then(function (pin: number): NodeJSHttp.Agent {
+                var pfxPath = path.join(conf.get("serverDir"), "certs", "client", pin.toString(), "client.pfx");
+                var cert = fs.readFileSync(pfxPath);
+                fs.unlinkSync(pfxPath);
+                return new https.Agent({strictSSL: true, pfx: cert});
+            });
+        } else {
+            return Q.resolve<NodeJSHttp.Agent>(null);
+        }
     }
 }
 

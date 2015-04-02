@@ -16,6 +16,8 @@
         "tar": "0.1.20",
         "q": "1.0.1",
         "rimraf": "2.2.6",
+        "fstream": "0.1.28",
+        "request": "2.36.0",
         "taco-utils": "file:../taco-utils",
         "taco-remote-lib": "file:../taco-remote-lib"
     },
@@ -24,9 +26,7 @@
         "mocha": "2.0.1",
         "mkdirp": "0.3.5",
         "should": "4.3.0",
-        "fstream": "0.1.28",
-        "nconf": "0.6.9",
-        "request": "2.36.0"
+        "nconf": "0.6.9"
     },
     "bundledDependencies": [ "taco-utils" ],
 

@@ -40,11 +40,13 @@ module ServerModule {
         });
     }
 
-    export function test(conf: TacoRemote.IDict, modPath: string): Q.Promise<any> {
+    export function test(conf: TacoRemote.IDict, modPath: string, serverTestCapabilities: TacoRemote.IServerTestCapabilities): Q.Promise<any> {
         var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.get("secure")) ? "s" : "", conf.get("hostname") || os.hostname, conf.get("port"));
         var downloadDir = path.join(conf.get("serverDir"), "selftest", "taco-cordova");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
-        return selftest.test(host, modPath, downloadDir);
+        return selftest.test(host, modPath, downloadDir, false, serverTestCapabilities.agent).then(function (): void {
+            selftest.test(host, modPath, downloadDir, false, serverTestCapabilities.agent)
+        });
     }
 }
 

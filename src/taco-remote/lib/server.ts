@@ -85,32 +85,34 @@ module Server {
      * Attempt to test each of the server modules against a separate instance of taco-remote which is assumed to be running with the same configuration
      */
     export function test(conf: HostSpecifics.IConf): Q.Promise<any> {
-        var serverMods: { [mod: string]: { mountPath: string } } = conf.get("modules");
-        var promise: Q.Promise<any> = Q({});
-        if (serverMods) {
-            promise = Object.keys(serverMods).reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
-                try {
-                    var attachPath = serverMods[mod].mountPath;
-                    var modGen: TacoRemote.IServerModuleFactory = require(mod);
-                    return promise.then(function (): Q.Promise<any> {
-                        return modGen.test(conf, attachPath).then(function (): void {
-                            console.log(resources.getString("TestPassed", mod));
-                        }, function (err: Error): void {
-                            console.error(resources.getString("TestFailed", mod));
-                            console.error(err);
-                            throw err;
+        return initializeServerTestCapabilities(conf).then(function (serverTestCaps: TacoRemote.IServerTestCapabilities): Q.Promise<any> {
+            var serverMods: { [mod: string]: { mountPath: string } } = conf.get("modules");
+            var promise: Q.Promise<any> = Q({});
+            if (serverMods) {
+                promise = Object.keys(serverMods).reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
+                    try {
+                        var attachPath = serverMods[mod].mountPath;
+                        var modGen: TacoRemote.IServerModuleFactory = require(mod);
+                        return promise.then(function (): Q.Promise<any> {
+                            return modGen.test(conf, attachPath, serverTestCaps).then(function (): void {
+                                console.log(resources.getString("TestPassed", mod));
+                            }, function (err: Error): void {
+                                    console.error(resources.getString("TestFailed", mod));
+                                    console.error(err);
+                                    throw err;
+                                });
                         });
-                    });
-                } catch (e) {
-                    console.error(e);
-                    return Q.reject(e);
-                }
-            }, promise);
-        } else {
-            console.warn(resources.getString("NoServerModulesSelected"));
-        }
+                    } catch (e) {
+                        console.error(e);
+                        return Q.reject(e);
+                    }
+                }, promise);
+            } else {
+                console.warn(resources.getString("NoServerModulesSelected"));
+            }
 
-        return promise;
+            return promise;
+        });
     }
 
     export function resetServerCert(conf: HostSpecifics.IConf): Q.Promise<any> {
@@ -133,6 +135,21 @@ module Server {
             }
 
             return serverCapabilities;
+        });
+    }
+
+    function initializeServerTestCapabilities(conf: TacoRemote.IDict): Q.Promise<TacoRemote.IServerTestCapabilities> {
+        var serverTestCapPromises: Q.Promise<any>[] = [
+            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q(null),
+            // More capabilities can be exposed here
+        ];
+        return Q.all(serverTestCapPromises).spread(function (agent: https.Agent): TacoRemote.IServerCapabilities {
+            var serverTestCapabilities: TacoRemote.IServerTestCapabilities = {};
+            if (agent) {
+                serverTestCapabilities.agent = agent;
+            }
+
+            return serverTestCapabilities;
         });
     }
 

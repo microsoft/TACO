@@ -22,7 +22,7 @@ import Q = require ("q");
 import HostSpecifics = require ("../host-specifics");
 import utils = require ("taco-utils");
 
-var resources = utils.ResourcesManager;
+import resources = utils.ResourcesManager;
 
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
@@ -73,7 +73,11 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public downloadClientCerts(req: express.Request, res: express.Response): void {
         res.sendStatus(404);
     }
+
+    public getHttpsAgent(conf: HostSpecifics.IConf): Q.Promise<NodeJSHttp.Agent> {
+        throw new Error("Not Implemented");
+    }
 }
 
-var darwinSpecifics: HostSpecifics.IHostSpecifics = new Win32Specifics();
-export = darwinSpecifics;
+var win32Specifics: HostSpecifics.IHostSpecifics = new Win32Specifics();
+export = win32Specifics;

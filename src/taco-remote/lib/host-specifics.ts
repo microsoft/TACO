@@ -60,6 +60,8 @@ module HostSpecifics {
         getServerCerts(): Q.Promise<ICertStore>;
         removeAllCertsSync(conf: IConf): void;
         downloadClientCerts(request: express.Request, response: express.Response): void;
+
+        getHttpsAgent(conf: IConf): Q.Promise<NodeJSHttp.Agent>;
     }
 }
 
