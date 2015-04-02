@@ -24,6 +24,7 @@ import serveIndex = require ("serve-index");
 
 import buildManager = require ("./build-manager");
 import HostSpecifics = require ("./host-specifics");
+import TacoCordovaConf = require ("./taco-cordova-conf");
 import utils = require ("taco-utils");
 import util = require ("util");
 
@@ -33,7 +34,7 @@ module ServerModule {
     export function create(conf: TacoRemote.IDict, modPath: string, serverCapabilities: TacoRemote.IServerCapabilities): Q.Promise<TacoRemote.IServerModule> {
         resources.init(conf.get("lang"), path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(conf).then(function (): TacoRemote.IServerModule {
-            return new Server(conf, modPath);
+            return new Server(new TacoCordovaConf(conf), modPath);
         });
     }
 }
@@ -41,25 +42,12 @@ module ServerModule {
 export = ServerModule;
 
 class Server implements TacoRemote.IServerModule {
-    private serverConf: TacoRemote.IDict;
+    private serverConf: TacoCordovaConf;
     private modPath: string;
 
-    constructor(conf: TacoRemote.IDict, modPath: string) {
+    constructor(conf: TacoCordovaConf, modPath: string) {
         this.serverConf = conf;
         this.modPath = modPath;
-
-        var defaults: any = {
-            maxBuildsInQueue: 10,
-            maxBuildsToKeep: 20,
-            deleteBuildsOnShutdown: true,
-            allowsEmulate: true
-        };
-        var hostDefaults = HostSpecifics.hostSpecifics.defaults(defaults);
-        Object.keys(hostDefaults).forEach(function (key: string): void {
-            if (typeof (conf.get(key)) === "undefined") {
-                conf.set(key, hostDefaults[key]);
-            }
-        });
 
         // Initialize the build manager (after our app settings are all setup)
         buildManager.init(conf);
@@ -91,7 +79,7 @@ class Server implements TacoRemote.IServerModule {
 
     // Submits a new build task
     private submitNewBuild(req: express.Request, res: express.Response): void {
-        var port = this.serverConf.get("port");
+        var port = this.serverConf.port;
         var modPath = this.modPath;
         Q.nfcall(buildManager.submitNewBuild, req).then(function (buildInfo: utils.BuildInfo): void {
             var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);

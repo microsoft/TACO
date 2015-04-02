@@ -17,6 +17,26 @@ import express = require ("express");
 import os = require ("os");
 import Q = require ("q");
 
+class HostSpecifics {
+    private static CachedSpecifics: HostSpecifics.IHostSpecifics;
+    public static get hostSpecifics(): HostSpecifics.IHostSpecifics {
+        if (!HostSpecifics.CachedSpecifics) {
+            switch (os.platform()) {
+                case "darwin":
+                    HostSpecifics.CachedSpecifics = require("./darwin/darwin-specifics");
+                    break;
+                case "win32":
+                    HostSpecifics.CachedSpecifics = require("./win32/win32-specifics");
+                    break;
+                default:
+                    throw new Error("UnsupportedPlatform");
+            }
+        }
+
+        return HostSpecifics.CachedSpecifics;
+    }
+}
+
 module HostSpecifics {
     export interface IConf {
         get(key: string): any;
@@ -41,19 +61,6 @@ module HostSpecifics {
         removeAllCertsSync(conf: IConf): void;
         downloadClientCerts(request: express.Request, response: express.Response): void;
     }
-
-    export var hostSpecifics: IHostSpecifics;
-    var cachedSpecifics: IHostSpecifics;
-    Object.defineProperty(HostSpecifics, "hostSpecifics", {
-        get: function (): IHostSpecifics {
-            if (!cachedSpecifics) {
-                var platform: string = os.platform();
-                cachedSpecifics = require("./" + platform + "/" + platform + "-specifics");
-            }
-
-            return cachedSpecifics;
-        }
-    });
 }
 
 export = HostSpecifics;

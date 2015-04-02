@@ -161,7 +161,7 @@ describe("server", function (): void {
     it("should load server modules and serve requests from there", function (mocha: MochaDone): void {
         var modPath = path.join("..", "test", "test-module"); // path is relative to lib/server.js since that's where the require is invoked
         var testModules: { [key: string]: any } = {};
-        testModules[modPath] = "testRoute";
+        testModules[modPath] = { mountPath: "testRoute" };
 
         nconf.defaults({ serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
         server.start(nconf).then(function (): void {

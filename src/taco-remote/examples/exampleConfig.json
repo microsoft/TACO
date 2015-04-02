@@ -6,15 +6,17 @@
     "certExpirationDays": 1825,
     "lang": "en",
     "modules": {
-        "taco-cordova": "cordova"
-    },
-    "allowsEmulate": true,
-    "maxBuildsToKeep": 20,
-    "maxBuildsInQueue": 10,
-    "deleteBuildsOnShutdown": true,
+        "taco-cordova": {
+            "mountPath": "cordova",
+            "allowsEmulate": true,
+            "maxBuildsToKeep": 20,
+            "maxBuildsInQueue": 10,
+            "deleteBuildsOnShutdown": true,
 
-    "nativeDebugProxyPort": 3001,
-    "webDebugProxyDevicePort": 9221,
-    "webDebugProxyPortMin": 9222,
-    "webDebugProxyPortMax": 9322
+            "nativeDebugProxyPort": 3001,
+            "webDebugProxyDevicePort": 9221,
+            "webDebugProxyPortMin": 9222,
+            "webDebugProxyPortMax": 9322
+        }
+    }
 }

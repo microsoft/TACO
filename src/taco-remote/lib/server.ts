@@ -112,12 +112,12 @@ module Server {
                 next();
             }
         };
-        var serverMods: { [mod: string]: string } = conf.get("modules");
+        var serverMods: { [mod: string]: { mountPath: string } } = conf.get("modules");
         var promise: Q.Promise<any> = Q({});
         if (serverMods) {
             promise = Object.keys(serverMods).reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
                 try {
-                    var attachPath = serverMods[mod];
+                    var attachPath = serverMods[mod].mountPath;
                     var modGen: TacoRemote.IServerModuleFactory = require(mod);
                     return promise.then(function (): Q.Promise<any> {
                         return modGen.create(conf, attachPath, serverCapabilities).then(function (serverMod: TacoRemote.IServerModule): void {

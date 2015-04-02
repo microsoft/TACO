@@ -63,18 +63,17 @@ module Certs {
         yesOrNoHandler = yesOrNoHandler || readline.createInterface({ input: process.stdin, output: process.stdout });
         var answerCallback = function (answer: string): void {
             answer = answer.toLowerCase();
-            if (answer === "y" || answer === "yes") {
+            if (resources.getString("OSXResetServerCertResponseYes").split("\n").indexOf(answer) !== -1) {
                 yesOrNoHandler.close();
                 shouldProceedDeferred.resolve(true);
-            } else if (answer === "n" || answer === "no") {
+            } else if (resources.getString("OSXResetServerCertResponseNo").split("\n").indexOf(answer) !== -1) {
                 yesOrNoHandler.close();
                 shouldProceedDeferred.resolve(false);
             } else {
-                yesOrNoHandler.question("Please answer [Y]es or [N]o." + os.EOL, answerCallback);
+                yesOrNoHandler.question(resources.getString("OSXResetServerCertPleaseYesNo") + os.EOL, answerCallback);
             }
         };
-        yesOrNoHandler.question("Warning: This command deletes all current client certificates. " +
-            "You will need to generate and configure a new security PIN. Do you want to continue? [Y]es or [N]o" + os.EOL, answerCallback);
+        yesOrNoHandler.question(resources.getString("OSXResetServerCertQuery") + os.EOL, answerCallback);
         return shouldProceedDeferred.promise.
             then(function (shouldProceed: boolean): Q.Promise<any> {
                 if (shouldProceed) {

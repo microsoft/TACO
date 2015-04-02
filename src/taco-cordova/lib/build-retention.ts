@@ -12,16 +12,15 @@
 
 import rimraf = require ("rimraf");
 import utils = require ("taco-utils");
+import TacoCordovaConf = require ("./taco-cordova-conf");
 
 import resources = utils.ResourcesManager;
 
 module BuildRetention {
     var maxBuildsToKeep: number;
-    var conf: { get(prop: string): any };
-    export function init(baseBuildDir: string, config: { get(prop: string): any }): void {
-        conf = config;
-        maxBuildsToKeep = conf.get("maxBuildsToKeep");
-        console.info(resources.getStringForLanguage(conf.get("lang"), "BuildRetentionInit"), baseBuildDir, maxBuildsToKeep);
+    export function init(baseBuildDir: string, config: TacoCordovaConf): void {
+        maxBuildsToKeep = config.maxBuildsToKeep;
+        console.info(resources.getString("BuildRetentionInit"), baseBuildDir, maxBuildsToKeep);
     }
 
     export function purge(builds: { [idx: string]: utils.BuildInfo }): void {
@@ -53,7 +52,7 @@ module BuildRetention {
         var numbersToDelete = eligibleBuilds.slice(0, nBuildsToDelete).map(function (b: utils.BuildInfo): string {
             return b.buildNumber.toString();
         });
-        console.info(resources.getStringForLanguage(conf.get("lang"), "BuildRetentionPreDelete"), nBuildsToDelete);
+        console.info(resources.getString("BuildRetentionPreDelete"), nBuildsToDelete);
         deleteBuilds(builds, numbersToDelete, false);
     }
 
@@ -66,7 +65,7 @@ module BuildRetention {
         for (var i = 0; i < toDelete.length; ++i) {
             var idx = toDelete[i];
             var buildInfo = builds[idx];
-            console.info(resources.getStringForLanguage(conf.get("lang"), "BuildRetentionDelete"), buildInfo.buildNumber, buildInfo.buildDir);
+            console.info(resources.getString("BuildRetentionDelete"), buildInfo.buildNumber, buildInfo.buildDir);
             if (sync) {
                 rimraf.sync(buildInfo.buildDir);
             } else {

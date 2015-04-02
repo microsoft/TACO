@@ -23,6 +23,7 @@ import zlib = require ("zlib");
 
 import buildRetention = require ("./build-retention");
 import HostSpecifics = require ("./host-specifics");
+import TacoCordovaConf = require ("./taco-cordova-conf");
 import utils = require ("taco-utils");
 
 import resources = utils.ResourcesManager;
@@ -44,15 +45,15 @@ module BuildManager {
             downloaded: number;
         },
         requestRedirector: TacoRemoteLib.IRequestRedirector,
-        serverConf: TacoRemote.IDict;
+        serverConf: TacoCordovaConf;
 
-    export function init(conf: TacoRemote.IDict): void {
+    export function init(conf: TacoCordovaConf): void {
         serverConf = conf;
-        baseBuildDir = path.resolve(process.cwd(), conf.get("serverDir"), "taco-cordova", "builds");
+        baseBuildDir = path.resolve(process.cwd(), conf.serverDir, "taco-cordova", "builds");
         utils.UtilHelper.createDirectoryIfNecessary(baseBuildDir);
-        maxBuildsInQueue = conf.get("maxBuildsInQueue");
-        deleteBuildsOnShutdown = utils.UtilHelper.argToBool(conf.get("deleteBuildsOnShutdown"));
-        var allowsEmulate = utils.UtilHelper.argToBool(conf.get("allowsEmulate"));
+        maxBuildsInQueue = conf.maxBuildsInQueue;
+        deleteBuildsOnShutdown = conf.deleteBuildsOnShutdown;
+        var allowsEmulate = conf.allowsEmulate;
         
         try {
             requestRedirector = require(conf.get("redirector"));
@@ -75,7 +76,7 @@ module BuildManager {
         };
         currentBuild = null;
         queuedBuilds = [];
-        console.info(resources.getStringForLanguage(conf.get("lang"), "BuildManagerInit"),
+        console.info(resources.getStringForLanguage(conf.lang, "BuildManagerInit"),
             baseBuildDir, maxBuildsInQueue, deleteBuildsOnShutdown, allowsEmulate, nextBuildNumber);
     }
 
@@ -86,14 +87,14 @@ module BuildManager {
     }
 
     export function submitNewBuild(req: express.Request, callback: Function): void {
-        console.info(resources.getStringForLanguage(serverConf.get("lang"), "NewBuildSubmitted"));
+        console.info(resources.getStringForLanguage(serverConf.lang, "NewBuildSubmitted"));
         console.info(req.url);
         console.info(req.headers);
 
         buildMetrics.submitted++;
 
         if (queuedBuilds.length === maxBuildsInQueue) {
-            var message = resources.getStringForLanguage(serverConf.get("lang"), "BuildQueueFull", maxBuildsInQueue);
+            var message = resources.getStringForLanguage(serverConf.lang, "BuildQueueFull", maxBuildsInQueue);
             var error: any = new Error(message);
             error.code = 503;
             throw error;
@@ -211,7 +212,7 @@ module BuildManager {
     }
 
     export function emulateBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
-        if (!utils.UtilHelper.argToBool(serverConf.get("allowsEmulate"))) {
+        if (!utils.UtilHelper.argToBool(serverConf.allowsEmulate)) {
             res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
             return;
         }
@@ -267,21 +268,21 @@ module BuildManager {
             }
         } catch (e) {
             buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
-            console.error(resources.getStringForLanguage(serverConf.get("lang"), "FailedCreateDirectory", extractToDir, e.message));
+            console.error(resources.getStringForLanguage(serverConf.lang, "FailedCreateDirectory", extractToDir, e.message));
             buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
             buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
-            console.error(resources.getStringForLanguage(serverConf.get("lang"), "NoTgzFound", buildInfo.tgzFilePath));
+            console.error(resources.getStringForLanguage(serverConf.lang, "NoTgzFound", buildInfo.tgzFilePath));
             buildMetrics.failed++;
             return;
         }
 
         var onError = function (err: Error): void {
             buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
-            console.info(resources.getStringForLanguage(serverConf.get("lang"), "TgzExtractError", buildInfo.tgzFilePath, err.message));
+            console.info(resources.getStringForLanguage(serverConf.lang, "TgzExtractError", buildInfo.tgzFilePath, err.message));
             buildMetrics.failed++;
         };
 

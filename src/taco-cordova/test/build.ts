@@ -29,8 +29,14 @@ describe("taco-cordova", function (): void {
         nconf.defaults({
             serverDir: serverDir,
             port: 3000,
-            secure: false
+            secure: false,
+            modules: {
+                "taco-cordova": {
+                    mountPoint: modMountPoint
+                }
+            }
         }).use("memory");
+
         TacoCordova.create(nconf, modMountPoint, {}).then(function (serverModule: TacoRemote.IServerModule): void {
             serverMod = serverModule;
 
@@ -38,7 +44,7 @@ describe("taco-cordova", function (): void {
 
             server = http.createServer(app);
             server.listen(3000, mocha);
-        });
+        }).fail(mocha);
     });
 
     after(function (mocha: MochaDone): void {
