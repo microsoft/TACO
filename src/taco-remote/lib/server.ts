@@ -97,10 +97,10 @@ module Server {
                             return modGen.test(conf, attachPath, serverTestCaps).then(function (): void {
                                 console.log(resources.getString("TestPassed", mod));
                             }, function (err: Error): void {
-                                    console.error(resources.getString("TestFailed", mod));
-                                    console.error(err);
-                                    throw err;
-                                });
+                                console.error(resources.getString("TestFailed", mod));
+                                console.error(err);
+                                throw err;
+                            });
                         });
                     } catch (e) {
                         console.error(e);
