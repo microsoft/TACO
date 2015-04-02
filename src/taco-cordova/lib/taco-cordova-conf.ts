@@ -1,5 +1,7 @@
 ﻿/// <reference path="../../typings/taco-remote.d.ts" />
 import HostSpecifics = require ("./host-specifics");
+import tacoUtils = require ("taco-utils");
+import UtilHelper = tacoUtils.UtilHelper;
 
 class TacoCordovaConf {
     private tacoCordovaConf: {
@@ -46,11 +48,11 @@ class TacoCordovaConf {
     }
 
     public get allowsEmulate(): boolean {
-        return !!this.tacoCordovaConf.allowsEmulate;
+        return UtilHelper.argToBool(this.tacoCordovaConf.allowsEmulate);
     }
 
     public get deleteBuildsOnShutdown(): boolean {
-        return !!this.tacoCordovaConf.deleteBuildsOnShutdown;
+        return UtilHelper.argToBool(this.tacoCordovaConf.deleteBuildsOnShutdown);
     }
 
     public get maxBuildsInQueue(): number {
