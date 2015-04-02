@@ -36,4 +36,10 @@ declare module TacoUtility {
         private static getBestLanguageFromArray(acceptLangs);
         private static loadLanguage(language, resourcesDir);
     }
+
+    module ResourcesManager {
+        interface IResources {
+            getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string;
+        }
+    }
 }

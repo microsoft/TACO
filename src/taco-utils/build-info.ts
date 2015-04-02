@@ -1,5 +1,6 @@
 ﻿import utilHelper = require ("./util-helper");
 import UtilHelper = utilHelper.UtilHelper;
+import resources = require ("./resources-manager");
 
 module TacoUtility {
     export class BuildInfo {
@@ -113,7 +114,7 @@ module TacoUtility {
          * 
          * @returns This object, after setting the message in the appropriate language.
          */
-        public localize(req: any, resources: { getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string }): BuildInfo {
+        public localize(req: any, resources: resources.ResourcesManager.IResources): BuildInfo {
             if (this.messageId) {
                 this.message = resources.getStringForLanguage(req, this.messageId, this.messageArgs);
             } else {

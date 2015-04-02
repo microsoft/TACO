@@ -161,6 +161,12 @@ module TacoUtility {
             return require(resourcesPath);
         }
     }
+
+    export module ResourcesManager {
+        export interface IResources {
+            getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string;
+        }
+    }
 }
 
 export = TacoUtility;
