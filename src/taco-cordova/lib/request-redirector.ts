@@ -3,6 +3,7 @@
 
 import express = require ("express");
 import tacoUtility = require ("taco-utils");
+import Q = require ("q");
 import BuildInfo = tacoUtility.BuildInfo;
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {

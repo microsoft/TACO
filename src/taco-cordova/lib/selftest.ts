@@ -28,9 +28,14 @@ module SelfTest {
         tgzProducingStream.pipe(request.post(buildUrl, function (error: any, response: any, body: any): void {
             if (error) {
                 deferred.reject(error);
+                return;
             }
 
             var buildingUrl = response.headers["content-location"];
+            if (!buildingUrl) {
+                deferred.reject(new Error(body));
+                return;
+            }
 
             var i = 0;
             var ping = setInterval(function (): void {
