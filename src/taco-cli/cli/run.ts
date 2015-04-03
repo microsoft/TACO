@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+"use strict";
 
 import assert = require ("assert");
 import child_process = require ("child_process");
@@ -112,7 +113,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.loadSettings().then(function (settings: Settings.ISettings): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
-            var buildTarget = commandData.options["target"] || "iphone 4s"; // TODO: Select an appropriate default for the platform, or leave target unspecified and have the server pick a default
+            var buildTarget = commandData.options["target"] || "iphone 5"; // TODO: Select an appropriate default for the platform, or leave target unspecified and have the server pick a default
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {

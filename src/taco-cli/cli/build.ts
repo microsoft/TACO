@@ -2,6 +2,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/cordova-extensions.d.ts" />
+"use strict";
 
 import assert = require("assert");
 import child_process = require("child_process");

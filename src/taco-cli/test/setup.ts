@@ -78,7 +78,7 @@ describe("taco setup", function (): void {
         };
         var expectedSequence = [
             {
-                expectedUrl: "/modules/taco-cordova",
+                expectedUrl: "/modules/taco-remote",
                 head: {
                     "Content-Type": "text/plain"
                 },
@@ -155,7 +155,7 @@ describe("taco setup", function (): void {
                 response: fs.readFileSync(path.resolve(__dirname, "resources", "certs", "client.pfx"))
             },
             {
-                expectedUrl: "/modules/taco-cordova",
+                expectedUrl: "/modules/taco-remote",
                 head: {
                     "Content-Type": "text/plain"
                 },

@@ -22,7 +22,7 @@
     "_command.setup.description.comment": "Description for 'taco setup remote'",
     "command.setup.options.platform": "The platform that you wish to configure remote builds for",
     "_command.setup.options.platform.comment": "Description of the PLATFORM argument",
-    "command.setup.remote.header": "Please ensure that taco-remote is running on the remote server.\n You can generate new client information at any time by typing taco-remote generateClientCert. For more details, see <fwlink goes here>",
+    "command.setup.remote.header": "Please ensure that remotebuild is running on the remote server.\n You can generate new client information at any time by typing remotebuild generateClientCert. For more details, see <fwlink goes here>",
     "_command.setup.remote.header.comment": "Message printed to console when running taco setup remote",
     "command.setup.remote.query.host": "Remote host name / IP address: ",
     "_command.setup.remote.query.host.comment": "Query asking the user to enter the host name or IP address of the remote server",
@@ -36,7 +36,7 @@
     "_command.setup.remote.invalidPin.comment": "Message printed when an invalid pin is specified. {0} is the value the user entered",
     "command.setup.remote.rejectedPin": "Unable to use PIN to pair with remote build server: PIN was rejected",
     "_command.setup.remote.rejectedPin.comment": "Message printed when a valid looking PIN fails to work",
-    "command.setup.cantFindRemoteMount": "Unable to contact {0} to find where the remote build server services Cordova builds. Is the server running taco-remote with taco-cordova configured?",
+    "command.setup.cantFindRemoteMount": "Unable to contact {0} to find where the remote build server services Cordova builds. Is the server running remotebuild with taco-remote configured?",
     "_command.setup.cantFindRemoteMount.comment": "Message printed when unable to find where to query the remote server for future builds. {0} is the URL we tried to contact",
 
     "command.build.description": "Build a cordova project",
