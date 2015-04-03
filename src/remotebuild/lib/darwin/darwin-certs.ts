@@ -13,7 +13,6 @@
 
 import child_process = require ("child_process");
 import fs = require ("fs");
-import nconf = require ("nconf");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
@@ -191,9 +190,9 @@ module Certs {
         }
     }
 
-    export function downloadClientCerts(pinString: string): string {
-        purgeExpiredPinBasedClientCertsSync();
-        var clientCertsDir = path.join(nconf.get("serverDir"), "certs", "client");
+    export function downloadClientCerts(conf: HostSpecifics.IConf, pinString: string): string {
+        purgeExpiredPinBasedClientCertsSync(conf);
+        var clientCertsDir = path.join(conf.get("serverDir"), "certs", "client");
 
         var pin = parseInt(pinString);
         if (isNaN(pin)) {
@@ -209,18 +208,18 @@ module Certs {
         return pfx;
     }
 
-    export function invalidatePIN(pinString: string): void {
-        var pinDir = path.join(nconf.get("serverDir"), "certs", "client", "" + parseInt(pinString));
+    export function invalidatePIN(conf: HostSpecifics.IConf, pinString: string): void {
+        var pinDir = path.join(conf.get("serverDir"), "certs", "client", "" + parseInt(pinString));
         rimraf(pinDir, function (): void { });
     }
 
-    export function purgeExpiredPinBasedClientCertsSync(): void {
-        var clientCertsDir = path.join(nconf.get("serverDir"), "certs", "client");
+    export function purgeExpiredPinBasedClientCertsSync(conf: HostSpecifics.IConf): void {
+        var clientCertsDir = path.join(conf.get("serverDir"), "certs", "client");
         if (!fs.existsSync(clientCertsDir)) {
             return;
         }
 
-        var pinTimeoutInMinutes = nconf.get("pinTimeout");
+        var pinTimeoutInMinutes = conf.get("pinTimeout");
         var expiredIfOlderThan = new Date().getTime() - (pinTimeoutInMinutes * 60 * 1000);
         fs.readdirSync(clientCertsDir).forEach(function (f: string): void {
             var pfx = path.join(clientCertsDir, f, "client.pfx");

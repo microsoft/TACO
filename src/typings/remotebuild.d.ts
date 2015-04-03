@@ -7,6 +7,15 @@ declare module RemoteBuild {
         get(prop: string): any;
         set(prop: string, value: any): void
     }
+    interface IRemoteBuildConfiguration {
+        lang: string;
+        port: string;
+        serverDir: string;
+        secure: boolean;
+    }
+    interface IRemoteBuildModuleConfiguration {
+        [property: string]: any;
+    }
     interface ICertStore {
         getKey: () => Buffer;
         getCert: () => Buffer;

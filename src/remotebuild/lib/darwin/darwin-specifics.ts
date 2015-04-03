@@ -28,6 +28,7 @@ import UtilHelper = utils.UtilHelper;
 import resources = utils.ResourcesManager;
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
+    private conf: HostSpecifics.IConf;
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var osxdefaults: { [key: string]: any } = {
             serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
@@ -46,6 +47,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
     public initialize(conf: HostSpecifics.IConf): Q.Promise<any> {
+        this.conf = conf;
         if (process.getuid() === 0) {
             console.warn(resources.getString("RunningAsRootError"));
             process.exit(1);
@@ -86,7 +88,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     public downloadClientCerts(req: express.Request, res: express.Response): void {
-        Q.fcall<string>(certs.downloadClientCerts, req.params.pin).then(function (pfxFile: string): void {
+        Q.fcall<string>(certs.downloadClientCerts, this.conf, req.params.pin).then(function (pfxFile: string): void {
             res.sendFile(pfxFile);
         }).catch<void>(function (error: { code?: number; id: string}): void {
             if (error.code) {
@@ -94,7 +96,9 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
             } else {
                 res.status(404).send(error);
             }
-        }).finally(function (): void { certs.invalidatePIN(req.params.pin); }).done();
+        }).finally((): void => {
+            certs.invalidatePIN(this.conf, req.params.pin);
+        }).done();
     }
 
     public getHttpsAgent(conf: HostSpecifics.IConf): Q.Promise<NodeJSHttp.Agent> {

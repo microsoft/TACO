@@ -168,8 +168,8 @@ macOnly("Certs", function (): void {
     // Test that client certificates are purged if they are older than the timeout, and are not purged if they are younger
     it("PurgeExpiredPinBasedClientCertsSync", function (done: MochaDone): void {
         var createdPin: number;
-
-        certs.initializeServerCerts(conf({ serverDir: serverDir })).
+        var config = conf({ serverDir: serverDir });
+        certs.initializeServerCerts(config).
             then(function (): Q.Promise<number> {
             return certs.generateClientCert(conf({ serverDir: serverDir, suppressSetupMessage: true }));
         }).
@@ -181,7 +181,7 @@ macOnly("Certs", function (): void {
             then(function (): void {
             // 0.00002 in minutes is approx 1ms pin-expiration which is short enough it should always cause the new cert to be purged
             nconf.defaults({ serverDir: serverDir, pinTimeout: 0.00002 });
-            certs.purgeExpiredPinBasedClientCertsSync();
+            certs.purgeExpiredPinBasedClientCertsSync(config);
         }).
             then(function (): void {
             should.assert(!fs.existsSync(path.join(clientCertsDir, "" + createdPin)), "client pin directory should no longer exist after purge with very quick timeout");
@@ -193,7 +193,7 @@ macOnly("Certs", function (): void {
             then(function (pin: number): void {
             createdPin = pin;
             nconf.defaults({ serverDir: serverDir, pinTimeout: 10 });
-            certs.purgeExpiredPinBasedClientCertsSync();
+            certs.purgeExpiredPinBasedClientCertsSync(config);
         }).
             then(function (): void {
             should.assert(fs.existsSync(path.join(clientCertsDir, "" + createdPin)), "client pin directory should still exist after purge with 10 min timeout");

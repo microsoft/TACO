@@ -91,8 +91,8 @@ class Server {
      */
     public static test(conf: HostSpecifics.IConf): Q.Promise<any> {
         return Server.initializeServerTestCapabilities(conf).then(function (serverTestCaps: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
-            return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, attachPath: string): Q.Promise<any> {
-                return modGen.test(conf, attachPath, serverTestCaps).then(function (): void {
+            return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, mountPath: string): Q.Promise<any> {
+                return modGen.test(conf, mountPath, serverTestCaps).then(function (): void {
                     console.log(resources.getString("TestPassed", mod));
                 }, function (err: Error): void {
                     console.error(resources.getString("TestFailed", mod));
@@ -149,15 +149,15 @@ class Server {
                 next();
             }
         };
-        return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, attachPath: string): Q.Promise<any> {
-            return modGen.create(conf, attachPath, serverCapabilities).then(function (serverMod: RemoteBuild.IServerModule): void {
+        return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, mountPath: string): Q.Promise<any> {
+            return modGen.create(conf, mountPath, serverCapabilities).then(function (serverMod: RemoteBuild.IServerModule): void {
                 var modRouter = serverMod.getRouter();
                 // These routes are fully secured through client cert verification:
                 if (utils.UtilHelper.argToBool(conf.get("secure"))) {
-                    app.all("/" + attachPath, onlyAuthorizedClientRequest);
+                    app.all("/" + mountPath, onlyAuthorizedClientRequest);
                 }
 
-                app.use("/" + attachPath, modRouter);
+                app.use("/" + mountPath, modRouter);
                 Server.Modules.push(serverMod);
             });
         });
