@@ -23,7 +23,7 @@ import path = require ("path");
 import Q = require ("q");
 import serveIndex = require ("serve-index");
 
-import buildManager = require ("./build-manager");
+import BuildManager = require ("./build-manager");
 import HostSpecifics = require ("./host-specifics");
 import selftest = require ("./selftest");
 import TacoCordovaConf = require ("./taco-cordova-conf");
@@ -32,7 +32,7 @@ import util = require ("util");
 
 import resources = utils.ResourcesManager;
 
-module ServerModule {
+module ServerModuleFactory /* implements TacoRemote.IServerModuleFactory */ {
     export function create(conf: TacoRemote.IDict, modPath: string, serverCapabilities: TacoRemote.IServerCapabilities): Q.Promise<TacoRemote.IServerModule> {
         resources.init(conf.get("lang"), path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(conf).then(function (): TacoRemote.IServerModule {
@@ -50,18 +50,19 @@ module ServerModule {
     }
 }
 
-export = ServerModule;
+export = ServerModuleFactory;
 
 class Server implements TacoRemote.IServerModule {
     private serverConf: TacoCordovaConf;
     private modPath: string;
+    private buildManager: BuildManager;
 
     constructor(conf: TacoCordovaConf, modPath: string) {
         this.serverConf = conf;
         this.modPath = modPath;
 
         // Initialize the build manager (after our app settings are all setup)
-        buildManager.init(conf);
+        this.buildManager = new BuildManager(conf);
     }
 
     public getRouter(): express.Router {
@@ -71,28 +72,28 @@ class Server implements TacoRemote.IServerModule {
         router.get("/build/tasks/:id/log", this.getBuildLog);
         router.get("/build/tasks", this.getAllBuildStatus);
         router.get("/build/:id", this.getBuildStatus);
-        router.get("/build/:id/download", this.checkBuildThenAction(buildManager.downloadBuild));
+        router.get("/build/:id/download", this.checkBuildThenAction(this.buildManager.downloadBuild));
 
-        router.get("/build/:id/emulate", this.checkBuildThenAction(buildManager.emulateBuild));
-        router.get("/build/:id/deploy", this.checkBuildThenAction(buildManager.deployBuild));
-        router.get("/build/:id/run", this.checkBuildThenAction(buildManager.runBuild));
-        router.get("/build/:id/debug", this.checkBuildThenAction(buildManager.debugBuild));
+        router.get("/build/:id/emulate", this.checkBuildThenAction(this.buildManager.emulateBuild));
+        router.get("/build/:id/deploy", this.checkBuildThenAction(this.buildManager.deployBuild));
+        router.get("/build/:id/run", this.checkBuildThenAction(this.buildManager.runBuild));
+        router.get("/build/:id/debug", this.checkBuildThenAction(this.buildManager.debugBuild));
 
-        router.use("/files", serveIndex(buildManager.getBaseBuildDir()));
-        router.use("/files", express.static(buildManager.getBaseBuildDir()));
+        router.use("/files", serveIndex(this.buildManager.getBaseBuildDir()));
+        router.use("/files", express.static(this.buildManager.getBaseBuildDir()));
 
         return router;
     }
 
     public shutdown(): void {
-        buildManager.shutdown();
+        this.buildManager.shutdown();
     }
 
     // Submits a new build task
     private submitNewBuild(req: express.Request, res: express.Response): void {
         var port = this.serverConf.port;
         var modPath = this.modPath;
-        Q.nfcall(buildManager.submitNewBuild, req).then(function (buildInfo: utils.BuildInfo): void {
+        Q.nfcall(this.buildManager.submitNewBuild, req).then(function (buildInfo: utils.BuildInfo): void {
             var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
             res.set({
                 "Content-Type": "application/json",
@@ -107,7 +108,7 @@ class Server implements TacoRemote.IServerModule {
 
     // Queries on the status of a build task, used by a client to poll
     private getBuildStatus(req: express.Request, res: express.Response): void {
-        var buildInfo = buildManager.getBuildInfo(req.params.id);
+        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             buildInfo.localize(req, resources);
             if (!buildInfo.message) {
@@ -123,10 +124,10 @@ class Server implements TacoRemote.IServerModule {
 
     // Retrieves log file for a build task, can be used by a client when build failed
     private getBuildLog(req: express.Request, res: express.Response): void {
-        var buildInfo = buildManager.getBuildInfo(req.params.id);
+        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             res.set("Content-Type", "text/plain");
-            buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
+            this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
         } else {
             res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
@@ -134,13 +135,14 @@ class Server implements TacoRemote.IServerModule {
 
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
-        var allBuildInfo = buildManager.getAllBuildInfo();
+        var allBuildInfo = this.buildManager.getAllBuildInfo();
         res.json(200, allBuildInfo);
     }
 
     private checkBuildThenAction(func: (buildInfo: utils.BuildInfo, req: express.Request, res: express.Response) => void): (req: express.Request, res: express.Response) => void {
+        var self = this;
         return function (req: express.Request, res: express.Response): void {
-            var buildInfo = buildManager.getBuildInfo(req.params.id);
+            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (!buildInfo) {
                 res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
                 return;
@@ -151,7 +153,7 @@ class Server implements TacoRemote.IServerModule {
                 return;
             }
 
-            func.bind(buildManager)(buildInfo, req, res);
+            func.call(self.buildManager, buildInfo, req, res);
         };
     }
 }

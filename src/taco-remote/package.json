@@ -22,13 +22,15 @@
         "rimraf": "2.2.6",
         "taco-utils": "file:../taco-utils"
     },
+    "optionalDependencies": { 
+        "taco-cordova": "file:../taco-cordova"
+    },
     "devDependencies": {
         "typescript": "1.3.0",
         "mocha": "2.0.1",
         "mkdirp": "0.3.5",
         "should": "4.3.0",
-        "request": "2.36.0",
-        "taco-cordova":  "file:../taco-cordova"
+        "request": "2.36.0"
     },
     "bundledDependencies": [ "taco-utils" ],
 

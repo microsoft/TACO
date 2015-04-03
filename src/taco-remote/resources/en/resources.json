@@ -2,8 +2,10 @@
     "IndexPageContent": "Remote build Express server open for business on port {0}",
     "_IndexPageContent.comment": "Message sent back in any request for index page of build server",
 
-    "NoServerModulesSelected": "Warning: No server modules selected. Please make sure to specify a config with modules, e.g. \"modules\": {\"taco-cordova\": \"cordova\"} ",
-    "_NoServerModulesSelected.comment": "",
+    "NoServerModulesSelected": "Warning: No server modules selected. Defaulting to configuration \"modules\": {\"taco-cordova\": { \"mountPath\": \"cordova\"} }",
+    "_NoServerModulesSelected.comment": "Warning printed to console when the configuration does not specify what server modules to load",
+    "UnableToLoadModule": "Error: Unable to load module {0}. Try running 'npm install {0}' or specifying the full path to the package",
+    "_UnableToLoadModule.comment": "Error printed when we try to load a user-provided module and the require() fails. {0} is the name of the module",
 
     "UnauthorizedClientRequest": "The remote build server denied the build request, because the client certificate is invalid or has expired.  To build your project, you must generate and configure a security PIN. See http://go.microsoft.com/fwlink/?LinkID=511904.",
     "_UnauthorizedClientRequest.comment": "Message sent back to Visual Studio when a build request is submitted to a secure server with invalid client certificate",

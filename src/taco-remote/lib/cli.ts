@@ -53,6 +53,15 @@ function cli(): void {
     // Initialize localization resources
     resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
 
+    var serverMods = nconf.get("modules");
+    if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
+        console.warn(resources.getString("NoServerModulesSelected"));
+        serverMods = {
+            "taco-cordova": { mountPath: "cordova" }
+        };
+        nconf.set("modules", serverMods);
+    }
+
     if (nconf.get("help") || nconf.get("h") || nconf.get("?") || !nconf.get("serverDir")) {
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
         process.exit(0);

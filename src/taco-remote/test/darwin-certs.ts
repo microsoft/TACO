@@ -255,6 +255,7 @@ function testServerCertsExist(): void {
 
 function conf(data: any): HostSpecifics.IConf {
     var nconf = require("nconf");
+    nconf.use("memory");
     nconf.defaults(data);
     return nconf;
 }

@@ -16,16 +16,17 @@ import TacoCordovaConf = require ("./taco-cordova-conf");
 
 import resources = utils.ResourcesManager;
 
-module BuildRetention {
-    var maxBuildsToKeep: number;
-    export function init(baseBuildDir: string, config: TacoCordovaConf): void {
-        maxBuildsToKeep = config.maxBuildsToKeep;
-        console.info(resources.getString("BuildRetentionInit"), baseBuildDir, maxBuildsToKeep);
+class BuildRetention {
+    private maxBuildsToKeep: number;
+
+    constructor(baseBuildDir: string, config: TacoCordovaConf) {
+        this.maxBuildsToKeep = config.maxBuildsToKeep;
+        console.info(resources.getString("BuildRetentionInit"), baseBuildDir, this.maxBuildsToKeep);
     }
 
-    export function purge(builds: { [idx: string]: utils.BuildInfo }): void {
+    public purge(builds: { [idx: string]: utils.BuildInfo }): void {
         var buildNumbers = Object.keys(builds);
-        var nBuildsToDelete = buildNumbers.length - maxBuildsToKeep;
+        var nBuildsToDelete = buildNumbers.length - this.maxBuildsToKeep;
         if (nBuildsToDelete <= 0) {
             return;
         }
@@ -53,15 +54,15 @@ module BuildRetention {
             return b.buildNumber.toString();
         });
         console.info(resources.getString("BuildRetentionPreDelete"), nBuildsToDelete);
-        deleteBuilds(builds, numbersToDelete, false);
+        BuildRetention.deleteBuilds(builds, numbersToDelete, false);
     }
 
-    export function deleteAllSync(builds: { [idx: string]: utils.BuildInfo }): void {
+    public deleteAllSync(builds: { [idx: string]: utils.BuildInfo }): void {
         var buildNumbers = Object.keys(builds);
-        deleteBuilds(builds, buildNumbers, true);
+        BuildRetention.deleteBuilds(builds, buildNumbers, true);
     }
 
-    function deleteBuilds(builds: { [idx: string]: utils.BuildInfo }, toDelete: string[], sync?: boolean): void {
+    private static deleteBuilds(builds: { [idx: string]: utils.BuildInfo }, toDelete: string[], sync?: boolean): void {
         for (var i = 0; i < toDelete.length; ++i) {
             var idx = toDelete[i];
             var buildInfo = builds[idx];
@@ -69,20 +70,20 @@ module BuildRetention {
             if (sync) {
                 rimraf.sync(buildInfo.buildDir);
             } else {
-                deleteBuildDirectoryAsync(buildInfo.buildDir);
+                BuildRetention.deleteBuildDirectoryAsync(buildInfo.buildDir);
             }
 
             delete builds[idx];
         }
     }
 
-    function deleteBuildDirectoryAsync(buildDir: string, callback?: Function): void {
+    private static deleteBuildDirectoryAsync(buildDir: string, callback?: Function): void {
         rimraf(buildDir, function (err: Error): void {
             if (callback) {
                 callback(err);
             }
         });
-    };
+    }
 }
 
 export = BuildRetention;

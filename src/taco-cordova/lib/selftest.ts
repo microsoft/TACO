@@ -9,8 +9,19 @@ import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
 
-module SelfTest {
-    export function test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
+class SelfTest {
+    /**
+     * Attempt to submit a build to the specified host running taco-cordova on the specifed mount point
+     *
+     * @param {string} host The protocol, hostname, and port of the server. E.g. "http://localhost:3000"
+     * @param {string} modMountPoint The location where taco-cordova is mounted. E.g. "cordova"
+     * @param {string} downloadDir The folder to save any resulting output to
+     * @param {boolean} deviceBuild Whether to build for device, or the emulator.
+     * @param {https.Agent} agent An agent to use if making a secure connection.
+     *
+     * @return a promise which is resolved if the build succeeded, or rejected if the build failed.
+     */
+    public static test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
         var cordovaApp = path.resolve(__dirname, "..", "examples", "cordovaApp", "helloCordova");
         var tping = 5000;
         var maxPings = 10;
@@ -20,7 +31,7 @@ module SelfTest {
         var buildOptions = deviceBuild ? "--device" : "--emulator";
 
         var tgzProducingStream: NodeJS.ReadableStream = null;
-        var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", mode: 777, filter: filterForTar });
+        var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", mode: 777, filter: SelfTest.filterForTar });
         tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
         var deferred = Q.defer();
@@ -86,7 +97,7 @@ module SelfTest {
     }
 
     // Archive up what is needed for an ios build and put current process user id on entries
-    function filterForTar(reader: fstream.Reader, props: { uid: number }): boolean {
+    private static filterForTar(reader: fstream.Reader, props: { uid: number }): boolean {
         if (reader.parent) {
             if (reader.parent.basename.match(/^platforms$/)) {
                 return false;

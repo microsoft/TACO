@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/taco-utils.d.ts" />
+/// <reference path="../../../typings/taco-remote.d.ts" />
 "use strict";
 
 import child_process = require ("child_process");
@@ -12,53 +13,8 @@ import tacoUtils = require ("taco-utils");
 import resources = tacoUtils.ResourcesManager;
 import UtilHelper = tacoUtils.UtilHelper;
 
-module DarwinDependencies {
-    export function tryInstallHomebrew(): Q.Promise<any> {
-        var homebrewInstalled = Q.defer();
-        // We use spawn here rather than exec primarily so we can allow for user-interaction
-        var curlInstaller = child_process.spawn("curl", ["-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"]);
-        var installHomebrew = child_process.spawn("ruby", ["-"]);
-
-        curlInstaller.stdout.on("data", function (data: any): void {
-            installHomebrew.stdin.write(data);
-        });
-        curlInstaller.on("close", function (code: number): void {
-            installHomebrew.stdin.end();
-        });
-
-        installHomebrew.stdout.on("data", function (data: any): void {
-            console.info("" + data);
-        });
-        installHomebrew.stderr.on("data", function (data: any): void {
-            console.error("" + data);
-        });
-        installHomebrew.on("close", function (code: number): void {
-            homebrewInstalled.resolve({});
-        });
-        installHomebrew.on("error", function (arg: any): void {
-            console.error("ERROR: " + JSON.stringify(arg));
-            homebrewInstalled.reject(arg);
-        });
-
-        return homebrewInstalled.promise;
-    }
-
-    export function tryInstallPackages(): Q.Promise<{}> {
-        // Install these packages if they do not exist.
-        // We need to check first since the install will fail if an older version is already installed.
-        // ideviceinstaller and ios-webkit-debug-proxy will install libimobiledevice if required
-        return Q.denodeify(child_process.exec)(
-            "(brew list ideviceinstaller | grep ideviceinstaller > /dev/null || brew install ideviceinstaller) && " +
-            "(brew list ios-webkit-debug-proxy | grep ios-webkit-debug-proxy > /dev/null || brew install ios-webkit-debug-proxy)"
-            );
-    }
-
-    export function verifyPackagesInstalled(): Q.Promise<{}> {
-        // Verify that both of these can run.
-        return Q.denodeify(child_process.exec)("ideviceinstaller -h > /dev/null && ios_webkit_debug_proxy -h > /dev/null");
-    }
-
-    export function askInstallHomebrew(conf: TacoRemote.IDict): Q.Promise<any> {
+class DarwinDependencies {
+    public static askInstallHomebrew(conf: TacoRemote.IDict): Q.Promise<any> {
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-cordova");
         var isFirstRun = !fs.existsSync(firstRunPath);
         var deferred = Q.defer();
@@ -70,8 +26,8 @@ module DarwinDependencies {
                 var shouldInstall = response === "" || response.trim().toLowerCase().indexOf(resources.getString("HomebrewInstallationQueryResponse")) === 0;
 
                 if (shouldInstall) {
-                    tryInstallHomebrew().then(tryInstallPackages).then(function (): void {
-                        verifyPackagesInstalled()
+                    DarwinDependencies.tryInstallHomebrew().then(DarwinDependencies.tryInstallPackages).then(function (): void {
+                        DarwinDependencies.verifyPackagesInstalled()
                         .then(function (): void {
                             console.info(resources.getString("HomebrewInstallationSuccess"));
                             deferred2.resolve(true);
@@ -102,6 +58,51 @@ module DarwinDependencies {
         }
 
         return deferred.promise;
+    }
+
+    private static tryInstallHomebrew(): Q.Promise<any> {
+        var homebrewInstalled = Q.defer();
+        // We use spawn here rather than exec primarily so we can allow for user-interaction
+        var curlInstaller = child_process.spawn("curl", ["-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"]);
+        var installHomebrew = child_process.spawn("ruby", ["-"]);
+
+        curlInstaller.stdout.on("data", function (data: any): void {
+            installHomebrew.stdin.write(data);
+        });
+        curlInstaller.on("close", function (code: number): void {
+            installHomebrew.stdin.end();
+        });
+
+        installHomebrew.stdout.on("data", function (data: any): void {
+            console.info("" + data);
+        });
+        installHomebrew.stderr.on("data", function (data: any): void {
+            console.error("" + data);
+        });
+        installHomebrew.on("close", function (code: number): void {
+            homebrewInstalled.resolve({});
+        });
+        installHomebrew.on("error", function (arg: any): void {
+            console.error("ERROR: " + JSON.stringify(arg));
+            homebrewInstalled.reject(arg);
+        });
+
+        return homebrewInstalled.promise;
+    }
+
+    private static tryInstallPackages(): Q.Promise<{}> {
+        // Install these packages if they do not exist.
+        // We need to check first since the install will fail if an older version is already installed.
+        // ideviceinstaller and ios-webkit-debug-proxy will install libimobiledevice if required
+        return Q.denodeify(child_process.exec)(
+            "(brew list ideviceinstaller | grep ideviceinstaller > /dev/null || brew install ideviceinstaller) && " +
+            "(brew list ios-webkit-debug-proxy | grep ios-webkit-debug-proxy > /dev/null || brew install ios-webkit-debug-proxy)"
+            );
+    }
+
+    private static verifyPackagesInstalled(): Q.Promise<{}> {
+        // Verify that both of these can run.
+        return Q.denodeify(child_process.exec)("ideviceinstaller -h > /dev/null && ios_webkit_debug_proxy -h > /dev/null");
     }
 }
 

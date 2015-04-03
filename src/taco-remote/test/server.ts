@@ -36,6 +36,7 @@ var darwinOnlyTest = os.platform() === "darwin" ? it : it.skip;
 describe("server", function (): void {
     before(function (): void {
         resources.init("en", path.join(__dirname, "..", "resources"));
+        nconf.use("memory");
     });
     after(function (): void {
         resources.teardown();
