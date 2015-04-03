@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
+"use strict";
 
 import fs = require ("fs");
 import https = require ("https");

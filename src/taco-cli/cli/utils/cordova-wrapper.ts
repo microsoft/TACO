@@ -1,4 +1,7 @@
-﻿import child_process = require ("child_process");
+﻿/// <reference path="../../../typings/node.d.ts" />
+/// <reference path="../../../typings/Q.d.ts" />
+"use strict";
+import child_process = require ("child_process");
 import Q = require ("q");
 
 class CordovaWrapper {

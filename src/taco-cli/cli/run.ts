@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+"use strict";
 
 import assert = require ("assert");
 import child_process = require ("child_process");

@@ -34,9 +34,10 @@ import resources = utils.ResourcesManager;
 
 module ServerModuleFactory /* implements TacoRemote.IServerModuleFactory */ {
     export function create(conf: TacoRemote.IDict, modPath: string, serverCapabilities: TacoRemote.IServerCapabilities): Q.Promise<TacoRemote.IServerModule> {
-        resources.init(conf.get("lang"), path.join(__dirname, "..", "resources"));
+        var tacoCordovaConf = new TacoCordovaConf(conf);
+        resources.init(tacoCordovaConf.lang, path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(conf).then(function (): TacoRemote.IServerModule {
-            return new Server(new TacoCordovaConf(conf), modPath);
+            return new Server(tacoCordovaConf, modPath);
         });
     }
 
