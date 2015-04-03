@@ -47,7 +47,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
     public initialize(conf: HostSpecifics.IConf): Q.Promise<any> {
         if (process.getuid() === 0) {
-            console.warn(resources.getStringForLanguage(conf.get("lang"), "RunningAsRootError"));
+            console.warn(resources.getString("RunningAsRootError"));
             process.exit(1);
         }
 

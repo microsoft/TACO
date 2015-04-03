@@ -8,6 +8,7 @@ import path = require ("path");
 import TacoCordova = require ("../lib/server");
 import TacoUtils = require ("taco-utils");
 import UtilHelper = TacoUtils.UtilHelper;
+import resources = TacoUtils.ResourcesManager;
 import selftest = require ("../lib/selftest");
 
 var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
@@ -18,6 +19,8 @@ describe("taco-cordova", function (): void {
     var downloadDir = path.join(__dirname, "out", "selftest");
     var modMountPoint = "Test";
     before(function (mocha: MochaDone): void {
+        resources.init("en", path.join(__dirname, "..", "resources"));
+        resources.UnitTest = true;
         var app = express();
         var serverDir = path.join(__dirname, "out");
         UtilHelper.createDirectoryIfNecessary(serverDir);

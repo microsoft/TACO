@@ -18,6 +18,7 @@ import child_process = require ("child_process");
 import express = require ("express");
 import fs = require ("fs");
 import path = require ("path");
+import Q = require ("q");
 import tar = require ("tar");
 import zlib = require ("zlib");
 
@@ -26,6 +27,7 @@ import HostSpecifics = require ("./host-specifics");
 import TacoCordovaConf = require ("./taco-cordova-conf");
 import utils = require ("taco-utils");
 
+import BuildInfo = utils.BuildInfo;
 import resources = utils.ResourcesManager;
 
 interface IBuildMetrics {
@@ -42,9 +44,9 @@ class BuildManager {
     private maxBuildsInQueue: number;
     private nextBuildNumber: number;
     private deleteBuildsOnShutdown: boolean;
-    private builds: { [idx: string]: utils.BuildInfo };
-    private currentBuild: utils.BuildInfo;
-    private queuedBuilds: utils.BuildInfo[];
+    private builds: { [idx: string]: BuildInfo };
+    private currentBuild: BuildInfo;
+    private queuedBuilds: BuildInfo[];
     private buildMetrics: IBuildMetrics;
     private requestRedirector: TacoRemoteLib.IRequestRedirector;
     private serverConf: TacoCordovaConf;
@@ -79,7 +81,7 @@ class BuildManager {
         };
         this.currentBuild = null;
         this.queuedBuilds = [];
-        console.info(resources.getStringForLanguage(conf.lang, "BuildManagerInit"),
+        console.info(resources.getString("BuildManagerInit"),
             this.baseBuildDir, this.maxBuildsInQueue, this.deleteBuildsOnShutdown, allowsEmulate, this.nextBuildNumber);
     }
 
@@ -89,15 +91,15 @@ class BuildManager {
         }
     }
 
-    public submitNewBuild(req: express.Request, callback: Function): void {
-        console.info(resources.getStringForLanguage(this.serverConf.lang, "NewBuildSubmitted"));
+    public submitNewBuild(req: express.Request): Q.Promise<BuildInfo> {
+        console.info(resources.getString("NewBuildSubmitted"));
         console.info(req.url);
         console.info(req.headers);
 
         this.buildMetrics.submitted++;
 
         if (this.queuedBuilds.length === this.maxBuildsInQueue) {
-            var message = resources.getStringForLanguage(this.serverConf.lang, "BuildQueueFull", this.maxBuildsInQueue);
+            var message = resources.getString("BuildQueueFull", this.maxBuildsInQueue);
             var error: any = new Error(message);
             error.code = 503;
             throw error;
@@ -112,22 +114,21 @@ class BuildManager {
 
         // TODO: Check if any package can service the request
         var self = this;
-        this.requestRedirector.getPackageToServeRequest(null, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.init(this.serverConf);
+        return this.requestRedirector.getPackageToServeRequest(null, req).then(function (pkg: TacoRemoteLib.IRemoteLib): Q.Promise<BuildInfo> {
+            pkg.init(self.serverConf);
             var errors: string[] = [];
             if (!pkg.validateBuildRequest(req, errors)) {
-                callback(errors);
                 self.buildMetrics.rejected++;
-                return;
+                return Q.reject<BuildInfo>(errors);
             }
 
             self.buildMetrics.accepted++;
 
             if (!buildNumber) {
-                buildNumber = ++this.nextBuildNumber;
+                buildNumber = ++self.nextBuildNumber;
             }
 
-            var buildDir = path.join(this.baseBuildDir, "" + buildNumber);
+            var buildDir = path.join(self.baseBuildDir, "" + buildNumber);
             if (!fs.existsSync(buildDir)) {
                 fs.mkdirSync(buildDir);
             }
@@ -136,7 +137,7 @@ class BuildManager {
 
             // Pass the build query to the buildInfo, for package-specific config options
             var params = req.query;
-            params.status = utils.BuildInfo.UPLOADING;
+            params.status = BuildInfo.UPLOADING;
             params.buildCommand = buildCommand;
             params.buildPlatform = buildPlatform;
             params.configuration = configuration;
@@ -144,25 +145,27 @@ class BuildManager {
             params.buildDir = buildDir;
             params.buildNumber = buildNumber;
             params.options = options;
-            var buildInfo = new utils.BuildInfo(params);
+            var buildInfo = new BuildInfo(params);
             // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
             Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
             buildInfo["pkg"] = pkg;
 
             self.builds[buildNumber] = buildInfo;
 
+            var deferred = Q.defer<BuildInfo>();
             self.saveUploadedTgzFile(buildInfo, req, function (err: any, result: any): void {
                 if (err) {
-                    callback(err);
+                    deferred.reject(err);
                 } else {
-                    callback(null, buildInfo);
+                    deferred.resolve(buildInfo);
                     self.beginBuild(req, buildInfo);
                 }
             });
-        }).done();
+            return deferred.promise;
+        });
     }
 
-    public getBuildInfo(id: number): utils.BuildInfo {
+    public getBuildInfo(id: number): BuildInfo {
         return this.builds[id] || null;
     }
 
@@ -189,7 +192,7 @@ class BuildManager {
     }
 
     // TODO: This won't localize the builds
-    public getAllBuildInfo(): { metrics: any; queued: number; currentBuild: utils.BuildInfo; queuedBuilds: utils.BuildInfo[]; allBuilds: any } {
+    public getAllBuildInfo(): { metrics: any; queued: number; currentBuild: BuildInfo; queuedBuilds: BuildInfo[]; allBuilds: any } {
         return {
             metrics: this.buildMetrics,
             queued: this.queuedBuilds.length,
@@ -200,13 +203,13 @@ class BuildManager {
     }
 
     // Downloads the requested build.
-    public downloadBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public downloadBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         var self = this;
         this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
             pkg.downloadBuild(buildInfo, req, res, function (err: any): void {
                 if (!err) {
                     self.buildMetrics.downloaded++;
-                    buildInfo.updateStatus(utils.BuildInfo.DOWNLOADED);
+                    buildInfo.updateStatus(BuildInfo.DOWNLOADED);
                 }
             });
         });
@@ -216,7 +219,7 @@ class BuildManager {
         return this.baseBuildDir;
     }
 
-    public emulateBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public emulateBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         if (!utils.UtilHelper.argToBool(this.serverConf.allowsEmulate)) {
             res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
             return;
@@ -227,44 +230,44 @@ class BuildManager {
         });
     }
 
-    public deployBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public deployBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
             pkg.deployBuild(buildInfo, req, res);
         });
     }
 
-    public runBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public runBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
             pkg.runBuild(buildInfo, req, res);
         });
     }
 
-    public debugBuild(buildInfo: utils.BuildInfo, req: express.Request, res: express.Response): void {
+    public debugBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
             pkg.debugBuild(buildInfo, req, res);
         });
     }
 
-    private saveUploadedTgzFile(buildInfo: utils.BuildInfo, req: express.Request, callback: Function): void {
+    private saveUploadedTgzFile(buildInfo: BuildInfo, req: express.Request, callback: Function): void {
         var self = this;
         console.info(resources.getString("UploadSaving", buildInfo.buildDir));
         buildInfo.tgzFilePath = path.join(buildInfo.buildDir, "upload_" + buildInfo.buildNumber + ".tgz");
         var tgzFile = fs.createWriteStream(buildInfo.tgzFilePath);
         req.pipe(tgzFile);
         tgzFile.on("finish", function (): void {
-            buildInfo.updateStatus(utils.BuildInfo.UPLOADED);
+            buildInfo.updateStatus(BuildInfo.UPLOADED);
             console.info(resources.getString("UploadSavedSuccessfully", buildInfo.tgzFilePath));
             callback(null, buildInfo);
         });
         tgzFile.on("error", function (err: Error): void {
-            buildInfo.updateStatus(utils.BuildInfo.ERROR, "ErrorSavingTgz", tgzFile, err.message);
+            buildInfo.updateStatus(BuildInfo.ERROR, "ErrorSavingTgz", tgzFile, err.message);
             console.error(resources.getString("ErrorSavingTgz", tgzFile, err));
             self.buildMetrics.failed++;
             callback(err, buildInfo);
         });
     }
 
-    private beginBuild(req: express.Request, buildInfo: utils.BuildInfo): void {
+    private beginBuild(req: express.Request, buildInfo: BuildInfo): void {
         var self = this;
         var extractToDir = path.join(buildInfo.buildDir, "cordovaApp");
         buildInfo.buildSuccessful = false;
@@ -274,22 +277,22 @@ class BuildManager {
                 fs.mkdirSync(extractToDir);
             }
         } catch (e) {
-            buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
-            console.error(resources.getStringForLanguage(self.serverConf.lang, "FailedCreateDirectory", extractToDir, e.message));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
+            console.error(resources.getString("FailedCreateDirectory", extractToDir, e.message));
             self.buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
-            buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
-            console.error(resources.getStringForLanguage(self.serverConf.lang, "NoTgzFound", buildInfo.tgzFilePath));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
+            console.error(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
             self.buildMetrics.failed++;
             return;
         }
 
         var onError = function (err: Error): void {
-            buildInfo.updateStatus(utils.BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
-            console.info(resources.getStringForLanguage(self.serverConf.lang, "TgzExtractError", buildInfo.tgzFilePath, err.message));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
+            console.info(resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
             self.buildMetrics.failed++;
         };
 
@@ -307,7 +310,7 @@ class BuildManager {
         tarExtractor.on("end", function (): void {
             self.removeDeletedFiles(buildInfo);
 
-            buildInfo.updateStatus(utils.BuildInfo.EXTRACTED);
+            buildInfo.updateStatus(BuildInfo.EXTRACTED);
             console.info(resources.getString("UploadExtractedSuccessfully", extractToDir));
             self.build(buildInfo);
         });
@@ -320,7 +323,7 @@ class BuildManager {
         unzip.pipe(tarExtractor).on("error", onError);
     }
 
-    private removeDeletedFiles(buildInfo: utils.BuildInfo): void {
+    private removeDeletedFiles(buildInfo: BuildInfo): void {
         var changeListFile = path.join(buildInfo.appDir, "changeList.json");
         if (fs.existsSync(changeListFile)) {
             buildInfo.changeList = JSON.parse(fs.readFileSync(changeListFile, { encoding: "utf-8" }));
@@ -338,7 +341,7 @@ class BuildManager {
 
     // build may change the current working directory to the app dir. To build multiple builds in parallel we will
     // need to fork out child processes. For now, limiting to one build at a time, and queuing up new builds that come in while a current build is in progress.
-    private build(buildInfo: utils.BuildInfo): void {
+    private build(buildInfo: BuildInfo): void {
         var self = this;
         if (self.currentBuild) {
             console.info(resources.getString("NewBuildQueued", buildInfo.buildNumber));
@@ -354,19 +357,19 @@ class BuildManager {
 
         if (!fs.existsSync(buildInfo.appDir)) {
             console.info(resources.getString("BuildDirectoryNotFound", buildInfo.buildDir));
-            buildInfo.updateStatus(utils.BuildInfo.ERROR, "BuildDirectoryNotFound", buildInfo.buildDir);
+            buildInfo.updateStatus(BuildInfo.ERROR, "BuildDirectoryNotFound", buildInfo.buildDir);
             self.buildMetrics.failed++;
             self.dequeueNextBuild();
             return;
         }
 
         self.requestRedirector.getPackageToServeRequest(buildInfo, null).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.build(buildInfo, function (resultBuildInfo: utils.BuildInfo): void {
+            pkg.build(buildInfo, function (resultBuildInfo: BuildInfo): void {
                 buildInfo.updateStatus(resultBuildInfo.status, resultBuildInfo.messageId, resultBuildInfo.messageArgs);
-                if (buildInfo.status === utils.BuildInfo.COMPLETE) {
+                if (buildInfo.status === BuildInfo.COMPLETE) {
                     self.buildMetrics.succeeded++;
                     buildInfo.buildSuccessful = true;
-                } else if (buildInfo.status === utils.BuildInfo.INVALID) {
+                } else if (buildInfo.status === BuildInfo.INVALID) {
                     self.buildMetrics.rejected++;
                 } else {
                     self.buildMetrics.failed++;

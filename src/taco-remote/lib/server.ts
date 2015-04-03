@@ -66,7 +66,7 @@ class Server {
             return Server.startupServer(conf, app);
         }).then(Server.registerShutdownHooks)
           .fail(function (err: any): void {
-            console.error(resources.getStringForLanguage(conf.get("lang"), "ServerStartFailed"), err);
+            console.error(resources.getString("ServerStartFailed"), err);
             if (err.stack) {
                 console.error(err.stack);
             }
@@ -198,7 +198,7 @@ class Server {
                 svr.listen(conf.get("port"), function (): void {
                     Server.ServerInstance = svr;
                     Server.ServerConf = conf;
-                    console.log(resources.getStringForLanguage(conf.get("lang"), "InsecureServerStarted"), conf.get("port"));
+                    console.log(resources.getString("InsecureServerStarted"), conf.get("port"));
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -244,7 +244,7 @@ class Server {
                 svr.listen(conf.get("port"), function (): void {
                     Server.ServerInstance = svr;
                     Server.ServerConf = conf;
-                    console.log(resources.getStringForLanguage(conf.get("lang"), "SecureServerStarted"), conf.get("port"));
+                    console.log(resources.getString("SecureServerStarted"), conf.get("port"));
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -254,7 +254,7 @@ class Server {
 
     private static friendlyServerListenError(err: any, conf: HostSpecifics.IConf): string {
         if (err.code === "EADDRINUSE") {
-            return resources.getStringForLanguage(conf.get("lang"), "ServerPortInUse", conf.get("port"));
+            return resources.getString("ServerPortInUse", conf.get("port"));
         } else {
             return err.toString();
         }
@@ -267,14 +267,12 @@ class Server {
     }
 
     private static registerShutdownHooks(): void {
-        // We should have serverConf defined at this point, but just in case fall back to english
-        var lang = Server.ServerConf && Server.ServerConf.get("lang") || "en";
         // It is strongly recommended in a NodeJs server to kill the process off on uncaughtException.
         Server.ErrorShutdown = function (err: Error): void {
-            console.error(resources.getStringForLanguage(lang, "UncaughtErrorShutdown"));
+            console.error(resources.getString("UncaughtErrorShutdown"));
             console.error(err);
             console.error((<any>err).stack);
-            console.info(resources.getStringForLanguage(lang, "ServerShutdown"));
+            console.info(resources.getString("ServerShutdown"));
             
             Server.Modules.forEach(function (mod: TacoRemote.IServerModule): void {
                 mod.shutdown();
@@ -286,7 +284,7 @@ class Server {
 
         // Opportunity to clean up builds on exit
         Server.Shutdown = function (): void {
-            console.info(resources.getStringForLanguage(lang, "ServerShutdown"));
+            console.info(resources.getString("ServerShutdown"));
             // BUG: Currently if buildManager.shutdown() is called while a build log is being written, rimraf will throw an exception on windows
             Server.Modules.forEach(function (mod: TacoRemote.IServerModule): void {
                 mod.shutdown();

@@ -41,6 +41,7 @@ module ServerModuleFactory /* implements TacoRemote.IServerModuleFactory */ {
     }
 
     export function test(conf: TacoRemote.IDict, modPath: string, serverTestCapabilities: TacoRemote.IServerTestCapabilities): Q.Promise<any> {
+        resources.init(conf.get("lang"), path.join(__dirname, "..", "resources"));
         var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.get("secure")) ? "s" : "", conf.get("hostname") || os.hostname, conf.get("port"));
         var downloadDir = path.join(conf.get("serverDir"), "selftest", "taco-cordova");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
@@ -68,10 +69,10 @@ class Server implements TacoRemote.IServerModule {
     public getRouter(): express.Router {
         var router = express.Router();
         router.post("/build/tasks", this.submitNewBuild.bind(this));
-        router.get("/build/tasks/:id", this.getBuildStatus);
-        router.get("/build/tasks/:id/log", this.getBuildLog);
-        router.get("/build/tasks", this.getAllBuildStatus);
-        router.get("/build/:id", this.getBuildStatus);
+        router.get("/build/tasks/:id", this.getBuildStatus.bind(this));
+        router.get("/build/tasks/:id/log", this.getBuildLog.bind(this));
+        router.get("/build/tasks", this.getAllBuildStatus.bind(this));
+        router.get("/build/:id", this.getBuildStatus.bind(this));
         router.get("/build/:id/download", this.checkBuildThenAction(this.buildManager.downloadBuild));
 
         router.get("/build/:id/emulate", this.checkBuildThenAction(this.buildManager.emulateBuild));
@@ -93,7 +94,7 @@ class Server implements TacoRemote.IServerModule {
     private submitNewBuild(req: express.Request, res: express.Response): void {
         var port = this.serverConf.port;
         var modPath = this.modPath;
-        Q.nfcall(this.buildManager.submitNewBuild, req).then(function (buildInfo: utils.BuildInfo): void {
+        this.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
             var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
             res.set({
                 "Content-Type": "application/json",

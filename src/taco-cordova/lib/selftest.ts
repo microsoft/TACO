@@ -52,6 +52,7 @@ class SelfTest {
             var i = 0;
             var ping = setInterval(function (): void {
                 i++;
+                console.log(util.format("%d...",i));
                 request.get({ url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
                     if (error) {
                         clearInterval(ping);

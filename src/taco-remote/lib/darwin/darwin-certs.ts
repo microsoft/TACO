@@ -90,7 +90,7 @@ module Certs {
         var caKeyPath = path.join(certsDir, "ca-key.pem");
         var caCertPath = path.join(certsDir, "ca-cert.pem");
         if (!fs.existsSync(caKeyPath) || !fs.existsSync(caCertPath)) {
-            var error = resources.getStringForLanguage(conf.get("lang"), "CAFilesNotFound", caKeyPath, caCertPath);
+            var error = resources.getString("CAFilesNotFound", caKeyPath, caCertPath);
             return Q(0).thenReject(error);
         }
 

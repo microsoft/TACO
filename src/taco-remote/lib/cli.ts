@@ -74,7 +74,7 @@ function cli(): void {
     if (task) {
         HostSpecifics.hostSpecifics.initialize(nconf).then(task.execute).done();
     } else {
-        console.info(resources.getStringForLanguage(nconf.get("lang"), "UnknownCommand"), command);
+        console.info(resources.getString("UnknownCommand"), command);
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
         process.exit(0);
     }
