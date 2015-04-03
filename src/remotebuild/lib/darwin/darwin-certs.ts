@@ -40,9 +40,9 @@ module Certs {
     module CERT_DEFAULTS {
         export var days = 1825; // 5 years
         export var country = "US";
-        export var ca_cn = "taco-remote." + os.hostname() + ".Certificate-Authority"; // NOTE: Changing certificates away from referring to vs-mda-remote may require changes to VS, until the CLI can configure certs appropriately
-        export var pfx_name = "taco-remote." + os.hostname() + ".Client-Certificate";
-        export var client_cn = "taco-remote." + os.hostname(); // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
+        export var ca_cn = "remotebuild." + os.hostname() + ".Certificate-Authority"; // NOTE: Changing certificates away from referring to vs-mda-remote may require changes to VS, until the CLI can configure certs appropriately
+        export var pfx_name = "remotebuild." + os.hostname() + ".Client-Certificate";
+        export var client_cn = "remotebuild." + os.hostname(); // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
     };
 
     var certStore: HostSpecifics.ICertStore = null;
@@ -362,7 +362,7 @@ module Certs {
             console.info(resources.getString("OSXCertSetupNoPinTimeout"));
         }
 
-        console.info("taco-remote generateClientCert");
+        console.info("remotebuild generateClientCert");
         console.info("");
     };
 }

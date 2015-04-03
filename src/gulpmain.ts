@@ -17,7 +17,7 @@ import tsUtil = require ("./taco-cli/compile/typescript-util");
 
 var buildConfig = require("../../src/build_config.json");
 
-var modulesToInstallAndTest = ["taco-utils", "taco-cli", "taco-remote", "taco-cordova", "taco-remote-lib"];
+var modulesToInstallAndTest = ["taco-utils", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["install-build"]);

@@ -12,14 +12,14 @@
 
 import rimraf = require ("rimraf");
 import utils = require ("taco-utils");
-import TacoCordovaConf = require ("./taco-cordova-conf");
+import TacoRemoteConf = require ("./taco-remote-conf");
 
 import resources = utils.ResourcesManager;
 
 class BuildRetention {
     private maxBuildsToKeep: number;
 
-    constructor(baseBuildDir: string, config: TacoCordovaConf) {
+    constructor(baseBuildDir: string, config: TacoRemoteConf) {
         this.maxBuildsToKeep = config.maxBuildsToKeep;
         console.info(resources.getString("BuildRetentionInit"), baseBuildDir, this.maxBuildsToKeep);
     }

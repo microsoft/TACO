@@ -1,5 +1,5 @@
 ﻿
-# taco-cordova
+# remotebuild
 
 An OSX agent to remotely build iOS apps created using Visual Studio Tools for Apache Cordova.
 

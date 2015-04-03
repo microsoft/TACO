@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/taco-utils.d.ts" />
-/// <reference path="../../../typings/taco-remote.d.ts" />
+/// <reference path="../../../typings/remotebuild.d.ts" />
 "use strict";
 
 import child_process = require ("child_process");
@@ -14,8 +14,8 @@ import resources = tacoUtils.ResourcesManager;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class DarwinDependencies {
-    public static askInstallHomebrew(conf: TacoRemote.IDict): Q.Promise<any> {
-        var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-cordova");
+    public static askInstallHomebrew(conf: RemoteBuild.IDict): Q.Promise<any> {
+        var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         var isFirstRun = !fs.existsSync(firstRunPath);
         var deferred = Q.defer();
         if (isFirstRun) {

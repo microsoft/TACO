@@ -1,5 +1,5 @@
 {
-    "name": "taco-cordova",
+    "name": "remotebuild",
     "description": "Agent to remotely build, run, and debug iOS apps created using Visual Studio Tools for Apache Cordova.",
     "version": "0.2.6",
     "author": {
@@ -8,25 +8,29 @@
     },
     "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
     "main": "./lib/server.js",
+    "bin": {
+        "remotebuild": "./bin/remotebuild"
+    },
 
     "preferGlobal": true,
     "dependencies": {
         "express": "4.12.2",
-        "serve-index": "1.6.2",
-        "tar": "0.1.20",
+        "morgan": "1.5.1",
+        "errorhandler": "1.3.4",
+        "nconf": "0.6.9",
         "q": "1.0.1",
         "rimraf": "2.2.6",
-        "fstream": "0.1.28",
-        "request": "2.36.0",
-        "taco-utils": "file:../taco-utils",
-        "taco-remote-lib": "file:../taco-remote-lib"
+        "taco-utils": "file:../taco-utils"
+    },
+    "optionalDependencies": { 
+        "taco-remote": "file:../taco-remote"
     },
     "devDependencies": {
         "typescript": "1.3.0",
         "mocha": "2.0.1",
         "mkdirp": "0.3.5",
         "should": "4.3.0",
-        "nconf": "0.6.9"
+        "request": "2.36.0"
     },
     "bundledDependencies": [ "taco-utils" ],
 

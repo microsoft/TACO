@@ -24,7 +24,7 @@ import zlib = require ("zlib");
 
 import BuildRetention = require ("./build-retention");
 import HostSpecifics = require ("./host-specifics");
-import TacoCordovaConf = require ("./taco-cordova-conf");
+import TacoRemoteConf = require ("./taco-remote-conf");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
@@ -49,12 +49,12 @@ class BuildManager {
     private queuedBuilds: BuildInfo[];
     private buildMetrics: IBuildMetrics;
     private requestRedirector: TacoRemoteLib.IRequestRedirector;
-    private serverConf: TacoCordovaConf;
+    private serverConf: TacoRemoteConf;
     private buildRetention: BuildRetention;
 
-    constructor(conf: TacoCordovaConf) {
+    constructor(conf: TacoRemoteConf) {
         this.serverConf = conf;
-        this.baseBuildDir = path.resolve(process.cwd(), conf.serverDir, "taco-cordova", "builds");
+        this.baseBuildDir = path.resolve(process.cwd(), conf.serverDir, "taco-remote", "builds");
         utils.UtilHelper.createDirectoryIfNecessary(this.baseBuildDir);
         this.maxBuildsInQueue = conf.maxBuildsInQueue;
         this.deleteBuildsOnShutdown = conf.deleteBuildsOnShutdown;

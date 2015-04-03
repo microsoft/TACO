@@ -1,11 +1,12 @@
 ﻿/// <reference path="../../typings/mocha.d.ts" />
 
 import express = require ("express");
+import fs = require ("fs");
 import http = require ("http");
 import nconf = require ("nconf");
 import os = require ("os");
 import path = require ("path");
-import TacoCordova = require ("../lib/server");
+import TacoRemote = require ("../lib/server");
 import TacoUtils = require ("taco-utils");
 import UtilHelper = TacoUtils.UtilHelper;
 import resources = TacoUtils.ResourcesManager;
@@ -13,14 +14,19 @@ import selftest = require ("../lib/selftest");
 
 var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
 
-describe("taco-cordova", function (): void {
+describe("taco-remote", function (): void {
     var server: http.Server;
-    var serverMod: TacoRemote.IServerModule;
+    var serverMod: RemoteBuild.IServerModule;
     var downloadDir = path.join(__dirname, "out", "selftest");
     var modMountPoint = "Test";
     before(function (mocha: MochaDone): void {
         resources.init("en", path.join(__dirname, "..", "resources"));
         resources.UnitTest = true;
+        process.env["TACO_HOME"] = path.join(__dirname, "out");
+        UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
+        var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
+        fs.writeFileSync(firstRunPath, ""); // Just need the file to exist so the test doesn't try to ask us about installing homebrew
+
         var app = express();
         var serverDir = path.join(__dirname, "out");
         UtilHelper.createDirectoryIfNecessary(serverDir);
@@ -30,13 +36,13 @@ describe("taco-cordova", function (): void {
             port: 3000,
             secure: false,
             modules: {
-                "taco-cordova": {
+                "taco-remote": {
                     mountPoint: modMountPoint
                 }
             }
         }).use("memory");
 
-        TacoCordova.create(nconf, modMountPoint, {}).then(function (serverModule: TacoRemote.IServerModule): void {
+        TacoRemote.create(nconf, modMountPoint, {}).then(function (serverModule: RemoteBuild.IServerModule): void {
             serverMod = serverModule;
 
             app.use("/" + modMountPoint, serverModule.getRouter());

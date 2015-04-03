@@ -1,6 +1,6 @@
 ﻿param(
     [Parameter(Mandatory=$True)][string]$Command,
-    [Parameter(Mandatory=$False)][string]$CertificateName = "taco-remote"
+    [Parameter(Mandatory=$False)][string]$CertificateName = "remotebuild"
 )
 
 # Uncaught exceptions do not correctly set the exit code in powershell scripts invoked via the -file argument!

@@ -11,10 +11,10 @@ import zlib = require ("zlib");
 
 class SelfTest {
     /**
-     * Attempt to submit a build to the specified host running taco-cordova on the specifed mount point
+     * Attempt to submit a build to the specified host running taco-remote on the specifed mount point
      *
      * @param {string} host The protocol, hostname, and port of the server. E.g. "http://localhost:3000"
-     * @param {string} modMountPoint The location where taco-cordova is mounted. E.g. "cordova"
+     * @param {string} modMountPoint The location where taco-remote is mounted. E.g. "cordova"
      * @param {string} downloadDir The folder to save any resulting output to
      * @param {boolean} deviceBuild Whether to build for device, or the emulator.
      * @param {https.Agent} agent An agent to use if making a secure connection.

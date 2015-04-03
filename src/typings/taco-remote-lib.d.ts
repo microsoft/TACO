@@ -3,7 +3,7 @@
 /// <reference path="../typings/taco-utils.d.ts" />
 /// <reference path="../typings/express.d.ts" />
 /// <reference path="../typings/semver.d.ts" />
-/// <reference path="../typings/taco-remote.d.ts" />
+/// <reference path="../typings/remotebuild.d.ts" />
 
 declare module TacoRemoteLib {
     interface IRequestRedirector {

@@ -1,16 +1,16 @@
-﻿/// <reference path="../../typings/taco-remote.d.ts" />
+﻿/// <reference path="../../typings/remotebuild.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 
 import express = require ("express");
 import Q = require ("q");
 
 module TestServerModuleFactory {
-    export function create(conf: TacoRemote.IDict, modPath: string): Q.Promise<TacoRemote.IServerModule> {
+    export function create(conf: RemoteBuild.IDict, modPath: string): Q.Promise<RemoteBuild.IServerModule> {
         TestServerModule.ModPath = modPath;
         return Q(new TestServerModule());
     }
 
-    export class TestServerModule implements TacoRemote.IServerModule {
+    export class TestServerModule implements RemoteBuild.IServerModule {
         public static IsShutDown: boolean = false;
         public static LastReq: Express.Request = null;
         public static ModPath: string = null;

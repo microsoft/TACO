@@ -1,4 +1,4 @@
-﻿/// <reference path="../../typings/taco-remote.d.ts" />
+﻿/// <reference path="../../typings/remotebuild.d.ts" />
 import HostSpecifics = require ("./host-specifics");
 import tacoUtils = require ("taco-utils");
 import UtilHelper = tacoUtils.UtilHelper;
@@ -24,9 +24,9 @@ class TacoCordovaConf {
         [key: string]: any;
     };
 
-    constructor(serverConf: TacoRemote.IDict) {
+    constructor(serverConf: RemoteBuild.IDict) {
         // Create a copy of the data so we don't accidentally modify things
-        this.tacoCordovaConf = JSON.parse(JSON.stringify(serverConf.get("modules:taco-cordova")));
+        this.tacoCordovaConf = JSON.parse(JSON.stringify(serverConf.get("modules:taco-remote")));
 
         this.tacoCordovaConf.lang = serverConf.get("lang");
         this.tacoCordovaConf.port = serverConf.get("port");

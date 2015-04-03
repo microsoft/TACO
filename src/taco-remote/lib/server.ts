@@ -11,304 +11,151 @@
 /// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/express-extensions.d.ts" />
-/// <reference path="../../typings/morgan.d.ts" />
-/// <reference path="../../typings/errorhandler.d.ts" />
-/// <reference path="../../typings/taco-remote.d.ts" />
+/// <reference path="../../typings/taco-remote-lib.d.ts" />
+/// <reference path="../../typings/remotebuild.d.ts" />
+/// <reference path="../../typings/serve-index.d.ts" />
 "use strict";
 
-import errorhandler = require ("errorhandler");
 import express = require ("express");
 import fs = require ("fs");
-import http = require ("http");
-import https = require ("https");
-import expressLogger = require ("morgan");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import serveIndex = require ("serve-index");
 
+import BuildManager = require ("./build-manager");
 import HostSpecifics = require ("./host-specifics");
+import selftest = require ("./selftest");
+import TacoRemoteConf = require ("./taco-remote-conf");
 import utils = require ("taco-utils");
 import util = require ("util");
 
 import resources = utils.ResourcesManager;
-import UtilHelper = utils.UtilHelper;
 
-interface IDictionaryT<T> {
-    [index: string]: T;
+module ServerModuleFactory /* implements RemoteBuild.IServerModuleFactory */ {
+    export function create(conf: RemoteBuild.IDict, modPath: string, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
+        var tacoRemoteConf = new TacoRemoteConf(conf);
+        resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
+        return HostSpecifics.hostSpecifics.initialize(conf).then(function (): RemoteBuild.IServerModule {
+            return new Server(tacoRemoteConf, modPath);
+        });
+    }
+
+    export function test(conf: RemoteBuild.IDict, modPath: string, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
+        resources.init(conf.get("lang"), path.join(__dirname, "..", "resources"));
+        var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.get("secure")) ? "s" : "", conf.get("hostname") || os.hostname, conf.get("port"));
+        var downloadDir = path.join(conf.get("serverDir"), "selftest", "taco-remote");
+        utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
+        return selftest.test(host, modPath, downloadDir, /* deviceBuild */ false, serverTestCapabilities.agent).then(function (): Q.Promise<any> {
+            return selftest.test(host, modPath, downloadDir, /* deviceBuild */ true, serverTestCapabilities.agent);
+        });
+    }
 }
 
-class Server {
-    private static Modules: TacoRemote.IServerModule[] = [];
+export = ServerModuleFactory;
 
-    private static ServerInstance: { close(callback?: Function): void };
-    private static ServerConf: HostSpecifics.IConf;
+class Server implements RemoteBuild.IServerModule {
+    private serverConf: TacoRemoteConf;
+    private modPath: string;
+    private buildManager: BuildManager;
 
-    private static ErrorShutdown: (e: any) => void;
-    private static Shutdown: () => void;
+    constructor(conf: TacoRemoteConf, modPath: string) {
+        this.serverConf = conf;
+        this.modPath = modPath;
 
-    public static start(conf: HostSpecifics.IConf): Q.Promise<any> {
-        var app = express();
-        app.use(expressLogger("dev"));
-        app.use(errorhandler());
-
-        var serverDir = conf.get("serverDir");
-        UtilHelper.createDirectoryIfNecessary(serverDir);
-
-        app.get("/", function (req: express.Request, res: express.Response): void {
-            res.status(200).send(resources.getStringForLanguage(req, "IndexPageContent", conf.get("port")));
-        });
-
-        app.get("/certs/:pin", HostSpecifics.hostSpecifics.downloadClientCerts);
-        app.get("/modules/:module", Server.getModuleMount);
-
-        return Server.initializeServerCapabilities(conf).then(function (serverCapabilities: TacoRemote.IServerCapabilities): Q.Promise<any> {
-            return Server.loadServerModules(conf, app, serverCapabilities);
-        }).then(function (): Q.Promise<any> {
-            return Server.startupServer(conf, app);
-        }).then(Server.registerShutdownHooks)
-          .fail(function (err: any): void {
-            console.error(resources.getString("ServerStartFailed"), err);
-            if (err.stack) {
-                console.error(err.stack);
-            }
-
-            throw err;
-        });
+        // Initialize the build manager (after our app settings are all setup)
+        this.buildManager = new BuildManager(conf);
     }
 
-    public static stop(callback: Function): void {
-        process.removeListener("uncaughtException", Server.ErrorShutdown);
-        process.removeListener("SIGTERM", Server.Shutdown);
-        process.removeListener("SIGINT", Server.Shutdown);
-        if (Server.ServerInstance) {
-            var tempInstance = Server.ServerInstance;
-            Server.ServerInstance = null;
-            tempInstance.close(callback);
-        }
+    public getRouter(): express.Router {
+        var router = express.Router();
+        router.post("/build/tasks", this.submitNewBuild.bind(this));
+        router.get("/build/tasks/:id", this.getBuildStatus.bind(this));
+        router.get("/build/tasks/:id/log", this.getBuildLog.bind(this));
+        router.get("/build/tasks", this.getAllBuildStatus.bind(this));
+        router.get("/build/:id", this.getBuildStatus.bind(this));
+        router.get("/build/:id/download", this.checkBuildThenAction(this.buildManager.downloadBuild));
+
+        router.get("/build/:id/emulate", this.checkBuildThenAction(this.buildManager.emulateBuild));
+        router.get("/build/:id/deploy", this.checkBuildThenAction(this.buildManager.deployBuild));
+        router.get("/build/:id/run", this.checkBuildThenAction(this.buildManager.runBuild));
+        router.get("/build/:id/debug", this.checkBuildThenAction(this.buildManager.debugBuild));
+
+        router.use("/files", serveIndex(this.buildManager.getBaseBuildDir()));
+        router.use("/files", express.static(this.buildManager.getBaseBuildDir()));
+
+        return router;
     }
 
-    /**
-     * Attempt to test each of the server modules against a separate instance of taco-remote which is assumed to be running with the same configuration
-     */
-    public static test(conf: HostSpecifics.IConf): Q.Promise<any> {
-        return Server.initializeServerTestCapabilities(conf).then(function (serverTestCaps: TacoRemote.IServerTestCapabilities): Q.Promise<any> {
-            return Server.eachServerModule(conf, function (modGen: TacoRemote.IServerModuleFactory, mod: string, attachPath: string): Q.Promise<any> {
-                return modGen.test(conf, attachPath, serverTestCaps).then(function (): void {
-                    console.log(resources.getString("TestPassed", mod));
-                }, function (err: Error): void {
-                    console.error(resources.getString("TestFailed", mod));
-                    console.error(err);
-                    throw err;
-                });
-            });
-        });
+    public shutdown(): void {
+        this.buildManager.shutdown();
     }
 
-    public static resetServerCert(conf: HostSpecifics.IConf): Q.Promise<any> {
-        return HostSpecifics.hostSpecifics.resetServerCert(conf);
-    }
-
-    public static generateClientCert(conf: HostSpecifics.IConf): Q.Promise<any> {
-        return HostSpecifics.hostSpecifics.generateClientCert(conf);
-    }
-
-    public static initializeServerCapabilities(conf: TacoRemote.IDict): Q.Promise<TacoRemote.IServerCapabilities> {
-        var serverCapPromises: Q.Promise<any>[] = [
-            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q(null),
-            // More capabilities can be exposed here
-        ];
-        return Q.all(serverCapPromises).spread(function (certStore: HostSpecifics.ICertStore): TacoRemote.IServerCapabilities {
-            var serverCapabilities: TacoRemote.IServerCapabilities = {};
-            if (certStore) {
-                serverCapabilities.certStore = certStore;
-            }
-
-            return serverCapabilities;
-        });
-    }
-
-    private static initializeServerTestCapabilities(conf: TacoRemote.IDict): Q.Promise<TacoRemote.IServerTestCapabilities> {
-        var serverTestCapPromises: Q.Promise<any>[] = [
-            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.getHttpsAgent(conf) : Q(null),
-            // More capabilities can be exposed here
-        ];
-        return Q.all(serverTestCapPromises).spread(function (agent: https.Agent): TacoRemote.IServerCapabilities {
-            var serverTestCapabilities: TacoRemote.IServerTestCapabilities = {};
-            if (agent) {
-                serverTestCapabilities.agent = agent;
-            }
-
-            return serverTestCapabilities;
-        });
-    }
-
-    private static loadServerModules(conf: TacoRemote.IDict, app: Express.Application, serverCapabilities: TacoRemote.IServerCapabilities): Q.Promise<any> {
-        var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
-            if (!(<any>req).client.authorized) {
-                res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));
-            } else {
-                next();
-            }
-        };
-        return Server.eachServerModule(conf, function (modGen: TacoRemote.IServerModuleFactory, mod: string, attachPath: string): Q.Promise<any> {
-            return modGen.create(conf, attachPath, serverCapabilities).then(function (serverMod: TacoRemote.IServerModule): void {
-                var modRouter = serverMod.getRouter();
-                // These routes are fully secured through client cert verification:
-                if (utils.UtilHelper.argToBool(conf.get("secure"))) {
-                    app.all("/" + attachPath, onlyAuthorizedClientRequest);
-                }
-
-                app.use("/" + attachPath, modRouter);
-                Server.Modules.push(serverMod);
-            });
-        });
-    }
-
-    private static eachServerModule(conf: TacoRemote.IDict, eachFunc: (modGen: TacoRemote.IServerModuleFactory, mod: string, mountPath: string) => Q.Promise<any>): Q.Promise<any> {
-        var serverMods: IDictionaryT<IDictionaryT<any>> = conf.get("modules");
-        if (typeof (serverMods) !== "object") {
-            serverMods = {};
-        }
-
-        return Object.keys(serverMods).reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
-            try {
-                var modGen: TacoRemote.IServerModuleFactory = require(mod);
-            } catch (e) {
-                console.error(resources.getString("UnableToLoadModule", mod));
-                return Q.reject(e);
-            }
-
-            return promise.then(function (): Q.Promise<any> {
-                return eachFunc(modGen, mod, serverMods[mod]["mountPath"]);
-            });
-        }, Q({}));
-    }
-
-    private static startupServer(conf: HostSpecifics.IConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
-        var isSsl = utils.UtilHelper.argToBool(conf.get("secure"));
-        return isSsl ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
-    }
-
-    private static startupPlainHttpServer(conf: HostSpecifics.IConf, app: express.Application): Q.Promise<http.Server> {
-        return Q(http.createServer(app)).
-            then(function (svr: http.Server): Q.Promise<http.Server> {
-                var deferred = Q.defer<http.Server>();
-                svr.on("error", function (err: any): void {
-                    deferred.reject(Server.friendlyServerListenError(err, conf));
-                });
-                svr.listen(conf.get("port"), function (): void {
-                    Server.ServerInstance = svr;
-                    Server.ServerConf = conf;
-                    console.log(resources.getString("InsecureServerStarted"), conf.get("port"));
-                    Server.writePid();
-                    deferred.resolve(svr);
-                });
-                return deferred.promise;
-            });
-    }
-
-    private static startupHttpsServer(conf: HostSpecifics.IConf, app: express.Application): Q.Promise<https.Server> {
-        var generatedNewCerts = false;
-        var generatedClientPin: number;
-        return HostSpecifics.hostSpecifics.getServerCerts().
-            then(function (certStore: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
-                if (certStore.newCerts) {
-                    generatedNewCerts = true;
-                    return HostSpecifics.hostSpecifics.generateClientCert(conf).
-                        then(function (pin: number): HostSpecifics.ICertStore {
-                            generatedClientPin = pin;
-                            return certStore;
-                        });
-                }
-
-                return Q(certStore);
-            }).
-            then(function (certStore: HostSpecifics.ICertStore): https.Server {
-                var sslSettings = {
-                    key: certStore.getKey(),
-                    cert: certStore.getCert(),
-                    ca: certStore.getCA(),
-                    requestCert: true,
-                    rejectUnauthorized: false
-                };
-                return https.createServer(sslSettings, app);
-            }).
-            then(function (svr: https.Server): Q.Promise<https.Server> {
-                var deferred = Q.defer<https.Server>();
-                svr.on("error", function (err: any): void {
-                    if (generatedNewCerts) {
-                        HostSpecifics.hostSpecifics.removeAllCertsSync(conf);
-                    }
-
-                    deferred.reject(Server.friendlyServerListenError(err, conf));
-                });
-                svr.listen(conf.get("port"), function (): void {
-                    Server.ServerInstance = svr;
-                    Server.ServerConf = conf;
-                    console.log(resources.getString("SecureServerStarted"), conf.get("port"));
-                    Server.writePid();
-                    deferred.resolve(svr);
-                });
-                return Q(deferred.promise);
-            });
-    }
-
-    private static friendlyServerListenError(err: any, conf: HostSpecifics.IConf): string {
-        if (err.code === "EADDRINUSE") {
-            return resources.getString("ServerPortInUse", conf.get("port"));
-        } else {
-            return err.toString();
-        }
-    }
-
-    private static writePid(): void {
-        if (utils.UtilHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
-            fs.writeFile(path.join(Server.ServerConf.get("serverDir"), "running_process_id"), process.pid);
-        }
-    }
-
-    private static registerShutdownHooks(): void {
-        // It is strongly recommended in a NodeJs server to kill the process off on uncaughtException.
-        Server.ErrorShutdown = function (err: Error): void {
-            console.error(resources.getString("UncaughtErrorShutdown"));
-            console.error(err);
-            console.error((<any>err).stack);
-            console.info(resources.getString("ServerShutdown"));
-            
-            Server.Modules.forEach(function (mod: TacoRemote.IServerModule): void {
-                mod.shutdown();
-            });
-
-            process.exit(1);
-        };
-        process.on("uncaughtException", Server.ErrorShutdown);
-
-        // Opportunity to clean up builds on exit
-        Server.Shutdown = function (): void {
-            console.info(resources.getString("ServerShutdown"));
-            // BUG: Currently if buildManager.shutdown() is called while a build log is being written, rimraf will throw an exception on windows
-            Server.Modules.forEach(function (mod: TacoRemote.IServerModule): void {
-                mod.shutdown();
-            });
-            Server.ServerInstance.close();
-            process.exit(0);
-        };
-        process.on("SIGTERM", Server.Shutdown);
-        process.on("SIGINT", Server.Shutdown);
-    }
-
-    private static getModuleMount(req: express.Request, res: express.Response): void {
-        var mod: string = req.params.module;
-        if (mod && Server.ServerConf.get("modules") && Server.ServerConf.get("modules")[mod]) {
-            var mountLocation = Server.ServerConf.get("modules")[mod];
-            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.host, Server.ServerConf.get("port"), mountLocation);
+    // Submits a new build task
+    private submitNewBuild(req: express.Request, res: express.Response): void {
+        var port = this.serverConf.port;
+        var modPath = this.modPath;
+        this.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
+            var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
             res.set({
+                "Content-Type": "application/json",
                 "Content-Location": contentLocation
             });
-            res.status(200).send(mountLocation);
+            res.status(202).json(buildInfo.localize(req, resources));
+        }, function (err: any): void {
+            res.set({ "Content-Type": "application/json" });
+            res.status(err.code || 400).send({ status: resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
+        }).done();
+    }
+
+    // Queries on the status of a build task, used by a client to poll
+    private getBuildStatus(req: express.Request, res: express.Response): void {
+        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
+        if (buildInfo) {
+            buildInfo.localize(req, resources);
+            if (!buildInfo.message) {
+                // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
+                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib>buildInfo["pkg"]).locResources);
+            }
+
+            res.status(200).json(buildInfo);
         } else {
-            res.sendStatus(404);
+            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
     }
-}
 
-export = Server;
+    // Retrieves log file for a build task, can be used by a client when build failed
+    private getBuildLog(req: express.Request, res: express.Response): void {
+        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
+        if (buildInfo) {
+            res.set("Content-Type", "text/plain");
+            this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
+        } else {
+            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+        }
+    }
+
+    // Queries on the status of all build tasks
+    private getAllBuildStatus(req: express.Request, res: express.Response): void {
+        var allBuildInfo = this.buildManager.getAllBuildInfo();
+        res.json(200, allBuildInfo);
+    }
+
+    private checkBuildThenAction(func: (buildInfo: utils.BuildInfo, req: express.Request, res: express.Response) => void): (req: express.Request, res: express.Response) => void {
+        var self = this;
+        return function (req: express.Request, res: express.Response): void {
+            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
+            if (!buildInfo) {
+                res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+                return;
+            }
+
+            if (!buildInfo.buildSuccessful) {
+                res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
+                return;
+            }
+
+            func.call(self.buildManager, buildInfo, req, res);
+        };
+    }
+}

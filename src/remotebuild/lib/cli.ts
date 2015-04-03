@@ -24,7 +24,7 @@ import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 
 function cli(): void {
-    console.info("taco-remote");
+    console.info("remotebuild");
     console.info("Copyright (C) 2014 Microsoft Corporation. All rights reserved.");
     console.info(require("../package").version);
     console.info("");
@@ -38,9 +38,9 @@ function cli(): void {
     if (nconf.get("config")) {
         nconf.file({ file: nconf.get("config") });
     } else {
-        // Default to using TACO_HOME/TacoRemote.config
+        // Default to using TACO_HOME/RemoteBuild.config
         // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
-        nconf.file({ file: path.join(UtilHelper.tacoHome, "TacoRemote.config") });
+        nconf.file({ file: path.join(UtilHelper.tacoHome, "RemoteBuild.config") });
     };
     var defaults: any = {
         port: 3000,
@@ -57,7 +57,7 @@ function cli(): void {
     if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
         console.warn(resources.getString("NoServerModulesSelected"));
         serverMods = {
-            "taco-cordova": { mountPath: "cordova" }
+            "taco-remote": { mountPath: "cordova" }
         };
         nconf.set("modules", serverMods);
     }
