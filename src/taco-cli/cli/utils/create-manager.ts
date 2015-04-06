@@ -111,6 +111,7 @@ module CreateManager {
                 // TEMP for now, the templates are in our git repo, so "downloading" a template simply means unzipping it from the repo location
                 // to the cache.
                 if (!fs.existsSync(templateInfo.archiveUrl)) {
+                    logger.logErrorLine(resources.getString("command.create.templatesUnavailable"));
                     return Q.reject<string>("command.create.templatesUnavailable");
                 }
 
