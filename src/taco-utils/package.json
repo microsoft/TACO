@@ -10,7 +10,6 @@
         "test": "mocha"
     },
     "dependencies": {
-        "adm-zip": "0.4.4",
         "colors": "^1.0.3",
         "elementtree": "0.1.6",
         "nopt": "^3.0.1",

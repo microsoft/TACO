@@ -12,15 +12,15 @@ import gulp = require ("gulp");
 import del = require ("del");
 import os = require ("os");
 import path = require ("path");
-import Q = require("q");
-import tar = require("tar");
-import fstream = require("fstream");
-import zlib = require("zlib");
+import Q = require ("q");
+import tar = require ("tar");
+import fstream = require ("fstream");
+import zlib = require ("zlib");
 import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
 import tsUtil = require ("./taco-cli/compile/typescript-util");
 
-var buildConfig = require("../../src/build_config.json");
+var buildConfig = require ("../../src/build_config.json");
 
 var modulesToInstallAndTest = ["taco-utils", "taco-cli"];
 
