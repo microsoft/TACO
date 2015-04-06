@@ -42,14 +42,13 @@ class Create implements commands.IDocumentedCommand {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
-        var self = this;
-
         this.parseArguments(data);
         this.verifyArguments();
 
+        var self = this;
+
         return this.createProject()
-            .then(function (templateDisplayName: string): Q.Promise<any> {
-                self.commandParameters.templateDisplayName = templateDisplayName;
+            .then(function (): Q.Promise<any> {
                 return self.finalize();
             });
     }
@@ -76,11 +75,13 @@ class Create implements commands.IDocumentedCommand {
         // Parameter exclusivity validation and other verifications
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
             logger.logErrorLine(resources.getString("command.create.notTemplateIfCustomWww"));
+
             return Q.reject("command.create.notTemplateIfCustomWww");
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["kit"]) {
             logger.logErrorLine(resources.getString("command.create.notBothCliAndKit"));
+
             return Q.reject("command.create.notBothCliAndKit");
         }
 
@@ -108,7 +109,13 @@ class Create implements commands.IDocumentedCommand {
             var options: { [option: string]: any } = this.commandParameters.data.options;
 
             if (mustUseTemplate) {
-                return createManager.CreateManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options);
+                var self = this;
+                return createManager.CreateManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options)
+                    .then(function (templateDisplayName: string): Q.Promise<any> {
+                        self.commandParameters.templateDisplayName = templateDisplayName;
+
+                        return Q.resolve(null);
+                    });
             } else {
                 return createManager.CreateManager.createKitProjectWithCustomWww(kitId, projectPath, appId, appName, cordovaConfig, options);
             }
@@ -118,6 +125,16 @@ class Create implements commands.IDocumentedCommand {
     private finalize(): Q.Promise<any> {
         // Report success over multiple loggings for different styles
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
+
+        if (this.commandParameters.templateDisplayName) {
+            logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName), logger.Level.Normal);
+        } else {
+            // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
+            var customWwwPath: string = this.commandParameters.data.options["copy-from"] ? this.commandParameters.data.options["copy-from"] : this.commandParameters.data.options["link-to"];
+
+            logger.log(" " + resources.getString("command.create.success.projectCustomWww", customWwwPath), logger.Level.Normal);
+        }
+
         logger.log(" " + resources.getString("command.create.success.readyForUse"), logger.Level.Normal);
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.projectPath), logger.Level.NormalBold);
 

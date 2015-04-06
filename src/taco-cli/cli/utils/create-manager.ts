@@ -55,12 +55,14 @@ module CreateManager {
 
             return KitHelper.KitHelper.getTemplateInfo(kitId, templateId)
                 .then(function (templateInfo: KitHelper.ITemplateInfo): Q.Promise<string> {
-                    templateName = templateInfo.displayName;
+                templateName = templateInfo.displayName;
+
                     return self.findTemplatePath(templateInfo);
                 })
                 .then(function (templatePath: string): Q.Promise<any> {
                     templateSrcPath = templatePath;
                     options["copy-from"] = templateSrcPath;
+
                     return cordovaWrapper.create(kitId, path, appId, appName, cordovaConfig, options, self.TacoOnlyOptions);
                 })
                 .then(function (): Q.Promise<any> {
