@@ -22,6 +22,7 @@ interface ICreateParameters {
     cordovaConfig: string;
     data: commands.ICommandData;
     templateDisplayName?: string;
+    isKitProject?: boolean;
 }
 
 /*
@@ -71,32 +72,30 @@ class Create implements commands.IDocumentedCommand {
         }
     }
 
-    private verifyArguments(): Q.Promise<any> {
+    private verifyArguments(): void {
         // Parameter exclusivity validation and other verifications
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
             logger.logErrorLine(resources.getString("command.create.notTemplateIfCustomWww"));
 
-            return Q.reject("command.create.notTemplateIfCustomWww");
+            throw new Error("command.create.notTemplateIfCustomWww");
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["kit"]) {
             logger.logErrorLine(resources.getString("command.create.notBothCliAndKit"));
 
-            return Q.reject("command.create.notBothCliAndKit");
+            throw new Error("command.create.notBothCliAndKit");
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
             logger.logWarnLine(resources.getString("command.create.notBothTemplateAndCli"));
         }
-
-        return Q.resolve(null);
     }
 
     private createProject(): Q.Promise<any> {
-        var isKitProject: boolean = !this.commandParameters.data.options["cli"];
-        var mustUseTemplate: boolean = isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
+        this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
+        var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
 
-        if (!isKitProject) {
+        if (!this.commandParameters.isKitProject) {
             // TODO Create CLI project here
             return Q.resolve(null);
         } else {
@@ -126,16 +125,21 @@ class Create implements commands.IDocumentedCommand {
         // Report success over multiple loggings for different styles
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
 
-        if (this.commandParameters.templateDisplayName) {
-            logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName), logger.Level.Normal);
-        } else {
-            // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
-            var customWwwPath: string = this.commandParameters.data.options["copy-from"] ? this.commandParameters.data.options["copy-from"] : this.commandParameters.data.options["link-to"];
+        if (this.commandParameters.isKitProject) {
+            if (this.commandParameters.templateDisplayName) {
+                logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName), logger.Level.Normal);
+            } else {
+                // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
+                var customWwwPath: string = this.commandParameters.data.options["copy-from"] ? this.commandParameters.data.options["copy-from"] : this.commandParameters.data.options["link-to"];
 
-            logger.log(" " + resources.getString("command.create.success.projectCustomWww", customWwwPath), logger.Level.Normal);
+                logger.log(" " + resources.getString("command.create.success.projectCustomWww", customWwwPath), logger.Level.Normal);
+            }
+
+            logger.log(" " + resources.getString("command.create.success.readyForUse"), logger.Level.Normal);
+        } else {
+            logger.log(" " + resources.getString("command.create.success.projectCLI", customWwwPath), logger.Level.Normal);
         }
 
-        logger.log(" " + resources.getString("command.create.success.readyForUse"), logger.Level.Normal);
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.projectPath), logger.Level.NormalBold);
 
         return Q.resolve(null);
