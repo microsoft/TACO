@@ -44,8 +44,9 @@ macOnly("Certs", function (): void {
         mkdirp.sync(certsDir);
     });
 
-    after(function (): void {
-        rmdir.sync(certsDir);
+    after(function (done: MochaDone): void {
+        nconf.overrides({});
+        rmdir(certsDir, done);
     });
     
     before(function (): void {
