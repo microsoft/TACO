@@ -86,7 +86,7 @@ module CreateManager {
          * @param {string} A JSON string whose key/value pairs will be added to the Cordova config file by Cordova
          * @param {[option: string]: any} The options to give to Cordova
          *
-         * @return {Q.Promise<string>} An empty Q promise
+         * @return {Q.Promise<any>} An empty Q promise
          */
         public static createKitProjectWithCustomWww(kitId: string, path: string, appId?: string, appName?: string, cordovaConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
             appId = appId ? appId : this.DefaultAppId;
@@ -207,7 +207,7 @@ module KitHelper {
          * @param {string} The id of the desired kit
          * @param {string} The id of the desired template
          *
-         * @return {Q.Promise<ITemplateCacheInfo>} A Q promise that is resolved with the ITemplateCacheInfo object as the result, or with null if no metadata was previously loaded
+         * @return {Q.Promise<ITemplateInfo>} A Q promise that is resolved with the ITemplateInfo object as the result, or with null if no metadata was previously loaded
          */
         public static getTemplateInfo(kitId: string, templateId: string): Q.Promise<ITemplateInfo> {
             var self = this;
