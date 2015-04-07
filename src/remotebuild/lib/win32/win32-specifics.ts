@@ -20,6 +20,7 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("../host-specifics");
+import RemoteBuildConf = require ("../remotebuild-conf");
 import utils = require ("taco-utils");
 
 import resources = utils.ResourcesManager;
@@ -42,7 +43,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
-    public initialize(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public initialize(conf: RemoteBuildConf): Q.Promise<any> {
         return Q({});
     }
 
@@ -50,15 +51,15 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
         console.info(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
-    public resetServerCert(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {
         return Q.reject(new Error("Not Implemented"));
     }
 
-    public generateClientCert(conf: HostSpecifics.IConf): Q.Promise<number> {
+    public generateClientCert(conf: RemoteBuildConf): Q.Promise<number> {
         return Q.reject<number>(new Error("Not Implemented"));
     }
 
-    public initializeServerCerts(conf: HostSpecifics.IConf): Q.Promise<HostSpecifics.ICertStore> {
+    public initializeServerCerts(conf: RemoteBuildConf): Q.Promise<HostSpecifics.ICertStore> {
         return Q.reject<HostSpecifics.ICertStore>(new Error("Not Implemented"));
     }
 
@@ -66,7 +67,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
         return Q.reject<HostSpecifics.ICertStore>(new Error("Not Implemented"));
     }
 
-    public removeAllCertsSync(conf: HostSpecifics.IConf): void {
+    public removeAllCertsSync(conf: RemoteBuildConf): void {
         throw new Error("Not Implemented");
     }
 
@@ -74,7 +75,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
         res.sendStatus(404);
     }
 
-    public getHttpsAgent(conf: HostSpecifics.IConf): Q.Promise<NodeJSHttp.Agent> {
+    public getHttpsAgent(conf: RemoteBuildConf): Q.Promise<NodeJSHttp.Agent> {
         throw new Error("Not Implemented");
     }
 }

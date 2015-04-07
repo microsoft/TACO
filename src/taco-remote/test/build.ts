@@ -31,18 +31,19 @@ describe("taco-remote", function (): void {
         var serverDir = path.join(__dirname, "out");
         UtilHelper.createDirectoryIfNecessary(serverDir);
         UtilHelper.createDirectoryIfNecessary(downloadDir);
-        nconf.defaults({
+        var serverConfig = {
             serverDir: serverDir,
             port: 3000,
             secure: false,
-            modules: {
-                "taco-remote": {
-                    mountPoint: modMountPoint
-                }
-            }
-        }).use("memory");
+            lang: "en",
+            hostname: os.hostname()
+        };
 
-        TacoRemote.create(nconf, modMountPoint, {}).then(function (serverModule: RemoteBuild.IServerModule): void {
+        var modConfig : RemoteBuild.IServerModuleConfiguration = {
+            mountPath: modMountPoint
+        };
+
+        TacoRemote.create(serverConfig, modConfig, {}).then(function (serverModule: RemoteBuild.IServerModule): void {
             serverMod = serverModule;
 
             app.use("/" + modMountPoint, serverModule.getRouter());

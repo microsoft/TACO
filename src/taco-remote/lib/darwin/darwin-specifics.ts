@@ -15,6 +15,7 @@ import Q = require ("q");
 
 import HostSpecifics = require ("../host-specifics");
 import deps = require ("./darwin-dependencies");
+import TacoRemoteConf = require ("../taco-remote-conf");
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
@@ -34,8 +35,8 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
-    public initialize(conf: RemoteBuild.IDict): Q.Promise<any> {
-        return deps.askInstallHomebrew(conf);
+    public initialize(conf: TacoRemoteConf): Q.Promise<any> {
+        return deps.askInstallHomebrew();
     }
 }
 

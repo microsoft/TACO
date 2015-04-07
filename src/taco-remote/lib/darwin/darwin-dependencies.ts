@@ -14,7 +14,7 @@ import resources = tacoUtils.ResourcesManager;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class DarwinDependencies {
-    public static askInstallHomebrew(conf: RemoteBuild.IDict): Q.Promise<any> {
+    public static askInstallHomebrew(): Q.Promise<any> {
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         var isFirstRun = !fs.existsSync(firstRunPath);
         var deferred = Q.defer();

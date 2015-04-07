@@ -3,18 +3,22 @@
 /// <reference path="./Q.d.ts" />
 
 declare module RemoteBuild {
-    interface IDict {
+    interface IReadOnlyDict {
         get(prop: string): any;
+    }
+    interface IDict extends IReadOnlyDict {
         set(prop: string, value: any): void
     }
     interface IRemoteBuildConfiguration {
         lang: string;
-        port: string;
+        port: number;
         serverDir: string;
         secure: boolean;
+        hostname: string;
     }
-    interface IRemoteBuildModuleConfiguration {
-        [property: string]: any;
+    interface IServerModuleConfiguration {
+        mountPath: string;
+        [prop: string]: any;
     }
     interface ICertStore {
         getKey: () => Buffer;
@@ -28,8 +32,8 @@ declare module RemoteBuild {
         agent?: NodeJSHttp.Agent;
     }
     interface IServerModuleFactory {
-        create(conf: IDict, modPath: string, serverCapabilities: IServerCapabilities): Q.Promise<RemoteBuild.IServerModule>;
-        test(conf: IDict, modPath: string, serverTestCapabilities: IServerTestCapabilities): Q.Promise<any>; // When remotebuild is invoked in testing mode, it will call for the modules to test themselves against a separate instance of the server running in the normal mode
+        create(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration, serverCapabilities: IServerCapabilities): Q.Promise<RemoteBuild.IServerModule>;
+        test(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration, serverTestCapabilities: IServerTestCapabilities): Q.Promise<any>; // When remotebuild is invoked in testing mode, it will call for the modules to test themselves against a separate instance of the server running in the normal mode
     }
     interface IServerModule {
         getRouter(): Express.Router;

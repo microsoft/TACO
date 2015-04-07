@@ -1,10 +1,11 @@
 ﻿/// <reference path="../../typings/remotebuild.d.ts" />
+"use strict";
 import HostSpecifics = require ("./host-specifics");
 import tacoUtils = require ("taco-utils");
 import UtilHelper = tacoUtils.UtilHelper;
 
-class TacoCordovaConf {
-    private tacoCordovaConf: {
+class TacoRemoteConf implements RemoteBuild.IReadOnlyDict {
+    private tacoRemoteConf: {
         lang: string;
         port: number;
         serverDir: string;
@@ -24,13 +25,13 @@ class TacoCordovaConf {
         [key: string]: any;
     };
 
-    constructor(serverConf: RemoteBuild.IDict) {
+    constructor(serverConf: RemoteBuild.IRemoteBuildConfiguration, moduleConf: RemoteBuild.IServerModuleConfiguration) {
         // Create a copy of the data so we don't accidentally modify things
-        this.tacoCordovaConf = JSON.parse(JSON.stringify(serverConf.get("modules:taco-remote")));
+        this.tacoRemoteConf = JSON.parse(JSON.stringify(moduleConf));
 
-        this.tacoCordovaConf.lang = serverConf.get("lang");
-        this.tacoCordovaConf.port = serverConf.get("port");
-        this.tacoCordovaConf.serverDir = serverConf.get("serverDir");
+        this.tacoRemoteConf.lang = serverConf.lang;
+        this.tacoRemoteConf.port = serverConf.port;
+        this.tacoRemoteConf.serverDir = serverConf.serverDir;
 
         var defaults: any = {
             maxBuildsInQueue: 10,
@@ -41,43 +42,43 @@ class TacoCordovaConf {
         var hostDefaults = HostSpecifics.hostSpecifics.defaults(defaults);
         var self = this;
         Object.keys(hostDefaults).forEach(function (key: string): void {
-            if (typeof (self.tacoCordovaConf[key]) === "undefined") {
-                self.tacoCordovaConf[key] = hostDefaults[key];
+            if (typeof (self.tacoRemoteConf[key]) === "undefined") {
+                self.tacoRemoteConf[key] = hostDefaults[key];
             }
         });
     }
 
     public get allowsEmulate(): boolean {
-        return UtilHelper.argToBool(this.tacoCordovaConf.allowsEmulate);
+        return UtilHelper.argToBool(this.tacoRemoteConf.allowsEmulate);
     }
 
     public get deleteBuildsOnShutdown(): boolean {
-        return UtilHelper.argToBool(this.tacoCordovaConf.deleteBuildsOnShutdown);
+        return UtilHelper.argToBool(this.tacoRemoteConf.deleteBuildsOnShutdown);
     }
 
     public get maxBuildsInQueue(): number {
-        return this.tacoCordovaConf.maxBuildsInQueue;
+        return this.tacoRemoteConf.maxBuildsInQueue;
     }
 
     public get maxBuildsToKeep(): number {
-        return this.tacoCordovaConf.maxBuildsToKeep;
+        return this.tacoRemoteConf.maxBuildsToKeep;
     }
 
     public get serverDir(): string {
-        return this.tacoCordovaConf.serverDir;
+        return this.tacoRemoteConf.serverDir;
     }
 
     public get lang(): string {
-        return this.tacoCordovaConf.lang;
+        return this.tacoRemoteConf.lang;
     }
 
     public get port(): number {
-        return this.tacoCordovaConf.port;
+        return this.tacoRemoteConf.port;
     }
 
     public get(prop: string): any {
-        return this.tacoCordovaConf[prop];
+        return this.tacoRemoteConf[prop];
     }
 }
 
-export = TacoCordovaConf;
+export = TacoRemoteConf;

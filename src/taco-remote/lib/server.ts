@@ -33,21 +33,21 @@ import util = require ("util");
 import resources = utils.ResourcesManager;
 
 module ServerModuleFactory /* implements RemoteBuild.IServerModuleFactory */ {
-    export function create(conf: RemoteBuild.IDict, modPath: string, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
-        var tacoRemoteConf = new TacoRemoteConf(conf);
+    export function create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
+        var tacoRemoteConf = new TacoRemoteConf(conf, modConfig);
         resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
-        return HostSpecifics.hostSpecifics.initialize(conf).then(function (): RemoteBuild.IServerModule {
-            return new Server(tacoRemoteConf, modPath);
+        return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
+            return new Server(tacoRemoteConf, modConfig.mountPath);
         });
     }
 
-    export function test(conf: RemoteBuild.IDict, modPath: string, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
-        resources.init(conf.get("lang"), path.join(__dirname, "..", "resources"));
-        var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.get("secure")) ? "s" : "", conf.get("hostname") || os.hostname, conf.get("port"));
-        var downloadDir = path.join(conf.get("serverDir"), "selftest", "taco-remote");
+    export function test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
+        resources.init(conf.lang, path.join(__dirname, "..", "resources"));
+        var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
+        var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
-        return selftest.test(host, modPath, downloadDir, /* deviceBuild */ false, serverTestCapabilities.agent).then(function (): Q.Promise<any> {
-            return selftest.test(host, modPath, downloadDir, /* deviceBuild */ true, serverTestCapabilities.agent);
+        return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ false, serverTestCapabilities.agent).then(function (): Q.Promise<any> {
+            return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ true, serverTestCapabilities.agent);
         });
     }
 }

@@ -17,6 +17,8 @@ import express = require ("express");
 import os = require ("os");
 import Q = require ("q");
 
+import TacoRemoteConf = require ("./taco-remote-conf");
+
 class HostSpecifics {
     private static CachedSpecifics: HostSpecifics.IHostSpecifics;
     public static get hostSpecifics(): HostSpecifics.IHostSpecifics {
@@ -40,7 +42,7 @@ class HostSpecifics {
 module HostSpecifics {
     export interface IHostSpecifics {
         defaults(base: { [key: string]: any }): { [key: string]: any };
-        initialize(conf: RemoteBuild.IDict): Q.Promise<any>;
+        initialize(conf: TacoRemoteConf): Q.Promise<any>;
     }
 }
 

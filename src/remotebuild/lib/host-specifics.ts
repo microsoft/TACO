@@ -16,6 +16,7 @@ import child_process = require ("child_process");
 import express = require ("express");
 import os = require ("os");
 import Q = require ("q");
+import RemoteBuildConf = require ("./remotebuild-conf");
 
 class HostSpecifics {
     private static CachedSpecifics: HostSpecifics.IHostSpecifics;
@@ -38,10 +39,6 @@ class HostSpecifics {
 }
 
 module HostSpecifics {
-    export interface IConf {
-        get(key: string): any;
-        set(prop: string, value: any): void;
-    }
     export interface ICertStore {
         newCerts: boolean;
         getKey: () => any;
@@ -51,17 +48,17 @@ module HostSpecifics {
 
     export interface IHostSpecifics {
         defaults(base: { [key: string]: any }): { [key: string]: any };
-        initialize(conf: HostSpecifics.IConf): Q.Promise<any>;
+        initialize(conf: RemoteBuildConf): Q.Promise<any>;
         printUsage(language: string): void;
 
-        resetServerCert(conf: IConf): Q.Promise<any>;
-        generateClientCert(conf: IConf): Q.Promise<number>;
-        initializeServerCerts(conf: IConf): Q.Promise<ICertStore>;
+        resetServerCert(conf: RemoteBuildConf): Q.Promise<any>;
+        generateClientCert(conf: RemoteBuildConf): Q.Promise<number>;
+        initializeServerCerts(conf: RemoteBuildConf): Q.Promise<ICertStore>;
         getServerCerts(): Q.Promise<ICertStore>;
-        removeAllCertsSync(conf: IConf): void;
+        removeAllCertsSync(conf: RemoteBuildConf): void;
         downloadClientCerts(request: express.Request, response: express.Response): void;
 
-        getHttpsAgent(conf: IConf): Q.Promise<NodeJSHttp.Agent>;
+        getHttpsAgent(conf: RemoteBuildConf): Q.Promise<NodeJSHttp.Agent>;
     }
 }
 

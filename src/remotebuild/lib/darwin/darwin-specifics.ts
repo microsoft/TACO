@@ -22,13 +22,14 @@ import Q = require ("q");
 
 import certs = require ("./darwin-certs");
 import HostSpecifics = require ("../host-specifics");
+import RemoteBuildConf = require ("../remotebuild-conf");
 import utils = require ("taco-utils");
 import UtilHelper = utils.UtilHelper;
 
 import resources = utils.ResourcesManager;
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
-    private conf: HostSpecifics.IConf;
+    private static Config: RemoteBuildConf;
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var osxdefaults: { [key: string]: any } = {
             serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
@@ -46,19 +47,12 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
-    public initialize(conf: HostSpecifics.IConf): Q.Promise<any> {
-        this.conf = conf;
+    public initialize(conf: RemoteBuildConf): Q.Promise<any> {
+        DarwinSpecifics.Config = conf;
         if (process.getuid() === 0) {
             console.warn(resources.getString("RunningAsRootError"));
             process.exit(1);
         }
-
-        // We don't get expansion of ~ or ~user by default
-        // To support the simple case of "my home directory" I'm doing the replacement here
-        // We only want to expand if the directory starts with ~/ not in cases such as /foo/~
-        // Ideally we would also cope with the case of ~user/ but that is harder to find and probably less common
-        var serverDir = conf.get("serverDir");
-        conf.set("serverDir", serverDir.replace(/^~(?=\/|^)/, process.env.HOME));
 
         return Q({});
     }
@@ -67,15 +61,15 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
         console.info(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
-    public resetServerCert(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {
         return certs.resetServerCert(conf);
     }
 
-    public generateClientCert(conf: HostSpecifics.IConf): Q.Promise<number> {
+    public generateClientCert(conf: RemoteBuildConf): Q.Promise<number> {
         return certs.generateClientCert(conf);
     }
 
-    public initializeServerCerts(conf: HostSpecifics.IConf): Q.Promise<HostSpecifics.ICertStore> {
+    public initializeServerCerts(conf: RemoteBuildConf): Q.Promise<HostSpecifics.ICertStore> {
         return certs.initializeServerCerts(conf);
     }
 
@@ -83,12 +77,12 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
         return certs.getServerCerts();
     }
 
-    public removeAllCertsSync(conf: HostSpecifics.IConf): void {
+    public removeAllCertsSync(conf: RemoteBuildConf): void {
         certs.removeAllCertsSync(conf);
     }
 
     public downloadClientCerts(req: express.Request, res: express.Response): void {
-        Q.fcall<string>(certs.downloadClientCerts, this.conf, req.params.pin).then(function (pfxFile: string): void {
+        Q.fcall<string>(certs.downloadClientCerts, DarwinSpecifics.Config, req.params.pin).then(function (pfxFile: string): void {
             res.sendFile(pfxFile);
         }).catch<void>(function (error: { code?: number; id: string}): void {
             if (error.code) {
@@ -97,15 +91,15 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
                 res.status(404).send(error);
             }
         }).finally((): void => {
-            certs.invalidatePIN(this.conf, req.params.pin);
+            certs.invalidatePIN(DarwinSpecifics.Config, req.params.pin);
         }).done();
     }
 
-    public getHttpsAgent(conf: HostSpecifics.IConf): Q.Promise<NodeJSHttp.Agent> {
-        if (UtilHelper.argToBool(conf.get("secure"))) {
+    public getHttpsAgent(conf: RemoteBuildConf): Q.Promise<NodeJSHttp.Agent> {
+        if (conf.secure) {
             conf.set("suppressSetupMessage", true);
             return certs.generateClientCert(conf).then(function (pin: number): NodeJSHttp.Agent {
-                var pfxPath = path.join(conf.get("serverDir"), "certs", "client", pin.toString(), "client.pfx");
+                var pfxPath = path.join(conf.serverDir, "certs", "client", pin.toString(), "client.pfx");
                 var cert = fs.readFileSync(pfxPath);
                 fs.unlinkSync(pfxPath);
                 return new https.Agent({ strictSSL: true, pfx: cert });

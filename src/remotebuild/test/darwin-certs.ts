@@ -24,6 +24,7 @@ import mkdirp = require ("mkdirp");
 
 import certs = require ("../lib/darwin/darwin-certs");
 import HostSpecifics = require ("../lib/host-specifics");
+import RemoteBuildConf = require ("../lib/remotebuild-conf");
 
 import utils = require ("taco-utils");
 import resources = utils.ResourcesManager;
@@ -220,7 +221,7 @@ macOnly("Certs", function (): void {
 
         certs.makeSelfSigningCACert(caKeyPath, caCertPath).
             then(function (): Q.Promise<void> {
-            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, nconf.defaults({ serverDir: path.join(__dirname, "out") }));
+            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, conf({ serverDir: path.join(__dirname, "out") }));
         }).
             then(function (): void {
             should.assert(fs.existsSync(outKeyPath), "key should exist after makeSelfSignedCert completes");
@@ -253,9 +254,9 @@ function testServerCertsExist(): void {
     should.assert(fs.existsSync(path.join(certsDir, "ca-cert.pem")), "ca-cert should exist after initializeServerCerts completes");
 }
 
-function conf(data: any): HostSpecifics.IConf {
+function conf(data: any): RemoteBuildConf {
     var nconf = require("nconf");
     nconf.use("memory");
     nconf.defaults(data);
-    return nconf;
+    return new RemoteBuildConf(nconf);
 }

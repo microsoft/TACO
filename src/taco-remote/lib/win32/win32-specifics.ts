@@ -16,6 +16,7 @@ import Q = require ("q");
 
 import HostSpecifics = require ("../host-specifics");
 import utils = require ("taco-utils");
+import TacoRemoteConf = require ("../taco-remote-conf");
 
 var resources = utils.ResourcesManager;
 
@@ -33,7 +34,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
-    public initialize(conf: RemoteBuild.IDict): Q.Promise<any> {
+    public initialize(conf: TacoRemoteConf): Q.Promise<any> {
         return Q({});
     }
 }

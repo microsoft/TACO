@@ -25,6 +25,7 @@ import tacoUtils = require ("taco-utils");
 import resources = tacoUtils.ResourcesManager;
 import utils = tacoUtils.UtilHelper;
 import HostSpecifics = require ("../host-specifics");
+import RemoteBuildConf = require ("../remotebuild-conf");
 
 var exec = child_process.exec;
 
@@ -51,8 +52,8 @@ module Certs {
         close: () => void;
     }
 
-    export function resetServerCert(conf: HostSpecifics.IConf, yesOrNoHandler?: ICliHandler): Q.Promise<any> {
-        var certsDir = path.join(conf.get("serverDir"), "certs");
+    export function resetServerCert(conf: RemoteBuildConf, yesOrNoHandler?: ICliHandler): Q.Promise<any> {
+        var certsDir = path.join(conf.serverDir, "certs");
 
         if (!fs.existsSync(certsDir)) {
             return initializeServerCerts(conf);
@@ -84,8 +85,8 @@ module Certs {
             });
     };
 
-    export function generateClientCert(conf: HostSpecifics.IConf): Q.Promise<number> {
-        var certsDir = path.join(conf.get("serverDir"), "certs");
+    export function generateClientCert(conf: RemoteBuildConf): Q.Promise<number> {
+        var certsDir = path.join(conf.serverDir, "certs");
         var caKeyPath = path.join(certsDir, "ca-key.pem");
         var caCertPath = path.join(certsDir, "ca-cert.pem");
         if (!fs.existsSync(caKeyPath) || !fs.existsSync(caCertPath)) {
@@ -104,8 +105,8 @@ module Certs {
             });
     };
 
-    export function initializeServerCerts(conf: HostSpecifics.IConf): Q.Promise<HostSpecifics.ICertStore> {
-        var certsDir = path.join(conf.get("serverDir"), "certs");
+    export function initializeServerCerts(conf: RemoteBuildConf): Q.Promise<HostSpecifics.ICertStore> {
+        var certsDir = path.join(conf.serverDir, "certs");
         var certPaths = {
             certsDir: certsDir,
             caKeyPath: path.join(certsDir, "ca-key.pem"),
@@ -183,16 +184,16 @@ module Certs {
         return openSslPromise(args);
     };
 
-    export function removeAllCertsSync(conf: HostSpecifics.IConf): void {
-        var certsDir = path.join(conf.get("serverDir"), "certs");
+    export function removeAllCertsSync(conf: RemoteBuildConf): void {
+        var certsDir = path.join(conf.serverDir, "certs");
         if (fs.existsSync(certsDir)) {
             rimraf.sync(certsDir);
         }
     }
 
-    export function downloadClientCerts(conf: HostSpecifics.IConf, pinString: string): string {
+    export function downloadClientCerts(conf: RemoteBuildConf, pinString: string): string {
         purgeExpiredPinBasedClientCertsSync(conf);
-        var clientCertsDir = path.join(conf.get("serverDir"), "certs", "client");
+        var clientCertsDir = path.join(conf.serverDir, "certs", "client");
 
         var pin = parseInt(pinString);
         if (isNaN(pin)) {
@@ -208,18 +209,18 @@ module Certs {
         return pfx;
     }
 
-    export function invalidatePIN(conf: HostSpecifics.IConf, pinString: string): void {
-        var pinDir = path.join(conf.get("serverDir"), "certs", "client", "" + parseInt(pinString));
+    export function invalidatePIN(conf: RemoteBuildConf, pinString: string): void {
+        var pinDir = path.join(conf.serverDir, "certs", "client", "" + parseInt(pinString));
         rimraf(pinDir, function (): void { });
     }
 
-    export function purgeExpiredPinBasedClientCertsSync(conf: HostSpecifics.IConf): void {
-        var clientCertsDir = path.join(conf.get("serverDir"), "certs", "client");
+    export function purgeExpiredPinBasedClientCertsSync(conf: RemoteBuildConf): void {
+        var clientCertsDir = path.join(conf.serverDir, "certs", "client");
         if (!fs.existsSync(clientCertsDir)) {
             return;
         }
 
-        var pinTimeoutInMinutes = conf.get("pinTimeout");
+        var pinTimeoutInMinutes = conf.pinTimeout;
         var expiredIfOlderThan = new Date().getTime() - (pinTimeoutInMinutes * 60 * 1000);
         fs.readdirSync(clientCertsDir).forEach(function (f: string): void {
             var pfx = path.join(clientCertsDir, f, "client.pfx");
@@ -230,6 +231,7 @@ module Certs {
     };
 
     // Makes a CA cert that will be used for self-signing our server and client certs.
+    // Exported for tests
     export function makeSelfSigningCACert(caKeyPath: string, caCertPath: string, options?: IOptions): Q.Promise<{ stdout: string; stderr: string }> {
         options = options || {};
         var days = options.days || CERT_DEFAULTS.days;
@@ -239,13 +241,14 @@ module Certs {
     };
 
     // Makes a new private key and certificate signed with the CA.
-    export function makeSelfSignedCert(caKeyPath: string, caCertPath: string, outKeyPath: string, outCertPath: string, options: IOptions, conf: HostSpecifics.IConf): Q.Promise<void> {
+    // Exported for tests
+    export function makeSelfSignedCert(caKeyPath: string, caCertPath: string, outKeyPath: string, outCertPath: string, options: IOptions, conf: RemoteBuildConf): Q.Promise<void> {
         options = options || {};
         var csrPath = path.join(path.dirname(outCertPath), "CSR-" + path.basename(outCertPath));
         var days = options.days || CERT_DEFAULTS.days;
         var cn = options.cn || os.hostname();
 
-        var cnfPath = path.join(conf.get("serverDir"), "certs", "openssl.cnf");
+        var cnfPath = path.join(conf.serverDir, "certs", "openssl.cnf");
         writeConfigFile(cnfPath, conf);
 
         return openSslPromise("genrsa -out " + outKeyPath + " 1024").
@@ -285,10 +288,11 @@ module Certs {
         return deferred.promise;
     }
 
-    function certOptionsFromConf(conf: HostSpecifics.IConf): IOptions {
+    function certOptionsFromConf(conf: RemoteBuildConf): IOptions {
         var options: IOptions = {};
         if (conf.get("certExpirationdays") < 1) {
             console.info(resources.getString("CertExpirationInvalid", conf.get("certExpirationdays"), CERT_DEFAULTS.days));
+            options.days = CERT_DEFAULTS.days;
         } else {
             options.days = conf.get("certExpirationdays");
         }
@@ -296,12 +300,11 @@ module Certs {
         return options;
     }
 
-    function writeConfigFile(cnfPath: string, conf: HostSpecifics.IConf): void {
+    function writeConfigFile(cnfPath: string, conf: RemoteBuildConf): void {
         var net = os.networkInterfaces();
         var cnf = "[req]\ndistinguished_name = req_distinguished_name\nreq_extensions = v3_req\n[req_distinguished_name]\nC_default = US\n[ v3_req ]\nbasicConstraints = CA:FALSE\nkeyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names\n[alt_names]\n";
         
-        // If the user has provided a hostname then respect it
-        var hostname: string = conf.get("hostname") || os.hostname();
+        var hostname: string = conf.hostname;
         cnf += util.format("DNS.1 = %s\n", hostname);
 
         var ipCount = 1;
@@ -317,7 +320,7 @@ module Certs {
         fs.writeFileSync(cnfPath, cnf);
     }
 
-    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: IOptions, conf: HostSpecifics.IConf): Q.Promise<number> {
+    function makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: IOptions, conf: RemoteBuildConf): Q.Promise<number> {
         options = options || {};
         options.cn = CERT_DEFAULTS.client_cn;
         var clientCertsPath = path.join(certsDir, "client");
@@ -350,10 +353,10 @@ module Certs {
 
     // TODO: Make this explain how to configure taco-cli?
     // TODO: How do we want this to work in the world where it is shared between VS and taco-cli?
-    function printSetupInstructionsToConsole(conf: HostSpecifics.IConf, pin: number): void {
-        var host = conf.get("hostname") || os.hostname();
-        var port = conf.get("port");
-        var pinTimeoutInMinutes = conf.get("pinTimeout");
+    function printSetupInstructionsToConsole(conf: RemoteBuildConf, pin: number): void {
+        var host = conf.hostname;
+        var port = conf.port;
+        var pinTimeoutInMinutes = conf.pinTimeout;
         console.info(resources.getString("OSXCertSetupInformation", host, port, pin));
         if (pinTimeoutInMinutes) {
             console.info(resources.getString("OSXCertSetupPinTimeout", pinTimeoutInMinutes));

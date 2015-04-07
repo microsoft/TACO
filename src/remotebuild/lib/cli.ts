@@ -19,6 +19,7 @@ import Q = require ("q");
 import HostSpecifics = require ("./host-specifics");
 import utils = require ("taco-utils");
 import server = require ("./server");
+import RemoteBuildConf = require ("./remotebuild-conf");
 
 import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
@@ -42,25 +43,10 @@ function cli(): void {
         // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
         nconf.file({ file: path.join(UtilHelper.tacoHome, "RemoteBuild.config") });
     };
-    var defaults: any = {
-        port: 3000,
-        secure: true,
-        pinTimeout: 10
-    };
-
-    defaults = HostSpecifics.hostSpecifics.defaults(defaults);
-    nconf.defaults(defaults);
+    
     // Initialize localization resources
     resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
-
-    var serverMods = nconf.get("modules");
-    if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
-        console.warn(resources.getString("NoServerModulesSelected"));
-        serverMods = {
-            "taco-remote": { mountPath: "cordova" }
-        };
-        nconf.set("modules", serverMods);
-    }
+    var remotebuildConf = new RemoteBuildConf(nconf);
 
     if (nconf.get("help") || nconf.get("h") || nconf.get("?") || !nconf.get("serverDir")) {
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
@@ -72,7 +58,9 @@ function cli(): void {
 
     var task = tasks[command];
     if (task) {
-        HostSpecifics.hostSpecifics.initialize(nconf).then(task.execute).done();
+        HostSpecifics.hostSpecifics.initialize(remotebuildConf).then(function (): Q.Promise<any> {
+            return task.execute(remotebuildConf);
+        }).done();
     } else {
         console.info(resources.getString("UnknownCommand"), command);
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
@@ -80,26 +68,26 @@ function cli(): void {
     }
 }
 
-var tasks: { [key: string]: { execute(): Q.IPromise<any>; } };
+var tasks: { [key: string]: { execute(config: RemoteBuildConf): Q.Promise<any>; } };
 tasks = {
     start: {
-        execute: function (): Q.Promise<void> {
-            return server.start(nconf);
+        execute: function (config: RemoteBuildConf): Q.Promise<void> {
+            return server.start(config);
         }
     },
     test: {
-        execute: function (): Q.Promise<void> {
-            return server.test(nconf);
+        execute: function (config: RemoteBuildConf): Q.Promise<void> {
+            return server.test(config);
         }
     },
     resetServerCert: {
-        execute: function (): Q.Promise<void> {
-            return server.resetServerCert(nconf);
+        execute: function (config: RemoteBuildConf): Q.Promise<void> {
+            return server.resetServerCert(config);
         }
     },
     generateClientCert: {
-        execute: function (): Q.Promise<void> {
-            return server.generateClientCert(nconf);
+        execute: function (config: RemoteBuildConf): Q.Promise<void> {
+            return server.generateClientCert(config);
         }
     }
 };

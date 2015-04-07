@@ -26,6 +26,7 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("./host-specifics");
+import RemoteBuildConf = require ("./remotebuild-conf");
 import utils = require ("taco-utils");
 import util = require ("util");
 
@@ -40,21 +41,21 @@ class Server {
     private static Modules: RemoteBuild.IServerModule[] = [];
 
     private static ServerInstance: { close(callback?: Function): void };
-    private static ServerConf: HostSpecifics.IConf;
+    private static ServerConf: RemoteBuildConf;
 
     private static ErrorShutdown: (e: any) => void;
     private static Shutdown: () => void;
 
-    public static start(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public static start(conf: RemoteBuildConf): Q.Promise<any> {
         var app = express();
         app.use(expressLogger("dev"));
         app.use(errorhandler());
 
-        var serverDir = conf.get("serverDir");
+        var serverDir = conf.serverDir;
         UtilHelper.createDirectoryIfNecessary(serverDir);
 
         app.get("/", function (req: express.Request, res: express.Response): void {
-            res.status(200).send(resources.getStringForLanguage(req, "IndexPageContent", conf.get("port")));
+            res.status(200).send(resources.getStringForLanguage(req, "IndexPageContent", conf.port));
         });
 
         app.get("/certs/:pin", HostSpecifics.hostSpecifics.downloadClientCerts);
@@ -89,10 +90,10 @@ class Server {
     /**
      * Attempt to test each of the server modules against a separate instance of remotebuild which is assumed to be running with the same configuration
      */
-    public static test(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public static test(conf: RemoteBuildConf): Q.Promise<any> {
         return Server.initializeServerTestCapabilities(conf).then(function (serverTestCaps: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
-            return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, mountPath: string): Q.Promise<any> {
-                return modGen.test(conf, mountPath, serverTestCaps).then(function (): void {
+            return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
+                return modGen.test(conf, moduleConfig, serverTestCaps).then(function (): void {
                     console.log(resources.getString("TestPassed", mod));
                 }, function (err: Error): void {
                     console.error(resources.getString("TestFailed", mod));
@@ -103,17 +104,17 @@ class Server {
         });
     }
 
-    public static resetServerCert(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public static resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {
         return HostSpecifics.hostSpecifics.resetServerCert(conf);
     }
 
-    public static generateClientCert(conf: HostSpecifics.IConf): Q.Promise<any> {
+    public static generateClientCert(conf: RemoteBuildConf): Q.Promise<any> {
         return HostSpecifics.hostSpecifics.generateClientCert(conf);
     }
 
-    public static initializeServerCapabilities(conf: RemoteBuild.IDict): Q.Promise<RemoteBuild.IServerCapabilities> {
+    public static initializeServerCapabilities(conf: RemoteBuildConf): Q.Promise<RemoteBuild.IServerCapabilities> {
         var serverCapPromises: Q.Promise<any>[] = [
-            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q(null),
+            conf.secure ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q(null),
             // More capabilities can be exposed here
         ];
         return Q.all(serverCapPromises).spread(function (certStore: HostSpecifics.ICertStore): RemoteBuild.IServerCapabilities {
@@ -126,9 +127,9 @@ class Server {
         });
     }
 
-    private static initializeServerTestCapabilities(conf: RemoteBuild.IDict): Q.Promise<RemoteBuild.IServerTestCapabilities> {
+    private static initializeServerTestCapabilities(conf: RemoteBuildConf): Q.Promise<RemoteBuild.IServerTestCapabilities> {
         var serverTestCapPromises: Q.Promise<any>[] = [
-            utils.UtilHelper.argToBool(conf.get("secure")) ? HostSpecifics.hostSpecifics.getHttpsAgent(conf) : Q(null),
+            conf.secure ? HostSpecifics.hostSpecifics.getHttpsAgent(conf) : Q(null),
             // More capabilities can be exposed here
         ];
         return Q.all(serverTestCapPromises).spread(function (agent: https.Agent): RemoteBuild.IServerCapabilities {
@@ -141,7 +142,7 @@ class Server {
         });
     }
 
-    private static loadServerModules(conf: RemoteBuild.IDict, app: Express.Application, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
+    private static loadServerModules(conf: RemoteBuildConf, app: Express.Application, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
         var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
             if (!(<any>req).client.authorized) {
                 res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));
@@ -149,27 +150,23 @@ class Server {
                 next();
             }
         };
-        return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, mountPath: string): Q.Promise<any> {
-            return modGen.create(conf, mountPath, serverCapabilities).then(function (serverMod: RemoteBuild.IServerModule): void {
+        return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
+            return modGen.create(conf, moduleConfig, serverCapabilities).then(function (serverMod: RemoteBuild.IServerModule): void {
                 var modRouter = serverMod.getRouter();
                 // These routes are fully secured through client cert verification:
-                if (utils.UtilHelper.argToBool(conf.get("secure"))) {
-                    app.all("/" + mountPath, onlyAuthorizedClientRequest);
+                if (conf.secure) {
+                    app.all("/" + moduleConfig.mountPath, onlyAuthorizedClientRequest);
                 }
 
-                app.use("/" + mountPath, modRouter);
+                app.use("/" + moduleConfig.mountPath, modRouter);
                 Server.Modules.push(serverMod);
             });
         });
     }
 
-    private static eachServerModule(conf: RemoteBuild.IDict, eachFunc: (modGen: RemoteBuild.IServerModuleFactory, mod: string, mountPath: string) => Q.Promise<any>): Q.Promise<any> {
-        var serverMods: IDictionaryT<IDictionaryT<any>> = conf.get("modules");
-        if (typeof (serverMods) !== "object") {
-            serverMods = {};
-        }
-
-        return Object.keys(serverMods).reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
+    private static eachServerModule(conf: RemoteBuildConf, eachFunc: (modGen: RemoteBuild.IServerModuleFactory, mod: string, modConfig: { mountPath: string }) => Q.Promise<any>): Q.Promise<any> {
+        var serverMods = conf.modules;
+        return serverMods.reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
             try {
                 var modGen: RemoteBuild.IServerModuleFactory = require(mod);
             } catch (e) {
@@ -178,27 +175,27 @@ class Server {
             }
 
             return promise.then(function (): Q.Promise<any> {
-                return eachFunc(modGen, mod, serverMods[mod]["mountPath"]);
+                return eachFunc(modGen, mod, conf.moduleConfig(mod));
             });
         }, Q({}));
     }
 
-    private static startupServer(conf: HostSpecifics.IConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
+    private static startupServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
         var isSsl = utils.UtilHelper.argToBool(conf.get("secure"));
         return isSsl ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
     }
 
-    private static startupPlainHttpServer(conf: HostSpecifics.IConf, app: express.Application): Q.Promise<http.Server> {
+    private static startupPlainHttpServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<http.Server> {
         return Q(http.createServer(app)).
             then(function (svr: http.Server): Q.Promise<http.Server> {
                 var deferred = Q.defer<http.Server>();
                 svr.on("error", function (err: any): void {
                     deferred.reject(Server.friendlyServerListenError(err, conf));
                 });
-                svr.listen(conf.get("port"), function (): void {
+                svr.listen(conf.port, function (): void {
                     Server.ServerInstance = svr;
                     Server.ServerConf = conf;
-                    console.log(resources.getString("InsecureServerStarted"), conf.get("port"));
+                    console.log(resources.getString("InsecureServerStarted"), conf.port);
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -206,7 +203,7 @@ class Server {
             });
     }
 
-    private static startupHttpsServer(conf: HostSpecifics.IConf, app: express.Application): Q.Promise<https.Server> {
+    private static startupHttpsServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<https.Server> {
         var generatedNewCerts = false;
         var generatedClientPin: number;
         return HostSpecifics.hostSpecifics.getServerCerts().
@@ -241,10 +238,10 @@ class Server {
 
                     deferred.reject(Server.friendlyServerListenError(err, conf));
                 });
-                svr.listen(conf.get("port"), function (): void {
+                svr.listen(conf.port, function (): void {
                     Server.ServerInstance = svr;
                     Server.ServerConf = conf;
-                    console.log(resources.getString("SecureServerStarted"), conf.get("port"));
+                    console.log(resources.getString("SecureServerStarted"), conf.port);
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -252,9 +249,9 @@ class Server {
             });
     }
 
-    private static friendlyServerListenError(err: any, conf: HostSpecifics.IConf): string {
+    private static friendlyServerListenError(err: any, conf: RemoteBuildConf): string {
         if (err.code === "EADDRINUSE") {
-            return resources.getString("ServerPortInUse", conf.get("port"));
+            return resources.getString("ServerPortInUse", conf.port);
         } else {
             return err.toString();
         }
@@ -262,7 +259,7 @@ class Server {
 
     private static writePid(): void {
         if (utils.UtilHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
-            fs.writeFile(path.join(Server.ServerConf.get("serverDir"), "running_process_id"), process.pid);
+            fs.writeFile(path.join(Server.ServerConf.serverDir, "running_process_id"), process.pid);
         }
     }
 
@@ -298,9 +295,10 @@ class Server {
 
     private static getModuleMount(req: express.Request, res: express.Response): void {
         var mod: string = req.params.module;
-        if (mod && Server.ServerConf.get("modules") && Server.ServerConf.get("modules")[mod]) {
-            var mountLocation = Server.ServerConf.get("modules")[mod];
-            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.host, Server.ServerConf.get("port"), mountLocation);
+        var modConfig = Server.ServerConf.moduleConfig(mod);
+        if (mod && modConfig && modConfig.mountPath ) {
+            var mountLocation = modConfig.mountPath;
+            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.host, Server.ServerConf.port, mountLocation);
             res.set({
                 "Content-Location": contentLocation
             });
