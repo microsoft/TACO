@@ -20,7 +20,7 @@ import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
 import tsUtil = require ("./taco-cli/compile/typescript-util");
 
-var buildConfig = require ("../../src/build_config.json");
+var buildConfig = require("../../src/build_config.json");
 
 var modulesToInstallAndTest = ["taco-utils", "taco-cli"];
 
@@ -170,7 +170,7 @@ gulp.task("prepare-templates", ["clean-templates"], function (callback: Function
     var templatesPath: string = buildConfig.templates;
     var kits: string[] = getChildDirectoriesSync(templatesPath);
 
-    kits.forEach(function (value: string, index: number, array: string[]) {
+    kits.forEach(function (value: string, index: number, array: string[]): void {
         // Read the kit's dir for all the available templates
         var kitSrcPath: string = path.join(buildConfig.templates, value);
         var kitTargetPath: string = path.join(buildTemplatesPath, value);
@@ -181,7 +181,7 @@ gulp.task("prepare-templates", ["clean-templates"], function (callback: Function
 
         var kitTemplates: string[] = getChildDirectoriesSync(kitSrcPath);
 
-        kitTemplates.forEach(function (value: string, index: number, array: string[]) {
+        kitTemplates.forEach(function (value: string, index: number, array: string[]): void {
             var templateSrcPath: string = path.resolve(kitSrcPath, value);
             var templateTargetPath: string = path.join(kitTargetPath, value + ".tar.gz");
             var dirReader: fstream.Reader = new fstream.Reader({ path: templateSrcPath, type: "Directory", mode: 777 });
