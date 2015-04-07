@@ -4,17 +4,19 @@
 import express = require ("express");
 import Q = require ("q");
 
-module TestServerModuleFactory {
-    export function create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
-        TestServerModule.ModConfig = modConfig;
-        return Q(new TestServerModule());
+class TestServerModuleFactory {
+    public static create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
+        TestServerModuleFactory.TestServerModule.ModConfig = modConfig;
+        return Q(new TestServerModuleFactory.TestServerModule());
     }
+}
 
+module TestServerModuleFactory {
     export class TestServerModule implements RemoteBuild.IServerModule {
         public static IsShutDown: boolean = false;
         public static LastReq: Express.Request = null;
         public static ModConfig: RemoteBuild.IServerModuleConfiguration = null;
-        constructor() {}
+        constructor() { }
         public getRouter(): Express.Router {
             var router = express.Router();
             router.all("*", function (req: Express.Request, res: Express.Response): void {
