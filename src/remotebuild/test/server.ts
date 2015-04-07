@@ -24,7 +24,8 @@ import Q = require ("q");
 import tacoUtils = require ("taco-utils");
 import resources = tacoUtils.ResourcesManager;
 import server = require ("../lib/server");
-import RemoteBuildConf = require ("../lib/remotebuild-conf");
+import RemoteBuildConf = require("../lib/remotebuild-conf");
+import HostSpecifics = require("../lib/host-specifics");
 
 import testServerModuleFactory = require ("./test-module");
 
@@ -124,8 +125,10 @@ describe("server", function (): void {
     darwinOnlyTest("should be able to download a certificate exactly once on mac", function (done: MochaDone): void {
         this.timeout(5000); // Certificates can take ages to generate apparently
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
-        server.start(new RemoteBuildConf(nconf))
-            .then(function (): void {
+        var config = new RemoteBuildConf(nconf);
+        HostSpecifics.hostSpecifics.initialize(config).then(function (): Q.Promise<any> {
+            return server.start(config)
+        }).then(function (): void {
             fs.existsSync(clientCertsDir).should.be.ok;
         }).then(function (): Q.Promise<string> {
             var pins = fs.readdirSync(clientCertsDir);

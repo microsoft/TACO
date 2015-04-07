@@ -90,6 +90,8 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
             }
         }).finally((): void => {
             certs.invalidatePIN(DarwinSpecifics.Config, req.params.pin);
+        }).catch(function (err: Error): void {
+            console.error(err);
         }).done();
     }
 
