@@ -27,11 +27,10 @@ class CordovaWrapper {
      * @param {string} The name of app
      * @param {string} A JSON string whose key/value pairs will be added to the cordova config file in <project path>/.cordova/
      * @param {[option: string]: any} Bag of option flags for the 'cordova create' command
-     * @param {string[]} Options to exclude from the options passed to Cordova
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(kitId: string, path: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }, optionsToExclude?: string[]): Q.Promise<any> {
+    public static create(path: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var command: string[] = ["create", path];
 
         if (id) {
@@ -48,13 +47,11 @@ class CordovaWrapper {
 
         // Add options to the command
         for (var option in options) {
-            if (optionsToExclude.indexOf(option) === -1) {
-                command.push("--" + option);
+            command.push("--" + option);
 
-                // If the property has a value that isn't boolean, also include its value in the command
-                if (options[option] && typeof options[option] !== "Boolean") {
-                    command.push(options[option]);
-                }
+            // If the property has a value that isn't boolean, also include its value in the command
+            if (options[option] && typeof options[option] !== "Boolean") {
+                command.push(options[option]);
             }
         }
 

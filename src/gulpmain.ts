@@ -158,7 +158,7 @@ gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
 });
 
 /* Task to archive template folders */
-gulp.task("prepare-templates", ["clean-templates"], function (callback: Function): Q.Promise<any> {
+gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> {
     var buildTemplatesPath: string = path.resolve(buildConfig.buildTemplates);
     var pipes: NodeJS.WritableStream[] = [];
 
@@ -185,8 +185,8 @@ gulp.task("prepare-templates", ["clean-templates"], function (callback: Function
             var templateSrcPath: string = path.resolve(kitSrcPath, value);
             var templateTargetPath: string = path.join(kitTargetPath, value + ".tar.gz");
             var dirReader: fstream.Reader = new fstream.Reader({ path: templateSrcPath, type: "Directory", mode: 777 });
-
             var pipe: NodeJS.WritableStream = dirReader.pipe(tar.Pack()).pipe(zlib.createGzip()).pipe(new fstream.Writer({ path: templateTargetPath }));
+
             pipes.push(pipe);
         });
     });
