@@ -22,8 +22,6 @@ interface ICreateParameters {
     appName: string;
     cordovaConfig: string;
     data: commands.ICommandData;
-    templateDisplayName?: string;
-    isKitProject?: boolean;
 }
 
 /*
@@ -55,8 +53,8 @@ class Create implements commands.IDocumentedCommand {
         var self = this;
 
         return this.createProject()
-            .then(function (): Q.Promise<any> {
-                self.finalize();
+            .then(function (templateDisplayName: string): Q.Promise<any> {
+                self.finalize(templateDisplayName);
                 return Q.resolve(null);
             });
     }
@@ -97,61 +95,60 @@ class Create implements commands.IDocumentedCommand {
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
             logger.logErrorLine(resources.getString("command.create.notBothTemplateAndCli"));
 
-            throw new Error("command.create.notBothCliAndKit");
+            throw new Error("command.create.notBothTemplateAndCli");
         }
     }
 
-    private createProject(): Q.Promise<any> {
-        this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
-        var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
+    private createProject(): Q.Promise<string> {
+        var mustUseTemplate: boolean = this.mustCreateKitProject() && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
 
-        if (!this.commandParameters.isKitProject) {
-            // TODO Properly handle CLI project creation here
-            return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+        // Shortcuts
+        var kitId: string = this.commandParameters.data.options["kit"];
+        var templateId: string = this.commandParameters.data.options["template"];
+        var projectPath: string = this.commandParameters.projectPath;
+        var appId: string = this.commandParameters.appId;
+        var appName: string = this.commandParameters.appName;
+        var cordovaConfig: string = this.commandParameters.cordovaConfig;
+        var options: { [option: string]: any } = this.commandParameters.data.options;
+
+        if (mustUseTemplate) {
+            var self = this;
+
+            return createManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
+                .then(function (templateDisplayName: string): Q.Promise<string> {
+                    return Q.resolve(templateDisplayName);
+                });
         } else {
-            var kitId: string = this.commandParameters.data.options["kit"];
-            var templateId: string = this.commandParameters.data.options["template"];
-            var projectPath: string = this.commandParameters.projectPath;
-            var appId: string = this.commandParameters.appId;
-            var appName: string = this.commandParameters.appName;
-            var cordovaConfig: string = this.commandParameters.cordovaConfig;
-            var options: { [option: string]: any } = this.commandParameters.data.options;
-
-            if (mustUseTemplate) {
-                var self = this;
-
-                return createManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options)
-                    .then(function (templateDisplayName: string): Q.Promise<any> {
-                        self.commandParameters.templateDisplayName = templateDisplayName;
-
-                        return Q.resolve(null);
-                    });
-            } else {
-                return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
-            }
+            return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions))
+                .then(function (): Q.Promise<string> {
+                    // We didn't use a template to create the project, so we resolve with a null template display name
+                    return Q.resolve<string>(null);
+                });
         }
     }
 
-    private finalize(): void {
+    private finalize(templateDisplayName: string): void {
         // Report success over multiple loggings for different styles
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
 
-        if (this.commandParameters.isKitProject) {
-            if (this.commandParameters.templateDisplayName) {
-                logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName), logger.Level.Normal);
+        if (this.mustCreateKitProject()) {
+            if (templateDisplayName) {
+                logger.log(" " + resources.getString("command.create.success.projectTemplate", templateDisplayName), logger.Level.Normal);
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] ? this.commandParameters.data.options["copy-from"] : this.commandParameters.data.options["link-to"];
 
                 logger.log(" " + resources.getString("command.create.success.projectCustomWww", customWwwPath), logger.Level.Normal);
             }
-
-            logger.log(" " + resources.getString("command.create.success.readyForUse"), logger.Level.Normal);
         } else {
             logger.log(" " + resources.getString("command.create.success.projectCLI", customWwwPath), logger.Level.Normal);
         }
 
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.projectPath), logger.Level.NormalBold);
+    }
+
+    private mustCreateKitProject(): boolean {
+        return !this.commandParameters.data.options["cli"];
     }
 }
 

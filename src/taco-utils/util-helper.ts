@@ -301,9 +301,9 @@ module TacoUtility {
          */
         public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any } {
             var cleansed: { [option: string]: any } = {};
-
+            
             for (var opt in options) {
-                if (exclude.indexOf(opt) < 0) {
+                if (!exclude || exclude.indexOf(opt) < 0) {
                     cleansed[opt] = options[opt];
                 }
             }

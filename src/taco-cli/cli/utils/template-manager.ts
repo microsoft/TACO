@@ -15,7 +15,6 @@ import logger = tacoUtility.Logger;
 import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
 import cordovaWrapper = require ("./cordova-wrapper");
-import createCommand = require ("../create");
 
 class TemplateManager {
     private static DefaultTemplateId: string = "blank";
@@ -35,10 +34,11 @@ class TemplateManager {
      * @param {string} The name of the app
      * @param {string} A JSON string whose key/value pairs will be added to the Cordova config file by Cordova
      * @param {[option: string]: any} The options to give to Cordova
+     * @param {string[]} The options to ignore when executing the 'cordova create' command
      *
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
-    public static createKitProjectWithTemplate(kitId: string, templateId: string, path: string, appId?: string, appName?: string, cordovaConfig?: string, options?: { [option: string]: any }): Q.Promise<string> {
+    public static createKitProjectWithTemplate(kitId: string, templateId: string, path: string, appId?: string, appName?: string, cordovaConfig?: string, options?: { [option: string]: any }, optionsToExclude?: string[]): Q.Promise<string> {
         var templateName: string = null;
         var templateSrcPath: string = null;
 
@@ -46,7 +46,7 @@ class TemplateManager {
 
         return KitHelper.KitHelper.getTemplateInfo(kitId, templateId)
             .then(function (templateInfo: KitHelper.ITemplateInfo): Q.Promise<string> {
-            templateName = templateInfo.displayName;
+                templateName = templateInfo.displayName;
 
                 return TemplateManager.findTemplatePath(templateInfo);
             })
@@ -54,7 +54,7 @@ class TemplateManager {
                 templateSrcPath = templatePath;
                 options["copy-from"] = templateSrcPath;
 
-                return cordovaWrapper.create(path, appId, appName, cordovaConfig, utils.cleanseOptions(options, createCommand.TacoOnlyOptions));
+                return cordovaWrapper.create(path, appId, appName, cordovaConfig, utils.cleanseOptions(options, optionsToExclude));
             })
             .then(function (): Q.Promise<any> {
                 return TemplateManager.copyRemainingItems(path, templateSrcPath);
@@ -92,11 +92,24 @@ class TemplateManager {
             wrench.mkdirSyncRecursive(cachedTemplateKitPath, 777);
 
             // Extract the template archive to the cache
-            fs.createReadStream(templateInfo.archiveUrl).pipe(zlib.createGunzip()).pipe(tar.Extract({ path: cachedTemplateKitPath }));
-        }
+            var stream: tar.ExtractStream = fs.createReadStream(templateInfo.archiveUrl).pipe(zlib.createGunzip()).pipe(tar.Extract({ path: cachedTemplateKitPath }));
+            var deferred = Q.defer();
 
-        // Return path to template in cache
-        return Q.resolve(cachedTemplatePath);
+            stream.on("finish", function (): void {
+                deferred.resolve({});
+            });
+
+            stream.on("error", function (e: Error): void {
+                deferred.reject(e);
+            });
+
+            return deferred.promise.then(function (): Q.Promise<string> {
+                return Q.resolve(cachedTemplatePath);
+            });
+        } else {
+            // Template already extracted to cache
+            return Q.resolve(cachedTemplatePath);
+        }
     }
 
     private static copyRemainingItems(projectPath: string, templateSrcLocation: string): Q.Promise<any> {
