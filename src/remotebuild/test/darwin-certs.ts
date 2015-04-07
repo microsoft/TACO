@@ -49,6 +49,7 @@ macOnly("Certs", function (): void {
     });
     
     before(function (): void {
+        nconf.use("memory");
         resources.init("en", path.join(__dirname, "..", "resources"));
     });
 
@@ -181,8 +182,7 @@ macOnly("Certs", function (): void {
         }).
             then(function (): void {
             // 0.00002 in minutes is approx 1ms pin-expiration which is short enough it should always cause the new cert to be purged
-            nconf.defaults({ serverDir: serverDir, pinTimeout: 0.00002 });
-            certs.purgeExpiredPinBasedClientCertsSync(config);
+            certs.purgeExpiredPinBasedClientCertsSync(conf({ serverDir: serverDir, pinTimeout: 0.00002 }));
         }).
             then(function (): void {
             should.assert(!fs.existsSync(path.join(clientCertsDir, "" + createdPin)), "client pin directory should no longer exist after purge with very quick timeout");
@@ -193,8 +193,7 @@ macOnly("Certs", function (): void {
         // create another PIN and purge with a 10 minute timeout
             then(function (pin: number): void {
             createdPin = pin;
-            nconf.defaults({ serverDir: serverDir, pinTimeout: 10 });
-            certs.purgeExpiredPinBasedClientCertsSync(config);
+            certs.purgeExpiredPinBasedClientCertsSync(conf({ serverDir: serverDir, pinTimeout: 10 }));
         }).
             then(function (): void {
             should.assert(fs.existsSync(path.join(clientCertsDir, "" + createdPin)), "client pin directory should still exist after purge with 10 min timeout");
@@ -255,8 +254,10 @@ function testServerCertsExist(): void {
 }
 
 function conf(data: any): RemoteBuildConf {
-    var nconf = require("nconf");
-    nconf.use("memory");
-    nconf.defaults(data);
+    // To silence the warning about lacking module configurations
+    data.modules = {
+        test: {}
+    };
+    nconf.overrides(data);
     return new RemoteBuildConf(nconf);
 }
