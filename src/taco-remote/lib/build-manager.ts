@@ -111,6 +111,7 @@ class BuildManager {
         var options: string = req.query.options || "";
         var buildNumber: number = req.query.buildNumber || null;
         var buildPlatform: string = req.query.platform || "ios";
+        var logLevel: string = req.query.logLevel || null;
 
         // TODO: Check if any package can service the request
         var self = this;
@@ -145,6 +146,7 @@ class BuildManager {
             params.buildDir = buildDir;
             params.buildNumber = buildNumber;
             params.options = options;
+            params.logLevel = logLevel;
             var buildInfo = new BuildInfo(params);
             // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
             Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
