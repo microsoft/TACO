@@ -111,7 +111,7 @@ module TacoUtility {
          * @param {string} target Location to copy to
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
-        public static copyRecursive(source: string, target: string, options: any = {}): Q.Promise<any> {
+        public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any> {
             var deferred = Q.defer();
 
             ncp.ncp(source, target, options, function (error: any): void {
