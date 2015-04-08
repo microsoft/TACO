@@ -1,9 +1,12 @@
 /// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/taco-kits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 
-import tacoUtility = require ("taco-utils");
+import tacoUtility = require("taco-utils");
+import tacoKits = require("taco-kits");
 import utils = tacoUtility.UtilHelper;
+import kitHelper = tacoKits.KitHelper;
 import commands = tacoUtility.Commands;
 import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
@@ -54,6 +57,12 @@ class Create implements commands.IDocumentedCommand {
 
         var self = this;
 
+        /*return kitHelper.getKitInfo("4.2.0-Win10-Beta")
+            .then(function (info: tacoKits.IKitInfo): Q.Promise<any> {
+                logger.log(info.toString(), logger.Level.Normal);
+
+            return Q.resolve(null);
+        });*/
         return this.createProject()
             .then(function (): Q.Promise<any> {
                 self.finalize();
@@ -107,7 +116,12 @@ class Create implements commands.IDocumentedCommand {
 
         if (!this.commandParameters.isKitProject) {
             // TODO Properly handle CLI project creation here
-            return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+            return kitHelper.getCordovaCliForDefaultKit()
+                .then(function (cordovaCliVersion: string): Q.Promise<any> {
+                return cordovaWrapper.setCliVersion(cordovaCliVersion)
+            }).then(function (cordovaCliVersion: string): Q.Promise<any> {
+                return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+            });
         } else {
             var kitId: string = this.commandParameters.data.options["kit"];
             var templateId: string = this.commandParameters.data.options["template"];

@@ -22,7 +22,7 @@ import tsUtil = require ("./taco-cli/compile/typescript-util");
 
 var buildConfig = require("../../src/build_config.json");
 
-var modulesToInstallAndTest = ["taco-utils", "taco-cli"];
+var modulesToInstallAndTest = ["taco-utils", "taco-cli", "taco-kits"];
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["install-build"]);

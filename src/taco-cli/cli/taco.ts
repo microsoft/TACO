@@ -1,13 +1,16 @@
 /// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/taco-kits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordova-extensions.d.ts" />
 
-import tacoUtility = require ("taco-utils");
+import tacoUtility = require("taco-utils");
+import tacoKits = require("taco-kits");
 import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
 import commandsFactory = commands.CommandFactory;
 import path = require ("path");
 var cordova = require("cordova");
+import kits = tacoKits.KitHelper;
 
 /*
  * Taco

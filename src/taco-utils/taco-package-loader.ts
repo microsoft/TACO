@@ -141,7 +141,7 @@ module TacoUtility {
             return PackageSpecType.Error;
         }
 
-        private static installPackageFromNPM<T>(packageName: string, packageVersion: string, packageTargetPath: string): Q.Promise<T> {
+        public static installPackageFromNPM<T>(packageName: string, packageVersion: string, packageTargetPath: string): Q.Promise<T> {
             var deferred = Q.defer<T>();
             try {
                 mkdirp.sync(packageTargetPath);

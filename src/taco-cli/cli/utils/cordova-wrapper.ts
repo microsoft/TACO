@@ -1,7 +1,12 @@
 ﻿import child_process = require ("child_process");
 import Q = require ("q");
-
+import tacoUtility = require("taco-utils");
 class CordovaWrapper {
+    private currentCordovaCliPath: string = null;
+    public static setCliVersion(cordovaCliVersion: string): Q.Promise<any> {
+        var deferred = Q.defer();
+        return deferred.promise;
+    }
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
         var proc = child_process.exec(["cordova"].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {

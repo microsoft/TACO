@@ -16,5 +16,6 @@ declare module TacoUtility {
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
         static lazyRequire<T>(packageName: string, packageVersion: string): Q.Promise<T>;
+        static installPackageFromNPM<T>(packageName: string, packageVersion: string, packageTargetPath: string): Q.Promise<T>;
     }
 }
