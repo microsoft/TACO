@@ -24,8 +24,16 @@ declare module "fstream" {
 
     }
 
-    export class Writer extends Abstract {
-
+    export class Writer extends Abstract implements NodeJS.WritableStream {
+        constructor(props: any);
+        writable: boolean;
+        write(buffer: Buffer, cb?: Function): boolean;
+        write(str: string, cb?: Function): boolean;
+        write(str: string, encoding?: string, cb?: Function): boolean;
+        end(): void;
+        end(buffer: Buffer, cb?: Function): void;
+        end(str: string, cb?: Function): void;
+        end(str: string, encoding?: string, cb?: Function): void;
     }
 
     export class Abstract implements NodeJS.EventEmitter {
