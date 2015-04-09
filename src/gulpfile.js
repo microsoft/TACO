@@ -24,7 +24,7 @@ gulp.task("prep", ["install"], function (callback) {
 
 /* install gulp in root folder */
 gulp.task("install", function (callback) {
-    npmUtil.installPackages(["del", "gulp", "typescript", "ncp", "q", "run-sequence", "tar", "fstream"], callback);
+    npmUtil.installPackages(["del", "gulp", "typescript", "ncp", "q", "run-sequence", "tar", "fstream", "mocha-teamcity-reporter"], callback);
 });
 
 /*  

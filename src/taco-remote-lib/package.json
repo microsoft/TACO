@@ -21,8 +21,7 @@
 	"devDependencies": {
 		"typescript": "1.3.0",
 		"mocha": "2.0.1",
-		"should":  "4.3.0",
-		"mocha-teamcity-reporter": "latest"
+		"should":  "4.3.0"
 	},
 	"bundledDependencies": ["taco-utils"],
 	"optionalDependencies": {
