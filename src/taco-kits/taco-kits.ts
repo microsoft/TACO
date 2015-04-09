@@ -1,5 +1,5 @@
 "use strict";
-import kitParser = require("./kit-helper");
+import kitParser = require ("./kit-helper");
 
 module TacoKits {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    

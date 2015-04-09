@@ -6,33 +6,9 @@ import utils = tacoUtility.UtilHelper;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
-    private static currentCordovaCliPath: string = null;
-    public static setCliVersion(cordovaCliVersion: string): Q.Promise<string> {
-        var deferred = Q.defer<string>();
-        return CordovaWrapper.ensureCordovaCliVersionInstallation(cordovaCliVersion).then(function (packageTargetPath: string): Q.Promise<string> {
-            CordovaWrapper.currentCordovaCliPath = packageTargetPath;
-            deferred.resolve(packageTargetPath);
-            return deferred.promise;
-        });
-        deferred.reject({});
-        return deferred.promise;
-    }
-
-    private static ensureCordovaCliVersionInstallation(cordovaCliVersion: string): Q.Promise<string> {
-        var deferred = Q.defer<string>();
-
-        return packageLoader.lazyAcquire("cordova", cordovaCliVersion).then(function (packageTargetPath: string): Q.Promise<string> {
-            deferred.resolve(packageTargetPath);
-            return deferred.promise;
-        });
-        deferred.reject({});
-        return deferred.promise;
-    }
-
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
-        var commandPath = path.resolve(CordovaWrapper.currentCordovaCliPath, 'bin', 'cordova');
-        var proc = child_process.exec([commandPath].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
+        var proc = child_process.exec(["cordova"].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
             if (err) {
                 deferred.reject(err);
             } else {
@@ -58,7 +34,8 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
+    public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
+        var deferred = Q.defer<any>();
         var command: string[] = ["create", projectPath];
 
         if (id) {
@@ -84,15 +61,21 @@ class CordovaWrapper {
         }
         
         try {
-            var cordova = require(path.resolve(CordovaWrapper.currentCordovaCliPath, 'cordova'));
-            if (cordova.cordova_lib) {
-                return cordova.cli(command);
-            }
+            var cordova: any = undefined;
+            return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordovaModule): Q.Promise<any> {
+                cordova = cordovaModule;
+                if (cordova.cordova_lib) {
+                    deferred.resolve(cordova);
+                    return cordova.cli(command);
+                }
+            });
         }
         catch (e) {
             console.log(e);
+            deferred.reject({});
             // Rethrow and log error
         }
+        return deferred.promise;
     }
 }
 

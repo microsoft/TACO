@@ -3,8 +3,8 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 
-import tacoUtility = require("taco-utils");
-import tacoKits = require("taco-kits");
+import tacoUtility = require ("taco-utils");
+import tacoKits = require ("taco-kits");
 import utils = tacoUtility.UtilHelper;
 import kitHelper = tacoKits.KitHelper;
 import commands = tacoUtility.Commands;
@@ -109,13 +109,10 @@ class Create implements commands.IDocumentedCommand {
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
 
         if (!this.commandParameters.isKitProject) {
-           var cliVersion: string = this.commandParameters.data.options["cli"];
+           var cordovaCli: string = this.commandParameters.data.options["cli"];
 
             // Use the CLI version specified as an argument to create the project
-            return cordovaWrapper.setCliVersion(cliVersion)
-                .then(function (cordovaCliVersion: string): Q.Promise<any> {
-                return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
-            });
+           return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
         } else {
             var kitId: string = this.commandParameters.data.options["kit"];
             var templateId: string = this.commandParameters.data.options["template"];
@@ -126,6 +123,8 @@ class Create implements commands.IDocumentedCommand {
             var options: { [option: string]: any } = this.commandParameters.data.options;
 
             kitId = kitId ? kitId : kitHelper.getDefaultKitId();
+            var cordovaCli : string = kitHelper.getCordovaCliForKit(kitId);
+
             if (mustUseTemplate) {
                 var self = this;
 
@@ -136,7 +135,7 @@ class Create implements commands.IDocumentedCommand {
                         return Q.resolve(null);
                     });
             } else {
-                return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+                return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
             }
         }
     }

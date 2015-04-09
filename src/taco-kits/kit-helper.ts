@@ -6,7 +6,6 @@ import path = require ("path");
 import fs = require ("fs");
 
 module TacoKits {
-
     export interface IPluginOverrideMetaData {
         [pluginId: string]: {
             name: string;
@@ -75,10 +74,9 @@ module TacoKits {
     }
 
     export class KitHelper {
-
-        private static kitMetaData: ITacoKitMetaData = undefined;
-        private static kitFileName = "TacoKitMetaData.json";
-        private static defaultKitId: string = undefined;
+        private static kitMetaData: ITacoKitMetaData;
+        private static kitFileName: string = "TacoKitMetaData.json";
+        private static defaultKitId: string;
 
         public static getKitMetaData(): Q.Promise<ITacoKitMetaData> {
             if (KitHelper.kitMetaData) {
@@ -110,7 +108,6 @@ module TacoKits {
 
                 return deferredPromise.promise;
             });
-
         }
 
         public static getAllPluginsInfo(): Q.Promise<IPluginMetadata> {
@@ -140,8 +137,7 @@ module TacoKits {
         public static getDefaultKitId(): string {
             if (KitHelper.defaultKitId) {
                 return KitHelper.defaultKitId;
-            }
-            else {
+            } else {
                 KitHelper.getKitMetaData().then(function (metaData: ITacoKitMetaData): string {
                     var kits: IKitMetadata = metaData.kits;
                     Object.keys(kits).forEach(function (kitId: string): string {
@@ -153,8 +149,7 @@ module TacoKits {
                     });
                     return KitHelper.defaultKitId;
                 });
-            }
-            
+            }        
         }
 
         public static getCordovaCliForDefaultKit(): Q.Promise<string> {
@@ -172,13 +167,12 @@ module TacoKits {
             }); 
         }
 
-        public static getCordovaCliForKit(kitId: string): Q.Promise<string> {
-            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
-            return KitHelper.getKitMetaData().then(function (metaData: ITacoKitMetaData): Q.Promise<string> {
+        public static getCordovaCliForKit(kitId: string): string {
+            KitHelper.getKitMetaData().then(function (metaData: ITacoKitMetaData): string {
                 var kits: IKitMetadata = metaData.kits;
-                deferredPromise.resolve(kits[kitId].cli);
-                return deferredPromise.promise;
+                return kits[kitId].cli;
             });
+            return null;
         }
 
         public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetaData> {
@@ -217,12 +211,11 @@ module TacoKits {
             });
         }
 
-
         public static isKitValid(kitId: string): Q.Promise<boolean> {
             var deferredPromise: Q.Deferred<boolean> = Q.defer<boolean>();
             return KitHelper.getKitMetaData().then(function (metaData: ITacoKitMetaData): Q.Promise<boolean> {
                 var kits: IKitMetadata = metaData.kits;
-                deferredPromise.resolve(kits[kitId] && kits[kitId].deprecated? true: false);
+                deferredPromise.resolve(kits[kitId] && kits[kitId].deprecated ? true : false);
                 return deferredPromise.promise;
             });
             deferredPromise.resolve(false);

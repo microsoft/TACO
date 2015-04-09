@@ -10,10 +10,12 @@ import zlib = require ("zlib");
 import wrench = require ("wrench");
 import tar = require ("tar");
 import replace = require ("replace");
-import tacoUtility = require ("taco-utils");
+import tacoUtility = require("taco-utils");
+import tacoKits = require("taco-kits");
 import logger = tacoUtility.Logger;
 import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
+import kitHelper = tacoKits.KitHelper;
 import cordovaWrapper = require ("./cordova-wrapper");
 import createCommand = require ("../create");
 
@@ -41,8 +43,9 @@ class TemplateManager {
     public static createKitProjectWithTemplate(kitId: string, templateId: string, path: string, appId?: string, appName?: string, cordovaConfig?: string, options?: { [option: string]: any }): Q.Promise<string> {
         var templateName: string = null;
         var templateSrcPath: string = null;
-
+      
         templateId = templateId ? templateId : TemplateManager.DefaultTemplateId;
+        var cordovaCli: string = kitHelper.getCordovaCliForKit(kitId);
 
         return KitHelper.KitHelper.getTemplateInfo(kitId, templateId)
             .then(function (templateInfo: KitHelper.ITemplateInfo): Q.Promise<string> {
@@ -54,7 +57,7 @@ class TemplateManager {
                 templateSrcPath = templatePath;
                 options["copy-from"] = templateSrcPath;
 
-                return cordovaWrapper.create(path, appId, appName, cordovaConfig, utils.cleanseOptions(options, createCommand.TacoOnlyOptions));
+                return cordovaWrapper.create(cordovaCli, path, appId, appName, cordovaConfig, utils.cleanseOptions(options, createCommand.TacoOnlyOptions));
             })
             .then(function (): Q.Promise<any> {
                 return TemplateManager.copyRemainingItems(path, templateSrcPath);
