@@ -76,6 +76,8 @@ declare module TacoKits {
     class KitHelper {
         private static kitMetaData: ITacoKitMetaData;
         private static kitFileName: string;
+        private static defaultKitId: string;
+        public static getDefaultKitId(): string;
 
         public static getKitMetaData(): Q.Promise<ITacoKitMetaData>;
 

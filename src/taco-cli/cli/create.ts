@@ -57,12 +57,6 @@ class Create implements commands.IDocumentedCommand {
 
         var self = this;
 
-        /*return kitHelper.getKitInfo("4.2.0-Win10-Beta")
-            .then(function (info: tacoKits.IKitInfo): Q.Promise<any> {
-                logger.log(info.toString(), logger.Level.Normal);
-
-            return Q.resolve(null);
-        });*/
         return this.createProject()
             .then(function (): Q.Promise<any> {
                 self.finalize();
@@ -115,11 +109,11 @@ class Create implements commands.IDocumentedCommand {
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
 
         if (!this.commandParameters.isKitProject) {
-            // TODO Properly handle CLI project creation here
-            return kitHelper.getCordovaCliForDefaultKit()
+           var cliVersion: string = this.commandParameters.data.options["cli"];
+
+            // Use the CLI version specified as an argument to create the project
+            return cordovaWrapper.setCliVersion(cliVersion)
                 .then(function (cordovaCliVersion: string): Q.Promise<any> {
-                return cordovaWrapper.setCliVersion(cordovaCliVersion)
-            }).then(function (cordovaCliVersion: string): Q.Promise<any> {
                 return cordovaWrapper.create(projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
             });
         } else {
@@ -131,6 +125,7 @@ class Create implements commands.IDocumentedCommand {
             var cordovaConfig: string = this.commandParameters.cordovaConfig;
             var options: { [option: string]: any } = this.commandParameters.data.options;
 
+            kitId = kitId ? kitId : kitHelper.getDefaultKitId();
             if (mustUseTemplate) {
                 var self = this;
 

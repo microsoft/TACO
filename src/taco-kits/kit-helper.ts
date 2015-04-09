@@ -137,6 +137,26 @@ module TacoKits {
             }); 
         }
 
+        public static getDefaultKitId(): string {
+            if (KitHelper.defaultKitId) {
+                return KitHelper.defaultKitId;
+            }
+            else {
+                KitHelper.getKitMetaData().then(function (metaData: ITacoKitMetaData): string {
+                    var kits: IKitMetadata = metaData.kits;
+                    Object.keys(kits).forEach(function (kitId: string): string {
+                        // Get the kit for which the default attribute is set to true
+                        if (kits[kitId].default) {
+                            KitHelper.defaultKitId = kitId;
+                            return KitHelper.defaultKitId;
+                        }
+                    });
+                    return KitHelper.defaultKitId;
+                });
+            }
+            
+        }
+
         public static getCordovaCliForDefaultKit(): Q.Promise<string> {
             var deferredPromise: Q.Deferred<string> = Q.defer<string>();
             return KitHelper.getKitMetaData().then(function (metaData: ITacoKitMetaData): Q.Promise<string> {
