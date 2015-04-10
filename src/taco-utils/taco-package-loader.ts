@@ -18,6 +18,10 @@ import semver = require ("semver");
 import Q = require ("q");
 import UtilHelper = require ("./util-helper");
 import utils = UtilHelper.UtilHelper;
+import ResUtil =  require("./resources-manager");
+import resources = ResUtil.ResourcesManager;
+import loggerUtil = require("./logger");
+import logger = loggerUtil.Logger;
 
 module TacoUtility {
     export enum PackageSpecType {
@@ -40,15 +44,18 @@ module TacoUtility {
         public static lazyRequire<T>(packageName: string, packageVersion: string): Q.Promise<T> {
             var packageTargetPath: string;
             var deferred = Q.defer<T>();
-
             var homeCordovaModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
             switch (TacoPackageLoader.getPackageSpecType(packageVersion)) {
                 case PackageSpecType.Version: {
                     packageTargetPath = path.join(homeCordovaModulesPath, packageVersion, "node_modules");
                     if (!fs.existsSync(path.join(packageTargetPath, packageName, "package.json"))) {
+                        logger.log(resources.getString("packageLoader.downloadingMessage", packageVersion), logger.Level.NormalBold);
+                        logger.logLine(resources.getString("packageLoader.cordovaToolVersion", packageVersion), logger.Level.Normal);
+                        logger.log("\n", logger.Level.Normal);
                         TacoPackageLoader.installPackageFromNPM<T>(packageName, packageVersion, packageTargetPath).then(function (pkg: T): void {
                             deferred.resolve(pkg);
                         }, function (err: any): void {
+                                logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
                                 deferred.reject(err);
                             });
                     } else {
@@ -56,6 +63,7 @@ module TacoUtility {
                             var pkg = <T>require(path.join(packageTargetPath, packageName));
                             deferred.resolve(pkg);
                         } catch (e) {
+                            logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
                             deferred.reject(e);
                         }
                     }
@@ -73,15 +81,18 @@ module TacoUtility {
                             if (error) {
                                 rimraf(packageTargetPath, function (error: Error): void {
                                     if (error) {
+                                        logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
                                         deferred.reject(error);
                                     }
                                 });
+                                logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
                                 deferred.reject(error);
                             } else {
                                 try {
                                     var pkg = <T>require(path.join(packageTargetPath, packageName));
                                     deferred.resolve(pkg);
                                 } catch (e) {
+                                    logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
                                     deferred.reject(e);
                                 }
                             }

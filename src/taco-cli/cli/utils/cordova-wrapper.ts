@@ -36,18 +36,19 @@ class CordovaWrapper {
      * @return {Q.Promise<any>} An empty promise
      */
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
-        var deferred = Q.defer<any>();
-        var command = ["node"];
+        var deferred = Q.defer();
+        var command = ["node", __dirname];
+
+        command.push("create");
 
         if (projectPath) {
             command.push(projectPath);
         }
 
-        command.push("create");
-
         if (id) {
             command.push(id);
         }
+
         if (name) {
             command.push(name);
         }
@@ -64,14 +65,12 @@ class CordovaWrapper {
                 command.push(options[option]);
             }
         }
-        
         try {
             var cordova: any = undefined;
-            return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordovaModule): Q.Promise<any> {
+            return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordovaModule): void {
                 cordova = cordovaModule;
                 if (cordova.cordova_lib) {
-                    deferred.resolve(cordova);
-                    return cordova.cli(command);
+                    cordova.cli(command);
                 }
             });
         }
@@ -80,6 +79,7 @@ class CordovaWrapper {
             deferred.reject({});
             // Rethrow and log error
         }
+        deferred.resolve({}); 
         return deferred.promise;
     }
 }

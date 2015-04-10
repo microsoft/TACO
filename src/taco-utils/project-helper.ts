@@ -27,6 +27,29 @@ module TacoUtility {
          * 
          * a command.
          */
+        /*public static createTacoJsonFile(defaultKidId: string, isKitProject?: boolean, kitId?: string, cli?: string): Q.Promise<any>{
+            var jsonData: { [obj: string]: string };
+            if (isKitProject) {
+                if (kitId) {
+                    kitHelper.getDefaultKit().then(function (kitId): void {
+                        this.commandParameters.kitId = kitId;
+                        jsonData = { 'kit': kitId };
+                    });
+                }
+                else {
+                    jsonData = { 'kit': this.commandParameters.kitId };
+                }
+            } else {
+                if (!this.commandParameters.cordovaCli) {
+                    logger.log(resources.getString("command.create.tacoJsonFileCreationError"), logger.Level.Error);
+                    return;
+                }
+                jsonData = { 'cli': this.commandParameters.cordovaCli };
+            }
+            var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
+            fs.closeSync(fs.openSync(tacoJsonPath, 'w'));
+            fs.writeFileSync(tacoJsonPath, JSON.stringify(jsonData), { 'flags': 'w' });
+        }*/
     }
 }
 

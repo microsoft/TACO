@@ -30,7 +30,6 @@ module TacoUtility {
             };
             original: string[];
             remain: string[];
-            raw?: string[];
         };
 
         /**

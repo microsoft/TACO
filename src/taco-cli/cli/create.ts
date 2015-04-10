@@ -63,9 +63,12 @@ class Create implements commands.IDocumentedCommand {
 
         return this.createProject()
             .then(function (): Q.Promise<any> {
+                return self.createTacoJsonFile()
+            .then(function (): Q.Promise<any> {
                 self.finalize();
                 return Q.resolve(null);
             });
+        });
     }
 
     /**
@@ -77,9 +80,8 @@ class Create implements commands.IDocumentedCommand {
 
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = utils.parseArguments(Create.KnownOptions, {}, args.original, 0);
-        console.log('Remain: ' + commandData.remain.join());
         this.commandParameters = {
-            projectPath: args.raw[1],
+            projectPath: commandData.remain[0],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
             appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,
             cordovaConfig: commandData.remain[3],
@@ -109,7 +111,7 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private createProject(): Q.Promise<any> {
- 
+        var self = this;
         var input: string[] = process.argv;
         this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
@@ -122,15 +124,16 @@ class Create implements commands.IDocumentedCommand {
         var options: { [option: string]: any } = this.commandParameters.data.options;
         var cordovaCli: string;
 
+        logger.log("\n", logger.Level.Normal);
+
         if (!this.commandParameters.isKitProject) {
             this.commandParameters.cordovaCli = this.commandParameters.data.options["cli"];
             // Use the CLI version specified as an argument to create the project
             return cordovaWrapper.create(this.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
         } else {
             return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli): Q.Promise<any> {
-                this.commandParameters.kitId = kitId;
+                self.commandParameters.kitId = kitId;
                 if (mustUseTemplate) {
-                    var self = this;
                     return createManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options)
                         .then(function (templateDisplayName: string): Q.Promise<any> {
                         self.commandParameters.templateDisplayName = templateDisplayName;
@@ -143,35 +146,45 @@ class Create implements commands.IDocumentedCommand {
         }
     }
 
-    private createTacoJsonFile(): void {
+    private createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
+            if (err) {
+                deferred.reject(err);
+            }
+            deferred.resolve({});
+        });
+        return deferred.promise;
+    }
+
+    private createTacoJsonFile(): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
         var jsonData: { [obj: string]: string };
+        var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
         if (this.commandParameters.isKitProject) {
             if (!this.commandParameters.kitId) {
-                kitHelper.getDefaultKit().then(function (kitId): void {
+                return kitHelper.getDefaultKit().then(function (kitId): void {
                     this.commandParameters.kitId = kitId;
-                    jsonData = { 'kit': kitId };
+                    return this.createJsonFileWithContents(tacoJsonPath, { 'kit': kitId });
                 });
             }
             else {
-                jsonData = { 'kit': this.commandParameters.kitId };
+                return this.createJsonFileWithContents(tacoJsonPath, { 'kit': this.commandParameters.kitId });
             }
         } else {
             if (!this.commandParameters.cordovaCli) {
-                logger.log(resources.getString("command.create.tacoJsonFileCreationError"), logger.Level.Error);
-                return;
+                deferred.reject(resources.getString("command.create.tacoJsonFileCreationError"));
+                return deferred.promise;
             }
-            jsonData = { 'cli': this.commandParameters.cordovaCli };
+            return this.createJsonFileWithContents(tacoJsonPath, { 'cli': this.commandParameters.cordovaCli });
         }
-        var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
-        fs.writeFileSync(tacoJsonPath, JSON.stringify(jsonData));
     }
 
     private finalize(): void {
+        logger.log("\n", logger.Level.Normal);
+
         // Report success over multiple loggings for different styles
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
-
-        // Create taco.json file
-        this.createTacoJsonFile();
 
         if (this.commandParameters.isKitProject) {
             if (this.commandParameters.templateDisplayName) {
@@ -189,6 +202,9 @@ class Create implements commands.IDocumentedCommand {
         }
 
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.projectPath), logger.Level.NormalBold);
+        if (this.commandParameters.isKitProject) {
+            logger.log(" " + resources.getString("command.create.success.kitUsed", this.commandParameters.kitId), logger.Level.NormalBold);
+        }
     }
 }
 
