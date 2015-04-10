@@ -474,7 +474,7 @@ class TacoRemoteClient {
     private static logBuildOutput(buildInfo: BuildInfo, settings: BuildSettings): Q.Promise<BuildInfo> {
         var serverUrl = settings.buildServerUrl;
         var deferred = Q.defer<BuildInfo>();
-        var offset: number = buildInfo ["logOffset"] || 0;
+        var offset: number = buildInfo["logOffset"] || 0;
         var logFlags = offset > 0 ? "r+" : "w";
         var buildNumber = buildInfo.buildNumber;
         var downloadUrl = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);

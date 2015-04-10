@@ -114,6 +114,8 @@ module TacoUtility {
         public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any> {
             var deferred = Q.defer();
 
+            options = options ? options : {};
+
             ncp.ncp(source, target, options, function (error: any): void {
                 if (error) {
                     deferred.reject(error);

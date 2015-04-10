@@ -18,6 +18,8 @@ declare module "wrench" {
     export function copyDirRecursive(srcDir: string, newDir: string, fn: (err: Error) => void): void;
 
     export class LineReader {
+        fd: number;
+
         constructor(filename: string, bufferSize?: number);
 
         getBufferAndSetCurrentPosition(position: number): number;
