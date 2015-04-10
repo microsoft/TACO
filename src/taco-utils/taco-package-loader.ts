@@ -36,6 +36,7 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
+        /** TODO - Remove and use lazyAcquire instead **/
         public static lazyRequire<T>(packageName: string, packageVersion: string): Q.Promise<T> {
             var packageTargetPath: string;
             var deferred = Q.defer<T>();

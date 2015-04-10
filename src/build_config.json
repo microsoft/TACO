@@ -4,7 +4,8 @@
     "build": "../build",
     "buildSrc": "../build/src",
     "buildBin": "../build/bin",
-	"buildTemplates": "../build/templates",
+    "buildTemplates": "../build/templates",
+    "deployTemplates": "../src/kits/templates",
     "copPath":  "../tools/internal/TSStyleCop/TSStyleCop.js",
     "copConfig":  "../tools/internal/TSStyleCop/TSStyleAllRules.json"
 }

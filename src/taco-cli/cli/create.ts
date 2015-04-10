@@ -14,7 +14,9 @@ import level = logger.Level;
 import createManager = require ("./utils/template-manager");
 import cordovaWrapper = require ("./utils/cordova-wrapper");
 import nopt = require ("nopt");
-import Q = require ("q");
+import Q = require("q");
+import fs = require("fs");
+import path = require("path");
 
 /* 
  * Wrapper interface for create command parameters
@@ -25,8 +27,10 @@ interface ICreateParameters {
     appName: string;
     cordovaConfig: string;
     data: commands.ICommandData;
+    cordovaCli?: string;
     templateDisplayName?: string;
     isKitProject?: boolean;
+    kitId?: string;
 }
 
 /*
@@ -73,9 +77,9 @@ class Create implements commands.IDocumentedCommand {
 
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = utils.parseArguments(Create.KnownOptions, {}, args.original, 0);
-
+        console.log('Remain: ' + commandData.remain.join());
         this.commandParameters = {
-            projectPath: commandData.remain[0],
+            projectPath: args.raw[1],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
             appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,
             cordovaConfig: commandData.remain[3],
@@ -105,44 +109,69 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private createProject(): Q.Promise<any> {
+ 
+        var input: string[] = process.argv;
         this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
+        var kitId: string = this.commandParameters.data.options["kit"];
+        var templateId: string = this.commandParameters.data.options["template"];
+        var projectPath: string = this.commandParameters.projectPath;
+        var appId: string = this.commandParameters.appId;
+        var appName: string = this.commandParameters.appName;
+        var cordovaConfig: string = this.commandParameters.cordovaConfig;
+        var options: { [option: string]: any } = this.commandParameters.data.options;
+        var cordovaCli: string;
 
         if (!this.commandParameters.isKitProject) {
-           var cordovaCli: string = this.commandParameters.data.options["cli"];
-
+            this.commandParameters.cordovaCli = this.commandParameters.data.options["cli"];
             // Use the CLI version specified as an argument to create the project
-           return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+            return cordovaWrapper.create(this.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
         } else {
-            var kitId: string = this.commandParameters.data.options["kit"];
-            var templateId: string = this.commandParameters.data.options["template"];
-            var projectPath: string = this.commandParameters.projectPath;
-            var appId: string = this.commandParameters.appId;
-            var appName: string = this.commandParameters.appName;
-            var cordovaConfig: string = this.commandParameters.cordovaConfig;
-            var options: { [option: string]: any } = this.commandParameters.data.options;
-
-            kitId = kitId ? kitId : kitHelper.getDefaultKitId();
-            var cordovaCli : string = kitHelper.getCordovaCliForKit(kitId);
-
-            if (mustUseTemplate) {
-                var self = this;
-
-                return createManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options)
-                    .then(function (templateDisplayName: string): Q.Promise<any> {
+            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli): Q.Promise<any> {
+                this.commandParameters.kitId = kitId;
+                if (mustUseTemplate) {
+                    var self = this;
+                    return createManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options)
+                        .then(function (templateDisplayName: string): Q.Promise<any> {
                         self.commandParameters.templateDisplayName = templateDisplayName;
-
                         return Q.resolve(null);
                     });
-            } else {
-                return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
-            }
+                } else {
+                    return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+                }
+            });
         }
+    }
+
+    private createTacoJsonFile(): void {
+        var jsonData: { [obj: string]: string };
+        if (this.commandParameters.isKitProject) {
+            if (!this.commandParameters.kitId) {
+                kitHelper.getDefaultKit().then(function (kitId): void {
+                    this.commandParameters.kitId = kitId;
+                    jsonData = { 'kit': kitId };
+                });
+            }
+            else {
+                jsonData = { 'kit': this.commandParameters.kitId };
+            }
+        } else {
+            if (!this.commandParameters.cordovaCli) {
+                logger.log(resources.getString("command.create.tacoJsonFileCreationError"), logger.Level.Error);
+                return;
+            }
+            jsonData = { 'cli': this.commandParameters.cordovaCli };
+        }
+        var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
+        fs.writeFileSync(tacoJsonPath, JSON.stringify(jsonData));
     }
 
     private finalize(): void {
         // Report success over multiple loggings for different styles
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
+
+        // Create taco.json file
+        this.createTacoJsonFile();
 
         if (this.commandParameters.isKitProject) {
             if (this.commandParameters.templateDisplayName) {

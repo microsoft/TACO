@@ -32,6 +32,8 @@
     "_command.create.success.projectCLI.comment": "This sentence follows the word 'Success!' for CLI projects after the create command succeeds.",
     "command.create.success.path": "{0}",
     "_command.create.success.path.comment": "This is the last part of the success message for the create command. {0} is the path where the project was created.",
+    "command.create.tacoJsonFileCreationError": "Error: Creation of taco.json file failed",
+    "_command.create.tacoJsonFileCreationError.comment": "This message is displayed when the taco.json file creation fails.",
 
     "command.help.description": "Get help for a command",
     "command.help.usage.synopsis": "Synopsis",

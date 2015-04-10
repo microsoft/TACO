@@ -6,6 +6,7 @@ import utils = tacoUtility.UtilHelper;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
+    private static cliCommandPath: string;
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
         var proc = child_process.exec(["cordova"].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
@@ -36,16 +37,20 @@ class CordovaWrapper {
      */
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer<any>();
-        var command: string[] = ["create", projectPath];
+        var command = ["node"];
+
+        if (projectPath) {
+            command.push(projectPath);
+        }
+
+        command.push("create");
 
         if (id) {
             command.push(id);
         }
-
         if (name) {
             command.push(name);
         }
-
         if (cdvConfig) {
             command.push(cdvConfig);
         }

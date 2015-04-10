@@ -77,9 +77,12 @@ declare module TacoKits {
         private static kitMetaData: ITacoKitMetaData;
         private static kitFileName: string;
         private static defaultKitId: string;
-        public static getDefaultKitId(): string;
 
-        public static getCordovaCliForKit(kitId: string): string
+        public static init(locale: string): void;
+
+        public static getValidCordovaCli(kitId: string): Q.Promise<string>;
+
+        public static getCordovaCliForKit(kitId: string): Q.Promise<string>;
 
         public static getKitMetaData(): Q.Promise<ITacoKitMetaData>;
 
@@ -94,7 +97,6 @@ declare module TacoKits {
         public static getPlatformOverrideForKit(kit: string): Q.Promise<string>;
 
         public static getPluginOverrideForKit(kit: string): Q.Promise<string>;
-
 
         public static isKitValid(kitId: string): Q.Promise<boolean>;
 

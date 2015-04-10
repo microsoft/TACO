@@ -194,6 +194,11 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
     return Q.all(pipes.map(streamToPromise));
 });
 
+/* Task to deploy the archived templates to taco-kits package */
+gulp.task("copy-templates", ["prepare-templates"], function (): any {
+    return gulp.src(path.join(buildConfig.buildTemplates, "/**")).pipe(gulp.dest(buildConfig.deployTemplates));
+});
+
 function getChildDirectoriesSync(dir: string): string[] {
     return fs.readdirSync(dir).filter(function (entry: string): boolean {
         return fs.statSync(path.resolve(dir, entry)).isDirectory();
