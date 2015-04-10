@@ -61,7 +61,7 @@ export class TypeScriptServices {
     /**
      * Compiles a diectory using the default settings, and the given source and destination location.
      */
-    public compileDirectory(sourceDirectory: string, outputDirectory: string, cb: Function): void {
+    public compileDirectory(sourceDirectory: string, outputDirectory: string, sourceMap: boolean, cb: Function): void {
         var sourceFiles = this.getProjectTypescriptFiles(sourceDirectory, []);
 
         this.compileTypescript({
@@ -69,7 +69,8 @@ export class TypeScriptServices {
             noEmitOnError: true,
             target: ts.ScriptTarget.ES5,
             module: ts.ModuleKind.CommonJS,
-            outDir: outputDirectory
+            outDir: outputDirectory,
+            sourceMap: sourceMap
         }, sourceFiles, cb);
     }
 
