@@ -3,6 +3,7 @@
 /// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
+
 "use strict";
 import child_process = require ("child_process");
 import fs = require ("fs");
@@ -12,18 +13,9 @@ import nopt = require ("nopt");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import commands = require ("./commands");
 
 module TacoUtility {
-    export interface IParsedCommand {
-        original: string[];
-        remain: string[];
-        options: IOptions;
-    }
-
-    export interface IOptions {
-        [index: string]: any;
-    }
-
     export class UtilHelper {
         private static InvalidAppNameChars: { [key: string]: string } = {
             34: "\"",
@@ -119,9 +111,8 @@ module TacoUtility {
          * @param {string} target Location to copy to
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
-        public static copyRecursive(source: string, target: string): Q.Promise<any> {
+        public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any> {
             var deferred = Q.defer();
-            var options = {};
 
             ncp.ncp(source, target, options, function (error: any): void {
                 if (error) {
@@ -175,7 +166,7 @@ module TacoUtility {
          *
          * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
-        public static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): TacoUtility.IParsedCommand {
+        public static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): commands.Commands.ICommandData {
             var undefinedToken: string = "$TACO_CLI_UNDEFINED_TOKEN$";
             var argsClone: string[];
 
@@ -198,7 +189,7 @@ module TacoUtility {
             var noptParsed: Nopt.OptionsParsed = nopt(knownOptions, shortHands, argsClone ? argsClone : args, slice);
 
             // Create the IParsedCommand object
-            var parsed: TacoUtility.IParsedCommand = { original: [], remain: [], options: {} };
+            var parsed: commands.Commands.ICommandData = { original: [], remain: [], options: {} };
 
             for (var property in noptParsed) {
                 // Determine whether property is a flag
@@ -298,6 +289,26 @@ module TacoUtility {
 
                 callback(error, stdout, stderr);
             });
+        }
+
+        /**
+         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
+         *
+         * @param {[option: string]: any} Options dictionary to be cleansed
+         * @returns {string[]} Options to exclude from the specified options dictionary
+         *
+         * @return {[option: string]: any } A new options dictionary containing the cleansed options
+         */
+        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any } {
+            var cleansed: { [option: string]: any } = {};
+            
+            for (var opt in options) {
+                if (!exclude || exclude.indexOf(opt) < 0) {
+                    cleansed[opt] = options[opt];
+                }
+            }
+
+            return cleansed;
         }
     }
 }

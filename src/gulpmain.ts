@@ -3,6 +3,8 @@
 /// <reference path="typings/gulp.d.ts" />
 /// <reference path="typings/gulp-extensions.d.ts" />
 /// <reference path="typings/del.d.ts" />
+/// <reference path="typings/tar.d.ts" />
+/// <reference path="typings/fstream.d.ts" />
 var runSequence = require("run-sequence");
 import child_process = require ("child_process");
 import fs = require ("fs");
@@ -11,6 +13,9 @@ import del = require ("del");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import tar = require ("tar");
+import fstream = require ("fstream");
+import zlib = require ("zlib");
 import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
 import tsUtil = require ("./taco-cli/compile/typescript-util");
@@ -96,7 +101,15 @@ gulp.task("clean", function (callback: (err: Error) => void): void {
     del([buildPath + "/**"], { force: true }, callback);
 });
 
-function streamToPromise(stream: NodeJS.ReadWriteStream): Q.Promise<any> {
+/* Cleans up only the templates in the build folder */
+gulp.task("clean-templates", function (callback: (err: Error) => void): void {
+    var util = require("util");
+    var templatesPath = path.resolve(buildConfig.buildTemplates);
+    console.warn(util.format("Deleting %s", templatesPath));
+    del([templatesPath + "/**"], { force: true }, callback);
+});
+
+function streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {
     var deferred = Q.defer();
     stream.on("finish", function (): void {
         deferred.resolve({});
@@ -143,4 +156,48 @@ gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
         });
     }, Q({}));
 });
+
+/* Task to archive template folders */
+gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> {
+    var buildTemplatesPath: string = path.resolve(buildConfig.buildTemplates);
+    var pipes: NodeJS.WritableStream[] = [];
+
+    if (!fs.existsSync(buildTemplatesPath)) {
+        fs.mkdirSync(buildTemplatesPath);
+    }
+
+    // Read the templates dir to discover the different kits
+    var templatesPath: string = buildConfig.templates;
+    var kits: string[] = getChildDirectoriesSync(templatesPath);
+
+    kits.forEach(function (value: string, index: number, array: string[]): void {
+        // Read the kit's dir for all the available templates
+        var kitSrcPath: string = path.join(buildConfig.templates, value);
+        var kitTargetPath: string = path.join(buildTemplatesPath, value);
+
+        if (!fs.existsSync(kitTargetPath)) {
+            fs.mkdirSync(kitTargetPath);
+        }
+
+        var kitTemplates: string[] = getChildDirectoriesSync(kitSrcPath);
+
+        kitTemplates.forEach(function (value: string, index: number, array: string[]): void {
+            var templateSrcPath: string = path.resolve(kitSrcPath, value);
+            var templateTargetPath: string = path.join(kitTargetPath, value + ".tar.gz");
+            var dirReader: fstream.Reader = new fstream.Reader({ path: templateSrcPath, type: "Directory", mode: 777 });
+            var pipe: NodeJS.WritableStream = dirReader.pipe(tar.Pack()).pipe(zlib.createGzip()).pipe(new fstream.Writer({ path: templateTargetPath }));
+
+            pipes.push(pipe);
+        });
+    });
+
+    return Q.all(pipes.map(streamToPromise));
+});
+
+function getChildDirectoriesSync(dir: string): string[] {
+    return fs.readdirSync(dir).filter(function (entry: string): boolean {
+        return fs.statSync(path.resolve(dir, entry)).isDirectory();
+    });
+}
+
 module.exports = gulp;

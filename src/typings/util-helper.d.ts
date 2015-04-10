@@ -3,16 +3,8 @@
 /// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts" />
 /// <reference path="../typings/ncp.d.ts" />
-declare module TacoUtility {
-    interface IParsedCommand {
-        original: string[];
-        remain: string[];
-        options: IOptions;
-    }
-    interface IOptions {
-        [index: string]: any;
-    }
 
+declare module TacoUtility {
     class UtilHelper {
         private static InvalidAppNameChars;
 
@@ -49,7 +41,7 @@ declare module TacoUtility {
          * @param {string} target Location to copy to
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
-        static copyRecursive(source: string, target: string): Q.Promise<any>;
+        public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any>;
         /**
          * Extract optional arguments from an arguments array.
          *
@@ -80,7 +72,7 @@ declare module TacoUtility {
          *
          * @returns {Nopt.OptionsParsed} the nopt parsed object
          */
-        static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): IParsedCommand;
+        static parseArguments(knownOptions: Nopt.FlagTypeMap, shortHands?: Nopt.ShortFlags, args?: string[], slice?: number): Commands.ICommandData;
         /**
          * Synchronously create a directory if it does not exist
          *
@@ -113,5 +105,14 @@ declare module TacoUtility {
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
         public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): void;
+        /**
+         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
+         *
+         * @param {[option: string]: any} Options dictionary to be cleansed
+         * @returns {string[]} Options to exclude from the specified options dictionary
+         *
+         * @return {[option: string]: any } A new options dictionary containing the cleansed options
+         */
+        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any };
     }
 }
