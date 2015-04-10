@@ -14,15 +14,16 @@ export class TypeScriptServices {
         var host = ts.createCompilerHost(options);
         var program = ts.createProgram(filenames, options, host);
         var checker = ts.createTypeChecker(program, true);
-        var result = checker.emitFiles();
+        var result = program.emit();
 
-        var allDiagnostics = program.getDiagnostics()
-            .concat(checker.getDiagnostics())
+        var allDiagnostics = program.getSyntacticDiagnostics()
+            .concat(program.getGlobalDiagnostics())
+            .concat(program.getSemanticDiagnostics())
             .concat(result.diagnostics);
 
         allDiagnostics.forEach(diagnostic => this.logDiagnosticMessage(diagnostic));
 
-        if (result.emitResultStatus !== 0) {
+        if (result.emitSkipped) {
             /* compilation failed */
             if (cb) {
                 cb(TypeScriptServices.FailureMessage);
@@ -79,8 +80,8 @@ export class TypeScriptServices {
     private logDiagnosticMessage(diagnostic: ts.Diagnostic): void {
         var sourceFile = diagnostic.file;
         if (sourceFile) {
-            var lineAndCharacter = sourceFile.getLineAndCharacterFromPosition(diagnostic.start);
-            console.warn(sourceFile.filename + "(" + lineAndCharacter.line + "," + lineAndCharacter.character + "): " + diagnostic.messageText);
+            var lineAndCharacter = sourceFile.getLineAndCharacterOfPosition(diagnostic.start);
+            console.warn(sourceFile.fileName + "(" + lineAndCharacter.line + "," + lineAndCharacter.character + "): " + diagnostic.messageText);
         } else {
             console.warn(diagnostic.messageText);
         }
