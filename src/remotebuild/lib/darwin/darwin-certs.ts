@@ -39,7 +39,7 @@ class Certs {
         client_cn: "remotebuild." + os.hostname(), // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
     };
 
-    private static  CertStore: HostSpecifics.ICertStore = null;
+    private static CertStore: HostSpecifics.ICertStore = null;
 
     public static resetServerCert(conf: RemoteBuildConf, yesOrNoHandler?: Certs.ICliHandler): Q.Promise<any> {
         var certsDir = path.join(conf.serverDir, "certs");

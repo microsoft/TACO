@@ -109,7 +109,7 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
     del([templatesPath + "/**"], { force: true }, callback);
 });
 
-function streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {
+function streamToPromise(stream: NodeJS.WritableStream): Q.Promise<any> {
     var deferred = Q.defer();
     stream.on("finish", function (): void {
         deferred.resolve({});
