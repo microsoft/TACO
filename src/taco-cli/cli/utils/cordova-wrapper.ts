@@ -6,10 +6,10 @@ import utils = tacoUtility.UtilHelper;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
-    private static cliCommandPath: string;
-    public static cli(args: string[]): Q.Promise<any> {
+    public static cli(args: string[], cordovaCliPath?: string): Q.Promise<any> {
         var deferred = Q.defer();
-        var proc = child_process.exec(["cordova"].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
+        var cordovaCli = cordovaCliPath ? "cordova" : path.resolve(cordovaCliPath, "bin", "cordova.cmd");
+        var proc = child_process.exec([cordovaCli].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
             if (err) {
                 deferred.reject(err);
             } else {
@@ -37,9 +37,9 @@ class CordovaWrapper {
      */
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer();
-        var command = ["node", __dirname];
-
-        command.push("create");
+        //var command = ["node", __dirname];
+        var command = ["create"];
+        //command.push("create");
 
         if (projectPath) {
             command.push(projectPath);
@@ -66,11 +66,18 @@ class CordovaWrapper {
             }
         }
         try {
-            var cordova: any = undefined;
-            return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordovaModule): void {
+            var cordovaCliPath: any;
+            /*return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordovaModule): void {
                 cordova = cordovaModule;
                 if (cordova.cordova_lib) {
-                    cordova.cli(command);
+                    return cordova.cli(command);
+                }
+            });*/
+            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliPath): void {
+                var cordova = require(cordovaCliPath);
+                if (cordova) {
+                    CordovaWrapper.cli(command, cordovaCliPath);
+                    deferred.resolve(cordovaCliPath);
                 }
             });
         }
@@ -79,7 +86,6 @@ class CordovaWrapper {
             deferred.reject({});
             // Rethrow and log error
         }
-        deferred.resolve({}); 
         return deferred.promise;
     }
 }

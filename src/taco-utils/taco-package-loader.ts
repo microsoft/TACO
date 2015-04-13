@@ -216,14 +216,14 @@ module TacoUtility {
 
             var args = ['/c', 'npm', 'install'];
 
-            var cwd = packageTargetPath;
+            var dir = packageTargetPath;
             if (packageSpecType == PackageSpecType.Version) {
                 args.push('cordova' + '@' + packageVersion);
-                // actual install happens 2 directories down. {cwd}\node_modules\cordova
-                cwd = path.resolve(packageTargetPath, "..", "..");
+                // actual install happens 2 directories down. {dir}\node_modules\cordova
+                dir = path.resolve(packageTargetPath, "..", "..");
             }
 
-            utils.loggedExec("npm install " + packageName + "@" + packageVersion, { cwd: packageTargetPath }, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            utils.loggedExec("npm install " + packageName + "@" + packageVersion, { cwd: dir }, function (error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {
                     rimraf(packageTargetPath, function (error: Error): void {
                         deferred.reject(error);
