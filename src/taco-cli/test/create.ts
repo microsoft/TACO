@@ -29,55 +29,54 @@ describe("taco create", function (): void {
     // Project info
     var testAppId: string = "testId";
     var testAppName: string = "testAppName";
+    var testTemplateId: string = "testTemplate";
+    var testKitId: string = "testKit";
 
     // Important paths
     var runFolder: string = path.resolve(__dirname, "create_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
     var templateCache: string = path.join(tacoHome, "templates");
     var copyFromPath: string = path.resolve(__dirname, "resources", "templates", "testKit", "testTemplate");
-
-    // Paths for the test projects
-    var projectPaths: string[] = [
-        (path.join(runFolder, "scenario0")),
-        (path.join(runFolder, "scenario1")),
-        (path.join(runFolder, "scenario2")),
-        (path.join(runFolder, "scenario3")),
-        (path.join(runFolder, "scenario4")),
-        (path.join(runFolder, "scenario5")),
-        (path.join(runFolder, "scenario6")),
-        (path.join(runFolder, "scenario7")),
-        (path.join(runFolder, "scenario8")),
-        (path.join(runFolder, "scenario9")),
-        (path.join(runFolder, "scenario10")),
-        (path.join(runFolder, "scenario11")),
-        (path.join(runFolder, "scenario12")),
-        (path.join(runFolder, "scenario13")),
-        (path.join(runFolder, "scenario14")),
-        (path.join(runFolder, "scenario15")),
-        (path.join(runFolder, "scenario16"))
-    ];
+    var testTemplateKitSrc: string = path.resolve(__dirname, "resources", "templates", testKitId);
+    var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);
 
     // Commands for the different end to end scenarios to test
     var scenarios: string[][] = [
-        (projectPaths[0] + " --kit 4.0.0-Kit --template typescript " + testAppId + " " + testAppName + " {}").split(" "),
-        (projectPaths[1] + " --kit 5.0.0-Kit --template blank " + testAppId + " " + testAppName).split(" "),
-        (projectPaths[2] + " --kit 4.2.0-Kit --template typescript " + testAppId).split(" "),
-        (projectPaths[3] + " --kit 4.2.0-Kit --template blank").split(" "),
-        (projectPaths[4] + " --kit 5.0.0-Kit --template").split(" "),
-        (projectPaths[5] + " --kit 4.0.0-Kit").split(" "),
-        (projectPaths[6] + " --template typescript").split(" "),
-        (projectPaths[7] + " --template").split(" "),
-        (projectPaths[8] + " --copy-from " + copyFromPath).split(" "),
-        (projectPaths[9] + " --cli 4.2.0").split(" "),
-        (projectPaths[10] + " --kit").split(" "),
-        (projectPaths[11] + " --template unknown").split(" "),
-        (projectPaths[12] + " --kit 5.0.0-Kit --template typescript").split(" "),
-        (projectPaths[13] + " --kit 5.0.0-Kit --template typescript --copy-from " + copyFromPath).split(" "),
-        (projectPaths[14] + " --kit 5.0.0-Kit --cli 4.2.0").split(" "),
-        (projectPaths[15] + " --cli 4.2.0 --template typescript").split(" ")
+        ("--kit 4.0.0-Kit --template typescript " + testAppId + " " + testAppName + " {}").split(" "),
+        ("--kit 5.0.0-Kit --template blank " + testAppId + " " + testAppName).split(" "),
+        ("--kit 4.2.0-Kit --template typescript " + testAppId).split(" "),
+        ("--kit 4.2.0-Kit --template blank").split(" "),
+        ("--kit 5.0.0-Kit --template").split(" "),
+        ("--kit 4.0.0-Kit").split(" "),
+        ("--template typescript").split(" "),
+        ("--template").split(" "),
+        ("--copy-from " + copyFromPath).split(" "),
+        ("--cli 4.2.0").split(" "),
+        ("--kit").split(" "),
+        ("--template unknown").split(" "),
+        ("--kit 5.0.0-Kit --template typescript").split(" "),
+        ("--kit 5.0.0-Kit --template typescript --copy-from " + copyFromPath).split(" "),
+        ("--kit 5.0.0-Kit --cli 4.2.0").split(" "),
+        ("--cli 4.2.0 --template typescript").split(" "),
+        ("--kit 4.0.0-Kit --template typescript " + testAppId + " " + testAppName + " {}").split(" "),
+        ("--kit 5.0.0-Kit --copy-from unknownCopyFromPath").split(" "),
+        ("--cli unknownCliVersion").split(" "),
+        ("--unknownParameter").split(" "),
+        ("42").split(" ")
     ];
 
-    function makeICommandData(args: string[]): tacoUtils.Commands.ICommandData {
+    function getProjectPath(scenario: number): string {
+        return path.join(runFolder, "scenario" + scenario);
+    }
+
+    function makeICommandData(scenario: number): tacoUtils.Commands.ICommandData {
+        // Get the scenario's command line
+        var args: string[] = scenarios[scenario];
+
+        // Add the project creation path for the scenario to the front of the command line
+        args.unshift(getProjectPath(scenario));
+
+        // Build and return the ICommandData object
         return {
             options: {},
             original: args,
@@ -98,27 +97,24 @@ describe("taco create", function (): void {
     function runScenario(scenario: number, expectedFileCount: number): Q.Promise<any> {
         var create = new Create();
 
-        return create.run(makeICommandData(scenarios[scenario])).then(function (): void {
-            var fileCount: number = countProjectItemsRecursive(projectPaths[scenario]);
+        return create.run(makeICommandData(scenario)).then(function (): void {
+            var fileCount: number = countProjectItemsRecursive(getProjectPath(scenario));
 
             fileCount.should.be.exactly(expectedFileCount);
         });
     }
 
-    function runFailureScenario(scenario: number, expectedError: string, done: MochaDone): void {
+    function runFailureScenario(scenario: number, expectedError?: string): Q.Promise<any> {
         var create = new Create();
 
-        create.run(makeICommandData(scenarios[scenario])).then(function (): void {
-            done(new Error("Scenario succeeded when it shouldn't have"));
-        }, function (err: string): void {
-            try {
+        return create.run(makeICommandData(scenario)).then(function (): Q.Promise<any> {
+            throw new Error("Scenario succeeded when it shouldn't have");
+        }, function (err: string): Q.Promise<any> {
+            if (expectedError) {
                 err.should.equal(expectedError);
-            } catch (err) {
-                done(err);
-                return;
             }
 
-            done();
+            return Q.resolve(null);
         });
     }
 
@@ -225,13 +221,15 @@ describe("taco create", function (): void {
         //
         // Create command should fail if --kit was specified with no value
         var scenario: number = 10;
-        runFailureScenario(scenario, "ERROR_ID_HERE", done);
+
+        runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done)
     });
 
     it("should fail: Scenario 11 [path, template (unknown value)]", function (done: MochaDone): void {
         // If a template is not found, create command should fail with an appropriate message
         var scenario: number = 11;
-        runFailureScenario(scenario, "command.create.templateNotFound", done);
+
+        runFailureScenario(scenario, "command.create.templateNotFound").then(done, done);
     });
 
     it.skip("should fail: Scenario 12 [typescript template with a kit that doesn't have a typescript template]", function (done: MochaDone): void {
@@ -239,24 +237,70 @@ describe("taco create", function (): void {
         //
         // Similar to scenario 11 (create command should fail when a template is not found), but for typescript templates we have a specific message
         var scenario: number = 12;
-        runFailureScenario(scenario, "command.create.noTypescript", done);
+
+        runFailureScenario(scenario, "command.create.noTypescript").then(done, done);
     });
 
     it("should fail: Scenario 13 [path, kit, template, copy-from]", function (done: MochaDone): void {
         // Create command should fail when both --template and --copy-from are specified
         var scenario: number = 13;
-        runFailureScenario(scenario, "command.create.notTemplateIfCustomWww", done);
+
+        runFailureScenario(scenario, "command.create.notTemplateIfCustomWww").then(done, done);
     });
 
     it("should fail: Scenario 14 [path, kit, cli]", function (done: MochaDone): void {
         // Create command should fail when both --kit and --cli are specified
         var scenario: number = 14;
-        runFailureScenario(scenario, "command.create.notBothCliAndKit", done);
+
+        runFailureScenario(scenario, "command.create.notBothCliAndKit").then(done, done);
     });
 
     it("should fail: Scenario 15 [path, cli, template]", function (done: MochaDone): void {
         // Create command should fail when both --cli and --template are specified
         var scenario: number = 15;
-        runFailureScenario(scenario, "command.create.notBothTemplateAndCli", done);
+
+        runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
+    });
+
+    it("should fail: Scenario 16 [path (value is an existing project)]", function (done: MochaDone): void {
+        // Create command should fail when the specified path is a non-empty existing folder (Cordova error)
+        var scenario: number = 16;
+        var copyDest: string = getProjectPath(scenario);
+
+        wrench.mkdirSyncRecursive(copyDest, 777);
+        utils.copyRecursive(testTemplateSrc, copyDest).then(function (): void {
+            runFailureScenario(scenario).then(done, done);
+        });
+    });
+
+    it("should fail: Scenario 17 [copy-from (unknown path)]", function (done: MochaDone): void {
+        // Create command should fail when --copy-from is specified with a path that doesn't exist (Cordova error)
+        var scenario: number = 17;
+
+        runFailureScenario(scenario).then(done, done);
+    });
+
+    it.skip("should fail: Scenario 18 [cli (unknown value)]", function (done: MochaDone): void {
+        // TODO Enable this test when kits story is checked in and cli validation is in place
+        //
+        // Create command should fail when specified cli version doesn't exist
+        var scenario: number = 18;
+
+        runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done);
+    });
+
+    it("should succeed: Scenario 19 [path, extra unknown parameter]", function (done: MochaDone): void {
+        var scenario: number = 19;
+
+        // Template that will be used: default blank
+        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+        runScenario(scenario, 90).then(done, done);
+    });
+
+    it("should fail: Scenario 20 [path, appId (invalid value)]", function (done: MochaDone): void {
+        // Create command should fail when an invalid app ID is specified (Cordova error)
+        var scenario: number = 20;
+
+        runFailureScenario(scenario).then(done, done);
     });
 });
