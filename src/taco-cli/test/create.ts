@@ -20,6 +20,8 @@ import wrench = require ("wrench");
 import mocha = require ("mocha");
 import path = require ("path");
 import fs = require ("fs");
+import os = require ("os");
+import util = require ("util");
 import Create = require ("../cli/create");
 import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
@@ -33,7 +35,7 @@ describe("taco create", function (): void {
     var testKitId: string = "testKit";
 
     // Important paths
-    var runFolder: string = path.resolve(__dirname, "create_test_run");
+    var runFolder: string = path.resolve(os.tmpdir(), "taco_cli_create_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
     var templateCache: string = path.join(tacoHome, "templates");
     var copyFromPath: string = path.resolve(__dirname, "resources", "templates", "testKit", "testTemplate");
@@ -41,28 +43,28 @@ describe("taco create", function (): void {
     var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);
 
     // Commands for the different end to end scenarios to test
-    var scenarios: string[][] = [
-        ("--kit 4.0.0-Kit --template typescript " + testAppId + " " + testAppName + " {}").split(" "),
-        ("--kit 5.0.0-Kit --template blank " + testAppId + " " + testAppName).split(" "),
-        ("--kit 4.2.0-Kit --template typescript " + testAppId).split(" "),
-        ("--kit 4.2.0-Kit --template blank").split(" "),
-        ("--kit 5.0.0-Kit --template").split(" "),
-        ("--kit 4.0.0-Kit").split(" "),
-        ("--template typescript").split(" "),
-        ("--template").split(" "),
-        ("--copy-from " + copyFromPath).split(" "),
-        ("--cli 4.2.0").split(" "),
-        ("--kit").split(" "),
-        ("--template unknown").split(" "),
-        ("--kit 5.0.0-Kit --template typescript").split(" "),
-        ("--kit 5.0.0-Kit --template typescript --copy-from " + copyFromPath).split(" "),
-        ("--kit 5.0.0-Kit --cli 4.2.0").split(" "),
-        ("--cli 4.2.0 --template typescript").split(" "),
-        ("--kit 4.0.0-Kit --template typescript " + testAppId + " " + testAppName + " {}").split(" "),
-        ("--kit 5.0.0-Kit --copy-from unknownCopyFromPath").split(" "),
-        ("--cli unknownCliVersion").split(" "),
-        ("--unknownParameter").split(" "),
-        ("42").split(" ")
+    var scenarios: string[] = [
+        util.format("--kit 4.0.0-Kit --template typescript %s %s {}", testAppId, testAppName),
+        util.format("--kit 5.0.0-Kit --template blank %s %s", testAppId, testAppName),
+        util.format("--kit 4.2.0-Kit --template typescript %s", testAppId),
+        "--kit 4.2.0-Kit --template blank",
+        "--kit 5.0.0-Kit --template",
+        "--kit 4.0.0- Kit",
+        "--template typescript",
+        "--template",
+        util.format("--copy-from %s", copyFromPath),
+        "--cli 4.2.0",
+        "--kit",
+        "--template unknown",
+        "--kit 5.0.0-Kit --template typescript",
+        util.format("--kit 5.0.0-Kit --template typescript --copy-from %s", copyFromPath),
+        "--kit 5.0.0-Kit --cli 4.2.0",
+        "--cli 4.2.0 --template typescript",
+        util.format("--kit 4.0.0-Kit --template typescript %s %s {}", testAppId, testAppName),
+        "--kit 5.0.0-Kit --copy-from unknownCopyFromPath",
+        "--cli unknownCliVersion",
+        "--unknownParameter",
+        "42"
     ];
 
     function getProjectPath(scenario: number): string {
@@ -71,7 +73,7 @@ describe("taco create", function (): void {
 
     function makeICommandData(scenario: number): tacoUtils.Commands.ICommandData {
         // Get the scenario's command line
-        var args: string[] = scenarios[scenario];
+        var args: string[] = scenarios[scenario].split(" ");
 
         // Add the project creation path for the scenario to the front of the command line
         args.unshift(getProjectPath(scenario));
@@ -222,7 +224,7 @@ describe("taco create", function (): void {
         // Create command should fail if --kit was specified with no value
         var scenario: number = 10;
 
-        runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done)
+        runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done);
     });
 
     it("should fail: Scenario 11 [path, template (unknown value)]", function (done: MochaDone): void {
