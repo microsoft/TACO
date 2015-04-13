@@ -6,6 +6,7 @@
  * ******************************************************
  */
 /// <reference path="../typings/Q.d.ts" />
+/// <reference path="../typings/taco-utils.d.ts" />
 
 "use strict";
 import Q = require ("q");

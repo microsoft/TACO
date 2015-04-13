@@ -40,107 +40,36 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        /** TODO - Remove and use lazyAcquire instead **/
         public static lazyRequire<T>(packageName: string, packageVersion: string): Q.Promise<T> {
+            var deferred = Q.defer<T>();
             var packageTargetPath: string;
-            var deferred = Q.defer<T>();
-            var homeCordovaModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
-            switch (TacoPackageLoader.getPackageSpecType(packageVersion)) {
-                case PackageSpecType.Version: {
-                    packageTargetPath = path.join(homeCordovaModulesPath, packageVersion, "node_modules");
-                    if (!fs.existsSync(path.join(packageTargetPath, packageName, "package.json"))) {
-                        logger.log(resources.getString("packageLoader.downloadingMessage", packageVersion), logger.Level.NormalBold);
-                        logger.logLine(resources.getString("packageLoader.cordovaToolVersion", packageVersion), logger.Level.Normal);
-                        logger.log("\n", logger.Level.Normal);
-                        TacoPackageLoader.installPackageFromNPM<T>(packageName, packageVersion, packageTargetPath).then(function (pkg: T): void {
-                            deferred.resolve(pkg);
-                        }, function (err: any): void {
-                                logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
-                                deferred.reject(err);
-                            });
-                    } else {
-                        try {
-                            var pkg = <T>require(path.join(packageTargetPath, packageName));
-                            deferred.resolve(pkg);
-                        } catch (e) {
-                            logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
-                            deferred.reject(e);
-                        }
-                    }
-                }
-
-                    break;
-                case PackageSpecType.Uri: {
-                    packageTargetPath = path.join(homeCordovaModulesPath, "temp-remote", packageName);
-                    if (fs.existsSync(path.join(packageTargetPath))) {
-                        rimraf.sync(packageTargetPath);
-                    }
-
-                    TacoPackageLoader.cloneGitRepo(packageVersion, packageTargetPath).then(function (): void {
-                        utils.loggedExec("npm install", { cwd: packageTargetPath }, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-                            if (error) {
-                                rimraf(packageTargetPath, function (error: Error): void {
-                                    if (error) {
-                                        logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
-                                        deferred.reject(error);
-                                    }
-                                });
-                                logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
-                                deferred.reject(error);
-                            } else {
-                                try {
-                                    var pkg = <T>require(path.join(packageTargetPath, packageName));
-                                    deferred.resolve(pkg);
-                                } catch (e) {
-                                    logger.log(resources.getString("packageLoader.donwloadError", packageVersion), logger.Level.Normal);
-                                    deferred.reject(e);
-                                }
-                            }
-                        });
-                    }).catch(function (err: any): void {
-                        deferred.reject(err);
-                    });
-                }
-
-                    break;
-                case PackageSpecType.Error:
-                default: {
-                    deferred.reject(new Error("Unknown package version"));
-                }
-            }
-
+            TacoPackageLoader.lazyAcquire(packageName, packageVersion).
+                then(function (packageTargetPath) :Q.Promise<T> {
+                var pkg = <T>require(packageTargetPath);
+                return Q.resolve(pkg);
+            }).
+                fail(function (error) {
+                TacoPackageLoader.cleanFolderOnFailure(packageTargetPath);
+                console.log(error);
+                throw error;
+            });
             return deferred.promise;
         }
 
-        public static installPackageFromNPM<T>(packageName: string, packageVersion: string, packageTargetPath: string): Q.Promise<T> {
-            var deferred = Q.defer<T>();
-            try {
-                mkdirp.sync(packageTargetPath);
-
-                utils.loggedExec("npm install " + packageName + "@" + packageVersion, { cwd: packageTargetPath }, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-                    if (error) {
-                        rimraf(packageTargetPath, function (error: Error): void {
-                            deferred.reject(error);
-                        });
-                        deferred.reject(error);
-                    } else {
-                        var pkg = <T>require(path.join(packageTargetPath, packageName));
-                        deferred.resolve(pkg);
-                    }
-                });
-            } catch (err) {
-                console.log(err);
-                deferred.reject(err);
-            }
-
-            return deferred.promise;
-        }
-
+        /**
+         * Acquires a node package with specified version. If the package is not already downloaded,
+         * then first download the package and cache it locally for future loads.
+         *
+         * @param {string} packageName The name of the package to load
+         * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         *
+         * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved with the path of the acquired package
+         */
         private static lazyAcquire(packageName: string, packageVersion: string): Q.Promise<any> {
             var packageSpecType: PackageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
 
             if (packageSpecType == PackageSpecType.Error) {
-                return Q.reject('Invalid CLI version : '+ packageVersion);
+                return Q.reject("Invalid CLI version : " + packageVersion);
             }
 
             var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
@@ -228,24 +157,35 @@ module TacoUtility {
                     rimraf(packageTargetPath, function (error: Error): void {
                         deferred.reject(error);
                     });
+                    if (packageName == 'cordova') {
+                        logger.log(resources.getString("packageLoader.errorMessage"), logger.Level.Error);
+                        logger.log(resources.getString("packageLoader.downloadErrorMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Error);
+                        logger.log("\n", logger.Level.Normal);
+                    }
                     deferred.reject(error);
                 } else {
+                    if (packageName == 'cordova') {
+                        logger.log(resources.getString("packageLoader.successMessage"), logger.Level.Success);
+                        logger.log(resources.getString("packageLoader.downloadCompletedMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Normal);
+                        logger.log("\n", logger.Level.Normal);
+                    }
                     deferred.resolve(packageTargetPath);
                 }
+                
             });
-
             return deferred.promise;
         }
 
         private static installPackage(packageName: string, packageVersion: string, packageTargetPath: string, packageSpecType: PackageSpecType): Q.Promise<any> {
+            logger.log(resources.getString("packageLoader.downloadingMessage", packageVersion), logger.Level.NormalBold);
+            logger.logLine(resources.getString("packageLoader.cordovaToolVersion", packageVersion), logger.Level.Normal);
+            logger.log("\n", logger.Level.Normal);
             switch (packageSpecType) {
                 case PackageSpecType.Version:
-                    console.log('Installing Cordova Version', packageName + '@' + packageVersion);
                     return TacoPackageLoader.npmInstallPackage(packageName, packageVersion, packageTargetPath, packageSpecType);
                     break;
 
                 case PackageSpecType.Uri:
-                    console.log('Installing Cordova From GIT Repo', packageVersion);
                     return TacoPackageLoader.cloneGitRepo(packageVersion, packageTargetPath).
                         then(function () {
                             return TacoPackageLoader.npmInstallPackage(packageName, packageVersion, packageTargetPath, packageSpecType);
@@ -291,11 +231,6 @@ module TacoUtility {
         private static installPackageIfNecessary(packageName: string, packageVersion: string, packageTargetPath: string, packageSpecType: PackageSpecType): Q.Promise<any> {
             var deferred = Q.defer();
             if (!TacoPackageLoader.npmInstallNeeded(packageTargetPath)) {
-                if (packageSpecType == PackageSpecType.Uri) {
-                    console.log("InstalledCordovaToolsFromGit", packageVersion);
-                } else {
-                    console.log("InstalledCordovaVersionSame", packageVersion);
-                }
                 deferred.resolve({});
                 return deferred.promise;
             }

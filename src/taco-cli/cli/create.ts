@@ -63,11 +63,14 @@ class Create implements commands.IDocumentedCommand {
 
         return this.createProject()
             .then(function (): Q.Promise<any> {
-                return self.createTacoJsonFile()
-            .then(function (): Q.Promise<any> {
+            return self.createTacoJsonFile()
+                .then(function (): Q.Promise<any> {
                 self.finalize();
                 return Q.resolve(null);
             });
+        }).fail(function (err: any) {
+            logger.log(err.message, logger.Level.Error);
+            return Q.reject({});
         });
     }
 

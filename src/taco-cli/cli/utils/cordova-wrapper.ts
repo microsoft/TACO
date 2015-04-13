@@ -73,18 +73,15 @@ class CordovaWrapper {
                     return cordova.cli(command);
                 }
             });*/
-            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliPath): void {
+            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliPath): Q.Promise<any> {
                 var cordova = require(cordovaCliPath);
                 if (cordova) {
-                    CordovaWrapper.cli(command, cordovaCliPath);
-                    deferred.resolve(cordovaCliPath);
+                    return CordovaWrapper.cli(command, cordovaCliPath);
                 }
             });
         }
         catch (e) {
-            console.log(e);
-            deferred.reject({});
-            // Rethrow and log error
+            deferred.reject(e);
         }
         return deferred.promise;
     }
