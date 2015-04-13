@@ -65,7 +65,7 @@ module TacoUtility {
          *
          * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved with the path of the acquired package
          */
-        private static lazyAcquire(packageName: string, packageVersion: string): Q.Promise<any> {
+        public static lazyAcquire(packageName: string, packageVersion: string): Q.Promise<any> {
             var packageSpecType: PackageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
 
             if (packageSpecType == PackageSpecType.Error) {

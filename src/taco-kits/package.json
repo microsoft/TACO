@@ -10,7 +10,6 @@
         "test": "mocha"
     },
     "dependencies": {
-        "colors": "^1.0.3",
         "q": "^1.1.2",
         "taco-utils": "file:../taco-utils"
     },

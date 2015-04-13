@@ -59,7 +59,7 @@ module TacoUtility {
         /**
          * for quick logging use
          */
-        export function logLine(msg?: string, level?: Level): void {
+        export function logLine(msg: string, level?: Level): void {
             log(msg + "\n", level);
         }
 

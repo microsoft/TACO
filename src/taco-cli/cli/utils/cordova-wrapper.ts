@@ -1,4 +1,7 @@
-﻿import child_process = require ("child_process");
+﻿/// <reference path="../../../typings/node.d.ts" />
+/// <reference path="../../../typings/Q.d.ts" />
+
+import child_process = require("child_process");
 import Q = require("q");
 import path = require("path");
 import tacoUtility = require("taco-utils");
@@ -37,9 +40,7 @@ class CordovaWrapper {
      */
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer();
-        //var command = ["node", __dirname];
         var command = ["create"];
-        //command.push("create");
 
         if (projectPath) {
             command.push(projectPath);
@@ -67,12 +68,6 @@ class CordovaWrapper {
         }
         try {
             var cordovaCliPath: any;
-            /*return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordovaModule): void {
-                cordova = cordovaModule;
-                if (cordova.cordova_lib) {
-                    return cordova.cli(command);
-                }
-            });*/
             return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliPath): Q.Promise<any> {
                 var cordova = require(cordovaCliPath);
                 if (cordova) {

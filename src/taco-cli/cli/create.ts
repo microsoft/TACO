@@ -66,7 +66,7 @@ class Create implements commands.IDocumentedCommand {
             return self.createTacoJsonFile()
                 .then(function (): Q.Promise<any> {
                 self.finalize();
-                return Q.resolve(null);
+                return Q.resolve({});
             });
         }).fail(function (err: any) {
             logger.log(err.message, logger.Level.Error);
@@ -115,7 +115,6 @@ class Create implements commands.IDocumentedCommand {
 
     private createProject(): Q.Promise<any> {
         var self = this;
-        var input: string[] = process.argv;
         this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
         var kitId: string = this.commandParameters.data.options["kit"];

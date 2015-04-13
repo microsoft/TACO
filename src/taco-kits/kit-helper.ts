@@ -123,18 +123,18 @@ module TacoKits {
          */
         public static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
             var kits: IKitMetadata = null;
-            var deferredPromise: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
+            var deferred: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
             return KitHelper.getKitMetadata()
                 .then(function (Metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
                     kits = Metadata.kits;
                     if (kits[kitId]) {
                     // Found the specified kit
-                    deferredPromise.resolve(kits[kitId]);
+                    deferred.resolve(kits[kitId]);
                 } else {
                     // Error, no kit matching the kit id
-                    deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
+                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
                 }
-                return deferredPromise.promise;
+                return deferred.promise;
             });
         }
 
@@ -142,11 +142,11 @@ module TacoKits {
          *   Returns information regarding all the plugins supported
          */
         public static getAllPluginsInfo(): Q.Promise<IPluginMetadata> {
-            var deferredPromise: Q.Deferred<IPluginMetadata> = Q.defer<IPluginMetadata>();
+            var deferred: Q.Deferred<IPluginMetadata> = Q.defer<IPluginMetadata>();
             return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<IPluginMetadata> {
                 var plugins: IPluginMetadata = Metadata.plugins;
-                deferredPromise.resolve(Metadata.plugins);
-                return deferredPromise.promise;
+                deferred.resolve(Metadata.plugins);
+                return deferred.promise;
             }); 
         }
 
@@ -155,18 +155,18 @@ module TacoKits {
          *  Note that the default kit is one with default attribute set to 'true'
          */
         public static getDefaultKit(): Q.Promise<string> {
-            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            var deferred: Q.Deferred<string> = Q.defer<string>();
             return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
                 var kits: IKitMetadata = Metadata.kits;
                 Object.keys(kits).forEach(function (kitId: string): Q.Promise<string> {
                     // Get the kit for which the default attribute is set to true
                     if (kits[kitId].default) {
-                        deferredPromise.resolve(kitId);
-                        return deferredPromise.promise;
+                        deferred.resolve(kitId);
+                        return deferred.promise;
                     }
                 });
-                deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.NoDefaultKit")));
-                return deferredPromise.promise;
+                deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoDefaultKit")));
+                return deferred.promise;
             }); 
         }
 
@@ -174,18 +174,18 @@ module TacoKits {
          *   Returns the Cordova Cli used by the default kit 
          */
         public static getCordovaCliForDefaultKit(): Q.Promise<string> {
-            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            var deferred: Q.Deferred<string> = Q.defer<string>();
             return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
                 var kits: IKitMetadata = Metadata.kits;
                 Object.keys(kits).forEach(function (kitId: string): Q.Promise<string> {
                     // Get the kit for which the default attribute is set to true
                     if (kits[kitId].default) {
-                        deferredPromise.resolve(kits[kitId].cli);
-                        return deferredPromise.promise;
+                        deferred.resolve(kits[kitId].cli);
+                        return deferred.promise;
                     }
                 });
-                deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.NoDefaultKit")));
-                return deferredPromise.promise;
+                deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoDefaultKit")));
+                return deferred.promise;
             }); 
         }
 
@@ -195,32 +195,32 @@ module TacoKits {
          *   Otherwise, returns the CLI used by the default kit
          */
         public static getValidCordovaCli(kitId: string): Q.Promise<string> {
-            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            var deferred: Q.Deferred<string> = Q.defer<string>();
             return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
                 var kits: IKitMetadata = Metadata.kits;
                 if (kitId && kits[kitId]) {
-                    deferredPromise.resolve(kits[kitId].cli);
-                    return deferredPromise.promise;
+                    deferred.resolve(kits[kitId].cli);
+                    return deferred.promise;
                 }
                 else {
                     return KitHelper.getCordovaCliForDefaultKit();
                 }
             });
-            return deferredPromise.promise;
+            return deferred.promise;
         }
 
         /**
          *   Returns the Cordova CLI used by the kit
          */
         public static getCordovaCliForKit(kitId: string): Q.Promise<string> {
-            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            var deferred: Q.Deferred<string> = Q.defer<string>();
             KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
                 var kits: IKitMetadata = Metadata.kits;
-                deferredPromise.resolve(kits[kitId].cli);
-                return deferredPromise.promise;
+                deferred.resolve(kits[kitId].cli);
+                return deferred.promise;
             });
-            deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.NoCliSpecification")));
-            return deferredPromise.promise;
+            deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoCliSpecification")));
+            return deferred.promise;
         }
 
         /**
@@ -228,22 +228,22 @@ module TacoKits {
          */
         public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata> {
             var kits: IKitMetadata = null;
-            var deferredPromise: Q.Deferred<IPlatformOverrideMetadata> = Q.defer<IPlatformOverrideMetadata>();
+            var deferred: Q.Deferred<IPlatformOverrideMetadata> = Q.defer<IPlatformOverrideMetadata>();
             return KitHelper.getKitMetadata()
                 .then(function (Metadata: ITacoKitMetadata): Q.Promise<IPlatformOverrideMetadata> {
                     kits = Metadata.kits;
                     if (kits[kitId]) {
                         if (kits[kitId].platforms) {
-                            deferredPromise.resolve(null);
+                            deferred.resolve(null);
                         } else {
-                            deferredPromise.resolve(kits[kitId].platforms);
+                            deferred.resolve(kits[kitId].platforms);
                         }
                     }
                     else {
                         // Error, no kit matching the kit id
-                        deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
+                        deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
                     } 
-                return deferredPromise.promise;
+                return deferred.promise;
             });
         }
 
@@ -252,22 +252,22 @@ module TacoKits {
          */
         public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata> {
             var kits: IKitMetadata = null;
-            var deferredPromise: Q.Deferred<IPluginOverrideMetadata> = Q.defer<IPluginOverrideMetadata>();
+            var deferred: Q.Deferred<IPluginOverrideMetadata> = Q.defer<IPluginOverrideMetadata>();
             return KitHelper.getKitMetadata()
                 .then(function (Metadata: ITacoKitMetadata): Q.Promise<IPluginOverrideMetadata> {
                     kits = Metadata.kits;
                     if (kits[kitId]) {
                         if (kits[kitId].plugins) {
-                            deferredPromise.resolve(null);
+                            deferred.resolve(null);
                         } else {
-                            deferredPromise.resolve(kits[kitId].plugins);
+                            deferred.resolve(kits[kitId].plugins);
                         }
                     }
                     else {
                         // Error, no kit matching the kit id
-                        deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
+                        deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
                     }
-                return deferredPromise.promise;
+                return deferred.promise;
             });
         }
 
@@ -275,14 +275,14 @@ module TacoKits {
          *   Returns true is a kit is deprecated, false otherwise
          */
         public static isKitDeprecated(kitId: string): Q.Promise<boolean> {
-            var deferredPromise: Q.Deferred<boolean> = Q.defer<boolean>();
+            var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
             return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<boolean> {
                 var kits: IKitMetadata = Metadata.kits;
-                deferredPromise.resolve(kits[kitId] && kits[kitId].deprecated ? true : false);
-                return deferredPromise.promise;
+                deferred.resolve(kits[kitId] && kits[kitId].deprecated ? true : false);
+                return deferred.promise;
             });
-            deferredPromise.resolve(false);
-            return deferredPromise.promise;
+            deferred.resolve(false);
+            return deferred.promise;
         }
 
         /**
