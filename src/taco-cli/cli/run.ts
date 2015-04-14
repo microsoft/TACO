@@ -18,7 +18,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 
 import CordovaWrapper = require ("./utils/cordova-wrapper");
 
-import RemoteBuild = require ("./remote-build/taco-remote-client");
+import RemoteBuild = require ("./remote-build/remotebuild-client");
 import RemoteBuildSettings = require ("./remote-build/build-settings");
 
 import Settings = require ("./utils/settings");

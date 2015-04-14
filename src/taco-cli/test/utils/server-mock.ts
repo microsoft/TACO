@@ -4,11 +4,11 @@ import http = require ("http");
 import https = require ("https");
 import path = require ("path");
 
-module ServerMock {
+class ServerMock {
     /*
      * Create a https server using the certificates in test/resources/certs/
      */
-    export function createSecureTestServer(): https.Server {
+    public static createSecureTestServer(): https.Server {
         var testCertsFolder = path.resolve(__dirname, "..", "resources", "certs");
         var sslSettings: https.ServerOptions = {
             key: fs.readFileSync(path.join(testCertsFolder, "server-key.pem")),
@@ -24,7 +24,7 @@ module ServerMock {
     /*
      * Create a simple state machine that expects a particular sequence of HTTP requests, and errors out if that expectation is not matched
      */
-    export function generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean }[]):
+    public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean }[]):
         (request: http.ServerRequest, response: http.ServerResponse) => void {
         var sequenceIndex = 0;
         return function (request: http.ServerRequest, response: http.ServerResponse): void {
@@ -53,7 +53,7 @@ module ServerMock {
                 onErr(new Error("Unexpected query " + request.url));
             }
         };
-    };
+    }
 }
 
 export = ServerMock;

@@ -43,6 +43,8 @@ declare module TacoUtility {
         message: string;
         tgzFilePath: string;
         appDir: string;
+        logLevel: string;
+
         constructor(params: {
             buildNumber?: number;
             status?: string;
@@ -52,6 +54,7 @@ declare module TacoUtility {
             buildDir?: string;
             buildLang?: string;
             buildPlatform?: string;
+            logLevel?: string;
             [index: string]: any;
         });
         [index: string]: any;

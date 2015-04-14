@@ -8,5 +8,7 @@
     "taco-utils.exception.missingcommand": "Cannot find command module for command {0}",
     "_taco-utils.exception.missingcommand.comment": "can find commands.json, but cannot find module referenced i.e. create.js, shouldn't happen",
     "command.badArguments": "Unhandled arguments for {0}: {1}",
-    "_command.badArguments.comment": "Error reported when 'taco {0}' is given arguments it cannot handle. {0} is the command name and {1} is the arguments"
+    "_command.badArguments.comment": "Error reported when 'taco {0}' is given arguments it cannot handle. {0} is the command name and {1} is the arguments",
+    "InvalidPackageVersionSpecifier": "Error: invalid version specifier '{1}' for package '{0}'.",
+    "_InvalidPackageVersionSpecifier.comment": "{0} is the package name, and {1} is the package version"
 }
