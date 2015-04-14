@@ -1,9 +1,5 @@
 
-// To add more classes, make sure that they define themselves in the TacoUtility namespace,
-// include a reference to the d.ts file that is generated (as above), and make sure
-// to remove the "export =" and any imports in the file. If it refers to external types,
-// ensure that it has a /// <reference> to the relevant file, and that it uses the same name
-// that file does for the type's namespace. See util-helper for how it uses Q
+// Typings for taco-kits package
 
 declare module TacoKits {
     interface IPluginOverrideMetadata {
@@ -74,24 +70,45 @@ declare module TacoKits {
     }
 
     class KitHelper {
-        private static kitMetadata: ITacoKitMetadata;
-        private static kitFileName: string;
-        private static defaultKitId: string;
-
+        /**
+         *   Initializes resource manager with the locale for resource strings
+         */
         public static init(locale: string): void;
 
+        /**
+         *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
+         *   or resolved with the parsed metadata
+         */
         public static getKitMetadata(): Q.Promise<ITacoKitMetadata>;
 
+        /**
+         *  Returns a promise resolved with the Id of the default kit or rejected with error
+         *  Note that the default kit is one with default attribute set to 'true'
+         */
         public static getDefaultKit(): Q.Promise<string>;
 
+        /**
+         *   Returns a promise resolved by a valid cordova Cli for the kitId
+         *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
+         *   Otherwise, returns the cordovaCli used by the default kit
+         */
         public static getValidCordovaCli(kitId: string): Q.Promise<string>;
 
+        /**
+         *  Returns a promise resolved with the platform override info for the kit
+         */
         public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata>;
 
+        /**
+         *  Returns a promise resolved with the plugin override info for the kit
+         */
         public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata>;
 
-        public static isKitDeprecated(kitId: string): Q.Promise<boolean>;
-
+        /**
+         *   Returns a promise resolved by the template override information for the specified kit
+         *   If there is an override for {kitId} -> returns the template override info for the {templateId}
+         *   Else -> returns the default template information with id {templateId}
+         */
         public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo>;
     }
 }

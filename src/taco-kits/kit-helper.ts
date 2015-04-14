@@ -100,7 +100,8 @@ module TacoKits {
         }
 
         /**
-         *   Initializes the metadata property of KitHelper by parsing the metadata file
+         *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
+         *   or resolved with the parsed metadata
          */ 
         public static getKitMetadata(): Q.Promise<ITacoKitMetadata> {
             if (KitHelper.kitMetadata) {
@@ -119,8 +120,9 @@ module TacoKits {
         }
         
         /**
-         *   Returns information regarding a particular kit
-         */
+        *   Returns a promise which is either rejected with a failure to find the specified kit
+        *   or resolved with the information regarding the kit
+        */
         private static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
             var kits: IKitMetadata = null;
             var deferredPromise: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
@@ -144,8 +146,9 @@ module TacoKits {
         }
 
         /**
-         *   Returns the Cordova Cli used by the kit
-         */
+        *   Returns a promise which is either rejected with a failure to find the Cordova Cli
+        *   attribute for the kit or resolved with the Cli attribute found in the matadata file
+        */
         private static getCordovaCliForKit(kitId: string): Q.Promise<string> {
             var deferredPromise: Q.Deferred<string> = Q.defer<string>();
             return KitHelper.getKitInfo(kitId).then(function (kitInfo: IKitInfo): Q.Promise<string> {
@@ -160,7 +163,7 @@ module TacoKits {
         }
 
         /**
-         *  Returns the Id of the default kit 
+         *  Returns a promise resolved with the Id of the default kit or rejected with error
          *  Note that the default kit is one with default attribute set to 'true'
          */
         public static getDefaultKit(): Q.Promise<string> {
@@ -186,7 +189,8 @@ module TacoKits {
         }
 
         /**
-         *   Returns the Cordova Cli used by the default kit 
+         *  Returns a promise resolved with the Cordova Cli used by the default kit
+         *  Note that the default kit is one with default attribute set to 'true'
          */
         private static getCordovaCliForDefaultKit(): Q.Promise<string> {
             var deferredPromise: Q.Deferred<string> = Q.defer<string>();
@@ -197,7 +201,7 @@ module TacoKits {
         }
 
         /**
-         *   Returns a valid cordova Cli for the kitId
+         *   Returns a promise resolved by a valid cordova Cli for the kitId
          *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
          *   Otherwise, returns the cordovaCli used by the default kit
          */
@@ -212,7 +216,7 @@ module TacoKits {
         }
 
         /**
-         *   Returns all the platform overrides of the specified kit
+         *  Returns a promise resolved with the platform override info for the kit
          */
         public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata> {
             var deferredPromise: Q.Deferred<IPlatformOverrideMetadata> = Q.defer<IPlatformOverrideMetadata>();
@@ -228,7 +232,7 @@ module TacoKits {
         }
 
         /**
-         *   Returns all the plugin overrides of the specified kit
+         *  Returns a promise resolved with the plugin override info for the kit
          */
         public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata> {
             var deferredPromise: Q.Deferred<IPluginOverrideMetadata> = Q.defer<IPluginOverrideMetadata>();
@@ -244,7 +248,8 @@ module TacoKits {
         }
 
         /**
-         *   Returns true is a kit is deprecated, false otherwise
+         *   Returns a promise reolved by a boolean value indicating
+         *   whether the specified kit is deprecated, or not
          */
         public static isKitDeprecated(kitId: string): Q.Promise<boolean> {
             var deferredPromise: Q.Deferred<boolean> = Q.defer<boolean>();
@@ -272,16 +277,19 @@ module TacoKits {
         }
 
         /**
-         *   Returns template override for the specified kit
-         *   If there is an override -> return the template override info for the {templateId}
-         *   Else -> return the default template information with id {templateId}
+         *   Returns a promise resolved by the template override information for the specified kit
+         *   If there is an override for {kitId} -> returns the template override info for the {templateId}
+         *   Else -> returns the default template information with id {templateId}
          */
         public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo> {
             var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
             var templates: ITemplateMetadata = null;
-            var templateOverrideInfo: ITemplateOverrideInfo = null;
-            KitHelper.getTemplateMetadata()
-                .then(function (templates: ITemplateMetadata): Q.Promise<string> {
+            var templateOverrideInfo: ITemplateOverrideInfo = {
+                kitId: '', templateInfo: {}
+            };
+            return KitHelper.getTemplateMetadata()
+                .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
+                    templates = templateMetadata;
                     return kitId ? Q.resolve(kitId) : KitHelper.getDefaultKit();
             })
                 .then(function (kitId: string): Q.Promise<ITemplateOverrideInfo> {
@@ -317,9 +325,7 @@ module TacoKits {
                     deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidTemplate")));
                 }
                 return deferred.promise;
-            });
-            return deferred.promise;
-        }
+            });        }
     }
 }
 

@@ -1,7 +1,7 @@
 ﻿"use strict";
 
 /*
- * A static class that exports the string literal names of external modules used in code
+ * A static class that exports the string literal names of external modules and other constants used in taco source code
  */
 module Constants {
     export var Cordova = "cordova";

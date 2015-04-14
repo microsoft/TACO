@@ -11,7 +11,6 @@ var kitHelper = tacoKits.KitHelper;
 import commandsFactory = commands.CommandFactory;
 import path = require ("path");
 var cordova = require("cordova");
-import kits = tacoKits.KitHelper;
 
 /*
  * Taco
@@ -40,8 +39,7 @@ class Taco {
         commandData = {
             options: {},
             original: commandArgs,
-            remain: commandArgs,
-            raw: cordovaCliArgs
+            remain: commandArgs
         };  
 
         var cordovaCliArgs = process.argv;
@@ -51,8 +49,7 @@ class Taco {
         var commandData: tacoUtility.Commands.ICommandData = {
             options: {},
             original: commandArgs,
-            remain: commandArgs,
-            raw: cordovaCliArgs
+            remain: commandArgs
         };
 
         // if no command found that can handle these args, route args directly to Cordova
