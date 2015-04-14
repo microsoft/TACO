@@ -35,13 +35,6 @@ class Taco {
             input = "help";
         }                 
 
-        var commandData: tacoUtility.Commands.ICommandData;
-        commandData = {
-            options: {},
-            original: commandArgs,
-            remain: commandArgs
-        };  
-
         var cordovaCliArgs = process.argv;
         var commandArgs = process.argv.slice(3);
         command = commandsFactory.getTask(input, commandArgs, __dirname);

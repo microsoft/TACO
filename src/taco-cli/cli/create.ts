@@ -161,7 +161,6 @@ class Create implements commands.IDocumentedCommand {
 
     private createTacoJsonFile(): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var jsonData: { [obj: string]: string };
         var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
         if (this.commandParameters.isKitProject) {
             if (!this.commandParameters.kitId) {
