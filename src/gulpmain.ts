@@ -22,7 +22,7 @@ import tsUtil = require ("./taco-cli/compile/typescript-util");
 
 var buildConfig = require("../../src/build_config.json");
 
-var modulesToInstallAndTest = ["taco-utils", "taco-cli", "taco-remote-lib"];
+var modulesToInstallAndTest = ["taco-utils", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["install-build"]);
@@ -109,7 +109,7 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
     del([templatesPath + "/**"], { force: true }, callback);
 });
 
-function streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {
+function streamToPromise(stream: NodeJS.WritableStream): Q.Promise<any> {
     var deferred = Q.defer();
     stream.on("finish", function (): void {
         deferred.resolve({});

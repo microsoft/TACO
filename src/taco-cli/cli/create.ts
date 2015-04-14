@@ -9,7 +9,7 @@ import commands = tacoUtility.Commands;
 import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import createManager = require ("./utils/template-manager");
+import templateManager = require ("./utils/template-manager");
 import cordovaWrapper = require ("./utils/cordova-wrapper");
 import nopt = require ("nopt");
 import Q = require ("q");
@@ -48,8 +48,12 @@ class Create implements commands.IDocumentedCommand {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
-        this.parseArguments(data);
-        this.verifyArguments();
+        try {
+            this.parseArguments(data);
+            this.verifyArguments();
+        } catch (err) {
+            return Q.reject(err.message);
+        }
 
         var self = this;
 
@@ -115,7 +119,7 @@ class Create implements commands.IDocumentedCommand {
         if (mustUseTemplate) {
             var self = this;
 
-            return createManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
+            return templateManager.createKitProjectWithTemplate(kitId, templateId, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
                 .then(function (templateDisplayName: string): Q.Promise<string> {
                     return Q.resolve(templateDisplayName);
                 });

@@ -18,7 +18,7 @@
     "_command.create.templateNotFound.comment": "Error shown when the user specifies an unknown template identifier. {0} is the template identifier that the user specified as parameter in the command line.",
     "command.create.noTypescript": "Error: This version of Cordova does not contain a TypeScript template",
     "_command.create.noTypescript.comment": "Error shown when the user specifies a TypeScript template, but there is no such template available for the selected kit.",
-    "command.create.templatesUnavailable": "Error: Unable to access or download templates",
+    "command.create.templatesUnavailable": "Error: Unable to access or fetch templates",
     "_command.create.templatesUnavailable.comment": "Error reported when templates cannot be downloaded",
     "command.create.success.base": "Success!",
     "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",

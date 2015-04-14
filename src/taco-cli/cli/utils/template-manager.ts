@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../../typings/wrench.d.ts" />
 /// <reference path="../../../typings/replace.d.ts" />
 /// <reference path="../../../typings/tar.d.ts" />
+/// <reference path="../../../typings/taco-utils.d.ts"/>
 
 "use strict";
 import Q = require ("q");
@@ -16,6 +17,10 @@ import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
 import cordovaWrapper = require ("./cordova-wrapper");
 
+interface IKitHelper {
+    getTemplateInfo: (kitId: string, templateId: string) => Q.Promise<KitHelper.ITemplateInfo>;
+}
+
 class TemplateManager {
     private static DefaultTemplateId: string = "blank";
 
@@ -23,6 +28,7 @@ class TemplateManager {
      * The following members are public static to expose access to automated tests
      */
     public static TemplateCachePath: string = null;
+    public static Kits: IKitHelper = null;
 
     /**
      * Creates a kit project using 'cordova create' with the specified template.
@@ -39,12 +45,16 @@ class TemplateManager {
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
     public static createKitProjectWithTemplate(kitId: string, templateId: string, path: string, appId?: string, appName?: string, cordovaConfig?: string, options?: { [option: string]: any }, optionsToExclude?: string[]): Q.Promise<string> {
+        if (!TemplateManager.Kits) {
+            TemplateManager.Kits = KitHelper.KitHelper;
+        }
+
         var templateName: string = null;
         var templateSrcPath: string = null;
 
         templateId = templateId ? templateId : TemplateManager.DefaultTemplateId;
 
-        return KitHelper.KitHelper.getTemplateInfo(kitId, templateId)
+        return TemplateManager.Kits.getTemplateInfo(kitId, templateId)
             .then(function (templateInfo: KitHelper.ITemplateInfo): Q.Promise<string> {
                 templateName = templateInfo.displayName;
 
@@ -57,7 +67,9 @@ class TemplateManager {
                 return cordovaWrapper.create(path, appId, appName, cordovaConfig, utils.cleanseOptions(options, optionsToExclude));
             })
             .then(function (): Q.Promise<any> {
-                return TemplateManager.copyRemainingItems(path, templateSrcPath);
+                var options: any = { clobber: false };
+
+                return utils.copyRecursive(templateSrcPath, path, options);
             })
             .then(function (): Q.Promise<any> {
                 return TemplateManager.performTokenReplacements(path, appId, appName);
@@ -110,12 +122,6 @@ class TemplateManager {
             // Template already extracted to cache
             return Q.resolve(cachedTemplatePath);
         }
-    }
-
-    private static copyRemainingItems(projectPath: string, templateSrcLocation: string): Q.Promise<any> {
-        var options: any = { clobber: false };
-
-        return utils.copyRecursive(templateSrcLocation, projectPath, options);
     }
 
     private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
