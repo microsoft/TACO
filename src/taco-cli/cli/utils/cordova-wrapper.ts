@@ -1,5 +1,6 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
+/// <reference path="../../../typings/cordova-extensions.d.ts" />
 
 import child_process = require("child_process");
 import Q = require("q");
@@ -7,11 +8,13 @@ import path = require("path");
 import tacoUtility = require("taco-utils");
 import utils = tacoUtility.UtilHelper;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import constants = require("./Constants");
+import ICordova = Cordova.ICordova;
 
 class CordovaWrapper {
     public static cli(args: string[], cordovaCliPath?: string): Q.Promise<any> {
         var deferred = Q.defer();
-        var cordovaCli = cordovaCliPath ? "cordova" : path.resolve(cordovaCliPath, "bin", "cordova.cmd");
+        var cordovaCli = cordovaCliPath ? path.resolve(cordovaCliPath, constants.CordovaCmdBinPath) : constants.Cordova;
         var proc = child_process.exec([cordovaCli].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
             if (err) {
                 deferred.reject(err);
@@ -40,38 +43,12 @@ class CordovaWrapper {
      */
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer();
-        var command = ["create"];
-
-        if (projectPath) {
-            command.push(projectPath);
-        }
-
-        if (id) {
-            command.push(id);
-        }
-
-        if (name) {
-            command.push(name);
-        }
-        if (cdvConfig) {
-            command.push(cdvConfig);
-        }
-
-        // Add options to the command
-        for (var option in options) {
-            command.push("--" + option);
-
-            // If the property has a value that isn't boolean, also include its value in the command
-            if (options[option] && typeof options[option] !== "Boolean") {
-                command.push(options[option]);
-            }
-        }
         try {
-            var cordovaCliPath: any;
-            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliPath): Q.Promise<any> {
-                var cordova = require(cordovaCliPath);
-                if (cordova) {
-                    return CordovaWrapper.cli(command, cordovaCliPath);
+            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliModulePath): Q.Promise<any> {
+                var cordovaLibPath = path.join(cordovaCliModulePath, constants.NpmNodeModules, constants.CordovaLib);
+                if (cordovaLibPath) {
+                    var cordova_lib = require(cordovaLibPath);
+                    return cordova_lib.cordova.raw.create(projectPath, id, name, cdvConfig);
                 }
             });
         }

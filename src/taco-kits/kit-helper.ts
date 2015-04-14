@@ -32,26 +32,26 @@ module TacoKits {
         };
     }
 
-    export interface ITemplateInfo {
-        id: string;
+    export interface ITemplateOverrideInfo {
         kitId: string;
-        archiveUrl: string;
-        displayName: string;
+        templateInfo: ITemplateInfo;
     }
 
-    interface ITemplateMetadata {
-        [kitName: string]: {
-            [templateName: string]: {
-                name: string;
-                url: string;
-            };
+    export interface ITemplateInfo {
+        [id: string]: {
+            name: string;
+            url: string;
         };
+    }
+
+    export interface ITemplateMetadata {
+        [kitName: string]: ITemplateInfo;
     }
 
     export interface IKitInfo {
         kitId: string;
-        cli: string;
-        tacoMin: string;
+        "cordova-cli": string;
+        "taco-min": string;
         name: string;
         description?: string;
         releaseNotesUri?: string;
@@ -121,33 +121,42 @@ module TacoKits {
         /**
          *   Returns information regarding a particular kit
          */
-        public static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
+        private static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
             var kits: IKitMetadata = null;
-            var deferred: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
+            var deferredPromise: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
             return KitHelper.getKitMetadata()
                 .then(function (Metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
                     kits = Metadata.kits;
-                    if (kits[kitId]) {
-                    // Found the specified kit
-                    deferred.resolve(kits[kitId]);
-                } else {
-                    // Error, no kit matching the kit id
-                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
-                }
-                return deferred.promise;
+                    if (kits && kits[kitId]) {
+                        if (kits[kitId].deprecated) {
+                            deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
+                        }
+                        else {
+                            // Found the specified kit
+                            deferredPromise.resolve(kits[kitId]);
+                        }
+                    } else {
+                        // Error, no kit matching the kit id
+                        deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
+                    }
+                return deferredPromise.promise;
             });
         }
 
         /**
-         *   Returns information regarding all the plugins supported
+         *   Returns the Cordova Cli used by the kit
          */
-        public static getAllPluginsInfo(): Q.Promise<IPluginMetadata> {
-            var deferred: Q.Deferred<IPluginMetadata> = Q.defer<IPluginMetadata>();
-            return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<IPluginMetadata> {
-                var plugins: IPluginMetadata = Metadata.plugins;
-                deferred.resolve(Metadata.plugins);
-                return deferred.promise;
-            }); 
+        private static getCordovaCliForKit(kitId: string): Q.Promise<string> {
+            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            return KitHelper.getKitInfo(kitId).then(function (kitInfo: IKitInfo): Q.Promise<string> {
+                if (kitInfo["cordova-cli"]) {
+                    deferredPromise.resolve(kitInfo["cordova-cli"]);
+                }
+                else {
+                    deferredPromise.reject(new Error(resourcesManager.getString("taco-kits.exception.NoCliSpecification", kitId)));
+                }
+                return deferredPromise.promise;
+            });
         }
 
         /**
@@ -155,95 +164,66 @@ module TacoKits {
          *  Note that the default kit is one with default attribute set to 'true'
          */
         public static getDefaultKit(): Q.Promise<string> {
-            var deferred: Q.Deferred<string> = Q.defer<string>();
-            return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
-                var kits: IKitMetadata = Metadata.kits;
-                Object.keys(kits).forEach(function (kitId: string): Q.Promise<string> {
-                    // Get the kit for which the default attribute is set to true
-                    if (kits[kitId].default) {
-                        deferred.resolve(kitId);
-                        return deferred.promise;
-                    }
+            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            if (KitHelper.defaultKitId) {
+                deferredPromise.resolve(KitHelper.defaultKitId);
+                return deferredPromise.promise;
+            }
+            else {
+                return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
+                    var kits: IKitMetadata = Metadata.kits;
+                    Object.keys(kits).some(function (kitId: string): boolean {
+                        // Get the kit for which the default attribute is set to true
+                        if (kits[kitId].default) {
+                            KitHelper.defaultKitId = kitId;
+                            deferredPromise.resolve(kitId);
+                            return true;
+                        }
+                    });
+                    return deferredPromise.promise;
                 });
-                deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoDefaultKit")));
-                return deferred.promise;
-            }); 
+            }
         }
 
         /**
          *   Returns the Cordova Cli used by the default kit 
          */
-        public static getCordovaCliForDefaultKit(): Q.Promise<string> {
-            var deferred: Q.Deferred<string> = Q.defer<string>();
-            return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
-                var kits: IKitMetadata = Metadata.kits;
-                Object.keys(kits).forEach(function (kitId: string): Q.Promise<string> {
-                    // Get the kit for which the default attribute is set to true
-                    if (kits[kitId].default) {
-                        deferred.resolve(kits[kitId].cli);
-                        return deferred.promise;
-                    }
-                });
-                deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoDefaultKit")));
-                return deferred.promise;
-            }); 
+        private static getCordovaCliForDefaultKit(): Q.Promise<string> {
+            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            return KitHelper.getDefaultKit().then(function (defaultKit: string): Q.Promise<string> {
+                return KitHelper.getCordovaCliForKit(defaultKit);
+            });
+            return deferredPromise.promise;
         }
 
         /**
-         *   Returns a valid CLI for the kitId
-         *   If kitId param is a valid {kitId}, returns the CLI used by the kit with id {kitId}
-         *   Otherwise, returns the CLI used by the default kit
+         *   Returns a valid cordova Cli for the kitId
+         *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
+         *   Otherwise, returns the cordovaCli used by the default kit
          */
         public static getValidCordovaCli(kitId: string): Q.Promise<string> {
-            var deferred: Q.Deferred<string> = Q.defer<string>();
-            return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
-                var kits: IKitMetadata = Metadata.kits;
-                if (kitId && kits[kitId]) {
-                    deferred.resolve(kits[kitId].cli);
-                    return deferred.promise;
-                }
-                else {
-                    return KitHelper.getCordovaCliForDefaultKit();
-                }
-            });
-            return deferred.promise;
-        }
-
-        /**
-         *   Returns the Cordova CLI used by the kit
-         */
-        public static getCordovaCliForKit(kitId: string): Q.Promise<string> {
-            var deferred: Q.Deferred<string> = Q.defer<string>();
-            KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<string> {
-                var kits: IKitMetadata = Metadata.kits;
-                deferred.resolve(kits[kitId].cli);
-                return deferred.promise;
-            });
-            deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoCliSpecification")));
-            return deferred.promise;
+            var deferredPromise: Q.Deferred<string> = Q.defer<string>();
+            if (kitId) {
+                return KitHelper.getCordovaCliForKit(kitId);
+            }
+            else {
+                return KitHelper.getCordovaCliForDefaultKit();
+            }
         }
 
         /**
          *   Returns all the platform overrides of the specified kit
          */
         public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata> {
-            var kits: IKitMetadata = null;
-            var deferred: Q.Deferred<IPlatformOverrideMetadata> = Q.defer<IPlatformOverrideMetadata>();
-            return KitHelper.getKitMetadata()
-                .then(function (Metadata: ITacoKitMetadata): Q.Promise<IPlatformOverrideMetadata> {
-                    kits = Metadata.kits;
-                    if (kits[kitId]) {
-                        if (kits[kitId].platforms) {
-                            deferred.resolve(null);
-                        } else {
-                            deferred.resolve(kits[kitId].platforms);
-                        }
-                    }
-                    else {
-                        // Error, no kit matching the kit id
-                        deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
-                    } 
-                return deferred.promise;
+            var deferredPromise: Q.Deferred<IPlatformOverrideMetadata> = Q.defer<IPlatformOverrideMetadata>();
+            return KitHelper.getKitInfo(kitId).then(function (kitInfo: IKitInfo): Q.Promise<IPlatformOverrideMetadata> {
+                if (kitInfo.platforms) {
+                    deferredPromise.resolve(kitInfo.platforms);
+                }
+                else {
+                    deferredPromise.resolve(null);
+                }
+                return deferredPromise.promise;
             });
         }
 
@@ -251,23 +231,15 @@ module TacoKits {
          *   Returns all the plugin overrides of the specified kit
          */
         public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata> {
-            var kits: IKitMetadata = null;
-            var deferred: Q.Deferred<IPluginOverrideMetadata> = Q.defer<IPluginOverrideMetadata>();
-            return KitHelper.getKitMetadata()
-                .then(function (Metadata: ITacoKitMetadata): Q.Promise<IPluginOverrideMetadata> {
-                    kits = Metadata.kits;
-                    if (kits[kitId]) {
-                        if (kits[kitId].plugins) {
-                            deferred.resolve(null);
-                        } else {
-                            deferred.resolve(kits[kitId].plugins);
-                        }
-                    }
-                    else {
-                        // Error, no kit matching the kit id
-                        deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
-                    }
-                return deferred.promise;
+            var deferredPromise: Q.Deferred<IPluginOverrideMetadata> = Q.defer<IPluginOverrideMetadata>();
+            return KitHelper.getKitInfo(kitId).then(function (kitInfo: IKitInfo): Q.Promise<IPluginOverrideMetadata> {
+                if (kitInfo.platforms) {
+                    deferredPromise.resolve(kitInfo.plugins);
+                }
+                else {
+                    deferredPromise.resolve(null);
+                }
+                return deferredPromise.promise;
             });
         }
 
@@ -275,71 +247,78 @@ module TacoKits {
          *   Returns true is a kit is deprecated, false otherwise
          */
         public static isKitDeprecated(kitId: string): Q.Promise<boolean> {
-            var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
-            return KitHelper.getKitMetadata().then(function (Metadata: ITacoKitMetadata): Q.Promise<boolean> {
-                var kits: IKitMetadata = Metadata.kits;
-                deferred.resolve(kits[kitId] && kits[kitId].deprecated ? true : false);
-                return deferred.promise;
+            var deferredPromise: Q.Deferred<boolean> = Q.defer<boolean>();
+            return KitHelper.getKitInfo(kitId).then(function (kitInfo: IKitInfo): Q.Promise<boolean> {
+                deferredPromise.resolve(kitInfo.deprecated ? true : false);
+                return deferredPromise.promise;
             });
-            deferred.resolve(false);
-            return deferred.promise;
         }
 
         /**
-         *   Returns info regarding the specified template
+         *   Returns the template metadata for all the kits from the TacoKitMetadata.json file
          */
-        public static getTemplateInfo(kitId: string, templateId: string): Q.Promise<ITemplateInfo> {
-            var templateMetadata: ITemplateMetadata = null;
+        private static getTemplateMetadata(): Q.Promise<ITemplateMetadata> {
+            var deferred: Q.Deferred<ITemplateMetadata> = Q.defer<ITemplateMetadata>();
             return KitHelper.getKitMetadata()
                 .then(function (Metadata: ITacoKitMetadata): Q.Promise<ITemplateMetadata> {
-                templateMetadata = Metadata.templates;
+                var templates = Metadata.templates;
+                if (templates) {
+                    deferred.resolve(templates);
+                } else {
+                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit")));
+                }
+                return deferred.promise;
+            });
+        }
 
-                return Q.resolve(templateMetadata);
-            }).then(function (Metadata: ITemplateMetadata): Q.Promise<string> {
-                templateMetadata = Metadata;
-
-                return kitId ? Q.resolve(kitId) : KitHelper.getDefaultKit();
+        /**
+         *   Returns template override for the specified kit
+         *   If there is an override -> return the template override info for the {templateId}
+         *   Else -> return the default template information with id {templateId}
+         */
+        public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo> {
+            var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
+            var templates: ITemplateMetadata = null;
+            var templateOverrideInfo: ITemplateOverrideInfo = null;
+            KitHelper.getTemplateMetadata()
+                .then(function (templates: ITemplateMetadata): Q.Promise<string> {
+                    return kitId ? Q.resolve(kitId) : KitHelper.getDefaultKit();
             })
-                .then(function (kitId: string): Q.Promise<ITemplateInfo> {
-                var templateInfoPromise: Q.Deferred<ITemplateInfo> = Q.defer<ITemplateInfo>();
-                var templateInfo: ITemplateInfo = {
-                    id: templateId,
-                    kitId: "",
-                    archiveUrl: "",
-                    displayName: ""
-                };
-
-                if (templateMetadata[kitId]) {
+                .then(function (kitId: string): Q.Promise<ITemplateOverrideInfo> {
+                if (templates[kitId]) {
                     // Found an override for the specified kit
-                    if (templateMetadata[kitId][templateId]) {
+                    if (templates[kitId][templateId]) {
                         // Found the specified template
-                        templateInfo.kitId = kitId;
-                        templateInfo.archiveUrl = templateMetadata[kitId][templateId].url;
-                        templateInfo.displayName = templateMetadata[kitId][templateId].name;
-                        templateInfoPromise.resolve(templateInfo);
+                        templateOverrideInfo.kitId = kitId;
+                        templateOverrideInfo.templateInfo[templateId] = templates[kitId][templateId];
+
+                        // Convert the url from relative to absolute local path
+                        templateOverrideInfo.templateInfo[templateId].url = path.resolve(__dirname, templateOverrideInfo.templateInfo[templateId].url);
+                        deferred.resolve(templateOverrideInfo);
                     } else {
                         // Error, the kit override does not define the specified template id
                         if (templateId === KitHelper.tsTemplateId) {
                             // We have a special error message for typescript
-                            templateInfoPromise.reject("taco-kits.exception.TypescriptNotSupported");
+                            deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.TypescriptNotSupported")));
                         } else {
-                            templateInfoPromise.reject("taco-kits.exception.InvalidTemplate");
+                            deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidTemplate")));
                         }
                     }
-                } else if (templateMetadata["default"][templateId]) {
+                } else if (templates["default"][templateId]) {
                     // Found a default template matching the specified template id
-                    templateInfo.kitId = "default";
-                    templateInfo.archiveUrl = templateMetadata["default"][templateId].url;
-                    templateInfo.displayName = templateMetadata["default"][templateId].name;
+                    templateOverrideInfo.kitId = "default";
+                    templateOverrideInfo.templateInfo[templateId] = templates["default"][templateId];
 
-                    templateInfoPromise.resolve(templateInfo);
+                    // Convert the url from relative to absolute local path
+                    templateOverrideInfo.templateInfo[templateId].url = path.resolve(__dirname, templateOverrideInfo.templateInfo[templateId].url);
+                    deferred.resolve(templateOverrideInfo);
                 } else {
                     // Error, no template matching the specified template id
-                    templateInfoPromise.reject("taco-kits.exception.InvalidTemplate");
+                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidTemplate")));
                 }
-
-                return templateInfoPromise.promise;
+                return deferred.promise;
             });
+            return deferred.promise;
         }
     }
 }

@@ -6,7 +6,7 @@
 // that file does for the type's namespace. See util-helper for how it uses Q
 
 declare module TacoKits {
-    interface IPluginOverrideMetaData {
+    interface IPluginOverrideMetadata {
         [pluginId: string]: {
             name: string;
             version: string;
@@ -15,27 +15,27 @@ declare module TacoKits {
         };
     }
 
-    interface IPlatformOverrideMetaData {
+    interface IPlatformOverrideMetadata {
         [platformName: string]: {
             version: string;
             src: string;
         };
     }
 
-    interface ITemplateInfo {
-        id: string;
+    interface ITemplateOverrideInfo {
         kitId: string;
-        archiveUrl: string;
-        displayName: string;
+        templateInfo: ITemplateInfo;
     }
 
-    interface ITemplateMetaData {
-        [kitName: string]: {
-            [templateName: string]: {
-                name: string;
-                url: string;
-            };
+    interface ITemplateInfo {
+        [id: string]: {
+            name: string;
+            url: string;
         };
+    }
+
+    interface ITemplateMetadata {
+        [kitName: string]: ITemplateInfo;
     }
 
     interface IKitInfo {
@@ -48,8 +48,8 @@ declare module TacoKits {
         deprecated?: boolean;
         deprecatedReasonUri?: boolean;
         default?: boolean;
-        plugins?: IPluginOverrideMetaData[];
-        platforms?: IPlatformOverrideMetaData[];
+        plugins?: IPluginOverrideMetadata[];
+        platforms?: IPlatformOverrideMetadata[];
     }
 
     interface IKitMetadata {
@@ -67,40 +67,32 @@ declare module TacoKits {
         [pluginId: string]: IPluginInfo;
     }
 
-    interface ITacoKitMetaData {
+    interface ITacoKitMetadata {
         plugins?: IPluginMetadata;
         kits?: IKitMetadata;
-        templates?: ITemplateMetaData;
+        templates?: ITemplateMetadata;
     }
 
     class KitHelper {
-        private static kitMetaData: ITacoKitMetaData;
+        private static kitMetadata: ITacoKitMetadata;
         private static kitFileName: string;
         private static defaultKitId: string;
 
         public static init(locale: string): void;
 
-        public static getValidCordovaCli(kitId: string): Q.Promise<string>;
-
-        public static getCordovaCliForKit(kitId: string): Q.Promise<string>;
-
-        public static getKitMetaData(): Q.Promise<ITacoKitMetaData>;
-
-        public static getKitInfo(kitId: string): Q.Promise<IKitInfo>;
-
-        public static getAllPluginsInfo(): Q.Promise<IPluginMetadata>;
+        public static getKitMetadata(): Q.Promise<ITacoKitMetadata>;
 
         public static getDefaultKit(): Q.Promise<string>;
 
-        public static getCordovaCliForDefaultKit(): Q.Promise<string>;
+        public static getValidCordovaCli(kitId: string): Q.Promise<string>;
 
-        public static getPlatformOverrideForKit(kit: string): Q.Promise<string>;
+        public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata>;
 
-        public static getPluginOverrideForKit(kit: string): Q.Promise<string>;
+        public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata>;
 
-        public static isKitValid(kitId: string): Q.Promise<boolean>;
+        public static isKitDeprecated(kitId: string): Q.Promise<boolean>;
 
-        public static getTemplateInfo(kitId: string, templateId: string): Q.Promise<ITemplateInfo>;
+        public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo>;
     }
 }
 

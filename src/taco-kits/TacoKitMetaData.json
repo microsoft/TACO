@@ -15,7 +15,7 @@
 
     "kits": {
         "4.2.0-Win10-Beta": {   
-            "cli": "4.2.0",
+            "cordova-cli": "4.2.0",
             "taco-min": "15.1.2",
             "releaseNotesUri": "http://cordova.apache.org/4.2.0/release.md",
             "name": {
@@ -41,7 +41,7 @@
             }
         },
         "4.0.0-Kit": {
-            "cli": "4.0.0",
+            "cordova-cli": "4.0.0",
             "taco-min": "15.1.2",
             "deprecated": "true",
             "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
@@ -53,7 +53,7 @@
             }
         },
         "4.2.0-Kit": {
-            "cli": "4.2.0",
+            "cordova-cli": "4.2.0",
             "plugins": {
                 "org.apache.cordova.camera": {
                     "version": "0.2.29"
@@ -61,7 +61,7 @@
             }
         },
         "5.0.0-Kit": {
-            "cli": "5.0.0",
+            "cordova-cli": "5.0.0",
             "default": true,
             "platforms": {
                 "android": "4.2.1",
@@ -80,27 +80,27 @@
         "default": {
                     "blank": {
                         "name": "Blank template",
-                        "url": "templates/default/blank.zip"
+                        "url": "templates/default/blank.tar.gz"
                     },
                     "typescript": {
                         "name": "Blank TypeScript template",
-                        "url": "templates/default/typescript.zip"
+                        "url": "templates/default/typescript.tar.gz"
                     }
                 },
                 "4.0.0-Kit": {
                     "blank": {
                         "name": "Blank template",
-                        "url": "templates/4.0.0-kit/blank.zip"
+                        "url": "templates/4.0.0-kit/blank.tar.gz"
                     },
                     "typescript": {
                         "name": "Blank TypeScript template",
-                        "url": "templates/4.0.0-kit/typescript.zip"
+                        "url": "templates/4.0.0-kit/typescript.tar.gz"
                     }
                 },
                 "5.0.0-Kit": {
                     "blank": {
                         "name": "Blank template",
-                        "url": "templates/5.0.0-kit/blank.zip"
+                        "url": "templates/5.0.0-kit/blank.tar.gz"
                     }
                 }	
 	}

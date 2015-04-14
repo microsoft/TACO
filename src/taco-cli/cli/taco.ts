@@ -37,23 +37,12 @@ class Taco {
         }                 
 
         var commandData: tacoUtility.Commands.ICommandData;
-        if (input === "create") {
-            commandData = {
-                options: {},
-                original: commandArgs,
-                remain: commandArgs,
-                raw: cordovaCliArgs
-            };
-        }
-        else {
-            commandData = {
-                options: {},
-                original: commandArgs,
-                remain: commandArgs,
-                raw: cordovaCliArgs
-            };
-        }
-            
+        commandData = {
+            options: {},
+            original: commandArgs,
+            remain: commandArgs,
+            raw: cordovaCliArgs
+        };  
 
         var cordovaCliArgs = process.argv;
         var commandArgs = process.argv.slice(3);

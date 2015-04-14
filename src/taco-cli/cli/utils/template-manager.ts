@@ -46,11 +46,11 @@ class TemplateManager {
       
         templateId = templateId ? templateId : TemplateManager.DefaultTemplateId;
 
-        return KitHelper.KitHelper.getTemplateInfo(kitId, templateId)
-            .then(function (templateInfo: KitHelper.ITemplateInfo): Q.Promise<string> {
-            templateName = templateInfo.displayName;
-
-                return TemplateManager.findTemplatePath(templateInfo);
+        return kitHelper.getTemplateOverrideInfo(kitId, templateId)
+            .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
+            var templateInfo = templateOverrideForKit.templateInfo;
+            templateName = templateInfo[templateId].name;
+            return TemplateManager.findTemplatePath(templateId, templateOverrideForKit.kitId, templateInfo);
             })
             .then(function (templatePath: string): Q.Promise<any> {
                 templateSrcPath = templatePath;
@@ -69,22 +69,22 @@ class TemplateManager {
             });
     }
 
-    private static findTemplatePath(templateInfo: KitHelper.ITemplateInfo): Q.Promise<string> {
+    private static findTemplatePath(templateId: string, kitId: string, templateInfo: TacoKits.ITemplateInfo): Q.Promise<string> {
         // Look through template cache to find the requested template
         if (!TemplateManager.TemplateCachePath) {
             TemplateManager.TemplateCachePath = path.join(utils.tacoHome, "templates");
         }
 
         // TODO sanitize kitId before using it as a folder name?
-        var cachedTemplateKitPath: string = path.join(TemplateManager.TemplateCachePath, templateInfo.kitId);
-        var cachedTemplatePath: string = path.join(cachedTemplateKitPath, templateInfo.id);
+        var cachedTemplateKitPath: string = path.join(TemplateManager.TemplateCachePath, kitId);
+        var cachedTemplatePath: string = path.join(cachedTemplateKitPath, templateId);
 
         if (!fs.existsSync(cachedTemplatePath)) {
             // Download template's archive file
             // TODO
             // TEMP for now, the templates are in our git repo, so "downloading" a template simply means unzipping it from the repo location
             // to the cache.
-            if (!fs.existsSync(templateInfo.archiveUrl)) {
+            if (!fs.existsSync(templateInfo[templateId].url)) {
                 logger.logErrorLine(resources.getString("command.create.templatesUnavailable"));
 
                 return Q.reject<string>("command.create.templatesUnavailable");
@@ -94,7 +94,7 @@ class TemplateManager {
             wrench.mkdirSyncRecursive(cachedTemplateKitPath, 777);
 
             // Extract the template archive to the cache
-            fs.createReadStream(templateInfo.archiveUrl).pipe(zlib.createGunzip()).pipe(tar.Extract({ path: cachedTemplateKitPath }));
+            fs.createReadStream(templateInfo[templateId].url).pipe(zlib.createGunzip()).pipe(tar.Extract({ path: cachedTemplateKitPath }));
         }
 
         // Return path to template in cache
