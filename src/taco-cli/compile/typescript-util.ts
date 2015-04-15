@@ -13,7 +13,6 @@ export class TypeScriptServices {
     public compileTypescript(options: ts.CompilerOptions, filenames: string[], cb: Function): void {
         var host = ts.createCompilerHost(options);
         var program = ts.createProgram(filenames, options, host);
-        var checker = ts.createTypeChecker(program, true);
         var result = program.emit();
 
         var allDiagnostics = program.getSyntacticDiagnostics()
