@@ -157,6 +157,9 @@ class IOSBuild {
 
     private static change_directory(currentBuild: BuildInfo): any {
         process.chdir(currentBuild.appDir);
+		// Cordova checks process.env.PWD before process.cwd()
+		// so we need to update that as well.
+		process.env.PWD = currentBuild.appDir;
         return {};
     }
 
