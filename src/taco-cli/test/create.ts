@@ -120,23 +120,32 @@ describe("taco create", function (): void {
         });
     }
 
-    before(function (): void {
+    before(function (done: MochaDone): void {
         // Set ResourcesManager to test mode
         resources.UnitTest = true;
-
-        // Create a temporary folder for our test run
-        wrench.mkdirSyncRecursive(runFolder, 777);
 
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
-        // Make sure the template cache is initially 
-        fs.existsSync(templateCache).should.equal(false, "Test template cache must be initially empty for this test suite");
+        // Delete existing run folder if necessary
+        rimraf(runFolder, function (err: Error): void {
+            if (err) {
+                done(err);
+            } else {
+                // Create the run folder for our tests
+                wrench.mkdirSyncRecursive(runFolder, 777);
+                done();
+            }
+        });
     });
 
     after(function (done: MochaDone): void {
-        rimraf(runFolder, function (): void {
-            done();
+        rimraf(runFolder, function (err: Error): void {
+            if (err) {
+                done(err);
+            } else {
+                done();
+            }
         });
     });
 

@@ -3,8 +3,7 @@
 /// <reference path="typings/gulp.d.ts" />
 /// <reference path="typings/gulp-extensions.d.ts" />
 /// <reference path="typings/del.d.ts" />
-/// <reference path="typings/tar.d.ts" />
-/// <reference path="typings/fstream.d.ts" />
+/// <reference path="typings/archiver.d.ts" />
 var runSequence = require("run-sequence");
 import child_process = require ("child_process");
 import fs = require ("fs");
@@ -13,8 +12,7 @@ import del = require ("del");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import tar = require ("tar");
-import fstream = require ("fstream");
+import archiver = require ("archiver");
 import zlib = require ("zlib");
 import dtsUtil = require ("../tools/tsdefinition-util");
 import stylecopUtil = require ("../tools/stylecop-util");
@@ -58,7 +56,7 @@ function TrimEnd(str: string, chars: string[]): string {
     return str.substring(0, index + 1);
 }
 
-gulp.task("install-build", ["copy-build"], function (): Q.Promise<any> {
+gulp.task("install-build", ["copy-build", "prepare-templates"], function (): Q.Promise<any> {
     var paths = modulesToInstallAndTest.map(function (m: string): string { return path.resolve(buildConfig.buildBin, m); });
     return paths.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
         return soFar.then(function (): Q.Promise<any> {
@@ -160,7 +158,7 @@ gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
 /* Task to archive template folders */
 gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> {
     var buildTemplatesPath: string = path.resolve(buildConfig.buildTemplates);
-    var pipes: NodeJS.WritableStream[] = [];
+    var promises: Q.Promise<any>[] = [];
 
     if (!fs.existsSync(buildTemplatesPath)) {
         fs.mkdirSync(buildTemplatesPath);
@@ -182,16 +180,28 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
         var kitTemplates: string[] = getChildDirectoriesSync(kitSrcPath);
 
         kitTemplates.forEach(function (value: string, index: number, array: string[]): void {
+            // Create the template's archive
             var templateSrcPath: string = path.resolve(kitSrcPath, value);
-            var templateTargetPath: string = path.join(kitTargetPath, value + ".tar.gz");
-            var dirReader: fstream.Reader = new fstream.Reader({ path: templateSrcPath, type: "Directory", mode: 777 });
-            var pipe: NodeJS.WritableStream = dirReader.pipe(tar.Pack()).pipe(zlib.createGzip()).pipe(new fstream.Writer({ path: templateTargetPath }));
+            var templateTargetPath: string = path.join(kitTargetPath, value + ".zip");
+            var archive: any = archiver("zip");
+            var outputStream: NodeJS.WritableStream = fs.createWriteStream(templateTargetPath);
+            var deferred: Q.Deferred<any> = Q.defer<any>();
+            
+            archive.on("error", function (err: Error): void {
+                deferred.reject(err);
+            });
 
-            pipes.push(pipe);
+            outputStream.on("close", function (): void {
+                deferred.resolve({});
+            });
+
+            archive.pipe(outputStream);
+            archive.directory(templateSrcPath, value).finalize();
+            promises.push(deferred.promise);
         });
     });
 
-    return Q.all(pipes.map(streamToPromise));
+    return Q.all(promises);
 });
 
 function getChildDirectoriesSync(dir: string): string[] {
