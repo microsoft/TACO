@@ -3,12 +3,20 @@
 /// <reference path="../typings/taco-utils.d.ts" />
 /// <reference path="../typings/express.d.ts" />
 /// <reference path="../typings/semver.d.ts" />
-/// <reference path="../typings/taco-remote.d.ts" />
+/// <reference path="../typings/remotebuild.d.ts" />
 
 declare module TacoRemoteLib {
-    interface IReadOnlyConf extends TacoRemote.IDict {
+    interface IRequestRedirector {
+        getPackageToServeRequest(buildInfo: TacoUtility.BuildInfo, req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib>;
+    }
+    interface IReadOnlyConf {
+        get(prop: string): any;
     }
     interface IRemoteLib {
+        /**
+         * The module exposes the localization resources so that the server can localize buildInfo regardless of where the string tokens come from.
+         */
+        locResources: TacoUtility.ResourcesManager.IResources;
         /**
          * Initialize this package so it is ready to service requests
          *

@@ -1,9 +1,0 @@
-{
-    "serverDir": "~/remote-builds",
-    "port": 3000,
-    "secure": true,
-    "allowsEmulate": true,
-    "maxBuildsToKeep": 20,
-    "maxBuildsInQueue": 10,
-    "deleteBuildsOnShutdown": true
-}

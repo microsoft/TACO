@@ -22,7 +22,7 @@ import tsUtil = require ("./taco-cli/compile/typescript-util");
 
 var buildConfig = require("../../src/build_config.json");
 
-var modulesToInstallAndTest = ["taco-utils", "taco-cli", "taco-kits"];
+var modulesToInstallAndTest = ["taco-utils", "taco-cli", "taco-kits", "remotebuild", "taco-remote", "taco-remote-lib"];
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["install-build"]);
@@ -30,7 +30,7 @@ gulp.task("default", ["install-build"]);
 /* Compiles the typescript files in the project, for fast iterative use */
 gulp.task("compile", function (callback: Function): void {
     var tsCompiler = new tsUtil.TypeScriptServices();
-    tsCompiler.compileDirectory(buildConfig.src, buildConfig.buildSrc, callback);
+    tsCompiler.compileDirectory(buildConfig.src, buildConfig.buildSrc, /*sourceMap*/ true, callback);
 });
 
 /* compile + copy */
@@ -109,7 +109,7 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
     del([templatesPath + "/**"], { force: true }, callback);
 });
 
-function streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {
+function streamToPromise(stream: NodeJS.WritableStream): Q.Promise<any> {
     var deferred = Q.defer();
     stream.on("finish", function (): void {
         deferred.resolve({});
@@ -125,6 +125,7 @@ gulp.task("copy", function (): Q.Promise<any> {
     return Q.all([
         gulp.src(path.join(buildConfig.src, "/**/package.json")).pipe(gulp.dest(buildConfig.buildSrc)),
         gulp.src(path.join(buildConfig.src, "/**/resources.json")).pipe(gulp.dest(buildConfig.buildSrc)),
+        gulp.src(path.join(buildConfig.src, "/**/TacoKitMetaData.json")).pipe(gulp.dest(buildConfig.buildSrc)),
         gulp.src(path.join(buildConfig.src, "/**/test/**")).pipe(gulp.dest(buildConfig.buildSrc)),
         gulp.src(path.join(buildConfig.src, "/**/commands.json")).pipe(gulp.dest(buildConfig.buildSrc)),
         gulp.src(path.join(buildConfig.src, "/**/bin/**")).pipe(gulp.dest(buildConfig.buildSrc)),

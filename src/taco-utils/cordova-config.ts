@@ -21,6 +21,13 @@ module TacoUtility {
         }
 
         /**
+         * Helper method to get a CordovaConfig object for a cordova project
+         */
+        public static getCordovaConfig(cordovaDirPath: string): CordovaConfig {
+            return new CordovaConfig(path.join(cordovaDirPath, "config.xml"));
+        }
+
+        /**
          * Get the package ID
          *
          * @returns {string} The packageID

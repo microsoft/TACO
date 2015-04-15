@@ -6,10 +6,8 @@ import child_process = require("child_process");
 import Q = require("q");
 import path = require("path");
 import tacoUtility = require("taco-utils");
-import utils = tacoUtility.UtilHelper;
 import packageLoader = tacoUtility.TacoPackageLoader;
 import constants = require("./Constants");
-import ICordova = Cordova.ICordova;
 
 class CordovaWrapper {
     public static cli(args: string[], cordovaCliPath?: string): Q.Promise<any> {

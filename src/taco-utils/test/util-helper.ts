@@ -8,8 +8,10 @@
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/nopt.d.ts"/>
+/// <reference path="../../typings/taco-utils.d.ts" />
 "use strict";
-import should = require ("should");
+var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+
 import mocha = require ("mocha");
 
 import utils = require ("../util-helper");

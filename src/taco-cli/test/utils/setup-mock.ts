@@ -2,8 +2,8 @@
 
 import Settings = require ("../../cli/utils/settings");
 
-module SetupMock {
-    export function makeCliMock(onError: (err: Error) => void, onClose: () => void, desiredState: { host: string; port: number; pin: string }, onQuestion?: () => void): {
+class SetupMock {
+    public static makeCliMock(onError: (err: Error) => void, onClose: () => void, desiredState: { host: string; port: number; pin: string }, onQuestion?: () => void): {
             question: (question: string, callback: (answer: string) => void) => void;
             close: () => void
         } {
@@ -31,7 +31,7 @@ module SetupMock {
         };
     }
 
-    export function saveConfig(platform: string, config: Settings.IRemoteConnectionInfo): Q.Promise<any> {
+    public static saveConfig(platform: string, config: Settings.IRemoteConnectionInfo): Q.Promise<any> {
         return Settings.loadSettings(true).catch(function (): Settings.ISettings {
             return { remotePlatforms: {} };
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {

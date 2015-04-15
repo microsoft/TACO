@@ -1,5 +1,6 @@
 ﻿import utilHelper = require ("./util-helper");
 import UtilHelper = utilHelper.UtilHelper;
+import resources = require ("./resources-manager");
 
 module TacoUtility {
     export class BuildInfo {
@@ -48,8 +49,9 @@ module TacoUtility {
 
         public tgzFilePath: string;
         public appDir: string;
+        public logLevel: string;
 
-        constructor(params: { buildNumber?: number; status?: string; buildCommand?: string; configuration?: string; options?: any; buildDir?: string; buildLang?: string; buildPlatform?: string; [index: string]: any }) {
+        constructor(params: { buildNumber?: number; status?: string; buildCommand?: string; configuration?: string; options?: any; buildDir?: string; buildLang?: string; buildPlatform?: string; logLevel?: string; [index: string]: any }) {
             var self = this;
             Object.keys(params).forEach(function (key: string): void {
                 self[key] = params[key];
@@ -62,6 +64,8 @@ module TacoUtility {
             this.buildDir = params.buildDir;
             this.buildLang = params.buildLang;
             this.buildPlatform = params.buildPlatform;
+            this.logLevel = params.logLevel;
+
             this.submissionTime = new Date();
             this.changeList = null;
             this.buildSuccessful = false;
@@ -113,7 +117,7 @@ module TacoUtility {
          * 
          * @returns This object, after setting the message in the appropriate language.
          */
-        public localize(req: any, resources: { getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string }): BuildInfo {
+        public localize(req: any, resources: resources.ResourcesManager.IResources): BuildInfo {
             if (this.messageId) {
                 this.message = resources.getStringForLanguage(req, this.messageId, this.messageArgs);
             } else {

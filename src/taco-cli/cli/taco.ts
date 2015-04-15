@@ -2,6 +2,7 @@
 /// <reference path="../../typings/taco-kits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordova-extensions.d.ts" />
+"use strict";
 
 import tacoUtility = require("taco-utils");
 import tacoKits = require("taco-kits");

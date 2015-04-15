@@ -1,3 +1,4 @@
+/// <reference path="../typings/resources-manager" />
 declare module TacoUtility {
     class BuildInfo {
         static UPLOADING: string;
@@ -42,6 +43,8 @@ declare module TacoUtility {
         message: string;
         tgzFilePath: string;
         appDir: string;
+        logLevel: string;
+
         constructor(params: {
             buildNumber?: number;
             status?: string;
@@ -51,6 +54,7 @@ declare module TacoUtility {
             buildDir?: string;
             buildLang?: string;
             buildPlatform?: string;
+            logLevel?: string;
             [index: string]: any;
         });
         [index: string]: any;
@@ -77,6 +81,6 @@ declare module TacoUtility {
          *
          * @returns This object, after setting the message in the appropriate language.
          */
-        localize(req: any, resources: { getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string }): BuildInfo;
+        localize(req: any, resources: TacoUtility.ResourcesManager.IResources): BuildInfo;
     }
 }

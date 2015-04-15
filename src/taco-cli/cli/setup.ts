@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../typings/taco-utils.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
+"use strict";
 
 import fs = require ("fs");
 import https = require ("https");
@@ -160,7 +161,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     private static findRemoteMountPath(hostPortAndCert: { host: string; port: number; certName?: string; secure: boolean }): Q.Promise<string> {
-        var mountDiscoveryUrl = util.format("http%s://%s:%d/modules/%s", hostPortAndCert.certName ? "s" : "", hostPortAndCert.host, hostPortAndCert.port, "taco-cordova");
+        var mountDiscoveryUrl = util.format("http%s://%s:%d/modules/%s", hostPortAndCert.certName ? "s" : "", hostPortAndCert.host, hostPortAndCert.port, "taco-remote");
         return ConnectionSecurity.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
             var options: request.Options = {
                 url: mountDiscoveryUrl,

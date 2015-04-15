@@ -2,6 +2,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/cordova-extensions.d.ts" />
+"use strict";
 
 import assert = require("assert");
 import child_process = require("child_process");
@@ -18,7 +19,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 
 import CordovaWrapper = require("./utils/cordova-wrapper");
 
-import RemoteBuild = require("./remote-build/taco-remote-client");
+import RemoteBuild = require("./remote-build/remotebuild-client");
 import RemoteBuildSettings = require("./remote-build/build-settings");
 
 import Settings = require("./utils/settings");

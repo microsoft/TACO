@@ -24,14 +24,14 @@ declare module TacoKits {
     }
 
     interface ITemplateInfo {
-        [id: string]: {
-            name: string;
-            url: string;
-        };
+        name: string;
+        url: string;
     }
 
     interface ITemplateMetadata {
-        [kitName: string]: ITemplateInfo;
+        [kitId: string]: {
+            [templateIdd: string]: ITemplateInfo;
+        }
     }
 
     interface IKitInfo {

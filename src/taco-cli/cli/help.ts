@@ -2,6 +2,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+"use strict";
 import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;

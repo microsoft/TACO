@@ -1,6 +1,7 @@
 "use strict";
 import buildInfo = require ("./build-info");
 import cordovaConfig = require ("./cordova-config");
+import countStream = require ("./count-stream");
 import resourcesManager = require ("./resources-manager");
 import utilHelper = require ("./util-helper");
 import commands = require ("./commands");
@@ -19,6 +20,7 @@ module TacoUtility {
     export var Logger = logger.Logger;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
+    export var CountStream = countStream.CountStream;
     /// <enable code="SA1301" />
 }
 

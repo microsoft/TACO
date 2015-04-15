@@ -109,7 +109,6 @@ class Settings {
 
     /*
      * Construct the base URL for the given build server
-     * TODO: return a Request.Options which has the appropriate security configured?
      */
     public static getRemoteServerUrl(server: Settings.IRemoteConnectionInfo): string {
         return util.format("http%s://%s:%d/%s", server.secure ? "s" : "", server.host, server.port, server.mountPoint);

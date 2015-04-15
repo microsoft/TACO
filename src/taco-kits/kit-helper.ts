@@ -39,14 +39,14 @@ module TacoKits {
     }
 
     export interface ITemplateInfo {
-        [id: string]: {
-            name: string;
-            url: string;
-        };
+        name: string;
+        url: string;
     }
 
     export interface ITemplateMetadata {
-        [kitName: string]: ITemplateInfo;
+        [kitId: string]: {
+            [templateId: string]: ITemplateInfo;
+        }
     }
 
     export interface IKitInfo {
@@ -130,7 +130,7 @@ module TacoKits {
             return KitHelper.getKitMetadata()
                 .then(function (Metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
                     kits = Metadata.kits;
-                    if (kits && kits[kitId]) {
+                    if (kitId && kits && kits[kitId]) {
                         if (kits[kitId].deprecated) {
                             deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
                         }
@@ -139,7 +139,7 @@ module TacoKits {
                             deferred.resolve(kits[kitId]);
                         }
                     } else {
-                        // Error, no kit matching the kit id
+                        // Error, empty kitId or no kit matching the kit id
                         deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
                     }
                 return deferred.promise;
@@ -286,7 +286,7 @@ module TacoKits {
             var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
             var templates: ITemplateMetadata = null;
             var templateOverrideInfo: ITemplateOverrideInfo = {
-                kitId: '', templateInfo: {}
+                kitId: '', templateInfo: { name: '', url: '' }
             };
             return KitHelper.getTemplateMetadata()
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
@@ -299,10 +299,10 @@ module TacoKits {
                     if (templates[kitId][templateId]) {
                         // Found the specified template
                         templateOverrideInfo.kitId = kitId;
-                        templateOverrideInfo.templateInfo[templateId] = templates[kitId][templateId];
+                        templateOverrideInfo.templateInfo = templates[kitId][templateId];
 
                         // Convert the url from relative to absolute local path
-                        templateOverrideInfo.templateInfo[templateId].url = path.resolve(__dirname, templateOverrideInfo.templateInfo[templateId].url);
+                        templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
                         deferred.resolve(templateOverrideInfo);
                     } else {
                         // Error, the kit override does not define the specified template id
@@ -316,17 +316,18 @@ module TacoKits {
                 } else if (templates["default"][templateId]) {
                     // Found a default template matching the specified template id
                     templateOverrideInfo.kitId = "default";
-                    templateOverrideInfo.templateInfo[templateId] = templates["default"][templateId];
+                    templateOverrideInfo.templateInfo = templates["default"][templateId];
 
                     // Convert the url from relative to absolute local path
-                    templateOverrideInfo.templateInfo[templateId].url = path.resolve(__dirname, templateOverrideInfo.templateInfo[templateId].url);
+                    templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
                     deferred.resolve(templateOverrideInfo);
                 } else {
                     // Error, no template matching the specified template id
                     deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidTemplate")));
                 }
                 return deferred.promise;
-            });        }
+                });
+        }
     }
 }
 

@@ -2,6 +2,7 @@
 /// <reference path="../../typings/taco-kits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+"use strict";
 
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
@@ -11,12 +12,40 @@ import commands = tacoUtility.Commands;
 import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import createManager = require ("./utils/template-manager");
+import templateManager = require ("./utils/template-manager");
 import cordovaWrapper = require ("./utils/cordova-wrapper");
 import nopt = require ("nopt");
 import Q = require("q");
 import fs = require("fs");
 import path = require("path");
+
+interface ICordovaLibMetadata {
+    url: string;
+    version: string;
+    id: string;
+    link: boolean;
+}
+
+interface ICordovaConfigMetadata {
+    id: string;
+    name: string;
+    lib: {
+        "www": ICordovaLibMetadata;
+    };
+}
+
+interface I {
+    projectPath: string;
+    appId: string;
+    appName: string;
+    cordovaConfig: string;
+    data: commands.ICommandData;
+    templateDisplayName?: string;
+    cordovaCli?: string;
+    isKitProject?: boolean;
+    kitId?: string;
+}
+
 
 /* 
  * Wrapper interface for create command parameters
@@ -27,8 +56,8 @@ interface ICreateParameters {
     appName: string;
     cordovaConfig: string;
     data: commands.ICommandData;
-    cordovaCli?: string;
     templateDisplayName?: string;
+    cordovaCli?: string;
     isKitProject?: boolean;
     kitId?: string;
 }
@@ -56,21 +85,25 @@ class Create implements commands.IDocumentedCommand {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
-        this.parseArguments(data);
-        this.verifyArguments();
+        try {
+            this.parseArguments(data);
+            this.verifyArguments();
+        } catch (err) {
+            return Q.reject(err.message);
+        }
 
         var self = this;
 
         return this.createProject()
-            .then(function (): Q.Promise<any> {
+            .then(function (templateDisplayName: string): Q.Promise<any> {
             return self.createTacoJsonFile()
                 .then(function (): Q.Promise<any> {
-                self.finalize();
-                return Q.resolve({});
+                    self.finalize();
+                return Q.resolve(null);
             });
         }).fail(function (err: any) {
             logger.log(err.message, logger.Level.Error);
-            return Q.reject({});
+            return Q.reject(err.message);
         });
     }
 
@@ -109,7 +142,34 @@ class Create implements commands.IDocumentedCommand {
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
             logger.logErrorLine(resources.getString("command.create.notBothTemplateAndCli"));
 
-            throw new Error("command.create.notBothCliAndKit");
+            throw new Error("command.create.notBothTemplateAndCli");
+        }
+    }
+
+    private formalizeParameters(): void {
+        var config: ICordovaConfigMetadata;
+        // If we got a fourth parameter, consider it to be JSON to init the config.
+        if (this.commandParameters.cordovaConfig) {
+            config = JSON.parse(this.commandParameters.cordovaConfig);
+        }
+        var customWww = this.commandParameters.data.options['copy-from'] || this.commandParameters.data.options['link-to'];
+        if (customWww) {
+            if (customWww.indexOf('http') === 0) {
+                throw new Error(
+                    'Only local paths for custom www assets are supported.'
+                    );
+            }
+            if (customWww.substr(0, 1) === '~') {  // resolve tilde in a naive way.
+                customWww = path.join(process.env.HOME, customWww.substr(1));
+            }
+            customWww = path.resolve(customWww);
+            var wwwCfg: ICordovaLibMetadata = { url: customWww, version: '', id: '', link: false };
+            if (this.commandParameters.data.options['link-to']) {
+                wwwCfg.link = true;
+            }
+            config.lib = config.lib || { www: { url: '', version: '', id: '', link: false } };
+            config.lib.www = wwwCfg;
+            this.commandParameters.cordovaConfig = JSON.stringify(config);
         }
     }
 
@@ -123,11 +183,16 @@ class Create implements commands.IDocumentedCommand {
         var appId: string = this.commandParameters.appId;
         var appName: string = this.commandParameters.appName;
         var cordovaConfig: string = this.commandParameters.cordovaConfig;
-        var options: { [option: string]: any } = this.commandParameters.data.options;
+        var options: { [option: string]: any } = this.commandParameters.data.options
         var cordovaCli: string;
+        
+        // Massage the cordovaConfig parameter with the options provided
+        this.formalizeParameters();
+
 
         logger.log("\n", logger.Level.Normal);
 
+        //Now, create the project 
         if (!this.commandParameters.isKitProject) {
             this.commandParameters.cordovaCli = this.commandParameters.data.options["cli"];
             // Use the CLI version specified as an argument to create the project
@@ -136,10 +201,10 @@ class Create implements commands.IDocumentedCommand {
             return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli): Q.Promise<any> {
                 self.commandParameters.kitId = kitId;
                 if (mustUseTemplate) {
-                    return createManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options)
+                    return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
                         .then(function (templateDisplayName: string): Q.Promise<any> {
                         self.commandParameters.templateDisplayName = templateDisplayName;
-                        return Q.resolve(null);
+                        return Q.resolve(templateDisplayName);
                     });
                 } else {
                     return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
@@ -182,12 +247,11 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private finalize(): void {
-        logger.log("\n", logger.Level.Normal);
-
         // Report success over multiple loggings for different styles
+        logger.log("\n", logger.Level.Normal);
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
 
-        if (this.commandParameters.isKitProject) {
+        if (this.mustCreateKitProject()) {
             if (this.commandParameters.templateDisplayName) {
                 logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName), logger.Level.Normal);
             } else {
@@ -196,8 +260,6 @@ class Create implements commands.IDocumentedCommand {
 
                 logger.log(" " + resources.getString("command.create.success.projectCustomWww", customWwwPath), logger.Level.Normal);
             }
-
-            logger.log(" " + resources.getString("command.create.success.readyForUse"), logger.Level.Normal);
         } else {
             logger.log(" " + resources.getString("command.create.success.projectCLI", customWwwPath), logger.Level.Normal);
         }
@@ -206,6 +268,10 @@ class Create implements commands.IDocumentedCommand {
         if (this.commandParameters.isKitProject) {
             logger.log(" " + resources.getString("command.create.success.kitUsed", this.commandParameters.kitId), logger.Level.NormalBold);
         }
+    }
+
+    private mustCreateKitProject(): boolean {
+        return !this.commandParameters.data.options["cli"];
     }
 }
 

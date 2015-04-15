@@ -111,8 +111,10 @@ module TacoUtility {
          * @param {string} target Location to copy to
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
-        public static copyRecursive(source: string, target: string, options: any = {}): Q.Promise<any> {
+        public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any> {
             var deferred = Q.defer();
+
+            options = options ? options : {};
 
             ncp.ncp(source, target, options, function (error: any): void {
                 if (error) {
@@ -197,7 +199,7 @@ module TacoUtility {
                     // This is one of the parsed flags, so add it to our object
                     parsed.options[property] = noptParsed[property];
 
-                    // If the value is the undefined token, set it to the actual undefined value
+                    // If the value is the undefined token, set it to a null value so we can detect that no argument was provided
                     if (parsed.options[property] === undefinedToken) {
                         parsed.options[property] = null;
                     }
@@ -301,9 +303,9 @@ module TacoUtility {
          */
         public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any } {
             var cleansed: { [option: string]: any } = {};
-
+            
             for (var opt in options) {
-                if (exclude.indexOf(opt) < 0) {
+                if (!exclude || exclude.indexOf(opt) < 0) {
                     cleansed[opt] = options[opt];
                 }
             }

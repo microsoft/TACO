@@ -1,3 +1,0 @@
-﻿# vs-mda-client
-
-

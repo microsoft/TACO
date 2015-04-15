@@ -21,5 +21,6 @@
     "_packageLoader.downloadError.comment": "Error reported when downloading Cordova tools {0}fails",
     "packageLoader.downloadCompletedMessage": "Downloading {0} completed.",
     "_packageLoader.downloadCompletedMessage.comment": "Message reporting the success of Cordova tools {0} download."
-
+    "InvalidPackageVersionSpecifier": "Error: invalid version specifier '{1}' for package '{0}'.",
+    "_InvalidPackageVersionSpecifier.comment": "{0} is the package name, and {1} is the package version"
 }
