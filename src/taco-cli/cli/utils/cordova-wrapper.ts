@@ -2,12 +2,12 @@
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/cordova-extensions.d.ts" />
 
-import child_process = require("child_process");
-import Q = require("q");
-import path = require("path");
-import tacoUtility = require("taco-utils");
+import child_process = require ("child_process");
+import Q = require ("q");
+import path = require ("path");
+import tacoUtility = require ("taco-utils");
 import packageLoader = tacoUtility.TacoPackageLoader;
-import constants = require("./Constants");
+import constants = require ("./Constants");
 
 class CordovaWrapper {
     public static cli(args: string[], cordovaCliPath?: string): Q.Promise<any> {
@@ -42,17 +42,17 @@ class CordovaWrapper {
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer();
         try {
-            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliModulePath): Q.Promise<any> {
+            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliModulePath: string): Q.Promise<any> {
                 var cordovaLibPath = path.join(cordovaCliModulePath, constants.NpmNodeModules, constants.CordovaLib);
                 if (cordovaLibPath) {
                     var cordova_lib = require(cordovaLibPath);
                     return cordova_lib.cordova.raw.create(projectPath, id, name, cdvConfig);
                 }
             });
-        }
-        catch (e) {
+        } catch (e) {
             deferred.reject(e);
         }
+
         return deferred.promise;
     }
 }

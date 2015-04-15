@@ -87,7 +87,7 @@ describe("TemplateManager", function (): void {
         templates.TemplateCachePath = templateCache;
 
         // Mock the KitHelper in TemplateManager
-        //templates.Kits = mockKitHelper;
+        // templates.Kits = mockKitHelper;
         done();
     });
 
@@ -97,7 +97,7 @@ describe("TemplateManager", function (): void {
 
         // Reset TemplateManager
         templates.TemplateCachePath = null;
-        //templates.Kits = null;
+        // templates.Kits = null;
     });
 
     describe("findTemplatePath()", function (): void {

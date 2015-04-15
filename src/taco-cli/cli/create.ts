@@ -15,9 +15,9 @@ import level = logger.Level;
 import templateManager = require ("./utils/template-manager");
 import cordovaWrapper = require ("./utils/cordova-wrapper");
 import nopt = require ("nopt");
-import Q = require("q");
-import fs = require("fs");
-import path = require("path");
+import Q = require ("q");
+import fs = require ("fs");
+import path = require ("path");
 
 interface ICordovaLibMetadata {
     url: string;
@@ -45,7 +45,6 @@ interface I {
     isKitProject?: boolean;
     kitId?: string;
 }
-
 
 /* 
  * Wrapper interface for create command parameters
@@ -101,7 +100,7 @@ class Create implements commands.IDocumentedCommand {
                     self.finalize();
                 return Q.resolve(null);
             });
-        }).fail(function (err: any) {
+            }).fail(function (err: any): Q.Promise<any> {
             logger.log(err.message, logger.Level.Error);
             return Q.reject(err.message);
         });
@@ -152,22 +151,27 @@ class Create implements commands.IDocumentedCommand {
         if (this.commandParameters.cordovaConfig) {
             config = JSON.parse(this.commandParameters.cordovaConfig);
         }
-        var customWww = this.commandParameters.data.options['copy-from'] || this.commandParameters.data.options['link-to'];
+
+        var customWww = this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"];
         if (customWww) {
-            if (customWww.indexOf('http') === 0) {
+            if (customWww.indexOf("http") === 0) {
                 throw new Error(
-                    'Only local paths for custom www assets are supported.'
+                    "Only local paths for custom www assets are supported."
                     );
             }
-            if (customWww.substr(0, 1) === '~') {  // resolve tilde in a naive way.
+
+            // Resolve HOME env path
+            if (customWww.substr(0, 1) === "~") {
                 customWww = path.join(process.env.HOME, customWww.substr(1));
             }
+
             customWww = path.resolve(customWww);
-            var wwwCfg: ICordovaLibMetadata = { url: customWww, version: '', id: '', link: false };
-            if (this.commandParameters.data.options['link-to']) {
+            var wwwCfg: ICordovaLibMetadata = { url: customWww, version: "", id: "", link: false };
+            if (this.commandParameters.data.options["link-to"]) {
                 wwwCfg.link = true;
             }
-            config.lib = config.lib || { www: { url: '', version: '', id: '', link: false } };
+
+            config.lib = config.lib || { www: { url: "", version: "", id: "", link: false } };
             config.lib.www = wwwCfg;
             this.commandParameters.cordovaConfig = JSON.stringify(config);
         }
@@ -183,22 +187,21 @@ class Create implements commands.IDocumentedCommand {
         var appId: string = this.commandParameters.appId;
         var appName: string = this.commandParameters.appName;
         var cordovaConfig: string = this.commandParameters.cordovaConfig;
-        var options: { [option: string]: any } = this.commandParameters.data.options
+        var options: { [option: string]: any } = this.commandParameters.data.options;
         var cordovaCli: string;
         
         // Massage the cordovaConfig parameter with the options provided
         this.formalizeParameters();
 
-
         logger.log("\n", logger.Level.Normal);
 
-        //Now, create the project 
+        // Now, create the project 
         if (!this.commandParameters.isKitProject) {
             this.commandParameters.cordovaCli = this.commandParameters.data.options["cli"];
             // Use the CLI version specified as an argument to create the project
             return cordovaWrapper.create(this.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
         } else {
-            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli): Q.Promise<any> {
+            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli: string): Q.Promise<any> {
                 self.commandParameters.kitId = kitId;
                 if (mustUseTemplate) {
                     return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
@@ -219,6 +222,7 @@ class Create implements commands.IDocumentedCommand {
             if (err) {
                 deferred.reject(err);
             }
+
             deferred.resolve({});
         });
         return deferred.promise;
@@ -229,20 +233,20 @@ class Create implements commands.IDocumentedCommand {
         var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
         if (this.commandParameters.isKitProject) {
             if (!this.commandParameters.kitId) {
-                return kitHelper.getDefaultKit().then(function (kitId): void {
+                return kitHelper.getDefaultKit().then(function (kitId: string): void {
                     this.commandParameters.kitId = kitId;
-                    return this.createJsonFileWithContents(tacoJsonPath, { 'kit': kitId });
+                    return this.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
                 });
-            }
-            else {
-                return this.createJsonFileWithContents(tacoJsonPath, { 'kit': this.commandParameters.kitId });
+            } else {
+                return this.createJsonFileWithContents(tacoJsonPath, { kit: this.commandParameters.kitId });
             }
         } else {
             if (!this.commandParameters.cordovaCli) {
                 deferred.reject(resources.getString("command.create.tacoJsonFileCreationError"));
                 return deferred.promise;
             }
-            return this.createJsonFileWithContents(tacoJsonPath, { 'cli': this.commandParameters.cordovaCli });
+
+            return this.createJsonFileWithContents(tacoJsonPath, { cli: this.commandParameters.cordovaCli });
         }
     }
 

@@ -4,8 +4,8 @@
 /// <reference path="../../typings/cordova-extensions.d.ts" />
 "use strict";
 
-import tacoUtility = require("taco-utils");
-import tacoKits = require("taco-kits");
+import tacoUtility = require ("taco-utils");
+import tacoKits = require ("taco-kits");
 import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
 var kitHelper = tacoKits.KitHelper;

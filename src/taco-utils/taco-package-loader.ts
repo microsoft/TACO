@@ -9,15 +9,15 @@
 /// <reference path="../typings/semver.d.ts" />
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import mkdirp = require("mkdirp");
-import path = require("path");
-import rimraf = require("rimraf");
-import semver = require("semver");
-import Q = require("q");
-import UtilHelper = require("./util-helper");
-import ResourcesManager = require("./resources-manager");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import mkdirp = require ("mkdirp");
+import path = require ("path");
+import rimraf = require ("rimraf");
+import semver = require ("semver");
+import Q = require ("q");
+import UtilHelper = require ("./util-helper");
+import ResourcesManager = require ("./resources-manager");
 import utils = UtilHelper.UtilHelper;
 import resources = ResourcesManager.ResourcesManager;
 
@@ -46,15 +46,11 @@ module TacoUtility {
             var deferred = Q.defer<T>();
             var packageTargetPath: string;
             TacoPackageLoader.lazyAcquire(packageName, packageVersion, logLevel).
-                then(function (packageTargetPath): Q.Promise<T> {
+                then(function (packageTargetPath: string): Q.Promise<T> {
                 var pkg = <T>require(packageTargetPath);
                 return Q.resolve(pkg);
                 });
             return deferred.promise;
-        }
-
-        private static requirePackage<T>(packageTargetPath: string): T {
-            return <T>require(packageTargetPath);
         }
 
         /**
@@ -75,6 +71,48 @@ module TacoUtility {
             });
         }
 
+        private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
+            var deferred = Q.defer();
+            try {
+                mkdirp.sync(packageTargetPath);
+
+                var args: string[] = ["install"];
+                var cwd = packageTargetPath;
+                // When installing from the online npm repo, we need to provide the package name and version, and 
+                // we need to allow for the node_modules/ packagename folders to be added
+                if (specType === PackageSpecType.Version) {
+                    args.push(packageName + "@" + packageVersion);
+                    cwd = path.resolve(cwd, "..", "..");
+                }
+
+                if (logLevel) {
+                    args.push("--loglevel", logLevel);
+                }
+
+                var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+
+                var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
+                npmProcess.on("error", function (error: Error): void {
+                    rimraf(packageTargetPath, function (): void {
+                        deferred.reject(error);
+                    });
+                });
+                npmProcess.on("exit", function (exitCode: number): void {
+                    if (exitCode === 0) {
+                        deferred.resolve({});
+                    } else {
+                        rimraf(packageTargetPath, function (): void {
+                            deferred.reject(new Error("NpmInstallFailed"));
+                        });
+                    }
+                });
+            } catch (err) {
+                console.log(err);
+                deferred.reject(err);
+            }
+
+            return deferred.promise;
+        }
 
         private static getPackageTargetPath(packageName: string, packageVersion: string, packageSpecType: PackageSpecType): string {
             var homePackageModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
@@ -125,11 +163,8 @@ module TacoUtility {
             }
         }
 
-        private static packageNeedsInstall(targetPath: string): boolean {
-            var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
-            // if package.json doesn't exist or status file is still lingering around
-            // it is an invalid installation
-            return !fs.existsSync(path.join(targetPath, "package.json")) || fs.existsSync(statusFilePath);
+        private static requirePackage<T>(packageTargetPath: string): T {
+            return <T>require(packageTargetPath);
         }
 
         private static getStatusFilePath(targetPath: string): string {
@@ -196,47 +231,11 @@ module TacoUtility {
             return PackageSpecType.Error;
         }
 
-        private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
-            var deferred = Q.defer();
-            try {
-                mkdirp.sync(packageTargetPath);
-
-                var args: string[] = ["install"];
-                var cwd = packageTargetPath;
-                // When installing from the online npm repo, we need to provide the package name and version, and 
-                // we need to allow for the node_modules/ packagename folders to be added
-                if (specType === PackageSpecType.Version) {
-                    args.push(packageName + "@" + packageVersion);
-                    cwd = path.resolve(cwd, "..", "..");
-                }
-
-                if (logLevel) {
-                    args.push("--loglevel", logLevel);
-                }
-
-                var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-
-                var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
-                npmProcess.on("error", function (error: Error): void {
-                    rimraf(packageTargetPath, function (): void {
-                        deferred.reject(error);
-                    });
-                });
-                npmProcess.on("exit", function (exitCode: number): void {
-                    if (exitCode === 0) {
-                        deferred.resolve({});
-                    } else {
-                        rimraf(packageTargetPath, function (): void {
-                            deferred.reject(new Error("NpmInstallFailed"));
-                        });
-                    }
-                });
-            } catch (err) {
-                console.log(err);
-                deferred.reject(err);
-            }
-
-            return deferred.promise;
+        private static packageNeedsInstall(targetPath: string): boolean {
+            var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
+            // if package.json doesn't exist or status file is still lingering around
+            // it is an invalid installation
+            return !fs.existsSync(path.join(targetPath, "package.json")) || fs.existsSync(statusFilePath);
         }
     }
 }

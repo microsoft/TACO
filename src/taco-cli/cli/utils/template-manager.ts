@@ -11,8 +11,8 @@ import zlib = require ("zlib");
 import wrench = require ("wrench");
 import tar = require ("tar");
 import replace = require ("replace");
-import tacoUtility = require("taco-utils");
-import tacoKits = require("taco-kits");
+import tacoUtility = require ("taco-utils");
+import tacoKits = require ("taco-kits");
 import logger = tacoUtility.Logger;
 import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
@@ -86,8 +86,7 @@ class TemplateManager {
         if (!fs.existsSync(cachedTemplatePath)) {
             // Download template's archive file
             // TODO
-            // TEMP for now, the templates are in our git repo, so "downloading" a template simply means unzipping it from the repo location
-            // to the cache.
+            // TEMP for now, the templates are in our git repo, so "downloading" a template simply means unzipping it from the repo location to the cache.
             if (!fs.existsSync(templateInfo.url)) {
                 logger.logErrorLine(resources.getString("command.create.templatesUnavailable"));
 
