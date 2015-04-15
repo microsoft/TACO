@@ -19,6 +19,9 @@ import Q = require ("q");
 import fs = require ("fs");
 import path = require ("path");
 
+/* 
+ * Wrapper interfaces for config JSON parameter for create command
+ */
 interface ICordovaLibMetadata {
     url: string;
     version: string;
@@ -32,18 +35,6 @@ interface ICordovaConfigMetadata {
     lib: {
         "www": ICordovaLibMetadata;
     };
-}
-
-interface I {
-    projectPath: string;
-    appId: string;
-    appName: string;
-    cordovaConfig: string;
-    data: commands.ICommandData;
-    templateDisplayName?: string;
-    cordovaCli?: string;
-    isKitProject?: boolean;
-    kitId?: string;
 }
 
 /* 
@@ -124,6 +115,9 @@ class Create implements commands.IDocumentedCommand {
         };
     }
 
+    /**
+     * Verify that the right combination of options is passed
+     */
     private verifyArguments(): void {
         // Parameter exclusivity validation and other verifications
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
@@ -145,6 +139,9 @@ class Create implements commands.IDocumentedCommand {
         }
     }
 
+    /**
+     * Massage the options parameters - they need to be passed in as a stringified config JSON object
+     */
     private formalizeParameters(): void {
         var config: ICordovaConfigMetadata;
         // If we got a fourth parameter, consider it to be JSON to init the config.
@@ -177,6 +174,9 @@ class Create implements commands.IDocumentedCommand {
         }
     }
 
+    /**
+     * Creates the Kit or CLI project
+     */
     private createProject(): Q.Promise<any> {
         var self = this;
         this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
@@ -216,6 +216,9 @@ class Create implements commands.IDocumentedCommand {
         }
     }
 
+    /**
+     * Methods to create and drop the taco.json file in the newly created Cordova project directory
+     */
     private createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
@@ -250,6 +253,9 @@ class Create implements commands.IDocumentedCommand {
         }
     }
 
+    /**
+     * Finalizes the creation of project by printing the Success messages with information about the Kit and template used
+     */
     private finalize(): void {
         // Report success over multiple loggings for different styles
         logger.log("\n", logger.Level.Normal);
