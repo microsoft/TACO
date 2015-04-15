@@ -28,7 +28,7 @@ gulp.task("default", ["install-build"]);
 /* Compiles the typescript files in the project, for fast iterative use */
 gulp.task("compile", function (callback: Function): void {
     var tsCompiler = new tsUtil.TypeScriptServices();
-    tsCompiler.compileDirectory(buildConfig.src, buildConfig.buildSrc, callback);
+    tsCompiler.compileDirectory(buildConfig.src, buildConfig.buildSrc, /*sourceMap*/ true, callback);
 });
 
 /* compile + copy */
