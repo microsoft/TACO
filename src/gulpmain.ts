@@ -196,6 +196,9 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
             });
 
             archive.pipe(outputStream);
+
+            // Note: archiver.bulk() automatically ignores files starting with "."; if this behavior ever changes, or if a different package is used
+            // to archive the templates, some logic to exclude the ".taco-ignore" files found in the templates will need to be added here
             archive.bulk({ expand: true, cwd: path.join(templatesPath, kitValue), src: [templateValue + "/**"] }).finalize();
             promises.push(deferred.promise);
         });
