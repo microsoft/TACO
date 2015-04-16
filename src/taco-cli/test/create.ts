@@ -133,7 +133,7 @@ describe("taco create", function (): void {
                 done(err);
             } else {
                 // Create the run folder for our tests
-                wrench.mkdirSyncRecursive(runFolder, 777);
+                wrench.mkdirSyncRecursive(runFolder, 511); // 511 decimal is 0777 octal
                 done();
             }
         });
@@ -278,7 +278,7 @@ describe("taco create", function (): void {
         var scenario: number = 16;
         var copyDest: string = getProjectPath(scenario);
 
-        wrench.mkdirSyncRecursive(copyDest, 777);
+        wrench.mkdirSyncRecursive(copyDest, 511); // 511 decimal is 0777 octal
         utils.copyRecursive(testTemplateSrc, copyDest).then(function (): void {
             runFailureScenario(scenario).then(done, done);
         });

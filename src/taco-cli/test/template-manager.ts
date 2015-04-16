@@ -92,10 +92,10 @@ describe("TemplateManager", function (): void {
                 done(err);
             } else {
                 // Create the run folder for our tests
-                wrench.mkdirSyncRecursive(runFolder, 777);
+                wrench.mkdirSyncRecursive(runFolder, 511); // 511 decimal is 0777 octal
 
                 // Prepare the test template (archive it)
-                wrench.mkdirSyncRecursive(testTemplateArchiveFolder, 777);
+                wrench.mkdirSyncRecursive(testTemplateArchiveFolder, 511); // 511 decimal is 0777 octal
 
                 var archive: any = archiver("zip");
                 var outputStream: NodeJS.WritableStream = fs.createWriteStream(testTemplateArchive);
@@ -137,7 +137,7 @@ describe("TemplateManager", function (): void {
             var copySrc: string = path.join(testTemplateSrc, "a.txt");
             var copyDest: string = path.join(cachedTestTemplate, "a.txt");
 
-            wrench.mkdirSyncRecursive(cachedTestTemplate, 777);
+            wrench.mkdirSyncRecursive(cachedTestTemplate, 511); // 511 decimal is 0777 octal
             utils.copyFile(copySrc, copyDest).then(function (): string {
                 // Call findTemplatePath()
                 return (<any>templates).findTemplatePath(templateInfo);
@@ -227,7 +227,7 @@ describe("TemplateManager", function (): void {
             // Copy template items to a new folder
             var testProjectPath = path.join(runFolder, "testProject");
 
-            wrench.mkdirSyncRecursive(testProjectPath, 777);
+            wrench.mkdirSyncRecursive(testProjectPath, 511); // 511 decimal is 0777 octal
             utils.copyRecursive(testTemplateSrc, testProjectPath).then(function (): string {
                 // Call performTokenReplacement()
                 return (<any>templates).performTokenReplacements(testProjectPath, testAppId, testAppName);
