@@ -219,43 +219,6 @@ class Create implements commands.IDocumentedCommand {
     }
 
     /**
-     * Methods to create and drop the taco.json file in the newly created Cordova project directory
-     */
-    private createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
-            if (err) {
-                deferred.reject(err);
-            }
-
-            deferred.resolve({});
-        });
-        return deferred.promise;
-    }
-
-    private createTacoJsonFile(): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        var tacoJsonPath: string = path.resolve(this.commandParameters.projectPath, "taco.json");
-        if (this.commandParameters.isKitProject) {
-            if (!this.commandParameters.kitId) {
-                return kitHelper.getDefaultKit().then(function (kitId: string): void {
-                    this.commandParameters.kitId = kitId;
-                    return this.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
-                });
-            } else {
-                return this.createJsonFileWithContents(tacoJsonPath, { kit: this.commandParameters.kitId });
-            }
-        } else {
-            if (!this.commandParameters.cordovaCli) {
-                deferred.reject(resources.getString("command.create.tacoJsonFileCreationError"));
-                return deferred.promise;
-            }
-
-            return this.createJsonFileWithContents(tacoJsonPath, { cli: this.commandParameters.cordovaCli });
-        }
-    }
-
-    /**
      * Finalizes the creation of project by printing the Success messages with information about the Kit and template used
      */
     private finalize(): void {
