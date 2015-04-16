@@ -27,6 +27,10 @@ import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import resources = tacoUtils.ResourcesManager;
 
+interface IScenarioList {
+    [scenario: number]: string;
+}
+
 describe("taco create", function (): void {
     // Project info
     var testAppId: string = "testId";
@@ -43,37 +47,40 @@ describe("taco create", function (): void {
     var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);
 
     // Commands for the different end to end scenarios to test
-    var scenarios: string[] = [
-        util.format("--kit 4.0.0-Kit --template typescript %s %s {}", testAppId, testAppName),
-        util.format("--kit 5.0.0-Kit --template blank %s %s", testAppId, testAppName),
-        util.format("--kit 4.2.0-Kit --template typescript %s", testAppId),
-        "--kit 4.2.0-Kit --template blank",
-        "--kit 5.0.0-Kit --template",
-        "--kit 4.0.0- Kit",
-        "--template typescript",
-        "--template",
-        util.format("--copy-from %s", copyFromPath),
-        "--cli 4.2.0",
-        "--kit",
-        "--template unknown",
-        "--kit 5.0.0-Kit --template typescript",
-        util.format("--kit 5.0.0-Kit --template typescript --copy-from %s", copyFromPath),
-        "--kit 5.0.0-Kit --cli 4.2.0",
-        "--cli 4.2.0 --template typescript",
-        util.format("--kit 4.0.0-Kit --template typescript %s %s {}", testAppId, testAppName),
-        "--kit 5.0.0-Kit --copy-from unknownCopyFromPath",
-        "--cli unknownCliVersion",
-        "--unknownParameter",
-        "42"
-    ];
+    var successScenarios: IScenarioList = {
+        1: util.format("--kit 4.0.0-Kit --template typescript %s %s {}", testAppId, testAppName),
+        2: util.format("--kit 5.0.0-Kit --template blank %s %s", testAppId, testAppName),
+        3: util.format("--kit 4.2.0-Kit --template typescript %s", testAppId),
+        4: "--kit 4.2.0-Kit --template blank",
+        5: "--kit 5.0.0-Kit --template",
+        6: "--kit 4.0.0- Kit",
+        7: "--template typescript",
+        8: "--template",
+        9: util.format("--copy-from %s", copyFromPath),
+        10: "--cli 4.2.0",
+        11: "--unknownParameter"
+    };
+
+    var failureScenarios: IScenarioList = {
+        1: "--kit",
+        2: "--template unknown",
+        3: "--kit 5.0.0-Kit --template typescript",
+        4: util.format("--kit 5.0.0-Kit --template typescript --copy-from %s", copyFromPath),
+        5: "--kit 5.0.0-Kit --cli 4.2.0",
+        6: "--cli 4.2.0 --template typescript",
+        7: util.format("--kit 4.0.0-Kit --template typescript %s %s {}", testAppId, testAppName),
+        8: "--kit 5.0.0-Kit --copy-from unknownCopyFromPath",
+        9: "--cli unknownCliVersion",
+        10: "42"
+    };
 
     function getProjectPath(scenario: number): string {
         return path.join(runFolder, "scenario" + scenario);
     }
 
-    function makeICommandData(scenario: number): tacoUtils.Commands.ICommandData {
+    function makeICommandData(scenario: number, scenarioList: IScenarioList): tacoUtils.Commands.ICommandData {
         // Get the scenario's command line
-        var args: string[] = scenarios[scenario].split(" ");
+        var args: string[] = scenarioList[scenario].split(" ");
 
         // Add the project creation path for the scenario to the front of the command line
         args.unshift(getProjectPath(scenario));
@@ -99,7 +106,7 @@ describe("taco create", function (): void {
     function runScenario(scenario: number, expectedFileCount: number): Q.Promise<any> {
         var create = new Create();
 
-        return create.run(makeICommandData(scenario)).then(function (): void {
+        return create.run(makeICommandData(scenario, successScenarios)).then(function (): void {
             var fileCount: number = countProjectItemsRecursive(getProjectPath(scenario));
 
             fileCount.should.be.exactly(expectedFileCount);
@@ -109,7 +116,7 @@ describe("taco create", function (): void {
     function runFailureScenario(scenario: number, expectedError?: string): Q.Promise<any> {
         var create = new Create();
 
-        return create.run(makeICommandData(scenario)).then(function (): Q.Promise<any> {
+        return create.run(makeICommandData(scenario, failureScenarios)).then(function (): Q.Promise<any> {
             throw new Error("Scenario succeeded when it shouldn't have");
         }, function (err: string): Q.Promise<any> {
             if (expectedError) {
@@ -149,169 +156,173 @@ describe("taco create", function (): void {
         });
     });
 
-    it("should succeed: Scenario 0 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
-        var scenario: number = 0;
+    describe("Success scenarios", function (): void {
+        it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
+            var scenario: number = 1;
 
-        // Template that will be used: 4.0.0-Kit typescript
-        // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
-        runScenario(scenario, 114).then(done, done);
-    });
+            // Template that will be used: 4.0.0-Kit typescript
+            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
+            runScenario(scenario, 114).then(done, done);
+        });
 
-    it("should succeed: Scenario 1 [path, id, name, kit, template]", function (done: MochaDone): void {
-        var scenario: number = 1;
+        it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
+            var scenario: number = 2;
 
-        // Template that will be used: 4.0.0-Kit blank
-        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-        runScenario(scenario, 90).then(done, done);
-    });
+            // Template that will be used: 4.0.0-Kit blank
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+            runScenario(scenario, 90).then(done, done);
+        });
 
-    it("should succeed: Scenario 2 [path, id, kit, template]", function (done: MochaDone): void {
-        var scenario: number = 2;
+        it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
+            var scenario: number = 3;
 
-        // Template that will be used: default typescript
-        // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
-        runScenario(scenario, 114).then(done, done);
-    });
+            // Template that will be used: default typescript
+            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
+            runScenario(scenario, 114).then(done, done);
+        });
 
-    it("should succeed: Scenario 3 [path, kit, template]", function (done: MochaDone): void {
-        var scenario: number = 3;
+        it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
+            var scenario: number = 4;
 
-        // Template that will be used: default blank
-        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-        runScenario(scenario, 90).then(done, done);
-    });
+            // Template that will be used: default blank
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+            runScenario(scenario, 90).then(done, done);
+        });
 
-    it("should succeed: Scenario 4 [path, kit, template (no value)]", function (done: MochaDone): void {
-        var scenario: number = 4;
+        it("Success scenario 5 [path, kit, template (no value)]", function (done: MochaDone): void {
+            var scenario: number = 5;
 
-        // Template that will be used: 5.0.0-Kit blank
-        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-        runScenario(scenario, 90).then(done, done);
-    });
+            // Template that will be used: 5.0.0-Kit blank
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+            runScenario(scenario, 90).then(done, done);
+        });
 
-    it("should succeed: Scenario 5 [path, kit]", function (done: MochaDone): void {
-        var scenario: number = 5;
+        it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
+            var scenario: number = 6;
 
-        // Template that will be used: 4.0.0-Kit blank
-        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-        runScenario(scenario, 90).then(done, done);
-    });
+            // Template that will be used: 4.0.0-Kit blank
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+            runScenario(scenario, 90).then(done, done);
+        });
 
-    it("should succeed: Scenario 6 [path, template]", function (done: MochaDone): void {
-        var scenario: number = 6;
+        it("Success scenario 7 [path, template]", function (done: MochaDone): void {
+            var scenario: number = 7;
 
-        // Template that will be used: 4.0.0-Kit typescript
-        // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
-        runScenario(scenario, 114).then(done, done);
-    });
+            // Template that will be used: 4.0.0-Kit typescript
+            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
+            runScenario(scenario, 114).then(done, done);
+        });
 
-    it("should succeed: Scenario 7 [path, template (no value)]", function (done: MochaDone): void {
-        var scenario: number = 7;
+        it("Success scenario 8 [path, template (no value)]", function (done: MochaDone): void {
+            var scenario: number = 8;
 
-        // Template that will be used: 4.0.0-Kit blank
-        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-        runScenario(scenario, 90).then(done, done);
-    });
+            // Template that will be used: 4.0.0-Kit blank
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+            runScenario(scenario, 90).then(done, done);
+        });
 
-    it("should succeed: Scenario 8 [path, copy-from]", function (done: MochaDone): void {
-        var scenario: number = 8;
+        it("Success scenario 9 [path, copy-from]", function (done: MochaDone): void {
+            var scenario: number = 9;
 
-        // The copy-from source has 2 files and 1 folder, and Cordova will add 2 files and 4 folders, for a total of 9 entries
-        runScenario(scenario, 9).then(done, done);
-    });
+            // The copy-from source has 2 files and 1 folder, and Cordova will add 2 files and 4 folders, for a total of 9 entries
+            runScenario(scenario, 9).then(done, done);
+        });
 
-    it("should succeed: Scenario 9 [path, cli]", function (done: MochaDone): void {
-        var scenario: number = 9;
+        it("Success scenario 10 [path, cli]", function (done: MochaDone): void {
+            var scenario: number = 10;
 
-        // The default cordova project has 6 files and 7 folders, for a total of 13 entries
-        runScenario(scenario, 13).then(done, done);
-    });
+            // The default cordova project has 6 files and 7 folders, for a total of 13 entries
+            runScenario(scenario, 13).then(done, done);
+        });
 
-    it.skip("should fail: Scenario 10 [path, kit (no value)]", function (done: MochaDone): void {
-        // TODO Complete this test after kit story is checked in.
-        //
-        // Create command should fail if --kit was specified with no value
-        var scenario: number = 10;
+        it("Success scenario 11 [path, extra unknown parameter]", function (done: MochaDone): void {
+            var scenario: number = 11;
 
-        runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done);
-    });
-
-    it("should fail: Scenario 11 [path, template (unknown value)]", function (done: MochaDone): void {
-        // If a template is not found, create command should fail with an appropriate message
-        var scenario: number = 11;
-
-        runFailureScenario(scenario, "command.create.templateNotFound").then(done, done);
-    });
-
-    it.skip("should fail: Scenario 12 [typescript template with a kit that doesn't have a typescript template]", function (done: MochaDone): void {
-        // TODO Enable this test when the real metadata is used; the 5.0.0-Kit will exist and not define a typescript template.
-        //
-        // Similar to scenario 11 (create command should fail when a template is not found), but for typescript templates we have a specific message
-        var scenario: number = 12;
-
-        runFailureScenario(scenario, "command.create.noTypescript").then(done, done);
-    });
-
-    it("should fail: Scenario 13 [path, kit, template, copy-from]", function (done: MochaDone): void {
-        // Create command should fail when both --template and --copy-from are specified
-        var scenario: number = 13;
-
-        runFailureScenario(scenario, "command.create.notTemplateIfCustomWww").then(done, done);
-    });
-
-    it("should fail: Scenario 14 [path, kit, cli]", function (done: MochaDone): void {
-        // Create command should fail when both --kit and --cli are specified
-        var scenario: number = 14;
-
-        runFailureScenario(scenario, "command.create.notBothCliAndKit").then(done, done);
-    });
-
-    it("should fail: Scenario 15 [path, cli, template]", function (done: MochaDone): void {
-        // Create command should fail when both --cli and --template are specified
-        var scenario: number = 15;
-
-        runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
-    });
-
-    it("should fail: Scenario 16 [path (value is an existing project)]", function (done: MochaDone): void {
-        // Create command should fail when the specified path is a non-empty existing folder (Cordova error)
-        var scenario: number = 16;
-        var copyDest: string = getProjectPath(scenario);
-
-        wrench.mkdirSyncRecursive(copyDest, 511); // 511 decimal is 0777 octal
-        utils.copyRecursive(testTemplateSrc, copyDest).then(function (): void {
-            runFailureScenario(scenario).then(done, done);
+            // Template that will be used: default blank
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
+            runScenario(scenario, 90).then(done, done);
         });
     });
 
-    it("should fail: Scenario 17 [copy-from (unknown path)]", function (done: MochaDone): void {
-        // Create command should fail when --copy-from is specified with a path that doesn't exist (Cordova error)
-        var scenario: number = 17;
+    describe("Failure scenarios", function (): void {
+        it.skip("Failure scenario 1 [path, kit (no value)]", function (done: MochaDone): void {
+            // TODO Complete this test after kit story is checked in.
+            //
+            // Create command should fail if --kit was specified with no value
+            var scenario: number = 1;
 
-        runFailureScenario(scenario).then(done, done);
-    });
+            runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done);
+        });
 
-    it.skip("should fail: Scenario 18 [cli (unknown value)]", function (done: MochaDone): void {
-        // TODO Enable this test when kits story is checked in and cli validation is in place
-        //
-        // Create command should fail when specified cli version doesn't exist
-        var scenario: number = 18;
+        it("Failure scenario 2 [path, template (unknown value)]", function (done: MochaDone): void {
+            // If a template is not found, create command should fail with an appropriate message
+            var scenario: number = 2;
 
-        runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done);
-    });
+            runFailureScenario(scenario, "command.create.templateNotFound").then(done, done);
+        });
 
-    it("should succeed: Scenario 19 [path, extra unknown parameter]", function (done: MochaDone): void {
-        var scenario: number = 19;
+        it.skip("Failure scenario 3 [typescript template with a kit that doesn't have a typescript template]", function (done: MochaDone): void {
+            // TODO Enable this test when the real metadata is used; the 5.0.0-Kit will exist and not define a typescript template.
+            //
+            // Similar to failure scenario 2 (create command should fail when a template is not found), but for typescript templates we have a specific message
+            var scenario: number = 3;
 
-        // Template that will be used: default blank
-        // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-        runScenario(scenario, 90).then(done, done);
-    });
+            runFailureScenario(scenario, "command.create.noTypescript").then(done, done);
+        });
 
-    it("should fail: Scenario 20 [path, appId (invalid value)]", function (done: MochaDone): void {
-        // Create command should fail when an invalid app ID is specified (Cordova error)
-        var scenario: number = 20;
+        it("Failure scenario 4 [path, kit, template, copy-from]", function (done: MochaDone): void {
+            // Create command should fail when both --template and --copy-from are specified
+            var scenario: number = 4;
 
-        runFailureScenario(scenario).then(done, done);
+            runFailureScenario(scenario, "command.create.notTemplateIfCustomWww").then(done, done);
+        });
+
+        it("Failure scenario 5 [path, kit, cli]", function (done: MochaDone): void {
+            // Create command should fail when both --kit and --cli are specified
+            var scenario: number = 5;
+
+            runFailureScenario(scenario, "command.create.notBothCliAndKit").then(done, done);
+        });
+
+        it("Failure scenario 6 [path, cli, template]", function (done: MochaDone): void {
+            // Create command should fail when both --cli and --template are specified
+            var scenario: number = 6;
+
+            runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
+        });
+
+        it("Failure scenario 7 [path (value is an existing project)]", function (done: MochaDone): void {
+            // Create command should fail when the specified path is a non-empty existing folder (Cordova error)
+            var scenario: number = 7;
+            var copyDest: string = getProjectPath(scenario);
+
+            wrench.mkdirSyncRecursive(copyDest, 511); // 511 decimal is 0777 octal
+            utils.copyRecursive(testTemplateSrc, copyDest).then(function (): void {
+                runFailureScenario(scenario).then(done, done);
+            });
+        });
+
+        it("Failure scenario 8 [copy-from (unknown path)]", function (done: MochaDone): void {
+            // Create command should fail when --copy-from is specified with a path that doesn't exist (Cordova error)
+            var scenario: number = 8;
+
+            runFailureScenario(scenario).then(done, done);
+        });
+
+        it.skip("Failure scenario 9 [cli (unknown value)]", function (done: MochaDone): void {
+            // TODO Enable this test when kits story is checked in and cli validation is in place
+            //
+            // Create command should fail when specified cli version doesn't exist
+            var scenario: number = 9;
+
+            runFailureScenario(scenario, "ERROR_ID_HERE").then(done, done);
+        });
+
+        it("Failure scenario 10 [path, appId (invalid value)]", function (done: MochaDone): void {
+            // Create command should fail when an invalid app ID is specified (Cordova error)
+            var scenario: number = 10;
+
+            runFailureScenario(scenario).then(done, done);
+        });
     });
 });
