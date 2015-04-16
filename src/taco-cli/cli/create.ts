@@ -13,7 +13,8 @@ import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
 import templateManager = require ("./utils/template-manager");
-import cordovaWrapper = require ("./utils/cordova-wrapper");
+import cordovaWrapper = require("./utils/cordova-wrapper");
+import projectHelper = require("./utils/project-helper");
 import nopt = require ("nopt");
 import Q = require ("q");
 import fs = require ("fs");
@@ -86,7 +87,8 @@ class Create implements commands.IDocumentedCommand {
 
         return this.createProject()
             .then(function (templateDisplayName: string): Q.Promise<any> {
-            return self.createTacoJsonFile()
+            var valueToSerialize: string = self.commandParameters.isKitProject ? self.commandParameters.kitId : self.commandParameters.cordovaCli;
+            return projectHelper.createTacoJsonFile(self.commandParameters.projectPath, self.commandParameters.isKitProject, valueToSerialize)
                 .then(function (): Q.Promise<any> {
                     self.finalize();
                 return Q.resolve(null);
@@ -140,7 +142,7 @@ class Create implements commands.IDocumentedCommand {
     }
 
     /**
-     * Massage the options parameters - they need to be passed in as a stringified config JSON object
+     * Massage the optional parameters - they need to be passed in as a stringified config JSON object to cordova.raw.create 
      */
     private formalizeParameters(): void {
         var config: ICordovaConfigMetadata;
@@ -205,7 +207,7 @@ class Create implements commands.IDocumentedCommand {
                 self.commandParameters.kitId = kitId;
                 if (mustUseTemplate) {
                     return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
-                        .then(function (templateDisplayName: string): Q.Promise<any> {
+                        .then(function (templateDisplayName: string): Q.Promise<string> {
                         self.commandParameters.templateDisplayName = templateDisplayName;
                         return Q.resolve(templateDisplayName);
                     });

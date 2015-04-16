@@ -43,35 +43,15 @@ module TacoUtility {
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
         public static lazyRequire<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
-            var deferred = Q.defer<T>();
-            var packageTargetPath: string;
-            TacoPackageLoader.lazyAcquire(packageName, packageVersion, logLevel).
-                then(function (packageTargetPath: string): Q.Promise<T> {
-                var pkg = <T>require(packageTargetPath);
-                return Q.resolve(pkg);
-                });
-            return deferred.promise;
-        }
-
-        /**
-         * Acquires a node package with specified version. If the package is not already downloaded,
-         * then first download the package and cache it locally for future loads.
-         *
-         * @param {string} packageName The name of the package to load
-         * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
-         *
-         * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved with the path of the acquired package
-         */
-        public static lazyAcquire(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<any> {
             var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
             var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
 
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): Q.Promise<any> {
-                return Q.resolve(packageTargetPath);
-            });
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): T {
+                return TacoPackageLoader.requirePackage<T>(packageTargetPath);
+            });  
         }
 
-        private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
+       private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
             var deferred = Q.defer();
             try {
                 mkdirp.sync(packageTargetPath);

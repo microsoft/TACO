@@ -39,8 +39,8 @@ module TacoUtility {
          * log
          */
         export function log(msg: string, level?: Level): void {
-            msg = colorize(msg, level);
             level = level ? level : Level.Normal;
+            msg = colorize(msg, level);
             switch (level) {
                 case Level.Error:
                 case Level.Warn:
@@ -60,6 +60,7 @@ module TacoUtility {
          * for quick logging use
          */
         export function logLine(msg: string, level?: Level): void {
+            level = level ? level : Level.Normal;
             log(msg + "\n", level);
         }
 

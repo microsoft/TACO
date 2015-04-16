@@ -42,12 +42,8 @@ class CordovaWrapper {
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer();
         try {
-            return packageLoader.lazyAcquire("cordova", cordovaCli).then(function (cordovaCliModulePath: string): Q.Promise<any> {
-                var cordovaLibPath = path.join(cordovaCliModulePath, constants.NpmNodeModules, constants.CordovaLib);
-                if (cordovaLibPath) {
-                    var cordova_lib = require(cordovaLibPath);
-                    return cordova_lib.cordova.raw.create(projectPath, id, name, cdvConfig);
-                }
+            return packageLoader.lazyRequire("cordova", cordovaCli).then(function(cordova: Cordova.ICordova): Q.Promise<any> {
+                return cordova.raw.create(projectPath, id, name, cdvConfig);
             });
         } catch (e) {
             deferred.reject(e);
