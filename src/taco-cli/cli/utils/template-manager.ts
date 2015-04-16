@@ -1,16 +1,15 @@
 ﻿/// <reference path="../../../typings/wrench.d.ts" />
 /// <reference path="../../../typings/replace.d.ts" />
-/// <reference path="../../../typings/tar.d.ts" />
 /// <reference path="../../../typings/taco-utils.d.ts"/>
+/// <reference path="../../../typings/adm-zip.d.ts"/>
 
 "use strict";
 import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
-import zlib = require ("zlib");
 import wrench = require ("wrench");
-import tar = require ("tar");
 import replace = require ("replace");
+import admZip = require ("adm-zip");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
 import logger = tacoUtility.Logger;
@@ -94,23 +93,14 @@ class TemplateManager {
             }
 
             // Cache does not contain the specified template, create the directory tree to cache it
-            wrench.mkdirSyncRecursive(cachedTemplateKitPath, 777);
+            wrench.mkdirSyncRecursive(cachedTemplateKitPath, 511); // 511 decimal is 0777 octal
 
             // Extract the template archive to the cache
-            var stream: tar.ExtractStream = fs.createReadStream(templateInfo.url).pipe(zlib.createGunzip()).pipe(tar.Extract({ path: cachedTemplateKitPath }));
-            var deferred = Q.defer();
+            var templateZip = new admZip(templateInfo.url);
 
-            stream.on("finish", function (): void {
-                deferred.resolve({});
-            });
+            templateZip.extractAllTo(cachedTemplateKitPath);
 
-            stream.on("error", function (e: Error): void {
-                deferred.reject(e);
-            });
-
-            return deferred.promise.then(function (): Q.Promise<string> {
-                return Q.resolve(cachedTemplatePath);
-            });
+            return Q.resolve(cachedTemplatePath);
         } else {
             // Template already extracted to cache
             return Q.resolve(cachedTemplatePath);
@@ -235,11 +225,11 @@ module KitHelper {
                 default: {
                     blank: {
                         name: "Blank template",
-                        url: path.resolve(__dirname, "..", "..", "..", "..", "templates", "default", "blank.tar.gz")
+                        url: path.resolve(__dirname, "..", "..", "..", "..", "templates", "default", "blank.zip")
                     },
                     typescript: {
                         name: "Blank TypeScript template",
-                        url: path.resolve(__dirname, "..", "..", "..", "..", "templates", "default", "typescript.tar.gz")
+                        url: path.resolve(__dirname, "..", "..", "..", "..", "templates", "default", "typescript.zip")
                     }
                 }
             };

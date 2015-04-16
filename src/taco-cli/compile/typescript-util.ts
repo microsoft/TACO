@@ -59,7 +59,7 @@ export class TypeScriptServices {
     }
 
     /**
-     * Compiles a diectory using the default settings, and the given source and destination location.
+     * Compiles a directory using the default settings, and the given source and destination location.
      */
     public compileDirectory(sourceDirectory: string, outputDirectory: string, sourceMap: boolean, cb: Function): void {
         var sourceFiles = this.getProjectTypescriptFiles(sourceDirectory, []);

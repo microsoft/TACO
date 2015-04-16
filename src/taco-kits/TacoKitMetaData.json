@@ -80,27 +80,27 @@
         "default": {
                     "blank": {
                         "name": "Blank template",
-                        "url": "templates/default/blank.tar.gz"
+                        "url": "templates/default/blank.zip"
                     },
                     "typescript": {
                         "name": "Blank TypeScript template",
-                        "url": "templates/default/typescript.tar.gz"
+                        "url": "templates/default/typescript.zip"
                     }
                 },
                 "4.0.0-Kit": {
                     "blank": {
                         "name": "Blank template",
-                        "url": "templates/4.0.0-kit/blank.tar.gz"
+                        "url": "templates/4.0.0-kit/blank.zip"
                     },
                     "typescript": {
                         "name": "Blank TypeScript template",
-                        "url": "templates/4.0.0-kit/typescript.tar.gz"
+                        "url": "templates/4.0.0-kit/typescript.zip"
                     }
                 },
                 "5.0.0-Kit": {
                     "blank": {
                         "name": "Blank template",
-                        "url": "templates/5.0.0-kit/blank.tar.gz"
+                        "url": "templates/5.0.0-kit/blank.zip"
                     }
                 }	
 	}

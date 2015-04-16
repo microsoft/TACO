@@ -31,7 +31,7 @@ class SelfTest {
         var buildOptions = deviceBuild ? "--device" : "--emulator";
 
         var tgzProducingStream: NodeJS.ReadableStream = null;
-        var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", mode: 777, filter: SelfTest.filterForTar });
+        var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
         tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
         var deferred = Q.defer();

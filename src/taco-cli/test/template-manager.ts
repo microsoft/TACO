@@ -8,8 +8,7 @@
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/rimraf.d.ts"/>
-/// <reference path="../../typings/fstream.d.ts"/>
-/// <reference path="../../typings/tar.d.ts"/>
+/// <reference path="../../typings/archiver.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
 /// <reference path="../../typings/taco-utils.d.ts"/>
 
@@ -20,14 +19,14 @@ import mocha = require ("mocha");
 import path = require ("path");
 import zlib = require ("zlib");
 import fs = require ("fs");
+import os = require ("os");
 import templates = require ("../cli/utils/template-manager");
 import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import resources = tacoUtils.ResourcesManager;
 import rimraf = require ("rimraf");
-import fstream = require ("fstream");
-import tar = require ("tar");
 import wrench = require ("wrench");
+import archiver = require ("archiver");
 
 interface ITemplateInfo {
     id: string;
@@ -51,13 +50,14 @@ describe("TemplateManager", function (): void {
     var testAppName: string = "testAppName";
 
     // Important paths
-    var runFolder: string = path.resolve(__dirname, "templates_test_run");
+    var runFolder: string = path.resolve(os.tmpdir(), "taco_cli_templates_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
     var templateCache: string = path.join(tacoHome, "templates");
     var cachedTestTemplate: string = path.join(templateCache, testKitId, testTemplateId);
     var testTemplateKitSrc: string = path.resolve(__dirname, "resources", "templates", testKitId);
     var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);
-    var testTemplateArchive: string = path.join(testTemplateKitSrc, testTemplateId + ".tar.gz");
+    var testTemplateArchiveFolder: string = path.join(runFolder, "template-archives", testKitId);
+    var testTemplateArchive: string = path.join(testTemplateArchiveFolder, testTemplateId + ".zip");
 
     // ITemplateInfo object
     var templateInfo: ITemplateInfo = {
@@ -80,15 +80,39 @@ describe("TemplateManager", function (): void {
         // Set ResourcesManager to test mode
         resources.UnitTest = true;
 
-        // Create a temporary folder for our test run
-        wrench.mkdirSyncRecursive(runFolder, 777);
-
         // Set the temporary template cache location in TemplateManager for our tests
         templates.TemplateCachePath = templateCache;
 
         // Mock the KitHelper in TemplateManager
+
         // templates.Kits = mockKitHelper;
-        done();
+
+        // Delete existing run folder if necessary
+        rimraf(runFolder, function (err: Error): void {
+            if (err) {
+                done(err);
+            } else {
+                // Create the run folder for our tests
+                wrench.mkdirSyncRecursive(runFolder, 511); // 511 decimal is 0777 octal
+
+                // Prepare the test template (archive it)
+                wrench.mkdirSyncRecursive(testTemplateArchiveFolder, 511); // 511 decimal is 0777 octal
+
+                var archive: any = archiver("zip");
+                var outputStream: NodeJS.WritableStream = fs.createWriteStream(testTemplateArchive);
+
+                archive.on("error", function (err: Error): void {
+                    done(err);
+                });
+
+                outputStream.on("close", function (): void {
+                    done();
+                });
+
+                archive.pipe(outputStream);
+                archive.directory(testTemplateSrc, testTemplateId).finalize();
+            }
+        });
     });
 
     after(function (done: MochaDone): void {
@@ -114,7 +138,7 @@ describe("TemplateManager", function (): void {
             var copySrc: string = path.join(testTemplateSrc, "a.txt");
             var copyDest: string = path.join(cachedTestTemplate, "a.txt");
 
-            wrench.mkdirSyncRecursive(cachedTestTemplate, 777);
+            wrench.mkdirSyncRecursive(cachedTestTemplate, 511); // 511 decimal is 0777 octal
             utils.copyFile(copySrc, copyDest).then(function (): string {
                 // Call findTemplatePath()
                 return (<any>templates).findTemplatePath(templateInfo);
@@ -204,7 +228,7 @@ describe("TemplateManager", function (): void {
             // Copy template items to a new folder
             var testProjectPath = path.join(runFolder, "testProject");
 
-            wrench.mkdirSyncRecursive(testProjectPath, 777);
+            wrench.mkdirSyncRecursive(testProjectPath, 511); // 511 decimal is 0777 octal
             utils.copyRecursive(testTemplateSrc, testProjectPath).then(function (): string {
                 // Call performTokenReplacement()
                 return (<any>templates).performTokenReplacements(testProjectPath, testAppId, testAppName);
