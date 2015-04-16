@@ -100,7 +100,7 @@ class TemplateManager {
             }
 
             // Cache does not contain the specified template, create the directory tree to cache it
-            wrench.mkdirSyncRecursive(cachedTemplateKitPath, 777);
+            wrench.mkdirSyncRecursive(cachedTemplateKitPath, 511); // 511 decimal is 0777 octal
 
             // Extract the template archive to the cache
             var templateZip = new admZip(templateInfo.archiveUrl);

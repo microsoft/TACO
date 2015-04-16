@@ -282,7 +282,7 @@ class RemoteBuildClient {
 
         var deferred = Q.defer();
 
-        var firstPassReader = new fstream.Reader({ path: projectSourceDir, type: "Directory", mode: 777, filter: filterForChanges });
+        var firstPassReader = new fstream.Reader({ path: projectSourceDir, type: "Directory", filter: filterForChanges });
         firstPassReader.on("close", function (): void {
             // We have now determined which files are new and which files are old. Construct changeList.json
             var previousFiles = Object.keys(lastChangeTime);
@@ -312,7 +312,7 @@ class RemoteBuildClient {
         });
 
         return deferred.promise.then(function (): zlib.Gzip {
-            var projectSourceDirReader = new fstream.Reader({ path: projectSourceDir, type: "Directory", mode: 777, filter: filterForTar });
+            var projectSourceDirReader = new fstream.Reader({ path: projectSourceDir, type: "Directory", filter: filterForTar });
             var tgzProducingStream = projectSourceDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
             return tgzProducingStream;
         });
