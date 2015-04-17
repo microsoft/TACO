@@ -13,8 +13,8 @@ import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
 import templateManager = require ("./utils/template-manager");
-import cordovaWrapper = require("./utils/cordova-wrapper");
-import projectHelper = require("./utils/project-helper");
+import cordovaWrapper = require ("./utils/cordova-wrapper");
+import projectHelper = require ("./utils/project-helper");
 import nopt = require ("nopt");
 import Q = require ("q");
 import fs = require ("fs");
@@ -88,12 +88,11 @@ class Create implements commands.IDocumentedCommand {
         return this.createProject()
             .then(function (templateDisplayName: string): Q.Promise<any> {
             var valueToSerialize: string = self.commandParameters.isKitProject ? self.commandParameters.kitId : self.commandParameters.cordovaCli;
-            return projectHelper.createTacoJsonFile(self.commandParameters.projectPath, self.commandParameters.isKitProject, valueToSerialize)
-                .then(function (): Q.Promise<any> {
-                    self.finalize();
-                return Q.resolve(null);
-            });
-            }).fail(function (err: any): Q.Promise<any> {
+            return projectHelper.createTacoJsonFile(self.commandParameters.projectPath, self.commandParameters.isKitProject, valueToSerialize);
+        }).then(function (): Q.Promise<any> {
+            self.finalize();
+            return Q.resolve(null);
+        }).fail(function (err: any): Q.Promise<any> {
             logger.log(err.message, logger.Level.Error);
             return Q.reject(err.message);
         });

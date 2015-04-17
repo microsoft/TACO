@@ -84,9 +84,7 @@ describe("TemplateManager", function (): void {
         templates.TemplateCachePath = templateCache;
 
         // Mock the KitHelper in TemplateManager
-
         // templates.Kits = mockKitHelper;
-
         // Delete existing run folder if necessary
         rimraf(runFolder, function (err: Error): void {
             if (err) {

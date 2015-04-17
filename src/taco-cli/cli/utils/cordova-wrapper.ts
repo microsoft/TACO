@@ -7,13 +7,12 @@ import Q = require ("q");
 import path = require ("path");
 import tacoUtility = require ("taco-utils");
 import packageLoader = tacoUtility.TacoPackageLoader;
-import constants = require ("./Constants");
 
 class CordovaWrapper {
-    public static cli(args: string[], cordovaCliPath?: string): Q.Promise<any> {
+    private static CordovaModuleName: string = "cordova";
+    public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
-        var cordovaCli = cordovaCliPath ? path.resolve(cordovaCliPath, constants.CordovaCmdBinPath) : constants.Cordova;
-        var proc = child_process.exec([cordovaCli].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
+        var proc = child_process.exec([CordovaWrapper.CordovaModuleName].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
             if (err) {
                 deferred.reject(err);
             } else {
@@ -42,7 +41,7 @@ class CordovaWrapper {
     public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
         var deferred = Q.defer();
         try {
-            return packageLoader.lazyRequire("cordova", cordovaCli).then(function(cordova: Cordova.ICordova): Q.Promise<any> {
+            return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordova: Cordova.ICordova): Q.Promise<any> {
                 return cordova.raw.create(projectPath, id, name, cdvConfig);
             });
         } catch (e) {
