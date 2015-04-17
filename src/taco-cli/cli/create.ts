@@ -71,7 +71,7 @@ class Create implements commands.IDocumentedCommand {
 
     private commandParameters: ICreateParameters;
 
-    public static TacoOnlyOptions: string[] = ["cli", "kit", "template"];
+    private static TacoOnlyOptions: string[] = ["cli", "kit", "template"];
     
     public info: commands.ICommandInfo;
 
@@ -202,17 +202,27 @@ class Create implements commands.IDocumentedCommand {
             // Use the CLI version specified as an argument to create the project
             return cordovaWrapper.create(this.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
         } else {
-            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli: string): Q.Promise<any> {
+            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli: string): void {
                 self.commandParameters.kitId = kitId;
-                if (mustUseTemplate) {
-                    return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
-                        .then(function (templateDisplayName: string): Q.Promise<string> {
-                        self.commandParameters.templateDisplayName = templateDisplayName;
-                        return Q.resolve(templateDisplayName);
-                    });
-                } else {
-                    return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
-                }
+            }).then(function (): Q.Promise<any> {
+                return kitHelper.getKitInfo(kitId);
+                }).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {
+                    if (kitHelper.isKitDeprecated(kitInfo)) {
+                        // Warn the user
+                        logger.log("\n");
+                        logger.logLine(resources.getString("command.create.warning.deprecatedKit", kitId), logger.Level.Warn);
+                        logger.log("\n");
+                        logger.logLine(resources.getString("command.create.warning.deprecatedKitSuggestion"), logger.Level.Warn);
+                    }
+                    if (mustUseTemplate) {
+                        return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
+                            .then(function (templateDisplayName: string): Q.Promise<string> {
+                                self.commandParameters.templateDisplayName = templateDisplayName;
+                                return Q.resolve(templateDisplayName);
+                            });
+                    } else {
+                        return cordovaWrapper.create(cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+                    }
             });
         }
     }

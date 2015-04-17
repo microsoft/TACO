@@ -18,6 +18,11 @@
     "_command.create.templatesUnavailable.comment": "Error reported when templates cannot be downloaded",
     "command.create.success.base": "Success!",
     "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
+    "command.create.warning.deprecatedKit": "Warning: Kit {0} has been deprecated.",
+    "_command.create.warning.deprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation.",
+    "command.create.warning.deprecatedKitSuggestion": "Consider changing your project to use a more recent Kit. For deprecation information, see {fwdLink_toDo}",
+    "_command.create.warning.deprecatedKitSuggestion.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
+    
     "command.create.success.projectTemplate": "Your project using the {0} is ready for use at",
     "_command.create.success.projectTemplate.comment": "This sentence follows the word 'Success!' when the create command succeeds if the project was created using a template. {0} is the display name of the template the project was created with.",
     "command.create.success.projectCustomWww": "Your project using custom assets from {0} is ready for use at",

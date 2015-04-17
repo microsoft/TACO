@@ -123,15 +123,30 @@ module TacoKits {
         }
 
         /**
-         *   Returns a promise reolved by a boolean value indicating
-         *   whether the specified kit is deprecated, or not
+         *   Returns a promise which is either rejected with a failure to find the specified kit
+         *   or resolved with the information regarding the kit
          */
-        public static isKitDeprecated(kitId: string): Q.Promise<boolean> {
-            var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
-            return KitHelper.getKitInfo(kitId).then(function (kitInfo: IKitInfo): Q.Promise<boolean> {
-                deferred.resolve(kitInfo.deprecated ? true : false);
+        public static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
+            var kits: IKitMetadata = null;
+            var deferred: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
+            return KitHelper.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
+                kits = metadata.kits;
+                if (kitId && kits && kits[kitId]) {
+                    deferred.resolve(kits[kitId]);
+                } else {
+                    // Error, empty kitId or no kit matching the kit id
+                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
+                }
+
                 return deferred.promise;
             });
+        }
+
+        /**
+         *  Returns 'true' if a kit is deprecated, 'false' otherwise
+         */
+        public static isKitDeprecated(kitInfo: IKitInfo): boolean {
+            return kitInfo.deprecated ? true : false;
         }
 
         /**
@@ -279,31 +294,6 @@ module TacoKits {
                     deferred.resolve(kitInfo["cordova-cli"]);
                 } else {
                     deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.NoCliSpecification", kitId)));
-                }
-
-                return deferred.promise;
-            });
-        }
-        
-        /**
-         *   Returns a promise which is either rejected with a failure to find the specified kit
-         *   or resolved with the information regarding the kit
-         */
-        private static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
-            var kits: IKitMetadata = null;
-            var deferred: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
-            return KitHelper.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
-                kits = metadata.kits;
-                if (kitId && kits && kits[kitId]) {
-                    if (kits[kitId].deprecated) {
-                        deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
-                    } else {
-                        // Found the specified kit
-                        deferred.resolve(kits[kitId]);
-                    }
-                } else {
-                    // Error, empty kitId or no kit matching the kit id
-                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId)));
                 }
 
                 return deferred.promise;

@@ -20,6 +20,8 @@ import UtilHelper = require ("./util-helper");
 import ResourcesManager = require ("./resources-manager");
 import utils = UtilHelper.UtilHelper;
 import resources = ResourcesManager.ResourcesManager;
+import loggerUtil = require("./logger");
+import logger = loggerUtil.Logger;
 
 module TacoUtility {
     export enum PackageSpecType {

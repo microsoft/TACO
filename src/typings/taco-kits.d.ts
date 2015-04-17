@@ -82,10 +82,21 @@ declare module TacoKits {
         public static getKitMetadata(): Q.Promise<ITacoKitMetadata>;
 
         /**
+         *   Returns a promise which is either rejected with a failure to find the specified kit
+         *   or resolved with the information regarding the kit
+         */
+        public static getKitInfo(kitId: string): Q.Promise<IKitInfo>;
+
+        /**
          *  Returns a promise resolved with the Id of the default kit or rejected with error
          *  Note that the default kit is one with default attribute set to 'true'
          */
         public static getDefaultKit(): Q.Promise<string>;
+
+        /**
+         *  Returns 'true' if a kit is deprecated, 'false' otherwise
+         */
+        public static isKitDeprecated(kitInfo: IKitInfo): boolean;
 
         /**
          *   Returns a promise resolved by a valid cordova Cli for the kitId
