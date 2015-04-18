@@ -2,7 +2,8 @@
 /// <reference path="typings/Q.d.ts" />
 /// <reference path="typings/gulp.d.ts" />
 /// <reference path="typings/gulp-extensions.d.ts" />
-
+/// <reference path="typings/del.d.ts" />
+/// <reference path="typings/archiver.d.ts" />
 var runSequence = require("run-sequence");
 import gulp = require ("gulp");
 import path = require ("path");

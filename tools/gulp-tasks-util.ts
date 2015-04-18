@@ -3,7 +3,9 @@
 /// <reference path="../src/typings/tar.d.ts" />
 /// <reference path="../src/typings/fstream.d.ts" />
 /// <reference path="../src/typings/del.d.ts" />
+/// <reference path="../src/typings/archiver.d.ts" />
 
+import archiver = require("archiver");
 import child_process = require("child_process");
 import del = require("del");
 import fs = require("fs");
@@ -12,9 +14,8 @@ import gulp = require("gulp");
 import os = require("os");
 import path = require("path");
 import Q = require("q");
-import tar = require("tar");
 import util = require("util");
-import zlib = require("zlib");
+import zlib = require("zlib")
 
 class GulpUtil {
 
@@ -62,19 +63,20 @@ class GulpUtil {
 
     public static prepareTemplates(templatesSrc: string, templatesDest: string): Q.Promise<any> {
         var buildTemplatesPath: string = path.resolve(templatesDest);
-        var pipes: NodeJS.WritableStream[] = [];
+        var promises: Q.Promise<any>[] = [];
 
         if (!fs.existsSync(buildTemplatesPath)) {
             fs.mkdirSync(buildTemplatesPath);
         }
 
         // Read the templates dir to discover the different kits
-        var kits: string[] = GulpUtil.getChildDirectoriesSync(templatesSrc);
+        var templatesPath: string = templatesSrc;
+        var kits: string[] = GulpUtil.getChildDirectoriesSync(templatesPath);
 
-        kits.forEach(function (value: string, index: number, array: string[]): void {
+        kits.forEach(function (kitValue: string, index: number, array: string[]): void {
             // Read the kit's dir for all the available templates
-            var kitSrcPath: string = path.join(templatesSrc, value);
-            var kitTargetPath: string = path.join(buildTemplatesPath, value);
+            var kitSrcPath: string = path.join(templatesSrc, kitValue);
+            var kitTargetPath: string = path.join(buildTemplatesPath, kitValue);
 
             if (!fs.existsSync(kitTargetPath)) {
                 fs.mkdirSync(kitTargetPath);
@@ -82,16 +84,32 @@ class GulpUtil {
 
             var kitTemplates: string[] = GulpUtil.getChildDirectoriesSync(kitSrcPath);
 
-            kitTemplates.forEach(function (value: string, index: number, array: string[]): void {
-                var templateSrcPath: string = path.resolve(kitSrcPath, value);
-                var templateTargetPath: string = path.join(kitTargetPath, value + ".tar.gz");
-                var dirReader: fstream.Reader = new fstream.Reader({ path: templateSrcPath, type: "Directory", mode: 777 });
+            kitTemplates.forEach(function (templateValue: string, index: number, array: string[]): void {
+                // Create the template's archive
+                var templateSrcPath: string = path.resolve(kitSrcPath, templateValue);
+                var templateTargetPath: string = path.join(kitTargetPath, templateValue + ".zip");
+                var archive: any = archiver("zip");
+                var outputStream: NodeJS.WritableStream = fs.createWriteStream(templateTargetPath);
+                var deferred: Q.Deferred<any> = Q.defer<any>();
 
-                var pipe: NodeJS.WritableStream = dirReader.pipe(tar.Pack()).pipe(zlib.createGzip()).pipe(new fstream.Writer({ path: templateTargetPath }));
-                pipes.push(pipe);
+                archive.on("error", function (err: Error): void {
+                    deferred.reject(err);
+                });
+
+                outputStream.on("close", function (): void {
+                    deferred.resolve({});
+                });
+
+                archive.pipe(outputStream);
+
+                // Note: archiver.bulk() automatically ignores files starting with "."; if this behavior ever changes, or if a different package is used
+                // to archive the templates, some logic to exclude the ".taco-ignore" files found in the templates will need to be added here
+                archive.bulk({ expand: true, cwd: path.join(templatesPath, kitValue), src: [templateValue + "/**"] }).finalize();
+                promises.push(deferred.promise);
             });
         });
-        return Q.all(pipes.map(GulpUtil.streamToPromise));
+
+        return Q.all(promises);
     }
 
     private static installModule(modulePath: string): Q.Promise<any> {
