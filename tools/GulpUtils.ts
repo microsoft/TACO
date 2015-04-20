@@ -5,39 +5,36 @@
 /// <reference path="../src/typings/del.d.ts" />
 /// <reference path="../src/typings/archiver.d.ts" />
 
-import archiver = require("archiver");
-import child_process = require("child_process");
-import del = require("del");
-import fs = require("fs");
-import fstream = require("fstream");
-import gulp = require("gulp");
-import os = require("os");
-import path = require("path");
-import Q = require("q");
-import util = require("util");
-import zlib = require("zlib")
+import archiver = require ("archiver");
+import child_process = require ("child_process");
+import del = require ("del");
+import fs = require ("fs");
+import fstream = require ("fstream");
+import gulp = require ("gulp");
+import os = require ("os");
+import path = require ("path");
+import Q = require ("q");
+import util = require ("util");
+import zlib = require ("zlib")
 
-class GulpUtil {
+class GulpUtils {
 
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
         return modulesToTest.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
-                var modulePath = path.resolve(modulesRoot, val);
-                return GulpUtil.installModule(modulePath)
-                    .then(function (): Q.Promise<any> {
 
-                    var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                    var testProcess = child_process.spawn(npmCommand, ["test"], { cwd: modulePath, stdio: "inherit" });
-                    var deferred = Q.defer();
-                    testProcess.on("close", function (code: number): void {
-                        if (code) {
-                            deferred.reject("Test failed for " + modulePath);
-                        } else {
-                            deferred.resolve({});
-                        }
-                    });
-                    return deferred.promise;
+                var modulePath = path.resolve(modulesRoot, val);
+                var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
+                var testProcess = child_process.spawn(npmCommand, ["test"], { cwd: modulePath, stdio: "inherit" });
+                var deferred = Q.defer();
+                testProcess.on("close", function (code: number): void {
+                    if (code) {
+                        deferred.reject("Test failed for " + modulePath);
+                    } else {
+                        deferred.resolve({});
+                    }
                 });
+                return deferred.promise;
             });
         }, Q({}))
     }
@@ -45,14 +42,14 @@ class GulpUtil {
     public static installModules(modulesToInstall: string[], modulesRoot: string): Q.Promise<any> {
         return modulesToInstall.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
-                return GulpUtil.installModule(path.resolve(modulesRoot, val));
+                return GulpUtils.installModule(path.resolve(modulesRoot, val));
             });
         }, Q({}))
     }
 
     public static copyFiles(pathsToCopy: string[], srcPath: string, destPath: string): Q.Promise<any> {
         return Q.all(pathsToCopy.map(function (val: string): Q.Promise<any> {
-            return GulpUtil.streamToPromise(gulp.src(path.join(srcPath, val)).pipe(gulp.dest(destPath)));
+            return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, val)).pipe(gulp.dest(destPath)));
         }));
     }
 
@@ -71,7 +68,7 @@ class GulpUtil {
 
         // Read the templates dir to discover the different kits
         var templatesPath: string = templatesSrc;
-        var kits: string[] = GulpUtil.getChildDirectoriesSync(templatesPath);
+        var kits: string[] = GulpUtils.getChildDirectoriesSync(templatesPath);
 
         kits.forEach(function (kitValue: string, index: number, array: string[]): void {
             // Read the kit's dir for all the available templates
@@ -82,7 +79,7 @@ class GulpUtil {
                 fs.mkdirSync(kitTargetPath);
             }
 
-            var kitTemplates: string[] = GulpUtil.getChildDirectoriesSync(kitSrcPath);
+            var kitTemplates: string[] = GulpUtils.getChildDirectoriesSync(kitSrcPath);
 
             kitTemplates.forEach(function (templateValue: string, index: number, array: string[]): void {
                 // Create the template's archive
@@ -137,4 +134,4 @@ class GulpUtil {
     }
 }
 
-export = GulpUtil;
+export = GulpUtils;

@@ -2,19 +2,26 @@
 /// <reference path="typings/Q.d.ts" />
 /// <reference path="typings/gulp.d.ts" />
 /// <reference path="typings/gulp-extensions.d.ts" />
-/// <reference path="typings/del.d.ts" />
-/// <reference path="typings/archiver.d.ts" />
+/// <reference path="typings/nopt.d.ts" />
+
 var runSequence = require("run-sequence");
 import gulp = require ("gulp");
 import path = require ("path");
 import Q = require ("q");
 import stylecopUtil = require ("../tools/stylecop-util");
 import tsUtil = require ("./taco-cli/compile/typescript-util");
-import gulpUtil = require("../tools/gulp-tasks-util");
-
+import gulpUtils = require("../tools/GulpUtils");
+import nopt = require ("nopt");
+ 
 var buildConfig = require("../../src/build_config.json");
-
 var tacoModules = ["taco-utils", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
+
+// honour --module flag.
+// gulp --module taco-cli will build/install/run tests only for taco-cli
+var options: any = nopt({ moduleFilter: String, }, {}, process.argv);
+if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) != -1) {
+    tacoModules = [options.moduleFilter];
+}
 
 /* Default task for building /src folder into /bin */
 gulp.task("default", ["install-build"]);
@@ -37,7 +44,7 @@ gulp.task("rebuild", function (callback: Function): void {
 
 /* Task to install the compiled modules */
 gulp.task("install-build", ["build", "prepare-templates"], function (): Q.Promise<any> {
-    return gulpUtil.installModules(tacoModules, buildConfig.buildSrc);
+    return gulpUtils.installModules(tacoModules, buildConfig.buildSrc);
 });
 
 /* Runs style cop on the sources. */
@@ -48,18 +55,18 @@ gulp.task("run-stylecop", function (callback: Function): void {
 
 /* Cleans up the build location, will have to call "gulp prep" again */
 gulp.task("clean", function (callback: (err: Error) => void): void {
-    gulpUtil.deleteDirectoryRecursive(path.resolve(buildConfig.build), callback);
+    gulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.build), callback);
 });
 
 /* Cleans up only the templates in the build folder */
 gulp.task("clean-templates", function (callback: (err: Error) => void): void {
-    gulpUtil.deleteDirectoryRecursive(path.resolve(buildConfig.buildTemplates), callback);
+    gulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.buildTemplates), callback);
 });
 
 /* copy package.json and resources.json files from source to bin */
 gulp.task("copy", function (): Q.Promise<any> {
 
-    return gulpUtil.copyFiles(
+    return gulpUtils.copyFiles(
         [
             "build_config.json",
             "/**/package.json",
@@ -76,12 +83,12 @@ gulp.task("copy", function (): Q.Promise<any> {
 
 /* Task to run tests */
 gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
-    return gulpUtil.runAllTests(tacoModules, buildConfig.buildSrc);
+    return gulpUtils.runAllTests(tacoModules, buildConfig.buildSrc);
 });
 
 /* Task to archive template folders */
 gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> {
-    return gulpUtil.prepareTemplates(buildConfig.templates, buildConfig.buildTemplates);
+    return gulpUtils.prepareTemplates(buildConfig.templates, buildConfig.buildTemplates);
 });
 
 module.exports = gulp;
