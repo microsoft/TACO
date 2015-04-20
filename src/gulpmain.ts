@@ -16,8 +16,8 @@ import nopt = require ("nopt");
 var buildConfig = require("../../src/build_config.json");
 var tacoModules = ["taco-utils", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 
-// honour --module flag.
-// gulp --module taco-cli will build/install/run tests only for taco-cli
+// honour --moduleFilter flag.
+// gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
 var options: any = nopt({ moduleFilter: String, }, {}, process.argv);
 if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) != -1) {
     tacoModules = [options.moduleFilter];
