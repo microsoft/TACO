@@ -62,13 +62,5 @@
             { "name": "--emulator", "description": "[command.run.emulator.description]" },
             { "name": "--target", "description": "[command.run.target.description]" }
         ]
-    },
-    "install-reqs": {
-        "synopsis": "",
-        "modulePath": "./install-reqs",
-        "description": "",
-        "args": [
-            { "name": "PLATFORM", "description": "[command.run.platform.description]" }
-        ]
     }
 }
