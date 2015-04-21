@@ -13,7 +13,6 @@
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
-import mkdirp = require ("mkdirp");
 import nconf = require ("nconf");
 import net = require ("net");
 import os = require ("os");
@@ -37,7 +36,6 @@ var clientCertsDir = path.join(certsDir, "client");
 var darwinOnlyTest = os.platform() === "darwin" ? it : it.skip;
 
 describe("server", function (): void {
-    var tacoHome = path.join(__dirname, "out", "taco_home");
     before(function (): void {
         resources.init("en", path.join(__dirname, "..", "resources"));
         // Clear out settings for nconf
