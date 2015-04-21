@@ -169,7 +169,7 @@ describe("taco create", function (): void {
 
             // Template that will be used: 4.0.0-Kit typescript
             // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
-            runScenario(scenario, 121).then(done, done);
+            runScenario(scenario, 119).then(done, done);
         });
 
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
@@ -177,68 +177,68 @@ describe("taco create", function (): void {
 
             // Template that will be used: 4.0.0-Kit blank
             // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-            runScenario(scenario, 96).then(done, done);
+            runScenario(scenario, 95).then(done, done);
         });
 
         it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
             var scenario: number = 3;
 
             // Template that will be used: default typescript
-            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
-            runScenario(scenario, 121).then(done, done);
+            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 119 entries
+            runScenario(scenario, 119).then(done, done);
         });
 
         it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
             var scenario: number = 4;
 
             // Template that will be used: default blank
-            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-            runScenario(scenario, 96).then(done, done);
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 95 entries
+            runScenario(scenario, 95).then(done, done);
         });
 
         it("Success scenario 5 [path, kit, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 5;
 
             // Template that will be used: 5.0.0-Kit blank
-            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-            runScenario(scenario, 96).then(done, done);
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 95 entries
+            runScenario(scenario, 95).then(done, done);
         });
 
         it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
             var scenario: number = 6;
 
             // Template that will be used: 4.0.0-Kit blank
-            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-            runScenario(scenario, 96).then(done, done);
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 95 entries
+            runScenario(scenario, 95).then(done, done);
         });
 
         it("Success scenario 7 [path, template blank]", function (done: MochaDone): void {
             var scenario: number = 7;
 
             // Template that will be used: 5.0.0-Kit blank
-            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 114 entries
-            runScenario(scenario, 96).then(done, done);
+            // The template has 84 files and 26 folders, and Cordova will add 1 file and 3 folders, for a total of 95 entries
+            runScenario(scenario, 95).then(done, done);
         });
 
         it("Success scenario 8 [path, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 8;
 
             // Template that will be used: 4.0.0-Kit blank
-            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-            runScenario(scenario, 96).then(done, done);
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 95 entries
+            runScenario(scenario, 95).then(done, done);
         });
 
         it("Success scenario 9 [path, copy-from]", function (done: MochaDone): void {
             var scenario: number = 9;
 
-            // The copy-from source has 2 files and 1 folder, and Cordova will add 2 files and 4 folders, for a total of 9 entries
+            // The copy-from source has 2 files and 1 folder, and Cordova will add 2 files and 4 folders, for a total of 14 entries
             runScenario(scenario, 14).then(done, done);
         });
 
         it("Success scenario 10 [path, cli]", function (done: MochaDone): void {
             var scenario: number = 10;
 
-            // The default cordova project has 6 files and 7 folders, for a total of 13 entries
+            // The default cordova project has 6 files and 7 folders, for a total of 14 entries
             runScenario(scenario, 14).then(done, done);
         });
 
@@ -246,8 +246,8 @@ describe("taco create", function (): void {
             var scenario: number = 11;
 
             // Template that will be used: default blank
-            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 90 entries
-            runScenario(scenario, 96).then(done, done);
+            // The template has 64 files and 22 folders, and Cordova will add 1 file and 3 folders, for a total of 95 entries
+            runScenario(scenario, 95).then(done, done);
         });
     });
 
