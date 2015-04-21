@@ -13,6 +13,7 @@
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
+import mkdirp = require ("mkdirp");
 import nconf = require ("nconf");
 import net = require ("net");
 import os = require ("os");
@@ -36,6 +37,7 @@ var clientCertsDir = path.join(certsDir, "client");
 var darwinOnlyTest = os.platform() === "darwin" ? it : it.skip;
 
 describe("server", function (): void {
+    var tacoHome = path.join(__dirname, "out", "taco_home");
     before(function (): void {
         resources.init("en", path.join(__dirname, "..", "resources"));
         // Clear out settings for nconf
@@ -60,7 +62,7 @@ describe("server", function (): void {
 
     it("should start correctly in insecure mode", function (done: MochaDone): void {
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
-        server.start(new RemoteBuildConf(nconf))
+        server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
             fs.existsSync(serverDir).should.be.true;
             fs.existsSync(certsDir).should.be.false;
@@ -86,7 +88,7 @@ describe("server", function (): void {
 
         deferred.promise.then(function (): Q.Promise<any> {
             nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
-            return server.start(new RemoteBuildConf(nconf));
+            return server.start(new RemoteBuildConf(nconf, true));
         }).then(function (): void {
             dummyServer.close(function (): void {
                 done(new Error("Server should not start successfully when the port is already taken!"));
@@ -106,7 +108,7 @@ describe("server", function (): void {
     darwinOnlyTest("should start correctly in secure mode on mac", function (done: MochaDone): void {
         this.timeout(5000);
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en" });
-        server.start(new RemoteBuildConf(nconf))
+        server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
             fs.existsSync(serverDir).should.be.ok;
             fs.existsSync(certsDir).should.be.ok;
@@ -129,7 +131,7 @@ describe("server", function (): void {
     darwinOnlyTest("should be able to download a certificate exactly once on mac", function (done: MochaDone): void {
         this.timeout(5000); // Certificates can take ages to generate apparently
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
-        var config = new RemoteBuildConf(nconf);
+        var config = new RemoteBuildConf(nconf, true);
         HostSpecifics.hostSpecifics.initialize(config).then(function (): Q.Promise<any> {
             return server.start(config);
         }).then(function (): void {
@@ -173,7 +175,7 @@ describe("server", function (): void {
         testModules[modPath] = { mountPath: "testRoute" };
 
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
-        server.start(new RemoteBuildConf(nconf)).then(function (): void {
+        server.start(new RemoteBuildConf(nconf, true)).then(function (): void {
             testServerModuleFactory.TestServerModule.ModConfig.mountPath.should.equal("testRoute");
         }).then(function (): Q.Promise<any> {
             var deferred = Q.defer();
