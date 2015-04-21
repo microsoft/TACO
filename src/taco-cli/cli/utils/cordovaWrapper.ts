@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
-/// <reference path="../../../typings/cordova-extensions.d.ts" />
+/// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
 import child_process = require ("child_process");
 import Q = require ("q");
