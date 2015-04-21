@@ -8,7 +8,7 @@
 /// <reference path="../../typings/mocha.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
-/// <reference path="../../typings/cordova-extensions.d.ts" />
+/// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
@@ -33,8 +33,8 @@ import setupMod = require ("../cli/setup");
 var build = new buildMod();
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/server-mock");
-import SetupMock = require ("./utils/setup-mock");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
 
 describe("taco build", function () {
     var testHttpServer: http.Server;

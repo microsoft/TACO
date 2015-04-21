@@ -9,7 +9,7 @@
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/rimraf.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
-/// <reference path="../../typings/taco-utils.d.ts"/>
+/// <reference path="../../typings/tacoUtils.d.ts"/>
 
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.

@@ -1,4 +1,4 @@
-﻿/// <reference path="../../typings/taco-utils.d.ts" />
+﻿/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 "use strict";
@@ -19,7 +19,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 import util = require ("util");
 
 import Settings = require ("./utils/settings");
-import ConnectionSecurity = require ("./remote-build/connection-security");
+import ConnectionSecurity = require ("./remoteBuild/connectionSecurity");
 
 interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;

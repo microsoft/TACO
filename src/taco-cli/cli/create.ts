@@ -1,4 +1,4 @@
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 "use strict";
@@ -9,8 +9,8 @@ import commands = tacoUtility.Commands;
 import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import templateManager = require ("./utils/template-manager");
-import cordovaWrapper = require ("./utils/cordova-wrapper");
+import templateManager = require ("./utils/templateManager");
+import cordovaWrapper = require ("./utils/cordovaWrapper");
 import nopt = require ("nopt");
 import Q = require ("q");
 

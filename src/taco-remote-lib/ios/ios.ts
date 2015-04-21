@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/zip-stream.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 "use strict";
@@ -17,7 +17,7 @@ import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 import packer = require ("zip-stream");
 
-import iosAppRunner = require ("./ios-app-runner");
+import iosAppRunner = require ("./iosAppRunner");
 
 import ITargetPlatform = require ("../ITargetPlatform.d");
 

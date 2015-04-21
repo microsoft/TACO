@@ -23,12 +23,12 @@ import resources = TacoUtility.ResourcesManager;
 
 import setupMod = require ("../cli/setup");
 import Settings = require ("../cli/utils/settings");
-import ConnectionSecurity = require ("../cli/remote-build/connection-security");
+import ConnectionSecurity = require ("../cli/remoteBuild/connectionSecurity");
 
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/server-mock");
-import SetupMock = require ("./utils/setup-mock");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
 
 describe("taco setup", function (): void {
     var testHome = path.resolve(__dirname, "out");

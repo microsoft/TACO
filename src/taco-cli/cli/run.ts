@@ -1,4 +1,4 @@
-﻿/// <reference path="../../typings/taco-utils.d.ts" />
+﻿/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 "use strict";
@@ -16,10 +16,10 @@ import level = logger.Level;
 import BuildInfo = tacoUtility.BuildInfo;
 import UtilHelper = tacoUtility.UtilHelper;
 
-import CordovaWrapper = require ("./utils/cordova-wrapper");
+import CordovaWrapper = require ("./utils/cordovaWrapper");
 
-import RemoteBuild = require ("./remote-build/remotebuild-client");
-import RemoteBuildSettings = require ("./remote-build/build-settings");
+import RemoteBuild = require ("./remoteBuild/remoteBuildClient");
+import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 
 import Settings = require ("./utils/settings");
 

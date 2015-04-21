@@ -1,15 +1,15 @@
 ﻿/// <reference path="typings/node.d.ts" />
 /// <reference path="typings/Q.d.ts" />
 /// <reference path="typings/gulp.d.ts" />
-/// <reference path="typings/gulp-extensions.d.ts" />
+/// <reference path="typings/gulpExtensions.d.ts" />
 /// <reference path="typings/nopt.d.ts" />
 
 var runSequence = require("run-sequence");
 import gulp = require ("gulp");
 import path = require ("path");
 import Q = require ("q");
-import stylecopUtil = require ("../tools/stylecop-util");
-import tsUtil = require ("./taco-cli/compile/typescript-util");
+import stylecopUtil = require ("../tools/stylecopUtil");
+import tsUtil = require("./taco-cli/compile/typeScriptServices");
 import gulpUtils = require("../tools/GulpUtils");
 import nopt = require ("nopt");
  

@@ -8,10 +8,10 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
-/// <reference path="../../typings/express-extensions.d.ts" />
-/// <reference path="../../typings/taco-remote-lib.d.ts" />
+/// <reference path="../../typings/expressExtensions.d.ts" />
+/// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
 /// <reference path="../../typings/serve-index.d.ts" />
 "use strict";
@@ -23,10 +23,10 @@ import path = require ("path");
 import Q = require ("q");
 import serveIndex = require ("serve-index");
 
-import BuildManager = require ("./build-manager");
-import HostSpecifics = require ("./host-specifics");
+import BuildManager = require ("./buildManager");
+import HostSpecifics = require ("./hostSpecifics");
 import selftest = require ("./selftest");
-import TacoRemoteConf = require ("./taco-remote-conf");
+import TacoRemoteConf = require ("./tacoRemoteConf");
 import utils = require ("taco-utils");
 import util = require ("util");
 
