@@ -91,10 +91,7 @@ class Create implements commands.IDocumentedCommand {
             return projectHelper.createTacoJsonFile(self.commandParameters.projectPath, self.commandParameters.isKitProject, valueToSerialize);
         }).then(function (): Q.Promise<any> {
             self.finalize();
-            return Q.resolve(null);
-        }).fail(function (err: any): Q.Promise<any> {
-            logger.log(err.message, logger.Level.Error);
-            return Q.reject(err.message);
+            return Q.resolve({});
         });
     }
 
@@ -169,9 +166,11 @@ class Create implements commands.IDocumentedCommand {
                 wwwCfg.link = true;
             }
 
-            config.lib = config.lib || { www: { url: "", version: "", id: "", link: false } };
-            config.lib.www = wwwCfg;
-            this.commandParameters.cordovaConfig = JSON.stringify(config);
+            if (config) {
+                config.lib = config.lib || { www: { url: "", version: "", id: "", link: false } };
+                config.lib.www = wwwCfg;
+                this.commandParameters.cordovaConfig = JSON.stringify(config);
+            } 
         }
     }
 
@@ -181,8 +180,13 @@ class Create implements commands.IDocumentedCommand {
     private createProject(): Q.Promise<any> {
         var self = this;
         this.commandParameters.isKitProject = !this.commandParameters.data.options["cli"];
+        this.commandParameters.cordovaCli = this.commandParameters.data.options["cli"];
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
         var kitId: string = this.commandParameters.data.options["kit"];
+
+
+        this.commandParameters.kitId = kitId;
+
         var templateId: string = this.commandParameters.data.options["template"];
         var projectPath: string = this.commandParameters.projectPath;
         var appId: string = this.commandParameters.appId;
@@ -198,16 +202,25 @@ class Create implements commands.IDocumentedCommand {
 
         // Now, create the project 
         if (!this.commandParameters.isKitProject) {
-            this.commandParameters.cordovaCli = this.commandParameters.data.options["cli"];
-            // Use the CLI version specified as an argument to create the project
-            return cordovaWrapper.create(this.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
-        } else {
-            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCli: string): void {
-                self.commandParameters.kitId = kitId;
+            return this.printStatusMessage()
+                .then(function (): Q.Promise<any> {
+                    // Use the CLI version specified as an argument to create the project "command.create.status.cliProject
+                    return cordovaWrapper.create(self.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
+                });
+        }
+        else {
+            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCliToUse: string): void {
+                cordovaCli = cordovaCliToUse;
             }).then(function (): Q.Promise<any> {
-                return kitHelper.getKitInfo(kitId);
-                }).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {
-                    if (kitHelper.isKitDeprecated(kitInfo)) {
+                return self.printStatusMessage();
+            }).then(function (): Q.Promise<any> {
+                if (kitId) {
+                    return kitHelper.getKitInfo(kitId);
+                } else {
+                    return Q.resolve(null);
+                }      
+            }).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {
+                    if (kitInfo && kitHelper.isKitDeprecated(kitInfo)) {
                         // Warn the user
                         logger.log("\n");
                         logger.logLine(resources.getString("command.create.warning.deprecatedKit", kitId), logger.Level.Warn);
@@ -228,6 +241,40 @@ class Create implements commands.IDocumentedCommand {
     }
 
     /**
+     * Prints the project creation status message
+     */
+    private printStatusMessage(): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        logger.log(resources.getString("command.create.status.projectName"), logger.Level.Normal);
+        logger.log(this.commandParameters.appName, logger.Level.NormalBold);
+        logger.log(resources.getString("command.create.status.projectId"), logger.Level.Normal);
+        logger.log(this.commandParameters.appId, logger.Level.NormalBold);
+        logger.log(resources.getString("command.create.status.projectPath"), logger.Level.Normal);
+        logger.log(this.commandParameters.projectPath, logger.Level.NormalBold);
+            
+        if (!this.commandParameters.isKitProject) {
+            logger.log(resources.getString("command.create.status.cordovaCliUsed"), logger.Level.Normal);
+            logger.log(this.commandParameters.cordovaCli, logger.Level.NormalBold);
+            logger.log(resources.getString("command.create.status.noKitUsed"), logger.Level.Normal);
+            logger.logLine("...", logger.Level.Normal);
+            logger.log("\n");
+        } else {
+            var self = this;
+            return kitHelper.getDefaultKit().then(function (defaultKitId: string): void {
+                if (!self.commandParameters.kitId) {
+                    self.commandParameters.kitId = defaultKitId;
+                }
+                logger.log(resources.getString("command.create.status.kitIdUsed"), logger.Level.Normal);
+                logger.log(self.commandParameters.kitId, logger.Level.NormalBold);
+                logger.logLine("...", logger.Level.Normal);
+                logger.log("\n");
+            });
+        }
+        deferred.resolve({});
+        return deferred.promise;
+    }
+
+    /**
      * Finalizes the creation of project by printing the Success messages with information about the Kit and template used
      */
     private finalize(): void {
@@ -237,7 +284,7 @@ class Create implements commands.IDocumentedCommand {
 
         if (this.mustCreateKitProject()) {
             if (this.commandParameters.templateDisplayName) {
-                logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName), logger.Level.Normal);
+                logger.log(" " + resources.getString("command.create.success.projectTemplate", this.commandParameters.templateDisplayName, this.commandParameters.kitId), logger.Level.Normal);
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] ? this.commandParameters.data.options["copy-from"] : this.commandParameters.data.options["link-to"];
@@ -249,9 +296,6 @@ class Create implements commands.IDocumentedCommand {
         }
 
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.projectPath), logger.Level.NormalBold);
-        if (this.commandParameters.isKitProject) {
-            logger.log(" " + resources.getString("command.create.success.kitUsed", this.commandParameters.kitId), logger.Level.NormalBold);
-        }
     }
 
     private mustCreateKitProject(): boolean {

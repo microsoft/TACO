@@ -1,0 +1,3 @@
+This is a dummy file with the sole purpose of allowing to commit its parent directory (which would otherwise be empty) to git source control.
+
+It is not intended to be part of the template and will be excluded from the archive process (when doing "gulp prepare-templates").

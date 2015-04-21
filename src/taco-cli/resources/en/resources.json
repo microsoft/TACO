@@ -16,6 +16,15 @@
     "_command.create.notBothTemplateAndCli.comment": "Error shown when the user tries to create a project using a template (--template), but specifies the --cli parameter.",
     "command.create.templatesUnavailable": "Error: Unable to access or download templates",
     "_command.create.templatesUnavailable.comment": "Error reported when templates cannot be downloaded",
+    
+    "command.create.status.projectName": "Creating a new Cordova project with name ",
+    "command.create.status.projectId": " and id ",
+    "command.create.status.projectPath": " at location ",
+    "command.create.status.kitIdUsed": " using Kit ",
+    "command.create.status.cordovaCliUsed": " with Cordova version ",
+    "command.create.status.noKitUsed": " and no Kit",
+    "_command.create.status.comment": "Status message printed while a project is being created.",
+    
     "command.create.success.base": "Success!",
     "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
     "command.create.warning.deprecatedKit": "Warning: Kit {0} has been deprecated.",
@@ -31,8 +40,6 @@
     "_command.create.success.projectCLI.comment": "This sentence follows the word 'Success!' when the create command succeeds if the project was created using the --cli parameter",
     "command.create.success.path": "{0}",
     "_command.create.success.path.comment": "This is the part of the success message for the create command. {0} is the path where the project was created.",
-     "command.create.success.kitUsed": "using Kit {0}",
-    "_command.create.success.path.kitUsed": "This is the last part of the success message for the create command. {0} is the id of the kit used for project creation.",
     "command.create.tacoJsonFileCreationError": "Error: Creation of taco.json file failed",
     "_command.create.tacoJsonFileCreationError.comment": "This message is displayed when the taco.json file creation fails.",
 

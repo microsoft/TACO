@@ -20,7 +20,7 @@ import UtilHelper = require ("./util-helper");
 import ResourcesManager = require ("./resources-manager");
 import utils = UtilHelper.UtilHelper;
 import resources = ResourcesManager.ResourcesManager;
-import loggerUtil = require("./logger");
+import loggerUtil = require ("./logger");
 import logger = loggerUtil.Logger;
 
 module TacoUtility {
@@ -50,10 +50,10 @@ module TacoUtility {
 
             return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): T {
                 return TacoPackageLoader.requirePackage<T>(packageTargetPath);
-            });  
+            });
         }
 
-       private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
+        private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
             var deferred = Q.defer();
             try {
                 mkdirp.sync(packageTargetPath);
@@ -75,12 +75,24 @@ module TacoUtility {
 
                 var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
                 npmProcess.on("error", function (error: Error): void {
+                    if (packageName == "cordova") {
+                        logger.log("\n", logger.Level.Normal);
+                        logger.log(resources.getString("packageLoader.errorMessage"), logger.Level.Error);
+                        logger.log(resources.getString("packageLoader.downloadErrorMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Error);
+                        logger.log("\n", logger.Level.Normal);
+                    }
                     rimraf(packageTargetPath, function (): void {
                         deferred.reject(error);
                     });
                 });
                 npmProcess.on("exit", function (exitCode: number): void {
                     if (exitCode === 0) {
+                        if (packageName == "cordova") {
+                            logger.log("\n", logger.Level.Normal);
+                            logger.log(resources.getString("packageLoader.successMessage"), logger.Level.Success);
+                            logger.log(resources.getString("packageLoader.downloadCompletedMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Normal);
+                            logger.log("\n", logger.Level.Normal);
+                        }
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
@@ -110,6 +122,13 @@ module TacoUtility {
         }
 
         private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
+            var deferred: Q.Deferred<string> = Q.defer<string>();
+            if (specType == PackageSpecType.Error) {
+                logger.log(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
+                deferred.reject(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageVersion, packageName));
+                return deferred.promise;
+            }
+
             if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
                 return Q(targetPath);
             }
@@ -131,6 +150,12 @@ module TacoUtility {
         }
 
         private static installPackage(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<any> {
+            if (packageName == "cordova") {
+                logger.log(resources.getString("packageLoader.downloadingMessage", packageVersion), logger.Level.NormalBold);
+                logger.logLine(resources.getString("packageLoader.cordovaToolVersion", packageVersion), logger.Level.Normal);
+                logger.log("\n", logger.Level.Normal);
+            }
+
             switch (specType) {
                 case PackageSpecType.Version:
                     return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
@@ -141,7 +166,7 @@ module TacoUtility {
                     });
                 case PackageSpecType.Error:
                 default:
-                    return Q.reject(new Error(resources.getString("InvalidPackageVersionSpecifier", packageName, packageVersion)));
+                    return Q.reject(new Error(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageName, packageVersion)));
             }
         }
 

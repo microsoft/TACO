@@ -194,9 +194,9 @@ module TacoKits {
                         // Error, the kit override does not define the specified template id
                         if (templateId === KitHelper.TsTemplateId) {
                             // We have a special error message for typescript
-                            deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.TypescriptNotSupported")));
+                            deferred.reject("taco-kits.exception.TypescriptNotSupported");
                         } else {
-                            deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidTemplate")));
+                            deferred.reject("taco-kits.exception.InvalidTemplate")
                         }
                     }
                 } else if (templates["default"][templateId]) {
@@ -209,7 +209,7 @@ module TacoKits {
                     deferred.resolve(templateOverrideInfo);
                 } else {
                     // Error, no template matching the specified template id
-                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidTemplate")));
+                    deferred.reject("taco-kits.exception.InvalidTemplate");
                 }
 
                 return deferred.promise;

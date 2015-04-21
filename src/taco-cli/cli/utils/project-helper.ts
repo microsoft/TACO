@@ -16,7 +16,6 @@ class TacoProjectHelper {
         if (isKitProject) {
             if (!versionValue) {
                 return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
-                    this.commandParameters.kitId = kitId;
                     return TacoProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
                 });
             } else {

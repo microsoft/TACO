@@ -18,6 +18,10 @@ import utils = tacoUtility.UtilHelper;
 import kitHelper = tacoKits.KitHelper;
 import cordovaWrapper = require ("./cordova-wrapper");
 
+interface IKitHelper {
+    getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;
+}
+
 class TemplateManager {
     private static DefaultTemplateId: string = "blank";
 
@@ -25,7 +29,8 @@ class TemplateManager {
      * The following members are public static to expose access to automated tests
      */
     public static TemplateCachePath: string = null;
-    
+    public static Kits: IKitHelper = null;
+
     /**
      * Creates a kit project using 'cordova create' with the specified template.
      *

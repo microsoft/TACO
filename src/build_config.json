@@ -4,7 +4,7 @@
     "build": "../build",
     "buildSrc": "../build/src",
     "buildBin": "../build/bin",
-    "buildTemplates": "../src/taco-kits/templates",
+    "buildTemplates": "../build/src/taco-kits/templates",
     "copPath":  "../tools/internal/TSStyleCop/TSStyleCop.js",
     "copConfig":  "../tools/internal/TSStyleCop/TSStyleAllRules.json"
 }
