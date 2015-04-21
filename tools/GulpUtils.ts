@@ -19,13 +19,21 @@ import zlib = require ("zlib")
 
 class GulpUtils {
 
+    private static testCommand: string = "test";
+
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
         return modulesToTest.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
 
                 var modulePath = path.resolve(modulesRoot, val);
+                // check if package has any tests
+                var pkg = require(path.join(modulePath, "package.json"));
+                if (pkg.scripts.indexOf(GulpUtils.testCommand) == -1) {
+                    return Q({});
+                }
+
                 var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                var testProcess = child_process.spawn(npmCommand, ["test"], { cwd: modulePath, stdio: "inherit" });
+                var testProcess = child_process.spawn(npmCommand, [GulpUtils.testCommand], { cwd: modulePath, stdio: "inherit" });
                 var deferred = Q.defer();
                 testProcess.on("close", function (code: number): void {
                     if (code) {
