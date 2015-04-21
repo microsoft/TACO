@@ -10,16 +10,16 @@
 /// <reference path="../../typings/rimraf.d.ts" />
 "use strict";
 
-import rimraf = require ("rimraf");
-import utils = require ("taco-utils");
-import TacoRemoteConf = require ("./tacoRemoteConf");
+import rimraf = require("rimraf");
 
+import TacoRemoteConfig = require("./tacoRemoteConfig");
+import utils = require("taco-utils");
 import resources = utils.ResourcesManager;
 
 class BuildRetention {
     private maxBuildsToKeep: number;
 
-    constructor(baseBuildDir: string, config: TacoRemoteConf) {
+    constructor(baseBuildDir: string, config: TacoRemoteConfig) {
         this.maxBuildsToKeep = config.maxBuildsToKeep;
         console.info(resources.getString("BuildRetentionInit"), baseBuildDir, this.maxBuildsToKeep);
     }

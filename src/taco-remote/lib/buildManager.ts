@@ -14,18 +14,17 @@
 /// <reference path="./requestRedirector.ts" />
 "use strict";
 
-import child_process = require ("child_process");
-import express = require ("express");
-import fs = require ("fs");
-import path = require ("path");
-import Q = require ("q");
-import tar = require ("tar");
-import zlib = require ("zlib");
+import child_process = require("child_process");
+import express = require("express");
+import fs = require("fs");
+import path = require("path");
+import Q = require("q");
+import tar = require("tar");
+import zlib = require("zlib");
 
-import BuildRetention = require ("./buildRetention");
-import HostSpecifics = require ("./hostSpecifics");
-import TacoRemoteConf = require ("./tacoRemoteConf");
-import utils = require ("taco-utils");
+import BuildRetention = require("./buildRetention");
+import TacoRemoteConfig = require("./tacoRemoteConfig");
+import utils = require("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
 import resources = utils.ResourcesManager;
@@ -49,17 +48,17 @@ class BuildManager {
     private queuedBuilds: BuildInfo[];
     private buildMetrics: IBuildMetrics;
     private requestRedirector: TacoRemoteLib.IRequestRedirector;
-    private serverConf: TacoRemoteConf;
+    private serverConf: TacoRemoteConfig;
     private buildRetention: BuildRetention;
 
-    constructor(conf: TacoRemoteConf) {
+    constructor(conf: TacoRemoteConfig) {
         this.serverConf = conf;
         this.baseBuildDir = path.resolve(process.cwd(), conf.serverDir, "taco-remote", "builds");
         utils.UtilHelper.createDirectoryIfNecessary(this.baseBuildDir);
         this.maxBuildsInQueue = conf.maxBuildsInQueue;
         this.deleteBuildsOnShutdown = conf.deleteBuildsOnShutdown;
         var allowsEmulate = conf.allowsEmulate;
-        
+
         try {
             this.requestRedirector = require(conf.get("redirector"));
         } catch (e) {
@@ -113,7 +112,6 @@ class BuildManager {
         var buildPlatform: string = req.query.platform || "ios";
         var logLevel: string = req.query.logLevel || null;
 
-        // TODO: Check if any package can service the request
         var self = this;
         return this.requestRedirector.getPackageToServeRequest(null, req).then(function (pkg: TacoRemoteLib.IRemoteLib): Q.Promise<BuildInfo> {
             pkg.init(self.serverConf);
@@ -171,7 +169,6 @@ class BuildManager {
         return this.builds[id] || null;
     }
 
-    // TODO: Does this localize builds appropriately?
     public downloadBuildLog(id: number, offset: number, res: express.Response): void {
         var buildInfo = this.builds[id];
         if (!buildInfo) {
@@ -193,7 +190,6 @@ class BuildManager {
         logStream.pipe(res);
     }
 
-    // TODO: This won't localize the builds
     public getAllBuildInfo(): { metrics: any; queued: number; currentBuild: BuildInfo; queuedBuilds: BuildInfo[]; allBuilds: any } {
         return {
             metrics: this.buildMetrics,

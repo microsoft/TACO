@@ -2,18 +2,20 @@
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/remotebuild.d.ts" />
+
 "use strict";
 
-import child_process = require ("child_process");
-import fs = require ("fs");
-import path = require ("path");
-import Q = require ("q");
-import readline = require ("readline");
-import tacoUtils = require ("taco-utils");
+import child_process = require("child_process");
+import fs = require("fs");
+import path = require("path");
+import Q = require("q");
+import readline = require("readline");
+
+import tacoUtils = require("taco-utils");
 import resources = tacoUtils.ResourcesManager;
 import UtilHelper = tacoUtils.UtilHelper;
 
-class DarwinDependencies {
+class DarwinDependenciesHelper {
     public static askInstallHomebrew(): Q.Promise<any> {
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         var isFirstRun = !fs.existsSync(firstRunPath);
@@ -26,19 +28,19 @@ class DarwinDependencies {
                 var shouldInstall = response === "" || response.trim().toLowerCase().indexOf(resources.getString("HomebrewInstallationQueryResponse")) === 0;
 
                 if (shouldInstall) {
-                    DarwinDependencies.tryInstallHomebrew().then(DarwinDependencies.tryInstallPackages).then(function (): void {
-                        DarwinDependencies.verifyPackagesInstalled()
-                        .then(function (): void {
+                    DarwinDependenciesHelper.tryInstallHomebrew().then(DarwinDependenciesHelper.tryInstallPackages).then(function (): void {
+                        DarwinDependenciesHelper.verifyPackagesInstalled()
+                            .then(function (): void {
                             console.info(resources.getString("HomebrewInstallationSuccess"));
                             deferred2.resolve(true);
                         }, function (error: Error): void {
                                 console.error(resources.getString("HomebrewPackageVerificationFailed", error));
                                 process.exit(1);
-                        });
+                            });
                     }, function (error: Error): void {
                             console.error(resources.getString("HomebrewInstallationFailed", error));
                             process.exit(1);
-                    });
+                        });
                 } else {
                     console.info(resources.getString("HomebrewInstallationDeclined"));
                     deferred2.resolve(false);
@@ -106,4 +108,4 @@ class DarwinDependencies {
     }
 }
 
-export = DarwinDependencies;
+export = DarwinDependenciesHelper;

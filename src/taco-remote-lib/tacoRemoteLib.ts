@@ -9,13 +9,12 @@ import child_process = require ("child_process");
 import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
-import utils = require ("taco-utils");
+
+import IOSAgent = require("./ios/ios");
+import utils = require("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
 import resources = utils.ResourcesManager;
-
-import IOSAgent = require ("./ios/ios");
-import ITargetPlatform = require ("./ITargetPlatform.d");
 
 module TacoRemoteLib {
     var language: string;

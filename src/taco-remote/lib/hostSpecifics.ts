@@ -10,14 +10,15 @@
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
+
 "use strict";
 
-import child_process = require ("child_process");
-import express = require ("express");
-import os = require ("os");
-import Q = require ("q");
+import child_process = require("child_process");
+import express = require("express");
+import os = require("os");
+import Q = require("q");
 
-import TacoRemoteConf = require ("./tacoRemoteConf");
+import TacoRemoteConfig = require("./tacoRemoteConfig");
 
 class HostSpecifics {
     private static CachedSpecifics: HostSpecifics.IHostSpecifics;
@@ -42,7 +43,7 @@ class HostSpecifics {
 module HostSpecifics {
     export interface IHostSpecifics {
         defaults(base: { [key: string]: any }): { [key: string]: any };
-        initialize(conf: TacoRemoteConf): Q.Promise<any>;
+        initialize(conf: TacoRemoteConfig): Q.Promise<any>;
     }
 }
 

@@ -13,29 +13,28 @@
 /// <reference path="../../../typings/adm-zip.d.ts" />
 "use strict";
 
-import request = require ("request");
-import fs = require ("fs");
-import fstream = require ("fstream");
-import tar = require ("tar");
-import zlib = require ("zlib");
-import Q = require ("q");
-import querystring = require ("querystring");
-import path = require ("path");
-import tacoUtils = require ("taco-utils");
-import https = require ("https");
-import AdmZip = require ("adm-zip");
-import util = require ("util");
+import AdmZip = require("adm-zip");
+import fs = require("fs");
+import fstream = require("fstream");
+import https = require("https");
+import path = require("path");
+import Q = require("q");
+import querystring = require("querystring");
+import request = require("request");
+import tar = require("tar");
+import util = require("util");
+import zlib = require("zlib");
 
-import BuildSettings = require ("./buildSettings");
-import ConnectionSecurity = require ("./connectionSecurity");
-import Settings = require ("../utils/settings");
-
-import res = tacoUtils.ResourcesManager;
+import BuildSettings = require("./buildSettings");
+import ConnectionSecurityHelper = require("./connectionSecurityHelper");
+import Settings = require("../utils/settings");
+import tacoUtils = require("taco-utils");
 import BuildInfo = tacoUtils.BuildInfo;
-import UtilHelper = tacoUtils.UtilHelper;
 import CountStream = tacoUtils.CountStream;
+import res = tacoUtils.ResourcesManager;
+import UtilHelper = tacoUtils.UtilHelper;
 
-class RemoteBuildClient {
+class RemoteBuildClientHelper {
     public static PingInterval: number = 5000;
 
     /**
@@ -45,14 +44,14 @@ class RemoteBuildClient {
         var outputBuildDir: string = settings.platformConfigurationBldDir;
         var buildInfoFilePath = path.join(outputBuildDir, "buildInfo.json");
 
-        if (!RemoteBuildClient.isValidBuildServerUrl(settings.buildServerUrl)) {
+        if (!RemoteBuildClientHelper.isValidBuildServerUrl(settings.buildServerUrl)) {
             throw new Error(res.getString("InvalidRemoteBuildUrl", settings.buildServerUrl, 1));
         }
 
         var changeTimeFile = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
         var lastChangeTime: { [file: string]: number } = {};
 
-        var promise: Q.Promise<any> = RemoteBuildClient.checkForBuildOnServer(settings, buildInfoFilePath)
+        var promise: Q.Promise<any> = RemoteBuildClientHelper.checkForBuildOnServer(settings, buildInfoFilePath)
             .then(function (buildInfo: BuildInfo): void {
             settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
 
@@ -71,25 +70,25 @@ class RemoteBuildClient {
             }
         })
             .then(function (): Q.Promise<zlib.Gzip> {
-            return RemoteBuildClient.appAsTgzStream(settings, lastChangeTime, changeTimeFile);
+            return RemoteBuildClientHelper.appAsTgzStream(settings, lastChangeTime, changeTimeFile);
         })
             .then(function (tgz: zlib.Gzip): Q.Promise<string> {
-            return RemoteBuildClient.submitBuildRequestToServer(settings, tgz);
+            return RemoteBuildClientHelper.submitBuildRequestToServer(settings, tgz);
         })
             .then(function (buildingUrl: string): Q.Promise<BuildInfo> {
-            return RemoteBuildClient.pollForBuildComplete(settings, buildingUrl, RemoteBuildClient.PingInterval, 0);
+            return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, RemoteBuildClientHelper.PingInterval, 0);
         })
             .then(function (result: BuildInfo): Q.Promise<BuildInfo> {
             if (result.buildNumber) {
                 console.info(res.getString("RemoteBuildSuccessful"));
-                return RemoteBuildClient.logBuildOutput(result, settings);
+                return RemoteBuildClientHelper.logBuildOutput(result, settings);
             }
         }, function (err: any): Q.Promise<BuildInfo> {
                 if (err.buildInfo) {
                     // If we successfully submitted a build but the remote build server reports an error about the build, then grab the
                     // build log from the remote machine before propagating the reported failure
                     console.info(res.getString("RemoteBuildUnSuccessful"));
-                    return RemoteBuildClient.logBuildOutput(err.buildInfo, settings)
+                    return RemoteBuildClientHelper.logBuildOutput(err.buildInfo, settings)
                         .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                         throw err;
                     });
@@ -98,7 +97,7 @@ class RemoteBuildClient {
                 throw err;
             })
             .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-            return RemoteBuildClient.downloadRemotePluginFile(buildInfo, settings, path.join(settings.projectSourceDir, "plugins"));
+            return RemoteBuildClientHelper.downloadRemotePluginFile(buildInfo, settings, path.join(settings.projectSourceDir, "plugins"));
         })
             .then(function (buildInfo: BuildInfo): BuildInfo {
             UtilHelper.createDirectoryIfNecessary(outputBuildDir);
@@ -109,12 +108,12 @@ class RemoteBuildClient {
         });
 
         // If build is for a device we will download the build as a zip with the build output in it
-        if (RemoteBuildClient.isDeviceBuild(settings)) {
+        if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
             promise = promise
                 .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                return RemoteBuildClient.downloadBuild(buildInfo, settings, outputBuildDir)
+                return RemoteBuildClientHelper.downloadBuild(buildInfo, settings, outputBuildDir)
                     .then(function (zipFile: string): Q.Promise<{}> {
-                    return RemoteBuildClient.unzipBuildFiles(zipFile, outputBuildDir);
+                    return RemoteBuildClientHelper.unzipBuildFiles(zipFile, outputBuildDir);
                 }).then(function (): BuildInfo {
                     return buildInfo;
                 });
@@ -126,11 +125,11 @@ class RemoteBuildClient {
 
     public static run(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
         var buildUrlBase = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurity.getAgent(serverSettings) };
-        // TODO: How do we handle specified targets? Need to check vs-mda-remote
-        return RemoteBuildClient.httpOptions(buildUrlBase + "/deploy", httpSettings).then(RemoteBuildClient.promiseForHttpGet)
+        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+
+        return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/deploy", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (): Q.Promise<{ response: any; body: string }> {
-            return RemoteBuildClient.httpOptions(buildUrlBase + "/run", httpSettings).then(RemoteBuildClient.promiseForHttpGet);
+            return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/run", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet);
         }).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
             return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
         });
@@ -138,8 +137,8 @@ class RemoteBuildClient {
 
     public static emulate(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo, target: string): Q.Promise<BuildInfo> {
         var buildUrlBase = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurity.getAgent(serverSettings) };
-        return RemoteBuildClient.httpOptions(buildUrlBase + "/emulate?" + querystring.stringify({ target: target }), httpSettings).then(RemoteBuildClient.promiseForHttpGet)
+        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/emulate?" + querystring.stringify({ target: target }), httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): BuildInfo {
             return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
         });
@@ -147,8 +146,8 @@ class RemoteBuildClient {
 
     public static debug(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
         var buildUrlBase = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurity.getAgent(serverSettings) };
-        return RemoteBuildClient.httpOptions(buildUrlBase + "/debug", httpSettings).then(RemoteBuildClient.promiseForHttpGet).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
+        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/debug", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
             return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
         });
     }
@@ -180,10 +179,10 @@ class RemoteBuildClient {
         var buildUrl = serverUrl + "/build/" + buildNumber;
 
         // If we do have a buildInfo.json, check whether the server still has that build number around
-        return RemoteBuildClient.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<BuildInfo> {
+        return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<BuildInfo> {
             request.get((requestOptions), function (error: any, response: { statusCode: number }, body: string): void {
                 if (error) {
-                    deferred.reject(RemoteBuildClient.errorFromRemoteBuildServer(serverUrl, error, "RemoteBuildError"));
+                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "RemoteBuildError"));
                 } else if (response.statusCode === 200) {
                     deferred.resolve(buildInfo);
                 } else {
@@ -255,7 +254,7 @@ class RemoteBuildClient {
         var upToDateFiles: string[] = [];
 
         var filterForChanges = function (reader: fstream.Reader, props: any): boolean {
-            var shouldInclude = RemoteBuildClient.filterForRemote(settings, reader, lastChangeTime);
+            var shouldInclude = RemoteBuildClientHelper.filterForRemote(settings, reader, lastChangeTime);
             var appRelPath = path.relative(settings.projectSourceDir, reader.path);
             if (shouldInclude) {
                 var newmtime = reader.props.mtime.getTime();
@@ -338,7 +337,7 @@ class RemoteBuildClient {
         // Similarly for the others here
         var otherPlatformExclusions = [
             "merges",
-            path.join("res", "screens"), // TODO: do we still want to make this special?
+            path.join("res", "screens"),
             path.join("res", "icons"),
             path.join("res", "cert"),
             path.join("res", "native")
@@ -393,7 +392,7 @@ class RemoteBuildClient {
             platform: settings.platform
         };
 
-        if (RemoteBuildClient.isDeviceBuild(settings)) {
+        if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
             params["options"] = "--device";
         }
 
@@ -407,10 +406,10 @@ class RemoteBuildClient {
         appAsTgzStream.on("error", function (error: any): void {
             deferred.reject(new Error(res.getString("ErrorUploadingRemoteBuild", serverUrl, error)));
         });
-        return RemoteBuildClient.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<string> {
+        return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<string> {
             appAsTgzStream.pipe(request.post(requestOptions, function (error: any, response: any, body: any): void {
                 if (error) {
-                    deferred.reject(RemoteBuildClient.errorFromRemoteBuildServer(serverUrl, error, "ErrorUploadingRemoteBuild"));
+                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "ErrorUploadingRemoteBuild"));
                 } else if (response.statusCode === 400) {
                     // Build server sends back http 400 for invalid submissions with response like this. We will fail the build with a formatted message.
                     // {"status": "Invalid build submission", "errors": ["The requested cordova version 3.5.0-0.2.4 is not supported by this build manager. Installed cordova version is 3.4.1-0.1.0"]}
@@ -441,7 +440,7 @@ class RemoteBuildClient {
         var thisAttempt = attempts + 1;
         console.info(res.getString("CheckingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
 
-        return RemoteBuildClient.httpOptions(buildingUrl, settings).then(RemoteBuildClient.promiseForHttpGet)
+        return RemoteBuildClientHelper.httpOptions(buildingUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): Q.Promise<BuildInfo> {
             if (responseAndBody.response.statusCode !== 200) {
                 throw new Error("Http " + responseAndBody.response.statusCode + ": " + responseAndBody.body);
@@ -460,9 +459,9 @@ class RemoteBuildClient {
                 throw err;
             }
 
-            return RemoteBuildClient.logBuildOutput(buildInfo, settings).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+            return RemoteBuildClientHelper.logBuildOutput(buildInfo, settings).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 return Q.delay(interval).then(function (): Q.Promise<BuildInfo> {
-                    return RemoteBuildClient.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt, buildInfo["logOffset"]);
+                    return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt, buildInfo["logOffset"]);
                 });
             });
         });
@@ -478,7 +477,7 @@ class RemoteBuildClient {
         var logFlags = offset > 0 ? "r+" : "w";
         var buildNumber = buildInfo.buildNumber;
         var downloadUrl = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);
-        return RemoteBuildClient.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
+        return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
             var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
             var logStream = fs.createWriteStream(logPath, { start: offset, flags: logFlags });
@@ -508,7 +507,7 @@ class RemoteBuildClient {
         remotePluginStream.on("finish", function (): void {
             deferred.resolve(buildInfo);
         });
-        return RemoteBuildClient.httpOptions(downloadUrl, settings).then(request).invoke("pipe", remotePluginStream).then(function (): Q.Promise<BuildInfo> {
+        return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).invoke("pipe", remotePluginStream).then(function (): Q.Promise<BuildInfo> {
             return deferred.promise;
         });
     }
@@ -534,7 +533,7 @@ class RemoteBuildClient {
             console.info(res.getString("DownloadedRemoteBuild", toDir));
             deferred.resolve(zipFile);
         });
-        return RemoteBuildClient.httpOptions(downloadUrl, settings).then(request).invoke("pipe", outZip).then(function (): Q.Promise<string> {
+        return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).invoke("pipe", outZip).then(function (): Q.Promise<string> {
             return deferred.promise;
         });
     }
@@ -596,4 +595,4 @@ class RemoteBuildClient {
     }
 }
 
-export = RemoteBuildClient;
+export = RemoteBuildClientHelper;

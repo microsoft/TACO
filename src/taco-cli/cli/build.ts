@@ -10,19 +10,17 @@ import fs = require("fs");
 import nopt = require("nopt");
 import path = require("path");
 import Q = require("q");
-import tacoUtility = require("taco-utils");
-import commands = tacoUtility.Commands;
-import resources = tacoUtility.ResourcesManager;
-import logger = tacoUtility.Logger;
-import level = logger.Level;
-import UtilHelper = tacoUtility.UtilHelper;
 
 import CordovaWrapper = require("./utils/cordovaWrapper");
-
-import RemoteBuild = require("./remoteBuild/remoteBuildClient");
 import RemoteBuildSettings = require("./remoteBuild/buildSettings");
-
+import RemoteBuildClientHelper = require("./remoteBuild/remotebuildClientHelper");
 import Settings = require("./utils/settings");
+import tacoUtility = require("taco-utils");
+import commands = tacoUtility.Commands;
+import logger = tacoUtility.Logger;
+import level = logger.Level;
+import resources = tacoUtility.ResourcesManager;
+import UtilHelper = tacoUtility.UtilHelper;
 
 /*
  * Build
@@ -78,7 +76,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     /*
      * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
      */
-    public static RemoteBuild = RemoteBuild;
+    public static RemoteBuild = RemoteBuildClientHelper;
 
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
@@ -168,7 +166,8 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                 platform: platform,
                 configuration: configuration,
                 buildTarget: buildTarget,
-                language: language
+                language: language,
+                cordovaVersion: require("cordova/package.json").version // TODO (Devdiv 1160583): Use Kit specified version
             });
             return Build.RemoteBuild.build(buildSettings);
         });

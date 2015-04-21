@@ -10,15 +10,16 @@
 /// <reference path="../../../typings/optimist.d.ts" />
 "use strict";
 
-import path = require ("path");
-import https = require ("https");
-import tacoUtils = require ("taco-utils");
+import fs = require("fs");
+import https = require("https");
+import optimist = require("optimist");
+import path = require("path");
+import Q = require("q");
+
+import ConnectionSecurityHelper = require("./connectionSecurityHelper");
+import Settings = require("../utils/settings");
+import tacoUtils = require("taco-utils");
 import res = tacoUtils.ResourcesManager;
-import fs = require ("fs");
-import optimist = require ("optimist");
-import Q = require ("q");
-import ConnectionSecurity = require ("./connectionSecurity");
-import Settings = require ("../utils/settings");
 
 class BuildSettings {
     public agent: Q.Promise<https.Agent>;
@@ -50,14 +51,12 @@ class BuildSettings {
 
         this.platformConfigurationBldDir = path.join(this.projectSourceDir, "remote", this.platform, this.configuration);
 
-        // TODO: accept version in arguments
-        this.cordovaVersion = require("cordova/package.json").version;
+        this.cordovaVersion = args.cordovaVersion;
 
         // Build state and configuration
         this.incrementalBuild = null;
 
-        this.agent = ConnectionSecurity.getAgent(args.buildServerInfo);
-    }
+        this.agent = ConnectionSecurityHelper.getAgent(args.buildServerInfo);    }
 }
 
 module BuildSettings {
@@ -68,6 +67,7 @@ module BuildSettings {
         projectSourceDir: string;
         buildServerInfo: Settings.IRemoteConnectionInfo;
         language: string;
+        cordovaVersion: string;
         buildTarget?: string;
         changeListJsonFile?: string;
     }

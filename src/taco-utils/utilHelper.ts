@@ -27,7 +27,6 @@ module TacoUtility {
         };
 
         public static get tacoHome(): string {
-            // TODO: allow command line to override this?
             if (process.env["TACO_HOME"]) {
                 return process.env["TACO_HOME"];
             }

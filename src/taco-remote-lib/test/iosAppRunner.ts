@@ -12,9 +12,10 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-import runner = require ("../ios/iosAppRunner");
 import net = require ("net");
 import Q = require ("q");
+
+import runner = require("../ios/iosAppRunnerHelper");
 
 interface IMockDebuggerProxy extends net.Server {
     protocolState?: number;

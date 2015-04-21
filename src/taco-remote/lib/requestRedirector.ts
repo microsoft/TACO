@@ -1,9 +1,10 @@
 ﻿/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
 
-import express = require ("express");
-import tacoUtility = require ("taco-utils");
-import Q = require ("q");
+import express = require("express");
+import Q = require("q");
+
+import tacoUtility = require("taco-utils");
 import BuildInfo = tacoUtility.BuildInfo;
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
@@ -12,7 +13,7 @@ class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
         // ALTERNATELY:
         // Should we just look up the package to service a request once, based on the request, and then stash it in the buildInfo for later reference? Never letting you change?
         // In that case we would need to be careful when updating buildInfo objects from responses in other processes but that should be workable.
-        // TODO: Implement interesting behaviours in here
+        // TODO (Devdiv 1160580): Implement interesting behaviours in here
         return Q(require("taco-remote-lib"));
     }
 }

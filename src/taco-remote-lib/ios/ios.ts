@@ -3,23 +3,23 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/zip-stream.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
+/// <reference path="../ITargetPlatform.d.ts" />
+
 "use strict";
 
-import child_process = require ("child_process");
-import fs = require ("fs");
-import net = require ("net");
-import path = require ("path");
-import util = require ("util");
-import utils = require ("taco-utils");
+import child_process = require("child_process");
+import fs = require("fs");
+import net = require("net");
+import path = require("path");
+import util = require("util");
+import packer = require("zip-stream");
+
+import iosAppRunner = require("./iosAppRunnerHelper");
+import utils = require("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
 import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
-import packer = require ("zip-stream");
-
-import iosAppRunner = require ("./iosAppRunner");
-
-import ITargetPlatform = require ("../ITargetPlatform.d");
 
 class IOSAgent implements ITargetPlatform {
     private nativeDebugProxyPort: number;
@@ -137,7 +137,7 @@ class IOSAgent implements ITargetPlatform {
 
         var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
 
-        var emulateProcess = child_process.fork(path.join(__dirname, "ios-emulate.js"), [], { silent: true });
+        var emulateProcess = child_process.fork(path.join(__dirname, "iosEmulateHelper.js"), [], { silent: true });
         var emulateLogger = new ProcessLogger();
         emulateLogger.begin(buildInfo.buildDir, "emulate.log", buildInfo.buildLang, emulateProcess);
         emulateProcess.send({ appDir: buildInfo.appDir, appName: cfg.id(), target: req.query.target }, null);
@@ -215,7 +215,7 @@ class IOSAgent implements ITargetPlatform {
     }
 
     public createBuildProcess(): child_process.ChildProcess {
-        return child_process.fork(path.join(__dirname, "ios-build.js"), [], { silent: true });
+        return child_process.fork(path.join(__dirname, "iosBuild.js"), [], { silent: true });
     }
 }
 

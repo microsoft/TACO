@@ -340,8 +340,6 @@ class Certs {
             " -name \'" + name + "\' -password pass:");
     }
 
-    // TODO: Make this explain how to configure taco-cli?
-    // TODO: How do we want this to work in the world where it is shared between VS and taco-cli?
     private static printSetupInstructionsToConsole(conf: RemoteBuildConf, pin: number): void {
         var host = conf.hostname;
         var port = conf.port;

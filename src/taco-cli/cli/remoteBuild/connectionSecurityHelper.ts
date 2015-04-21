@@ -20,7 +20,7 @@ import res = tacoUtils.ResourcesManager;
 import UtilHelper = tacoUtils.UtilHelper;
 import logger = tacoUtils.Logger;
 
-class ConnectionSecurity {
+class ConnectionSecurityHelper {
     public static getAgent(connectionInfo: { secure: boolean; host: string; port: number; certName?: string }): Q.Promise<https.Agent> {
         if (!connectionInfo.secure) {
             return Q<https.Agent>(null);
@@ -134,4 +134,4 @@ class ConnectionSecurity {
     }
 }
 
-export = ConnectionSecurity;
+export = ConnectionSecurityHelper;

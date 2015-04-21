@@ -25,6 +25,7 @@ import resources = TacoUtility.ResourcesManager;
 import BuildInfo = TacoUtility.BuildInfo;
 import util = require("util");
 
+// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
 import cordova = require("cordova");
 
 import buildMod = require("../cli/build");
@@ -101,7 +102,7 @@ describe("taco build", function () {
     it("should make the correct sequence of calls for 'taco build --remote test'", function (mocha: MochaDone) {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version; // TODO
+        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12340;
         
         // Mock out the server on the other side
@@ -192,7 +193,7 @@ describe("taco build", function () {
     it("should report an error if the remote build fails", function (mocha: MochaDone) {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version; // TODO
+        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12341;
         
         // Mock out the server on the other side
@@ -272,7 +273,7 @@ describe("taco build", function () {
     it("should attempt incremental builds where possible", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version; // TODO
+        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12342;
 
         var buildInfoDir = path.join("remote", "test", configuration);

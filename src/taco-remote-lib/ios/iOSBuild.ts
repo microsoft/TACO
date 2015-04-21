@@ -10,26 +10,24 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/rimraf.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
+
 "use strict";
 
-import child_process = require ("child_process");
-import fs = require ("fs");
-import path = require ("path");
-import Q = require ("q");
-import rimraf = require ("rimraf");
+import child_process = require("child_process");
+import fs = require("fs");
+import path = require("path");
+import Q = require("q");
+import rimraf = require("rimraf");
+
+import plist = require("./plist");
 import utils = require("taco-utils");
-import TacoPackageLoader = utils.TacoPackageLoader;
-
-import plist = require ("./plist");
-
-import resources = utils.ResourcesManager;
 import BuildInfo = utils.BuildInfo;
 import CordovaConfig = utils.CordovaConfig;
+import resources = utils.ResourcesManager;
+import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
 
-
 var cordova: Cordova.ICordova = null;
-
 
 function beforePrepare(data: any): void {
     // Instead of a build, we call prepare and then compile
@@ -75,13 +73,13 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
         cordova.on("before_prepare", beforePrepare);
         cordova.on("after_compile", afterCompile);
 
-        IOSBuild.build(buildInfo, function (resultBuildInfo: BuildInfo): void {
+        IOSBuildHelper.build(buildInfo, function (resultBuildInfo: BuildInfo): void {
             process.send(resultBuildInfo);
         });
     });
 });
 
-class IOSBuild {
+class IOSBuildHelper {
     public static build(currentBuild: BuildInfo, callback: Function): void {
         cfg = CordovaConfig.getCordovaConfig(currentBuild.appDir);
 
@@ -89,19 +87,19 @@ class IOSBuild {
         var isDeviceBuild = currentBuild.options.indexOf("--device") !== -1;
 
         try {
-            Q.fcall(IOSBuild.change_directory, currentBuild)
-            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform"); process.send(currentBuild); })
-            .then(IOSBuild.addOrPrepareIOS)
-            .then(function (): void { IOSBuild.applyPreferencesToBuildConfig(cfg); })
-            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(currentBuild); })
-            .then(IOSBuild.prepareNativeOverrides)
-            .then(IOSBuild.updateAppPlistBuildNumber)
-            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CordovaCompiling"); process.send(currentBuild); })
-            .then(IOSBuild.build_ios)
-            .then(IOSBuild.rename_app)
-            .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(currentBuild); })
-            .then(isDeviceBuild ? IOSBuild.package_ios : noOp)
-            .then(function (): void {
+            Q.fcall(IOSBuildHelper.change_directory, currentBuild)
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform"); process.send(currentBuild); })
+                .then(IOSBuildHelper.addOrPrepareIOS)
+                .then(function (): void { IOSBuildHelper.applyPreferencesToBuildConfig(cfg); })
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(currentBuild); })
+                .then(IOSBuildHelper.prepareNativeOverrides)
+                .then(IOSBuildHelper.updateAppPlistBuildNumber)
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CordovaCompiling"); process.send(currentBuild); })
+                .then(IOSBuildHelper.build_ios)
+                .then(IOSBuildHelper.rename_app)
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(currentBuild); })
+                .then(isDeviceBuild ? IOSBuildHelper.package_ios : noOp)
+                .then(function (): void {
                 console.info(resources.getString("DoneBuilding", currentBuild.buildNumber));
                 currentBuild.updateStatus(BuildInfo.COMPLETE);
             })
@@ -137,19 +135,19 @@ class IOSBuild {
         }
 
         promise = promise.then(function (): Q.Promise<any> {
-            return IOSBuild.appendToBuildConfig("TARGETED_DEVICE_FAMILY = " + deviceToAdd);
+            return IOSBuildHelper.appendToBuildConfig("TARGETED_DEVICE_FAMILY = " + deviceToAdd);
         });
 
         var deploymentTarget = preferences["deployment-target"];
         if (deploymentTarget) {
             promise = promise.then(function (): Q.Promise<any> {
-                return IOSBuild.appendToBuildConfig("IPHONEOS_DEPLOYMENT_TARGET = " + deploymentTarget);
+                return IOSBuildHelper.appendToBuildConfig("IPHONEOS_DEPLOYMENT_TARGET = " + deploymentTarget);
             });
         }
 
         // Ensure we end the line so the config file is in a good state if we try to append things later.
         promise = promise.then(function (): Q.Promise<any> {
-            return IOSBuild.appendToBuildConfig("");
+            return IOSBuildHelper.appendToBuildConfig("");
         });
 
         return promise;
@@ -173,20 +171,20 @@ class IOSBuild {
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
             return cordova.raw.platform("add", "ios");
         } else {
-            return IOSBuild.update_ios();
+            return IOSBuildHelper.update_ios();
         }
     }
 
     private static update_ios(): Q.Promise<any> {
         var promise: Q.Promise<any> = Q({});
         if (currentBuild.changeList.deletedPluginsIos) {
-            // TODO: Incremental builds complicate things here.
+            // TODO (Devdiv 1160581): Incremental builds complicate things here.
             // If we change to sending over the platforms/ios folder, then this issue is solved.
             // We either need to add / remove plugins, as we do here (Note: this might cause issues for plugins installed locally / doing plugin dev?)
             // Or add/remove the platform, which means that builds won't actually be incremental (uploads will be, but not the build)
             currentBuild.changeList.deletedPluginsIos.forEach(function (deletedPlugin: string): void {
                 promise = promise.then(function (): Q.Promise<any> {
-                    return cordova.raw.plugin("remove", deletedPlugin).fail(IOSBuild.pluginRemovalErrorHandler);
+                    return cordova.raw.plugin("remove", deletedPlugin).fail(IOSBuildHelper.pluginRemovalErrorHandler);
                 });
             });
 
@@ -320,5 +318,3 @@ class IOSBuild {
         return deferred.promise;
     }
 }
-
-export = IOSBuild;

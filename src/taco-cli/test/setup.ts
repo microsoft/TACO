@@ -17,18 +17,17 @@ import https = require ("https");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
-import TacoUtility = require ("taco-utils");
+
+import ConnectionSecurityHelper = require("../cli/remoteBuild/connectionSecurityHelper");
+import Settings = require("../cli/utils/settings");
+import SetupMod = require("../cli/setup");
+import ServerMock = require("./utils/serverMock");
+import SetupMock = require("./utils/setupMock");
+import TacoUtility = require("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 
-import setupMod = require ("../cli/setup");
-import Settings = require ("../cli/utils/settings");
-import ConnectionSecurity = require ("../cli/remoteBuild/connectionSecurity");
-
-var setup = new setupMod();
-
-import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
+var setup = new SetupMod();
 
 describe("taco setup", function (): void {
     var testHome = path.resolve(__dirname, "out");
@@ -91,7 +90,7 @@ describe("taco setup", function (): void {
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
-        setupMod.CliSession = SetupMock.makeCliMock(mocha, () => { sessionClosed = true; }, desiredState, () => { questionsAsked++; });
+        SetupMod.CliSession = SetupMock.makeCliMock(mocha, () => { sessionClosed = true; }, desiredState, () => { questionsAsked++; });
         Q(["remote", "ios"]).then(setupRun).then(function (): void {
             if (questionsAsked !== 3) {
                 throw new Error("Wrong number of questions asked: " + questionsAsked);
@@ -116,7 +115,7 @@ describe("taco setup", function (): void {
     });
 
     it("should reject unknown parameters", function (mocha: MochaDone): void {
-        setupMod.CliSession = {
+        SetupMod.CliSession = {
             question: function (question: string, callback: (answer: string) => void): void {
                 mocha(new Error("Should not get as far as querying the user with invalid paramters"));
             },
@@ -175,7 +174,7 @@ describe("taco setup", function (): void {
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
-        setupMod.CliSession = SetupMock.makeCliMock(mocha, () => { }, desiredState);
+        SetupMod.CliSession = SetupMock.makeCliMock(mocha, () => { }, desiredState);
         Q(["remote", "ios"]).then(setupRun).then(function (): Q.Promise<Settings.ISettings> {
             return Settings.loadSettings();
         }).then(function (data: Settings.ISettings): Q.Promise<void> {
@@ -186,7 +185,7 @@ describe("taco setup", function (): void {
                 certName: data.remotePlatforms["ios"].certName, // Ignore the certName: it is used by windows, but not by osx
                 mountPoint: desiredState.mountPoint
             });
-            return ConnectionSecurity.getAgent(data.remotePlatforms["ios"]).then(function (agent: https.Agent): Q.Promise<any> {
+            return ConnectionSecurityHelper.getAgent(data.remotePlatforms["ios"]).then(function (agent: https.Agent): Q.Promise<any> {
                 // Now that a cert is configured, try making a secure connection to the (mocked) server to make sure the cert works.
                 var options: request.Options = {
                     url: Settings.getRemoteServerUrl(data.remotePlatforms["ios"]) + "/testCertUsage",
