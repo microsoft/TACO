@@ -28,7 +28,7 @@ import resources = utils.ResourcesManager;
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var win32defaults: { [key: string]: any } = {
-            serverDir: path.join(utils.UtilHelper.tacoHome, "remoteBuilds"),
+            serverDir: path.join(utils.UtilHelper.tacoHome, "remote-builds"),
             writePidToFile: false,
             lang: "en", // TODO: determine appropriate language on windows
             suppressSetupMessage: false,
