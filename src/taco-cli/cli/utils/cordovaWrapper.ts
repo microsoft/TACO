@@ -1,13 +1,18 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
-"use strict";
+/// <reference path="../../../typings/cordova-extensions.d.ts" />
+
 import child_process = require ("child_process");
 import Q = require ("q");
+import path = require ("path");
+import tacoUtility = require ("taco-utils");
+import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
+    private static CordovaModuleName: string = "cordova";
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
-        var proc = child_process.exec(["cordova"].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
+        var proc = child_process.exec([CordovaWrapper.CordovaModuleName].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
             if (err) {
                 deferred.reject(err);
             } else {
@@ -33,32 +38,17 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(path: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
-        var command: string[] = ["create", path];
-
-        if (id) {
-            command.push(id);
+    public static create(cordovaCli: string, projectPath: string, id?: string, name?: string, cdvConfig?: string, options?: { [option: string]: any }): Q.Promise<any> {
+        var deferred = Q.defer();
+        try {
+            return packageLoader.lazyRequire("cordova", cordovaCli).then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                return cordova.raw.create(projectPath, id, name, cdvConfig);
+            });
+        } catch (e) {
+            deferred.reject(e);
         }
 
-        if (name) {
-            command.push(name);
-        }
-
-        if (cdvConfig) {
-            command.push(cdvConfig);
-        }
-
-        // Add options to the command
-        for (var option in options) {
-            command.push("--" + option);
-
-            // If the property has a value that isn't boolean, also include its value in the command
-            if (options[option] && typeof options[option] !== "Boolean") {
-                command.push(options[option]);
-            }
-        }
-
-        return CordovaWrapper.cli(command);
+        return deferred.promise;
     }
 }
 

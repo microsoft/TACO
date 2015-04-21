@@ -1,0 +1,22 @@
+{
+    "name": "taco-kits",
+    "author": {
+        "name": "Microsoft Corp."
+    },
+    "description": "Validated Kits metadata for Taco CLI",
+    "version": "0.0.1",
+    "main": "taco-kits.js",
+    "scripts": {
+        "test": "mocha"
+    },
+    "dependencies": {
+        "q": "^1.1.2",
+        "taco-utils": "file:../taco-utils"
+    },
+    "bundledDependencies": ["taco-utils"],
+    "devDependencies": {
+        "typescript": "1.4.1",
+        "mocha": "2.0.1",
+        "should": "4.3.0"
+    }
+}

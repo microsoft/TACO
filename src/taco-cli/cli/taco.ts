@@ -1,11 +1,15 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/taco-kits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
+
 "use strict";
 
 import tacoUtility = require ("taco-utils");
+import tacoKits = require ("taco-kits");
 import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
+var kitHelper = tacoKits.KitHelper;
 import commandsFactory = commands.CommandFactory;
 import path = require ("path");
 var cordova = require("cordova");
@@ -23,7 +27,7 @@ class Taco {
         var resourcePath: string = path.resolve(__dirname, "..", "resources");
         resourcesManager.init("en", resourcePath);
         commandsFactory.init(path.join(__dirname, "../cli/commands.json"));
-        
+        kitHelper.init("en");
         // parse taco command
         var input: string = process.argv[2];
         var command: commands.ICommand = null;

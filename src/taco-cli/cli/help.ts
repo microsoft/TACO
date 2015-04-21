@@ -51,7 +51,7 @@ class Help implements commands.IDocumentedCommand {
      * prints out Microsoft header
      */
     public printHeader(): void {
-        logger.logLine("\n=================================================================", level.Normal);
+        logger.logLine("\n=================================================================");
     }
 
     /**

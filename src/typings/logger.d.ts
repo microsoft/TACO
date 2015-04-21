@@ -21,11 +21,11 @@ declare module TacoUtility {
         /**
          * log
          */
-        function log(msg: string, level: Level): void;
+        function log(msg: string, level?: Level): void;
         /**
          * for quick logging use
          */
-        function logLine(msg: string, level: Level): void;
+        function logLine(msg: string, level?: Level): void;
         function logErrorLine(msg: string): void;
         function logWarnLine(msg: string): void;
         function logLinkLine(msg: string): void;

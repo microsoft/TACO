@@ -11,6 +11,7 @@
 /// <reference path="../../typings/archiver.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
+/// <reference path="../../typings/taco-kits.d.ts"/>
 
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
@@ -27,16 +28,11 @@ import resources = tacoUtils.ResourcesManager;
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
 import archiver = require ("archiver");
-
-interface ITemplateInfo {
-    id: string;
-    kitId: string;
-    archiveUrl: string;
-    displayName: string;
-}
+import tacoKits = require("taco-kits");
+import kitHelper = tacoKits.KitHelper;
 
 interface IKitHelper {
-    getTemplateInfo: (kitId: string, templateId: string) => Q.Promise<ITemplateInfo>;
+    getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;
 }
 
 describe("TemplateManager", function (): void {
@@ -60,16 +56,14 @@ describe("TemplateManager", function (): void {
     var testTemplateArchive: string = path.join(testTemplateArchiveFolder, testTemplateId + ".zip");
 
     // ITemplateInfo object
-    var templateInfo: ITemplateInfo = {
-        id: testTemplateId,
-        kitId: testKitId,
-        archiveUrl: testTemplateArchive,
-        displayName: testDisplayName
+    var templateInfo: TacoKits.ITemplateInfo = {
+        name: testDisplayName,
+        url: testTemplateArchive       
     };
 
     // Mock for the KitHelper
     var mockKitHelper: IKitHelper = {
-        getTemplateInfo: function (kitId: string, templateId: string): Q.Promise<ITemplateInfo> {
+        getTemplateOverrideInfo: function (kitId: string, templateId: string): Q.Promise<TacoKits.ITemplateInfo> {
             // As this test suite is strictly testing the TemplateManager, we ignore the provided kitId and templateId parameters; we are only interested in
             // testing what the templateManager does with the returned ITemplateInfo, so we return a hard-coded one
             return Q.resolve(templateInfo);
@@ -85,7 +79,7 @@ describe("TemplateManager", function (): void {
 
         // Mock the KitHelper in TemplateManager
         templates.Kits = mockKitHelper;
-
+        
         // Delete existing run folder if necessary
         rimraf(runFolder, function (err: Error): void {
             if (err) {
@@ -140,7 +134,7 @@ describe("TemplateManager", function (): void {
             wrench.mkdirSyncRecursive(cachedTestTemplate, 511); // 511 decimal is 0777 octal
             utils.copyFile(copySrc, copyDest).then(function (): string {
                 // Call findTemplatePath()
-                return (<any>templates).findTemplatePath(templateInfo);
+                return (<any>templates).findTemplatePath(testTemplateId, testKitId, templateInfo);
             }).then(function (cachedTemplatePath: string): void {
                 // Verify the returned path is correct
                 cachedTemplatePath.should.equal(cachedTestTemplate);
@@ -159,7 +153,7 @@ describe("TemplateManager", function (): void {
             fs.existsSync(templateCache).should.equal(false, "Test template cache must be initially empty for this test");
 
             // Call findTemplatePath()
-            (<any>templates).findTemplatePath(templateInfo).then(function (cachedTemplatePath: string): void {
+            (<any>templates).findTemplatePath(testTemplateId, testKitId, templateInfo).then(function (cachedTemplatePath: string): void {
                 // Verify the returned path is correct
                 cachedTemplatePath.should.equal(cachedTestTemplate);
 
@@ -174,14 +168,12 @@ describe("TemplateManager", function (): void {
 
         it("should return the appropriate error when templates are not available", function (done: MochaDone): void {
             // Call findTemplatePath() with an ITemplateInfo that contains an archive path pointing to a location that doesn't exist
-            var invalidTemplateInfo: ITemplateInfo = {
-                id: testTemplateId,
-                kitId: testKitId,
-                archiveUrl: path.join(runFolder, "pathThatDoesntExist"),
-                displayName: testDisplayName
+            var invalidTemplateInfo: TacoKits.ITemplateInfo = {
+                name: testDisplayName,
+                url: path.join(runFolder, "pathThatDoesntExist")
             };
 
-            (<any>templates).findTemplatePath(invalidTemplateInfo).then(function (cachedTemplatePath: string): void {
+            (<any>templates).findTemplatePath(testTemplateId, testKitId, invalidTemplateInfo).then(function (cachedTemplatePath: string): void {
                 // The promise was resolved, this is an error
                 done(new Error("The operation completed successfully when it should have returned an error"));
             }, function (error: string): void {
