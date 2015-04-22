@@ -4,6 +4,7 @@
 /// <reference path="../src/typings/fstream.d.ts" />
 /// <reference path="../src/typings/del.d.ts" />
 /// <reference path="../src/typings/archiver.d.ts" />
+/// <reference path="../src/typings/gulp.d.ts" />
 
 import archiver = require ("archiver");
 import child_process = require ("child_process");

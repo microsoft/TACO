@@ -3,15 +3,20 @@
 /// <reference path="typings/gulp.d.ts" />
 /// <reference path="typings/gulpExtensions.d.ts" />
 /// <reference path="typings/nopt.d.ts" />
+/// <reference path="typings/merge2.d.ts" />
+/// <reference path="typings/gulp-typescript.d.ts" />
+/// <reference path="typings/gulp-sourcemaps.d.ts" />
 
 var runSequence = require("run-sequence");
 import gulp = require ("gulp");
 import path = require ("path");
 import Q = require ("q");
 import stylecopUtil = require ("../tools/stylecopUtil");
-import tsUtil = require ("./taco-cli/compile/typeScriptServices");
 import gulpUtils = require ("../tools/GulpUtils");
 import nopt = require ("nopt");
+import sourcemaps = require("gulp-sourcemaps");
+import merge = require ("merge2");
+import ts = require ("gulp-typescript");
  
 var buildConfig = require("../../src/build_config.json");
 var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
@@ -27,9 +32,12 @@ if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
 gulp.task("default", ["install-build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
-gulp.task("compile", function (callback: Function): void {
-    var tsCompiler = new tsUtil.TypeScriptServices();
-    tsCompiler.compileDirectory(buildConfig.src, buildConfig.buildSrc, /*sourceMap*/ true, callback);
+gulp.task("compile", function (callback: Function): any {
+    return gulp.src([buildConfig.src + "/**/*.ts"])
+                        .pipe(sourcemaps.init())
+                        .pipe(ts(buildConfig.tsCompileOptions))
+                        .pipe(sourcemaps.write("."))
+                        .pipe(gulp.dest(buildConfig.buildSrc));
 });
 
 /* compile + copy */
