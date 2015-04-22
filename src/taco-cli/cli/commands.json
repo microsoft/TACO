@@ -63,12 +63,12 @@
             { "name": "--target", "description": "[command.run.target.description]" }
         ]
     },
-    "install-reqs": {
-        "synopsis": "",
-        "modulePath": "./install-reqs",
-        "description": "",
+    "install-dependencies": {
+        "synopsis": "<PLATFORM>",
+        "modulePath": "./installDependencies",
+        "description": "[command.installDependencies.description]",
         "args": [
-            { "name": "PLATFORM", "description": "[command.run.platform.description]" }
+            { "name": "PLATFORM", "description": "[command.installDependencies.platform.description]" }
         ]
     }
 }
