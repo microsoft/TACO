@@ -70,6 +70,7 @@ declare module TacoKits {
     }
 
     class KitHelper {
+        public static KitMetadataFilePath: string;
         /**
          *   Initializes resource manager with the locale for resource strings
          */
