@@ -25,7 +25,7 @@ import resources = TacoUtility.ResourcesManager;
 import BuildInfo = TacoUtility.BuildInfo;
 
 // TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require("cordova");
+import cordova = require ("cordova");
 import runMod = require ("../cli/run");
 import setupMod = require ("../cli/setup");
 

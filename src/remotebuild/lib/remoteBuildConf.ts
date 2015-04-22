@@ -22,7 +22,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         [key: string]: any;
     };
 
-    constructor(conf: typeof nconf) {
+    constructor(conf: typeof nconf, isUnitTest?: boolean) {
         var defaults: any = {
             port: 3000,
             secure: true,
@@ -47,9 +47,13 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         var serverMods = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
             console.warn(resources.getString("NoServerModulesSelected"));
-            this.remoteBuildConf.modules = {
-                "taco-remote": { mountPath: "cordova" }
-            };
+            if (isUnitTest) {
+                this.remoteBuildConf.modules = { };
+            } else {
+                this.remoteBuildConf.modules = {
+                    "taco-remote": { mountPath: "cordova" }
+                };
+            }
         }
     }
 

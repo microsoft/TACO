@@ -10,14 +10,14 @@
 
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
 
-import HostSpecifics = require("../hostSpecifics");
-import TacoRemoteConfig = require("../tacoRemoteConfig");
-import utils = require("taco-utils");
+import HostSpecifics = require ("../hostSpecifics");
+import TacoRemoteConfig = require ("../tacoRemoteConfig");
+import utils = require ("taco-utils");
 import resources = utils.ResourcesManager;
 
 class Win32Specifics implements HostSpecifics.IHostSpecifics {

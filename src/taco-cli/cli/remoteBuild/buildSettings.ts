@@ -10,15 +10,15 @@
 /// <reference path="../../../typings/optimist.d.ts" />
 "use strict";
 
-import fs = require("fs");
-import https = require("https");
-import optimist = require("optimist");
-import path = require("path");
-import Q = require("q");
+import fs = require ("fs");
+import https = require ("https");
+import optimist = require ("optimist");
+import path = require ("path");
+import Q = require ("q");
 
-import ConnectionSecurityHelper = require("./connectionSecurityHelper");
-import Settings = require("../utils/settings");
-import tacoUtils = require("taco-utils");
+import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
+import Settings = require ("../utils/settings");
+import tacoUtils = require ("taco-utils");
 import res = tacoUtils.ResourcesManager;
 
 class BuildSettings {
@@ -56,7 +56,8 @@ class BuildSettings {
         // Build state and configuration
         this.incrementalBuild = null;
 
-        this.agent = ConnectionSecurityHelper.getAgent(args.buildServerInfo);    }
+        this.agent = ConnectionSecurityHelper.getAgent(args.buildServerInfo);
+    }
 }
 
 module BuildSettings {

@@ -11,12 +11,12 @@
 
 "use strict";
 
-import child_process = require("child_process");
-import path = require("path");
-import Q = require("q");
-import util = require("util");
+import child_process = require ("child_process");
+import path = require ("path");
+import Q = require ("q");
+import util = require ("util");
 
-import tacoUtils = require("taco-utils");
+import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import BuildInfo = tacoUtils.BuildInfo;
 

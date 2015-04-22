@@ -196,7 +196,7 @@ module TacoKits {
                             // We have a special error message for typescript
                             deferred.reject("taco-kits.exception.TypescriptNotSupported");
                         } else {
-                            deferred.reject("taco-kits.exception.InvalidTemplate")
+                            deferred.reject("taco-kits.exception.InvalidTemplate");
                         }
                     }
                 } else if (templates["default"][templateId]) {

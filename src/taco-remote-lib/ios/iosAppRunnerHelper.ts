@@ -11,13 +11,13 @@
 /// <reference path="../../typings/plist-with-patches.d.ts" />
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import net = require("net");
-import pl = require("plist-with-patches");
-import Q = require("q");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import net = require ("net");
+import pl = require ("plist-with-patches");
+import Q = require ("q");
 
-import utils = require("taco-utils");
+import utils = require ("taco-utils");
 import UtilHelper = utils.UtilHelper;
 
 var proxyInstance: child_process.ChildProcess = null;

@@ -75,24 +75,26 @@ module TacoUtility {
 
                 var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
                 npmProcess.on("error", function (error: Error): void {
-                    if (packageName == "cordova") {
+                    if (packageName === "cordova") {
                         logger.log("\n", logger.Level.Normal);
                         logger.log(resources.getString("packageLoader.errorMessage"), logger.Level.Error);
                         logger.log(resources.getString("packageLoader.downloadErrorMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Error);
                         logger.log("\n", logger.Level.Normal);
                     }
+
                     rimraf(packageTargetPath, function (): void {
                         deferred.reject(error);
                     });
                 });
                 npmProcess.on("exit", function (exitCode: number): void {
                     if (exitCode === 0) {
-                        if (packageName == "cordova") {
+                        if (packageName === "cordova") {
                             logger.log("\n", logger.Level.Normal);
                             logger.log(resources.getString("packageLoader.successMessage"), logger.Level.Success);
                             logger.log(resources.getString("packageLoader.downloadCompletedMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Normal);
                             logger.log("\n", logger.Level.Normal);
                         }
+
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
@@ -123,7 +125,7 @@ module TacoUtility {
 
         private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
             var deferred: Q.Deferred<string> = Q.defer<string>();
-            if (specType == PackageSpecType.Error) {
+            if (specType === PackageSpecType.Error) {
                 logger.log(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
                 deferred.reject(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageVersion, packageName));
                 return deferred.promise;
@@ -150,7 +152,7 @@ module TacoUtility {
         }
 
         private static installPackage(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<any> {
-            if (packageName == "cordova") {
+            if (packageName === "cordova") {
                 logger.log(resources.getString("packageLoader.downloadingMessage", packageVersion), logger.Level.NormalBold);
                 logger.logLine(resources.getString("packageLoader.cordovaToolVersion", packageVersion), logger.Level.Normal);
                 logger.log("\n", logger.Level.Normal);

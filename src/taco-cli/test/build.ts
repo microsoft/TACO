@@ -23,12 +23,12 @@ import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 import BuildInfo = TacoUtility.BuildInfo;
-import util = require("util");
+import util = require ("util");
 
 // TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require("cordova");
+import cordova = require ("cordova");
 
-import buildMod = require("../cli/build");
+import buildMod = require ("../cli/build");
 import setupMod = require ("../cli/setup");
 
 var build = new buildMod();
@@ -304,9 +304,7 @@ describe("taco build", function () {
                     vcli: require(path.join(__dirname, "..", "package.json")).version,
                     cfg: configuration,
                     platform: "test",
-                    buildNumber: buildNumber.toString()
-                    
-                }),
+                    buildNumber: buildNumber.toString() }),
                 head: {
                     "Content-Type": "application/json",
                     "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber

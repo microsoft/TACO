@@ -3,24 +3,23 @@
 /// <reference path="../../typings/node.d.ts" />
 "use strict";
 
-import fs = require("fs");
-import https = require("https");
-import nopt = require("nopt");
-import path = require("path");
-import Q = require("q");
-import readline = require("readline");
-import request = require("request");
-import util = require("util");
+import fs = require ("fs");
+import https = require ("https");
+import nopt = require ("nopt");
+import path = require ("path");
+import Q = require ("q");
+import readline = require ("readline");
+import request = require ("request");
+import util = require ("util");
 
-import ConnectionSecurityHelper = require("./remoteBuild/connectionSecurityHelper");
-import Settings = require("./utils/settings");
-import tacoUtility = require("taco-utils");
+import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
+import Settings = require ("./utils/settings");
+import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
 import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
-
 
 interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;

@@ -18,12 +18,12 @@ import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
 
-import ConnectionSecurityHelper = require("../cli/remoteBuild/connectionSecurityHelper");
-import Settings = require("../cli/utils/settings");
-import SetupMod = require("../cli/setup");
-import ServerMock = require("./utils/serverMock");
-import SetupMock = require("./utils/setupMock");
-import TacoUtility = require("taco-utils");
+import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
+import Settings = require ("../cli/utils/settings");
+import SetupMod = require ("../cli/setup");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
+import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 

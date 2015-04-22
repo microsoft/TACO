@@ -5,13 +5,13 @@
 
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
-import readline = require("readline");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
+import readline = require ("readline");
 
-import tacoUtils = require("taco-utils");
+import tacoUtils = require ("taco-utils");
 import resources = tacoUtils.ResourcesManager;
 import UtilHelper = tacoUtils.UtilHelper;
 

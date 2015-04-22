@@ -15,7 +15,7 @@ var should_module = require("should"); // Note not import: We don't want to refe
 import net = require ("net");
 import Q = require ("q");
 
-import runner = require("../ios/iosAppRunnerHelper");
+import runner = require ("../ios/iosAppRunnerHelper");
 
 interface IMockDebuggerProxy extends net.Server {
     protocolState?: number;

@@ -13,14 +13,14 @@
 
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
-import rimraf = require("rimraf");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
+import rimraf = require ("rimraf");
 
-import plist = require("./plist");
-import utils = require("taco-utils");
+import plist = require ("./plist");
+import utils = require ("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import CordovaConfig = utils.CordovaConfig;
 import resources = utils.ResourcesManager;
@@ -41,8 +41,6 @@ function afterCompile(data: any): void {
     cordova.emit("after_build", data);
 }
 
-
-
 // This file is only imported via modules in tests, and is invoked in a new process in normal execution.
 // All stderr/stdout messages are captured by the parent process and logged to a file.
 var currentBuild: BuildInfo = null;
@@ -57,6 +55,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
         process.send(buildInfo);
         process.exit(1);
     }
+
     currentBuild = buildInfo;
     language = buildRequest.language;
     var cordovaVersion: string = currentBuild["vcordova"];

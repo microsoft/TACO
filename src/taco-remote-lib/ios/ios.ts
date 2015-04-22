@@ -7,15 +7,15 @@
 
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import net = require("net");
-import path = require("path");
-import util = require("util");
-import packer = require("zip-stream");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import net = require ("net");
+import path = require ("path");
+import util = require ("util");
+import packer = require ("zip-stream");
 
-import iosAppRunner = require("./iosAppRunnerHelper");
-import utils = require("taco-utils");
+import iosAppRunner = require ("./iosAppRunnerHelper");
+import utils = require ("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
 import resources = utils.ResourcesManager;
