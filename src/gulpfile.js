@@ -3,7 +3,7 @@ var exec = require("child_process").exec,
     fs = require("fs"),
     path = require('path'),
     gulp = require("gulp"),
-    npmUtil = require ("../tools/npm-installer-util"),
+    npmUtil = require ("../tools/npmInstallerUtil"),
     buildConfig = require('./build_config.json');
     
 

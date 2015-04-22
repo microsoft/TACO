@@ -9,7 +9,7 @@
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/rimraf.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
-/// <reference path="../../typings/taco-utils.d.ts"/>
+/// <reference path="../../typings/tacoUtils.d.ts"/>
 
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
@@ -159,9 +159,7 @@ describe("taco create", function (): void {
         });
     });
 
-    describe("Success scenarios", function (): void {
-
-        // Downloading packages from the internet can take a while.
+    describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
         this.timeout(50000);
 
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
@@ -302,7 +300,7 @@ describe("taco create", function (): void {
 
         it("Failure scenario 7 [path, cli, template]", function (done: MochaDone): void {
             // Create command should fail when both --cli and --template are specified
-            var scenario: number =7;
+            var scenario: number = 7;
 
             runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
         });

@@ -7,7 +7,7 @@
 		"email": "vscordovatools-admin@microsoft.com"
 	},
 	"homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
-	"main": "./taco-remote-lib.js",
+	"main": "./tacoRemoteLib.js",
 
 
 	"preferGlobal": true,

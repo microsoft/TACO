@@ -6,7 +6,7 @@
  * ******************************************************
  */
 /// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/taco-utils.d.ts" />
+/// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
 import Q = require ("q");
@@ -196,7 +196,7 @@ module TacoKits {
                             // We have a special error message for typescript
                             deferred.reject("taco-kits.exception.TypescriptNotSupported");
                         } else {
-                            deferred.reject("taco-kits.exception.InvalidTemplate")
+                            deferred.reject("taco-kits.exception.InvalidTemplate");
                         }
                     }
                 } else if (templates["default"][templateId]) {

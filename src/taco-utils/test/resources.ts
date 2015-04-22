@@ -13,7 +13,7 @@ import path = require ("path");
 import should = require ("should");
 import mocha = require ("mocha");
 
-import util = require ("../taco-utils");
+import util = require ("../tacoUtils");
 
 var resources = util.ResourcesManager;
 

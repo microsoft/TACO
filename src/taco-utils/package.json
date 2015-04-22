@@ -5,7 +5,7 @@
     },
     "description": "strictly internal use to enable require in utility folder",
     "version": "0.0.1",
-    "main": "taco-utils.js",
+    "main": "tacoUtils.js",
     "scripts": {
         "test": "mocha"
     },

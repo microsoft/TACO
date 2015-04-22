@@ -24,10 +24,10 @@ import Q = require ("q");
 import tacoUtils = require ("taco-utils");
 import resources = tacoUtils.ResourcesManager;
 import server = require ("../lib/server");
-import RemoteBuildConf = require ("../lib/remotebuild-conf");
-import HostSpecifics = require ("../lib/host-specifics");
+import RemoteBuildConf = require ("../lib/remoteBuildConf");
+import HostSpecifics = require ("../lib/hostSpecifics");
 
-import testServerModuleFactory = require ("./test-module");
+import testServerModuleFactory = require ("./testServerModuleFactory");
 
 var serverDir = path.join(__dirname, "out", "server");
 var certsDir = path.join(serverDir, "certs");
@@ -102,7 +102,7 @@ describe("server", function (): void {
             });
     });
 
-    // TODO: Still need to work out how windows should work with certificates.
+    // TODO (Devdiv: 1160573): Still need to work out how windows should work with certificates.
     darwinOnlyTest("should start correctly in secure mode on mac", function (done: MochaDone): void {
         this.timeout(5000);
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en" });
@@ -168,7 +168,7 @@ describe("server", function (): void {
     });
 
     it("should load server modules and serve requests from there", function (mocha: MochaDone): void {
-        var modPath = path.join("..", "test", "test-module"); // path is relative to lib/server.js since that's where the require is invoked
+        var modPath = path.join("..", "test", "testServerModuleFactory"); // path is relative to lib/server.js since that's where the require is invoked
         var testModules: { [key: string]: any } = {};
         testModules[modPath] = { mountPath: "testRoute" };
 
