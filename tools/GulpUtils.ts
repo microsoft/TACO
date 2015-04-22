@@ -147,7 +147,7 @@ class GulpUtils {
                 fs.mkdirSync(folder);
             }
             return folder;
-        }, start);
+        }, start + path.sep);
     }
 }
 
