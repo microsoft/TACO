@@ -168,10 +168,10 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
     var templatesPath: string = buildConfig.templates;
     var kits: string[] = getChildDirectoriesSync(templatesPath);
 
-    kits.forEach(function (value: string, index: number, array: string[]): void {
+    kits.forEach(function (kitValue: string, index: number, array: string[]): void {
         // Read the kit's dir for all the available templates
-        var kitSrcPath: string = path.join(buildConfig.templates, value);
-        var kitTargetPath: string = path.join(buildTemplatesPath, value);
+        var kitSrcPath: string = path.join(buildConfig.templates, kitValue);
+        var kitTargetPath: string = path.join(buildTemplatesPath, kitValue);
 
         if (!fs.existsSync(kitTargetPath)) {
             fs.mkdirSync(kitTargetPath);
@@ -179,10 +179,10 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
 
         var kitTemplates: string[] = getChildDirectoriesSync(kitSrcPath);
 
-        kitTemplates.forEach(function (value: string, index: number, array: string[]): void {
+        kitTemplates.forEach(function (templateValue: string, index: number, array: string[]): void {
             // Create the template's archive
-            var templateSrcPath: string = path.resolve(kitSrcPath, value);
-            var templateTargetPath: string = path.join(kitTargetPath, value + ".zip");
+            var templateSrcPath: string = path.resolve(kitSrcPath, templateValue);
+            var templateTargetPath: string = path.join(kitTargetPath, templateValue + ".zip");
             var archive: any = archiver("zip");
             var outputStream: NodeJS.WritableStream = fs.createWriteStream(templateTargetPath);
             var deferred: Q.Deferred<any> = Q.defer<any>();
@@ -196,7 +196,10 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
             });
 
             archive.pipe(outputStream);
-            archive.directory(templateSrcPath, value).finalize();
+
+            // Note: archiver.bulk() automatically ignores files starting with "."; if this behavior ever changes, or if a different package is used
+            // to archive the templates, some logic to exclude the ".taco-ignore" files found in the templates will need to be added here
+            archive.bulk({ expand: true, cwd: path.join(templatesPath, kitValue), src: [templateValue + "/**"] }).finalize();
             promises.push(deferred.promise);
         });
     });
