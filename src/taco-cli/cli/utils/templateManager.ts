@@ -136,4 +136,5 @@ class TemplateManager {
         return Q.resolve(null);
     }
 }
+
 export = TemplateManager;

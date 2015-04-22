@@ -32,7 +32,6 @@ export class StyleCopUtil {
         };
 
         var excludedFiles = this.getProjectTypescriptDefinitionFiles(srcPath, []);
-
         var styleCopCommand = "node " + copPath + " -analyze " + srcPath + (excludedFiles ? " -exclude " + excludedFiles.join(" ") : "") + " -config " + copConfig;
         child_process.exec(styleCopCommand, childProcessCallback);
     }

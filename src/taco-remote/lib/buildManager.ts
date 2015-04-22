@@ -14,17 +14,17 @@
 /// <reference path="./requestRedirector.ts" />
 "use strict";
 
-import child_process = require("child_process");
-import express = require("express");
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
-import tar = require("tar");
-import zlib = require("zlib");
+import child_process = require ("child_process");
+import express = require ("express");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
+import tar = require ("tar");
+import zlib = require ("zlib");
 
-import BuildRetention = require("./buildRetention");
-import TacoRemoteConfig = require("./tacoRemoteConfig");
-import utils = require("taco-utils");
+import BuildRetention = require ("./buildRetention");
+import TacoRemoteConfig = require ("./tacoRemoteConfig");
+import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
 import resources = utils.ResourcesManager;

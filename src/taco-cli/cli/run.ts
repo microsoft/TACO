@@ -4,17 +4,17 @@
 
 "use strict";
 
-import assert = require("assert");
-import child_process = require("child_process");
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
+import assert = require ("assert");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
 
-import CordovaWrapper = require("./utils/CordovaWrapper");
-import tacoUtility = require("taco-utils");
-import RemoteBuildSettings = require("./remoteBuild/buildSettings");
-import RemoteBuildClientHelper = require("./remoteBuild/remotebuildClientHelper");
-import Settings = require("./utils/settings");
+import CordovaWrapper = require ("./utils/CordovaWrapper");
+import tacoUtility = require ("taco-utils");
+import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
+import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
+import Settings = require ("./utils/settings");
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;

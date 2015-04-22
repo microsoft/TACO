@@ -1,10 +1,10 @@
 ﻿/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
 
-import express = require("express");
-import Q = require("q");
+import express = require ("express");
+import Q = require ("q");
 
-import tacoUtility = require("taco-utils");
+import tacoUtility = require ("taco-utils");
 import BuildInfo = tacoUtility.BuildInfo;
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {

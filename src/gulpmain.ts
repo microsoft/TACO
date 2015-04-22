@@ -9,8 +9,8 @@ import gulp = require ("gulp");
 import path = require ("path");
 import Q = require ("q");
 import stylecopUtil = require ("../tools/stylecopUtil");
-import tsUtil = require("./taco-cli/compile/typeScriptServices");
-import gulpUtils = require("../tools/GulpUtils");
+import tsUtil = require ("./taco-cli/compile/typeScriptServices");
+import gulpUtils = require ("../tools/GulpUtils");
 import nopt = require ("nopt");
  
 var buildConfig = require("../../src/build_config.json");
@@ -19,7 +19,7 @@ var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-r
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
 var options: any = nopt({ moduleFilter: String, }, {}, process.argv);
-if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) != -1) {
+if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) <= -1) {
     tacoModules = [options.moduleFilter];
 }
 
@@ -65,7 +65,6 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
 
 /* copy package.json and resources.json files from source to bin */
 gulp.task("copy", function (): Q.Promise<any> {
-
     return gulpUtils.copyFiles(
         [
             "build_config.json",

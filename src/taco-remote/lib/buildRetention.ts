@@ -10,10 +10,10 @@
 /// <reference path="../../typings/rimraf.d.ts" />
 "use strict";
 
-import rimraf = require("rimraf");
+import rimraf = require ("rimraf");
 
-import TacoRemoteConfig = require("./tacoRemoteConfig");
-import utils = require("taco-utils");
+import TacoRemoteConfig = require ("./tacoRemoteConfig");
+import utils = require ("taco-utils");
 import resources = utils.ResourcesManager;
 
 class BuildRetention {

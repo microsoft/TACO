@@ -13,22 +13,22 @@
 /// <reference path="../../../typings/adm-zip.d.ts" />
 "use strict";
 
-import AdmZip = require("adm-zip");
-import fs = require("fs");
-import fstream = require("fstream");
-import https = require("https");
-import path = require("path");
-import Q = require("q");
-import querystring = require("querystring");
-import request = require("request");
-import tar = require("tar");
-import util = require("util");
-import zlib = require("zlib");
+import AdmZip = require ("adm-zip");
+import fs = require ("fs");
+import fstream = require ("fstream");
+import https = require ("https");
+import path = require ("path");
+import Q = require ("q");
+import querystring = require ("querystring");
+import request = require ("request");
+import tar = require ("tar");
+import util = require ("util");
+import zlib = require ("zlib");
 
-import BuildSettings = require("./buildSettings");
-import ConnectionSecurityHelper = require("./connectionSecurityHelper");
-import Settings = require("../utils/settings");
-import tacoUtils = require("taco-utils");
+import BuildSettings = require ("./buildSettings");
+import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
+import Settings = require ("../utils/settings");
+import tacoUtils = require ("taco-utils");
 import BuildInfo = tacoUtils.BuildInfo;
 import CountStream = tacoUtils.CountStream;
 import res = tacoUtils.ResourcesManager;

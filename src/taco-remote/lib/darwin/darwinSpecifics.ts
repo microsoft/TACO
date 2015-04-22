@@ -9,14 +9,14 @@
 
 "use strict";
 
-import child_process = require("child_process");
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
 
-import dependenciesHelper = require("./darwinDependenciesHelper");
-import HostSpecifics = require("../hostSpecifics");
-import TacoRemoteConfig = require("../tacoRemoteConfig");
+import dependenciesHelper = require ("./darwinDependenciesHelper");
+import HostSpecifics = require ("../hostSpecifics");
+import TacoRemoteConfig = require ("../tacoRemoteConfig");
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {

@@ -4,18 +4,18 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 "use strict";
 
-import assert = require("assert");
-import child_process = require("child_process");
-import fs = require("fs");
-import nopt = require("nopt");
-import path = require("path");
-import Q = require("q");
+import assert = require ("assert");
+import child_process = require ("child_process");
+import fs = require ("fs");
+import nopt = require ("nopt");
+import path = require ("path");
+import Q = require ("q");
 
-import CordovaWrapper = require("./utils/cordovaWrapper");
-import RemoteBuildSettings = require("./remoteBuild/buildSettings");
-import RemoteBuildClientHelper = require("./remoteBuild/remotebuildClientHelper");
-import Settings = require("./utils/settings");
-import tacoUtility = require("taco-utils");
+import CordovaWrapper = require ("./utils/cordovaWrapper");
+import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
+import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
+import Settings = require ("./utils/settings");
+import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
@@ -29,16 +29,21 @@ import UtilHelper = tacoUtility.UtilHelper;
  */
 class Build extends commands.TacoCommandBase implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.CommandData = {
-        "local": Boolean,
-        "remote": Boolean,
-        "clean": Boolean,
-        "debug": Boolean,
-        "release": Boolean,
-        "device": Boolean,
-        "emulator": Boolean,
-        "target": String
+        local: Boolean,
+        remote: Boolean,
+        clean: Boolean,
+        debug: Boolean,
+        release: Boolean,
+        device: Boolean,
+        emulator: Boolean,
+        target: String
     };
     private static ShortHands: Nopt.ShortFlags = {};
+
+    /*
+     * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
+     */
+    public static RemoteBuild = RemoteBuildClientHelper;
     public subcommands: commands.ICommand[] = [
         {
             // Remote Build
@@ -73,11 +78,6 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     public name: string = "build";
     public info: commands.ICommandInfo;
 
-    /*
-     * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
-     */
-    public static RemoteBuild = RemoteBuildClientHelper;
-
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
@@ -87,6 +87,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             // non-clean local builds are equivalent to cordova builds
             return false;
         }
+
         return true;
     }
 
@@ -131,13 +132,15 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                     });
                 });
             }
+
             break;
         case Settings.BuildLocationType.Remote:
             // remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
             break;
         default:
-            throw new Error(resources.getString('command.build.invalidPlatformLocation', platform.platform));
+            throw new Error(resources.getString("command.build.invalidPlatformLocation", platform.platform));
         }
+
         return promise;
     }
 
@@ -147,7 +150,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                 assert(platform.location !== Settings.BuildLocationType.Local);
                 return Build.buildRemotePlatform(platform.platform, commandData);
             }));
-        })
+        });
     }
 
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
@@ -159,6 +162,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             if (!remoteConfig) {
                 throw new Error(resources.getString("command.remotePlatformNotKnown", platform));
             }
+
             var buildSettings = new RemoteBuildSettings({
                 projectSourceDir: path.resolve("."),
                 buildServerInfo: remoteConfig,
@@ -189,7 +193,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
                         default:
-                            return Q.reject(new Error(resources.getString('command.build.invalidPlatformLocation',platform.platform)));
+                            return Q.reject(new Error(resources.getString("command.build.invalidPlatformLocation", platform.platform)));
                     }
                 });
             }, Q({}));

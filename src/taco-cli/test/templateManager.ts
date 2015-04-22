@@ -28,7 +28,7 @@ import resources = tacoUtils.ResourcesManager;
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
 import archiver = require ("archiver");
-import tacoKits = require("taco-kits");
+import tacoKits = require ("taco-kits");
 import kitHelper = tacoKits.KitHelper;
 
 interface IKitHelper {

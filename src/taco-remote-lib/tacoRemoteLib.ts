@@ -10,8 +10,8 @@ import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
 
-import IOSAgent = require("./ios/ios");
-import utils = require("taco-utils");
+import IOSAgent = require ("./ios/ios");
+import utils = require ("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
 import resources = utils.ResourcesManager;
