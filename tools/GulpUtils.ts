@@ -71,9 +71,7 @@ class GulpUtils {
         var buildTemplatesPath: string = path.resolve(templatesDest);
         var promises: Q.Promise<any>[] = [];
 
-        if (!fs.existsSync(buildTemplatesPath)) {
-            fs.mkdirSync(buildTemplatesPath);
-        }
+        GulpUtils.mkdirp(buildTemplatesPath);
 
         // Read the templates dir to discover the different kits
         var templatesPath: string = templatesSrc;
@@ -84,9 +82,7 @@ class GulpUtils {
             var kitSrcPath: string = path.join(templatesSrc, kitValue);
             var kitTargetPath: string = path.join(buildTemplatesPath, kitValue);
 
-            if (!fs.existsSync(kitTargetPath)) {
-                fs.mkdirSync(kitTargetPath);
-            }
+            GulpUtils.mkdirp(kitTargetPath);
 
             var kitTemplates: string[] = GulpUtils.getChildDirectoriesSync(kitSrcPath);
 
@@ -140,6 +136,18 @@ class GulpUtils {
         return fs.readdirSync(dir).filter(function (entry: string): boolean {
             return fs.statSync(path.resolve(dir, entry)).isDirectory();
         });
+    }
+
+    private static mkdirp(dir: string): void {
+        var folders = dir.split(path.sep);
+        var start = folders.shift();
+        folders.reduce(function (soFar: string, currentFolder: string): string {
+            var folder = path.join(soFar, currentFolder);
+            if (!fs.existsSync(folder)) {
+                fs.mkdirSync(folder);
+            }
+            return folder;
+        }, start);
     }
 }
 
