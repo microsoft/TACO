@@ -6,7 +6,7 @@
 
 import nopt = require ("nopt");
 import Q = require("q");
-import dependenciesInstaller = require ("dependenciesInstaller");
+import dependenciesInstaller = require ("dependencies-installer");
 import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import commands = tacoUtils.Commands;

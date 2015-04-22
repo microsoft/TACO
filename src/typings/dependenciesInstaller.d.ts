@@ -2,7 +2,24 @@
 /// <reference path="../typings/taco-utils.d.ts" />
 
 declare module DependenciesInstaller {
-    class DependenciesInstaller {
+    export interface IInstallerInfo {
+        installFrom: { [platformId: string]: string };
+        checksum: number;
+        bytes: number;
+    }
+
+    export interface IDependencyInfo {
+        displayName: string;
+        licenseUrl: string;
+        prerequesites: string[];
+        installers: { [versionId: string]: IInstallerInfo };
+    }
+
+    export interface IDependencyDictionary {
+        [dependencyId: string]: IDependencyInfo;
+    }
+
+    export class DependenciesInstaller {
         public constructor();
 
         /**
@@ -16,6 +33,6 @@ declare module DependenciesInstaller {
     }
 }
 
-declare module "dependenciesInstaller" {
+declare module "dependencies-installer" {
     export = DependenciesInstaller;
 }
