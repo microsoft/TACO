@@ -28,7 +28,7 @@ class GulpUtils {
                 var modulePath = path.resolve(modulesRoot, val);
                 // check if package has any tests
                 var pkg = require(path.join(modulePath, "package.json"));
-                if (pkg.scripts.indexOf(GulpUtils.TestCommand) == -1) {
+                if (!pkg.scripts || !(GulpUtils.TestCommand in pkg.scripts)) {
                     return Q({});
                 }
 
