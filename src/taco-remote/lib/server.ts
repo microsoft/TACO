@@ -8,12 +8,13 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
-/// <reference path="../../typings/express-extensions.d.ts" />
-/// <reference path="../../typings/taco-remote-lib.d.ts" />
+/// <reference path="../../typings/expressExtensions.d.ts" />
+/// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
 /// <reference path="../../typings/serve-index.d.ts" />
+
 "use strict";
 
 import express = require ("express");
@@ -22,19 +23,19 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import serveIndex = require ("serve-index");
-
-import BuildManager = require ("./build-manager");
-import HostSpecifics = require ("./host-specifics");
-import selftest = require ("./selftest");
-import TacoRemoteConf = require ("./taco-remote-conf");
-import utils = require ("taco-utils");
 import util = require ("util");
+
+import BuildManager = require ("./buildManager");
+import HostSpecifics = require ("./hostSpecifics");
+import selftest = require ("./selftest");
+import TacoRemoteConfig = require ("./tacoRemoteConfig");
+import utils = require ("taco-utils");
 
 import resources = utils.ResourcesManager;
 
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
-        var tacoRemoteConf = new TacoRemoteConf(conf, modConfig);
+        var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
         resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
             return new Server(tacoRemoteConf, modConfig.mountPath);
@@ -56,11 +57,11 @@ var serverModuleFactory = new ServerModuleFactory();
 export = serverModuleFactory;
 
 class Server implements RemoteBuild.IServerModule {
-    private serverConf: TacoRemoteConf;
+    private serverConf: TacoRemoteConfig;
     private modPath: string;
     private buildManager: BuildManager;
 
-    constructor(conf: TacoRemoteConf, modPath: string) {
+    constructor(conf: TacoRemoteConfig, modPath: string) {
         this.serverConf = conf;
         this.modPath = modPath;
 
@@ -104,9 +105,9 @@ class Server implements RemoteBuild.IServerModule {
             });
             res.status(202).json(buildInfo.localize(req, resources));
         }, function (err: any): void {
-            res.set({ "Content-Type": "application/json" });
-            res.status(err.code || 400).send({ status: resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
-        }).done();
+                res.set({ "Content-Type": "application/json" });
+                res.status(err.code || 400).send({ status: resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
+            }).done();
     }
 
     // Queries on the status of a build task, used by a client to poll

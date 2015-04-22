@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
-/// <reference path="../../../typings/taco-utils.d.ts" />
+/// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/nopt.d.ts" />
 "use strict";

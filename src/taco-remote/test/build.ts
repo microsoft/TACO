@@ -39,7 +39,7 @@ describe("taco-remote", function (): void {
             hostname: os.hostname()
         };
 
-        var modConfig : RemoteBuild.IServerModuleConfiguration = {
+        var modConfig: RemoteBuild.IServerModuleConfiguration = {
             mountPath: modMountPoint
         };
 
@@ -57,6 +57,7 @@ describe("taco-remote", function (): void {
         if (serverMod) {
             serverMod.shutdown();
         }
+
         server.close(mocha);
     });
 

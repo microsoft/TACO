@@ -3,10 +3,10 @@
 /// <reference path="./Q.d.ts" />
 
 declare module RemoteBuild {
-    interface IReadOnlyDict {
+    interface IReadOnlyDictionary {
         get(prop: string): any;
     }
-    interface IDict extends IReadOnlyDict {
+    interface IDictionary extends IReadOnlyDictionary {
         set(prop: string, value: any): void
     }
     interface IRemoteBuildConfiguration {

@@ -1,4 +1,4 @@
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
@@ -51,7 +51,7 @@ class Help implements commands.IDocumentedCommand {
      * prints out Microsoft header
      */
     public printHeader(): void {
-        logger.logLine("\n=================================================================", level.Normal);
+        logger.logLine("\n=================================================================");
     }
 
     /**

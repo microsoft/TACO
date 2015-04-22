@@ -2,9 +2,9 @@
 /// <reference path="../typings/Q.d.ts" />
 import fs = require ("fs");
 import path = require ("path");
-import tacoUtility = require ("./resources-manager");
+import tacoUtility = require ("./resourcesManager");
 import resourcesManager = tacoUtility.ResourcesManager;
-import utilHelper = require ("./util-helper");
+import utilHelper = require ("./utilHelper");
 import UtilHelper = utilHelper.UtilHelper;
 import logger = require ("./logger");
 import Q = require ("q");
@@ -57,7 +57,7 @@ module TacoUtility {
             public static init(commandsInfoPath: string): void {
                 commandsInfoPath = commandsInfoPath;
                 if (!fs.existsSync(commandsInfoPath)) {
-                    throw new Error(resourcesManager.getString("taco-utils.exception.listingfile"));
+                    throw new Error(resourcesManager.getString("tacoUtils.exception.listingfile"));
                 }
 
                 CommandFactory.Listings = require(commandsInfoPath);
@@ -68,7 +68,7 @@ module TacoUtility {
              */
             public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
                 if (!name || !CommandFactory.Listings) {
-                    throw new Error(resourcesManager.getString("taco-utils.exception.listingfile"));
+                    throw new Error(resourcesManager.getString("tacoUtils.exception.listingfile"));
                 }
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
@@ -78,7 +78,7 @@ module TacoUtility {
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error(resourcesManager.getString("taco-utils.exception.missingcommand", name));
+                    throw new Error(resourcesManager.getString("tacoUtils.exception.missingcommand", name));
                 }
 
                 var commandMod: any = require(modulePath);

@@ -17,7 +17,7 @@ This is an example configuration file with comments describing the meaning. Sinc
             "maxBuildsToKeep": 20, // How many builds to keep before deleting older ones
             "maxBuildsInQueue": 10, // How many builds to allow in a queue before rejecting new submissions
             "deleteBuildsOnShutdown": true, // Should builds be deleted when the server is shut down
-            "redirector": "/path/to/redirector/js/file", // This is a path to a js file along the lines of taco-remote/lib/request-redirector.js (the default). When a build request is made, this file determines what package to use to handle the particular request. If you have non-standard builds, you may provide your own implementation along the lines of taco-remote-lib
+            "redirector": "/path/to/redirector/js/file", // This is a path to a js file along the lines of taco-remote/lib/requestRedirector.js (the default). When a build request is made, this file determines what package to use to handle the particular request. If you have non-standard builds, you may provide your own implementation along the lines of taco-remote-lib
 
             "nativeDebugProxyPort": 3001, // What port should we attempt to open a debug channel to iOS devices on?
             "webDebugProxyDevicePort": 9221, // What port should we expose ios-webkit-debug-proxy on
