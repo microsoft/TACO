@@ -14,7 +14,7 @@ import Q = require ("q");
 import stylecopUtil = require ("../tools/stylecopUtil");
 import gulpUtils = require ("../tools/GulpUtils");
 import nopt = require ("nopt");
-import sourcemaps = require("gulp-sourcemaps");
+import sourcemaps = require ("gulp-sourcemaps");
 import merge = require ("merge2");
 import ts = require ("gulp-typescript");
  
