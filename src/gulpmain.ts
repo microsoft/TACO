@@ -19,7 +19,7 @@ var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-r
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
 var options: any = nopt({ moduleFilter: String, }, {}, process.argv);
-if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) <= -1) {
+if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
     tacoModules = [options.moduleFilter];
 }
 
