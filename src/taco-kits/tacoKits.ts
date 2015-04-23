@@ -145,7 +145,7 @@ module TacoKits {
                     deferred.resolve(kits[kitId]);
                 } else {
                     // Error, empty kitId or no kit matching the kit id
-                    logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidKit"));
+                    logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidKit", kitId));
                     deferred.reject("taco-kits.exception.InvalidKit");
                 }
 
@@ -208,7 +208,7 @@ module TacoKits {
                             logger.logErrorLine(resourcesManager.getString("taco-kits.exception.TypescriptNotSupported"));
                             deferred.reject("taco-kits.exception.TypescriptNotSupported");
                         } else {
-                            logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidTemplate"));
+                            logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidTemplate", templateId));
                             deferred.reject("taco-kits.exception.InvalidTemplate")
                         }
                     }
@@ -222,7 +222,7 @@ module TacoKits {
                     deferred.resolve(templateOverrideInfo);
                 } else {
                     // Error, no template matching the specified template id
-                    logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidTemplate"));
+                    logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidTemplate", templateId));
                     deferred.reject("taco-kits.exception.InvalidTemplate");
                 }
 
@@ -325,8 +325,9 @@ module TacoKits {
                 if (templates) {
                     deferred.resolve(templates);
                 } else {
-                    logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidKit"));
-                    deferred.reject(new Error(resourcesManager.getString("taco-kits.exception.InvalidKit")));
+                    // There definitely should be a templates node in the kit metadata
+                    logger.logErrorLine(resourcesManager.getString("taco-kits.exception.kitMetadataFileMalformed"));
+                    return Q.reject<ITemplateMetadata>("taco-kits.exception.kitMetadataFileMalformed");
                 }
 
                 return deferred.promise;

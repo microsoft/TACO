@@ -282,7 +282,7 @@ class Create implements commands.IDocumentedCommand {
         logger.log("\n", logger.Level.Normal);
         logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
 
-        if (this.mustCreateKitProject()) {
+        if (this.isKitProject()) {
             if (templateDisplayName) {
                 logger.log(" " + resources.getString("command.create.success.projectTemplate", templateDisplayName), logger.Level.Normal);
             } else {
@@ -296,10 +296,6 @@ class Create implements commands.IDocumentedCommand {
         }
 
         logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.projectPath), logger.Level.NormalBold);
-    }
-
-    private mustCreateKitProject(): boolean {
-        return !this.commandParameters.data.options["cli"];
     }
 }
 
