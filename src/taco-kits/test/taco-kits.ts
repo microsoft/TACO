@@ -7,127 +7,115 @@
 ﻿ */
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
-/// <reference path="../../typings/rimraf.d.ts"/>
-/// <reference path="../../typings/archiver.d.ts"/>
-/// <reference path="../../typings/wrench.d.ts"/>
 /// <reference path="../../typings/taco-utils.d.ts"/>
 /// <reference path="../../typings/taco-kits.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require ("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import mocha = require ("mocha");
 import path = require ("path");
-import zlib = require ("zlib");
-import fs = require ("fs");
-import os = require ("os");
+import tacoKits = require ("../taco-kits");
 import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
-import resources = tacoUtils.ResourcesManager;
-import rimraf = require ("rimraf");
-import wrench = require ("wrench");
-import archiver = require ("archiver");
-import tacoKits = require("../taco-kits");
 import kitHelper = tacoKits.KitHelper;
+import resources = tacoUtils.ResourcesManager;
 
 
 describe("KitHelper", function (): void {
     // Test Kit Info
-    var testDefaultKitId: string = "testTemplate";
-    var testKitId: string = "4.2.0-Kit";
-    var testKitInfo: tacoKits.IKitInfo = {
-
+    var testDefaultKitId: string = "5.0.0-Kit";
+    var testDeprecatedKitId: string = "4.0.0-Kit";
+    var testDefaultTemplateId: string = "blank";
+    var testDeprecatedKitInfo: tacoKits.IKitInfo = {
+        "cordova-cli": "4.0.0",
+        "taco-min": "1.0.0",
+        releaseNotesUri: "http://cordova.apache.org/4.0.0/release.md",
+        name: "4.0.0 Kit for Cordova Development",
+        "deprecated": true,
+        deprecatedReasonUri: "http://cordova.apache.org/blog/2014102310023",
+        plugins: {
+            "org.apache.cordova.camera" : {
+                "version": "0.2.27",
+                "platforms": "ios, android, wp8"
+            },
+            "org.apache.cordova.media-capture": {
+                version: "0.3.4",
+                platforms: "ios, android, windows, windows8"
+            }
+        }
     };
+
+    var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-kit", "blank.zip");
     var testTemplateOverrideInfo: tacoKits.ITemplateOverrideInfo = {
+        kitId: "5.0.0-Kit",
+        templateInfo: {
+            name: "Blank template",
+            url: templateSrcPath
+        }
     };
 
-    var testPlatformOverrideMetadata: tacoKits.IPlatformOverrideMetadata = {
+    var testPlatformOverridesForDefaultKit: tacoKits.IPlatformOverrideMetadata = {
+        "android": {
+            version: "4.2.1",
+            src: "https://github.com/apache/cordova-android/tree/4.2.1/archive/4.2.1.tgz"
+        },
+        "ios": {
+            version: "4.2.2",
+            src: "https://github.com/apache/cordova-ios/tree/4.2.2/archive/4.2.2.tgz"
+        },
+        "windows": {
+            version: "4.0.0",
+            src: "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0.tgz"
+        },
+        "wp8": {
+            version: "4.0.2",
+            src: "https://github.com/apache/cordova-wp8/tree/4.0.2/archive/4.0.2.tgz"
+        }
     };
-    var testPluginOverrideMetadata: tacoKits.IPluginOverrideMetadata = {
+
+    var testPluginOverridesForDefaultKit: tacoKits.IPluginOverrideMetadata = {
+        "org.apache.cordova.camera": {
+            version: "0.3.10"
+        }
+    };
+
+    var testDefaultKitInfo: tacoKits.IKitInfo = {
+        "cordova-cli": "5.0.0",
+        "taco-min": "1.0.0",
+        default: true,
+        releaseNotesUri: "http://cordova.apache.org/5.0.0/release.md",
+        name: "5.0.0 Kit for Cordova Development",
+        platforms: testPlatformOverridesForDefaultKit,
+        plugins: testPluginOverridesForDefaultKit
     };
 
     // Important paths
-    var runFolder: string = path.resolve(os.tmpdir(), "taco_kits");
-    var tacoHome: string = path.join(runFolder, "taco_home");
 
-    before(function (done: MochaDone): void {
+    before(function (): void {
         // Set ResourcesManager to test mode
         resources.UnitTest = true;
 
+        // Initialize Kit helper
+        kitHelper.init("en");
         // Set the kit metadata file location
-        kitHelper.KitMetadataFilePath = path.resolve("..", "test-data", "test-kit-metadata.json");
-
-        // Delete existing run folder if necessary
-        rimraf(runFolder, function (err: Error): void {
-            if (err) {
-                done(err);
-            } else {
-                // Create the run folder for our tests
-                wrench.mkdirSyncRecursive(runFolder, 511); // 511 decimal is 0777 octal
-            }
-        });
+        kitHelper.KitMetadataFilePath = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
     });
 
-    after(function (done: MochaDone): void {
-        // Delete run folder
-        rimraf(runFolder, done);
+    after(function (): void {
+        // Set ResourcesManager to test mode
+        resources.UnitTest = false;
 
         // Reset TemplateManager
         kitHelper.KitMetadataFilePath = null;
     });
 
     describe("getKitMetadata()", function (): void {
-        afterEach(function (done: MochaDone): void {
-            // Clear the template cache
-            rimraf(templateCache, done);
-        });
-
-        it("must return the right kit metadata for the kit ID passed", function (done: MochaDone): void {
-            // Call findTemplatePath()
-            return (<any>kitHelper).getKitMetadata();
-            }).then(function (cachedTemplatePath: string): void {
-                // Verify the returned path is correct
-                cachedTemplatePath.should.equal(cachedTestTemplate);
-
-                // Verify the TemplateManager didn't re-extract the template to the cache: the cached template should only contain the single file we placed there
-                // at the start of this test, "a.txt", otherwise it means the TemplateManager re-extracted the template even though it was already cached
-                fs.existsSync(path.join(cachedTestTemplate, "folder1")).should.be.exactly(false, "The template archive should not have been re-extracted to the cache");
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
-        });
-
-        it("should correctly find and cache a template that is not already cached", function (done: MochaDone): void {
-            // Make sure the template cache is empty
-            fs.existsSync(templateCache).should.equal(false, "Test template cache must be initially empty for this test");
-
-            // Call findTemplatePath()
-            (<any>templates).findTemplatePath(testTemplateId, testKitId, templateInfo).then(function (cachedTemplatePath: string): void {
-                // Verify the returned path is correct
-                cachedTemplatePath.should.equal(cachedTestTemplate);
-
-                // Verify the TemplateManager correctly extracted the template archive to the cache
-                fs.existsSync(path.join(cachedTestTemplate, "a.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
-                fs.existsSync(path.join(cachedTestTemplate, "folder1", "b.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
-        });
-
-        it("should return the appropriate error when templates are not available", function (done: MochaDone): void {
-            // Call findTemplatePath() with an ITemplateInfo that contains an archive path pointing to a location that doesn't exist
-            var invalidTemplateInfo: TacoKits.ITemplateInfo = {
-                name: testDisplayName,
-                url: path.join(runFolder, "pathThatDoesntExist")
-            };
-
-            (<any>templates).findTemplatePath(testTemplateId, testKitId, invalidTemplateInfo).then(function (cachedTemplatePath: string): void {
-                // The promise was resolved, this is an error
-                done(new Error("The operation completed successfully when it should have returned an error"));
-            }, function (error: string): void {
-                error.should.equal("command.create.templatesUnavailable");
+        it("must return the right kit metadata", function (done: MochaDone): void {
+            // Call getKitMetadata()
+            kitHelper.getKitMetadata()
+                .then(function (kitInfo: TacoKits.IKitMetadata): void {
+                // Verify the returned kit metadat is expected
+                kitInfo.should.equal(require(kitHelper.KitMetadataFilePath));
                 done();
             }).catch(function (err: string): void {
                 done(new Error(err));
@@ -135,51 +123,107 @@ describe("KitHelper", function (): void {
         });
     });
 
-    describe("performTokenReplacements()", function (): void {
-        var replacedLines: string[] = [
-            "some text",
-            testAppName,
-            testAppId,
-            "$appID$",
-            "$randomToken$$$$",
-            "more text",
-            "<xml_node xml_attribute=\"" + testAppName + "\">" + testAppId + "</xml_node>"
-        ];
+    describe("getKitInfo()", function (): void {
+        it("must return the right kit information for the deprecated kit ID passed", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            kitHelper.getKitInfo(testDeprecatedKitId)
+                .then(function (kitInfo: TacoKits.IKitInfo): void {
+                // Verify the returned kitInfo is correct
+                var stringifiedInfo = JSON.stringify(kitInfo);
+                stringifiedInfo.should.equal(JSON.stringify(testDeprecatedKitInfo));
+                done();
+            }).catch(function (err: string): void {
+                done(new Error(err));
+            });
+        });
 
-        function verifyFileContent(filePath: string): void {
-            var lr = new wrench.LineReader(filePath);
-            var lineNumber = 0;
+        it("must return the right kit information for the default kit ID passed", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            kitHelper.getKitInfo(testDefaultKitId)
+                .then(function (kitInfo: TacoKits.IKitInfo): void {
+                // Verify the returned kitInfo is correct
+                var stringifiedInfo = JSON.stringify(kitInfo);
+                stringifiedInfo.should.equal(JSON.stringify(testDefaultKitInfo));
+                done();
+            }).catch(function (err: string): void {
+                done(new Error(err));
+            });
+        });
+    });
 
-            while (lr.hasNextLine()) {
-                var currentLine: string = lr.getNextLine().trim();
-                var correctLine = replacedLines[lineNumber];
+    describe("getDefaultKit()", function (): void {
+        it("must return the ID of the default kit", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            kitHelper.getDefaultKit()
+                .then(function (kitId: string): void {
+                // Verify the returned kitInfo is correct
+                kitId.should.equal(testDefaultKitId);
+                done();
+            }).catch(function (err: string): void {
+                done(new Error(err));
+            });
+        });
+    });
 
-                if (currentLine !== correctLine) {
-                    fs.closeSync(lr.fd);
-                    throw new Error("Line wasn't correctly replaced");
-                }
+    describe("getPlatformOverridesForKit()", function (): void {
+        it("must return the platform overrides of the specified kit", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            kitHelper.getDefaultKit()
+                .then(function (kitId: string): void {
+                kitHelper.getPlatformOverridesForKit(kitId)
+                    .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): void {
+                    // Verify the returned kitInfo is correct
+                    platformOverrides.should.equal(testPlatformOverridesForDefaultKit);
+                    done();
+                });
+                done();
+            }).catch(function (err: string): void {
+                    done(new Error(err));
+            });          
+        });
+    });
 
-                lineNumber++;
-            }
+    describe("getPluginOverridesForKit()", function (): void {
+        it("must return the plugin overrides of the specified kit", function (done: MochaDone): void {
+            kitHelper.getDefaultKit()
+                .then(function (kitId: string): void {
+                kitHelper.getPluginOverridesForKit(kitId)
+                    .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): void {
+                    // Verify the returned kitInfo is correct
+                    pluginOverrides.should.equal(testPluginOverridesForDefaultKit);
+                    done();
+                });
+                done();
+            }).catch(function (err: string): void {
+                done(new Error(err));
+            });
+        });
+    });
 
-            fs.closeSync(lr.fd);
-        }
+    describe("isKitDeprecated()", function (): void {
+        it("must return false when a non-deprecated kit ID is passed", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            var isDeprecated: boolean = kitHelper.isKitDeprecated(testDefaultKitInfo);
+            isDeprecated.should.equal(false);
+            done();
+        });
 
-        it("should correctly replace all tokens in all files, recursively", function (done: MochaDone): void {
-            // Copy template items to a new folder
-            var testProjectPath = path.join(runFolder, "testProject");
+        it("must return false when a non-deprecated kit ID is passed", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            var isDeprecated: boolean = kitHelper.isKitDeprecated(testDeprecatedKitInfo);
+            isDeprecated.should.equal(true);
+            done();
+        });
+    });
 
-            wrench.mkdirSyncRecursive(testProjectPath, 511); // 511 decimal is 0777 octal
-            utils.copyRecursive(testTemplateSrc, testProjectPath).then(function (): string {
-                // Call performTokenReplacement()
-                return (<any>templates).performTokenReplacements(testProjectPath, testAppId, testAppName);
-            }).then(function (): void {
-                // Read both text files in the project and ensure replacements were correctly made
-                var fileA: string = path.join(testProjectPath, "a.txt");
-                var fileB: string = path.join(testProjectPath, "folder1", "b.txt");
-
-                verifyFileContent(fileA);
-                verifyFileContent(fileB);
+    describe("getTemplateOverrideInfo()", function (): void {
+        it("must return the template override information for the kit ID and template ID passed", function (done: MochaDone): void {
+            // Call findTemplatePath()
+            kitHelper.getTemplateOverrideInfo(testDefaultKitId, testDefaultTemplateId)
+                .then(function (templateOverrideInfo: TacoKits.ITemplateOverrideInfo): void {
+                // Verify the returned kitInfo is correct
+                var stringifiedInfo = JSON.stringify(templateOverrideInfo);
+                stringifiedInfo.should.equal(JSON.stringify(testTemplateOverrideInfo));
                 done();
             }).catch(function (err: string): void {
                 done(new Error(err));

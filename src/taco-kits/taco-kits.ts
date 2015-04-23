@@ -19,10 +19,10 @@ import logger = tacoUtility.Logger;
 module TacoKits { 
     export interface IPluginOverrideMetadata {
         [pluginId: string]: {
-            name: string;
-            version: string;
-            src: string;
-            platforms: string[];
+            name?: string;
+            version?: string;
+            src?: string;
+            platforms?: string;
         };
     }
 
@@ -50,14 +50,13 @@ module TacoKits {
     }
 
     export interface IKitInfo {
-        kitId: string;
         "cordova-cli": string;
-        "taco-min": string;
-        name: string;
+        "taco-min"?: string;
+        name?: string;
         description?: string;
         releaseNotesUri?: string;
         deprecated?: boolean;
-        deprecatedReasonUri?: boolean;
+        deprecatedReasonUri?: string;
         default?: boolean;
         plugins?: IPluginOverrideMetadata;
         platforms?: IPlatformOverrideMetadata;
@@ -68,7 +67,6 @@ module TacoKits {
     }
 
     export interface IPluginInfo {
-        pluginId: string;
         name: string;
         description?: string;
         platforms?: string[];

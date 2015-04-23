@@ -4,10 +4,10 @@
 declare module TacoKits {
     interface IPluginOverrideMetadata {
         [pluginId: string]: {
-            name: string;
-            version: string;
-            src: string;
-            platforms: string[];
+            name?: string;
+            version?: string;
+            src?: string;
+            platforms?: string;
         };
     }
 
@@ -35,17 +35,16 @@ declare module TacoKits {
     }
 
     interface IKitInfo {
-        kitId: string;
-        cli: string;
-        tacoMin: string;
-        name: string;
+        "cordova-cli": string;
+        "taco-min"?: string;
+        name?: string;
         description?: string;
         releaseNotesUri?: string;
         deprecated?: boolean;
-        deprecatedReasonUri?: boolean;
+        deprecatedReasonUri?: string;
         default?: boolean;
-        plugins?: IPluginOverrideMetadata[];
-        platforms?: IPlatformOverrideMetadata[];
+        plugins?: IPluginOverrideMetadata;
+        platforms?: IPlatformOverrideMetadata;
     }
 
     interface IKitMetadata {
