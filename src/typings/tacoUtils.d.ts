@@ -1,4 +1,4 @@
-/// <reference path="../typings/resourcesManager.d.ts" />
+/// <reference path="../typings/resourceManagerBase.d.ts" />
 /// <reference path="../typings/buildInfo.d.ts" />
 /// <reference path="../typings/cordovaConfig.d.ts" />
 /// <reference path="../typings/utilHelper.d.ts" />

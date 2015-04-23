@@ -19,7 +19,7 @@ import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import resources = tacoUtility.ResourcesManager;
+import resources = require("../resources/ResourceManager");
 import UtilHelper = tacoUtility.UtilHelper;
 
 /*
