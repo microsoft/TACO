@@ -1,24 +1,26 @@
-/// <reference path="../../typings/taco-utils.d.ts" />
-/// <reference path="../../typings/taco-kits.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 "use strict";
 
+
+import fs = require("fs");
+import nopt = require ("nopt");
+import path = require ("path");
+import Q = require("q");
+import cordovaWrapper = require ("./utils/cordovaWrapper");
+import projectHelper = require ("./utils/project-helper");
+import templateManager = require ("./utils/templateManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
-import utils = tacoUtility.UtilHelper;
-import kitHelper = tacoKits.KitHelper;
 import commands = tacoUtility.Commands;
-import resources = tacoUtility.ResourcesManager;
+import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import templateManager = require ("./utils/template-manager");
-import cordovaWrapper = require ("./utils/cordova-wrapper");
-import projectHelper = require ("./utils/project-helper");
-import nopt = require ("nopt");
-import Q = require ("q");
-import fs = require ("fs");
-import path = require ("path");
+import utils = tacoUtility.UtilHelper;
+import resources = tacoUtility.ResourcesManager;
+
 
 /* 
  * Wrapper interfaces for config JSON parameter for create command
@@ -60,7 +62,6 @@ interface ICreateParameters {
  */
 class Create implements commands.IDocumentedCommand {
     private static DefaultAppName: string = "HelloTaco";
-    private static DefaultAppId: string = "io.taco.myapp";
     private static KnownOptions: Nopt.FlagTypeMap = {
         kit: String,
         template: String,
@@ -69,9 +70,10 @@ class Create implements commands.IDocumentedCommand {
         "link-to": String
     };
 
-    private commandParameters: ICreateParameters;
-
     private static TacoOnlyOptions: string[] = ["cli", "kit", "template"];
+    private static DefaultAppId: string = "io.taco.myapp";
+
+    private commandParameters: ICreateParameters;
     
     public info: commands.ICommandInfo;
 
@@ -184,7 +186,6 @@ class Create implements commands.IDocumentedCommand {
         var mustUseTemplate: boolean = this.commandParameters.isKitProject && !this.commandParameters.data.options["copy-from"] && !this.commandParameters.data.options["link-to"];
         var kitId: string = this.commandParameters.data.options["kit"];
 
-
         this.commandParameters.kitId = kitId;
 
         var templateId: string = this.commandParameters.data.options["template"];
@@ -207,8 +208,7 @@ class Create implements commands.IDocumentedCommand {
                     // Use the CLI version specified as an argument to create the project "command.create.status.cliProject
                     return cordovaWrapper.create(self.commandParameters.cordovaCli, projectPath, appId, appName, cordovaConfig, utils.cleanseOptions(options, Create.TacoOnlyOptions));
                 });
-        }
-        else {
+        } else {
             return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCliToUse: string): void {
                 cordovaCli = cordovaCliToUse;
             }).then(function (): Q.Promise<any> {
@@ -227,6 +227,7 @@ class Create implements commands.IDocumentedCommand {
                         logger.log("\n");
                         logger.logLine(resources.getString("command.create.warning.deprecatedKitSuggestion"), logger.Level.Warn);
                     }
+
                     if (mustUseTemplate) {
                         return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, projectPath, appId, appName, cordovaConfig, options, Create.TacoOnlyOptions)
                             .then(function (templateDisplayName: string): Q.Promise<string> {
@@ -264,12 +265,14 @@ class Create implements commands.IDocumentedCommand {
                 if (!self.commandParameters.kitId) {
                     self.commandParameters.kitId = defaultKitId;
                 }
+
                 logger.log(resources.getString("command.create.status.kitIdUsed"), logger.Level.Normal);
                 logger.log(self.commandParameters.kitId, logger.Level.NormalBold);
                 logger.logLine("...", logger.Level.Normal);
                 logger.log("\n");
             });
         }
+
         deferred.resolve({});
         return deferred.promise;
     }

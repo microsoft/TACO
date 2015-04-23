@@ -1,17 +1,22 @@
 ﻿/// <reference path="typings/node.d.ts" />
 /// <reference path="typings/Q.d.ts" />
 /// <reference path="typings/gulp.d.ts" />
-/// <reference path="typings/gulp-extensions.d.ts" />
+/// <reference path="typings/gulpExtensions.d.ts" />
 /// <reference path="typings/nopt.d.ts" />
+/// <reference path="typings/merge2.d.ts" />
+/// <reference path="typings/gulp-typescript.d.ts" />
+/// <reference path="typings/gulp-sourcemaps.d.ts" />
 
 var runSequence = require("run-sequence");
 import gulp = require ("gulp");
 import path = require ("path");
 import Q = require ("q");
-import stylecopUtil = require ("../tools/stylecop-util");
-import tsUtil = require ("./taco-cli/compile/typescript-util");
-import gulpUtils = require("../tools/GulpUtils");
+import stylecopUtil = require ("../tools/stylecopUtil");
+import gulpUtils = require ("../tools/GulpUtils");
 import nopt = require ("nopt");
+import sourcemaps = require ("gulp-sourcemaps");
+import merge = require ("merge2");
+import ts = require ("gulp-typescript");
  
 var buildConfig = require("../../src/build_config.json");
 var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
@@ -19,7 +24,7 @@ var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-r
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
 var options: any = nopt({ moduleFilter: String, }, {}, process.argv);
-if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) != -1) {
+if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
     tacoModules = [options.moduleFilter];
 }
 
@@ -27,9 +32,12 @@ if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) != -1) {
 gulp.task("default", ["install-build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
-gulp.task("compile", function (callback: Function): void {
-    var tsCompiler = new tsUtil.TypeScriptServices();
-    tsCompiler.compileDirectory(buildConfig.src, buildConfig.buildSrc, /*sourceMap*/ true, callback);
+gulp.task("compile", function (callback: Function): any {
+    return gulp.src([buildConfig.src + "/**/*.ts"])
+                        .pipe(sourcemaps.init())
+                        .pipe(ts(buildConfig.tsCompileOptions))
+                        .pipe(sourcemaps.write("."))
+                        .pipe(gulp.dest(buildConfig.buildSrc));
 });
 
 /* compile + copy */
@@ -65,7 +73,6 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
 
 /* copy package.json and resources.json files from source to bin */
 gulp.task("copy", function (): Q.Promise<any> {
-
     return gulpUtils.copyFiles(
         [
             "build_config.json",

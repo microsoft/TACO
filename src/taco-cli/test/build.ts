@@ -8,7 +8,7 @@
 /// <reference path="../../typings/mocha.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
-/// <reference path="../../typings/cordova-extensions.d.ts" />
+/// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
@@ -23,18 +23,19 @@ import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 import BuildInfo = TacoUtility.BuildInfo;
-import util = require("util");
+import util = require ("util");
 
-import cordova = require("cordova");
+// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
+import cordova = require ("cordova");
 
-import buildMod = require("../cli/build");
+import buildMod = require ("../cli/build");
 import setupMod = require ("../cli/setup");
 
 var build = new buildMod();
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/server-mock");
-import SetupMock = require ("./utils/setup-mock");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
 
 describe("taco build", function () {
     var testHttpServer: http.Server;
@@ -101,7 +102,7 @@ describe("taco build", function () {
     it("should make the correct sequence of calls for 'taco build --remote test'", function (mocha: MochaDone) {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version; // TODO
+        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12340;
         
         // Mock out the server on the other side
@@ -192,7 +193,7 @@ describe("taco build", function () {
     it("should report an error if the remote build fails", function (mocha: MochaDone) {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version; // TODO
+        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12341;
         
         // Mock out the server on the other side
@@ -272,7 +273,7 @@ describe("taco build", function () {
     it("should attempt incremental builds where possible", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version; // TODO
+        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12342;
 
         var buildInfoDir = path.join("remote", "test", configuration);
@@ -303,9 +304,7 @@ describe("taco build", function () {
                     vcli: require(path.join(__dirname, "..", "package.json")).version,
                     cfg: configuration,
                     platform: "test",
-                    buildNumber: buildNumber.toString()
-                    
-                }),
+                    buildNumber: buildNumber.toString() }),
                 head: {
                     "Content-Type": "application/json",
                     "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber

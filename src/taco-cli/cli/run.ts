@@ -1,6 +1,7 @@
-﻿/// <reference path="../../typings/taco-utils.d.ts" />
+﻿/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+
 "use strict";
 
 import assert = require ("assert");
@@ -8,20 +9,18 @@ import child_process = require ("child_process");
 import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
+
+import CordovaWrapper = require ("./utils/CordovaWrapper");
 import tacoUtility = require ("taco-utils");
+import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
+import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
+import Settings = require ("./utils/settings");
+import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
-import resources = tacoUtility.ResourcesManager;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import BuildInfo = tacoUtility.BuildInfo;
+import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
-
-import CordovaWrapper = require ("./utils/cordova-wrapper");
-
-import RemoteBuild = require ("./remote-build/remotebuild-client");
-import RemoteBuildSettings = require ("./remote-build/build-settings");
-
-import Settings = require ("./utils/settings");
 
 /*
  * Run
@@ -35,7 +34,6 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
         debuginfo: Boolean,
         nobuild: Boolean,
 
-        // TODO: What if the last build we did wasn't for the appropriate target?
         device: Boolean,
         emulator: Boolean,
         target: String,
@@ -113,7 +111,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.loadSettings().then(function (settings: Settings.ISettings): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
-            var buildTarget = commandData.options["target"] || "iphone 5"; // TODO: Select an appropriate default for the platform, or leave target unspecified and have the server pick a default
+            var buildTarget = commandData.options["target"] || "iphone 5"; // TODO (Devdiv: 1160573): Select an appropriate default for non-iOS platforms, or leave target unspecified and have the server pick a default
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
@@ -130,11 +128,12 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 platform: platform,
                 configuration: configuration,
                 buildTarget: buildTarget,
-                language: language
+                language: language,
+                cordovaVersion: require("cordova/package.json").version // TODO (Devdiv 1160583): Use Kit specified version
             });
 
             // Find the build that we are supposed to run
-            buildInfoPromise = RemoteBuild.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+            buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 if (buildInfo) {
                     return Q(buildInfo);
                 } else if (commandData.options["nobuild"]) {
@@ -143,7 +142,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                     logger.logErrorLine(resources.getString("NoRemoteBuildIdFound", buildCommandToRun));
                     throw new Error("NoRemoteBuildIdFound");
                 } else {
-                    return RemoteBuild.build(buildSettings);
+                    return RemoteBuildClientHelper.build(buildSettings);
                 }
             });
 
@@ -151,18 +150,18 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             var runPromise: Q.Promise<BuildInfo>;
             if (commandData.options["emulator"]) {
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                    return RemoteBuild.emulate(buildInfo, remoteConfig, buildTarget);
+                    return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
                 });
             } else {
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                    return RemoteBuild.run(buildInfo, remoteConfig);
+                    return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
                 });
             }
 
             return runPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 if (commandData.options["debuginfo"]) {
                     // enable debugging and report connection information
-                    return RemoteBuild.debug(buildInfo, remoteConfig)
+                    return RemoteBuildClientHelper.debug(buildInfo, remoteConfig)
                         .then(function (buildInfo: BuildInfo): BuildInfo {
                         if (buildInfo["webDebugProxyPort"]) {
                             console.info(JSON.stringify({ webDebugProxyPort: buildInfo["webDebugProxyPort"] }));

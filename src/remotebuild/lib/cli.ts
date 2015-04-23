@@ -8,7 +8,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 "use strict";
 
 import fs = require ("fs");
@@ -16,10 +16,10 @@ import nconf = require ("nconf");
 import path = require ("path");
 import Q = require ("q");
 
-import HostSpecifics = require ("./host-specifics");
+import HostSpecifics = require ("./hostSpecifics");
 import utils = require ("taco-utils");
 import server = require ("./server");
-import RemoteBuildConf = require ("./remotebuild-conf");
+import RemoteBuildConf = require ("./remoteBuildConf");
 
 import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;

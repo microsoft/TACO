@@ -1,7 +1,8 @@
-/// <reference path="../../typings/taco-utils.d.ts" />
-/// <reference path="../../typings/taco-kits.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/cordova-extensions.d.ts" />
+/// <reference path="../../typings/cordovaExtensions.d.ts" />
+
 "use strict";
 
 import tacoUtility = require ("taco-utils");

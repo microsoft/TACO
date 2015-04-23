@@ -8,7 +8,7 @@
 /// <reference path="../../typings/mocha.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
-/// <reference path="../../typings/cordova-extensions.d.ts" />
+/// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
@@ -24,17 +24,16 @@ import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 import BuildInfo = TacoUtility.BuildInfo;
 
-// TODO: versioning
+// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
 import cordova = require ("cordova");
-
 import runMod = require ("../cli/run");
 import setupMod = require ("../cli/setup");
 
 var run = new runMod();
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/server-mock");
-import SetupMock = require ("./utils/setup-mock");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
 
 describe("taco run", function (): void {
     var testHttpServer: http.Server;

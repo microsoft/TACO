@@ -7,7 +7,7 @@
 ﻿ */
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/plist-with-patches.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 "use strict";
 
 import fs = require ("fs");

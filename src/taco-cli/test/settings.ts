@@ -21,7 +21,7 @@ import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 
-import SetupMock = require ("./utils/setup-mock");
+import SetupMock = require ("./utils/setupMock");
 
 import Settings = require ("../cli/utils/settings");
 

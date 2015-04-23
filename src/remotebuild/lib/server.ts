@@ -8,9 +8,9 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
-/// <reference path="../../typings/express-extensions.d.ts" />
+/// <reference path="../../typings/expressExtensions.d.ts" />
 /// <reference path="../../typings/morgan.d.ts" />
 /// <reference path="../../typings/errorhandler.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
@@ -25,8 +25,8 @@ import expressLogger = require ("morgan");
 import path = require ("path");
 import Q = require ("q");
 
-import HostSpecifics = require ("./host-specifics");
-import RemoteBuildConf = require ("./remotebuild-conf");
+import HostSpecifics = require ("./hostSpecifics");
+import RemoteBuildConf = require ("./remoteBuildConf");
 import utils = require ("taco-utils");
 import util = require ("util");
 

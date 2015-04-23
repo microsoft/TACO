@@ -9,23 +9,25 @@
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/rimraf.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
-/// <reference path="../../typings/taco-utils.d.ts"/>
+/// <reference path="../../typings/tacoUtils.d.ts"/>
+/// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
+import fs = require ("fs");
+import mocha = require ("mocha");
+import os = require ("os");
+import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
-import mocha = require ("mocha");
-import path = require ("path");
-import fs = require ("fs");
-import os = require ("os");
 import util = require ("util");
 import Create = require ("../cli/create");
+import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
 import resources = tacoUtils.ResourcesManager;
+import utils = tacoUtils.UtilHelper;
 
 interface IScenarioList {
     [scenario: number]: string;
@@ -141,6 +143,9 @@ describe("taco create", function (): void {
 
     before(function (done: MochaDone): void {
         this.timeout(30000);
+
+        tacoKits.KitHelper.init("en");
+
         // Set ResourcesManager to test mode
         resources.UnitTest = true;
 
@@ -170,9 +175,7 @@ describe("taco create", function (): void {
         });
     });
 
-    describe("Success scenarios", function (): void {
-
-        // Downloading packages from the internet can take a while.
+    describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
         this.timeout(50000);
 
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
@@ -310,7 +313,7 @@ describe("taco create", function (): void {
 
         it("Failure scenario 7 [path, cli, template]", function (done: MochaDone): void {
             // Create command should fail when both --cli and --template are specified
-            var scenario: number =7;
+            var scenario: number = 7;
 
             runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
         });

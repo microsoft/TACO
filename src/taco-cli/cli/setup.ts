@@ -1,4 +1,4 @@
-﻿/// <reference path="../../typings/taco-utils.d.ts" />
+﻿/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 "use strict";
@@ -10,16 +10,16 @@ import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
 import request = require ("request");
+import util = require ("util");
+
+import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
+import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
 import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
-import util = require ("util");
-
-import Settings = require ("./utils/settings");
-import ConnectionSecurity = require ("./remote-build/connection-security");
 
 interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;
@@ -144,7 +144,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                         // Invalid PIN specified
                         deferred.reject(new Error(resources.getString("command.setup.remote.rejectedPin")));
                     } else {
-                        ConnectionSecurity.saveCertificate(body, hostPortAndPin.host).then(function (certName: string): void {
+                        ConnectionSecurityHelper.saveCertificate(body, hostPortAndPin.host).then(function (certName: string): void {
                             deferred.resolve(certName.trim());
                         }, function (err: Error): void {
                                 deferred.reject(err);
@@ -162,7 +162,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
 
     private static findRemoteMountPath(hostPortAndCert: { host: string; port: number; certName?: string; secure: boolean }): Q.Promise<string> {
         var mountDiscoveryUrl = util.format("http%s://%s:%d/modules/%s", hostPortAndCert.certName ? "s" : "", hostPortAndCert.host, hostPortAndCert.port, "taco-remote");
-        return ConnectionSecurity.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
+        return ConnectionSecurityHelper.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
             var options: request.Options = {
                 url: mountDiscoveryUrl,
                 agent: agent

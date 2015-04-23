@@ -4,6 +4,7 @@
 /// <reference path="../src/typings/fstream.d.ts" />
 /// <reference path="../src/typings/del.d.ts" />
 /// <reference path="../src/typings/archiver.d.ts" />
+/// <reference path="../src/typings/gulp.d.ts" />
 
 import archiver = require ("archiver");
 import child_process = require ("child_process");
@@ -19,13 +20,21 @@ import zlib = require ("zlib")
 
 class GulpUtils {
 
+    private static TestCommand: string = "test";
+
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
         return modulesToTest.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
 
                 var modulePath = path.resolve(modulesRoot, val);
+                // check if package has any tests
+                var pkg = require(path.join(modulePath, "package.json"));
+                if (!pkg.scripts || !(GulpUtils.TestCommand in pkg.scripts)) {
+                    return Q({});
+                }
+
                 var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                var testProcess = child_process.spawn(npmCommand, ["test"], { cwd: modulePath, stdio: "inherit" });
+                var testProcess = child_process.spawn(npmCommand, [GulpUtils.TestCommand], { cwd: modulePath, stdio: "inherit" });
                 var deferred = Q.defer();
                 testProcess.on("close", function (code: number): void {
                     if (code) {
@@ -62,9 +71,7 @@ class GulpUtils {
         var buildTemplatesPath: string = path.resolve(templatesDest);
         var promises: Q.Promise<any>[] = [];
 
-        if (!fs.existsSync(buildTemplatesPath)) {
-            fs.mkdirSync(buildTemplatesPath);
-        }
+        GulpUtils.mkdirp(buildTemplatesPath);
 
         // Read the templates dir to discover the different kits
         var templatesPath: string = templatesSrc;
@@ -75,9 +82,7 @@ class GulpUtils {
             var kitSrcPath: string = path.join(templatesSrc, kitValue);
             var kitTargetPath: string = path.join(buildTemplatesPath, kitValue);
 
-            if (!fs.existsSync(kitTargetPath)) {
-                fs.mkdirSync(kitTargetPath);
-            }
+            GulpUtils.mkdirp(kitTargetPath);
 
             var kitTemplates: string[] = GulpUtils.getChildDirectoriesSync(kitSrcPath);
 
@@ -131,6 +136,18 @@ class GulpUtils {
         return fs.readdirSync(dir).filter(function (entry: string): boolean {
             return fs.statSync(path.resolve(dir, entry)).isDirectory();
         });
+    }
+
+    private static mkdirp(dir: string): void {
+        var folders = dir.split(path.sep);
+        var start = folders.shift();
+        folders.reduce(function (soFar: string, currentFolder: string): string {
+            var folder = path.join(soFar, currentFolder);
+            if (!fs.existsSync(folder)) {
+                fs.mkdirSync(folder);
+            }
+            return folder;
+        }, start + path.sep);
     }
 }
 
