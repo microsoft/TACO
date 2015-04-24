@@ -39,7 +39,7 @@ var caCertPath = path.join(certsDir, "ca-cert.pem");
 // Since the certs use openSSL to work with certificates, we restrict these tests to the mac where openSSL should exist.
 var macOnly = os.platform() === "darwin" ? describe : describe.skip;
 macOnly("Certs", function (): void {
-    after(function (done: MochaDone): void {
+    after(function (): void {
         nconf.overrides({});
     });
     
