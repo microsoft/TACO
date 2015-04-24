@@ -41,7 +41,7 @@ class IOSEmulateHelper {
     };
 
     public static emulate(emulateRequest: { appDir: string; appName: string; target: string }): Q.Promise<{ status: string; messageId: string; messageArgs?: any }> {
-        return Q.fcall(IOSEmulateHelper.cdToAppDir, emulateRequest)
+        return Q.fcall(IOSEmulateHelper.cdToAppDir, emulateRequest.appDir)
             .then(IOSEmulateHelper.cordovaEmulate.bind(IOSEmulateHelper, emulateRequest))
             .then(function success(): { status: string; messageId: string; messageArgs?: any } {
             return { status: BuildInfo.EMULATED, messageId: "EmulateSuccess" };
