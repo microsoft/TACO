@@ -16,9 +16,11 @@ var should_module = require("should"); // Note not import: We don't want to refe
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
+import rimraf = require ("rimraf");
 import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
@@ -39,7 +41,7 @@ import SetupMock = require ("./utils/setupMock");
 
 describe("taco build", function () {
     var testHttpServer: http.Server;
-    var tacoHome = path.join(__dirname, "out");
+    var tacoHome = path.join(os.tmpdir(), "taco-cli", "build");
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
@@ -74,6 +76,7 @@ describe("taco build", function () {
 
     after(function () {
         testHttpServer.close();
+        rimraf(tacoHome, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {

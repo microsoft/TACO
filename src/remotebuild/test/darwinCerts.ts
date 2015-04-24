@@ -29,7 +29,7 @@ import RemoteBuildConf = require ("../lib/remoteBuildConf");
 import utils = require ("taco-utils");
 import resources = utils.ResourcesManager;
 
-var serverDir = path.join(__dirname, "out");
+var serverDir = path.join(os.tmpdir(), "remotebuild", "certs");
 var certsDir = path.join(serverDir, "certs");
 var clientCertsDir = path.join(certsDir, "client");
 var caKeyPath = path.join(certsDir, "ca-key.pem");
@@ -41,6 +41,7 @@ var macOnly = os.platform() === "darwin" ? describe : describe.skip;
 macOnly("Certs", function (): void {
     after(function (): void {
         nconf.overrides({});
+        rmdir(serverDir, function (err: Error) {/* ignored */ }); // Not sync, and we don't wait for it. 
     });
     
     before(function (): void {
@@ -216,12 +217,12 @@ macOnly("Certs", function (): void {
     
     // Test that we can make a self signed certificate from the CA certificate
     it("MakeSelfSignedCert", function (done: MochaDone): void {
-        var outKeyPath = path.join(__dirname, "out", "selfsigned-key.pem");
-        var outCertPath = path.join(__dirname, "out", "selfsigned-cert.pem");
+        var outKeyPath = path.join(serverDir, "selfsigned-key.pem");
+        var outCertPath = path.join(serverDir, "selfsigned-cert.pem");
 
         certs.makeSelfSigningCACert(caKeyPath, caCertPath).
             then(function (): Q.Promise<void> {
-            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, conf({ serverDir: path.join(__dirname, "out") }));
+            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, conf({ serverDir: serverDir }));
         }).
             then(function (): void {
             should.assert(fs.existsSync(outKeyPath), "key should exist after makeSelfSignedCert completes");
