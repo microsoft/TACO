@@ -17,6 +17,42 @@
             { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" }
         ]
     },
+    "platform": {
+        "synopsis": "<COMMAND> [options]",
+        "modulePath": "./platform",
+        "description": "[command.platform.description]",
+        "args": [
+            { "name": "PATH", "description": "[command.create.path]" },
+            { "name": "ID", "description": "[command.create.args.id]" },
+            { "name": "NAME", "description": "[command.create.args.name]" },
+            { "name": "CONFIG", "description": "[command.create.args.config]" }
+        ],
+        "options": [
+            { "name": "--kit <NAME>", "description": "[command.create.options.kit]" },
+            { "name": "--template <NAME>", "description": "[command.create.options.template]" },
+            { "name": "--cli <VERSION>", "description": "[command.create.options.cli]" },
+            { "name": "--copy-from|src <PATH>", "description": "[command.create.options.copy]" },
+            { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" }
+        ]
+    },
+    "kit": {
+        "synopsis": "<PATH> [ID [NAME [CONFIG]]] [options]",
+        "modulePath": "./create",
+        "description": "[command.create.description]",
+        "args": [
+            { "name": "PATH", "description": "[command.create.path]" },
+            { "name": "ID", "description": "[command.create.args.id]" },
+            { "name": "NAME", "description": "[command.create.args.name]" },
+            { "name": "CONFIG", "description": "[command.create.args.config]" }
+        ],
+        "options": [
+            { "name": "--kit <NAME>", "description": "[command.create.options.kit]" },
+            { "name": "--template <NAME>", "description": "[command.create.options.template]" },
+            { "name": "--cli <VERSION>", "description": "[command.create.options.cli]" },
+            { "name": "--copy-from|src <PATH>", "description": "[command.create.options.copy]" },
+            { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" }
+        ]
+    },
     "help": {
         "synopsis": "[COMMAND]",
         "modulePath": "../cli/help",

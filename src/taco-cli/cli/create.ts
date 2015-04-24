@@ -4,11 +4,10 @@
 /// <reference path="../../typings/nopt.d.ts" />
 "use strict";
 
-
-import fs = require("fs");
+import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
-import Q = require("q");
+import Q = require ("q");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
 import templateManager = require ("./utils/templateManager");
@@ -20,7 +19,6 @@ import logger = tacoUtility.Logger;
 import level = logger.Level;
 import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
-
 
 /* 
  * Wrapper interfaces for config JSON parameter for create command

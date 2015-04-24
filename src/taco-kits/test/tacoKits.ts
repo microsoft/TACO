@@ -11,7 +11,7 @@
 /// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
-var should_module = require ("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import mocha = require ("mocha");
 import path = require ("path");
@@ -19,7 +19,6 @@ import tacoKits = require ("../tacoKits");
 import tacoUtils = require ("taco-utils");
 import kitHelper = tacoKits.KitHelper;
 import resources = tacoUtils.ResourcesManager;
-
 
 describe("KitHelper", function (): void {
     // Test Kit Info
@@ -31,12 +30,12 @@ describe("KitHelper", function (): void {
         "taco-min": "1.0.0",
         releaseNotesUri: "http://cordova.apache.org/4.0.0/release.md",
         name: "4.0.0 Kit for Cordova Development",
-        "deprecated": true,
+        deprecated: true,
         deprecatedReasonUri: "http://cordova.apache.org/blog/2014102310023",
         plugins: {
-            "org.apache.cordova.camera" : {
-                "version": "0.2.27",
-                "platforms": "ios, android, wp8"
+            "org.apache.cordova.camera": {
+                version: "0.2.27",
+                platforms: "ios, android, wp8"
             },
             "org.apache.cordova.media-capture": {
                 version: "0.3.4",
@@ -55,19 +54,19 @@ describe("KitHelper", function (): void {
     };
 
     var testPlatformOverridesForDefaultKit: tacoKits.IPlatformOverrideMetadata = {
-        "android": {
+        android: {
             version: "4.2.1",
             src: "https://github.com/apache/cordova-android/tree/4.2.1/archive/4.2.1.tgz"
         },
-        "ios": {
+        ios: {
             version: "4.2.2",
             src: "https://github.com/apache/cordova-ios/tree/4.2.2/archive/4.2.2.tgz"
         },
-        "windows": {
+        windows: {
             version: "4.0.0",
             src: "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0.tgz"
         },
-        "wp8": {
+        wp8: {
             version: "4.0.2",
             src: "https://github.com/apache/cordova-wp8/tree/4.0.2/archive/4.0.2.tgz"
         }
@@ -90,7 +89,6 @@ describe("KitHelper", function (): void {
     };
 
     // Important paths
-
     before(function (): void {
         // Set ResourcesManager to test mode
         resources.UnitTest = true;
@@ -103,7 +101,7 @@ describe("KitHelper", function (): void {
     });
 
     after(function (): void {
-        // Set ResourcesManager to test mode
+        // Reset ResourcesManager back to production mode
         resources.UnitTest = false;
 
         // Reset kit metadata path
@@ -114,8 +112,8 @@ describe("KitHelper", function (): void {
         it("must return the right kit metadata", function (done: MochaDone): void {
             // Call getKitMetadata()
             kitHelper.getKitMetadata()
-                .then(function (kitInfo: TacoKits.IKitMetadata): void {
-                // Verify the returned kit metadat is expected
+                .then(function (kitInfo: TacoKits.ITacoKitMetadata): void {
+                // Verify the returned kit metadata is expected
                 kitInfo.should.equal(require(kitHelper.KitMetadataFilePath));
                 done();
             }).catch(function (err: string): void {
@@ -178,7 +176,7 @@ describe("KitHelper", function (): void {
                 });
                 done();
             }).catch(function (err: string): void {
-                    done(new Error(err));
+                done(new Error(err));
             });          
         });
     });

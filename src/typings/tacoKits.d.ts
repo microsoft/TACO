@@ -4,7 +4,6 @@
 declare module TacoKits {
     interface IPluginOverrideMetadata {
         [pluginId: string]: {
-            name?: string;
             version?: string;
             src?: string;
             platforms?: string;
@@ -64,8 +63,8 @@ declare module TacoKits {
 
     interface ITacoKitMetadata {
         plugins?: IPluginMetadata;
-        kits?: IKitMetadata;
-        templates?: ITemplateMetadata;
+        kits: IKitMetadata;
+        templates: ITemplateMetadata;
     }
 
     class KitHelper {

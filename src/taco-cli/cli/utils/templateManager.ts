@@ -5,18 +5,20 @@
 /// <reference path="../../../typings/adm-zip.d.ts"/>
 
 "use strict";
-import Q = require ("q");
-import path = require ("path");
-import fs = require ("fs");
-import wrench = require ("wrench");
-import replace = require ("replace");
+
 import admZip = require ("adm-zip");
-import tacoUtility = require ("taco-utils");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
+import replace = require ("replace");
+import wrench = require ("wrench");
+import cordovaWrapper = require ("./cordovaWrapper");
 import tacoKits = require ("taco-kits");
+import tacoUtility = require ("taco-utils");
 import logger = tacoUtility.Logger;
 import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
-import cordovaWrapper = require ("./cordovaWrapper");
+
 import kitHelper = tacoKits.KitHelper;
 
 interface IKitHelper {

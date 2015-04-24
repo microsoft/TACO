@@ -9,13 +9,12 @@
 /// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
-import fs = require("fs");
+import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import logger = tacoUtility.Logger;
 import resourcesManager = tacoUtility.ResourcesManager;
-
 
 module TacoKits { 
     export interface IPluginOverrideMetadata {
@@ -79,8 +78,8 @@ module TacoKits {
 
     export interface ITacoKitMetadata {
         plugins?: IPluginMetadata;
-        kits?: IKitMetadata;
-        templates?: ITemplateMetadata;
+        kits: IKitMetadata;
+        templates: ITemplateMetadata;
     }
     /**
      *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
@@ -94,7 +93,7 @@ module TacoKits {
          /*
           * The following member is public static to expose access to automated tests
           */
-        public static KitMetadataFilePath: string = undefined;
+        public static KitMetadataFilePath: string;
 
         /**
          *   Initializes resource manager with the locale for resource strings
@@ -209,7 +208,7 @@ module TacoKits {
                             deferred.reject("taco-kits.exception.TypescriptNotSupported");
                         } else {
                             logger.logErrorLine(resourcesManager.getString("taco-kits.exception.InvalidTemplate", templateId));
-                            deferred.reject("taco-kits.exception.InvalidTemplate")
+                            deferred.reject("taco-kits.exception.InvalidTemplate");
                         }
                     }
                 } else if (templates["default"][templateId]) {
