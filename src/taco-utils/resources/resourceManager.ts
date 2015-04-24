@@ -2,13 +2,6 @@
 
 "use strict";
 
-import tacoUtility = require("../resourceManagerBase");
-
-class ResourceManager extends tacoUtility.ResourceManagerBase {
-    protected get ResourcesDirectory(): string {
-        return __dirname;
-    }
-}
-
-var resourceManager: ResourceManager = new ResourceManager();
+import tacoUtility = require("../resourceManager");
+var resourceManager: tacoUtility.ResourceManager = new tacoUtility.ResourceManager(__dirname);
 export = resourceManager;

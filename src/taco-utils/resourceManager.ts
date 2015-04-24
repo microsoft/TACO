@@ -6,13 +6,14 @@ import resourceSet = require("./resourceSet");
 import ResourceSet = resourceSet.ResourceSet;
 
 module TacoUtility {
-    export class ResourceManagerBase {
+    export class ResourceManager {
 
         private static DefaultLocale: string = "en";
+        private resourceDirectory: string = null;
         private resources: { [lang: string]: ResourceSet } = {};
 
-        protected get ResourcesDirectory(): string {
-            throw new Error("foo");
+        constructor(resourcesDirectory: string) {
+            this.resourceDirectory = resourcesDirectory;
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
@@ -21,7 +22,7 @@ module TacoUtility {
                 return id;
             }
 
-            var locale: string = ResourceManagerBase.getCurrentLocale();
+            var locale: string = ResourceManager.getCurrentLocale();
             this.EnsureResourceSet(locale);
             return this.resources[locale].getString(id, optionalArgs);
         }
@@ -33,7 +34,7 @@ module TacoUtility {
         private static getCurrentLocale(): string {
             return (process.domain && process.domain.lang) ||
                 process.env.LANG ||
-                ResourceManagerBase.DefaultLocale;
+                ResourceManager.DefaultLocale;
         }
 
         /*
@@ -51,7 +52,7 @@ module TacoUtility {
                 return;
             }
 
-            var resourceFilePath = ResourceManagerBase.getResourceFilePath(this.ResourcesDirectory, matchingLocale);
+            var resourceFilePath = ResourceManager.getResourceFilePath(this.resourceDirectory, matchingLocale);
             this.resources[matchingLocale] = new ResourceSet(resourceFilePath);
 
             this.resources[locale] = this.resources[matchingLocale];
@@ -63,7 +64,7 @@ module TacoUtility {
          */
         private getBestMatchingLocale(locale: string): string {
 
-            var availableResources: string[] = ResourceManagerBase.getAvailableLocales(this.ResourcesDirectory);
+            var availableResources: string[] = ResourceManager.getAvailableLocales(this.resourceDirectory);
             if (availableResources.indexOf(locale) >= 0) {
                 return locale;
             }
@@ -76,7 +77,7 @@ module TacoUtility {
                 }
             }
 
-            return ResourceManagerBase.DefaultLocale;
+            return ResourceManager.DefaultLocale;
         }
 
         /**
@@ -86,7 +87,7 @@ module TacoUtility {
             var availableLocales: string[] = [];
             fs.readdirSync(resourcesDirectory).forEach(function (filename: string): void {
                 try {
-                    if (fs.existsSync(ResourceManagerBase.getResourceFilePath(resourcesDirectory, filename))){
+                    if (fs.existsSync(ResourceManager.getResourceFilePath(resourcesDirectory, filename))){
                         availableLocales.push(filename);
                     }
                 } catch (e) {

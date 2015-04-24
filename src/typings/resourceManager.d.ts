@@ -1,6 +1,8 @@
 
 declare module TacoUtility {
-    class ResourceManagerBase {
+    class ResourceManager {
+
+        constructor(resourcesDirectory: string);
 
         /** ...optionalArgs is only there for typings, function rest params */
         public getString(id: string, ...optionalArgs: any[]): string;
