@@ -99,7 +99,7 @@
         "2.2.0-Kit": {
             "blank": {
                 "name": "Blank template",
-                "url": "templates/5.0.0-kit/blank.zip"
+                "url": "templates/2.2.0-kit/blank.zip"
             }
         },
         "4.0.0-Kit": {
@@ -119,7 +119,7 @@
             },
             "typescript": {
                  "name": "Blank TypeScript template",
-                 "url": "templates/4.0.0-kit/typescript.zip"
+                 "url": "templates/5.0.0-kit/typescript.zip"
             }
         }
     }
