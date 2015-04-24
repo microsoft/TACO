@@ -28,7 +28,7 @@ describe("plist", function (): void {
     });
     
     after(function (): void {
-        rimraf(testDir, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(testDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     it("should create plist files correctly", function (): void {

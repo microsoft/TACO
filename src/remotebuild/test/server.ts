@@ -46,7 +46,7 @@ describe("server", function (): void {
     });
     after(function (): void {
         resources.teardown();
-        rimraf(serverDir, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
     beforeEach(function (): void {
         rimraf.sync(serverDir);

@@ -17,8 +17,8 @@ import https = require ("https");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import request = require("request");
-import rimraf = require("rimraf");
+import request = require ("request");
+import rimraf = require ("rimraf");
 
 import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
 import Settings = require ("../cli/utils/settings");
@@ -47,7 +47,8 @@ describe("taco setup", function (): void {
         if (fs.existsSync(tacoSettingsFile)) {
             fs.unlinkSync(tacoSettingsFile);
         }
-        rimraf(testHome, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+
+        rimraf(testHome, function (err: Error): void { /* ignored */ }); // Not sync, and ignore errors
     });
 
     function makeICommandData(args: string[]): TacoUtility.Commands.ICommandData {

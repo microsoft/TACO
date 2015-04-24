@@ -30,7 +30,7 @@ describe("TacoPackageLoader", function (): void {
     });
 
     after(function (): void {
-        rimraf(testHome, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(testHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     // Downloading packages from the internet can take a while.

@@ -41,7 +41,7 @@ var macOnly = os.platform() === "darwin" ? describe : describe.skip;
 macOnly("Certs", function (): void {
     after(function (): void {
         nconf.overrides({});
-        rmdir(serverDir, function (err: Error) {/* ignored */ }); // Not sync, and we don't wait for it. 
+        rmdir(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and we don't wait for it. 
     });
     
     before(function (): void {

@@ -61,7 +61,7 @@ describe("taco-remote", function (): void {
         }
 
         server.close(mocha);
-        rimraf(serverDir, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     macOnlyIt("should successfully build the sample project", function (mocha: MochaDone): void {

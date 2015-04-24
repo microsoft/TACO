@@ -44,7 +44,7 @@ describe("taco settings", function (): void {
     });
 
     after(function (): void {
-        rimraf(tacoHome, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     it("should correctly report build locations when --local is specified", function (mocha: MochaDone): void {

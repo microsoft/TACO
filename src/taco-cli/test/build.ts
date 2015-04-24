@@ -76,7 +76,7 @@ describe("taco build", function () {
 
     after(function () {
         testHttpServer.close();
-        rimraf(tacoHome, function (err: Error) {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {
