@@ -2,7 +2,7 @@
 /// <reference path="../typings/tacoUtils.d.ts" />
 
 declare module TacoDependencyInstaller {
-    export class DependencyInstaller {
+    class DependencyInstaller {
         public constructor();
 
         /**
