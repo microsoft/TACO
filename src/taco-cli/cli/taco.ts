@@ -1,5 +1,5 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/taco-kits.d.ts" />
+/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 

@@ -11,25 +11,25 @@
 /// <reference path="../../typings/archiver.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
-/// <reference path="../../typings/taco-kits.d.ts"/>
+/// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-import mocha = require ("mocha");
-import path = require ("path");
-import zlib = require ("zlib");
+import archiver = require ("archiver");
 import fs = require ("fs");
+import mocha = require ("mocha");
 import os = require ("os");
-import templates = require ("../cli/utils/templateManager");
-import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
-import resources = tacoUtils.ResourcesManager;
+import path = require ("path");
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
-import archiver = require ("archiver");
+import zlib = require ("zlib");
+import templates = require ("../cli/utils/templateManager");
 import tacoKits = require ("taco-kits");
+import tacoUtils = require ("taco-utils");
 import kitHelper = tacoKits.KitHelper;
+import resources = tacoUtils.ResourcesManager;
+import utils = tacoUtils.UtilHelper;
 
 interface IKitHelper {
     getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;

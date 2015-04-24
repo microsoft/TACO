@@ -5,7 +5,10 @@
     },
     "description": "Validated Kits metadata for Taco CLI",
     "version": "0.0.1",
-    "main": "taco-kits.js",
+    "main": "tacoKits.js",
+    "scripts": {
+        "test": "mocha"
+    },
     "dependencies": {
         "q": "^1.1.2",
         "taco-utils": "file:../taco-utils"
