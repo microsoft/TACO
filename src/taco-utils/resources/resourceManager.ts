@@ -2,7 +2,7 @@
 
 "use strict";
 
-import tacoUtility = require("taco-utils");
+import tacoUtility = require("../resourceManagerBase");
 
 class ResourceManager extends tacoUtility.ResourceManagerBase {
     protected get ResourcesDirectory(): string {

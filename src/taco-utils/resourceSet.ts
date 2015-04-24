@@ -11,9 +11,10 @@ module TacoUtility {
         private resources: { [key: string]: any; } = {};
 
         constructor(resourceFileName: string) {
-            var res = require(path.join(resourceFileName));
+            var self = this;
+            var res = require(resourceFileName);
             Object.keys(res).forEach(function (key: string): void {
-                this.resources[key] = res[key];
+                self.resources[key] = res[key];
             });
         }
 

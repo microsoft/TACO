@@ -5,7 +5,7 @@
 import tacoUtility = require("taco-utils");
 
 class ResourceManager extends tacoUtility.ResourceManagerBase {
-    protected get ResourcesDir(): string {
+    protected get ResourcesDirectory(): string {
         return __dirname;
     }
 }

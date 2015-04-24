@@ -20,10 +20,10 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("../hostSpecifics");
+import resources = require("../../resources/resourceManager");
 import RemoteBuildConf = require ("../remoteBuildConf");
 import utils = require ("taco-utils");
 
-import resources = utils.ResourcesManager;
 
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
@@ -48,7 +48,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "UsageInformation"));
+        console.info(resources.getString(language, "UsageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {

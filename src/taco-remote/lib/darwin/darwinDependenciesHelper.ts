@@ -11,8 +11,9 @@ import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
 
+import resources = require("../../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
-import resources = tacoUtils.ResourcesManager;
+
 import UtilHelper = tacoUtils.UtilHelper;
 
 class DarwinDependenciesHelper {

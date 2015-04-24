@@ -12,6 +12,7 @@
 /// <reference path="../../typings/expressExtensions.d.ts" />
 /// <reference path="../../typings/tar.d.ts" />
 /// <reference path="./requestRedirector.ts" />
+
 "use strict";
 
 import child_process = require ("child_process");
@@ -23,11 +24,11 @@ import tar = require ("tar");
 import zlib = require ("zlib");
 
 import BuildRetention = require ("./buildRetention");
+import resources = require("../resources/resourceManager");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
-import resources = utils.ResourcesManager;
 
 interface IBuildMetrics {
     submitted: number;
@@ -219,7 +220,7 @@ class BuildManager {
 
     public emulateBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         if (!utils.UtilHelper.argToBool(this.serverConf.allowsEmulate)) {
-            res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
+            res.status(403).send(resources.getString("EmulateDisabled"));
             return;
         }
 
@@ -275,21 +276,21 @@ class BuildManager {
                 fs.mkdirSync(extractToDir);
             }
         } catch (e) {
-            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getString("FailedCreateDirectory", extractToDir, e.message));
             console.error(resources.getString("FailedCreateDirectory", extractToDir, e.message));
             self.buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
-            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getString("NoTgzFound", buildInfo.tgzFilePath));
             console.error(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
             self.buildMetrics.failed++;
             return;
         }
 
         var onError = function (err: Error): void {
-            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
             console.info(resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
             self.buildMetrics.failed++;
         };

@@ -9,28 +9,31 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
+
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import path = require ("path");
-import Q = require ("q");
-import TacoUtility = require ("taco-utils");
-import utils = TacoUtility.UtilHelper;
-import resources = TacoUtility.ResourcesManager;
+import Q = require("q");
+// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require("should"); 
 
+import resources = require("../resources/resourceManager");
+import Settings = require("../cli/utils/settings");
 import SetupMock = require ("./utils/setupMock");
+import TacoUtility = require("taco-utils");
 
-import Settings = require ("../cli/utils/settings");
+import utils = TacoUtility.UtilHelper;
+
 
 describe("taco settings", function (): void {
     var tacoHome = path.join(__dirname, "out");
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
-        resources.UnitTest = true;
+        process.domain.UnitTest = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Configure a dummy platform "test" to use the mocked out remote server

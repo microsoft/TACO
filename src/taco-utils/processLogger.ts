@@ -5,9 +5,9 @@
 
 import child_process = require ("child_process");
 import fs = require ("fs");
-import path = require ("path");
-import tacoUtility = require ("./resourcesManager");
-import resources = tacoUtility.ResourcesManager;
+import path = require("path");
+
+import resources = require("./resources/resourceManager");
 
 module TacoUtility {
     export class ProcessLogger {
@@ -29,7 +29,7 @@ module TacoUtility {
             var pathToLog = path.join(logDir, logFileName);
             this._stream = fs.createWriteStream(pathToLog);
             this._stream.on("error", function (err: any): void {
-                console.error(resources.getStringForLanguage(language, "ProcessLogError"), pathToLog, err);
+                console.error(resources.getString(language, "ProcessLogError"), pathToLog, err);
             });
             var me = this;
             proc.stdout.on("data", function (data: any): void {
@@ -40,7 +40,7 @@ module TacoUtility {
             });
             proc.on("exit", function (code: number): void {
                 if (code) {
-                    me.log(resources.getStringForLanguage(language, "LoggedProcessTerminatedWithCode", code));
+                    me.log(resources.getString(language, "LoggedProcessTerminatedWithCode", code));
                 }
 
                 me.end();

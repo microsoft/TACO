@@ -11,10 +11,11 @@ import net = require ("net");
 import path = require ("path");
 
 import IOSAgent = require ("./ios/ios");
+import resources = require("./resources/resourceManager");
 import utils = require ("taco-utils");
+
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
-import resources = utils.ResourcesManager;
 
 module TacoRemoteLib {
     var language: string;
@@ -23,8 +24,6 @@ module TacoRemoteLib {
 
     var supportedBuildConfigurations = ["debug", "release"];
     var finalStatuses = [BuildInfo.COMPLETE, BuildInfo.ERROR];
-
-    export var locResources: resources.IResources = resources;
 
     export interface IReadOnlyConf {
         get(key: string): any;
@@ -38,7 +37,6 @@ module TacoRemoteLib {
     export function init(config: IReadOnlyConf): void {
         if (!initialized) {
             language = config.get("lang");
-            resources.init(language, path.join(__dirname, "resources"));
 
             platforms = [];
             platforms.push(new IOSAgent(config));
@@ -50,7 +48,7 @@ module TacoRemoteLib {
      * Localize a buildInfo object using the resources of this package
      */
     export function localizeBuildInfo(buildInfo: BuildInfo, req: Express.Request): BuildInfo {
-        return buildInfo.localize(req, resources);
+        return buildInfo.localize();
     }
 
     /**
@@ -66,7 +64,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.downloadBuild(buildInfo, req, res, callback);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
+            res.status(404).send(resources.getString("UnsupportedPlatform"));
         }
     }
 
@@ -82,7 +80,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.emulateBuild(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
+            res.status(404).send(resources.getString("UnsupportedPlatform"));
         }
     }
 
@@ -98,7 +96,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.deployBuildToDevice(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
+            res.status(404).send(resources.getString("UnsupportedPlatform"));
         }
     }
 
@@ -114,7 +112,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.runOnDevice(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
+            res.status(404).send(resources.getString("UnsupportedPlatform"));
         }
     }
 
@@ -130,7 +128,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.debugBuild(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
+            res.status(404).send(resources.getString("UnsupportedPlatform"));
         }
     }
 
@@ -147,15 +145,15 @@ module TacoRemoteLib {
         var configuration: string = request.query.cfg || "release";
 
         if (!cordovaVersion) {
-            errors.push(resources.getStringForLanguage(request, "BuildRequestMissingCordovaVersion"));
+            errors.push(resources.getString("BuildRequestMissingCordovaVersion"));
         }
 
         if (buildCommand !== "build") {
-            errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedCommand", buildCommand));
+            errors.push(resources.getString("BuildRequestUnsupportedCommand", buildCommand));
         }
 
         if (supportedBuildConfigurations.indexOf(configuration) === -1) {
-            errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedConfiguration", configuration));
+            errors.push(resources.getString("BuildRequestUnsupportedConfiguration", configuration));
         }
 
         return errors.length === 0;

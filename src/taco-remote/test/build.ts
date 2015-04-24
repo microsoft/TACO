@@ -5,12 +5,14 @@ import fs = require ("fs");
 import http = require ("http");
 import nconf = require ("nconf");
 import os = require ("os");
-import path = require ("path");
+import path = require("path");
+
+import resources = require("../resources/resourceManager");
+import selftest = require("../lib/selftest");
 import TacoRemote = require ("../lib/server");
-import TacoUtils = require ("taco-utils");
+import TacoUtils = require("taco-utils");
+
 import UtilHelper = TacoUtils.UtilHelper;
-import resources = TacoUtils.ResourcesManager;
-import selftest = require ("../lib/selftest");
 
 var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
 
@@ -20,8 +22,6 @@ describe("taco-remote", function (): void {
     var downloadDir = path.join(__dirname, "out", "selftest");
     var modMountPoint = "Test";
     before(function (mocha: MochaDone): void {
-        resources.init("en", path.join(__dirname, "..", "resources"));
-        resources.UnitTest = true;
         process.env["TACO_HOME"] = path.join(__dirname, "out");
         UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");

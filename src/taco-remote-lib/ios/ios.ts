@@ -15,10 +15,11 @@ import util = require ("util");
 import packer = require ("zip-stream");
 
 import iosAppRunner = require ("./iosAppRunnerHelper");
+import resources = require("../resources/resourceManager");
 import utils = require ("taco-utils");
+
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
-import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 
 class IOSAgent implements ITargetPlatform {
@@ -62,7 +63,7 @@ class IOSAgent implements ITargetPlatform {
      */
     public runOnDevice(buildInfo: BuildInfo, req: Express.Request, res: Express.Response): void {
         if (!fs.existsSync(buildInfo.appDir)) {
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(resources.getString("BuildNotFound", req.params.id));
             return;
         }
 
@@ -72,12 +73,12 @@ class IOSAgent implements ITargetPlatform {
             .then(function (nativeProxyProcess: child_process.ChildProcess): Q.Promise<net.Socket> {
             return iosAppRunner.startApp(cfg.id(), proxyPort);
         }).then(function (success: net.Socket): void {
-            res.status(200).send(buildInfo.localize(req, resources));
+            res.status(200).send(buildInfo.localize());
         }, function (failure: any): void {
             if (failure instanceof Error) {
-                res.status(404).send(resources.getStringForLanguage(req, failure.message));
+                res.status(404).send(resources.getString(failure.message));
             } else {
-                res.status(404).send(resources.getStringForLanguage(req, failure));
+                res.status(404).send(resources.getString(failure));
             }
         });
     }
@@ -89,7 +90,7 @@ class IOSAgent implements ITargetPlatform {
         if (!fs.existsSync(pathToPlistFile) || !fs.existsSync(pathToIpaFile)) {
             var msg = resources.getString("DownloadInvalid", pathToPlistFile, pathToIpaFile);
             console.info(msg);
-            res.status(404).send(resources.getStringForLanguage(req, "DownloadInvalid", pathToPlistFile, pathToIpaFile));
+            res.status(404).send(resources.getString("DownloadInvalid", pathToPlistFile, pathToIpaFile));
             callback(msg);
             return;
         }
@@ -98,7 +99,7 @@ class IOSAgent implements ITargetPlatform {
         archive.on("error", function (err: Error): void {
             console.error(resources.getString("ArchivePackError", err.message));
             callback(err);
-            res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
+            res.status(404).send(resources.getString("ArchivePackError", err.message));
         });
         res.set({ "Content-Type": "application/zip" });
         archive.pipe(res);
@@ -106,7 +107,7 @@ class IOSAgent implements ITargetPlatform {
             if (err) {
                 console.error(resources.getString("ArchivePackError", err.message));
                 callback(err);
-                res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
+                res.status(404).send(resources.getString("ArchivePackError", err.message));
                 return;
             }
 
@@ -114,7 +115,7 @@ class IOSAgent implements ITargetPlatform {
                 if (err) {
                     console.error(resources.getString("ArchivePackError", err.message));
                     callback(err);
-                    res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
+                    res.status(404).send(resources.getString("ArchivePackError", err.message));
                     return;
                 }
 
@@ -126,7 +127,7 @@ class IOSAgent implements ITargetPlatform {
 
     public emulateBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
         if (!fs.existsSync(buildInfo.appDir)) {
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(resources.getString("BuildNotFound", req.params.id));
             return;
         }
 
@@ -145,9 +146,9 @@ class IOSAgent implements ITargetPlatform {
         emulateProcess.on("message", function (result: { status: string; messageId: string; messageArgs?: any }): void {
             buildInfo.updateStatus(result.status, result.messageId, result.messageArgs);
             if (result.status !== utils.BuildInfo.ERROR) {
-                res.status(200).send(buildInfo.localize(req, resources));
+                res.status(200).send(buildInfo.localize());
             } else {
-                res.status(404).send(buildInfo.localize(req, resources));
+                res.status(404).send(buildInfo.localize());
             }
 
             emulateProcess.kill();
@@ -158,7 +159,7 @@ class IOSAgent implements ITargetPlatform {
     public deployBuildToDevice(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
         var pathToIpaFile = path.join(buildInfo.appDir, "platforms", "ios", "build", "device", buildInfo["appName"] + ".ipa");
         if (!fs.existsSync(pathToIpaFile)) {
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(resources.getString("BuildNotFound", req.params.id));
             return;
         }
 
@@ -168,7 +169,7 @@ class IOSAgent implements ITargetPlatform {
         ideviceinstaller.stdout.on("data", function (data: Buffer): void {
             var dataStr: String = data.toString();
             if (dataStr.indexOf("ApplicationVerificationFailed") !== -1) {
-                res.status(404).send(resources.getStringForLanguage(req, "ProvisioningFailed"));
+                res.status(404).send(resources.getString("ProvisioningFailed"));
             }
 
             stdout += dataStr;
@@ -177,7 +178,7 @@ class IOSAgent implements ITargetPlatform {
             var dataStr: string = data.toString();
             if (dataStr.toLowerCase().indexOf("error") !== -1) {
                 if (dataStr.indexOf("No iOS device found, is it plugged in?") > -1) {
-                    res.status(404).send(resources.getStringForLanguage(req, "InstallFailNoDevice"));
+                    res.status(404).send(resources.getString("InstallFailNoDevice"));
                 } else {
                     res.status(404).send(dataStr);
                 }
@@ -190,7 +191,7 @@ class IOSAgent implements ITargetPlatform {
                 res.status(404).json({ stdout: stdout, stderr: stderr, code: code });
             } else {
                 buildInfo.updateStatus(utils.BuildInfo.INSTALLED, "InstallSuccess");
-                res.status(200).json(buildInfo.localize(req, resources));
+                res.status(200).json(buildInfo.localize());
             }
         });
     }
@@ -205,13 +206,13 @@ class IOSAgent implements ITargetPlatform {
         try {
             this.webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
         } catch (e) {
-            res.status(404).send(resources.getStringForLanguage(req, "UnableToDebug"));
+            res.status(404).send(resources.getString("UnableToDebug"));
             return;
         }
 
         buildInfo["webDebugProxyPort"] = this.webDebugProxyDevicePort;
         buildInfo.updateStatus(utils.BuildInfo.DEBUGGING, "DebugSuccess");
-        res.status(200).send(buildInfo.localize(req, resources));
+        res.status(200).send(buildInfo.localize());
     }
 
     public createBuildProcess(): child_process.ChildProcess {

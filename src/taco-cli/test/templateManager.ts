@@ -14,22 +14,26 @@
 /// <reference path="../../typings/taco-kits.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-import mocha = require ("mocha");
+// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+
+import archiver = require("archiver");
+import fs = require("fs");
+import mocha = require("mocha");
+import os = require("os");
 import path = require ("path");
-import zlib = require ("zlib");
-import fs = require ("fs");
-import os = require ("os");
+import rimraf = require("rimraf");
+var should_module = require("should");
+import wrench = require("wrench");
+import zlib = require("zlib");
+
+import resources = require("../resources/resourceManager");
+import tacoKits = require("taco-kits");
+import tacoUtils = require("taco-utils");
 import templates = require ("../cli/utils/templateManager");
-import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
-import resources = tacoUtils.ResourcesManager;
-import rimraf = require ("rimraf");
-import wrench = require ("wrench");
-import archiver = require ("archiver");
-import tacoKits = require ("taco-kits");
+
 import kitHelper = tacoKits.KitHelper;
+import utils = tacoUtils.UtilHelper;
 
 interface IKitHelper {
     getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;
@@ -72,7 +76,7 @@ describe("TemplateManager", function (): void {
 
     before(function (done: MochaDone): void {
         // Set ResourcesManager to test mode
-        resources.UnitTest = true;
+        process.domain.UnitTest = true;
 
         // Set the temporary template cache location in TemplateManager for our tests
         templates.TemplateCachePath = templateCache;
@@ -109,6 +113,7 @@ describe("TemplateManager", function (): void {
     });
 
     after(function (done: MochaDone): void {
+        process.domain.UnitTest = false;
         // Delete run folder
         rimraf(runFolder, done);
 

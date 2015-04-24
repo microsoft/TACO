@@ -25,9 +25,8 @@ import mkdirp = require ("mkdirp");
 import certs = require ("../lib/darwin/darwinCerts");
 import HostSpecifics = require ("../lib/hostSpecifics");
 import RemoteBuildConf = require ("../lib/remoteBuildConf");
-
+import resources = require("../resources/resourceManager");
 import utils = require ("taco-utils");
-import resources = utils.ResourcesManager;
 
 var serverDir = path.join(__dirname, "out");
 var certsDir = path.join(serverDir, "certs");
@@ -51,7 +50,6 @@ macOnly("Certs", function (): void {
     
     before(function (): void {
         nconf.use("memory");
-        resources.init("en", path.join(__dirname, "..", "resources"));
     });
 
     // These tests can take a fair amount of time

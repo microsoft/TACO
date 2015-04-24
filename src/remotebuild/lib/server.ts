@@ -27,10 +27,10 @@ import Q = require ("q");
 
 import HostSpecifics = require ("./hostSpecifics");
 import RemoteBuildConf = require ("./remoteBuildConf");
+import resources = require("../resources/resourceManager");
 import utils = require ("taco-utils");
 import util = require ("util");
 
-import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 
 interface IDictionaryT<T> {
@@ -55,7 +55,7 @@ class Server {
         UtilHelper.createDirectoryIfNecessary(serverDir);
 
         app.get("/", function (req: express.Request, res: express.Response): void {
-            res.status(200).send(resources.getStringForLanguage(req, "IndexPageContent", conf.port));
+            res.status(200).send(resources.getString("IndexPageContent", conf.port));
         });
 
         app.get("/certs/:pin", HostSpecifics.hostSpecifics.downloadClientCerts);
@@ -145,7 +145,7 @@ class Server {
     private static loadServerModules(conf: RemoteBuildConf, app: Express.Application, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
         var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
             if (!(<any>req).client.authorized) {
-                res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));
+                res.status(401).send(resources.getString("UnauthorizedClientRequest"));
             } else {
                 next();
             }

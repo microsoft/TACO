@@ -20,8 +20,7 @@ import HostSpecifics = require ("./hostSpecifics");
 import utils = require ("taco-utils");
 import server = require ("./server");
 import RemoteBuildConf = require ("./remoteBuildConf");
-
-import resources = utils.ResourcesManager;
+import resources = require("../resources/resourceManager");
 import UtilHelper = utils.UtilHelper;
 
 function cli(): void {
@@ -45,7 +44,7 @@ function cli(): void {
     };
     
     // Initialize localization resources
-    resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
+//    resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
     var remotebuildConf = new RemoteBuildConf(nconf);
 
     if (nconf.get("help") || nconf.get("h") || nconf.get("?") || !nconf.get("serverDir")) {
