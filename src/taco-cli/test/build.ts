@@ -21,17 +21,17 @@ import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
 import rimraf = require ("rimraf");
+import util = require ("util");
+
+import buildMod = require ("../cli/build");
+import setupMod = require ("../cli/setup");
 import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
 import BuildInfo = TacoUtility.BuildInfo;
-import util = require ("util");
 
 // TODO (Devdiv 1160579) Use dynamically acquired cordova versions
 import cordova = require ("cordova");
-
-import buildMod = require ("../cli/build");
-import setupMod = require ("../cli/setup");
 
 var build = new buildMod();
 var setup = new setupMod();
