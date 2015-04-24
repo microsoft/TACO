@@ -1,18 +1,18 @@
 ﻿/// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/dependenciesInstaller.d.ts" />
-/// <reference path="../typings/taco-utils.d.ts" />
+/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
+/// <reference path="../typings/tacoUtils.d.ts" />
+"use strict"
 
 import path = require ("path");
-import dependenciesInstaller = require ("dependencies-installer");
 import tacoUtils = require ("taco-utils");
 
-class InstallerBase {
+export class InstallerBase {
     protected static MaxDownloadAttempts: number = 1;
-    protected InstallerInfo: dependenciesInstaller.IInstallerInfo;
+    protected InstallerInfo: DependencyInstallerInterfaces.IInstallerInfo;
     protected SoftwareVersion: string;
     protected LicenseUrl: string;
 
-    public constructor(installerInfo: dependenciesInstaller.IInstallerInfo, softwareVersion: string, licenseUrl: string) {
+    public constructor(installerInfo: DependencyInstallerInterfaces.IInstallerInfo, softwareVersion: string, licenseUrl: string) {
         this.InstallerInfo = installerInfo;
         this.SoftwareVersion = softwareVersion;
         this.LicenseUrl = licenseUrl;
@@ -33,11 +33,11 @@ class InstallerBase {
         return this.SoftwareVersion;
     }
 
-    private downloadInstaller(): Q.Promise<any> {
+    protected downloadInstaller(): Q.Promise<any> {
         throw new Error("Abstract method was called");
     }
 
-    private install(): Q.Promise<any> {
+    protected install(): Q.Promise<any> {
         throw new Error("Abstract method was called");
     }
 

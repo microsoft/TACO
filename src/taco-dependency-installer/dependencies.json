@@ -1,2 +1,109 @@
-﻿{ 
+﻿{
+    "androidSdk": {
+        "displayName": "Android SDK",
+        "licenseUrl": "https://developer.android.com/sdk/terms.html",
+        "prerequesites": [
+            "javaJdk"
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    },
+    "ant": {
+        "displayName": "Apache Ant",
+        "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
+        "prerequesites": [
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    },
+    "gradle": {
+        "displayName": "Gradle",
+        "licenseUrl": "https://gradle.org/license/",
+        "prerequesites": [
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    },
+    "iosDeploy": {
+        "displayName": "ios-deploy",
+        "licenseUrl": "",
+        "prerequesites": [
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    },
+    "iosSim": {
+        "displayName": "ios-sim",
+        "licenseUrl": "",
+        "prerequesites": [
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    },
+    "javaJdk": {
+        "displayName": "Java SE Development Kit",
+        "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
+        "prerequesites": [
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "windows": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    },
+    "msBuild": {
+        "displayName": "Microsoft Build Tools",
+        "licenseUrl": "",
+        "prerequesites": [
+        ],
+        "installers": {
+            "7u55": {
+                "installerUrls": {
+                    "default": "someUrl"
+                },
+                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
+                "bytes": 129674656
+            }
+        }
+    }
 }

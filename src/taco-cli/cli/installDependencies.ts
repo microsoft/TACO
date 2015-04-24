@@ -1,12 +1,12 @@
 ﻿/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
-/// <reference path="../../typings/dependenciesInstaller.d.ts" />
-/// <reference path="../../typings/taco-utils.d.ts" />
+/// <reference path="../../typings/tacoDependencyInstaller.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 "use strict";
 
 import nopt = require ("nopt");
 import Q = require("q");
-import dependenciesInstaller = require ("dependencies-installer");
+import dependencyInstaller = require ("taco-dependency-installer");
 import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import commands = tacoUtils.Commands;
@@ -33,7 +33,7 @@ class InstallDependencies implements commands.IDocumentedCommand {
             return Q.reject(err.message);
         }
 
-        return new dependenciesInstaller.DependenciesInstaller().run(parsed);
+        return new dependencyInstaller.DependencyInstaller().run(parsed);
     }
 
     /**

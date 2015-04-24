@@ -84,7 +84,8 @@ gulp.task("copy", function (): Q.Promise<any> {
             "/**/bin/**",
             "/**/templates/**",
             "/**/examples/**",
-            "/**/*.ps1"
+            "/**/*.ps1",
+            "/**/dependencies.json",
         ],
         buildConfig.src, buildConfig.buildSrc);
 });

@@ -1,2 +1,22 @@
 ﻿{
+    "name": "taco-dependency-installer",
+    "author": {
+        "name": "Microsoft Corp."
+    },
+    "description": "strictly internal use to enable require in utility folder",
+    "version": "0.0.1",
+    "main": "dependencyInstaller.js",
+    "scripts": {
+        "test": "mocha"
+    },
+    "dependencies": {
+        "q": "^1.1.2",
+        "taco-utils": "file:../taco-utils"
+    },
+    "private": true,
+    "devDependencies": {
+        "typescript": ">=1.4.1",
+        "mocha": "2.0.1",
+        "should": "4.3.0"
+    }
 }
