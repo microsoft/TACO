@@ -14,6 +14,7 @@ import mocha = require ("mocha");
 
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
+import os = require ("os");
 import path = require ("path");
 import rimraf = require ("rimraf");
 
@@ -21,11 +22,15 @@ import utils = require ("../tacoPackageLoader");
 import TacoPackageLoader = utils.TacoPackageLoader;
 
 describe("TacoPackageLoader", function (): void {
-    var testHome = path.resolve(__dirname, "out");
+    var testHome = path.join(os.tmpdir(), "taco-utils", "packageLoader");
     before(function (): void {
         process.env["TACO_HOME"] = testHome;
         rimraf.sync(testHome);
         mkdirp.sync(testHome);
+    });
+
+    after(function (): void {
+        rimraf(testHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     // Downloading packages from the internet can take a while.

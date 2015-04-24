@@ -6,6 +6,8 @@ import http = require ("http");
 import nconf = require ("nconf");
 import os = require ("os");
 import path = require ("path");
+import rimraf = require ("rimraf");
+
 import TacoRemote = require ("../lib/server");
 import TacoUtils = require ("taco-utils");
 import UtilHelper = TacoUtils.UtilHelper;
@@ -17,18 +19,18 @@ var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
 describe("taco-remote", function (): void {
     var server: http.Server;
     var serverMod: RemoteBuild.IServerModule;
-    var downloadDir = path.join(__dirname, "out", "selftest");
+    var serverDir = path.join(os.tmpdir(), "taco-remote", "build");
+    var downloadDir = path.join(serverDir, "selftest");
     var modMountPoint = "Test";
     before(function (mocha: MochaDone): void {
         resources.init("en", path.join(__dirname, "..", "resources"));
         resources.UnitTest = true;
-        process.env["TACO_HOME"] = path.join(__dirname, "out");
+        process.env["TACO_HOME"] = serverDir;
         UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         fs.writeFileSync(firstRunPath, ""); // Just need the file to exist so the test doesn't try to ask us about installing homebrew
 
         var app = express();
-        var serverDir = path.join(__dirname, "out");
         UtilHelper.createDirectoryIfNecessary(serverDir);
         UtilHelper.createDirectoryIfNecessary(downloadDir);
         var serverConfig = {
@@ -59,6 +61,7 @@ describe("taco-remote", function (): void {
         }
 
         server.close(mocha);
+        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     macOnlyIt("should successfully build the sample project", function (mocha: MochaDone): void {
