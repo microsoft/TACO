@@ -29,7 +29,7 @@ import HostSpecifics = require ("../lib/hostSpecifics");
 
 import testServerModuleFactory = require ("./testServerModuleFactory");
 
-var serverDir = path.join(__dirname, "out", "server");
+var serverDir = path.join(os.tmpdir(), "remotebuild", "server");
 var certsDir = path.join(serverDir, "certs");
 var clientCertsDir = path.join(certsDir, "client");
 
@@ -46,6 +46,7 @@ describe("server", function (): void {
     });
     after(function (): void {
         resources.teardown();
+        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
     beforeEach(function (): void {
         rimraf.sync(serverDir);

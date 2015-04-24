@@ -15,8 +15,10 @@ var should_module = require("should"); // Note not import: We don't want to refe
 import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import rimraf = require ("rimraf");
 import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 import resources = TacoUtility.ResourcesManager;
@@ -26,7 +28,7 @@ import SetupMock = require ("./utils/setupMock");
 import Settings = require ("../cli/utils/settings");
 
 describe("taco settings", function (): void {
-    var tacoHome = path.join(__dirname, "out");
+    var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
@@ -39,6 +41,10 @@ describe("taco settings", function (): void {
         }, function (err: any): void {
             mocha(err);
         });
+    });
+
+    after(function (): void {
+        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     it("should correctly report build locations when --local is specified", function (mocha: MochaDone): void {
