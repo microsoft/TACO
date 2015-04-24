@@ -11,11 +11,10 @@
 /// <reference path="../../typings/archiver.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
-/// <reference path="../../typings/taco-kits.d.ts"/>
+/// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
 
-// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import archiver = require("archiver");
 import fs = require("fs");
@@ -23,6 +22,7 @@ import mocha = require("mocha");
 import os = require("os");
 import path = require ("path");
 import rimraf = require("rimraf");
+// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 var should_module = require("should");
 import wrench = require("wrench");
 import zlib = require("zlib");

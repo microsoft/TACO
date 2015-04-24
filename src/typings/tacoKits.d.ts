@@ -4,10 +4,9 @@
 declare module TacoKits {
     interface IPluginOverrideMetadata {
         [pluginId: string]: {
-            name: string;
-            version: string;
-            src: string;
-            platforms: string[];
+            version?: string;
+            src?: string;
+            platforms?: string;
         };
     }
 
@@ -35,17 +34,16 @@ declare module TacoKits {
     }
 
     interface IKitInfo {
-        kitId: string;
-        cli: string;
-        tacoMin: string;
-        name: string;
+        "cordova-cli": string;
+        "taco-min"?: string;
+        name?: string;
         description?: string;
         releaseNotesUri?: string;
         deprecated?: boolean;
-        deprecatedReasonUri?: boolean;
+        deprecatedReasonUri?: string;
         default?: boolean;
-        plugins?: IPluginOverrideMetadata[];
-        platforms?: IPlatformOverrideMetadata[];
+        plugins?: IPluginOverrideMetadata;
+        platforms?: IPlatformOverrideMetadata;
     }
 
     interface IKitMetadata {
@@ -65,11 +63,12 @@ declare module TacoKits {
 
     interface ITacoKitMetadata {
         plugins?: IPluginMetadata;
-        kits?: IKitMetadata;
-        templates?: ITemplateMetadata;
+        kits: IKitMetadata;
+        templates: ITemplateMetadata;
     }
 
     class KitHelper {
+        public static KitMetadataFilePath: string;
         /**
          *   Initializes resource manager with the locale for resource strings
          */

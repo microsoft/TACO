@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../../typings/wrench.d.ts" />
 /// <reference path="../../../typings/replace.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts"/>
+/// <reference path="../../../typings/tacoKits.d.ts"/>
 /// <reference path="../../../typings/adm-zip.d.ts"/>
 
 "use strict";

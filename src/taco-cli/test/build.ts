@@ -16,12 +16,18 @@ var should_module = require("should"); // Note not import: We don't want to refe
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import rimraf = require("rimraf");
 import util = require("util");
 import querystring = require ("querystring");
 
+import buildMod = require("../cli/build");
 import resources = require("../resources/resourceManager");
+import ServerMock = require("./utils/serverMock");
+import SetupMock = require("./utils/setupMock");
+import setupMod = require("../cli/setup");
 import TacoUtility = require("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
@@ -30,18 +36,12 @@ import utils = TacoUtility.UtilHelper;
 // TODO (Devdiv 1160579) Use dynamically acquired cordova versions
 import cordova = require ("cordova");
 
-import buildMod = require ("../cli/build");
-import setupMod = require ("../cli/setup");
-
 var build = new buildMod();
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
-
 describe("taco build", function () {
     var testHttpServer: http.Server;
-    var tacoHome = path.join(__dirname, "out");
+    var tacoHome = path.join(os.tmpdir(), "taco-cli", "build");
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
@@ -74,6 +74,7 @@ describe("taco build", function () {
 
     after(function () {
         testHttpServer.close();
+        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {
