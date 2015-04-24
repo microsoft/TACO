@@ -63,7 +63,7 @@ describe("taco-remote", function (): void {
 
     macOnlyIt("should successfully build the sample project", function (mocha: MochaDone): void {
         // Building can take a while
-        this.timeout(30000);
+        this.timeout(60000);
         var server = "http://" + os.hostname() + ":3000";
         selftest.test(server, modMountPoint, downloadDir, false, null).done(function (): void {
             mocha();
@@ -73,7 +73,7 @@ describe("taco-remote", function (): void {
     // Note: This test will fail unless it is run from a GUI login, or the user running the test has jumped through some hoops to allow the "codesign" program access to the keychain
     it.skip("should successfully build the sample project for device", function (mocha: MochaDone): void {
         // Building can take a while
-        this.timeout(30000);
+        this.timeout(60000);
         var server = "http://" + os.hostname() + ":3000";
         selftest.test(server, modMountPoint, downloadDir, true, null).done(function (): void {
             mocha();

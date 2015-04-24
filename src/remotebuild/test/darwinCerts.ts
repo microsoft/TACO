@@ -39,14 +39,8 @@ var caCertPath = path.join(certsDir, "ca-cert.pem");
 // Since the certs use openSSL to work with certificates, we restrict these tests to the mac where openSSL should exist.
 var macOnly = os.platform() === "darwin" ? describe : describe.skip;
 macOnly("Certs", function (): void {
-    beforeEach(function (): void {
-        rmdir.sync(certsDir);
-        mkdirp.sync(certsDir);
-    });
-
     after(function (done: MochaDone): void {
         nconf.overrides({});
-        rmdir(certsDir, done);
     });
     
     before(function (): void {
@@ -55,10 +49,12 @@ macOnly("Certs", function (): void {
     });
 
     // These tests can take a fair amount of time
-    this.timeout(5000);
+    this.timeout(10000);
     
     // Test that initializing server certificates creates new certificates
     it("InitializeServerCerts", function (done: MochaDone): void {
+        rmdir.sync(certsDir);
+        mkdirp.sync(certsDir);
         certs.initializeServerCerts(conf({ serverDir: serverDir })).
             then(function (certPaths: HostSpecifics.ICertStore): void {
             certPaths.newCerts.should.equal(true, "Expect newCerts true from initializeServerCerts");
@@ -70,6 +66,8 @@ macOnly("Certs", function (): void {
     
     // Test that initializing server certificates does not re-create certificates if they already exist
     it("InitializeServerCertsWhenCertsAlreadyExist", function (done: MochaDone): void {
+        rmdir.sync(certsDir);
+        mkdirp.sync(certsDir);
         certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true })).
             then(function (certPaths: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
             certPaths.newCerts.should.equal(true, "Expect newCerts true from first initializeServerCerts");
@@ -100,6 +98,8 @@ macOnly("Certs", function (): void {
     
     // Tests that generating a client certificate without appropriate server certificates fails
     it("GenerateClientCertWhenServerCertsDoNotExist", function (done: MochaDone): void {
+        rmdir.sync(certsDir);
+        mkdirp.sync(certsDir);
         certs.generateClientCert(conf({ serverDir: serverDir })).
         then(function (pin: number): void {
             throw "PIN should not be returned";
