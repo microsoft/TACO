@@ -17,7 +17,7 @@ module TacoUtility {
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
-            if (process.domain && process.domain.UnitTest) {
+            if (process.env["TACO_UNIT_TEST"]) {
                 // Mock out resources for unit tests
                 return id;
             }

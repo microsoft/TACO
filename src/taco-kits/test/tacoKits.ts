@@ -90,7 +90,7 @@ describe("KitHelper", function (): void {
     // Important paths
     before(function (): void {
         // Set ResourcesManager to test mode
-        process.env.LANG = true;
+        process.env["TACO_UNIT_TEST"] = true;
 
         
         // Set the kit metadata file location
@@ -99,7 +99,7 @@ describe("KitHelper", function (): void {
 
     after(function (): void {
         // Reset ResourcesManager back to production mode
-        process.env.LANG = false;
+        process.env["TACO_UNIT_TEST"] = false;
 
         // Reset kit metadata path
         kitHelper.KitMetadataFilePath = null;

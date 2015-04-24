@@ -44,7 +44,8 @@ function cli(): void {
     };
     
     // Initialize localization resources
-//    resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
+    // TODO
+    // resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
     var remotebuildConf = new RemoteBuildConf(nconf);
 
     if (nconf.get("help") || nconf.get("h") || nconf.get("?") || !nconf.get("serverDir")) {

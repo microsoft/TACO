@@ -25,13 +25,14 @@ import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
 
-import BuildInfo = tacoUtils.BuildInfo;
 import BuildSettings = require ("./buildSettings");
 import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
-import CountStream = tacoUtils.CountStream;
 import resources = require("../../resources/resourceManager");
 import Settings = require("../utils/settings");
 import tacoUtils = require("taco-utils");
+
+import BuildInfo = tacoUtils.BuildInfo;
+import CountStream = tacoUtils.CountStream;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class RemoteBuildClientHelper {

@@ -57,6 +57,7 @@ describe("taco build", function () {
     before(function (mocha: MochaDone): void {
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
+        process.env["TACO_UNIT_TEST"] = true;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
         var port = 3000;

@@ -35,12 +35,17 @@ import utils = require ("taco-utils");
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
         var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
+        // TODO
+        // resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
             return new Server(tacoRemoteConf, modConfig.mountPath);
         });
     }
 
-    public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
+    public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any>
+    {
+        // TODO
+        // resources.init(conf.lang, path.join(__dirname, "..", "resources"));
         var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
         var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);

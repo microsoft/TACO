@@ -76,7 +76,7 @@ describe("TemplateManager", function (): void {
 
     before(function (done: MochaDone): void {
         // Set ResourcesManager to test mode
-        process.domain.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
 
         // Set the temporary template cache location in TemplateManager for our tests
         templates.TemplateCachePath = templateCache;
@@ -113,7 +113,7 @@ describe("TemplateManager", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        process.domain.UnitTest = false;
+        process.env["TACO_UNIT_TEST"] = false;
         // Delete run folder
         rimraf(runFolder, done);
 

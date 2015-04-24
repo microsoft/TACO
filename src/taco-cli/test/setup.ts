@@ -38,7 +38,7 @@ describe("taco setup", function (): void {
         utils.createDirectoryIfNecessary(testHome);
         process.env["TACO_HOME"] = testHome;
         // Set up mocked out resources
-        process.domain.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         if (fs.existsSync(tacoSettingsFile)) {
             fs.unlinkSync(tacoSettingsFile);
         }

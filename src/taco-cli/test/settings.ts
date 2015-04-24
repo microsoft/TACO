@@ -34,7 +34,7 @@ describe("taco settings", function (): void {
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
-        process.domain.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Configure a dummy platform "test" to use the mocked out remote server

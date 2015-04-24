@@ -24,9 +24,8 @@ describe("taco-remote", function (): void {
     var downloadDir = path.join(serverDir, "selftest");
     var modMountPoint = "Test";
     before(function (mocha: MochaDone): void {
-        process.env.LANG = "en";
-        process.env.UnitTest = true;
-        process.env["TACO_HOME"] = path.join(__dirname, "out");
+        process.env["TACO_UNIT_TEST"] = true;
+        process.env["TACO_HOME"] = serverDir;
         UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         fs.writeFileSync(firstRunPath, ""); // Just need the file to exist so the test doesn't try to ask us about installing homebrew

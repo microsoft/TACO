@@ -147,7 +147,7 @@ describe("taco create", function (): void {
     before(function (done: MochaDone): void {
         this.timeout(30000);
         // Set ResourcesManager to test mode
-        process.env.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
 
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
