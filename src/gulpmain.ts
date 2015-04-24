@@ -41,7 +41,7 @@ gulp.task("compile", function (callback: Function): any {
 });
 
 /* compile + copy */
-gulp.task("build", function (callback: Function): void {
+gulp.task("build", ["prepare-templates"], function (callback: Function): void {
     runSequence("compile", "copy", callback);
 });
 
@@ -51,7 +51,7 @@ gulp.task("rebuild", function (callback: Function): void {
 });
 
 /* Task to install the compiled modules */
-gulp.task("install-build", ["build", "prepare-templates"], function (): Q.Promise<any> {
+gulp.task("install-build", ["build"], function (): Q.Promise<any> {
     return gulpUtils.installModules(tacoModules, buildConfig.buildSrc);
 });
 
