@@ -87,9 +87,14 @@ class Help implements commands.IDocumentedCommand {
         logger.logLine(resources.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
         logger.logLine(this.indent + this.tacoString + " " + command + " " + list.synopsis + "\n", level.Success);
         logger.logLine(this.getDescriptionString(list.description) + "\n", level.NormalBold);
-        this.printCommandTable(list.args, this.indent);        
-        logger.logLine("\n" + this.indent + resources.getString("command.help.usage.options") + "\n", level.NormalBold);
-        this.printCommandTable(list.options, this.indent + this.indent);
+        if (list.args) {
+            this.printCommandTable(list.args, this.indent);
+        }
+
+        if (list.options) {
+            logger.logLine("\n" + this.indent + resources.getString("command.help.usage.options") + "\n", level.NormalBold);
+            this.printCommandTable(list.options, this.indent + this.indent);
+        }
     }
 
     /**
