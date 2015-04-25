@@ -19,7 +19,6 @@ module TacoUtility {
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             var s = this.resources[id];
             if (!s) {
                 return s;
@@ -32,7 +31,7 @@ module TacoUtility {
             /*All args passed to current function:
             you can call getString('foo', 'bar', 'baz') or getString('foo',['bar', 'baz']) 
             and the utility function will extract ['bar', 'baz'] as args in both cases*/
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             if (args) {
                 for (var i: number = 0; i < args.length; i++) {
                     result = result.replace(new RegExp("\\{" + i + "\\}", "g"), args[i]);

@@ -132,7 +132,6 @@ declare module NodeJS {
         chdir(directory: string): void;
         cwd(): string;
         env: any;
-        domain: any;
         exit(code?: number): void;
         getgid(): number;
         setgid(id: number): void;

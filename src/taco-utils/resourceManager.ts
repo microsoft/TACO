@@ -1,9 +1,14 @@
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/nodeExtensions.d.ts" />
 
 import fs = require("fs");
 import path = require("path");
+
 import resourceSet = require("./resourceSet");
+import tacoUtility = require("./utilHelper");
+
 import ResourceSet = resourceSet.ResourceSet;
+import UtilHelper = tacoUtility.UtilHelper;
 
 module TacoUtility {
     export class ResourceManager {
@@ -24,7 +29,8 @@ module TacoUtility {
 
             var locale: string = ResourceManager.getCurrentLocale();
             this.EnsureResourceSet(locale);
-            return this.resources[locale].getString(id, optionalArgs);
+            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            return this.resources[locale].getString(id, args);
         }
 
         /*
