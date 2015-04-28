@@ -12,8 +12,7 @@
 "use strict";
 
 import path = require("path");
-// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
-var should_module = require("should"); 
+import should = require("should"); 
 import mocha = require ("mocha");
 
 import resourceManager = require("../resourceManager");
@@ -81,13 +80,12 @@ describe("resources", function (): void {
         actual.should.equal(expected);
     });
 
-    // TODO
-    //it("should return undefined for bad resource identifiers", function (): void {
-    //    var actual = getStringForLocale("en", "NoResourceDefinedForThis");
-    //    /// <disable code="SA9017" justification="We want to capture any changes in behavior, and currently it returns undefined" /> 
-    //    should(actual).be.equal(undefined);
-    //    /// <enable code="SA9017" />
-    //});
+    it("should return undefined for bad resource identifiers", function (): void {
+        var actual = getStringForLocale("en", "NoResourceDefinedForThis");
+        /// <disable code="SA9017" justification="We want to capture any changes in behavior, and currently it returns undefined" /> 
+        should(actual).be.equal(undefined);
+        /// <enable code="SA9017" />
+    });
 
     it("should handle unicode in resource strings", function (): void {
         var expectedResources = require(path.join(__dirname, "/resources/gb18030/resources.json"));

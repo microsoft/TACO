@@ -1,6 +1,7 @@
+/// <reference path="../typings/continuation-local-storage.ts" />
 /// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/nodeExtensions.d.ts" />
 
+import cls = require("continuation-local-storage");
 import fs = require("fs");
 import path = require("path");
 
@@ -13,9 +14,13 @@ import UtilHelper = tacoUtility.UtilHelper;
 module TacoUtility {
     export class ResourceManager {
 
+        public static ResourcesNamespace = "resources";
+        public static LocalesKey = "locales";
+
         private static DefaultLocale: string = "en";
         private resourceDirectory: string = null;
         private resources: { [lang: string]: ResourceSet } = {};
+        private availableLocales: string[] = null;
 
         constructor(resourcesDirectory: string) {
             this.resourceDirectory = resourcesDirectory;
@@ -27,81 +32,79 @@ module TacoUtility {
                 return id;
             }
 
-            var locale: string = ResourceManager.getCurrentLocale();
-            this.EnsureResourceSet(locale);
+            var locale: string = null;
+
+            var session: cls.Session = cls.getNamespace(ResourceManager.ResourcesNamespace);
+            if (session) {
+                var locales: string[] = session.get(ResourceManager.LocalesKey);
+                locale = this.getBestMatchingLocale(locales);
+            }
+
+            // Look at LANG environment variable or fallback to DefaultLocale ("en")
+            if (!locale && process.env.LANG) {
+                locale = this.getBestMatchingLocale([process.env.LANG]);
+            }
+
+            if (!locale && process.env.LANG) {
+                locale = this.getBestMatchingLocale([ResourceManager.DefaultLocale]);
+            }
+
+            locale = locale || ResourceManager.DefaultLocale;
+
+            if (!this.resources[locale]) {
+                var resourceFilePath = ResourceManager.getResourceFilePath(this.resourceDirectory, locale);
+                this.resources[locale] = new ResourceSet(resourceFilePath);
+            }
+
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             return this.resources[locale].getString(id, args);
         }
 
-        /*
-         * Look at domain locale otherwise fallback to LANG environment variable
-         * if both of them are not specified fallback to DefaultLocale ("en")
-         */
-        private static getCurrentLocale(): string {
-            return (process.domain && process.domain.lang) ||
-                process.env.LANG ||
-                ResourceManager.DefaultLocale;
-        }
-
-        /*
-         * Given a locale, reads up the best matching available resource files
-         * and associate the locale with corresponding ResourceSet
-         */
-        private EnsureResourceSet(locale: string): void {
-            if (this.resources[locale]) {
-                return;
-            }
-
-            var matchingLocale = this.getBestMatchingLocale(locale);
-            if (this.resources[matchingLocale]) {
-                this.resources[locale] = this.resources[matchingLocale];
-                return;
-            }
-
-            var resourceFilePath = ResourceManager.getResourceFilePath(this.resourceDirectory, matchingLocale);
-            this.resources[matchingLocale] = new ResourceSet(resourceFilePath);
-
-            this.resources[locale] = this.resources[matchingLocale];
-        }
 
         /**
          * Given a locale, walks up the locale chain and 
          * returns best matching locale based on available resource files
          */
-        private getBestMatchingLocale(locale: string): string {
+        private getBestMatchingLocale(locales: string[]): string {
+            var parentLocaleMatch: string = null;
+            var supportedLocales: string[] = this.getAvailableLocales();
 
-            var availableResources: string[] = ResourceManager.getAvailableLocales(this.resourceDirectory);
-            if (availableResources.indexOf(locale) >= 0) {
-                return locale;
-            }
-
-            // get parent language
-            if (locale.indexOf("-") > 0) {
-                locale = locale.split("-")[0]; 
-                if (availableResources.indexOf(locale) >= 0) {
+            for (var i: number = 0; i < locales.length; ++i) {
+                var locale: string = locales[i].toLowerCase();
+                if (supportedLocales.indexOf(locale) !== -1) {
+                    // Exact match on full language header, which could include the region
                     return locale;
+                }
+
+                var parentLocale = locale.split("-")[0];
+                if (supportedLocales.indexOf(parentLocale) !== -1) {
+                    // Match on primary language (e.g. it from it-CH). We may find a better match later, so continue looking.
+                    parentLocaleMatch = parentLocale;
                 }
             }
 
-            return ResourceManager.DefaultLocale;
+            return parentLocaleMatch;
         }
 
         /**
          * get list of available resources in given resourcesDirectory
          */
-        private static getAvailableLocales(resourcesDirectory: string): string[]{
-            var availableLocales: string[] = [];
-            fs.readdirSync(resourcesDirectory).forEach(function (filename: string): void {
-                try {
-                    if (fs.existsSync(ResourceManager.getResourceFilePath(resourcesDirectory, filename))){
-                        availableLocales.push(filename);
+        private getAvailableLocales(): string[] {
+            if (this.availableLocales == null) {
+                this.availableLocales = [];
+                var self = this;
+                fs.readdirSync(this.resourceDirectory).forEach(function (filename: string): void {
+                    try {
+                        if (fs.existsSync(ResourceManager.getResourceFilePath(self.resourceDirectory, filename))) {
+                            self.availableLocales.push(filename);
+                        }
+                    } catch (e) {
+                        // Folder was not a valid resource; ignore it
                     }
-                } catch (e) {
-                    // Folder was not a valid resource; ignore it
-                }
-            });
+                });
+            }
 
-            return availableLocales;
+            return this.availableLocales;
         }
 
         private static getResourceFilePath(resourcesDirectory: string, lang: string): string {

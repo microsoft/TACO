@@ -11,6 +11,7 @@
 
     "preferGlobal": true,
     "dependencies": {
+        "continuation-local-storage": "latest",
         "express": "4.12.2",
         "serve-index": "1.6.2",
         "tar": "0.1.20",

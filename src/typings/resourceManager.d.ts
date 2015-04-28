@@ -6,5 +6,9 @@ declare module TacoUtility {
 
         /** ...optionalArgs is only there for typings, function rest params */
         public getString(id: string, ...optionalArgs: any[]): string;
+
+        public static ResourcesNamespace: string;
+        public static LocalesKey: string;
+
     }
 }
