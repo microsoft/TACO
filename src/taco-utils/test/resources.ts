@@ -105,9 +105,9 @@ describe("resources", function (): void {
     });
 
     it("should honor CLS Session correctly for primary languages", function (): void {
-
+        var key: string = ResourceManager.LocalesKey;
         var expectedResources = require(path.join(__dirname, "/resources/it-ch/resources.json"));
-        clsSessionManager.ClsSessionManager.RunInTacoSession({ "locales": ["it-ch", "en"] }, function (req: string, res: string) {
+        clsSessionManager.ClsSessionManager.RunInTacoSession({ key: ["it-ch", "en"] }, function (req: string, res: string) {
             var actual = resources.getString("SimpleMessage");
             var expected = expectedResources["SimpleMessage"];
             actual.should.equal(expected);
@@ -115,9 +115,9 @@ describe("resources", function (): void {
     });
 
     it("should honor CLS Session correctly for secondday languages", function (): void {
-
+        var key: string = ResourceManager.LocalesKey;
         var expectedResources = require(path.join(__dirname, "/resources/en/resources.json"));
-        clsSessionManager.ClsSessionManager.RunInTacoSession({ "locales": ["fr-FR", "en-US"] }, function (req: string, res: string) {
+        clsSessionManager.ClsSessionManager.RunInTacoSession({ key: ["fr-FR", "en-US"] }, function (req: string, res: string) {
             var actual = resources.getString("SimpleMessage");
             var expected = expectedResources["SimpleMessage"];
             actual.should.equal(expected);

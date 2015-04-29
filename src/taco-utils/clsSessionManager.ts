@@ -5,10 +5,6 @@ import cls = require("continuation-local-storage");
 import tacoUtility = require("./utilHelper");
 import UtilHelper = tacoUtility.UtilHelper;
 
-interface IReadOnlyDictionary {
-    get(prop: string): any;
-}
-
 module TacoUtility {
 
     export class ClsSessionManager {
