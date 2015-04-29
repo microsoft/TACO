@@ -75,12 +75,12 @@ class IOSAgent implements ITargetPlatform {
         }).then(function (success: net.Socket): void {
             res.status(200).send(buildInfo.localize());
         }, function (failure: any): void {
-            if (failure instanceof Error) {
-                res.status(404).send(resources.getString(failure.message));
-            } else {
-                res.status(404).send(resources.getString(failure));
-            }
-        });
+                if (failure instanceof Error) {
+                    res.status(404).send(resources.getString(failure.message));
+                } else {
+                    res.status(404).send(resources.getString(failure));
+                }
+            });
     }
 
     public downloadBuild(buildInfo: BuildInfo, req: Express.Request, res: Express.Response, callback: (err: any) => void): void {
@@ -138,7 +138,7 @@ class IOSAgent implements ITargetPlatform {
 
         var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
 
-        var emulateProcess = child_process.fork(path.join(__dirname, "iosEmulateHelper.js"), [], { silent: true });
+        var emulateProcess: child_process.ChildProcess = IOSAgent.createEmulateProcess();
         var emulateLogger = new ProcessLogger();
         emulateLogger.begin(buildInfo.buildDir, "emulate.log", buildInfo.buildLang, emulateProcess);
         emulateProcess.send({ appDir: buildInfo.appDir, appName: cfg.id(), target: req.query.target }, null);
@@ -216,7 +216,21 @@ class IOSAgent implements ITargetPlatform {
     }
 
     public createBuildProcess(): child_process.ChildProcess {
-        return child_process.fork(path.join(__dirname, "iosBuild.js"), [], { silent: true });
+        return IOSAgent.createLocalizedProcess(path.join(__dirname, "iosBuild.js"));
+    }
+
+    private static createEmulateProcess(): child_process.ChildProcess {
+        return IOSAgent.createLocalizedProcess(path.join(__dirname, "iosEmulateHelper.js"));
+    }
+
+    private static createLocalizedProcess(startScriptPath: string): child_process.ChildProcess {
+
+        var localesKey: string = utils.ResourceManager.LocalesSessionKey;
+        var options: any = {
+            silent: true,
+            localesKey: utils.ClsSessionManager.GetCurrentTacoSessionVariable(localesKey)
+        }
+        return child_process.fork(startScriptPath, [], options);
     }
 }
 

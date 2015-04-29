@@ -224,17 +224,22 @@ class Server implements RemoteBuild.IServerModule {
     }
 
     private static RunInSession(req: express.Request, func: RequestHandler): void {
-        var sessionEnv: { [key: string]: any; } = {};
+        var localesKey: string = utils.ResourceManager.LocalesSessionKey;
+        utils.ClsSessionManager.RunInTacoSession({ localesKey: Server.GetAcceptLanguages(req) }, func);
+    }
+
+    private static GetAcceptLanguages(req: express.Request): string[] {
         if (req.headers) {
             var acceptLanguages = req.headers["accept-language"] || "";
             if (acceptLanguages !== "") {
-                var locales: string[] = acceptLanguages.split(",")
+                return acceptLanguages.split(",")
                     .map(function (l: string): string {
-                    return l.split(";")[0];
-                    });
-                sessionEnv[utils.ResourceManager.LocalesSessionKey] = locales;
+                        return l.split(";")[0];
+                    }).filter(function (l: string): boolean {
+                        return l !== "";
+                });
             }
         }
-        utils.ClsSessionManager.RunInTacoSession(sessionEnv, func);
+        return null;
     }
 }

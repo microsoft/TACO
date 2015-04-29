@@ -45,9 +45,24 @@ module TacoUtility {
          */
         public static getBestAvailableLocale(availableLocales: string[], inputLocales?: string[]): string {
 
-            return (inputLocales && ResourceManager.findMatchingLocale(availableLocales, inputLocales)) ||
-                (process.env.LANG && ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG])) ||
-                ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DefaultLocale]);
+            var locale = null;
+            // First let's see if there is a locale set at session level 
+            // on session object or env var LOCALES
+            if (inputLocales) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, inputLocales);
+            }
+
+            // Next look at system locale, for UNIX based systems look for LANG variable
+            if (!locale && process.env.LANG) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG]);
+            }
+
+            // Finally fallback to DefaultLocale ("en")
+            if (!locale) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DefaultLocale]);
+            }
+
+            return locale;
         }
 
         /**
@@ -81,7 +96,7 @@ module TacoUtility {
 
             // Scenario 1: getString is called in context of a web request or under a CLS session
             // get accepetable locales set on session
-            var locales: string[] = clsSessionManager.ClsSessionManager.GetCurrentTacoSessionVariable(ResourceManager.LocalesKey);
+            var locales: string[] = ResourceManager.getSessionLocales();
             if (locales && locales.length > 0) {
 
                 // intersect the list with the available resouces and find the best matching one
@@ -141,6 +156,29 @@ module TacoUtility {
             }
 
             return this.availableLocales;
+        }
+
+        /**
+         * Looks up current session locales
+         * checkup cls sessions locales otherwise look up LOCALES env var
+         * returns null if no session locales are found
+         */
+        private static getSessionLocales(): string[] {
+            var locales: string[] = clsSessionManager.ClsSessionManager.GetCurrentTacoSessionVariable(ResourceManager.LocalesKey);
+
+            // We can also set "locales" if a process fork is done as part of a build request
+            if (!locales) {
+                var localesEnv: string = process.env[ResourceManager.LocalesKey];
+                // special case: if envVar = null is specified, process actually gets "null"
+                if (localesEnv === "null") {
+                    localesEnv = null;
+                }
+                if (localesEnv) {
+                    locales = process.env[ResourceManager.LocalesKey].split(",");
+                }
+            }
+
+            return locales;
         }
 
         /**
