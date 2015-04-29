@@ -48,7 +48,7 @@ module TacoRemoteLib {
      * Localize a buildInfo object using the resources of this package
      */
     export function localizeBuildInfo(buildInfo: BuildInfo, req: Express.Request): BuildInfo {
-        return buildInfo.localize();
+        return buildInfo.localize(resources);
     }
 
     /**

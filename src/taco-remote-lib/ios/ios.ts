@@ -73,7 +73,7 @@ class IOSAgent implements ITargetPlatform {
             .then(function (nativeProxyProcess: child_process.ChildProcess): Q.Promise<net.Socket> {
             return iosAppRunner.startApp(cfg.id(), proxyPort);
         }).then(function (success: net.Socket): void {
-            res.status(200).send(buildInfo.localize());
+            res.status(200).send(buildInfo.localize(resources));
         }, function (failure: any): void {
                 if (failure instanceof Error) {
                     res.status(404).send(resources.getString(failure.message));
@@ -146,9 +146,9 @@ class IOSAgent implements ITargetPlatform {
         emulateProcess.on("message", function (result: { status: string; messageId: string; messageArgs?: any }): void {
             buildInfo.updateStatus(result.status, result.messageId, result.messageArgs);
             if (result.status !== utils.BuildInfo.ERROR) {
-                res.status(200).send(buildInfo.localize());
+                res.status(200).send(buildInfo.localize(resources));
             } else {
-                res.status(404).send(buildInfo.localize());
+                res.status(404).send(buildInfo.localize(resources));
             }
 
             emulateProcess.kill();
@@ -191,7 +191,7 @@ class IOSAgent implements ITargetPlatform {
                 res.status(404).json({ stdout: stdout, stderr: stderr, code: code });
             } else {
                 buildInfo.updateStatus(utils.BuildInfo.INSTALLED, "InstallSuccess");
-                res.status(200).json(buildInfo.localize());
+                res.status(200).json(buildInfo.localize(resources));
             }
         });
     }
@@ -225,10 +225,12 @@ class IOSAgent implements ITargetPlatform {
 
     private static createLocalizedProcess(startScriptPath: string): child_process.ChildProcess {
 
-        var localesKey: string = utils.ResourceManager.LocalesSessionKey;
+        var localesKey: string = utils.ResourceManager.LocalesKey;
         var options: any = {
             silent: true,
-            localesKey: utils.ClsSessionManager.GetCurrentTacoSessionVariable(localesKey)
+            env: {
+                localesKey: utils.ClsSessionManager.GetCurrentTacoSessionVariable(localesKey)
+            }
         }
         return child_process.fork(startScriptPath, [], options);
     }

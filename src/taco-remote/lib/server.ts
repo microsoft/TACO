@@ -98,7 +98,7 @@ class Server implements RemoteBuild.IServerModule {
     // Submits a new build task
     private submitNewBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var port = self.serverConf.port;
             var modPath = self.modPath;
             self.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
@@ -107,7 +107,7 @@ class Server implements RemoteBuild.IServerModule {
                     "Content-Type": "application/json",
                     "Content-Location": contentLocation
                 });
-                res.status(202).json(buildInfo.localize());
+                res.status(202).json(buildInfo.localize(resources));
             }, function (err: any): void {
                     res.set({ "Content-Type": "application/json" });
                     res.status(err.code || 400).send({ status: resources.getString("InvalidBuildRequest"), errors: err });
@@ -118,13 +118,13 @@ class Server implements RemoteBuild.IServerModule {
     // Queries on the status of a build task, used by a client to poll
     private getBuildStatus(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var buildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (buildInfo) {
-                buildInfo.localize();
+                buildInfo.localize(resources);
                 if (!buildInfo.message) {
                     // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
-                    buildInfo.localize();
+                    buildInfo.localize(resources);
                 }
 
                 res.status(200).json(buildInfo);
@@ -137,11 +137,11 @@ class Server implements RemoteBuild.IServerModule {
     // Retrieves log file for a build task, can be used by a client when build failed
     private getBuildLog(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
-            var buildInfo = this.buildManager.getBuildInfo(req.params.id);
+        Server.RunInSession(req, function (): void {
+            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (buildInfo) {
                 res.set("Content-Type", "text/plain");
-                this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
+                self.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
             } else {
                 res.status(404).send(resources.getString("BuildNotFound", req.params.id));
             }
@@ -151,7 +151,7 @@ class Server implements RemoteBuild.IServerModule {
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var allBuildInfo = self.buildManager.getAllBuildInfo();
             res.json(200, allBuildInfo);
         });
@@ -159,7 +159,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private downloadBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.downloadBuild(completedBuildInfo, req, res);
@@ -169,7 +169,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private emulateBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.emulateBuild(completedBuildInfo, req, res);
@@ -179,7 +179,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private deployBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.deployBuild(completedBuildInfo, req, res);
@@ -189,7 +189,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private runBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.runBuild(completedBuildInfo, req, res);
@@ -199,7 +199,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private debugBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.debugBuild(completedBuildInfo, req, res);
@@ -224,8 +224,10 @@ class Server implements RemoteBuild.IServerModule {
     }
 
     private static RunInSession(req: express.Request, func: RequestHandler): void {
-        var localesKey: string = utils.ResourceManager.LocalesSessionKey;
-        utils.ClsSessionManager.RunInTacoSession({ localesKey: Server.GetAcceptLanguages(req) }, func);
+        var localesKey: string = utils.ResourceManager.LocalesKey;
+        var sessionVar: any = {};
+        sessionVar[localesKey] = Server.GetAcceptLanguages(req);
+        utils.ClsSessionManager.RunInTacoSession(sessionVar, func);
     }
 
     private static GetAcceptLanguages(req: express.Request): string[] {

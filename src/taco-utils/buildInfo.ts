@@ -1,5 +1,6 @@
-﻿import resources = require("./resources/resourceManager");
-import utilHelper = require ("./utilHelper");
+﻿
+import utils = require("./resourceManager");
+import utilHelper = require("./utilHelper");
 
 import UtilHelper = utilHelper.UtilHelper;
 
@@ -118,7 +119,7 @@ module TacoUtility {
          * 
          * @returns This object, after setting the message in the appropriate language.
          */
-        public localize(): BuildInfo {
+        public localize(resources: utils.ResourceManager): BuildInfo {
             if (this.messageId) {
                 this.message = resources.getString(this.messageId, this.messageArgs);
             } else {
