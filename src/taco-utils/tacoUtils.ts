@@ -8,6 +8,7 @@ import commands = require ("./commands");
 import logger = require ("./logger");
 import processLogger = require ("./processLogger");
 import tacoPackageLoader = require ("./tacoPackageLoader");
+import clsSessionManager = require("./clsSessionManager");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
@@ -21,6 +22,7 @@ module TacoUtility {
     export var ProcessLogger = processLogger.ProcessLogger;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var CountStream = countStream.CountStream;
+    export var ClsSessionManager = clsSessionManager.ClsSessionManager;
     /// <enable code="SA1301" />
 }
 

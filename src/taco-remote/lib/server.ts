@@ -5,7 +5,6 @@
 ﻿ *                                                       *
 ﻿ *******************************************************
 ﻿ */
-/// <reference path="../../typings/continuation-local-storage.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
@@ -18,7 +17,6 @@
 
 "use strict";
 
-import cls = require("continuation-local-storage");
 import express = require ("express");
 import fs = require ("fs");
 import os = require ("os");
@@ -41,8 +39,6 @@ interface RequestHandler {
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
         var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
-        // TODO
-        // resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
             return new Server(tacoRemoteConf, modConfig.mountPath);
         });
@@ -50,8 +46,6 @@ class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
 
     public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any>
     {
-        // TODO
-        // resources.init(conf.lang, path.join(__dirname, "..", "resources"));
         var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
         var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
@@ -104,7 +98,7 @@ class Server implements RemoteBuild.IServerModule {
     // Submits a new build task
     private submitNewBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var port = self.serverConf.port;
             var modPath = self.modPath;
             self.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
@@ -124,7 +118,7 @@ class Server implements RemoteBuild.IServerModule {
     // Queries on the status of a build task, used by a client to poll
     private getBuildStatus(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var buildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (buildInfo) {
                 buildInfo.localize();
@@ -143,7 +137,7 @@ class Server implements RemoteBuild.IServerModule {
     // Retrieves log file for a build task, can be used by a client when build failed
     private getBuildLog(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var buildInfo = this.buildManager.getBuildInfo(req.params.id);
             if (buildInfo) {
                 res.set("Content-Type", "text/plain");
@@ -157,7 +151,7 @@ class Server implements RemoteBuild.IServerModule {
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var allBuildInfo = self.buildManager.getAllBuildInfo();
             res.json(200, allBuildInfo);
         });
@@ -165,7 +159,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private downloadBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.downloadBuild(completedBuildInfo, req, res);
@@ -175,7 +169,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private emulateBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.emulateBuild(completedBuildInfo, req, res);
@@ -185,7 +179,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private deployBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.deployBuild(completedBuildInfo, req, res);
@@ -195,7 +189,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private runBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.runBuild(completedBuildInfo, req, res);
@@ -205,7 +199,7 @@ class Server implements RemoteBuild.IServerModule {
 
     private debugBuild(req: express.Request, res: express.Response): void {
         var self = this;
-        this.RunInSession(req, res, function (req: express.Request, res: express.Response): void {
+        Server.RunInSession(req, function (req: express.Request, res: express.Response): void {
             var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
             if (completedBuildInfo != null) {
                 self.buildManager.debugBuild(completedBuildInfo, req, res);
@@ -229,21 +223,18 @@ class Server implements RemoteBuild.IServerModule {
         return buildInfo;
     }
 
-    private RunInSession(req: express.Request, res: express.Response, func: RequestHandler): void {
-        var self = this;
-        var session: cls.Session = cls.createNamespace(utils.ResourceManager.ResourcesNamespace);
-        session.run(function () {
-            if (req.headers) {
-                var acceptLanguages = req.headers["accept-language"] || "";
-                if (acceptLanguages !== "") {
-                    var locales: string[] = acceptLanguages.split(",")
-                        .map(function (l: string): string {
-                        return l.split(";")[0];
-                        });
-                    session.set(utils.ResourceManager.LocalesKey, locales);
-                    func.call(self, req, res);
-                }
+    private static RunInSession(req: express.Request, func: RequestHandler): void {
+        var sessionEnv: { [key: string]: any; } = {};
+        if (req.headers) {
+            var acceptLanguages = req.headers["accept-language"] || "";
+            if (acceptLanguages !== "") {
+                var locales: string[] = acceptLanguages.split(",")
+                    .map(function (l: string): string {
+                    return l.split(";")[0];
+                    });
+                sessionEnv[utils.ResourceManager.LocalesSessionKey] = locales;
             }
-        });
+        }
+        utils.ClsSessionManager.RunInTacoSession(sessionEnv, func);
     }
 }

@@ -26,7 +26,6 @@ class Taco {
      * Initialize all other config classes, Invoke task to be run
      */
     public static run(): void {
-        debugger;
         commandsFactory.init(path.join(__dirname, "../cli/commands.json"));
 
         // parse taco command

@@ -17,8 +17,10 @@ import mocha = require ("mocha");
 
 import resourceManager = require("../resourceManager");
 import tacoUtility = require("../tacoUtils");
+import clsSessionManager = require("../clsSessionManager");
 
 import UtilHelper = tacoUtility.UtilHelper;
+import ResourceManager = resourceManager.ResourceManager;
 var resources: resourceManager.ResourceManager = null;
 
 describe("resources", function (): void {
@@ -100,6 +102,26 @@ describe("resources", function (): void {
         var expectedResources = require(path.join(__dirname, "/resources/en/resources.json"));
         var expected = expectedResources["MessageWithRepeatedArgs"];
         expected.replace(/\{0\}/g, "X").should.equal(actual);
+    });
+
+    it("should honor CLS Session correctly for primary languages", function (): void {
+
+        var expectedResources = require(path.join(__dirname, "/resources/it-ch/resources.json"));
+        clsSessionManager.ClsSessionManager.RunInTacoSession({ "locales": ["it-ch", "en"] }, function (req: string, res: string) {
+            var actual = resources.getString("SimpleMessage");
+            var expected = expectedResources["SimpleMessage"];
+            actual.should.equal(expected);
+        });
+    });
+
+    it("should honor CLS Session correctly for secondday languages", function (): void {
+
+        var expectedResources = require(path.join(__dirname, "/resources/en/resources.json"));
+        clsSessionManager.ClsSessionManager.RunInTacoSession({ "locales": ["fr-FR", "en-US"] }, function (req: string, res: string) {
+            var actual = resources.getString("SimpleMessage");
+            var expected = expectedResources["SimpleMessage"];
+            actual.should.equal(expected);
+        });
     });
 });
 

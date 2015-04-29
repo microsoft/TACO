@@ -1,10 +1,11 @@
-/// <reference path="../typings/continuation-local-storage.ts" />
+/// <reference path="../typings/continuation-local-storage.d.ts" />
 /// <reference path="../typings/node.d.ts" />
 
-import cls = require("continuation-local-storage");
-import fs = require("fs");
-import path = require("path");
+import assert = require("assert");
+import fs = require ("fs");
+import path = require ("path");
 
+import clsSessionManager = require("./clsSessionManager");
 import resourceSet = require("./resourceSet");
 import tacoUtility = require("./utilHelper");
 
@@ -14,8 +15,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 module TacoUtility {
     export class ResourceManager {
 
-        public static ResourcesNamespace = "resources";
-        public static LocalesKey = "locales";
+        public static LocalesKey: string = "locales";
 
         private static DefaultLocale: string = "en";
         private resourceDirectory: string = null;
@@ -32,58 +32,94 @@ module TacoUtility {
                 return id;
             }
 
-            var locale: string = null;
-
-            var session: cls.Session = cls.getNamespace(ResourceManager.ResourcesNamespace);
-            if (session) {
-                var locales: string[] = session.get(ResourceManager.LocalesKey);
-                locale = this.getBestMatchingLocale(locales);
-            }
-
-            // Look at LANG environment variable or fallback to DefaultLocale ("en")
-            if (!locale && process.env.LANG) {
-                locale = this.getBestMatchingLocale([process.env.LANG]);
-            }
-
-            if (!locale && process.env.LANG) {
-                locale = this.getBestMatchingLocale([ResourceManager.DefaultLocale]);
-            }
-
-            locale = locale || ResourceManager.DefaultLocale;
-
-            if (!this.resources[locale]) {
-                var resourceFilePath = ResourceManager.getResourceFilePath(this.resourceDirectory, locale);
-                this.resources[locale] = new ResourceSet(resourceFilePath);
-            }
+            var resourceSet: ResourceSet = this.getOrCreateResourceSet();
+            assert.notEqual(resourceSet, null, "We should get a non-null resource set");
 
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            return this.resources[locale].getString(id, args);
+            return resourceSet.getString(id, args);
         }
 
+        /**
+         * Given an array of locales and list of available locales, walks up the locale chain and 
+         * returns best matching locale based on available resources
+         */
+        public static getBestAvailableLocale(availableLocales: string[], inputLocales?: string[]): string {
+
+            return (inputLocales && ResourceManager.findMatchingLocale(availableLocales, inputLocales)) ||
+                (process.env.LANG && ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG])) ||
+                ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DefaultLocale]);
+        }
 
         /**
-         * Given a locale, walks up the locale chain and 
-         * returns best matching locale based on available resource files
+         * Given availableLocales and inputLocales, find the best match
+         * preferring specific locales over parent locales ("fr-FR" over "fr")
          */
-        private getBestMatchingLocale(locales: string[]): string {
-            var parentLocaleMatch: string = null;
-            var supportedLocales: string[] = this.getAvailableLocales();
+        private static findMatchingLocale(availableLocales: string[], inputLocales: string[]): string {
+            var bestLocale: string = null;
 
-            for (var i: number = 0; i < locales.length; ++i) {
-                var locale: string = locales[i].toLowerCase();
-                if (supportedLocales.indexOf(locale) !== -1) {
-                    // Exact match on full language header, which could include the region
+            for (var i: number = 0; i < inputLocales.length; ++i) {
+                var locale: string = inputLocales[i].toLowerCase();
+                if (availableLocales.indexOf(locale) !== -1) {
                     return locale;
                 }
 
                 var parentLocale = locale.split("-")[0];
-                if (supportedLocales.indexOf(parentLocale) !== -1) {
+                if (availableLocales.indexOf(parentLocale) !== -1) {
                     // Match on primary language (e.g. it from it-CH). We may find a better match later, so continue looking.
-                    parentLocaleMatch = parentLocale;
+                    bestLocale = parentLocale;
                 }
             }
 
-            return parentLocaleMatch;
+            return bestLocale;
+        }
+
+        /**
+         * Given current environment and the CLS session code is executing in
+         * creates and returns the corresponding ResourceSet
+         */
+        private getOrCreateResourceSet(): ResourceSet {
+
+            // Scenario 1: getString is called in context of a web request or under a CLS session
+            // get accepetable locales set on session
+            var locales: string[] = clsSessionManager.ClsSessionManager.GetCurrentTacoSessionVariable(ResourceManager.LocalesKey);
+            if (locales && locales.length > 0) {
+
+                // intersect the list with the available resouces and find the best matching one
+                var bestLocale: string = ResourceManager.getBestAvailableLocale(this.getAvailableLocales(), locales);
+
+                this.EnsureResourceSet(bestLocale);
+                return this.resources[bestLocale];
+
+            } else {
+
+                var currentLocale: string = ResourceManager.getCurrentLocale().toLowerCase();
+
+                // if current locale is fr-FR and we find en is the best available resource set for "fr-FR"
+                // we will create this mapping now, to avoid second lookup for future requests
+                if (!this.resources[currentLocale]) {
+
+                    var matchingLocale: string = ResourceManager.getBestAvailableLocale(this.getAvailableLocales());
+                    this.EnsureResourceSet(matchingLocale);
+
+                    this.resources[currentLocale] = this.resources[matchingLocale];
+                    return this.resources[currentLocale];
+                }
+
+                return this.resources[currentLocale];
+            }
+        }
+
+
+        /**
+         * Creates a new entry in resources for provide locale
+         */
+        private EnsureResourceSet(locale: string): void {
+
+            assert(fs.existsSync(ResourceManager.getResourceFilePath(this.resourceDirectory, locale)));
+
+            if (!this.resources[locale]) {
+                this.resources[locale] = new ResourceSet(ResourceManager.getResourceFilePath(this.resourceDirectory, locale));
+            }
         }
 
         /**
@@ -105,6 +141,13 @@ module TacoUtility {
             }
 
             return this.availableLocales;
+        }
+
+        /**
+         * self explanatory. Use LANG environment variable otherwise fall back to Default ("en")
+         */
+        private static getCurrentLocale(): string {
+            return process.env.LANG || ResourceManager.DefaultLocale;
         }
 
         private static getResourceFilePath(resourcesDirectory: string, lang: string): string {
