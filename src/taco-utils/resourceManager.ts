@@ -45,7 +45,7 @@ module TacoUtility {
          */
         public static getBestAvailableLocale(availableLocales: string[], inputLocales?: string[]): string {
 
-            var locale = null;
+            var locale: string = null;
             // First let's see if there is a locale set at session level 
             // on session object or env var LOCALES
             if (inputLocales) {
