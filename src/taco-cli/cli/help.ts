@@ -6,7 +6,7 @@
 import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;
-import resources = require("../resources/ResourceManager");
+import resources = require ("../resources/ResourceManager");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;

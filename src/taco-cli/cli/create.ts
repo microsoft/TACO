@@ -10,12 +10,12 @@ import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
 
-import cordovaWrapper = require("./utils/cordovaWrapper");
+import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
-import resources = require("../resources/ResourceManager");
+import resources = require ("../resources/ResourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
-import templateManager = require("./utils/templateManager");
+import templateManager = require ("./utils/templateManager");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;

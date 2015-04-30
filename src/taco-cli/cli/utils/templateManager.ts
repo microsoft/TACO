@@ -6,15 +6,15 @@
 
 "use strict";
 
-import admZip = require("adm-zip");
-import fs = require("fs");
+import admZip = require ("adm-zip");
+import fs = require ("fs");
 import path = require ("path");
-import Q = require("q");
-import replace = require("replace");
+import Q = require ("q");
+import replace = require ("replace");
 import wrench = require ("wrench");
 
-import cordovaWrapper = require("./cordovaWrapper");
-import resources = require("../../resources/resourceManager");
+import cordovaWrapper = require ("./cordovaWrapper");
+import resources = require ("../../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
 

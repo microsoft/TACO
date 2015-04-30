@@ -5,10 +5,10 @@
 
 "use strict";
 
-import path = require("path");
+import path = require ("path");
 var cordova = require("cordova");
 
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
 

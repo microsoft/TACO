@@ -15,21 +15,20 @@
 
 "use strict";
 
-
-import archiver = require("archiver");
-import fs = require("fs");
-import mocha = require("mocha");
-import os = require("os");
+import archiver = require ("archiver");
+import fs = require ("fs");
+import mocha = require ("mocha");
+import os = require ("os");
 import path = require ("path");
-import rimraf = require("rimraf");
+import rimraf = require ("rimraf");
 // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 var should_module = require("should");
-import wrench = require("wrench");
-import zlib = require("zlib");
+import wrench = require ("wrench");
+import zlib = require ("zlib");
 
-import resources = require("../resources/resourceManager");
-import tacoKits = require("taco-kits");
-import tacoUtils = require("taco-utils");
+import resources = require ("../resources/resourceManager");
+import tacoKits = require ("taco-kits");
+import tacoUtils = require ("taco-utils");
 import templates = require ("../cli/utils/templateManager");
 
 import kitHelper = tacoKits.KitHelper;

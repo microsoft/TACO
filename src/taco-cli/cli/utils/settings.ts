@@ -8,10 +8,10 @@ import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import util = require("util");
+import util = require ("util");
 
-import resources = require("../../resources/resourceManager");
-import tacoUtils = require("taco-utils");
+import resources = require ("../../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
 import utils = tacoUtils.UtilHelper;

@@ -1,5 +1,4 @@
 declare module ContinuationLocalStorage {
-
     function createNamespace(name: String): Session;
     function getNamespace(name: String): Session;
 

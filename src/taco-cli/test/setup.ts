@@ -21,11 +21,11 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 
 import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
-import resources = require("../resources/resourceManager");
-import ServerMock = require("./utils/serverMock");
-import Settings = require("../cli/utils/settings");
-import SetupMod = require("../cli/setup");
-import SetupMock = require("./utils/setupMock");
+import resources = require ("../resources/resourceManager");
+import ServerMock = require ("./utils/serverMock");
+import Settings = require ("../cli/utils/settings");
+import SetupMod = require ("../cli/setup");
+import SetupMock = require ("./utils/setupMock");
 import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
 

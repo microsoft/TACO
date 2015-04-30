@@ -15,11 +15,11 @@ import mkdirp = require ("mkdirp");
 import path = require ("path");
 import rimraf = require ("rimraf");
 import semver = require ("semver");
-import Q = require("q");
+import Q = require ("q");
 
-import loggerUtil = require("./logger");
+import loggerUtil = require ("./logger");
 import UtilHelper = require ("./utilHelper");
-import resources = require("./resources/resourceManager");
+import resources = require ("./resources/resourceManager");
 
 import logger = loggerUtil.Logger;
 import utils = UtilHelper.UtilHelper;

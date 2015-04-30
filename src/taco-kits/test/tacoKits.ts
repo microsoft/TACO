@@ -92,8 +92,7 @@ describe("KitHelper", function (): void {
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
 
-        
-        // Set the kit metadata file location
+                // Set the kit metadata file location
         kitHelper.KitMetadataFilePath = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
     });
 

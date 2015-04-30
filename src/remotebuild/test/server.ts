@@ -21,11 +21,11 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 import Q = require ("q");
 
-import HostSpecifics = require("../lib/hostSpecifics");
-import RemoteBuildConf = require("../lib/remoteBuildConf");
-import resources = require("../resources/resourceManager");
+import HostSpecifics = require ("../lib/hostSpecifics");
+import RemoteBuildConf = require ("../lib/remoteBuildConf");
+import resources = require ("../resources/resourceManager");
 import server = require ("../lib/server");
-import tacoUtils = require("taco-utils");
+import tacoUtils = require ("taco-utils");
 import testServerModuleFactory = require ("./testServerModuleFactory");
 
 var serverDir = path.join(os.tmpdir(), "remotebuild", "server");

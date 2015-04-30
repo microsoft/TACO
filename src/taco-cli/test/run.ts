@@ -19,12 +19,12 @@ import http = require ("http");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import rimraf = require("rimraf");
+import rimraf = require ("rimraf");
 
-import querystring = require("querystring");
+import querystring = require ("querystring");
 
-import resources = require("../resources/resourceManager");
-import TacoUtility = require("taco-utils");
+import resources = require ("../resources/resourceManager");
+import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;

@@ -24,7 +24,7 @@ import tar = require ("tar");
 import zlib = require ("zlib");
 
 import BuildRetention = require ("./buildRetention");
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 

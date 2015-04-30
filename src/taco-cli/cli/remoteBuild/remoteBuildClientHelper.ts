@@ -27,9 +27,9 @@ import zlib = require ("zlib");
 
 import BuildSettings = require ("./buildSettings");
 import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
-import resources = require("../../resources/resourceManager");
-import Settings = require("../utils/settings");
-import tacoUtils = require("taco-utils");
+import resources = require ("../../resources/resourceManager");
+import Settings = require ("../utils/settings");
+import tacoUtils = require ("taco-utils");
 
 import BuildInfo = tacoUtils.BuildInfo;
 import CountStream = tacoUtils.CountStream;

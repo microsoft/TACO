@@ -10,11 +10,11 @@
 
 "use strict";
 
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
 
-import resources = require("./resources/resourceManager");
+import resources = require ("./resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import logger = tacoUtility.Logger;
 

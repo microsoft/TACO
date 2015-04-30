@@ -2,6 +2,6 @@
 
 "use strict";
 
-import tacoUtility = require("../resourceManager");
+import tacoUtility = require ("../resourceManager");
 var resourceManager: tacoUtility.ResourceManager = new tacoUtility.ResourceManager(__dirname);
 export = resourceManager;

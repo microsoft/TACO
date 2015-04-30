@@ -27,7 +27,7 @@ import Q = require ("q");
 
 import HostSpecifics = require ("./hostSpecifics");
 import RemoteBuildConf = require ("./remoteBuildConf");
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 import util = require ("util");
 

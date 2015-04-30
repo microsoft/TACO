@@ -20,7 +20,7 @@ import HostSpecifics = require ("./hostSpecifics");
 import utils = require ("taco-utils");
 import server = require ("./server");
 import RemoteBuildConf = require ("./remoteBuildConf");
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import UtilHelper = utils.UtilHelper;
 
 function cli(): void {

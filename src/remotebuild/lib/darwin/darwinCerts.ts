@@ -20,9 +20,9 @@ import readline = require ("readline");
 import rimraf = require ("rimraf");
 import util = require ("util");
 
-import HostSpecifics = require("../hostSpecifics");
-import RemoteBuildConf = require("../remoteBuildConf");
-import resources = require("../../resources/resourceManager");
+import HostSpecifics = require ("../hostSpecifics");
+import RemoteBuildConf = require ("../remoteBuildConf");
+import resources = require ("../../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 

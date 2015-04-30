@@ -19,16 +19,16 @@ import http = require ("http");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import rimraf = require("rimraf");
-import util = require("util");
+import rimraf = require ("rimraf");
+import util = require ("util");
 import querystring = require ("querystring");
 
-import buildMod = require("../cli/build");
-import resources = require("../resources/resourceManager");
-import ServerMock = require("./utils/serverMock");
-import SetupMock = require("./utils/setupMock");
-import setupMod = require("../cli/setup");
-import TacoUtility = require("taco-utils");
+import buildMod = require ("../cli/build");
+import resources = require ("../resources/resourceManager");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
+import setupMod = require ("../cli/setup");
+import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;

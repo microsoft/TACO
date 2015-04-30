@@ -3,7 +3,7 @@
 import nconf = require ("nconf");
 import os = require ("os");
 
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 import UtilHelper = tacoUtils.UtilHelper;
 

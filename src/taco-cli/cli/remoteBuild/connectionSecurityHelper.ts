@@ -14,10 +14,10 @@ import fs = require ("fs");
 import https = require ("https");
 import os = require ("os");
 import path = require ("path");
-import Q = require("q");
+import Q = require ("q");
 
-import resources = require("../../resources/resourceManager");
-import tacoUtils = require("taco-utils");
+import resources = require ("../../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
 
 import UtilHelper = tacoUtils.UtilHelper;
 import logger = tacoUtils.Logger;

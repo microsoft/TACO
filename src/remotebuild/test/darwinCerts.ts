@@ -25,7 +25,7 @@ import mkdirp = require ("mkdirp");
 import certs = require ("../lib/darwin/darwinCerts");
 import HostSpecifics = require ("../lib/hostSpecifics");
 import RemoteBuildConf = require ("../lib/remoteBuildConf");
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 
 var serverDir = path.join(os.tmpdir(), "remotebuild", "certs");

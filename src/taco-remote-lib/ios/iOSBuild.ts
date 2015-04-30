@@ -20,7 +20,7 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 
 import plist = require ("./plist");
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;

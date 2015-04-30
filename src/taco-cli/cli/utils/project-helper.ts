@@ -5,7 +5,7 @@ import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
 
-import resources = require("../../resources/resourceManager");
+import resources = require ("../../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
 

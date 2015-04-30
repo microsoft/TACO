@@ -16,7 +16,7 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("../hostSpecifics");
-import resources = require("../../resources/resourceManager");
+import resources = require ("../../resources/resourceManager");
 import TacoRemoteConfig = require ("../tacoRemoteConfig");
 import utils = require ("taco-utils");
 

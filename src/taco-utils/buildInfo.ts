@@ -1,6 +1,6 @@
 ﻿
-import utils = require("./resourceManager");
-import utilHelper = require("./utilHelper");
+import utils = require ("./resourceManager");
+import utilHelper = require ("./utilHelper");
 
 import UtilHelper = utilHelper.UtilHelper;
 

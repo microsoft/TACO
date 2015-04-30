@@ -20,11 +20,10 @@ import Q = require ("q");
 
 import certs = require ("./darwinCerts");
 import HostSpecifics = require ("../hostSpecifics");
-import resources = require("../../resources/resourceManager");
+import resources = require ("../../resources/resourceManager");
 import RemoteBuildConf = require ("../remoteBuildConf");
 import utils = require ("taco-utils");
 import UtilHelper = utils.UtilHelper;
-
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     private static Config: RemoteBuildConf;

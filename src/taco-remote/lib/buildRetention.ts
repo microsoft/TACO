@@ -12,7 +12,7 @@
 
 import rimraf = require ("rimraf");
 
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 

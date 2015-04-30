@@ -20,10 +20,9 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("../hostSpecifics");
-import resources = require("../../resources/resourceManager");
+import resources = require ("../../resources/resourceManager");
 import RemoteBuildConf = require ("../remoteBuildConf");
 import utils = require ("taco-utils");
-
 
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {

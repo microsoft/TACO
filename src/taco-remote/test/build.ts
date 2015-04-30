@@ -5,13 +5,13 @@ import fs = require ("fs");
 import http = require ("http");
 import nconf = require ("nconf");
 import os = require ("os");
-import path = require("path");
+import path = require ("path");
 
-import resources = require("../resources/resourceManager");
-import rimraf = require("rimraf");
-import selftest = require("../lib/selftest");
+import resources = require ("../resources/resourceManager");
+import rimraf = require ("rimraf");
+import selftest = require ("../lib/selftest");
 import TacoRemote = require ("../lib/server");
-import TacoUtils = require("taco-utils");
+import TacoUtils = require ("taco-utils");
 
 import UtilHelper = TacoUtils.UtilHelper;
 

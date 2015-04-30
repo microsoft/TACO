@@ -11,13 +11,13 @@
 
 "use strict";
 
-import path = require("path");
-import should = require("should"); 
+import path = require ("path");
+import should = require ("should"); 
 import mocha = require ("mocha");
 
-import resourceManager = require("../resourceManager");
-import tacoUtility = require("../tacoUtils");
-import clsSessionManager = require("../clsSessionManager");
+import resourceManager = require ("../resourceManager");
+import tacoUtility = require ("../tacoUtils");
+import clsSessionManager = require ("../clsSessionManager");
 
 import UtilHelper = tacoUtility.UtilHelper;
 import ResourceManager = resourceManager.ResourceManager;
@@ -109,7 +109,7 @@ describe("resources", function (): void {
         var sessionVar: any = {};
         sessionVar[key] = ["it-ch", "en"];
         var expectedResources = require(path.join(__dirname, "/resources/it-ch/resources.json"));
-        clsSessionManager.ClsSessionManager.RunInTacoSession(sessionVar, function () {
+        clsSessionManager.ClsSessionManager.runInTacoSession(sessionVar, function (): void {
             var actual = resources.getString("SimpleMessage");
             var expected = expectedResources["SimpleMessage"];
             actual.should.equal(expected);
@@ -121,7 +121,7 @@ describe("resources", function (): void {
         var sessionVar: any = {};
         sessionVar[key] = ["fr-FR", "en-US"];
         var expectedResources = require(path.join(__dirname, "/resources/en/resources.json"));
-        clsSessionManager.ClsSessionManager.RunInTacoSession(sessionVar, function () {
+        clsSessionManager.ClsSessionManager.runInTacoSession(sessionVar, function (): void {
             var actual = resources.getString("SimpleMessage");
             var expected = expectedResources["SimpleMessage"];
             actual.should.equal(expected);

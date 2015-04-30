@@ -8,7 +8,7 @@ import commands = require ("./commands");
 import logger = require ("./logger");
 import processLogger = require ("./processLogger");
 import tacoPackageLoader = require ("./tacoPackageLoader");
-import clsSessionManager = require("./clsSessionManager");
+import clsSessionManager = require ("./clsSessionManager");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    

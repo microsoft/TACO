@@ -1,12 +1,12 @@
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 
-import fs = require("fs");
+import fs = require ("fs");
 import path = require ("path");
-import Q = require("q");
+import Q = require ("q");
 
-import logger = require("./logger");
-import resources = require("./resources/resourceManager");
+import logger = require ("./logger");
+import resources = require ("./resources/resourceManager");
 import utilHelper = require ("./utilHelper");
 
 import UtilHelper = utilHelper.UtilHelper;

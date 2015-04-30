@@ -1,13 +1,11 @@
 ﻿/// <reference path="../typings/node.d.ts" />
 
-import path = require("path");
-import tacoUtility = require("./utilHelper");
+import path = require ("path");
+import tacoUtility = require ("./utilHelper");
 import UtilHelper = tacoUtility.UtilHelper;
 
 module TacoUtility {
-
     export class ResourceSet {
-
         private resources: { [key: string]: any; } = {};
 
         constructor(resourceFileName: string) {

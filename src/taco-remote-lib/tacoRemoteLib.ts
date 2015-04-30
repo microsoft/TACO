@@ -11,7 +11,7 @@ import net = require ("net");
 import path = require ("path");
 
 import IOSAgent = require ("./ios/ios");
-import resources = require("./resources/resourceManager");
+import resources = require ("./resources/resourceManager");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;

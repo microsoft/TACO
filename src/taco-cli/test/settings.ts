@@ -17,18 +17,17 @@ import del = require ("del");
 import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
-import Q = require("q");
-import rimraf = require("rimraf");
+import Q = require ("q");
+import rimraf = require ("rimraf");
 // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 var should_module = require("should"); 
 
-import resources = require("../resources/resourceManager");
-import Settings = require("../cli/utils/settings");
+import resources = require ("../resources/resourceManager");
+import Settings = require ("../cli/utils/settings");
 import SetupMock = require ("./utils/setupMock");
-import TacoUtility = require("taco-utils");
+import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
-
 
 describe("taco settings", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");

@@ -15,7 +15,7 @@ import util = require ("util");
 import packer = require ("zip-stream");
 
 import iosAppRunner = require ("./iosAppRunnerHelper");
-import resources = require("../resources/resourceManager");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
@@ -212,7 +212,7 @@ class IOSAgent implements ITargetPlatform {
 
         buildInfo["webDebugProxyPort"] = this.webDebugProxyDevicePort;
         buildInfo.updateStatus(utils.BuildInfo.DEBUGGING, "DebugSuccess");
-        res.status(200).send(buildInfo.localize());
+        res.status(200).send(buildInfo.localize(resources));
     }
 
     public createBuildProcess(): child_process.ChildProcess {
@@ -224,14 +224,13 @@ class IOSAgent implements ITargetPlatform {
     }
 
     private static createLocalizedProcess(startScriptPath: string): child_process.ChildProcess {
-
         var localesKey: string = utils.ResourceManager.LocalesKey;
         var options: any = {
             silent: true,
             env: {
-                localesKey: utils.ClsSessionManager.GetCurrentTacoSessionVariable(localesKey)
+                localesKey: utils.ClsSessionManager.getCurrentTacoSessionVariable(localesKey)
             }
-        }
+        };
         return child_process.fork(startScriptPath, [], options);
     }
 }
