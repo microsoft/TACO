@@ -99,4 +99,10 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
     return gulpUtils.prepareTemplates(buildConfig.templates, buildConfig.buildTemplates);
 });
 
+/* Task to generate Ploc files */
+gulp.task("ploc", ["copy"], function (): Q.Promise<any> {
+    return gulpUtils.generatePseudoLocResources(tacoModules, buildConfig.buildSrc);
+});
+
+
 module.exports = gulp;
