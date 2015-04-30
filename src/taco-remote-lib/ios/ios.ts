@@ -225,12 +225,11 @@ class IOSAgent implements ITargetPlatform {
 
     private static createLocalizedProcess(startScriptPath: string): child_process.ChildProcess {
         var localesKey: string = utils.ResourceManager.LocalesKey;
-        var options: any = {
-            silent: true,
-            env: {
-                localesKey: utils.ClsSessionManager.getCurrentTacoSessionVariable(localesKey)
-            }
-        };
+
+        // clone current environment and push "locales"
+        var env: any = Object.create(process.env);
+        env[localesKey] = utils.ClsSessionManager.getCurrentTacoSessionVariable(localesKey);
+        var options = { silent: true, env: env }
         return child_process.fork(startScriptPath, [], options);
     }
 }
