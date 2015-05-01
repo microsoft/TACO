@@ -3,5 +3,5 @@
 "use strict";
 
 import tacoUtility = require ("taco-utils");
-var resourceManager: tacoUtility.ResourceManager = new tacoUtility.ResourceManager(__dirname, "en");
+var resourceManager: tacoUtility.ResourceManager = new tacoUtility.ResourceManager(__dirname);
 export = resourceManager;
