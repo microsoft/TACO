@@ -12,8 +12,8 @@ import resources = require ("../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
 
-import commandsFactory = commands.CommandFactory;
 import commands = tacoUtility.Commands;
+import commandsFactory = commands.CommandFactory;
 var kitHelper = tacoKits.KitHelper;
 
 /*
