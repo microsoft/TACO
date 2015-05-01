@@ -17,11 +17,36 @@ module TacoUtility {
         private resourceDirectory: string = null;
         private resources: { [lang: string]: ResourceSet } = {};
         private availableLocales: string[] = null;
-        private initialLocale: string = null
+        private initialLocale: string = null;
 
         constructor(resourcesDirectory: string, language?: string) {
             this.resourceDirectory = resourcesDirectory;
             this.initialLocale = language;
+        }
+
+        /**
+         * Given an array of locales and list of available locales, walks up the locale chain and 
+         * returns best matching locale based on available resources
+         */
+        public static getBestAvailableLocale(availableLocales: string[], inputLocales?: string[]): string {
+            var locale: string = null;
+            // First let's see if there is a locale set at session level 
+            // on session object or env var LOCALES
+            if (inputLocales) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, inputLocales);
+            }
+
+            // Next look at system locale, for UNIX based systems look for LANG variable
+            if (!locale && process.env.LANG) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG]);
+            }
+
+            // Finally fallback to DefaultLocale ("en")
+            if (!locale) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DefaultLocale]);
+            }
+
+            return locale;
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
@@ -53,31 +78,6 @@ module TacoUtility {
         }
 
         /**
-         * Given an array of locales and list of available locales, walks up the locale chain and 
-         * returns best matching locale based on available resources
-         */
-        public static getBestAvailableLocale(availableLocales: string[], inputLocales?: string[]): string {
-            var locale: string = null;
-            // First let's see if there is a locale set at session level 
-            // on session object or env var LOCALES
-            if (inputLocales) {
-                locale = ResourceManager.findMatchingLocale(availableLocales, inputLocales);
-            }
-
-            // Next look at system locale, for UNIX based systems look for LANG variable
-            if (!locale && process.env.LANG) {
-                locale = ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG]);
-            }
-
-            // Finally fallback to DefaultLocale ("en")
-            if (!locale) {
-                locale = ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DefaultLocale]);
-            }
-
-            return locale;
-        }
-
-        /**
          * Given availableLocales and inputLocales, find the best match
          * preferring specific locales over parent locales ("fr-FR" over "fr")
          */
@@ -100,15 +100,15 @@ module TacoUtility {
             return bestLocale;
         }
 
+        private static getResourceFilePath(resourcesDirectory: string, lang: string): string {
+            return path.join(resourcesDirectory, lang, "resources.json");
+        }
+
         /**
          * self explanatory. Use LANG environment variable otherwise fall back to Default ("en")
          */
         private getCurrentLocale(): string {
             return (this.initialLocale || process.env.LANG || ResourceManager.DefaultLocale).toLowerCase();
-        }
-
-        private static getResourceFilePath(resourcesDirectory: string, lang: string): string {
-            return path.join(resourcesDirectory, lang, "resources.json");
         }
 
         /**
