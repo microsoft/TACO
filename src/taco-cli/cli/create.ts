@@ -246,8 +246,11 @@ class Create implements commands.IDocumentedCommand {
         logger.log(this.commandParameters.appName, logger.Level.NormalBold);
         logger.log(resources.getString("command.create.status.projectId"), logger.Level.Normal);
         logger.log(this.commandParameters.appId, logger.Level.NormalBold);
-        logger.log(resources.getString("command.create.status.projectPath"), logger.Level.Normal);
-        logger.log(this.commandParameters.projectPath, logger.Level.NormalBold);
+
+        if (this.commandParameters.projectPath) {
+            logger.log(resources.getString("command.create.status.projectPath"), logger.Level.Normal);
+            logger.log(this.commandParameters.projectPath, logger.Level.NormalBold);
+        }
         
         if (!this.isKitProject()) {
             logger.log(resources.getString("command.create.status.cordovaCliUsed"), logger.Level.Normal);

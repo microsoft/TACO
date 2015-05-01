@@ -39,6 +39,10 @@ module TacoUtility {
          * log
          */
         export function log(msg: string, level: Level = Level.Normal): void {
+            if (!msg) {
+                return;
+            }
+
             msg = colorize(msg, level);
             switch (level) {
                 case Level.Error:
