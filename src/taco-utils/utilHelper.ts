@@ -13,6 +13,7 @@ import nopt = require ("nopt");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+
 import commands = require ("./commands");
 
 module TacoUtility {

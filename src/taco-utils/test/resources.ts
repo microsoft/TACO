@@ -13,16 +13,16 @@ import path = require ("path");
 import should = require ("should");
 import mocha = require ("mocha");
 
-import util = require ("../tacoUtils");
+import tacoUtility = require ("../tacoUtils");
+import resourceManager = require ("../resourceManager");
 
-var resources = util.ResourcesManager;
+import ResourceManager = resourceManager.ResourceManager;
+
+var resources: resourceManager.ResourceManager = null;
 
 describe("resources", function (): void {
     before(function (): void {
-        resources.init("en", path.join(__dirname, "resources"));
-    });
-    after(function (): void {
-        resources.teardown();
+        resources = new tacoUtility.ResourceManager(path.join(__dirname, "resources"), "en");
     });
 
     it("should use the default language by default", function (): void {

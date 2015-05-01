@@ -13,6 +13,7 @@
 /// <reference path="../../typings/rimraf.d.ts" />
 /// <reference path="../../typings/mkdirp.d.ts" />
 "use strict";
+
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
@@ -25,9 +26,8 @@ import mkdirp = require ("mkdirp");
 import certs = require ("../lib/darwin/darwinCerts");
 import HostSpecifics = require ("../lib/hostSpecifics");
 import RemoteBuildConf = require ("../lib/remoteBuildConf");
-
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
-import resources = utils.ResourcesManager;
 
 var serverDir = path.join(os.tmpdir(), "remotebuild", "certs");
 var certsDir = path.join(serverDir, "certs");
@@ -46,7 +46,6 @@ macOnly("Certs", function (): void {
     
     before(function (): void {
         nconf.use("memory");
-        resources.init("en", path.join(__dirname, "..", "resources"));
     });
 
     // These tests can take a fair amount of time

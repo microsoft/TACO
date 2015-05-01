@@ -8,11 +8,12 @@ import os = require ("os");
 import path = require ("path");
 import rimraf = require ("rimraf");
 
+import resources = require ("../resources/resourceManager");
+import selftest = require ("../lib/selftest");
 import TacoRemote = require ("../lib/server");
 import TacoUtils = require ("taco-utils");
+
 import UtilHelper = TacoUtils.UtilHelper;
-import resources = TacoUtils.ResourcesManager;
-import selftest = require ("../lib/selftest");
 
 var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
 
@@ -22,9 +23,10 @@ describe("taco-remote", function (): void {
     var serverDir = path.join(os.tmpdir(), "taco-remote", "build");
     var downloadDir = path.join(serverDir, "selftest");
     var modMountPoint = "Test";
+    var resources: TacoUtils.ResourceManager = null;
     before(function (mocha: MochaDone): void {
-        resources.init("en", path.join(__dirname, "..", "resources"));
-        resources.UnitTest = true;
+        resources = new TacoUtils.ResourceManager(path.join(__dirname, "..", "resources"), "en");
+        process.env["TACO_UNIT_TEST"] = true;
         process.env["TACO_HOME"] = serverDir;
         UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");

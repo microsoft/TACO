@@ -15,10 +15,12 @@ import https = require ("https");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+
+import resources = require ("../../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
-import res = tacoUtils.ResourcesManager;
-import UtilHelper = tacoUtils.UtilHelper;
+
 import logger = tacoUtils.Logger;
+import UtilHelper = tacoUtils.UtilHelper;
 
 class ConnectionSecurityHelper {
     public static getAgent(connectionInfo: { secure: boolean; host: string; port: number; certName?: string }): Q.Promise<https.Agent> {
@@ -41,10 +43,10 @@ class ConnectionSecurityHelper {
                 certLoadProcess.on("close", function (code: number): void {
                     if (code) {
                         if (code === 1) {
-                            bufferDeferred.reject(new Error(res.getString("NoCertificateFound", connectionInfo.certName)));
+                            bufferDeferred.reject(new Error(resources.getString("NoCertificateFound", connectionInfo.certName)));
                         } else {
                             logger.logErrorLine(output);
-                            bufferDeferred.reject(new Error(res.getString("GetCertificateFailed")));
+                            bufferDeferred.reject(new Error(resources.getString("GetCertificateFailed")));
                         }
                     } else {
                         bufferDeferred.resolve(new Buffer(output, "base64"));
@@ -57,7 +59,7 @@ class ConnectionSecurityHelper {
                 fs.readFile(certPath, bufferDeferred.makeNodeResolver());
                 break;
             default:
-                throw new Error(res.getString("UnsupportedPlatform", os.platform()));
+                throw new Error(resources.getString("UnsupportedPlatform", os.platform()));
         }
 
         return bufferDeferred.promise.then(function (certificate: Buffer): https.Agent {
@@ -127,7 +129,7 @@ class ConnectionSecurityHelper {
                 });
                 break;
             default:
-                deferred.reject(new Error(res.getString("UnsupportedPlatform", os.platform())));
+                deferred.reject(new Error(resources.getString("UnsupportedPlatform", os.platform())));
         }
 
         return deferred.promise;

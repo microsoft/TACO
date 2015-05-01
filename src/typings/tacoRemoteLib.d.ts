@@ -16,7 +16,7 @@ declare module TacoRemoteLib {
         /**
          * The module exposes the localization resources so that the server can localize buildInfo regardless of where the string tokens come from.
          */
-        locResources: TacoUtility.ResourcesManager.IResources;
+        locResources: TacoUtility.ResourceManager;
         /**
          * Initialize this package so it is ready to service requests
          *

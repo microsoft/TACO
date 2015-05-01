@@ -24,11 +24,13 @@ import path = require ("path");
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
 import zlib = require ("zlib");
-import templates = require ("../cli/utils/templateManager");
+
+import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
+import templates = require ("../cli/utils/templateManager");
+
 import kitHelper = tacoKits.KitHelper;
-import resources = tacoUtils.ResourcesManager;
 import utils = tacoUtils.UtilHelper;
 
 interface IKitHelper {
@@ -72,7 +74,7 @@ describe("TemplateManager", function (): void {
 
     before(function (done: MochaDone): void {
         // Set ResourcesManager to test mode
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
 
         // Set the temporary template cache location in TemplateManager for our tests
         templates.TemplateCachePath = templateCache;

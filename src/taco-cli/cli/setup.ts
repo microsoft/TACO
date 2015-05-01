@@ -13,12 +13,13 @@ import request = require ("request");
 import util = require ("util");
 
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
+import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
+
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface ICliSession {

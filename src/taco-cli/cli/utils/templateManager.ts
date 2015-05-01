@@ -12,14 +12,15 @@ import path = require ("path");
 import Q = require ("q");
 import replace = require ("replace");
 import wrench = require ("wrench");
+
 import cordovaWrapper = require ("./cordovaWrapper");
+import resources = require ("../../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
-import logger = tacoUtility.Logger;
-import resources = tacoUtility.ResourcesManager;
-import utils = tacoUtility.UtilHelper;
 
+import logger = tacoUtility.Logger;
 import kitHelper = tacoKits.KitHelper;
+import utils = tacoUtility.UtilHelper;
 
 interface IKitHelper {
     getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;

@@ -2,7 +2,7 @@
 import buildInfo = require ("./buildInfo");
 import cordovaConfig = require ("./cordovaConfig");
 import countStream = require ("./countStream");
-import resourcesManager = require ("./resourcesManager");
+import resourceManager = require ("./resourceManager");
 import utilHelper = require ("./utilHelper");
 import commands = require ("./commands");
 import logger = require ("./logger");
@@ -14,7 +14,7 @@ module TacoUtility {
     /// <disable code="SA1301" justification="We are exporting classes" />
     export var BuildInfo = buildInfo.BuildInfo;
     export var CordovaConfig = cordovaConfig.CordovaConfig;
-    export var ResourcesManager = resourcesManager.ResourcesManager;
+    export var ResourceManager = resourceManager.ResourceManager;
     export var UtilHelper = utilHelper.UtilHelper;
     export var Commands = commands.Commands;
     export var Logger = logger.Logger;

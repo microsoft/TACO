@@ -20,10 +20,11 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 
 import plist = require ("./plist");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
+
 import BuildInfo = utils.BuildInfo;
 import CordovaConfig = utils.CordovaConfig;
-import resources = utils.ResourcesManager;
 import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
 
@@ -48,7 +49,6 @@ var cfg: CordovaConfig = null;
 var language: string = null;
 
 process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: string }): void {
-    resources.init(language, path.join(__dirname, "..", "resources"));
     var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(buildRequest.buildInfo);
     if (currentBuild) {
         buildInfo.updateStatus(BuildInfo.ERROR, "BuildInvokedTwice");

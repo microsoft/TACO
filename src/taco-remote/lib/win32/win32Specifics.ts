@@ -16,9 +16,9 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("../hostSpecifics");
+import resources = require ("../../resources/resourceManager");
 import TacoRemoteConfig = require ("../tacoRemoteConfig");
 import utils = require ("taco-utils");
-import resources = utils.ResourcesManager;
 
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {

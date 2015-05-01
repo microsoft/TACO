@@ -5,12 +5,10 @@ import tacoUtility = require ("./utilHelper");
 import UtilHelper = tacoUtility.UtilHelper;
 
 module TacoUtility {
-    export class ResourcesManager {
-        private static Resources: { [key: string]: any; } = {};
-        private static SupportedLanguages: string[] = [];
+    export class ResourceManager {
         private static DefaultLanguage: string = "en";
-
-        public static UnitTest: boolean = false;
+        private resources: { [key: string]: any; } = {};
+        private supportedLanguages: string[] = [];
 
         /**
          * Initialize the Resource Manager
@@ -18,43 +16,31 @@ module TacoUtility {
          * @param {string} language The default language to look up via getString
          * @param {string} resourcesDir The location to look for resources. The expectation is that this location has subfolders such as "en" and "it-ch" which contain "resources.json"
          */
-        public static init(language: string, resourcesDir: string): void {
-            if (ResourcesManager.SupportedLanguages.length === 0) {
-                // Initialize the resources for this package the first time we are initialized
-                ResourcesManager.loadFolder(path.join(__dirname, "resources"));
-            }
-
-            ResourcesManager.loadFolder(resourcesDir);
-
-            ResourcesManager.DefaultLanguage = ResourcesManager.bestLanguageMatchOrDefault(language);
-        }
-
-        // For unit tests
-        public static teardown(): void {
-            ResourcesManager.Resources = {};
-            ResourcesManager.SupportedLanguages = [];
+        constructor(resourcesDir: string, language: string) {
+            this.loadFolder(resourcesDir);
+            ResourceManager.DefaultLanguage = this.bestLanguageMatchOrDefault(language);
         }
 
         /** ...optionalArgs is only there for typings, function rest params */
-        public static getString(id: string, ...optionalArgs: any[]): string {
+        public getString(id: string, ...optionalArgs: any[]): string {
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            return ResourcesManager.getStringForLanguage(ResourcesManager.DefaultLanguage, id, args);
+            return this.getStringForLanguage(ResourceManager.DefaultLanguage, id, args);
         }
 
         /** ** ...optionalArgs is only there for typings, function rest params** */
-        public static getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
-            if (ResourcesManager.UnitTest) {
+        public getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
+            if (process.env["TACO_UNIT_TEST"]) {
                 // Mock out resources for unit tests
                 return id;
             }
 
-            if (!ResourcesManager.Resources) {
+            if (!this.resources) {
                 throw new Error("Resources have not been loaded");
             }
 
-            var lang = ResourcesManager.bestLanguageMatchOrDefault(requestOrAcceptLangs);
+            var lang = this.bestLanguageMatchOrDefault(requestOrAcceptLangs);
 
-            var s = ResourcesManager.Resources[lang][id];
+            var s = this.resources[lang][id];
             if (!s) {
                 return s;
             } else if (Array.isArray(s)) {
@@ -76,10 +62,15 @@ module TacoUtility {
             return result;
         }
 
-        private static bestLanguageMatchOrDefault(requestOrAcceptLangs: any): string {
-            var lang = ResourcesManager.bestLanguageMatch(requestOrAcceptLangs);
-            if (!ResourcesManager.Resources[lang]) {
-                lang = ResourcesManager.DefaultLanguage;
+        private static loadLanguage(language: string, resourcesDir: string): any {
+            var resourcesPath = path.join(resourcesDir, language, "resources.json");
+            return require(resourcesPath);
+        }
+
+        private bestLanguageMatchOrDefault(requestOrAcceptLangs: any): string {
+            var lang = this.bestLanguageMatch(requestOrAcceptLangs);
+            if (!this.resources[lang]) {
+                lang = ResourceManager.DefaultLanguage;
             }
 
             return lang.toLowerCase();
@@ -95,14 +86,14 @@ module TacoUtility {
          * This allows us to handle simple cases of a single string, as well as more complex cases where a client specifies
          * multiple preferences.
          */
-        private static bestLanguageMatch(requestOrAcceptLangs: any): string {
+        private bestLanguageMatch(requestOrAcceptLangs: any): string {
             if (Array.isArray(requestOrAcceptLangs)) {
-                return ResourcesManager.getBestLanguageFromArray(requestOrAcceptLangs);
+                return this.getBestLanguageFromArray(requestOrAcceptLangs);
             }
 
             var langString: string;
             if (!requestOrAcceptLangs) {
-                return ResourcesManager.DefaultLanguage;
+                return ResourceManager.DefaultLanguage;
             } else if (typeof requestOrAcceptLangs === "string") {
                 langString = requestOrAcceptLangs;
             } else if (requestOrAcceptLangs.headers) {
@@ -111,24 +102,24 @@ module TacoUtility {
                 throw new Error("Unsupported type of argument for acceptLangs: " + (typeof requestOrAcceptLangs));
             }
 
-            return ResourcesManager.getBestLanguageFromArray(langString.split(",").map(function (l: string): string { return l.split(";")[0]; }));
+            return this.getBestLanguageFromArray(langString.split(",").map(function (l: string): string { return l.split(";")[0]; }));
         }
 
         /**
          * Given a list of languages, we try to find an exact match if we can, and we fall back to a primary language otherwise.
          *  e.g. "fr-CA" will use "fr-CA" resources if present, but will fall back to "fr" resources if they are available
          */
-        private static getBestLanguageFromArray(acceptLangs: string[]): string {
+        private getBestLanguageFromArray(acceptLangs: string[]): string {
             var primaryLanguageMatch: string = null;
             for (var i: number = 0; i < acceptLangs.length; ++i) {
                 var lang: string = acceptLangs[i].toLowerCase();
                 var primaryLang = lang.split("-")[0];
-                if (ResourcesManager.SupportedLanguages.indexOf(lang) !== -1) {
+                if (this.supportedLanguages.indexOf(lang) !== -1) {
                     // Exact match on full language header, which could include the region
                     return lang;
                 }
 
-                if (ResourcesManager.SupportedLanguages.indexOf(primaryLang) !== -1) {
+                if (this.supportedLanguages.indexOf(primaryLang) !== -1) {
                     // Match on primary language (e.g. it from it-CH). We may find a better match later, so continue looking.
                     primaryLanguageMatch = primaryLang;
                 }
@@ -137,34 +128,24 @@ module TacoUtility {
             return primaryLanguageMatch;
         }
 
-        private static loadFolder(resourcesDir: string): void {
+        private loadFolder(resourcesDir: string): void {
+            var self: ResourceManager = this;
             fs.readdirSync(resourcesDir).forEach(function (filename: string): void {
                 try {
-                    var res = ResourcesManager.loadLanguage(filename, resourcesDir);
-                    if (ResourcesManager.Resources[filename.toLowerCase()]) {
+                    var res = ResourceManager.loadLanguage(filename, resourcesDir);
+                    if (self.resources[filename.toLowerCase()]) {
                         Object.keys(res).forEach(function (key: string): void {
-                            ResourcesManager.Resources[filename.toLowerCase()][key] = ResourcesManager.Resources[filename.toLowerCase()][key] || res[key];
+                            self.resources[filename.toLowerCase()][key] = self.resources[filename.toLowerCase()][key] || res[key];
                         });
                     } else {
-                        ResourcesManager.Resources[filename.toLowerCase()] = res;
+                        self.resources[filename.toLowerCase()] = res;
                     }
 
-                    ResourcesManager.SupportedLanguages.push(filename.toLowerCase());
+                    self.supportedLanguages.push(filename.toLowerCase());
                 } catch (e) {
                     // Folder was not a valid resource; ignore it
                 }
             });
-        }
-
-        private static loadLanguage(language: string, resourcesDir: string): any {
-            var resourcesPath = path.join(resourcesDir, language, "resources.json");
-            return require(resourcesPath);
-        }
-    }
-
-    export module ResourcesManager {
-        export interface IResources {
-            getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string;
         }
     }
 }

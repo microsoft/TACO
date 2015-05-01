@@ -24,13 +24,13 @@ import https = require ("https");
 import expressLogger = require ("morgan");
 import path = require ("path");
 import Q = require ("q");
+import util = require ("util");
 
 import HostSpecifics = require ("./hostSpecifics");
 import RemoteBuildConf = require ("./remoteBuildConf");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
-import util = require ("util");
 
-import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 
 interface IDictionaryT<T> {

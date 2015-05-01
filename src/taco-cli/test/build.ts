@@ -13,6 +13,8 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
+// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
+import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
@@ -25,21 +27,18 @@ import util = require ("util");
 
 import buildMod = require ("../cli/build");
 import setupMod = require ("../cli/setup");
+import resources = require ("../resources/resourceManager");
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
 import TacoUtility = require ("taco-utils");
-import utils = TacoUtility.UtilHelper;
-import resources = TacoUtility.ResourcesManager;
-import BuildInfo = TacoUtility.BuildInfo;
 
-// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require ("cordova");
+import BuildInfo = TacoUtility.BuildInfo;
+import utils = TacoUtility.UtilHelper;
 
 var build = new buildMod();
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
-
-describe("taco build", function () {
+describe("taco build", function (): void {
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "build");
 
@@ -56,7 +55,7 @@ describe("taco build", function () {
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Create a mocked out remote server so we can specify how it reacts
@@ -64,26 +63,26 @@ describe("taco build", function () {
         var port = 3000;
         testHttpServer.listen(port);
         // Configure a dummy platform "test" to use the mocked out remote server
-        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function () {
+        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
-        }, function (err: any) {
-            mocha(err);
-        });
+        }, function (err: any): void {
+                mocha(err);
+            });
 
         // Reduce the delay when polling for a change in status
         buildMod.RemoteBuild.PingInterval = 10;
     });
 
-    after(function () {
+    after(function (): void {
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {
         // Start each test with a pristine cordova project
-        Q.fcall(createCleanProject).done(function () {
+        Q.fcall(createCleanProject).done(function (): void {
             mocha();
-        }, function (err: any) {
+        }, function (err: any): void {
             mocha(err);
         });
     });
@@ -102,7 +101,7 @@ describe("taco build", function () {
         });
     };
 
-    it("should make the correct sequence of calls for 'taco build --remote test'", function (mocha: MochaDone) {
+    it("should make the correct sequence of calls for 'taco build --remote test'", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
         var vcordova = require("cordova/package.json").version;
@@ -184,7 +183,7 @@ describe("taco build", function () {
         var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
-        Q(buildArguments).then(buildRun).finally(function () {
+        Q(buildArguments).then(buildRun).finally(function (): void {
             testHttpServer.removeListener("request", serverFunction);
         }).done(function (): void {
             mocha();
@@ -193,7 +192,7 @@ describe("taco build", function () {
         });
     });
 
-    it("should report an error if the remote build fails", function (mocha: MochaDone) {
+    it("should report an error if the remote build fails", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
         var vcordova = require("cordova/package.json").version;
@@ -264,7 +263,7 @@ describe("taco build", function () {
         var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
-        Q(buildArguments).then(buildRun).finally(function () {
+        Q(buildArguments).then(buildRun).finally(function (): void {
             testHttpServer.removeListener("request", serverFunction);
         }).done(function (): void {
             mocha(new Error("The build failing should result in an error"));
@@ -343,7 +342,7 @@ describe("taco build", function () {
         var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
-        Q(buildArguments).then(buildRun).finally(function () {
+        Q(buildArguments).then(buildRun).finally(function (): void {
             testHttpServer.removeListener("request", serverFunction);
         }).done(function (): void {
             mocha(new Error("The build failing should result in an error"));

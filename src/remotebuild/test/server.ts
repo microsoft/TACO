@@ -10,6 +10,7 @@
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
 "use strict";
+
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
@@ -21,12 +22,11 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 import Q = require ("q");
 
-import tacoUtils = require ("taco-utils");
-import resources = tacoUtils.ResourcesManager;
-import server = require ("../lib/server");
-import RemoteBuildConf = require ("../lib/remoteBuildConf");
 import HostSpecifics = require ("../lib/hostSpecifics");
-
+import RemoteBuildConf = require ("../lib/remoteBuildConf");
+import resources = require ("../resources/resourceManager");
+import server = require ("../lib/server");
+import tacoUtils = require ("taco-utils");
 import testServerModuleFactory = require ("./testServerModuleFactory");
 
 var serverDir = path.join(os.tmpdir(), "remotebuild", "server");
@@ -37,7 +37,6 @@ var darwinOnlyTest = os.platform() === "darwin" ? it : it.skip;
 
 describe("server", function (): void {
     before(function (): void {
-        resources.init("en", path.join(__dirname, "..", "resources"));
         // Clear out settings for nconf
         nconf.overrides({});
         nconf.defaults({});
@@ -45,7 +44,6 @@ describe("server", function (): void {
         nconf.reset();
     });
     after(function (): void {
-        resources.teardown();
         rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
     beforeEach(function (): void {

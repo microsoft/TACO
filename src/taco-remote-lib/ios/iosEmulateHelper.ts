@@ -17,6 +17,7 @@ import Q = require ("q");
 import util = require ("util");
 
 import tacoUtils = require ("taco-utils");
+
 import utils = tacoUtils.UtilHelper;
 import BuildInfo = tacoUtils.BuildInfo;
 

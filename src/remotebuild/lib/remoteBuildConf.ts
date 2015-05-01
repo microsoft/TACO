@@ -1,12 +1,14 @@
 ﻿/// <reference path="../../typings/remotebuild.d.ts" />
 "use strict";
+
 import nconf = require ("nconf");
 import os = require ("os");
-import tacoUtils = require ("taco-utils");
-import UtilHelper = tacoUtils.UtilHelper;
-import resources = tacoUtils.ResourcesManager;
 
 import HostSpecifics = require ("./hostSpecifics");
+import resources = require ("../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
+
+import UtilHelper = tacoUtils.UtilHelper;
 
 class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
     private remoteBuildConf: {

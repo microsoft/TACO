@@ -19,20 +19,20 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
-import TacoUtility = require ("taco-utils");
-import utils = TacoUtility.UtilHelper;
-import resources = TacoUtility.ResourcesManager;
 
-import SetupMock = require ("./utils/setupMock");
-
+import resources = require ("../resources/resourceManager");
 import Settings = require ("../cli/utils/settings");
+import SetupMock = require ("./utils/setupMock");
+import TacoUtility = require ("taco-utils");
+
+import utils = TacoUtility.UtilHelper;
 
 describe("taco settings", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Configure a dummy platform "test" to use the mocked out remote server

@@ -23,11 +23,11 @@ import tar = require ("tar");
 import zlib = require ("zlib");
 
 import BuildRetention = require ("./buildRetention");
+import resources = require ("../resources/resourceManager");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
-import resources = utils.ResourcesManager;
 
 interface IBuildMetrics {
     submitted: number;

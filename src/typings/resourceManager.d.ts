@@ -1,23 +1,16 @@
 
 declare module TacoUtility {
-    class ResourcesManager {
-        private static Resources;
-        private static SupportedLanguages;
+    class ResourceManager {
+        private Resources;
+        private SupportedLanguages;
         private static DefaultLanguage;
-        public static UnitTest: boolean;
-        /**
-         * Initialize the Resource Manager
-         *
-         * @param {string} language The default language to look up via getString
-         * @param {string} resourcesDir The location to look for resources. The expectation is that this location has subfolders such as "en" and "it-ch" which contain "resources.json"
-         */
-        static init(language: string, resourcesDir: string): void;
-        static teardown(): void;
+
+        constructor(resourcesDir: string, language: string);
         /** ...optionalArgs is only there for typings, function rest params */
-        static getString(id: string, ...optionalArgs: any[]): string;
+        getString(id: string, ...optionalArgs: any[]): string;
         /** ** ...optionalArgs is only there for typings, function rest params** */
-        static getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string;
-        private static bestLanguageMatchOrDefault(requestOrAcceptLangs);
+        getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string;
+        private bestLanguageMatchOrDefault(requestOrAcceptLangs);
         /**
          * requestOrAcceptLangs can either be:
          * A string, with format "LangSpec[,LangSpec]*" where LangSpec is "Language[;anything]"
@@ -28,18 +21,12 @@ declare module TacoUtility {
          * This allows us to handle simple cases of a single string, as well as more complex cases where a client specifies
          * multiple preferences.
          */
-        private static bestLanguageMatch(requestOrAcceptLangs);
+        private bestLanguageMatch(requestOrAcceptLangs);
         /**
          * Given a list of languages, we try to find an exact match if we can, and we fall back to a primary language otherwise.
          *  e.g. "fr-CA" will use "fr-CA" resources if present, but will fall back to "fr" resources if they are available
          */
-        private static getBestLanguageFromArray(acceptLangs);
+        private getBestLanguageFromArray(acceptLangs);
         private static loadLanguage(language, resourcesDir);
-    }
-
-    module ResourcesManager {
-        interface IResources {
-            getStringForLanguage: (req: any, id: string, ...optionalArgs: any[]) => string;
-        }
     }
 }

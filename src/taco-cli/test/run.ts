@@ -13,6 +13,8 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
+// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
+import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
@@ -21,21 +23,19 @@ import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
 import rimraf = require ("rimraf");
-import TacoUtility = require ("taco-utils");
-import utils = TacoUtility.UtilHelper;
-import resources = TacoUtility.ResourcesManager;
-import BuildInfo = TacoUtility.BuildInfo;
 
-// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require ("cordova");
+import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
+import ServerMock = require ("./utils/serverMock");
 import setupMod = require ("../cli/setup");
+import SetupMock = require ("./utils/setupMock");
+import TacoUtility = require ("taco-utils");
+
+import BuildInfo = TacoUtility.BuildInfo;
+import utils = TacoUtility.UtilHelper;
 
 var run = new runMod();
 var setup = new setupMod();
-
-import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
 
 describe("taco run", function (): void {
     var testHttpServer: http.Server;
@@ -55,7 +55,7 @@ describe("taco run", function (): void {
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Create a mocked out remote server so we can specify how it reacts

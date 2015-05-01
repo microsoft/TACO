@@ -18,10 +18,10 @@ import pl = require ("plist-with-patches");
 import Q = require ("q");
 
 import utils = require ("taco-utils");
+
 import UtilHelper = utils.UtilHelper;
 
 var proxyInstance: child_process.ChildProcess = null;
-
 var promiseExec = Q.denodeify(UtilHelper.loggedExec);
 
 class IosAppRunnerHelper {

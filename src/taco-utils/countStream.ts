@@ -1,7 +1,8 @@
 ﻿/// <reference path="../typings/node.d.ts" />
 import stream = require ("stream");
-import Transform = stream.Transform;
 import util = require ("util");
+
+import Transform = stream.Transform;
 
 module TacoUtility {
     /**

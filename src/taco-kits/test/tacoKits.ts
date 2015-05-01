@@ -15,10 +15,12 @@ var should_module = require("should"); // Note not import: We don't want to refe
 
 import mocha = require ("mocha");
 import path = require ("path");
+
+import resources = require ("../resources/resourceManager");
 import tacoKits = require ("../tacoKits");
 import tacoUtils = require ("taco-utils");
+
 import kitHelper = tacoKits.KitHelper;
-import resources = tacoUtils.ResourcesManager;
 
 describe("KitHelper", function (): void {
     // Test Kit Info
@@ -91,10 +93,7 @@ describe("KitHelper", function (): void {
     // Important paths
     before(function (): void {
         // Set ResourcesManager to test mode
-        resources.UnitTest = true;
-
-        // Initialize Kit helper
-        kitHelper.init("en");
+        process.env["TACO_UNIT_TEST"] = true;
         
         // Set the kit metadata file location
         kitHelper.KitMetadataFilePath = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
@@ -102,7 +101,7 @@ describe("KitHelper", function (): void {
 
     after(function (): void {
         // Reset ResourcesManager back to production mode
-        resources.UnitTest = false;
+        process.env["TACO_UNIT_TEST"] = false;
 
         // Reset kit metadata path
         kitHelper.KitMetadataFilePath = null;

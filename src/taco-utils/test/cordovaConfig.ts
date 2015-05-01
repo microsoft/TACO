@@ -8,11 +8,10 @@
 "use strict";
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
-import should = require ("should");
-import mocha = require ("mocha");
-
 import fs = require ("fs");
+import mocha = require ("mocha");
 import path = require ("path");
+import should = require ("should");
 
 import util = require ("../tacoUtils");
 

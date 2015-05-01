@@ -23,10 +23,12 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
 import util = require ("util");
+
 import Create = require ("../cli/create");
+import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
-import resources = tacoUtils.ResourcesManager;
+
 import utils = tacoUtils.UtilHelper;
 
 interface IScenarioList {
@@ -145,10 +147,8 @@ describe("taco create", function (): void {
     before(function (done: MochaDone): void {
         this.timeout(30000);
 
-        tacoKits.KitHelper.init("en");
-
         // Set ResourcesManager to test mode
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
 
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
