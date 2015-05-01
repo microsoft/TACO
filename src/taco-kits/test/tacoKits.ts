@@ -18,6 +18,7 @@ import path = require ("path");
 import tacoKits = require ("../tacoKits");
 import tacoUtils = require ("taco-utils");
 import kitHelper = tacoKits.KitHelper;
+import resources = tacoUtils.ResourcesManager;
 
 describe("KitHelper", function (): void {
     // Test Kit Info
@@ -90,15 +91,18 @@ describe("KitHelper", function (): void {
     // Important paths
     before(function (): void {
         // Set ResourcesManager to test mode
-        process.env["TACO_UNIT_TEST"] = true;
+        resources.UnitTest = true;
 
-                // Set the kit metadata file location
+        // Initialize Kit helper
+        kitHelper.init("en");
+        
+        // Set the kit metadata file location
         kitHelper.KitMetadataFilePath = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
     });
 
     after(function (): void {
         // Reset ResourcesManager back to production mode
-        process.env["TACO_UNIT_TEST"] = false;
+        resources.UnitTest = false;
 
         // Reset kit metadata path
         kitHelper.KitMetadataFilePath = null;

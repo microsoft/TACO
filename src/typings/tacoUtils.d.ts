@@ -1,13 +1,12 @@
+/// <reference path="../typings/resourcesManager.d.ts" />
 /// <reference path="../typings/buildInfo.d.ts" />
-/// <reference path="../typings/clsSessionManager.d.ts" />
-/// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/cordovaConfig.d.ts" />
-/// <reference path="../typings/countStream.d.ts" />
-/// <reference path="../typings/logger.d.ts" />
-/// <reference path="../typings/processLogger.d.ts" />
-/// <reference path="../typings/resourceManager.d.ts" />
-/// <reference path="../typings/tacoPackageLoader.d.ts" />
 /// <reference path="../typings/utilHelper.d.ts" />
+/// <reference path="../typings/logger.d.ts" />
+/// <reference path="../typings/commands.d.ts" />
+/// <reference path="../typings/processLogger.d.ts" />
+/// <reference path="../typings/tacoPackageLoader.d.ts" />
+/// <reference path="../typings/countStream.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoUtility namespace,
 // include a reference to the d.ts file that is generated (as above), and make sure

@@ -5,16 +5,14 @@
 
 "use strict";
 
-import path = require ("path");
-var cordova = require("cordova");
-
-import resources = require ("../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
-
+import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
-import commandsFactory = commands.CommandFactory;
 var kitHelper = tacoKits.KitHelper;
+import commandsFactory = commands.CommandFactory;
+import path = require ("path");
+var cordova = require("cordova");
 
 /*
  * Taco
@@ -26,8 +24,10 @@ class Taco {
      * Initialize all other config classes, Invoke task to be run
      */
     public static run(): void {
+        var resourcePath: string = path.resolve(__dirname, "..", "resources");
+        resourcesManager.init("en", resourcePath);
         commandsFactory.init(path.join(__dirname, "../cli/commands.json"));
-
+        kitHelper.init("en");
         // parse taco command
         var input: string = process.argv[2];
         var command: commands.ICommand = null;

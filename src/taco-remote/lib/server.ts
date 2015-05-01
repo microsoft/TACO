@@ -27,24 +27,23 @@ import util = require ("util");
 
 import BuildManager = require ("./buildManager");
 import HostSpecifics = require ("./hostSpecifics");
-import resources = require ("../resources/resourceManager");
 import selftest = require ("./selftest");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 
-interface IRequestHandler {
-    (req: express.Request, res: express.Response): void;
-}
+import resources = utils.ResourcesManager;
 
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
         var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
+        resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
             return new Server(tacoRemoteConf, modConfig.mountPath);
         });
     }
 
     public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
+        resources.init(conf.lang, path.join(__dirname, "..", "resources"));
         var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
         var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
@@ -59,8 +58,8 @@ export = serverModuleFactory;
 
 class Server implements RemoteBuild.IServerModule {
     private serverConf: TacoRemoteConfig;
-    private buildManager: BuildManager;
     private modPath: string;
+    private buildManager: BuildManager;
 
     constructor(conf: TacoRemoteConfig, modPath: string) {
         this.serverConf = conf;
@@ -77,12 +76,12 @@ class Server implements RemoteBuild.IServerModule {
         router.get("/build/tasks/:id/log", this.getBuildLog.bind(this));
         router.get("/build/tasks", this.getAllBuildStatus.bind(this));
         router.get("/build/:id", this.getBuildStatus.bind(this));
-        router.get("/build/:id/download", this.downloadBuild.bind(this));
+        router.get("/build/:id/download", this.checkBuildThenAction(this.buildManager.downloadBuild));
 
-        router.get("/build/:id/emulate", this.emulateBuild.bind(this));
-        router.get("/build/:id/deploy", this.deployBuild.bind(this));
-        router.get("/build/:id/run", this.runBuild.bind(this));
-        router.get("/build/:id/debug", this.debugBuild.bind(this));
+        router.get("/build/:id/emulate", this.checkBuildThenAction(this.buildManager.emulateBuild));
+        router.get("/build/:id/deploy", this.checkBuildThenAction(this.buildManager.deployBuild));
+        router.get("/build/:id/run", this.checkBuildThenAction(this.buildManager.runBuild));
+        router.get("/build/:id/debug", this.checkBuildThenAction(this.buildManager.debugBuild));
 
         router.use("/files", serveIndex(this.buildManager.getBaseBuildDir()));
         router.use("/files", express.static(this.buildManager.getBaseBuildDir()));
@@ -94,153 +93,71 @@ class Server implements RemoteBuild.IServerModule {
         this.buildManager.shutdown();
     }
 
-    private static runInSession(req: express.Request, func: IRequestHandler): void {
-        var localesKey: string = utils.ResourceManager.LocalesKey;
-        var sessionVar: any = {};
-        sessionVar[localesKey] = Server.getAcceptLanguages(req);
-        utils.ClsSessionManager.runInTacoSession(sessionVar, func);
-    }
-
-    private static getAcceptLanguages(req: express.Request): string[] {
-        if (req.headers) {
-            var acceptLanguages = req.headers["accept-language"] || "";
-            if (acceptLanguages !== "") {
-                return acceptLanguages.split(",")
-                    .map(function (l: string): string {
-                        return l.split(";")[0];
-                    }).filter(function (l: string): boolean {
-                        return l !== "";
-                });
-            }
-        }
-
-        return null;
-    }
-
-    // Retrieves log file for a build task, can be used by a client when build failed
-    private getBuildLog(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
-            if (buildInfo) {
-                res.set("Content-Type", "text/plain");
-                self.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
-            } else {
-                res.status(404).send(resources.getString("BuildNotFound", req.params.id));
-            }
-        });
+    // Submits a new build task
+    private submitNewBuild(req: express.Request, res: express.Response): void {
+        var port = this.serverConf.port;
+        var modPath = this.modPath;
+        this.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
+            var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
+            res.set({
+                "Content-Type": "application/json",
+                "Content-Location": contentLocation
+            });
+            res.status(202).json(buildInfo.localize(req, resources));
+        }, function (err: any): void {
+                res.set({ "Content-Type": "application/json" });
+                res.status(err.code || 400).send({ status: resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
+            }).done();
     }
 
     // Queries on the status of a build task, used by a client to poll
     private getBuildStatus(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
-            if (buildInfo) {
-                buildInfo.localize(resources);
-                if (!buildInfo.message) {
-                    // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
-                    buildInfo.localize(resources);
-                }
-
-                res.status(200).json(buildInfo);
-            } else {
-                res.status(404).send(resources.getString("BuildNotFound", req.params.id));
-            }
-        });
-    }
-
-    private downloadBuild(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
-            if (completedBuildInfo) {
-                self.buildManager.downloadBuild(completedBuildInfo, req, res);
-            }
-        });
-    }
-
-    private emulateBuild(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
-            if (completedBuildInfo) {
-                self.buildManager.emulateBuild(completedBuildInfo, req, res);
-            }
-        });
-    }
-
-    private deployBuild(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
-            if (completedBuildInfo) {
-                self.buildManager.deployBuild(completedBuildInfo, req, res);
-            }
-        });
-    }
-
-    private runBuild(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
-            if (completedBuildInfo) {
-                self.buildManager.runBuild(completedBuildInfo, req, res);
-            }
-        });
-    }
-
-    private debugBuild(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var completedBuildInfo: utils.BuildInfo = self.getCompletedBuildInfo(req, res);
-            if (completedBuildInfo) {
-                self.buildManager.debugBuild(completedBuildInfo, req, res);
-            }
-        });
-    }
-
-    private getCompletedBuildInfo(req: express.Request, res: express.Response): utils.BuildInfo {
         var buildInfo = this.buildManager.getBuildInfo(req.params.id);
-        if (!buildInfo) {
-            res.status(404).send(resources.getString("BuildNotFound", req.params.id));
-            return null;
-        }
+        if (buildInfo) {
+            buildInfo.localize(req, resources);
+            if (!buildInfo.message) {
+                // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
+                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib>buildInfo["pkg"]).locResources);
+            }
 
-        if (!buildInfo.buildSuccessful) {
-            res.status(404).send(resources.getString("BuildNotCompleted", buildInfo.status));
-            return null;
+            res.status(200).json(buildInfo);
+        } else {
+            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
-
-        return buildInfo;
     }
 
-    // Submits a new build task
-    private submitNewBuild(req: express.Request, res: express.Response): void {
-        var self = this;
-        Server.runInSession(req, function (): void {
-            var port = self.serverConf.port;
-            var modPath = self.modPath;
-            self.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
-                var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
-                res.set({
-                    "Content-Type": "application/json",
-                    "Content-Location": contentLocation
-                });
-                res.status(202).json(buildInfo.localize(resources));
-            }, function (err: any): void {
-                    res.set({ "Content-Type": "application/json" });
-                    res.status(err.code || 400).send({ status: resources.getString("InvalidBuildRequest"), errors: err });
-                }).done();
-        });
+    // Retrieves log file for a build task, can be used by a client when build failed
+    private getBuildLog(req: express.Request, res: express.Response): void {
+        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
+        if (buildInfo) {
+            res.set("Content-Type", "text/plain");
+            this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
+        } else {
+            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+        }
     }
 
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
+        var allBuildInfo = this.buildManager.getAllBuildInfo();
+        res.json(200, allBuildInfo);
+    }
+
+    private checkBuildThenAction(func: (buildInfo: utils.BuildInfo, req: express.Request, res: express.Response) => void): (req: express.Request, res: express.Response) => void {
         var self = this;
-        Server.runInSession(req, function (): void {
-            var allBuildInfo = self.buildManager.getAllBuildInfo();
-            res.json(200, allBuildInfo);
-        });
+        return function (req: express.Request, res: express.Response): void {
+            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
+            if (!buildInfo) {
+                res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+                return;
+            }
+
+            if (!buildInfo.buildSuccessful) {
+                res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
+                return;
+            }
+
+            func.call(self.buildManager, buildInfo, req, res);
+        };
     }
 }

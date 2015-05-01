@@ -21,11 +21,12 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 import Q = require ("q");
 
-import HostSpecifics = require ("../lib/hostSpecifics");
-import RemoteBuildConf = require ("../lib/remoteBuildConf");
-import resources = require ("../resources/resourceManager");
-import server = require ("../lib/server");
 import tacoUtils = require ("taco-utils");
+import resources = tacoUtils.ResourcesManager;
+import server = require ("../lib/server");
+import RemoteBuildConf = require ("../lib/remoteBuildConf");
+import HostSpecifics = require ("../lib/hostSpecifics");
+
 import testServerModuleFactory = require ("./testServerModuleFactory");
 
 var serverDir = path.join(os.tmpdir(), "remotebuild", "server");
@@ -36,6 +37,7 @@ var darwinOnlyTest = os.platform() === "darwin" ? it : it.skip;
 
 describe("server", function (): void {
     before(function (): void {
+        resources.init("en", path.join(__dirname, "..", "resources"));
         // Clear out settings for nconf
         nconf.overrides({});
         nconf.defaults({});
@@ -43,6 +45,7 @@ describe("server", function (): void {
         nconf.reset();
     });
     after(function (): void {
+        resources.teardown();
         rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
     beforeEach(function (): void {

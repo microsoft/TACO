@@ -114,39 +114,6 @@ class GulpUtils {
         return Q.all(promises);
     }
 
-    public static generatePseudoLocResources(modulesList: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesList.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
-
-                var modulePath: string = path.resolve(modulesRoot, val);
-                var enResourcesPath: string = path.join(modulePath, "resources", "en", "resources.json");
-                var pLocResourcesDestPath: string = path.join(modulePath, "resources", "ploc");
-
-                return GulpUtils.streamToPromise(gulp.src(enResourcesPath).pipe(gulp.dest(pLocResourcesDestPath))).then(function () {
-
-                    var pLocResourcesPath: string = path.join(pLocResourcesDestPath, "resources.json");
-
-                    var resources: any = require(pLocResourcesPath);
-                    var deferred = Q.defer();
-                    Object.keys(resources).forEach(function (key: string): void {
-                        // Modify each value by appending PLOC tokens
-                        resources[key] = util.format("!!!PLOC## %s ##PLOC!!!", resources[key]);
-                    });
-
-                    // Serialize modified object back to resources file
-                    fs.writeFile(pLocResourcesPath, JSON.stringify(resources), function (err: NodeJS.ErrnoException): void {
-                        if (err) {
-                            deferred.reject(err);
-                        } else {
-                            deferred.resolve(null);
-                        }
-                    });
-                    return deferred.promise;
-                });
-            });
-        }, Q({}))
-    }
-    
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();

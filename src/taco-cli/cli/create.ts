@@ -2,25 +2,22 @@
 /// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
-
 "use strict";
 
 import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
-
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
-import resources = require ("../resources/ResourceManager");
+import templateManager = require ("./utils/templateManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
-import templateManager = require ("./utils/templateManager");
-
 import commands = tacoUtility.Commands;
+import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import kitHelper = tacoKits.KitHelper;
+import resources = tacoUtility.ResourcesManager;
 import utils = tacoUtility.UtilHelper;
 
 /* 

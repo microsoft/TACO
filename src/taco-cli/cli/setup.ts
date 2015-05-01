@@ -18,7 +18,7 @@ import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import resources = require ("../resources/ResourceManager");
+import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface ICliSession {

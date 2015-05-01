@@ -1,15 +1,13 @@
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
-
 import fs = require ("fs");
 import path = require ("path");
-import Q = require ("q");
-
-import logger = require ("./logger");
-import resources = require ("./resources/resourceManager");
+import tacoUtility = require ("./resourcesManager");
+import resourcesManager = tacoUtility.ResourcesManager;
 import utilHelper = require ("./utilHelper");
-
 import UtilHelper = utilHelper.UtilHelper;
+import logger = require ("./logger");
+import Q = require ("q");
 
 module TacoUtility {
     export module Commands {
@@ -59,7 +57,7 @@ module TacoUtility {
             public static init(commandsInfoPath: string): void {
                 commandsInfoPath = commandsInfoPath;
                 if (!fs.existsSync(commandsInfoPath)) {
-                    throw new Error(resources.getString("tacoUtils.exception.listingfile"));
+                    throw new Error(resourcesManager.getString("tacoUtils.exception.listingfile"));
                 }
 
                 CommandFactory.Listings = require(commandsInfoPath);
@@ -70,7 +68,7 @@ module TacoUtility {
              */
             public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
                 if (!name || !CommandFactory.Listings) {
-                    throw new Error(resources.getString("tacoUtils.exception.listingfile"));
+                    throw new Error(resourcesManager.getString("tacoUtils.exception.listingfile"));
                 }
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
@@ -80,7 +78,7 @@ module TacoUtility {
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error(resources.getString("tacoUtils.exception.missingcommand", name));
+                    throw new Error(resourcesManager.getString("tacoUtils.exception.missingcommand", name));
                 }
 
                 var commandMod: any = require(modulePath);
@@ -134,7 +132,7 @@ module TacoUtility {
                 if (subcommand) {
                     return subcommand.run(commandData);
                 } else {
-                    logger.Logger.logErrorLine(resources.getString("command.badArguments", this.name, commandData.original.toString()));
+                    logger.Logger.logErrorLine(resourcesManager.getString("command.badArguments", this.name, commandData.original.toString()));
                     return Q.reject(new Error("command.badArguments"));
                 }
             }

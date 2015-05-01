@@ -19,25 +19,25 @@ import http = require ("http");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 import util = require ("util");
-import querystring = require ("querystring");
 
 import buildMod = require ("../cli/build");
-import resources = require ("../resources/resourceManager");
-import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
 import setupMod = require ("../cli/setup");
 import TacoUtility = require ("taco-utils");
-
-import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
+import resources = TacoUtility.ResourcesManager;
+import BuildInfo = TacoUtility.BuildInfo;
 
 // TODO (Devdiv 1160579) Use dynamically acquired cordova versions
 import cordova = require ("cordova");
 
 var build = new buildMod();
 var setup = new setupMod();
+
+import ServerMock = require ("./utils/serverMock");
+import SetupMock = require ("./utils/setupMock");
 
 describe("taco build", function () {
     var testHttpServer: http.Server;
@@ -55,9 +55,10 @@ describe("taco build", function () {
     }
 
     before(function (mocha: MochaDone): void {
+        // Set up mocked out resources
+        resources.UnitTest = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
-        process.env["TACO_UNIT_TEST"] = true;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
         var port = 3000;

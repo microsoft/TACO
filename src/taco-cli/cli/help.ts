@@ -6,7 +6,7 @@
 import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import commandsFactory = tacoUtility.Commands.CommandFactory;
-import resources = require ("../resources/ResourceManager");
+import resourcesManager = tacoUtility.ResourcesManager;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
@@ -58,8 +58,8 @@ class Help implements commands.IDocumentedCommand {
      * prints out general usage of all support TACO commands, iterates through commands and their descriptions
      */
     public printGeneralUsage(): void {      
-        logger.logLine(resources.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
-        logger.logLine(this.indent + resources.getString("command.help.taco.usage") + "\n", level.Success);
+        logger.logLine(resourcesManager.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
+        logger.logLine(this.indent + resourcesManager.getString("command.help.taco.usage") + "\n", level.Success);
 
         var nameValuePairs: tacoUtility.Commands.INameDescription[] = new Array();
         for (var i in commandsFactory.Listings) {
@@ -78,21 +78,22 @@ class Help implements commands.IDocumentedCommand {
      */
     public printCommandUsage(command: string): void {
         if (!commandsFactory.Listings || !commandsFactory.Listings[command]) {
-            logger.logErrorLine(resources.getString("command.help.badcomand", "'" + command + "'") + "\n");
+            logger.logErrorLine(resourcesManager.getString("command.help.badcomand", "'" + command + "'") + "\n");
             this.printGeneralUsage();
             return;
         }
 
         var list: tacoUtility.Commands.ICommandInfo = commandsFactory.Listings[command];
-        logger.logLine(resources.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
+        logger.logLine(resourcesManager.getString("command.help.usage.synopsis") + "\n", level.NormalBold);
         logger.logLine(this.indent + this.tacoString + " " + command + " " + list.synopsis + "\n", level.Success);
         logger.logLine(this.getDescriptionString(list.description) + "\n", level.NormalBold);
+
         if (list.args) {
             this.printCommandTable(list.args, this.indent);
         }
 
         if (list.options) {
-            logger.logLine("\n" + this.indent + resources.getString("command.help.usage.options") + "\n", level.NormalBold);
+            logger.logLine("\n" + this.indent + resourcesManager.getString("command.help.usage.options") + "\n", level.NormalBold);
             this.printCommandTable(list.options, this.indent + this.indent);
         }
     }
@@ -152,7 +153,7 @@ class Help implements commands.IDocumentedCommand {
      * @param {string} id - string to get
      */
     private getString(id: string): string {
-        return resources.getString(id);
+        return resourcesManager.getString(id);
     }
 
     /**

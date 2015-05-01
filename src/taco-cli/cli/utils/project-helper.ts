@@ -4,12 +4,10 @@
 import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
-
-import resources = require ("../../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 import tacoKits = require ("taco-kits");
-
 import kitHelper = tacoKits.KitHelper;
+import resources = tacoUtility.ResourcesManager;
 
 class TacoProjectHelper {
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {

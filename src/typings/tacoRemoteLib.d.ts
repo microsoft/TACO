@@ -14,6 +14,10 @@ declare module TacoRemoteLib {
     }
     interface IRemoteLib {
         /**
+         * The module exposes the localization resources so that the server can localize buildInfo regardless of where the string tokens come from.
+         */
+        locResources: TacoUtility.ResourcesManager.IResources;
+        /**
          * Initialize this package so it is ready to service requests
          *
          * @param {IReadOnlyConf} config Configuration parameters that originate from the command line and config files

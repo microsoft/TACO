@@ -8,14 +8,12 @@ import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import util = require ("util");
-
-import resources = require ("../../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
-
 import commands = tacoUtils.Commands;
+import resources = tacoUtils.ResourcesManager;
 import utils = tacoUtils.UtilHelper;
 import logger = tacoUtils.Logger;
+import util = require ("util");
 
 /*
  * A static class which is responsible for dealing with the TacoSettings.json file

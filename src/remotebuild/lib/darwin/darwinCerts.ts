@@ -20,11 +20,12 @@ import readline = require ("readline");
 import rimraf = require ("rimraf");
 import util = require ("util");
 
+import tacoUtils = require ("taco-utils");
+
+import resources = tacoUtils.ResourcesManager;
+import utils = tacoUtils.UtilHelper;
 import HostSpecifics = require ("../hostSpecifics");
 import RemoteBuildConf = require ("../remoteBuildConf");
-import resources = require ("../../resources/resourceManager");
-import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
 
 var exec = child_process.exec;
 

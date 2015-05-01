@@ -21,13 +21,13 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 
 import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
-import resources = require ("../resources/resourceManager");
-import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
 import SetupMod = require ("../cli/setup");
+import ServerMock = require ("./utils/serverMock");
 import SetupMock = require ("./utils/setupMock");
 import TacoUtility = require ("taco-utils");
 import utils = TacoUtility.UtilHelper;
+import resources = TacoUtility.ResourcesManager;
 
 var setup = new SetupMod();
 
@@ -37,8 +37,7 @@ describe("taco setup", function (): void {
     before(function (): void {
         utils.createDirectoryIfNecessary(testHome);
         process.env["TACO_HOME"] = testHome;
-        // Set up mocked out resources
-        process.env["TACO_UNIT_TEST"] = true;
+        resources.UnitTest = true;
         if (fs.existsSync(tacoSettingsFile)) {
             fs.unlinkSync(tacoSettingsFile);
         }

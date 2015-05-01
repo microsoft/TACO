@@ -20,10 +20,11 @@ import Q = require ("q");
 
 import certs = require ("./darwinCerts");
 import HostSpecifics = require ("../hostSpecifics");
-import resources = require ("../../resources/resourceManager");
 import RemoteBuildConf = require ("../remoteBuildConf");
 import utils = require ("taco-utils");
 import UtilHelper = utils.UtilHelper;
+
+import resources = utils.ResourcesManager;
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     private static Config: RemoteBuildConf;
@@ -55,7 +56,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getString(language, "UsageInformation"));
+        console.info(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {
@@ -83,7 +84,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
             res.sendFile(pfxFile);
         }).catch<void>(function (error: { code?: number; id: string}): void {
             if (error.code) {
-                res.status(error.code).send(resources.getString(error.id));
+                res.status(error.code).send(resources.getStringForLanguage(req, error.id));
             } else {
                 res.status(404).send(error);
             }

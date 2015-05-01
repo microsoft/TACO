@@ -12,9 +12,9 @@
 
 import rimraf = require ("rimraf");
 
-import resources = require ("../resources/resourceManager");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
+import resources = utils.ResourcesManager;
 
 class BuildRetention {
     private maxBuildsToKeep: number;
