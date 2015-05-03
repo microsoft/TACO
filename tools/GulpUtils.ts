@@ -56,6 +56,14 @@ class GulpUtils {
         }, Q({}))
     }
 
+    public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
+        return modulesToUninstall.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function (): Q.Promise<any> {
+                return GulpUtils.uninstallModule(val, installRoot);
+            });
+        }, Q({}))
+    }
+
     public static copyFiles(pathsToCopy: string[], srcPath: string, destPath: string): Q.Promise<any> {
         return Q.all(pathsToCopy.map(function (val: string): Q.Promise<any> {
             return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, val)).pipe(gulp.dest(destPath)));
@@ -118,6 +126,17 @@ class GulpUtils {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
         child_process.exec("npm install", { cwd: modulePath }, deferred.makeNodeResolver());
+        return deferred.promise;
+    }
+
+    private static uninstallModule(moduleName: string, installDir: string): Q.Promise<any> {
+        if (!fs.existsSync(path.join(installDir, moduleName, "package.json"))){
+            return Q({});
+        }
+
+        console.log("Uninstalling " + moduleName);
+        var deferred = Q.defer<Buffer>();
+        child_process.exec("npm uninstall " + moduleName, { cwd: installDir }, deferred.makeNodeResolver());
         return deferred.promise;
     }
 

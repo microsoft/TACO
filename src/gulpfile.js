@@ -5,34 +5,49 @@ var exec = require("child_process").exec,
     gulp = require("gulp"),
     npmUtil = require ("../tools/npmInstallerUtil"),
     buildConfig = require('./build_config.json');
-    
+
+var devDependencies = ["del", "gulp", "typescript", "gulp-typescript", "gulp-sourcemaps", "merge2", "ncp", "q", "run-sequence", "archiver", "mocha-teamcity-reporter", "nopt"];
 
 gulp.on("task_not_found", function (err) {
     console.error("\nPlease run 'gulp prep' to prepare project\n");
 });
 
 /* compile the gulpmain.ts file into JS */
-gulp.task("prep", ["install"], function (callback) {
+gulp.task("prep", ["installDevDependencies"], function (callback) {
     var ts = require('gulp-typescript');
     var merge = require("merge2");
     var sourcemaps = require("gulp-sourcemaps");
-        return merge([
-            gulp.src(["gulpmain.ts"])
-                .pipe(sourcemaps.init())
-                .pipe(ts(buildConfig.tsCompileOptions))
-                .pipe(sourcemaps.write("."))
-                .pipe(gulp.dest(buildConfig.buildSrc)),
-            gulp.src(["../tools/**/*.ts"])
-                .pipe(sourcemaps.init())
-                .pipe(ts(buildConfig.tsCompileOptions))
-                .pipe(sourcemaps.write("."))
-            .pipe(gulp.dest(buildConfig.buildTools))
-        ]);
+    return merge([
+        gulp.src(["gulpmain.ts"])
+            .pipe(sourcemaps.init())
+            .pipe(ts(buildConfig.tsCompileOptions))
+            .pipe(sourcemaps.write("."))
+            .pipe(gulp.dest(buildConfig.buildSrc)),
+        gulp.src(["../tools/**/*.ts"])
+            .pipe(sourcemaps.init())
+            .pipe(ts(buildConfig.tsCompileOptions))
+            .pipe(sourcemaps.write("."))
+        .pipe(gulp.dest(buildConfig.buildTools))
+    ]);
 });
 
-/* install gulp in root folder */
-gulp.task("install", function (callback) {
-    npmUtil.installPackages(["del", "gulp", "typescript", "gulp-typescript", "gulp-sourcemaps", "merge2", "ncp", "q", "run-sequence", "archiver", "mocha-teamcity-reporter", "nopt"], callback);
+gulp.task("unprep", ["uninstallDevDependencies"], function (callback) {
+    var gulpMain = path.join(buildConfig.buildSrc, "gulpmain.js");
+    if (fs.existsSync(gulpMain)) {
+        fs.unlink(gulpMain, callback)
+    } else {
+        callback();
+    }
+});
+
+/* install dev dependencies in root folder */
+gulp.task("installDevDependencies", function (callback) {
+    npmUtil.installPackages(devDependencies, "..", callback);
+});
+
+/* uninstall dev dependencies from root folder */
+gulp.task("uninstallDevDependencies", function (callback) {
+    npmUtil.uninstallPackages(devDependencies, "..", callback);
 });
 
 /*  
