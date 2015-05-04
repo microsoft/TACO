@@ -145,7 +145,7 @@ describe("taco create", function (): void {
     }
 
     before(function (done: MochaDone): void {
-        this.timeout(30000);
+        this.timeout(50000);
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
@@ -166,7 +166,6 @@ describe("taco create", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(30000);
         rimraf(runFolder, function (err: Error): void {
             if (err) {
                 done(err);
@@ -177,8 +176,6 @@ describe("taco create", function (): void {
     });
 
     describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
-        this.timeout(50000);
-
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
             var scenario: number = 1;
 
