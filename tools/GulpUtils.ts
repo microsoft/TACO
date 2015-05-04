@@ -134,6 +134,9 @@ class GulpUtils {
             return Q({});
         }
 
+        // move one level up so that we run npm install from build\packages\
+        installDir = path.join(installDir, "..");
+
         console.log("Uninstalling " + moduleName);
         var deferred = Q.defer<Buffer>();
         child_process.exec("npm uninstall " + moduleName, { cwd: installDir }, deferred.makeNodeResolver());

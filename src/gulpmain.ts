@@ -62,7 +62,7 @@ gulp.task("run-stylecop", function (callback: Function): void {
 }); 
 
 /* Cleans up the build location, will have to call "gulp prep" again */
-gulp.task("clean", ["uninstall-build"], function (callback: (err: Error) => void): void {
+gulp.task("clean", ["uninstall-build"], function (): void {
 });
 
 /* Task to install the compiled modules */
