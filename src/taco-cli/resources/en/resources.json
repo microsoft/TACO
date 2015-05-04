@@ -262,5 +262,8 @@
     "RemoteBuildUnsuccessful": "Remote build failed",
     "_RemoteBuildUnsuccessful.comment": "Message printed when a remote build fails",
 
+    "CordovaCommandFailed": "'cordova {1}' failed with exit code {0}",
+    "_CordovaCommandFailed.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
+
     "PerformanceSummary": "------ vs-mda Performance Summary"
 }
