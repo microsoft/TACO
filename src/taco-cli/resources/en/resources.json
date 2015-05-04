@@ -17,6 +17,8 @@
     "_command.create.notBothTemplateAndCli.comment": "Error shown when the user tries to create a project using a template (--template), but specifies the --cli parameter.",
     "command.create.templatesUnavailable": "Error: Unable to access or download templates",
     "_command.create.templatesUnavailable.comment": "Error reported when templates cannot be downloaded",
+    "command.create.onlyLocalCustomWww": "Error: Only local paths for custom www assets are supported.",
+    "_command.create.onlyLocalCustomWww.comment": "Error reported when the specified path to the --copy-from or --link-to parameters is a web URL.",
     
     "command.create.status.projectName": "Creating a new Cordova project with name ",
     "command.create.status.projectId": " and id ",
