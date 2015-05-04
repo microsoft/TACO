@@ -166,6 +166,8 @@ describe("taco create", function (): void {
     });
 
     after(function (done: MochaDone): void {
+        this.timeout(50000);
+
         rimraf(runFolder, function (err: Error): void {
             if (err) {
                 done(err);
@@ -176,6 +178,8 @@ describe("taco create", function (): void {
     });
 
     describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
+        this.timeout(50000);
+
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
             var scenario: number = 1;
 
@@ -280,6 +284,8 @@ describe("taco create", function (): void {
     });
 
     describe("Failure scenarios", function (): void {
+        this.timeout(50000);
+
         it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {     
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
