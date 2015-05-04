@@ -195,6 +195,8 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
 
             settings.remotePlatforms[platform] = data;
             return Settings.saveSettings(settings);
+        }).then(function (): void {
+            logger.log(logger.colorize(resources.getString("command.success.base"), logger.Level.Success));
         });
     }
 
