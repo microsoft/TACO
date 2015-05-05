@@ -10,7 +10,7 @@ import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
 
-import cordovaUtils = require ("./utils/cordovaUtils");
+import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
 import resources = require ("../resources/resourceManager");
@@ -28,7 +28,7 @@ import utils = tacoUtility.UtilHelper;
  * Wrapper interface for create command parameters
  */
 interface ICreateParameters {
-    cordovaParameters: cordovaUtils.ICordovaCreateParameters;
+    cordovaParameters: cordovaHelper.ICordovaCreateParameters;
     data: commands.ICommandData;
 }
 
@@ -95,7 +95,7 @@ class Create implements commands.IDocumentedCommand {
 
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = utils.parseArguments(Create.KnownOptions, {}, args.original, 0);
-        var cordovaParams: cordovaUtils.ICordovaCreateParameters = {
+        var cordovaParams: cordovaHelper.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
             appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,

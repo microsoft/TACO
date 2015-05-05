@@ -4,18 +4,18 @@ import path = require ("path");
 
 import resources = require ("../../resources/resourceManager");
 
-module CordovaUtils {
+module CordovaHelper {
     /* 
      * Interfaces for the cordova create command
      */
-    interface ICordovaLibMetadata {
+    export interface ICordovaLibMetadata {
         url?: string;
         version?: string;
         id?: string;
         link?: boolean;
     }
 
-    interface ICordovaConfigMetadata {
+    export interface ICordovaConfigMetadata {
         id?: string;
         name?: string;
         lib?: {
@@ -31,11 +31,13 @@ module CordovaUtils {
         copyFrom?: string;
         linkTo?: string;
     }
+}
 
+class CordovaHelper {
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
      */
-    export function prepareCordovaConfig(parameters: ICordovaCreateParameters): void {
+    public static prepareCordovaConfig(parameters: CordovaHelper.ICordovaCreateParameters): void {
         /*
         Re-implementation of Cordova's code:
 
@@ -64,7 +66,7 @@ module CordovaUtils {
         }
         */
 
-        var config: ICordovaConfigMetadata = {};
+        var config: CordovaHelper.ICordovaConfigMetadata = {};
 
         // Verify if user specified a cordovaConfig parameter on the command line
         if (parameters.cordovaConfig) {
@@ -86,7 +88,7 @@ module CordovaUtils {
 
             customWww = path.resolve(customWww);
 
-            var wwwCfg: ICordovaLibMetadata = { url: customWww };
+            var wwwCfg: CordovaHelper.ICordovaLibMetadata = { url: customWww };
 
             if (parameters.linkTo) {
                 wwwCfg.link = true;
@@ -100,4 +102,4 @@ module CordovaUtils {
     }
 }
 
-export = CordovaUtils;
+export = CordovaHelper;

@@ -10,7 +10,7 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
-import cordovaUtils = require ("./cordovaUtils");
+import cordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 
@@ -52,10 +52,10 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(cordovaCli: string, cordovaParameters: cordovaUtils.ICordovaCreateParameters): Q.Promise<any> {
+    public static create(cordovaCli: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, cordovaCli)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                cordovaUtils.prepareCordovaConfig(cordovaParameters);
+                cordovaHelper.prepareCordovaConfig(cordovaParameters);
 
             return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
         });
