@@ -145,7 +145,7 @@ describe("taco create", function (): void {
     }
 
     before(function (done: MochaDone): void {
-        this.timeout(30000);
+        this.timeout(50000);
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
@@ -166,7 +166,8 @@ describe("taco create", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(30000);
+        this.timeout(50000);
+
         rimraf(runFolder, function (err: Error): void {
             if (err) {
                 done(err);
@@ -310,6 +311,8 @@ describe("taco create", function (): void {
     });
 
     describe("Failure scenarios", function (): void {
+        this.timeout(50000);
+
         it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {     
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
