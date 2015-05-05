@@ -77,7 +77,7 @@
             "default": true,
             "releaseNotesUri": "http://cordova.apache.org/5.0.0/release.md",
             "name": "5.0.0 Kit for Cordova Development",
-             "platforms": {
+            "platforms": {
                 "android": {
                     "version": "4.2.1",
                     "src": "https://github.com/apache/cordova-android/tree/4.2.1/archive/4.2.1.tgz"
@@ -104,31 +104,40 @@
     },
     "templates": {
         "default": {
-                    "blank": {
-                        "name": "Blank template",
-                        "url": "templates/default/blank.zip"
-                    },
-                    "typescript": {
-                        "name": "Blank TypeScript template",
-                        "url": "templates/default/typescript.zip"
-                    }
+            "blank": {
+                "name": {
+                    "en": "Blank template"
                 },
-                "4.0.0-Kit": {
-                    "blank": {
-                        "name": "Blank template",
-                        "url": "templates/4.0.0-kit/blank.zip"
-                    },
-                    "typescript": {
-                        "name": "Blank TypeScript template",
-                        "url": "templates/4.0.0-kit/typescript.zip"
-                    }
+                "url": "templates/default/blank.zip"
+            },
+            "typescript": {
+                "name": {
+                    "en": "Blank Typescript template"
                 },
-                "5.0.0-Kit": {
-                    "blank": {
-                        "name": "Blank template",
-                        "url": "templates/5.0.0-kit/blank.zip"
-                    }
-                }	
+                "url": "templates/default/typescript.zip"
+            }
+        },
+        "4.0.0-Kit": {
+            "blank": {
+                "name": {
+                    "en": "Blank template"
+                },
+                "url": "templates/4.0.0-Kit/blank.zip"
+            },
+            "typescript": {
+                "name": {
+                    "en": "Blank Typescript template"
+                },
+                "url": "templates/4.0.0-Kit/typescript.zip"
+            }
+        },
+        "5.0.0-Kit": {
+            "blank": {
+                "name": {
+                    "en": "Blank template"
+                },
+                "url": "templates/5.0.0-Kit/blank.zip"
+            }
+        }	
 	}
 }
-

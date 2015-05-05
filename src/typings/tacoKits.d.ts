@@ -17,13 +17,21 @@ declare module TacoKits {
         };
     }
 
-    interface ITemplateOverrideInfo {
+    export interface ITemplateOverrideInfo {
         kitId: string;
+        templateId?: string;
         templateInfo: ITemplateInfo;
     }
 
-    interface ITemplateInfo {
-        name: string;
+    export interface IKitTemplatesOverrideInfo {
+        kitId: string;
+        templates: ITemplateOverrideInfo[];
+    }
+
+    export interface ITemplateInfo {
+        name: {
+            [language: string]: string;
+        };
         url: string;
     }
 
@@ -120,6 +128,11 @@ declare module TacoKits {
          *   Else -> returns the default template information with id {templateId}
          */
         public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo>;
+
+        /**
+         *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
+         */
+        public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo>;
     }
 }
 

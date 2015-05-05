@@ -144,8 +144,9 @@ class Create implements commands.IDocumentedCommand {
      */
     private listTemplates(): Q.Promise<any> {
         var kit = this.commandParameters.data.options["kit"];
+        var templates: templateManager = new templateManager(kitHelper);
 
-        return templateManager.TemplateManager.getTemplatesForKit(kit)
+        return templates.getTemplatesForKit(kit)
             .then(function (list: templateManager.ITemplateList): void {
             var kitToPrint: string = kit || list.kitId;
 
@@ -203,7 +204,9 @@ class Create implements commands.IDocumentedCommand {
                 }
 
                 if (mustUseTemplate) {
-                    return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
+                    var templates: templateManager = new templateManager(kitHelper);
+
+                    return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
                         .then(function (templateDisplayName: string): Q.Promise<string> {
                             return Q.resolve(templateDisplayName);
                         });
