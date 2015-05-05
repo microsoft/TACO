@@ -14,7 +14,8 @@ import tacoUtility = require ("taco-utils");
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
-    private static CordovaModuleName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
+    private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
+    private static CordovaNpmPackageName: string = "cordova";
 
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
@@ -86,7 +87,7 @@ class CordovaWrapper {
 
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
-        var proc = child_process.spawn(CordovaWrapper.CordovaModuleName, args, { stdio: "inherit" });
+        var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
         proc.on("error", function (err: Error): void {
             deferred.reject(err);
         });
@@ -117,7 +118,7 @@ class CordovaWrapper {
      * @return {Q.Promise<any>} An empty promise
      */
     public static create(cordovaCli: string, cordovaParameters: CordovaWrapper.ICordovaCreateParameters): Q.Promise<any> {
-        return packageLoader.lazyRequire(CordovaWrapper.CordovaModuleName, cordovaCli)
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, cordovaCli)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
             CordovaWrapper.prepareCordovaConfig(cordovaParameters);
 
