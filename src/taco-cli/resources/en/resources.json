@@ -79,8 +79,6 @@
     "_command.setup.notfound.comment": "Message printed when we fail to look up the user provided hostname. {0} is that hostname",
     "command.setup.timedout": "Unable to contact '{0}', please check that the server is reachable.",
     "_command.setup.timedout.comment": "Message printed when a connection times out. {0} is the host name",
-    "command.setup.connreset": "Connection reset fetching {0}, check that your security matches the server.",
-    "_command.setup.connreset.comment": "Message printed when a connection is reset, typically due to HTTPS mismatches. {0} is the url we were trying to fetch",
 
     "command.build.description": "Build a cordova project",
     "_command.build.description.comment": "Description for 'taco build'",
