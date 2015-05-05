@@ -10,13 +10,14 @@ import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 
-import CordovaWrapper = require ("./utils/CordovaWrapper");
+import CordovaUtils = require ("./utils/CordovaUtils");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
 
+import cordovaWrapper = CordovaUtils.CordovaWrapper;
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
@@ -178,7 +179,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        CordovaWrapper.cli(commandData.original);
+        cordovaWrapper.cli(commandData.original);
         return Q({});
     }
 
@@ -191,7 +192,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                         return Run.runRemotePlatform(platform.platform, commandData);
                     };
                     var localRunFunc = function (): Q.Promise<any> {
-                        return CordovaWrapper.build(platform.platform);
+                        return cordovaWrapper.build(platform.platform);
                     };
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:

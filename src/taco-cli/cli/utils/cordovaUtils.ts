@@ -139,21 +139,12 @@ module CordovaUtils {
          * @return {Q.Promise<any>} An empty promise
          */
         public static create(cordovaCli: string, cordovaParameters: ICordovaCreateParameters): Q.Promise<any> {
-            var deferred = Q.defer();
-            var self = this;
+            return packageLoader.lazyRequire(CordovaWrapper.CordovaModuleName, cordovaCli)
+                .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    CordovaWrapper.prepareCordovaConfig(cordovaParameters);
 
-            try {
-                return packageLoader.lazyRequire(CordovaWrapper.CordovaModuleName, cordovaCli)
-                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                        CordovaWrapper.prepareCordovaConfig(cordovaParameters);
-
-                        return cordova.raw.create(projectPath, id, name, cdvConfig);
-                    });
-            } catch (e) {
-                deferred.reject(e);
-            }
-
-            return deferred.promise;
+                    return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
+                });
         }
     }
 }

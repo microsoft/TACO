@@ -12,12 +12,13 @@ import path = require ("path");
 import Q = require ("q");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
-import CordovaWrapper = require ("./utils/cordovaWrapper");
+import CordovaUtils = require ("./utils/cordovaUtils");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
 
+import cordovaWrapper = CordovaUtils.CordovaWrapper;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
@@ -179,7 +180,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return CordovaWrapper.cli(commandData.original);
+        return cordovaWrapper.cli(commandData.original);
     }
 
     private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
@@ -189,7 +190,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just build local, and failures are failures
-                            return CordovaWrapper.build(platform.platform);
+                            return cordovaWrapper.build(platform.platform);
                         case Settings.BuildLocationType.Remote:
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
