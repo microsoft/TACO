@@ -3,11 +3,10 @@
 
 import fs = require ("fs");
 import path = require ("path");
-var colors = require ("colors");
+import colors = require ("colors");
 
 module TacoUtility {
     export class Logger {
-
         /**
          * returns colorized string
          * wrapping "colors" module because not yet possible to combine themes, i.e. ["yellow", "bold"]:  https://github.com/Marak/colors.js/issues/72
@@ -89,8 +88,8 @@ module TacoUtility {
 
     export module Logger {
         /**
-        * Warning levels
-        */
+         * Warning levels
+         */
         export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
     }
 }

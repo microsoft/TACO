@@ -24,8 +24,8 @@ class Settings {
     private static Settings: Settings.ISettings = null;
     private static SettingsFileName = "TacoSettings.json";
 
-    public static get SettingsFile(): string {
-        return path.join(utils.tacoHome, Settings.SettingsFileName)
+    public static get settingsFile(): string {
+        return path.join(utils.tacoHome, Settings.SettingsFileName);
     }
 
     /*
@@ -37,7 +37,7 @@ class Settings {
         }
 
         try {
-            Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.SettingsFile));
+            Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
             return Q(Settings.Settings);
         } catch (e) {
             // Unable to read TacoSettings.json: it doesn't exist, or it is corrupt
@@ -53,7 +53,7 @@ class Settings {
         // save to TACO_HOME/TacoSettings.json and store as the cached version
         Settings.Settings = settings;
         utils.createDirectoryIfNecessary(utils.tacoHome);
-        fs.writeFileSync(Settings.SettingsFile, JSON.stringify(settings));
+        fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
         return Q({});
     }
 

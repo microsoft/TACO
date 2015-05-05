@@ -77,7 +77,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
         .then(function (): void {
             logger.log(logger.colorize(resources.getString("command.success.base"), logger.Level.Success));
-            logger.logLine(" " + resources.getString("command.setup.settingsStored", Settings.SettingsFile));
+            logger.logLine(" " + resources.getString("command.setup.settingsStored", Settings.settingsFile));
         })
         .catch(function (err: any): void {
             if (err.message) {
@@ -220,11 +220,11 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
 
     private static getFriendlyHttpError(error: any, host: string, port: number, url: string, secure: boolean): Error {
         if (error.code === "ECONNREFUSED") {
-            return new Error(resources.getString("command.setup.connrefused", util.format("http%s://%s:%s", secure ? "s": "", host, port)));
+            return new Error(resources.getString("command.setup.connrefused", util.format("http%s://%s:%s", secure ? "s" : "", host, port)));
         } else if (error.code === "ENOTFOUND") {
             return new Error(resources.getString("command.setup.notfound", host));
         } else if (error.code === "ETIMEDOUT") {
-            return  new Error(resources.getString("command.setup.timedout", host));
+            return new Error(resources.getString("command.setup.timedout", host));
         } else if (error.code === "ECONNRESET") {
             if (!secure) {
                 return new Error(resources.getString("RemoteBuildNonSslConnectionReset", url));
