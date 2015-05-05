@@ -1,8 +1,9 @@
-﻿/// <reference path="../../../typings/wrench.d.ts" />
+﻿/// <reference path="../../../typings/adm-zip.d.ts"/>
 /// <reference path="../../../typings/replace.d.ts" />
+/// <reference path="../../../typings/resourceManager.d.ts"/>
 /// <reference path="../../../typings/tacoUtils.d.ts"/>
 /// <reference path="../../../typings/tacoKits.d.ts"/>
-/// <reference path="../../../typings/adm-zip.d.ts"/>
+/// <reference path="../../../typings/wrench.d.ts" />
 
 "use strict";
 
@@ -23,8 +24,21 @@ import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import utils = tacoUtility.UtilHelper;
 
-interface IKitHelper {
-    getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;
+module TemplateManager {
+    export interface IKitHelper {
+        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit(kitId: string): Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+    }
+
+    export interface ITemplateDescriptor {
+        id: string;
+        name: string;
+    }
+
+    export interface ITemplateList {
+        kitId: string;
+        templates: ITemplateDescriptor[];
+    }
 }
 
 class TemplateManager {
@@ -34,7 +48,7 @@ class TemplateManager {
      * The following members are public static to expose access to automated tests
      */
     public static TemplateCachePath: string = null;
-    public static Kits: IKitHelper = null;
+    public static Kits: TemplateManager.IKitHelper = null;
 
     /**
      * Creates a kit project using 'cordova create' with the specified template.
