@@ -26,8 +26,6 @@
     "command.create.status.noKitUsed": " and no Kit",
     "_command.create.status.comment": "Status message printed while a project is being created.",
     
-    "command.create.success.base": "Success!",
-    "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
     "command.create.warning.deprecatedKit": "Warning: Kit {0} has been deprecated.",
     "_command.create.warning.deprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation.",
     "command.create.warning.deprecatedKitSuggestion": "Consider changing your project to use a more recent Kit. For deprecation information, see {fwdLink_toDo}",
@@ -73,6 +71,14 @@
     "_command.setup.remote.rejectedPin.comment": "Message printed when a valid looking PIN fails to work",
     "command.setup.cantFindRemoteMount": "Unable to contact {0} to find where the remote build server services Cordova builds. Is the server running remotebuild with taco-remote configured?",
     "_command.setup.cantFindRemoteMount.comment": "Message printed when unable to find where to query the remote server for future builds. {0} is the URL we tried to contact",
+    "command.setup.settingsStored": "Settings stored in {0}",
+    "_command.setup.settingsStored.comment": "Message printed after successfully storing settings. {0} is the location they were stored to",
+    "command.setup.connrefused": "Unable to connect to remote server. Make sure that the remotebuild server is running at {0}",
+    "_command.setup.connrefused.comment": "Message printed when we fail to connect to the remote server. {0} is the url of the server",
+    "command.setup.notfound": "Unable to look up host '{0}'. Check that the name is correct.",
+    "_command.setup.notfound.comment": "Message printed when we fail to look up the user provided hostname. {0} is that hostname",
+    "command.setup.timedout": "Unable to contact '{0}', please check that the server is reachable.",
+    "_command.setup.timedout.comment": "Message printed when a connection times out. {0} is the host name",
 
     "command.build.description": "Build a cordova project",
     "_command.build.description.comment": "Description for 'taco build'",
@@ -97,10 +103,6 @@
     "command.build.invalidPlatformLocation": "Error: Unable to understand '{0}' platform",
     "_command.build.invalidPlatformLocation.comment": "Error message printed when we can't determine whether a platform should be local or remote. {0} is the platform",
 
-    "command.notBothLocalRemote": "Error: must specify at most one of --local and --remote",
-    "_command.notBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
-    "command.notBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
-    "_command.notBothDeviceEmulate.comment": "Error reported when both --device and --emulator are specified for 'taco build' or 'taco run'",
     "command.build.localPlatformNotAdded": "Error: Platform {0} has not been added locally. Please try 'taco platform add {0}' before building",
     "_command.build.localPlatformNotAdded.comment": "Error reported when a local build has explicitly been requested for a particular platform and that platform is not present. {0} is the user specified platform",
     "command.build.tacoSettingsNotFound": "Error: Unable to load settings. Please run 'taco setup remote' before building remotely",
@@ -140,6 +142,14 @@
     "_command.run.emulator.description.comment": "Description of the --emualtor argument to 'taco run'",
     "command.run.target.description": "Run a build on the specified target",
     "_command.run.target.description.comment": "Description of the --target argument to 'taco run'",
+
+    "command.success.base": "Success!",
+    "_command.success.base.comment": "If commands succeed, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
+    "command.notBothLocalRemote": "Error: must specify at most one of --local and --remote",
+    "_command.notBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
+    "command.notBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
+    "_command.notBothDeviceEmulate.comment": "Error reported when both --device and --emulator are specified for 'taco build' or 'taco run'",
+
 
     "NoRemoteBuildIdFound": "Error: No remote build found. Please run '{0}' first",
     "_NoRemoteBuildIdFound.comment":  "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",

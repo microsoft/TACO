@@ -46,7 +46,7 @@ class RemoteBuildClientHelper {
         var buildInfoFilePath = path.join(outputBuildDir, "buildInfo.json");
 
         if (!RemoteBuildClientHelper.isValidBuildServerUrl(settings.buildServerUrl)) {
-            throw new Error(resources.getString("InvalidRemoteBuildUrl", settings.buildServerUrl, 1));
+            throw new Error(resources.getString("InvalidRemoteBuildUrl", settings.buildServerUrl));
         }
 
         var changeTimeFile = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
