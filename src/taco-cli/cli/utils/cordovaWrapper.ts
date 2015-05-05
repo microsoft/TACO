@@ -3,8 +3,10 @@
 /// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
 import child_process = require ("child_process");
-import Q = require ("q");
+import os = require ("os");
 import path = require ("path");
+import Q = require ("q");
+import util = require ("util");
 
 import resources = require ("../../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
@@ -12,7 +14,7 @@ import tacoUtility = require ("taco-utils");
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
-    private static CordovaModuleName: string = "cordova";
+    private static CordovaModuleName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
 
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
@@ -84,11 +86,15 @@ class CordovaWrapper {
 
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
-        var proc = child_process.exec([CordovaWrapper.CordovaModuleName].concat(args).join(" "), function (err: Error, stdout: Buffer, stderr: Buffer): void {
-            if (err) {
-                deferred.reject(err);
+        var proc = child_process.spawn(CordovaWrapper.CordovaModuleName, args, { stdio: "inherit" });
+        proc.on("error", function (err: Error): void {
+            deferred.reject(err);
+        });
+        proc.on("close", function (code: number): void {
+            if (code) {
+                deferred.reject(new Error(resources.getString("CordovaCommandFailed", code, args.join(" "))));
             } else {
-                deferred.resolve({ stdout: stdout, stderr: stderr });
+                deferred.resolve({});
             }
         });
         return deferred.promise;

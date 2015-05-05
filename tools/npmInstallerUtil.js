@@ -5,27 +5,27 @@ var path = require("path");
 /**
  * Utility for installing npm packages asynchronously.
  */
-function installPackage(pkg, callback, force) {
-    if (!force && isPackageInstalled(pkg)) {
+function installPackage(pkg, installRoot, callback) {
+    if (isPackageInstalled(pkg)) {
         callback();
     }
     else {
         console.info("Installing "+pkg);
-        exec("npm install " + pkg, { cwd: ".." } , function (error, stdout, stderr) {
+        exec("npm install " + pkg, { cwd: installRoot }, function (error, stdout, stderr) {
             callback(error);
         });
     }
 };
 
+function uninstallPackage(pkg, installRoot, callback) {
+    console.info("Uninstalling " + pkg);
+    exec("npm uninstall " + pkg, { cwd: installRoot }, function (error, stdout, stderr) {
+        callback(error);
+    });
+};
+
 function isPackageInstalled (pkg) {
     try {
-        // for folder based pkg names, look up package.name
-        if (fs.existsSync(pkg)) {
-            var pkgJson = path.join(pkg, "package.json");
-            if (fs.existsSync(pkgJson)) {
-                pkg = require(pkgJson).name;
-            }
-        }
         require(pkg);
         return true;
     } catch (e) {
@@ -33,17 +33,17 @@ function isPackageInstalled (pkg) {
     return false;
 };
 
-module.exports.installPackages = function (modules, callback, force) {
+function executePackageAction(modules, installRoot, callback, action) {
     var asyncLoop = function (idx) {
         if (idx < modules.length) {
-            installPackage(modules[idx], function (error) {
+            action(modules[idx], installRoot, function (error) {
                 if (!error) {
                     asyncLoop(idx + 1);
                 }
                 else {
                     callback(error);
                 }
-            }, force);
+            });
         }
         else {
             callback();
@@ -51,4 +51,11 @@ module.exports.installPackages = function (modules, callback, force) {
         ;
     };
     asyncLoop(0);
+}
+
+module.exports.installPackages = function (modules, installRoot, callback) {
+    executePackageAction(modules, installRoot, callback, installPackage);
+};
+module.exports.uninstallPackages = function (modules, installRoot, callback) {
+    executePackageAction(modules, installRoot, callback, uninstallPackage);
 };
