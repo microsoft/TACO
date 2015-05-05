@@ -10,6 +10,7 @@ import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
 
+import cordovaUtils = require ("./utils/cordovaUtils");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
 import resources = require ("../resources/resourceManager");
@@ -17,8 +18,8 @@ import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
 
-import kitHelper = tacoKits.KitHelper;
 import commands = tacoUtility.Commands;
+import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
 import utils = tacoUtility.UtilHelper;
@@ -27,7 +28,7 @@ import utils = tacoUtility.UtilHelper;
  * Wrapper interface for create command parameters
  */
 interface ICreateParameters {
-    cordovaParameters: cordovaWrapper.ICordovaCreateParameters;
+    cordovaParameters: cordovaUtils.ICordovaCreateParameters;
     data: commands.ICommandData;
 }
 
@@ -45,7 +46,7 @@ class Create implements commands.IDocumentedCommand {
         "link-to": String
     };
     private static ShortHands: Nopt.ShortFlags = {
-        "src": "--copy-from"
+        src: "--copy-from"
     };
     private static TacoOnlyOptions: string[] = ["cli", "kit", "template"];
     private static DefaultAppId: string = "io.cordova.hellocordova";
@@ -94,7 +95,7 @@ class Create implements commands.IDocumentedCommand {
 
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = utils.parseArguments(Create.KnownOptions, {}, args.original, 0);
-        var cordovaParams: cordovaWrapper.ICordovaCreateParameters = {
+        var cordovaParams: cordovaUtils.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
             appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,

@@ -13,13 +13,14 @@ import Q = require ("q");
 import replace = require ("replace");
 import wrench = require ("wrench");
 
+import cordovaUtils = require ("./cordovaUtils");
 import cordovaWrapper = require ("./cordovaWrapper");
 import resources = require ("../../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
-import logger = tacoUtility.Logger;
 import kitHelper = tacoKits.KitHelper;
+import logger = tacoUtility.Logger;
 import utils = tacoUtility.UtilHelper;
 
 interface IKitHelper {
@@ -49,7 +50,7 @@ class TemplateManager {
      *
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
-    public static createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCli: string, cordovaParameters: cordovaWrapper.ICordovaCreateParameters): Q.Promise<string> {
+    public static createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCli: string, cordovaParameters: cordovaUtils.ICordovaCreateParameters): Q.Promise<string> {
         var templateName: string = null;
         var templateSrcPath: string = null;
       
