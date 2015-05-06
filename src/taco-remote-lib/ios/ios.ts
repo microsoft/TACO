@@ -15,10 +15,11 @@ import util = require ("util");
 import packer = require ("zip-stream");
 
 import iosAppRunner = require ("./iosAppRunnerHelper");
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
+
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
-import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 
 class IOSAgent implements ITargetPlatform {

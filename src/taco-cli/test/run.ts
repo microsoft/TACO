@@ -13,31 +13,33 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
+// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
+import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
-import TacoUtility = require ("taco-utils");
-import utils = TacoUtility.UtilHelper;
-import resources = TacoUtility.ResourcesManager;
-import BuildInfo = TacoUtility.BuildInfo;
+import rimraf = require ("rimraf");
 
-// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require ("cordova");
+import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
+import ServerMock = require ("./utils/serverMock");
 import setupMod = require ("../cli/setup");
+import SetupMock = require ("./utils/setupMock");
+import TacoUtility = require ("taco-utils");
+
+import BuildInfo = TacoUtility.BuildInfo;
+import utils = TacoUtility.UtilHelper;
 
 var run = new runMod();
 var setup = new setupMod();
 
-import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
-
 describe("taco run", function (): void {
     var testHttpServer: http.Server;
-    var tacoHome = path.join(__dirname, "out");
+    var tacoHome = path.join(os.tmpdir(), "taco-cli", "run");
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
@@ -53,7 +55,7 @@ describe("taco run", function (): void {
 
     before(function (mocha: MochaDone): void {
         // Set up mocked out resources
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Create a mocked out remote server so we can specify how it reacts
@@ -70,6 +72,7 @@ describe("taco run", function (): void {
 
     after(function (): void {
         testHttpServer.close();
+        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {

@@ -1,7 +1,9 @@
 ﻿/// <reference path="../../typings/remotebuild.d.ts" />
 "use strict";
+
 import HostSpecifics = require ("./hostSpecifics");
 import tacoUtils = require ("taco-utils");
+
 import UtilHelper = tacoUtils.UtilHelper;
 
 class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {

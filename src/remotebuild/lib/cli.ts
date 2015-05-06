@@ -17,13 +17,13 @@ import path = require ("path");
 import Q = require ("q");
 
 import HostSpecifics = require ("./hostSpecifics");
-import utils = require ("taco-utils");
-import server = require ("./server");
 import RemoteBuildConf = require ("./remoteBuildConf");
+import server = require ("./server");
+import utils = require ("taco-utils");
 
-import resources = utils.ResourcesManager;
 import UtilHelper = utils.UtilHelper;
 
+var resources: utils.ResourceManager = null;
 function cli(): void {
     console.info("remotebuild");
     console.info("Copyright (C) 2014 Microsoft Corporation. All rights reserved.");
@@ -45,7 +45,7 @@ function cli(): void {
     };
     
     // Initialize localization resources
-    resources.init(nconf.get("lang"), path.join(__dirname, "..", "resources"));
+    resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"), nconf.get("lang"));
     var remotebuildConf = new RemoteBuildConf(nconf);
 
     if (nconf.get("help") || nconf.get("h") || nconf.get("?") || !nconf.get("serverDir")) {

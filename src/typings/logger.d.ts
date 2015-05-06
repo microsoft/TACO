@@ -13,24 +13,26 @@ declare module TacoUtility {
             Success = 4,
             NormalBold = 5,
         }
+    }
+    class Logger {
         /**
          * returns colorized string
          * wrapping "colors" module because not yet possible to combine themes, i.e. ["yellow", "bold"]:  https://github.com/Marak/colors.js/issues/72
          */
-        function colorize(msg: string, level: Level): string;
+        static colorize(msg: string, level: Logger.Level): string;
         /**
          * log
          */
-        function log(msg: string, level?: Level): void;
+        static log(msg: string, level?: Logger.Level): void;
         /**
          * for quick logging use
          */
-        function logLine(msg: string, level?: Level): void;
-        function logErrorLine(msg: string): void;
-        function logWarnLine(msg: string): void;
-        function logLinkLine(msg: string): void;
-        function logNormalLine(msg: string): void;
-        function logNormalBoldLine(msg: string): void;
-        function logSuccessLine(msg: string): void;
+        static logLine(msg: string, level?: Logger.Level): void;
+        static logErrorLine(msg: string): void;
+        static logWarnLine(msg: string): void;
+        static logLinkLine(msg: string): void;
+        static logNormalLine(msg: string): void;
+        static logNormalBoldLine(msg: string): void;
+        static logSuccessLine(msg: string): void;
     }
 }

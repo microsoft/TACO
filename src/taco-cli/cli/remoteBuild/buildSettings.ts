@@ -19,7 +19,6 @@ import Q = require ("q");
 import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
 import Settings = require ("../utils/settings");
 import tacoUtils = require ("taco-utils");
-import res = tacoUtils.ResourcesManager;
 
 class BuildSettings {
     public agent: Q.Promise<https.Agent>;

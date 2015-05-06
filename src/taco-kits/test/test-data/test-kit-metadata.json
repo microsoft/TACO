@@ -1,0 +1,134 @@
+﻿{
+    "plugins": {
+        "org.apache.cordova.camera": {
+            "name": {
+                "default": "Camera Plugin",
+                "es-mx": "Cámara Plugin"
+            },
+            "description": {
+                "default": "This plugin defines a global navigator.camera object, which provides an API for taking pictures and for choosing images from the system's image library.",
+                "es-mx": "Este plugin proporciona una API para tomar fotografías y por elegir imágenes de biblioteca de imágenes del sistema."
+            },
+            "platforms": "ios, android, wp8, windows8"
+        }
+    },
+
+    "kits": {
+        "4.2.0-Win10-Beta": {   
+            "cordova-cli": "4.2.0",
+            "taco-min": "1.0.0",
+            "releaseNotesUri": "http://cordova.apache.org/4.2.0/release.md",
+            "name": {
+                "default": "4.2.0 + Cordova Windows 10 Beta Kit",
+                "es-mx": "4.2.0 + Cordova de Windows 10 Beta Kit"
+            },
+            "description": {
+                "default": "A toolkit of plugins and platforms designed to work with the beta version of the Cordova Windows 10 platform.",
+                "es-mx": "Instantánea de plugins y plataformas diseñadas para trabajar con la versión beta de la plataforma de Windows 10 Cordova."
+            },
+            "plugins": {
+                "org.apache.cordova.camera": {
+                    "version": "0.2.28",
+                    "src": "http://github.com/msopentech/cordova-plugin-camera/tree/cordova-windows",
+                    "platforms": "ios, android, wp8, windows"
+                }
+            },
+            "platforms": {
+                "windows": {
+                    "version": "4.0.0-beta",
+                    "src": "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0-beta.tgz"
+                }
+            }
+        },
+        "4.0.0-Kit": {
+            "cordova-cli": "4.0.0",
+            "taco-min": "1.0.0",
+            "releaseNotesUri": "http://cordova.apache.org/4.0.0/release.md",
+            "name": "4.0.0 Kit for Cordova Development",
+            "deprecated": true,
+            "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
+            "plugins": {
+                "org.apache.cordova.camera": {
+                    "version": "0.2.27",
+                    "platforms": "ios, android, wp8"
+                },
+                "org.apache.cordova.media-capture": {
+                    "version": "0.3.4",
+                    "platforms": "ios, android, windows, windows8"
+                }
+            }
+        },
+        "4.2.0-Kit": {
+            "cordova-cli": "4.2.0",
+            "taco-min": "1.0.0",
+            "releaseNotesUri": "http://cordova.apache.org/4.2.0/release.md",
+            "name": {
+                "default": "4.2.0 Kit for Cordova Development"
+            },
+            "plugins": {
+                "org.apache.cordova.camera": {
+                    "version": "0.2.29"
+                }
+            }
+        },
+        "5.0.0-Kit": {
+            "cordova-cli": "5.0.0",
+            "taco-min": "1.0.0",
+            "default": true,
+            "releaseNotesUri": "http://cordova.apache.org/5.0.0/release.md",
+            "name": "5.0.0 Kit for Cordova Development",
+             "platforms": {
+                "android": {
+                    "version": "4.2.1",
+                    "src": "https://github.com/apache/cordova-android/tree/4.2.1/archive/4.2.1.tgz"
+                },
+                "ios": {
+                    "version": "4.2.2",
+                    "src": "https://github.com/apache/cordova-ios/tree/4.2.2/archive/4.2.2.tgz"
+                },
+                "windows": {
+                    "version": "4.0.0",
+                    "src": "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0.tgz"
+                },
+                "wp8": {
+                    "version": "4.0.2",
+                    "src": "https://github.com/apache/cordova-wp8/tree/4.0.2/archive/4.0.2.tgz"
+                }
+            },
+            "plugins": {
+                "org.apache.cordova.camera": {
+                    "version": "0.3.10"
+                }
+            }
+        }
+    },
+    "templates": {
+        "default": {
+                    "blank": {
+                        "name": "Blank template",
+                        "url": "templates/default/blank.zip"
+                    },
+                    "typescript": {
+                        "name": "Blank TypeScript template",
+                        "url": "templates/default/typescript.zip"
+                    }
+                },
+                "4.0.0-Kit": {
+                    "blank": {
+                        "name": "Blank template",
+                        "url": "templates/4.0.0-kit/blank.zip"
+                    },
+                    "typescript": {
+                        "name": "Blank TypeScript template",
+                        "url": "templates/4.0.0-kit/typescript.zip"
+                    }
+                },
+                "5.0.0-Kit": {
+                    "blank": {
+                        "name": "Blank template",
+                        "url": "templates/5.0.0-kit/blank.zip"
+                    }
+                }	
+	}
+}
+

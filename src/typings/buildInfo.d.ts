@@ -1,4 +1,4 @@
-/// <reference path="../typings/resourcesManager" />
+/// <reference path="../typings/resourceManager" />
 declare module TacoUtility {
     class BuildInfo {
         static UPLOADING: string;
@@ -81,6 +81,6 @@ declare module TacoUtility {
          *
          * @returns This object, after setting the message in the appropriate language.
          */
-        localize(req: any, resources: TacoUtility.ResourcesManager.IResources): BuildInfo;
+        localize(req: any, resources: TacoUtility.ResourceManager): BuildInfo;
     }
 }

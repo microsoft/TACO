@@ -11,11 +11,10 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
-
 import mocha = require ("mocha");
 
-import utils = require ("../utilHelper");
 import commands = require ("../commands");
+import utils = require ("../utilHelper");
 
 describe("UtilHelper", function (): void {
     describe("parseArguments()", function (): void {

@@ -1,22 +1,27 @@
 ﻿/// <reference path="../../../typings/wrench.d.ts" />
 /// <reference path="../../../typings/replace.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts"/>
+/// <reference path="../../../typings/tacoKits.d.ts"/>
 /// <reference path="../../../typings/adm-zip.d.ts"/>
 
 "use strict";
-import Q = require ("q");
-import path = require ("path");
-import fs = require ("fs");
-import wrench = require ("wrench");
-import replace = require ("replace");
+
 import admZip = require ("adm-zip");
-import tacoUtility = require ("taco-utils");
-import tacoKits = require ("taco-kits");
-import logger = tacoUtility.Logger;
-import resources = tacoUtility.ResourcesManager;
-import utils = tacoUtility.UtilHelper;
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
+import replace = require ("replace");
+import wrench = require ("wrench");
+
+import cordovaHelper = require ("./cordovaHelper");
 import cordovaWrapper = require ("./cordovaWrapper");
+import resources = require ("../../resources/resourceManager");
+import tacoKits = require ("taco-kits");
+import tacoUtility = require ("taco-utils");
+
 import kitHelper = tacoKits.KitHelper;
+import logger = tacoUtility.Logger;
+import utils = tacoUtility.UtilHelper;
 
 interface IKitHelper {
     getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;
@@ -45,8 +50,7 @@ class TemplateManager {
      *
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
-
-    public static createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCli: string, path: string, appId?: string, appName?: string, cordovaConfig?: string, options?: { [option: string]: any }, optionsToExclude?: string[]): Q.Promise<string> {
+    public static createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCli: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<string> {
         var templateName: string = null;
         var templateSrcPath: string = null;
       
@@ -55,22 +59,24 @@ class TemplateManager {
         return kitHelper.getTemplateOverrideInfo(kitId, templateId)
             .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
                 var templateInfo = templateOverrideForKit.templateInfo;
+
                 templateName = templateInfo.name;
+
                 return TemplateManager.findTemplatePath(templateId, templateOverrideForKit.kitId, templateInfo);
             })
             .then(function (templatePath: string): Q.Promise<any> {
                 templateSrcPath = templatePath;
-                options["copy-from"] = templateSrcPath;
+                cordovaParameters.copyFrom = templateSrcPath;
 
-                return cordovaWrapper.create(cordovaCli, path, appId, appName, cordovaConfig, utils.cleanseOptions(options, optionsToExclude));
+                return cordovaWrapper.create(cordovaCli, cordovaParameters);
             })
             .then(function (): Q.Promise<any> {
                 var options: any = { clobber: false };
 
-                return utils.copyRecursive(templateSrcPath, path, options);
+                return utils.copyRecursive(templateSrcPath, cordovaParameters.projectPath, options);
             })
             .then(function (): Q.Promise<any> {
-                return TemplateManager.performTokenReplacements(path, appId, appName);
+                return TemplateManager.performTokenReplacements(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName);
             })
             .then(function (): Q.Promise<string> {
                 return Q.resolve(templateName);

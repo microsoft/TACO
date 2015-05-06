@@ -11,15 +11,16 @@ import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
 
-import CordovaWrapper = require ("./utils/cordovaWrapper");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
+import CordovaWrapper = require ("./utils/cordovaWrapper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
+import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
+
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
 
 /*
@@ -126,7 +127,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             var cleanScriptPath = path.join("platforms", platform, "cordova", "clean");
             if (fs.existsSync(cleanScriptPath)) {
                 promise = promise.then(function (): Q.Promise<any> {
-                    return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any) {
+                    return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any): void {
                         // If we can't run the script, then show a warning but continue
                         logger.logWarnLine(err.toString());
                     });
@@ -156,7 +157,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         var configuration = commandData.options["release"] ? "release" : "debug";
         var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
-        return Settings.loadSettings().then(function (settings: Settings.ISettings) {
+        return Settings.loadSettings().then(function (settings: Settings.ISettings): Q.Promise<any> {
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {

@@ -8,12 +8,14 @@ import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import tacoUtils = require ("taco-utils");
-import commands = tacoUtils.Commands;
-import resources = tacoUtils.ResourcesManager;
-import utils = tacoUtils.UtilHelper;
-import logger = tacoUtils.Logger;
 import util = require ("util");
+
+import resources = require ("../../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
+
+import commands = tacoUtils.Commands;
+import logger = tacoUtils.Logger;
+import utils = tacoUtils.UtilHelper;
 
 /*
  * A static class which is responsible for dealing with the TacoSettings.json file
@@ -21,6 +23,10 @@ import util = require ("util");
 class Settings {
     private static Settings: Settings.ISettings = null;
     private static SettingsFileName = "TacoSettings.json";
+
+    public static get settingsFile(): string {
+        return path.join(utils.tacoHome, Settings.SettingsFileName);
+    }
 
     /*
      * Load data from TACO_HOME/TacoSettings.json
@@ -30,9 +36,8 @@ class Settings {
             return Q(Settings.Settings);
         }
 
-        var settingsPath = path.join(utils.tacoHome, Settings.SettingsFileName);
         try {
-            Settings.Settings = JSON.parse(<any>fs.readFileSync(settingsPath));
+            Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
             return Q(Settings.Settings);
         } catch (e) {
             // Unable to read TacoSettings.json: it doesn't exist, or it is corrupt
@@ -47,9 +52,8 @@ class Settings {
     public static saveSettings(settings: Settings.ISettings): Q.Promise<any> {
         // save to TACO_HOME/TacoSettings.json and store as the cached version
         Settings.Settings = settings;
-        var settingsPath = path.join(utils.tacoHome, Settings.SettingsFileName);
         utils.createDirectoryIfNecessary(utils.tacoHome);
-        fs.writeFileSync(settingsPath, JSON.stringify(settings));
+        fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
         return Q({});
     }
 

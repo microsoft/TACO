@@ -14,7 +14,7 @@ import IOSAgent = require ("./ios/ios");
 import utils = require ("taco-utils");
 import BuildInfo = utils.BuildInfo;
 import ProcessLogger = utils.ProcessLogger;
-import resources = utils.ResourcesManager;
+import resources = require ("./resources/resourceManager");
 
 module TacoRemoteLib {
     var language: string;
@@ -24,7 +24,7 @@ module TacoRemoteLib {
     var supportedBuildConfigurations = ["debug", "release"];
     var finalStatuses = [BuildInfo.COMPLETE, BuildInfo.ERROR];
 
-    export var locResources: resources.IResources = resources;
+    export var locResources: utils.ResourceManager = resources;
 
     export interface IReadOnlyConf {
         get(key: string): any;
@@ -38,7 +38,6 @@ module TacoRemoteLib {
     export function init(config: IReadOnlyConf): void {
         if (!initialized) {
             language = config.get("lang");
-            resources.init(language, path.join(__dirname, "resources"));
 
             platforms = [];
             platforms.push(new IOSAgent(config));

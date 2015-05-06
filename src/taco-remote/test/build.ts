@@ -6,29 +6,33 @@ import http = require ("http");
 import nconf = require ("nconf");
 import os = require ("os");
 import path = require ("path");
+import rimraf = require ("rimraf");
+
+import resources = require ("../resources/resourceManager");
+import selftest = require ("../lib/selftest");
 import TacoRemote = require ("../lib/server");
 import TacoUtils = require ("taco-utils");
+
 import UtilHelper = TacoUtils.UtilHelper;
-import resources = TacoUtils.ResourcesManager;
-import selftest = require ("../lib/selftest");
 
 var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
 
 describe("taco-remote", function (): void {
     var server: http.Server;
     var serverMod: RemoteBuild.IServerModule;
-    var downloadDir = path.join(__dirname, "out", "selftest");
+    var serverDir = path.join(os.tmpdir(), "taco-remote", "build");
+    var downloadDir = path.join(serverDir, "selftest");
     var modMountPoint = "Test";
+    var resources: TacoUtils.ResourceManager = null;
     before(function (mocha: MochaDone): void {
-        resources.init("en", path.join(__dirname, "..", "resources"));
-        resources.UnitTest = true;
-        process.env["TACO_HOME"] = path.join(__dirname, "out");
+        resources = new TacoUtils.ResourceManager(path.join(__dirname, "..", "resources"), "en");
+        process.env["TACO_UNIT_TEST"] = true;
+        process.env["TACO_HOME"] = serverDir;
         UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         fs.writeFileSync(firstRunPath, ""); // Just need the file to exist so the test doesn't try to ask us about installing homebrew
 
         var app = express();
-        var serverDir = path.join(__dirname, "out");
         UtilHelper.createDirectoryIfNecessary(serverDir);
         UtilHelper.createDirectoryIfNecessary(downloadDir);
         var serverConfig = {
@@ -59,11 +63,12 @@ describe("taco-remote", function (): void {
         }
 
         server.close(mocha);
+        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
     macOnlyIt("should successfully build the sample project", function (mocha: MochaDone): void {
         // Building can take a while
-        this.timeout(30000);
+        this.timeout(60000);
         var server = "http://" + os.hostname() + ":3000";
         selftest.test(server, modMountPoint, downloadDir, false, null).done(function (): void {
             mocha();
@@ -73,7 +78,7 @@ describe("taco-remote", function (): void {
     // Note: This test will fail unless it is run from a GUI login, or the user running the test has jumped through some hoops to allow the "codesign" program access to the keychain
     it.skip("should successfully build the sample project for device", function (mocha: MochaDone): void {
         // Building can take a while
-        this.timeout(30000);
+        this.timeout(60000);
         var server = "http://" + os.hostname() + ":3000";
         selftest.test(server, modMountPoint, downloadDir, true, null).done(function (): void {
             mocha();

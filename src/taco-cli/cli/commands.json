@@ -4,7 +4,7 @@
         "modulePath": "./create",
         "description": "[command.create.description]",
         "args": [
-            { "name": "PATH", "description": "[command.create.path]" },
+            { "name": "PATH", "description": "[command.create.args.path]" },
             { "name": "ID", "description": "[command.create.args.id]" },
             { "name": "NAME", "description": "[command.create.args.name]" },
             { "name": "CONFIG", "description": "[command.create.args.config]" }

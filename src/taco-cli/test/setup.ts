@@ -14,28 +14,31 @@ var should_module = require("should"); // Note not import: We don't want to refe
 import fs = require ("fs");
 import http = require ("http");
 import https = require ("https");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
+import rimraf = require ("rimraf");
 
 import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
+import resources = require ("../resources/resourceManager");
+import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
 import SetupMod = require ("../cli/setup");
-import ServerMock = require ("./utils/serverMock");
 import SetupMock = require ("./utils/setupMock");
 import TacoUtility = require ("taco-utils");
+
 import utils = TacoUtility.UtilHelper;
-import resources = TacoUtility.ResourcesManager;
 
 var setup = new SetupMod();
 
 describe("taco setup", function (): void {
-    var testHome = path.resolve(__dirname, "out");
+    var testHome = path.join(os.tmpdir(), "taco-cli", "setup");
     var tacoSettingsFile = path.join(testHome, "TacoSettings.json");
     before(function (): void {
         utils.createDirectoryIfNecessary(testHome);
         process.env["TACO_HOME"] = testHome;
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
         if (fs.existsSync(tacoSettingsFile)) {
             fs.unlinkSync(tacoSettingsFile);
         }
@@ -45,6 +48,8 @@ describe("taco setup", function (): void {
         if (fs.existsSync(tacoSettingsFile)) {
             fs.unlinkSync(tacoSettingsFile);
         }
+
+        rimraf(testHome, function (err: Error): void { /* ignored */ }); // Not sync, and ignore errors
     });
 
     function makeICommandData(args: string[]): TacoUtility.Commands.ICommandData {

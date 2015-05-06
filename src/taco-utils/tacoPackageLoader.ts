@@ -16,12 +16,13 @@ import path = require ("path");
 import rimraf = require ("rimraf");
 import semver = require ("semver");
 import Q = require ("q");
-import UtilHelper = require ("./utilHelper");
-import ResourcesManager = require ("./resourcesManager");
-import utils = UtilHelper.UtilHelper;
-import resources = ResourcesManager.ResourcesManager;
+
 import loggerUtil = require ("./logger");
+import UtilHelper = require ("./utilHelper");
+import resources = require ("./resources/resourceManager");
+
 import logger = loggerUtil.Logger;
+import utils = UtilHelper.UtilHelper;
 
 module TacoUtility {
     export enum PackageSpecType {

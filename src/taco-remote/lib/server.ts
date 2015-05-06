@@ -27,23 +27,21 @@ import util = require ("util");
 
 import BuildManager = require ("./buildManager");
 import HostSpecifics = require ("./hostSpecifics");
+// import resources = require("../resources/resourceManager");
 import selftest = require ("./selftest");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
-import utils = require ("taco-utils");
 
-import resources = utils.ResourcesManager;
+import utils = require ("taco-utils");
 
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
         var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
-        resources.init(tacoRemoteConf.lang, path.join(__dirname, "..", "resources"));
         return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
             return new Server(tacoRemoteConf, modConfig.mountPath);
         });
     }
 
     public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
-        resources.init(conf.lang, path.join(__dirname, "..", "resources"));
         var host = util.format("http%s://%s:%d", utils.UtilHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
         var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
@@ -60,6 +58,7 @@ class Server implements RemoteBuild.IServerModule {
     private serverConf: TacoRemoteConfig;
     private modPath: string;
     private buildManager: BuildManager;
+    private resources: utils.ResourceManager;
 
     constructor(conf: TacoRemoteConfig, modPath: string) {
         this.serverConf = conf;
@@ -67,6 +66,7 @@ class Server implements RemoteBuild.IServerModule {
 
         // Initialize the build manager (after our app settings are all setup)
         this.buildManager = new BuildManager(conf);
+        this.resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"), conf.lang);
     }
 
     public getRouter(): express.Router {
@@ -97,16 +97,17 @@ class Server implements RemoteBuild.IServerModule {
     private submitNewBuild(req: express.Request, res: express.Response): void {
         var port = this.serverConf.port;
         var modPath = this.modPath;
+        var self = this;
         this.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
             var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
             res.set({
                 "Content-Type": "application/json",
                 "Content-Location": contentLocation
             });
-            res.status(202).json(buildInfo.localize(req, resources));
+            res.status(202).json(buildInfo.localize(req, self.resources));
         }, function (err: any): void {
                 res.set({ "Content-Type": "application/json" });
-                res.status(err.code || 400).send({ status: resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
+                res.status(err.code || 400).send({ status: self.resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
             }).done();
     }
 
@@ -114,7 +115,7 @@ class Server implements RemoteBuild.IServerModule {
     private getBuildStatus(req: express.Request, res: express.Response): void {
         var buildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
-            buildInfo.localize(req, resources);
+            buildInfo.localize(req, this.resources);
             if (!buildInfo.message) {
                 // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
                 buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib>buildInfo["pkg"]).locResources);
@@ -122,7 +123,7 @@ class Server implements RemoteBuild.IServerModule {
 
             res.status(200).json(buildInfo);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
     }
 
@@ -133,7 +134,7 @@ class Server implements RemoteBuild.IServerModule {
             res.set("Content-Type", "text/plain");
             this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
     }
 
@@ -148,12 +149,12 @@ class Server implements RemoteBuild.IServerModule {
         return function (req: express.Request, res: express.Response): void {
             var buildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (!buildInfo) {
-                res.status(404).send(resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+                res.status(404).send(self.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
                 return;
             }
 
             if (!buildInfo.buildSuccessful) {
-                res.status(404).send(resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
+                res.status(404).send(self.resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
                 return;
             }
 

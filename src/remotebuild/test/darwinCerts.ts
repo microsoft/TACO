@@ -13,6 +13,7 @@
 /// <reference path="../../typings/rimraf.d.ts" />
 /// <reference path="../../typings/mkdirp.d.ts" />
 "use strict";
+
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
@@ -25,11 +26,10 @@ import mkdirp = require ("mkdirp");
 import certs = require ("../lib/darwin/darwinCerts");
 import HostSpecifics = require ("../lib/hostSpecifics");
 import RemoteBuildConf = require ("../lib/remoteBuildConf");
-
+import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
-import resources = utils.ResourcesManager;
 
-var serverDir = path.join(__dirname, "out");
+var serverDir = path.join(os.tmpdir(), "remotebuild", "certs");
 var certsDir = path.join(serverDir, "certs");
 var clientCertsDir = path.join(certsDir, "client");
 var caKeyPath = path.join(certsDir, "ca-key.pem");
@@ -39,26 +39,22 @@ var caCertPath = path.join(certsDir, "ca-cert.pem");
 // Since the certs use openSSL to work with certificates, we restrict these tests to the mac where openSSL should exist.
 var macOnly = os.platform() === "darwin" ? describe : describe.skip;
 macOnly("Certs", function (): void {
-    beforeEach(function (): void {
-        rmdir.sync(certsDir);
-        mkdirp.sync(certsDir);
-    });
-
-    after(function (done: MochaDone): void {
+    after(function (): void {
         nconf.overrides({});
-        rmdir(certsDir, done);
+        rmdir(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and we don't wait for it. 
     });
     
     before(function (): void {
         nconf.use("memory");
-        resources.init("en", path.join(__dirname, "..", "resources"));
     });
 
     // These tests can take a fair amount of time
-    this.timeout(5000);
+    this.timeout(10000);
     
     // Test that initializing server certificates creates new certificates
     it("InitializeServerCerts", function (done: MochaDone): void {
+        rmdir.sync(certsDir);
+        mkdirp.sync(certsDir);
         certs.initializeServerCerts(conf({ serverDir: serverDir })).
             then(function (certPaths: HostSpecifics.ICertStore): void {
             certPaths.newCerts.should.equal(true, "Expect newCerts true from initializeServerCerts");
@@ -70,6 +66,8 @@ macOnly("Certs", function (): void {
     
     // Test that initializing server certificates does not re-create certificates if they already exist
     it("InitializeServerCertsWhenCertsAlreadyExist", function (done: MochaDone): void {
+        rmdir.sync(certsDir);
+        mkdirp.sync(certsDir);
         certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true })).
             then(function (certPaths: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
             certPaths.newCerts.should.equal(true, "Expect newCerts true from first initializeServerCerts");
@@ -100,6 +98,8 @@ macOnly("Certs", function (): void {
     
     // Tests that generating a client certificate without appropriate server certificates fails
     it("GenerateClientCertWhenServerCertsDoNotExist", function (done: MochaDone): void {
+        rmdir.sync(certsDir);
+        mkdirp.sync(certsDir);
         certs.generateClientCert(conf({ serverDir: serverDir })).
         then(function (pin: number): void {
             throw "PIN should not be returned";
@@ -216,12 +216,12 @@ macOnly("Certs", function (): void {
     
     // Test that we can make a self signed certificate from the CA certificate
     it("MakeSelfSignedCert", function (done: MochaDone): void {
-        var outKeyPath = path.join(__dirname, "out", "selfsigned-key.pem");
-        var outCertPath = path.join(__dirname, "out", "selfsigned-cert.pem");
+        var outKeyPath = path.join(serverDir, "selfsigned-key.pem");
+        var outCertPath = path.join(serverDir, "selfsigned-cert.pem");
 
         certs.makeSelfSigningCACert(caKeyPath, caCertPath).
             then(function (): Q.Promise<void> {
-            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, conf({ serverDir: path.join(__dirname, "out") }));
+            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, conf({ serverDir: serverDir }));
         }).
             then(function (): void {
             should.assert(fs.existsSync(outKeyPath), "key should exist after makeSelfSignedCert completes");

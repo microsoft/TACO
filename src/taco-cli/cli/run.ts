@@ -11,15 +11,16 @@ import path = require ("path");
 import Q = require ("q");
 
 import CordovaWrapper = require ("./utils/CordovaWrapper");
-import tacoUtility = require ("taco-utils");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
+import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
+import tacoUtility = require ("taco-utils");
+
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
 
 /*

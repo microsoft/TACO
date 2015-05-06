@@ -6,8 +6,8 @@
 import child_process = require ("child_process");
 import fs = require ("fs");
 import path = require ("path");
-import tacoUtility = require ("./resourcesManager");
-import resources = tacoUtility.ResourcesManager;
+
+import resources = require ("./resources/resourceManager");
 
 module TacoUtility {
     export class ProcessLogger {

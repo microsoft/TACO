@@ -2,21 +2,24 @@
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/tacoDependencyInstaller.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
+
 "use strict";
 
 import nopt = require ("nopt");
-import Q = require("q");
+import Q = require ("q");
+
+import resources = require ("../resources/resourceManager");
 import dependencyInstaller = require ("taco-dependency-installer");
 import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
+
 import commands = tacoUtils.Commands;
-import resources = tacoUtils.ResourcesManager;
+import utils = tacoUtils.UtilHelper;
 import logger = tacoUtils.Logger;
 
 /*
  * InstallDependencies
  *
- * handles "taco install-dependencies"
+ * Handles "taco install-dependencies"
  */
 class InstallDependencies implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.FlagTypeMap = { };
@@ -33,7 +36,9 @@ class InstallDependencies implements commands.IDocumentedCommand {
             return Q.reject(err.message);
         }
 
-        return new dependencyInstaller.DependencyInstaller().run(parsed);
+        var installer: dependencyInstaller.DependencyInstaller = new dependencyInstaller.DependencyInstaller();
+
+        return installer.run(parsed);
     }
 
     /**

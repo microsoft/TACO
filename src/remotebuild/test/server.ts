@@ -10,6 +10,7 @@
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
 "use strict";
+
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
@@ -21,15 +22,14 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 import Q = require ("q");
 
-import tacoUtils = require ("taco-utils");
-import resources = tacoUtils.ResourcesManager;
-import server = require ("../lib/server");
-import RemoteBuildConf = require ("../lib/remoteBuildConf");
 import HostSpecifics = require ("../lib/hostSpecifics");
-
+import RemoteBuildConf = require ("../lib/remoteBuildConf");
+import resources = require ("../resources/resourceManager");
+import server = require ("../lib/server");
+import tacoUtils = require ("taco-utils");
 import testServerModuleFactory = require ("./testServerModuleFactory");
 
-var serverDir = path.join(__dirname, "out", "server");
+var serverDir = path.join(os.tmpdir(), "remotebuild", "server");
 var certsDir = path.join(serverDir, "certs");
 var clientCertsDir = path.join(certsDir, "client");
 
@@ -37,7 +37,6 @@ var darwinOnlyTest = os.platform() === "darwin" ? it : it.skip;
 
 describe("server", function (): void {
     before(function (): void {
-        resources.init("en", path.join(__dirname, "..", "resources"));
         // Clear out settings for nconf
         nconf.overrides({});
         nconf.defaults({});
@@ -45,7 +44,7 @@ describe("server", function (): void {
         nconf.reset();
     });
     after(function (): void {
-        resources.teardown();
+        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
     beforeEach(function (): void {
         rimraf.sync(serverDir);
@@ -104,7 +103,7 @@ describe("server", function (): void {
 
     // TODO (Devdiv: 1160573): Still need to work out how windows should work with certificates.
     darwinOnlyTest("should start correctly in secure mode on mac", function (done: MochaDone): void {
-        this.timeout(5000);
+        this.timeout(10000);
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en" });
         server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
@@ -127,7 +126,7 @@ describe("server", function (): void {
     });
 
     darwinOnlyTest("should be able to download a certificate exactly once on mac", function (done: MochaDone): void {
-        this.timeout(5000); // Certificates can take ages to generate apparently
+        this.timeout(10000); // Certificates can take ages to generate apparently
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
         var config = new RemoteBuildConf(nconf, true);
         HostSpecifics.hostSpecifics.initialize(config).then(function (): Q.Promise<any> {

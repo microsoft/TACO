@@ -3,6 +3,7 @@
     "command.create.args.path": "Where to create the project",
     "command.create.args.id": "Package ID for the project",
     "command.create.args.name": "Human readable app name",
+    "command.create.args.config": "json string whose key/values will be included in '[PATH]/.cordova/config.json'",
     "command.create.options.kit": "Use the specified Cordova Dev Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits.",
     "command.create.options.template": "Use an alternate project template instead of blank.",
     "command.create.options.cli": "Use a version of the Cordova CLI rather than a Cordova Dev Kit.",
@@ -16,6 +17,8 @@
     "_command.create.notBothTemplateAndCli.comment": "Error shown when the user tries to create a project using a template (--template), but specifies the --cli parameter.",
     "command.create.templatesUnavailable": "Error: Unable to access or download templates",
     "_command.create.templatesUnavailable.comment": "Error reported when templates cannot be downloaded",
+    "command.create.onlyLocalCustomWww": "Error: Only local paths for custom www assets are supported.",
+    "_command.create.onlyLocalCustomWww.comment": "Error reported when the specified path to the --copy-from or --link-to parameters is a web URL.",
     
     "command.create.status.projectName": "Creating a new Cordova project with name ",
     "command.create.status.projectId": " and id ",
@@ -25,8 +28,6 @@
     "command.create.status.noKitUsed": " and no Kit",
     "_command.create.status.comment": "Status message printed while a project is being created.",
     
-    "command.create.success.base": "Success!",
-    "_command.create.success.base.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
     "command.create.warning.deprecatedKit": "Warning: Kit {0} has been deprecated.",
     "_command.create.warning.deprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation.",
     "command.create.warning.deprecatedKitSuggestion": "Consider changing your project to use a more recent Kit. For deprecation information, see {fwdLink_toDo}",
@@ -72,6 +73,14 @@
     "_command.setup.remote.rejectedPin.comment": "Message printed when a valid looking PIN fails to work",
     "command.setup.cantFindRemoteMount": "Unable to contact {0} to find where the remote build server services Cordova builds. Is the server running remotebuild with taco-remote configured?",
     "_command.setup.cantFindRemoteMount.comment": "Message printed when unable to find where to query the remote server for future builds. {0} is the URL we tried to contact",
+    "command.setup.settingsStored": "Settings stored in {0}",
+    "_command.setup.settingsStored.comment": "Message printed after successfully storing settings. {0} is the location they were stored to",
+    "command.setup.connrefused": "Unable to connect to remote server. Make sure that the remotebuild server is running at {0}",
+    "_command.setup.connrefused.comment": "Message printed when we fail to connect to the remote server. {0} is the url of the server",
+    "command.setup.notfound": "Unable to look up host '{0}'. Check that the name is correct.",
+    "_command.setup.notfound.comment": "Message printed when we fail to look up the user provided hostname. {0} is that hostname",
+    "command.setup.timedout": "Unable to contact '{0}', please check that the server is reachable.",
+    "_command.setup.timedout.comment": "Message printed when a connection times out. {0} is the host name",
 
     "command.build.description": "Build a cordova project",
     "_command.build.description.comment": "Description for 'taco build'",
@@ -96,10 +105,6 @@
     "command.build.invalidPlatformLocation": "Error: Unable to understand '{0}' platform",
     "_command.build.invalidPlatformLocation.comment": "Error message printed when we can't determine whether a platform should be local or remote. {0} is the platform",
 
-    "command.notBothLocalRemote": "Error: must specify at most one of --local and --remote",
-    "_command.notBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
-    "command.notBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
-    "_command.notBothDeviceEmulate.comment": "Error reported when both --device and --emulator are specified for 'taco build' or 'taco run'",
     "command.build.localPlatformNotAdded": "Error: Platform {0} has not been added locally. Please try 'taco platform add {0}' before building",
     "_command.build.localPlatformNotAdded.comment": "Error reported when a local build has explicitly been requested for a particular platform and that platform is not present. {0} is the user specified platform",
     "command.build.tacoSettingsNotFound": "Error: Unable to load settings. Please run 'taco setup remote' before building remotely",
@@ -140,9 +145,16 @@
     "command.run.target.description": "Run a build on the specified target",
     "_command.run.target.description.comment": "Description of the --target argument to 'taco run'",
 
-    "command.installDependencies.description": "Attempt to automatically install missing 3rd party software that is required to build your project",
+    "command.success.base": "Success!",
+    "_command.success.base.comment": "If commands succeed, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
+    "command.notBothLocalRemote": "Error: must specify at most one of --local and --remote",
+    "_command.notBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
+    "command.notBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
+    "_command.notBothDeviceEmulate.comment": "Error reported when both --device and --emulator are specified for 'taco build' or 'taco run'",
+
+    "command.installDependencies.description": "Attempt to automatically install missing third party software that is required to build your project",
     "_command.installDependencies.description.comment": "Description for 'taco install-dependencies'",
-    "command.installDependencies.platform.description": "The target platform for which to install 3rd party software requirements",
+    "command.installDependencies.platform.description": "The target platform for which to install third party software requirements",
     "_command.installDependencies.platform.description.comment": "Description for the <PLATFORM> argument / parameter of 'taco install-dependencies'",
     "command.installDependencies.onlyOnePlatform": "Error: must specify exactly one platform name",
     "_command.installDependencies.onlyOnePlatform.comment": "Error shown when the number of arguments given to 'taco install-dependencies' is not exactly 1",
@@ -267,6 +279,9 @@
     "_RemoteBuildSuccessful.comment": "Message printed when a remote build completes successfully",
     "RemoteBuildUnsuccessful": "Remote build failed",
     "_RemoteBuildUnsuccessful.comment": "Message printed when a remote build fails",
+
+    "CordovaCommandFailed": "'cordova {1}' failed with exit code {0}",
+    "_CordovaCommandFailed.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
 
     "PerformanceSummary": "------ vs-mda Performance Summary"
 }

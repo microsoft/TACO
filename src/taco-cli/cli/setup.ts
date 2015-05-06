@@ -13,12 +13,13 @@ import request = require ("request");
 import util = require ("util");
 
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
+import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
+
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
-import resources = tacoUtility.ResourcesManager;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface ICliSession {
@@ -74,6 +75,10 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         .then(Setup.acquireCertificateIfRequired)
         .then(Setup.constructRemotePlatformSettings)
         .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
+        .then(function (): void {
+            logger.log(logger.colorize(resources.getString("command.success.base"), logger.Level.Success));
+            logger.logLine(" " + resources.getString("command.setup.settingsStored", Settings.settingsFile));
+        })
         .catch(function (err: any): void {
             if (err.message) {
                 logger.logErrorLine(err.message);
@@ -138,7 +143,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
             request.get({ uri: certificateUrl, strictSSL: false, encoding: null }, function (error: any, response: any, body: Buffer): void {
                 if (error) {
                     // Error contacting the build server
-                    deferred.reject(new Error(resources.getString("ErrorHTTPGet", certificateUrl, error)));
+                    deferred.reject(Setup.getFriendlyHttpError(error, hostPortAndPin.host, hostPortAndPin.port, certificateUrl, !!hostPortAndPin.pin));
                 } else {
                     if (response.statusCode !== 200) {
                         // Invalid PIN specified
@@ -171,7 +176,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
             var deferred = Q.defer<string>();
             request.get(options, function (error: any, response: any, body: any): void {
                 if (error) {
-                    deferred.reject(error);
+                    deferred.reject(Setup.getFriendlyHttpError(error, hostPortAndCert.host, hostPortAndCert.port, mountDiscoveryUrl, !!hostPortAndCert.certName));
                 } else if (response.statusCode !== 200) {
                     deferred.reject(new Error(resources.getString("command.setup.cantFindRemoteMount", mountDiscoveryUrl)));
                 } else {
@@ -211,6 +216,24 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
 
             return setting;
         });
+    }
+
+    private static getFriendlyHttpError(error: any, host: string, port: number, url: string, secure: boolean): Error {
+        if (error.code === "ECONNREFUSED") {
+            return new Error(resources.getString("command.setup.connrefused", util.format("http%s://%s:%s", secure ? "s" : "", host, port)));
+        } else if (error.code === "ENOTFOUND") {
+            return new Error(resources.getString("command.setup.notfound", host));
+        } else if (error.code === "ETIMEDOUT") {
+            return new Error(resources.getString("command.setup.timedout", host));
+        } else if (error.code === "ECONNRESET") {
+            if (!secure) {
+                return new Error(resources.getString("RemoteBuildNonSslConnectionReset", url));
+            } else {
+                return new Error(resources.getString("RemoteBuildSslConnectionReset", url));
+            }
+        } else {
+            return new Error(resources.getString("ErrorHTTPGet", url, error));
+        }
     }
 }
 

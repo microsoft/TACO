@@ -11,25 +11,27 @@
 /// <reference path="../../typings/archiver.d.ts"/>
 /// <reference path="../../typings/wrench.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
-/// <reference path="../../typings/taco-kits.d.ts"/>
+/// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-import mocha = require ("mocha");
-import path = require ("path");
-import zlib = require ("zlib");
+import archiver = require ("archiver");
 import fs = require ("fs");
+import mocha = require ("mocha");
 import os = require ("os");
-import templates = require ("../cli/utils/templateManager");
-import tacoUtils = require ("taco-utils");
-import utils = tacoUtils.UtilHelper;
-import resources = tacoUtils.ResourcesManager;
+import path = require ("path");
 import rimraf = require ("rimraf");
 import wrench = require ("wrench");
-import archiver = require ("archiver");
+import zlib = require ("zlib");
+
+import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
+import tacoUtils = require ("taco-utils");
+import templates = require ("../cli/utils/templateManager");
+
 import kitHelper = tacoKits.KitHelper;
+import utils = tacoUtils.UtilHelper;
 
 interface IKitHelper {
     getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateInfo>;
@@ -72,7 +74,7 @@ describe("TemplateManager", function (): void {
 
     before(function (done: MochaDone): void {
         // Set ResourcesManager to test mode
-        resources.UnitTest = true;
+        process.env["TACO_UNIT_TEST"] = true;
 
         // Set the temporary template cache location in TemplateManager for our tests
         templates.TemplateCachePath = templateCache;
