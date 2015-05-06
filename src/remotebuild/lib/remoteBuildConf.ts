@@ -103,6 +103,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 module RemoteBuildConf {
     export interface IModuleConf {
         mountPath: string;
+        requirePath?: string;
         [prop: string]: any;
     };
     export interface IModulesConf {

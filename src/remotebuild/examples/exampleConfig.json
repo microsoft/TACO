@@ -1,4 +1,4 @@
-This is an example configuration file with comments describing the meaning. Since JSON does not allow comments, this file is not valid as it stands 
+This is an example configuration file with comments describing the meaning. Since JSON does not allow comments, this file is not valid as it stands
 
 {
     "serverDir": "~/remote-builds", // Where should remotebuild store its working data, including certificates and builds. Defaults to TACO_HOME/remote-builds
@@ -6,12 +6,13 @@ This is an example configuration file with comments describing the meaning. Sinc
     "secure": true, // Should the server use HTTPS and require paired certificates
     "pinTimeout": 10, // How many minutes can pass between generating a client certificate and a client acquiring it
     "certExpirationDays": 1825, // How many days is a generated certificate valid for
-    "lang": "en", // What language should console messages be printed in. 
+    "lang": "en", // What language should console messages be printed in.
     "hostname": "localhost", // What hostname should the certificates be generated for. If this value is not specified, we default to os.hostname()
     "suppressSetupMessage": false,
     "writePidToFile": false,
     "modules": { // What node modules (which must previously be npm-installed) should service requests made to the server
         "taco-remote": { // Example: use the taco-remote node module, with the following configuration parameters
+            "requirePath": "taco-remote", // Where to require the module from, relative to server.js if specified as a relative path. Defaults to the name of the module
             "mountPath": "cordova", // all modules must specify a mountPath. For example, requests made to localhost:3000/cordova will be serviced by taco-remote
             "allowsEmulate": true, // Do we allow clients to use emulators on the server?
             "maxBuildsToKeep": 20, // How many builds to keep before deleting older ones

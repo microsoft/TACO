@@ -168,7 +168,8 @@ class Server {
         var serverMods = conf.modules;
         return serverMods.reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
             try {
-                var modGen: RemoteBuild.IServerModuleFactory = require(mod);
+                var requirePath = conf.moduleConfig(mod).requirePath || mod;
+                var modGen: RemoteBuild.IServerModuleFactory = require(requirePath);
             } catch (e) {
                 console.error(resources.getString("UnableToLoadModule", mod));
                 return Q.reject(e);

@@ -18,6 +18,7 @@ declare module RemoteBuild {
     }
     interface IServerModuleConfiguration {
         mountPath: string;
+        requirePath?: string;
         [prop: string]: any;
     }
     interface ICertStore {

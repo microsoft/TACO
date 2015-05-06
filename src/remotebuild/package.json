@@ -22,9 +22,6 @@
         "rimraf": "2.2.6",
         "taco-utils": "file:../taco-utils"
     },
-    "optionalDependencies": { 
-        "taco-remote": "file:../taco-remote"
-    },
     "devDependencies": {
         "typescript": "1.3.0",
         "mocha": "2.0.1",
