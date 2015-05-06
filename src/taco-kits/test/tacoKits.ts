@@ -5,16 +5,19 @@
 ﻿ *                                                       *
 ﻿ *******************************************************
 ﻿ */
-/// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
+/// <reference path="../../typings/sanitize-filename.d.ts"/>
+/// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
 /// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import mocha = require ("mocha");
 import path = require ("path");
+import sanitize = require ("sanitize-filename");
+// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require ("should");
 
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("../tacoKits");
@@ -23,6 +26,10 @@ import tacoUtils = require ("taco-utils");
 import kitHelper = tacoKits.KitHelper;
 
 describe("KitHelper", function (): void {
+    // Important paths
+    var testMetadataPath: string = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
+    var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetaData.json");
+
     // Test Kit Info
     var testDefaultKitId: string = "5.0.0-Kit";
     var testDeprecatedKitId: string = "4.0.0-Kit";
@@ -92,13 +99,12 @@ describe("KitHelper", function (): void {
         plugins: testPluginOverridesForDefaultKit
     };
 
-    // Important paths
     before(function (): void {
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
         
         // Set the kit metadata file location
-        kitHelper.KitMetadataFilePath = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
+        kitHelper.KitMetadataFilePath = testMetadataPath;
     });
 
     after(function (): void {
@@ -353,6 +359,38 @@ describe("KitHelper", function (): void {
                 .catch(function (err: string): void {
                     done(new Error(err));
                 });
+        });
+    });
+
+    describe("TacoKitMetaData.json", function () {
+        function verifyIsValidFileName(name: string) {
+            try {
+                name.should.be.exactly(sanitize(name));
+            } catch (err) {
+                throw new Error("'" + name + "' is not a valid directory name");
+            }
+        }
+
+        it("should only have kit ids that are suitable for directory names", function () {
+            var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
+
+            for (var kitId in metadata.kits) {
+                // Make sure we don't perform our check on objects added in the prototype
+                if (metadata.kits.hasOwnProperty(kitId)) {
+                    verifyIsValidFileName(kitId);
+                }
+            }
+        });
+
+        it("should only have template ids that are suitable for directory names", function () {
+            var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
+
+            for (var templateId in metadata.templates) {
+                // Make sure we don't perform our check on objects added in the prototype
+                if (metadata.kits.hasOwnProperty(templateId)) {
+                    verifyIsValidFileName(templateId);
+                }
+            }
         });
     });
 });
