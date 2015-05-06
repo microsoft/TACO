@@ -9,7 +9,7 @@
 /// <reference path="../typings/semver.d.ts" />
 "use strict";
 
-import assert = require("assert");
+import assert = require ("assert");
 import child_process = require ("child_process");
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
@@ -75,6 +75,7 @@ module TacoUtility {
                 });
             });
         }
+
         /**
          * Perform a fresh install of a specified node module, even if it is already cached
          *
@@ -106,7 +107,7 @@ module TacoUtility {
             mkdirp.sync(packageTargetPath);
             fs.writeFileSync(statusFilePath, "Outdated");
 
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, options.logLevel)
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, options.logLevel);
         }
 
         private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {

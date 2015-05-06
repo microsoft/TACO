@@ -17,17 +17,18 @@ var lastCheck = Date.now();
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
     // Update every 4 hours
-    public static checkInterval = 4 * 60 * 60 * 1000;
+    public static CheckInterval = 4 * 60 * 60 * 1000;
 
     public getPackageToServeRequest(req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib> {
         var promise = Q({});
         var now = Date.now();
-        if (now - lastCheck > RequestRedirector.checkInterval) {
+        if (now - lastCheck > RequestRedirector.CheckInterval) {
             lastCheck = now;
             promise = TacoPackageLoader.forceInstallPackage(tacoMuxLocation.name, tacoMuxLocation.location, { basePath: __dirname });
         }
-        return promise.then(function () {
-            return TacoPackageLoader.lazyRequireNoCache<TacoRemoteMultiplexer>(tacoMuxLocation.name, tacoMuxLocation.location, { basePath: __dirname }).then(function (mux: TacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
+
+        return promise.then(function (): Q.Promise<TacoRemoteLib.IRemoteLib> {
+            return TacoPackageLoader.lazyRequireNoCache<TacoRemoteMultiplexer.ITacoRemoteMultiplexer>(tacoMuxLocation.name, tacoMuxLocation.location, { basePath: __dirname }).then(function (mux: TacoRemoteMultiplexer.ITacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
                 var pkgLocation = mux.getPackage(req.query);
                 return TacoPackageLoader.lazyRequireNoCache<TacoRemoteLib.IRemoteLib>(pkgLocation.name, pkgLocation.location, { basePath: __dirname });
             });

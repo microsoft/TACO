@@ -207,6 +207,7 @@ class BuildManager {
             res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
+
         buildInfo["pkg"].downloadBuild(buildInfo, req, res, function (err: any): void {
             if (!err) {
                 self.buildMetrics.downloaded++;
@@ -229,6 +230,7 @@ class BuildManager {
             res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
+
         buildInfo["pkg"].emulateBuild(buildInfo, req, res);
     }
 
@@ -237,6 +239,7 @@ class BuildManager {
             res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
+
         buildInfo["pkg"].deployBuild(buildInfo, req, res);
     }
 
@@ -245,6 +248,7 @@ class BuildManager {
             res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
+
         buildInfo["pkg"].runBuild(buildInfo, req, res);
     }
 
@@ -253,6 +257,7 @@ class BuildManager {
             res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
+
         buildInfo["pkg"].debugBuild(buildInfo, req, res);
     }
 
