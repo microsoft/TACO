@@ -268,7 +268,7 @@ class Create implements commands.IDocumentedCommand {
     private finalize(templateDisplayName: string): void {
         // Report success over multiple loggings for different styles
         logger.log("\n", logger.Level.Normal);
-        logger.log(resources.getString("command.create.success.base"), logger.Level.Success);
+        logger.log(resources.getString("command.success.base"), logger.Level.Success);
 
         if (this.isKitProject()) {
             if (templateDisplayName) {

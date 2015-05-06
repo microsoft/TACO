@@ -3,20 +3,15 @@
 
 import fs = require ("fs");
 import path = require ("path");
-var colors = require("colors");
+import colors = require ("colors");
 
 module TacoUtility {
-    export module Logger {
-        /**
-         * Warning levels
-         */
-        export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
-
+    export class Logger {
         /**
          * returns colorized string
          * wrapping "colors" module because not yet possible to combine themes, i.e. ["yellow", "bold"]:  https://github.com/Marak/colors.js/issues/72
          */
-        export function colorize(msg: string, level: Level): string {
+        public static colorize(msg: string, level: Logger.Level): string {
             colors.setTheme({
                 error: "red",
                 warn: "yellow",
@@ -26,34 +21,34 @@ module TacoUtility {
             });
 
             switch (level) {
-                case Level.Error: return msg.error.bold;
-                case Level.Warn: return msg.warn.bold;
-                case Level.Link: return msg.link.underline;
-                case Level.Normal: return msg;
-                case Level.NormalBold: return msg.normalBold;
-                case Level.Success: return msg.success.bold;
+                case Logger.Level.Error: return msg.error.bold;
+                case Logger.Level.Warn: return msg.warn.bold;
+                case Logger.Level.Link: return msg.link.underline;
+                case Logger.Level.Normal: return msg;
+                case Logger.Level.NormalBold: return msg.normalBold;
+                case Logger.Level.Success: return msg.success.bold;
             }
         }          
 
         /**
          * log
          */
-        export function log(msg: string, level: Level = Level.Normal): void {
+        public static log(msg: string, level: Logger.Level = Logger.Level.Normal): void {
             if (!msg) {
                 return;
             }
 
-            msg = colorize(msg, level);
+            msg = Logger.colorize(msg, level);
             switch (level) {
-                case Level.Error:
-                case Level.Warn:
+                case Logger.Level.Error:
+                case Logger.Level.Warn:
                     process.stderr.write(msg);
                     return;
 
-                case Level.Link:
-                case Level.Success:
-                case Level.Normal:
-                case Level.NormalBold:
+                case Logger.Level.Link:
+                case Logger.Level.Success:
+                case Logger.Level.Normal:
+                case Logger.Level.NormalBold:
                     process.stdout.write(msg);
                     break;
             }
@@ -62,33 +57,40 @@ module TacoUtility {
         /**
          * for quick logging use
          */
-        export function logLine(msg: string, level: Level = Level.Normal): void {
-            log(msg + "\n", level);
+        public static logLine(msg: string, level: Logger.Level = Logger.Level.Normal): void {
+            Logger.log(msg + "\n", level);
         }
 
-        export function logErrorLine(msg: string): void {
-            logLine(msg, Level.Error);
+        public static logErrorLine(msg: string): void {
+            Logger.logLine(msg, Logger.Level.Error);
         }
 
-        export function logWarnLine(msg: string): void {
-            logLine(msg, Level.Warn);
+        public static logWarnLine(msg: string): void {
+            Logger.logLine(msg, Logger.Level.Warn);
         }
 
-        export function logLinkLine(msg: string): void {
-            logLine(msg, Level.Link);
+        public static logLinkLine(msg: string): void {
+            Logger.logLine(msg, Logger.Level.Link);
         }
 
-        export function logNormalLine(msg: string): void {
-            logLine(msg, Level.Normal);
+        public static logNormalLine(msg: string): void {
+            Logger.logLine(msg, Logger.Level.Normal);
         }
 
-        export function logNormalBoldLine(msg: string): void {
-            logLine(msg, Level.NormalBold);
+        public static logNormalBoldLine(msg: string): void {
+            Logger.logLine(msg, Logger.Level.NormalBold);
         }
 
-        export function logSuccessLine(msg: string): void {
-            logLine(msg, Level.Success);
+        public static logSuccessLine(msg: string): void {
+            Logger.logLine(msg, Logger.Level.Success);
         }
+    };
+
+    export module Logger {
+        /**
+         * Warning levels
+         */
+        export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
     }
 }
 
