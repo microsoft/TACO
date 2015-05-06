@@ -18,8 +18,7 @@
         "rimraf": "2.2.6",
         "fstream": "0.1.28",
         "request": "2.36.0",
-        "taco-utils": "file:../taco-utils",
-        "taco-remote-lib": "file:../taco-remote-lib"
+        "taco-utils": "file:../taco-utils"
     },
     "devDependencies": {
         "typescript": "1.3.0",

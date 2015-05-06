@@ -1,21 +1,37 @@
 ﻿/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
+/// <reference path="../../typings/express.d.ts" />
+/// <reference path="../../typings/tacoRemoteMultiplexer.d.ts" />
+"use strict";
 
-import express = require ("express");
 import Q = require ("q");
 
 import tacoUtility = require ("taco-utils");
 
 import BuildInfo = tacoUtility.BuildInfo;
+import TacoPackageLoader = tacoUtility.TacoPackageLoader;
+
+var tacoMuxLocation = require("./tacoRemoteMuxLocation.json");
+
+var lastCheck = Date.now();
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
-    public getPackageToServeRequest(buildInfo: BuildInfo, req: express.Request): Q.Promise<TacoRemoteLib.IRemoteLib> {
-        // Either argument could be null: buildInfo if this is a request to submit a new build, or req if this is just about to do a build
-        // ALTERNATELY:
-        // Should we just look up the package to service a request once, based on the request, and then stash it in the buildInfo for later reference? Never letting you change?
-        // In that case we would need to be careful when updating buildInfo objects from responses in other processes but that should be workable.
-        // TODO (Devdiv 1160580): Implement interesting behaviours in here
-        return Q(require("taco-remote-lib"));
+    // Update every 4 hours
+    public static checkInterval = 4 * 60 * 60 * 1000;
+
+    public getPackageToServeRequest(req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib> {
+        var promise = Q({});
+        var now = Date.now();
+        if (now - lastCheck > RequestRedirector.checkInterval) {
+            lastCheck = now;
+            promise = TacoPackageLoader.forceInstallPackage(tacoMuxLocation.name, tacoMuxLocation.location, { basePath: __dirname });
+        }
+        return promise.then(function () {
+            return TacoPackageLoader.lazyRequireNoCache<TacoRemoteMultiplexer>(tacoMuxLocation.name, tacoMuxLocation.location, { basePath: __dirname }).then(function (mux: TacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
+                var pkgLocation = mux.getPackage(req.query);
+                return TacoPackageLoader.lazyRequireNoCache<TacoRemoteLib.IRemoteLib>(pkgLocation.name, pkgLocation.location, { basePath: __dirname });
+            });
+        });
     }
 }
 

@@ -87,7 +87,9 @@ gulp.task("copy", function (): Q.Promise<any> {
             "/**/bin/**",
             "/**/templates/**",
             "/**/examples/**",
-            "/**/*.ps1"
+            "/**/*.ps1",
+            "/**/moduleLookup.json",
+            "/**/tacoRemoteMuxLocation.json"
         ],
         buildConfig.src, buildConfig.buildPackages);
 });

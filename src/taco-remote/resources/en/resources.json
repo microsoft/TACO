@@ -46,7 +46,9 @@
 	"BuildDirectoryNotFound": "Build directory {0} does not exist.",
 	"_BuildDirectoryNotFound.comment": "Message printed to console and returned to the client when ",
 	"BuildMovingOn": "Done with currentBuild. Checking for next build in queue.",
-	"_BuildMovingOn.comment": "Message printed to console when a build is finished, successfully or otherwise, before continuing with any queued builds",
+    "_BuildMovingOn.comment": "Message printed to console when a build is finished, successfully or otherwise, before continuing with any queued builds",
+    "MalformedBuildInfo": "Unable to find appropriate package for specifiede build",
+    "_MalformedBuildInfo.comment": "Message printed when a buildInfo object is missing a 'pkg' member. Shouldn't ever happen.",
 
 	"NewBuildSubmitted": "New build request submitted:",
 	"_NewBuildSubmitted.comment": "Message printed to the console when a new build is received",

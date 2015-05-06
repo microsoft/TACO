@@ -1,0 +1,10 @@
+﻿{
+    "tacoRemoteLib@0.0.1": {
+        "name": "tacoRemoteLib",
+        "location": "../../taco-remote-lib"
+    },
+    "samplePackageInNpm": {
+        "name": "tacoRemoteLib",
+        "location": "0.1.0"
+    }
+}

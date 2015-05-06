@@ -9,6 +9,7 @@
 /// <reference path="../typings/semver.d.ts" />
 "use strict";
 
+import assert = require("assert");
 import child_process = require ("child_process");
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
@@ -28,7 +29,8 @@ module TacoUtility {
     export enum PackageSpecType {
         Error = -1,
         Version = 0,
-        Uri = 1
+        Uri = 1,
+        RelativePath = 2
     }
 
     export class TacoPackageLoader {
@@ -45,13 +47,66 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyRequire<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
+        public static lazyRequire<T>(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<T> {
+            options = options || {};
             var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
             var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
 
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): T {
+            if (packageSpecType === PackageSpecType.RelativePath) {
+                assert.ok(options.basePath);
+                var relativePath = packageVersion.substring("file://".length);
+                var absolutePath = path.resolve(options.basePath, relativePath);
+                packageVersion = absolutePath;
+            }
+
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, options.logLevel).then(function (): T {
                 return TacoPackageLoader.requirePackage<T>(packageTargetPath);
             });
+        }
+
+        public static lazyRequireNoCache<T>(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<T> {
+            var requireCachePaths = Object.keys(require.cache);
+            return TacoPackageLoader.lazyRequire<T>(packageName, packageVersion, options).finally(function (): void {
+                // un-cache any files that were just required.
+                Object.keys(require.cache).filter(function (key: string): boolean {
+                    return requireCachePaths.indexOf(key) === -1;
+                }).forEach(function (key: string): void {
+                    delete require.cache[key];
+                });
+            });
+        }
+        /**
+         * Perform a fresh install of a specified node module, even if it is already cached
+         *
+         * This method is resilient against interrupted downloads, but is not safe under concurrency.
+         * Until that changes, we should not allow multiple builds at once.
+         * 
+         * @param {string} packageName The name of the package to load
+         * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
+         * @param {string} basePath Optional parameter which specifies the base path to resolve relative file paths against
+         *
+         * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved if the package installed succesfully
+         */
+
+        public static forceInstallPackage(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<any> {
+            options = options || {};
+            var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
+            var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
+
+            if (packageSpecType === PackageSpecType.RelativePath) {
+                assert.ok(options.basePath);
+                var relativePath = packageVersion.substring("file://".length);
+                var absolutePath = path.resolve(options.basePath, relativePath);
+                packageVersion = absolutePath;
+            }
+
+            // Intentionally create the status file, triggering a re-install
+            var statusFilePath = TacoPackageLoader.getStatusFilePath(packageTargetPath);
+            mkdirp.sync(packageTargetPath);
+            fs.writeFileSync(statusFilePath, "Outdated");
+
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, options.logLevel)
         }
 
         private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
@@ -117,6 +172,7 @@ module TacoUtility {
                 case PackageSpecType.Version:
                     return path.join(homePackageModulesPath, packageVersion, "node_modules", packageName);
                 case PackageSpecType.Uri:
+                case PackageSpecType.RelativePath:
                     return path.join(homePackageModulesPath, encodeURIComponent(packageVersion), "node_modules", packageName);
                 case PackageSpecType.Error:
                 default:
@@ -165,6 +221,10 @@ module TacoUtility {
                 case PackageSpecType.Uri:
                     return TacoPackageLoader.cloneGitRepo(packageVersion, targetPath, logLevel)
                         .then(function (): Q.Promise<any> {
+                        return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
+                        });
+                case PackageSpecType.RelativePath:
+                    return utils.copyRecursive(packageVersion, targetPath).then(function (): Q.Promise<any> {
                         return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
                     });
                 case PackageSpecType.Error:
@@ -236,6 +296,10 @@ module TacoUtility {
 
             if ((gitUrlRegex.exec(packageVersion))) {
                 return PackageSpecType.Uri;
+            }
+
+            if (packageVersion.match(/file:\/\/\..*/)) {
+                return PackageSpecType.RelativePath;
             }
 
             return PackageSpecType.Error;

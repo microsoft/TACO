@@ -113,7 +113,7 @@ class BuildManager {
         var logLevel: string = req.query.logLevel || null;
 
         var self = this;
-        return this.requestRedirector.getPackageToServeRequest(null, req).then(function (pkg: TacoRemoteLib.IRemoteLib): Q.Promise<BuildInfo> {
+        return this.requestRedirector.getPackageToServeRequest(req).then(function (pkg: TacoRemoteLib.IRemoteLib): Q.Promise<BuildInfo> {
             pkg.init(self.serverConf);
             var errors: string[] = [];
             if (!pkg.validateBuildRequest(req, errors)) {
@@ -203,13 +203,15 @@ class BuildManager {
     // Downloads the requested build.
     public downloadBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         var self = this;
-        this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.downloadBuild(buildInfo, req, res, function (err: any): void {
-                if (!err) {
-                    self.buildMetrics.downloaded++;
-                    buildInfo.updateStatus(BuildInfo.DOWNLOADED);
-                }
-            });
+        if (!buildInfo["pkg"]) {
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
+            return;
+        }
+        buildInfo["pkg"].downloadBuild(buildInfo, req, res, function (err: any): void {
+            if (!err) {
+                self.buildMetrics.downloaded++;
+                buildInfo.updateStatus(BuildInfo.DOWNLOADED);
+            }
         });
     }
 
@@ -223,27 +225,35 @@ class BuildManager {
             return;
         }
 
-        this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.emulateBuild(buildInfo, req, res);
-        });
+        if (!buildInfo["pkg"]) {
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
+            return;
+        }
+        buildInfo["pkg"].emulateBuild(buildInfo, req, res);
     }
 
     public deployBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
-        this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.deployBuild(buildInfo, req, res);
-        });
+        if (!buildInfo["pkg"]) {
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
+            return;
+        }
+        buildInfo["pkg"].deployBuild(buildInfo, req, res);
     }
 
     public runBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
-        this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.runBuild(buildInfo, req, res);
-        });
+        if (!buildInfo["pkg"]) {
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
+            return;
+        }
+        buildInfo["pkg"].runBuild(buildInfo, req, res);
     }
 
     public debugBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
-        this.requestRedirector.getPackageToServeRequest(buildInfo, req).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.debugBuild(buildInfo, req, res);
-        });
+        if (!buildInfo["pkg"]) {
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
+            return;
+        }
+        buildInfo["pkg"].debugBuild(buildInfo, req, res);
     }
 
     private saveUploadedTgzFile(buildInfo: BuildInfo, req: express.Request, callback: Function): void {
@@ -361,8 +371,11 @@ class BuildManager {
             return;
         }
 
-        self.requestRedirector.getPackageToServeRequest(buildInfo, null).then(function (pkg: TacoRemoteLib.IRemoteLib): void {
-            pkg.build(buildInfo, function (resultBuildInfo: BuildInfo): void {
+        if (!buildInfo["pkg"]) {
+            buildInfo.updateStatus(BuildInfo.ERROR, "MalformedBuildInfo");
+            self.dequeueNextBuild();
+        } else {
+            buildInfo["pkg"].build(buildInfo, function (resultBuildInfo: BuildInfo): void {
                 buildInfo.updateStatus(resultBuildInfo.status, resultBuildInfo.messageId, resultBuildInfo.messageArgs);
                 if (buildInfo.status === BuildInfo.COMPLETE) {
                     self.buildMetrics.succeeded++;
@@ -375,7 +388,7 @@ class BuildManager {
 
                 self.dequeueNextBuild();
             });
-        });
+        }
     }
 
     private dequeueNextBuild(): void {
