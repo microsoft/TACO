@@ -42,13 +42,13 @@ class Create implements commands.IDocumentedCommand {
         kit: String,
         template: String,
         cli: String,
+        list: Boolean,
         "copy-from": String,
         "link-to": String
     };
     private static ShortHands: Nopt.ShortFlags = {
         src: "--copy-from"
     };
-    private static TacoOnlyOptions: string[] = ["cli", "kit", "template"];
     private static DefaultAppId: string = "io.cordova.hellocordova";
     private static DefaultAppName: string = "HelloTaco";
 
@@ -64,22 +64,27 @@ class Create implements commands.IDocumentedCommand {
             return Q.reject(err.message);
         }
 
-        var self = this;
-        var templateDisplayName: string;
+        if (this.commandParameters.data.options["list"]) {
+            return this.listTemplates();
+        } else {
+            var self = this;
+            var templateDisplayName: string;
 
-        return this.createProject()
-            .then(function (templateUsed: string): Q.Promise<any> {
-            templateDisplayName = templateUsed;
+            return this.createProject()
+                .then(function (templateUsed: string): Q.Promise<any> {
+                    templateDisplayName = templateUsed;
 
-                var kitProject = self.isKitProject();
-                var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
+                    var kitProject = self.isKitProject();
+                    var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
-            }).then(function (): Q.Promise<any> {
-                self.finalize(templateDisplayName);
+                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                })
+                .then(function (): Q.Promise<any> {
+                    self.finalize(templateDisplayName);
 
-                return Q.resolve({});
-            });
+                    return Q.resolve({});
+                });
+        }
     }
 
     /**
@@ -135,6 +140,28 @@ class Create implements commands.IDocumentedCommand {
     }
 
     /**
+     * List available templates for the specified kit, or for the default kit if no kit is specified
+     */
+    private listTemplates(): Q.Promise<any> {
+        var kit = this.commandParameters.data.options["kit"];
+        var templates: templateManager = new templateManager(kitHelper);
+
+        return templates.getTemplatesForKit(kit)
+            .then(function (list: templateManager.ITemplateList): void {
+            var kitToPrint: string = kit || list.kitId;
+
+            logger.logLine(resources.getString("command.create.list.base", kitToPrint));
+            logger.log("\n");
+
+            for (var i: number = 0; i < list.templates.length; i++) {
+                logger.log(list.templates[i].id, level.NormalBold);
+                logger.log(": " + list.templates[i].name);
+                logger.log("\n");
+            }
+        });
+    }
+
+    /**
      * Creates the Kit or CLI project
      */
     private createProject(): Q.Promise<string> {
@@ -177,7 +204,9 @@ class Create implements commands.IDocumentedCommand {
                 }
 
                 if (mustUseTemplate) {
-                    return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
+                    var templates: templateManager = new templateManager(kitHelper);
+
+                    return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
                         .then(function (templateDisplayName: string): Q.Promise<string> {
                             return Q.resolve(templateDisplayName);
                         });

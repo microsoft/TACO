@@ -14,7 +14,8 @@
             { "name": "--template <NAME>", "description": "[command.create.options.template]" },
             { "name": "--cli <VERSION>", "description": "[command.create.options.cli]" },
             { "name": "--copy-from|src <PATH>", "description": "[command.create.options.copy]" },
-            { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" }
+            { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" },
+            { "name": "--list", "description": "[command.create.options.list]" }
         ]
     },
     "help": {

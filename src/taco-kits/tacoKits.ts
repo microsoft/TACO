@@ -18,7 +18,14 @@ import tacoUtility = require ("taco-utils");
 
 import logger = tacoUtility.Logger;
 
-module TacoKits { 
+module TacoKits {
+    // Basic interface for a KitHelper, for mocking purposes
+    export interface IKitHelper {
+        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+    }
+
+    // Metadata-related interfaces
     export interface IPluginOverrideMetadata {
         [pluginId: string]: {
             name?: string;
@@ -37,11 +44,19 @@ module TacoKits {
 
     export interface ITemplateOverrideInfo {
         kitId: string;
+        templateId?: string;
         templateInfo: ITemplateInfo;
     }
 
+    export interface IKitTemplatesOverrideInfo {
+        kitId: string;
+        templates: ITemplateOverrideInfo[];
+    }
+
     export interface ITemplateInfo {
-        name: string;
+        name: {
+            [language: string]: string;
+        };
         url: string;
     }
 
@@ -83,6 +98,7 @@ module TacoKits {
         kits: IKitMetadata;
         templates: ITemplateMetadata;
     }
+
     /**
      *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
      */
@@ -106,7 +122,6 @@ module TacoKits {
                 return Q(KitHelper.KitMetadata);
             }
             
-            // Look through template cache to find the requested template
             if (!KitHelper.KitMetadataFilePath) {
                 KitHelper.KitMetadataFilePath = path.resolve(__dirname, KitHelper.KitFileName);
             }
@@ -170,6 +185,57 @@ module TacoKits {
         }
 
         /**
+         *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
+         */
+        public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
+            var kit: string = null;
+            var templates: ITemplateMetadata = null;
+
+            return KitHelper.getTemplateMetadata()
+                .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
+                    templates = templateMetadata;
+
+                    return kitId ? Q.resolve(kitId) : KitHelper.getDefaultKit();
+                })
+                .then(function (kitId: string): Q.Promise<IKitInfo> {
+                    kit = kitId;
+
+                    // Try to get the kit info of the specified kit; we won't do anything with it, but it will throw an error if the kit is invalid
+                    return KitHelper.getKitInfo(kit);
+                })
+                .then(function (): Q.Promise<IKitTemplatesOverrideInfo> {
+                    var templatesForKit: { [templateId: string]: ITemplateInfo } = null;
+                    var templateList: ITemplateOverrideInfo[] = [];
+                    var kitOverride: string = kit;
+
+                    if (!templates[kitOverride]) {
+                        kitOverride = "default";
+                    }
+
+                    templatesForKit = templates[kitOverride];
+
+                    for (var templateId in templatesForKit) {
+                        if (templatesForKit.hasOwnProperty(templateId)) {
+                            var templateOverrideInfo: ITemplateOverrideInfo = {
+                                kitId: kitOverride,
+                                templateId: templateId,
+                                templateInfo: templatesForKit[templateId]
+                            };
+
+                            templateList.push(templateOverrideInfo);
+                        }
+                    }
+
+                    var kitTemplatesOverrideInfo: IKitTemplatesOverrideInfo = {
+                        kitId: kitOverride,
+                        templates: templateList
+                    };
+
+                    return Q.resolve(kitTemplatesOverrideInfo);
+                });
+        }
+
+        /**
          *   Returns a promise resolved by the template override information for the specified kit
          *   If there is an override for {kitId} -> returns the template override info for the {templateId}
          *   Else -> returns the default template information with id {templateId}
@@ -177,50 +243,50 @@ module TacoKits {
         public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo> {
             var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
             var templates: ITemplateMetadata = null;
-            var templateOverrideInfo: ITemplateOverrideInfo = {
-                kitId: "", templateInfo: { name: "", url: "" }
-            };
-            return KitHelper.getTemplateMetadata().then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
-                templates = templateMetadata;
-                return kitId ? Q.resolve(kitId) : KitHelper.getDefaultKit();
-            }).then(function (kitId: string): Q.Promise<ITemplateOverrideInfo> {
-                if (templates[kitId]) {
-                    // Found an override for the specified kit
-                    if (templates[kitId][templateId]) {
-                        // Found the specified template
-                        templateOverrideInfo.kitId = kitId;
-                        templateOverrideInfo.templateInfo = templates[kitId][templateId];
+            var templateOverrideInfo: ITemplateOverrideInfo = null;
+
+            return KitHelper.getTemplateMetadata()
+                .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
+                    templates = templateMetadata;
+
+                    return kitId ? Q.resolve(kitId) : KitHelper.getDefaultKit();
+                })
+                .then(function (kitId: string): Q.Promise<ITemplateOverrideInfo> {
+                    if (templates[kitId]) {
+                        // Found an override for the specified kit
+                        if (templates[kitId][templateId]) {
+                            // Found the specified template
+                            templateOverrideInfo = KitHelper.createTemplateOverrideInfo(kitId, templates[kitId][templateId]);
+
+                            // Convert the url from relative to absolute local path
+                            templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
+                            deferred.resolve(templateOverrideInfo);
+                        } else {
+                            // Error, the kit override does not define the specified template id
+                            if (templateId === KitHelper.TsTemplateId) {
+                                // We have a special error message for typescript
+                                logger.logErrorLine(resources.getString("taco-kits.exception.TypescriptNotSupported"));
+                                deferred.reject("taco-kits.exception.TypescriptNotSupported");
+                            } else {
+                                logger.logErrorLine(resources.getString("taco-kits.exception.InvalidTemplate", templateId));
+                                deferred.reject("taco-kits.exception.InvalidTemplate");
+                            }
+                        }
+                    } else if (templates["default"][templateId]) {
+                        // Found a default template matching the specified template id
+                        templateOverrideInfo = KitHelper.createTemplateOverrideInfo("default", templates["default"][templateId]);
 
                         // Convert the url from relative to absolute local path
                         templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
                         deferred.resolve(templateOverrideInfo);
                     } else {
-                        // Error, the kit override does not define the specified template id
-                        if (templateId === KitHelper.TsTemplateId) {
-                            // We have a special error message for typescript
-                            logger.logErrorLine(resources.getString("taco-kits.exception.TypescriptNotSupported"));
-                            deferred.reject("taco-kits.exception.TypescriptNotSupported");
-                        } else {
-                            logger.logErrorLine(resources.getString("taco-kits.exception.InvalidTemplate", templateId));
-                            deferred.reject("taco-kits.exception.InvalidTemplate");
-                        }
+                        // Error, no template matching the specified template id
+                        logger.logErrorLine(resources.getString("taco-kits.exception.InvalidTemplate", templateId));
+                        deferred.reject("taco-kits.exception.InvalidTemplate");
                     }
-                } else if (templates["default"][templateId]) {
-                    // Found a default template matching the specified template id
-                    templateOverrideInfo.kitId = "default";
-                    templateOverrideInfo.templateInfo = templates["default"][templateId];
 
-                    // Convert the url from relative to absolute local path
-                    templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
-                    deferred.resolve(templateOverrideInfo);
-                } else {
-                    // Error, no template matching the specified template id
-                    logger.logErrorLine(resources.getString("taco-kits.exception.InvalidTemplate", templateId));
-                    deferred.reject("taco-kits.exception.InvalidTemplate");
-                }
-
-                return deferred.promise;
-            });
+                    return deferred.promise;
+                });
         }
 
         /**
@@ -276,6 +342,26 @@ module TacoKits {
                     return deferred.promise;
                 });
             }
+        }
+
+        /**
+         * Builds an ITemplateOverrideInfo from a kit id and a ITemplateInfo. The ITemplateInfo is deep copied to make sure modifications
+         * to the ITemplateOverrideInfo do not affect the provided ITemplateInfo.
+         */
+        private static createTemplateOverrideInfo(kit: string, template: ITemplateInfo): ITemplateOverrideInfo {
+            var templateOverrideInfo: ITemplateOverrideInfo = {
+                kitId: kit,
+                templateInfo: {
+                    name: {},
+                    url: ""
+                }
+            };
+
+            // Deep copy the provided ITemplateInfo to the returned override object. Since we know ITemplateInfo only contains strings (and objects made of more strings),
+            // and are relatively small, it is safe to deep copy via JSON serialization
+            templateOverrideInfo.templateInfo = JSON.parse(JSON.stringify(template));
+
+            return templateOverrideInfo;
         }
 
         /**
