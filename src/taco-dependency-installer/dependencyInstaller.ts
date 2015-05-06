@@ -1,10 +1,12 @@
-﻿/// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
+﻿/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
+/// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
+
 "use strict"
 
 import fs = require ("fs");
 import path = require ("path");
+
 import installerBase = require ("./installerBase");
 import tacoUtils = require ("taco-utils");
 
@@ -24,7 +26,6 @@ module TacoDependencyInstaller {
             "ios-sim": "iosSim",
             "java": "javaJdk",
             "msbuild": "msBuild",
-            "xcode": "xCode"
         };
 
         private DependenciesData: DependencyInstallerInterfaces.IDependencyDictionary;
@@ -40,7 +41,7 @@ module TacoDependencyInstaller {
             this.parseDependenciesData();
 
             // Extract Cordova results and transform them to an array of dependency ids
-            var dependencyArray: string[] = cordovaResults;
+            var dependencyArray: string[] = DependencyInstaller.extractDependencyIds(cordovaResults);
 
             // Convert the Cordova ids to our own taco ids
             dependencyArray = DependencyInstaller.cordovaIdsToTacoIds(dependencyArray);
@@ -152,10 +153,42 @@ module TacoDependencyInstaller {
             return vertices;
         }
 
-        private static callCordovaCheckDependencies(): string[] {
+        private static callCordovaCheckDependencies(): any[] {
             // TODO Call Cordova when they have added dependency checking
             // TEMP
-            return ["ant", "gradle", "ios-deploy", "ios-sim", "java", "msbuild", "xcode"];
+            return [
+                {
+                    name: "ant"
+                },
+                {
+                    name: "gradle"
+                },
+                {
+                    name: "ios-deploy"
+                },
+                {
+                    name: "ios-sim"
+                },
+                {
+                    name: "java"
+                },
+                {
+                    name: "msbuild"
+                },
+                {
+                    name: "xcode"
+                }
+            ];
+        }
+
+        private static extractDependencyIds(cordovaChecksResult: any[]): string[] {
+            var dependencies: string[] = [];
+
+            cordovaChecksResult.forEach(function (value: any, index: number, array: any[]): void {
+                dependencies.push(value["name"]);
+            });
+
+            return dependencies;
         }
 
         private static removeEdgeFromList(vertex: number, list: number[]): boolean {

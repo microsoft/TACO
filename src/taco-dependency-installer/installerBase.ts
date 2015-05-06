@@ -1,9 +1,11 @@
-﻿/// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
+﻿/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
+/// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
+
 "use strict"
 
 import path = require ("path");
+
 import tacoUtils = require ("taco-utils");
 
 export class InstallerBase {
