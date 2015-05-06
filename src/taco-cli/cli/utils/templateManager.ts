@@ -25,7 +25,7 @@ import utils = tacoUtility.UtilHelper;
 module TemplateManager {
     export interface IKitHelper {
         getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
-        getTemplatesForKit(kitId: string): Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
     }
 
     export interface ITemplateDescriptor {
@@ -45,49 +45,7 @@ class TemplateManager {
     private templateCachePath: string = null;
     private kitHelper: TemplateManager.IKitHelper = null;
 
-    /**
-     * Returns the best localized name to use for the specified template.
-     */
-    private static getLocalizedTemplateName(templateInfo: TacoKits.ITemplateInfo): string {
-        // Get the best language to use from the available localizations in the template's name
-        var availableLanguages: string[] = [];
-
-        for (var language in templateInfo.name) {
-            if (templateInfo.name.hasOwnProperty(language)) {
-                availableLanguages.push(language);
-            }
-        }
-
-        var useLanguage: string = tacoUtility.ResourceManager.getBestAvailableLocale(availableLanguages);
-
-        return templateInfo.name[useLanguage];
-    }
-
-    private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
-        var replaceParams: Replace.IReplaceParameters = {
-            regex: "",
-            replacement: "",
-            paths: [path.resolve(projectPath)],
-            recursive: true,
-            silent: true
-        };
-
-        var tokens: { [token: string]: string } = {
-            "\\$appid\\$": appId,
-            "\\$projectname\\$": appName
-        };
-
-        for (var token in tokens) {
-            replaceParams.regex = token;
-            replaceParams.replacement = tokens[token];
-
-            replace(replaceParams);
-        }
-
-        return Q.resolve(null);
-    }
-
-    public constructor(kits: TemplateManager.IKitHelper, templateCache?: string) {
+    constructor(kits: TemplateManager.IKitHelper, templateCache?: string) {
         this.kitHelper = kits;
         this.templateCachePath = templateCache || path.join(utils.tacoHome, "templates");
     }
@@ -162,6 +120,48 @@ class TemplateManager {
 
             return Q.resolve(list);
         });
+    }
+
+    /**
+     * Returns the best localized name to use for the specified template.
+     */
+    private static getLocalizedTemplateName(templateInfo: TacoKits.ITemplateInfo): string {
+        // Get the best language to use from the available localizations in the template's name
+        var availableLanguages: string[] = [];
+
+        for (var language in templateInfo.name) {
+            if (templateInfo.name.hasOwnProperty(language)) {
+                availableLanguages.push(language);
+            }
+        }
+
+        var useLanguage: string = tacoUtility.ResourceManager.getBestAvailableLocale(availableLanguages);
+
+        return templateInfo.name[useLanguage];
+    }
+
+    private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
+        var replaceParams: Replace.IReplaceParameters = {
+            regex: "",
+            replacement: "",
+            paths: [path.resolve(projectPath)],
+            recursive: true,
+            silent: true
+        };
+
+        var tokens: { [token: string]: string } = {
+            "\\$appid\\$": appId,
+            "\\$projectname\\$": appName
+        };
+
+        for (var token in tokens) {
+            replaceParams.regex = token;
+            replaceParams.replacement = tokens[token];
+
+            replace(replaceParams);
+        }
+
+        return Q.resolve(null);
     }
 
     private findTemplatePath(templateId: string, kitId: string, templateInfo: TacoKits.ITemplateInfo): Q.Promise<string> {

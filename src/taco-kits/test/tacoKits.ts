@@ -17,7 +17,7 @@ import mocha = require ("mocha");
 import path = require ("path");
 import sanitize = require ("sanitize-filename");
 // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
-var should_module = require ("should");
+var should_module = require("should");
 
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("../tacoKits");
@@ -362,8 +362,8 @@ describe("KitHelper", function (): void {
         });
     });
 
-    describe("TacoKitMetaData.json", function () {
-        function verifyIsValidFileName(name: string) {
+    describe("TacoKitMetaData.json", function (): void {
+        function verifyIsValidFileName(name: string): void {
             try {
                 name.should.be.exactly(sanitize(name));
             } catch (err) {
@@ -371,7 +371,7 @@ describe("KitHelper", function (): void {
             }
         }
 
-        it("should only have kit ids that are suitable for directory names", function () {
+        it("should only have kit ids that are suitable for directory names", function (): void {
             var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
 
             for (var kitId in metadata.kits) {
@@ -382,7 +382,7 @@ describe("KitHelper", function (): void {
             }
         });
 
-        it("should only have template ids that are suitable for directory names", function () {
+        it("should only have template ids that are suitable for directory names", function (): void {
             var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
 
             for (var templateId in metadata.templates) {

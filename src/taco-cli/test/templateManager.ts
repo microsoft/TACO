@@ -23,7 +23,7 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
-var should_module = require ("should");
+var should_module = require("should");
 import wrench = require ("wrench");
 import zlib = require ("zlib");
 
