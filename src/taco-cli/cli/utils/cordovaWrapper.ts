@@ -43,22 +43,18 @@ class CordovaWrapper {
     /**
      * Wrapper for 'cordova create' command.
      *
-     * @param {string} The ID of the kit to use
-     * @param {string} The path of the project to create
-     * @param {string} The id of the app
-     * @param {string} The name of app
-     * @param {string} A JSON string whose key/value pairs will be added to the cordova config file in <project path>/.cordova/
-     * @param {[option: string]: any} Bag of option flags for the 'cordova create' command
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaCreateParameters} The cordova create options
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(cordovaCli: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
-        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, cordovaCli)
+    public static create(cordovaCliVersion: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, cordovaCliVersion)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
                 cordovaHelper.prepareCordovaConfig(cordovaParameters);
 
-            return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
-        });
+                return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
+            });
     }
 }
 

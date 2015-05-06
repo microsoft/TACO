@@ -23,11 +23,6 @@ import logger = tacoUtility.Logger;
 import utils = tacoUtility.UtilHelper;
 
 module TemplateManager {
-    export interface IKitHelper {
-        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
-        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
-    }
-
     export interface ITemplateDescriptor {
         id: string;
         name: string;
@@ -43,9 +38,9 @@ class TemplateManager {
     private static DefaultTemplateId: string = "blank";
 
     private templateCachePath: string = null;
-    private kitHelper: TemplateManager.IKitHelper = null;
+    private kitHelper: TacoKits.IKitHelper = null;
 
-    constructor(kits: TemplateManager.IKitHelper, templateCache?: string) {
+    constructor(kits: TacoKits.IKitHelper, templateCache?: string) {
         this.kitHelper = kits;
         this.templateCachePath = templateCache || path.join(utils.tacoHome, "templates");
     }
@@ -60,7 +55,7 @@ class TemplateManager {
      *
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
-    public createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCli: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<string> {
+    public createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCliVersion: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<string> {
         var self = this;
         var templateName: string = null;
         var templateSrcPath: string = null;
@@ -79,7 +74,7 @@ class TemplateManager {
                 templateSrcPath = templatePath;
                 cordovaParameters.copyFrom = templateSrcPath;
 
-                return cordovaWrapper.create(cordovaCli, cordovaParameters);
+                return cordovaWrapper.create(cordovaCliVersion, cordovaParameters);
             })
             .then(function (): Q.Promise<any> {
                 var options: any = { clobber: false };

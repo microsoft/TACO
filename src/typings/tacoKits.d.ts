@@ -2,6 +2,13 @@
 // Typings for taco-kits package
 
 declare module TacoKits {
+    // Basic interface for a KitHelper, for mocking purposes
+    interface IKitHelper {
+        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+    }
+
+    // Metadata-related interfaces
     interface IPluginOverrideMetadata {
         [pluginId: string]: {
             version?: string;
@@ -17,18 +24,18 @@ declare module TacoKits {
         };
     }
 
-    export interface ITemplateOverrideInfo {
+    interface ITemplateOverrideInfo {
         kitId: string;
         templateId?: string;
         templateInfo: ITemplateInfo;
     }
 
-    export interface IKitTemplatesOverrideInfo {
+    interface IKitTemplatesOverrideInfo {
         kitId: string;
         templates: ITemplateOverrideInfo[];
     }
 
-    export interface ITemplateInfo {
+    interface ITemplateInfo {
         name: {
             [language: string]: string;
         };

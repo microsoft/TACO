@@ -18,7 +18,14 @@ import tacoUtility = require ("taco-utils");
 
 import logger = tacoUtility.Logger;
 
-module TacoKits { 
+module TacoKits {
+    // Basic interface for a KitHelper, for mocking purposes
+    export interface IKitHelper {
+        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+    }
+
+    // Metadata-related interfaces
     export interface IPluginOverrideMetadata {
         [pluginId: string]: {
             name?: string;
@@ -91,6 +98,7 @@ module TacoKits {
         kits: IKitMetadata;
         templates: ITemplateMetadata;
     }
+
     /**
      *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
      */

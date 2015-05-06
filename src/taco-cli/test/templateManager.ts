@@ -94,7 +94,7 @@ describe("TemplateManager", function (): void {
     };
 
     // Mock for the KitHelper
-    var mockKitHelper: templateManager.IKitHelper = {
+    var mockKitHelper: TacoKits.IKitHelper = {
         getTemplateOverrideInfo: function (kitId: string, templateId: string): Q.Promise<TacoKits.ITemplateOverrideInfo> {
             // As this test suite is strictly testing the TemplateManager, we ignore the provided kitId and templateId parameters; we are only interested in
             // testing what the templateManager does with the returned testTemplateOverrideInfo, so we return a hard-coded one
