@@ -24,6 +24,7 @@
         "typescript": "1.3.0",
         "mocha": "2.0.1",
         "should": "4.3.0",
+        "morgan": "1.5.1",
         "nconf": "0.6.9"
     },
     "bundledDependencies": [ "taco-utils" ],

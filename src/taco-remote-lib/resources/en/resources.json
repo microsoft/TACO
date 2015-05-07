@@ -76,6 +76,8 @@
 
     "AcquiringCordova": "Acquiring cordova.",
     "_AcquiringCordova.comment": "Status message returned when downloading and installing the requested version of cordova",
+    "RequireCordovaFailed": "Error: Failed to acquire cordova version {0}. {1}",
+    "_RequireCordovaFailed.comment": "Error message reported when a build fails to install the requested cordova version. {0} is the cordova version, and {1} is the error",
     "UpdatingIOSPlatform": "Updating iOS platform.",
     "_UpdatingIOSPlatform.comment": "Status message returned when doing a 'cordova platform add ios' or 'cordova prepare ios'",
     "CopyingNativeOverrides": "Copying native overrides.",

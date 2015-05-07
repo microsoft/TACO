@@ -2,7 +2,8 @@
 
 import express = require ("express");
 import fs = require ("fs");
-import http = require ("http");
+import http = require("http");
+import expressLogger = require("morgan");
 import nconf = require ("nconf");
 import os = require ("os");
 import path = require ("path");
@@ -33,6 +34,7 @@ describe("taco-remote", function (): void {
         fs.writeFileSync(firstRunPath, ""); // Just need the file to exist so the test doesn't try to ask us about installing homebrew
 
         var app = express();
+        app.use(expressLogger("dev"));
         UtilHelper.createDirectoryIfNecessary(serverDir);
         UtilHelper.createDirectoryIfNecessary(downloadDir);
         var serverConfig = {
