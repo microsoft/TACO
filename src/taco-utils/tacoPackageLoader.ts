@@ -155,7 +155,7 @@ module TacoUtility {
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
-                            deferred.reject(new Error("NpmInstallFailed"));
+                            deferred.reject(new Error(resources.getString("packageLoaderNpmInstallFailed", packageName)));
                         });
                     }
                 });
