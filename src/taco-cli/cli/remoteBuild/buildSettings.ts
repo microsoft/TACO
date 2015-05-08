@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/optimist.d.ts" />

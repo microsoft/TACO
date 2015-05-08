@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/tacoUtils.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
@@ -97,13 +105,13 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("command.notBothLocalRemote"));
-            throw new Error("command.notBothLocalRemote");
+            logger.logErrorLine(resources.getString("commandNotBothLocalRemote"));
+            throw new Error("commandNotBothLocalRemote");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("command.notBothDeviceEmulate"));
-            throw new Error("command.notBothDeviceEmulate");
+            logger.logErrorLine(resources.getString("commandNotBothDeviceEmulate"));
+            throw new Error("commandNotBothDeviceEmulate");
         }
 
         return parsedOptions;
@@ -139,7 +147,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             // remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
             break;
         default:
-            throw new Error(resources.getString("command.build.invalidPlatformLocation", platform.platform));
+            throw new Error(resources.getString("commandBuildInvalidPlatformLocation", platform.platform));
         }
 
         return promise;
@@ -161,7 +169,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("command.remotePlatformNotKnown", platform));
+                throw new Error(resources.getString("commandRemotePlatformNotKnown", platform));
             }
 
             var buildSettings = new RemoteBuildSettings({
@@ -194,7 +202,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
                         default:
-                            return Q.reject(new Error(resources.getString("command.build.invalidPlatformLocation", platform.platform)));
+                            return Q.reject(new Error(resources.getString("commandBuildInvalidPlatformLocation", platform.platform)));
                     }
                 });
             }, Q({}));

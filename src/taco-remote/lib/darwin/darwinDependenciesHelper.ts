@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/remotebuild.d.ts" />
@@ -22,28 +30,28 @@ class DarwinDependenciesHelper {
         var isFirstRun = !fs.existsSync(firstRunPath);
         var deferred = Q.defer();
         if (isFirstRun) {
-            console.info(resources.getString("FirstRunDependencyConfiguration"));
+            console.info(resources.getString("firstRunDependencyConfiguration"));
             var readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
             var deferred2 = Q.defer<boolean>();
-            readlineInterface.question(resources.getString("HomebrewInstallationQuery"), function (response: string): void {
-                var shouldInstall = response === "" || response.trim().toLowerCase().indexOf(resources.getString("HomebrewInstallationQueryResponse")) === 0;
+            readlineInterface.question(resources.getString("homebrewInstallationQuery"), function (response: string): void {
+                var shouldInstall = response === "" || response.trim().toLowerCase().indexOf(resources.getString("homebrewInstallationQueryResponse")) === 0;
 
                 if (shouldInstall) {
                     DarwinDependenciesHelper.tryInstallHomebrew().then(DarwinDependenciesHelper.tryInstallPackages).then(function (): void {
                         DarwinDependenciesHelper.verifyPackagesInstalled()
                             .then(function (): void {
-                            console.info(resources.getString("HomebrewInstallationSuccess"));
+                            console.info(resources.getString("homebrewInstallationSuccess"));
                             deferred2.resolve(true);
                         }, function (error: Error): void {
-                                console.error(resources.getString("HomebrewPackageVerificationFailed", error));
+                                console.error(resources.getString("homebrewPackageVerificationFailed", error));
                                 process.exit(1);
                             });
                     }, function (error: Error): void {
-                            console.error(resources.getString("HomebrewInstallationFailed", error));
+                            console.error(resources.getString("homebrewInstallationFailed", error));
                             process.exit(1);
                         });
                 } else {
-                    console.info(resources.getString("HomebrewInstallationDeclined"));
+                    console.info(resources.getString("homebrewInstallationDeclined"));
                     deferred2.resolve(false);
                 }
             });

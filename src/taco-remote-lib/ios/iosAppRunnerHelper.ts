@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
@@ -46,7 +47,7 @@ class IosAppRunnerHelper {
             // First find the path of the app on the device
             var filename = stdout.trim();
             if (!/^\/tmp\/[0-9]+\.ideviceinstaller$/.test(filename)) {
-                throw new Error("WrongInstalledAppsFile");
+                throw new Error("wrongInstalledAppsFile");
             }
 
             var list: any[] = pl.parseFileSync(filename);
@@ -58,7 +59,7 @@ class IosAppRunnerHelper {
                 }
             }
 
-            throw new Error("PackageNotInstalled");
+            throw new Error("packageNotInstalled");
         }).then(function (path: string): Q.Promise<net.Socket> { return IosAppRunnerHelper.startAppViaDebugger(proxyPort, path); });
     }
 
@@ -192,10 +193,10 @@ class IosAppRunnerHelper {
                     if (stdout.indexOf("Error:") !== -1) {
                         deferred.resolve({}); // Technically failed, but likely caused by the image already being mounted.
                     } else if (stdout.indexOf("No device found, is it plugged in?") !== -1) {
-                        deferred.reject("NoDeviceAttached");
+                        deferred.reject("noDeviceAttached");
                     }
 
-                    deferred.reject("ErrorMountingDiskImage");
+                    deferred.reject("errorMountingDiskImage");
                 } else {
                     deferred.resolve({});
                 }
@@ -210,7 +211,7 @@ class IosAppRunnerHelper {
             return stdout.trim().substring(0, 3); // Versions for DeveloperDiskImage seem to be X.Y, while some device versions are X.Y.Z
             // NOTE: This will almost certainly be wrong in the next few years, once we hit version 10.0 
         }, function (): void {
-                throw new Error("FailedGetDeviceInfo");
+                throw new Error("failedGetDeviceInfo");
             });
 
         // Attempt to find the path where developer resources exist.
@@ -228,13 +229,13 @@ class IosAppRunnerHelper {
                 var dataStr: string = data.toString();
                 var path = dataStr.split("\n")[0].trim();
                 if (!path) {
-                    deferred.reject("FailedFindDeveloperDiskImage");
+                    deferred.reject("failedFindDeveloperDiskImage");
                 } else {
                     deferred.resolve(path);
                 }
             });
             find.on("close", function (code: number): void {
-                deferred.reject("FailedFindDeveloperDiskImage");
+                deferred.reject("failedFindDeveloperDiskImage");
             });
 
             return deferred.promise;

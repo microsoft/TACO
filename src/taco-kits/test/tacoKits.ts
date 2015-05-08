@@ -5,16 +5,19 @@
 ﻿ *                                                       *
 ﻿ *******************************************************
 ﻿ */
-/// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
+/// <reference path="../../typings/sanitize-filename.d.ts"/>
+/// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
 /// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import mocha = require ("mocha");
 import path = require ("path");
+import sanitize = require ("sanitize-filename");
+// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require("should");
 
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("../tacoKits");
@@ -23,6 +26,10 @@ import tacoUtils = require ("taco-utils");
 import kitHelper = tacoKits.KitHelper;
 
 describe("KitHelper", function (): void {
+    // Important paths
+    var testMetadataPath: string = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
+    var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetaData.json");
+
     // Test Kit Info
     var testDefaultKitId: string = "5.0.0-Kit";
     var testDeprecatedKitId: string = "4.0.0-Kit";
@@ -46,11 +53,13 @@ describe("KitHelper", function (): void {
         }
     };
 
-    var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-kit", "blank.zip");
+    var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-Kit", "blank.zip");
     var testTemplateOverrideInfo: tacoKits.ITemplateOverrideInfo = {
         kitId: "5.0.0-Kit",
         templateInfo: {
-            name: "Blank template",
+            name: {
+                en: "Blank template"
+            },
             url: templateSrcPath
         }
     };
@@ -90,13 +99,12 @@ describe("KitHelper", function (): void {
         plugins: testPluginOverridesForDefaultKit
     };
 
-    // Important paths
     before(function (): void {
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
         
         // Set the kit metadata file location
-        kitHelper.KitMetadataFilePath = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
+        kitHelper.KitMetadataFilePath = testMetadataPath;
     });
 
     after(function (): void {
@@ -112,12 +120,13 @@ describe("KitHelper", function (): void {
             // Call getKitMetadata()
             kitHelper.getKitMetadata()
                 .then(function (kitInfo: TacoKits.ITacoKitMetadata): void {
-                // Verify the returned kit metadata is expected
-                kitInfo.should.equal(require(kitHelper.KitMetadataFilePath));
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
+                    // Verify the returned kit metadata is expected
+                    kitInfo.should.equal(require(kitHelper.KitMetadataFilePath));
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
         });
     });
 
@@ -126,25 +135,29 @@ describe("KitHelper", function (): void {
             // Call getKitInfo()
             kitHelper.getKitInfo(testDeprecatedKitId)
                 .then(function (kitInfo: TacoKits.IKitInfo): void {
-                // Verify the returned kitInfo is correct
-                var stringifiedInfo = JSON.stringify(kitInfo);
-                stringifiedInfo.should.equal(JSON.stringify(testDeprecatedKitInfo));
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
+                    // Verify the returned kitInfo is correct
+                    var stringifiedInfo = JSON.stringify(kitInfo);
+
+                    stringifiedInfo.should.equal(JSON.stringify(testDeprecatedKitInfo));
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
         });
 
         it("must return the right kit information for the default kit ID passed", function (done: MochaDone): void {
             kitHelper.getKitInfo(testDefaultKitId)
                 .then(function (kitInfo: TacoKits.IKitInfo): void {
-                // Verify the returned kitInfo is correct
-                var stringifiedInfo = JSON.stringify(kitInfo);
-                stringifiedInfo.should.equal(JSON.stringify(testDefaultKitInfo));
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
+                    // Verify the returned kitInfo is correct
+                    var stringifiedInfo = JSON.stringify(kitInfo);
+
+                    stringifiedInfo.should.equal(JSON.stringify(testDefaultKitInfo));
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
         });
     });
 
@@ -153,12 +166,13 @@ describe("KitHelper", function (): void {
             // Call getDefaultKit()
             kitHelper.getDefaultKit()
                 .then(function (kitId: string): void {
-                // Verify the returned kitId is correct
-                kitId.should.equal(testDefaultKitId);
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
+                    // Verify the returned kitId is correct
+                    kitId.should.equal(testDefaultKitId);
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
         });
     });
 
@@ -166,17 +180,15 @@ describe("KitHelper", function (): void {
         it("must return the platform overrides of the specified kit", function (done: MochaDone): void {
             // Call getDefaultKit() to get the default kitId and pass it as param to getPlatformOverridesForKit
             kitHelper.getDefaultKit()
-                .then(function (kitId: string): void {
-                kitHelper.getPlatformOverridesForKit(kitId)
-                    .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): void {
+                .then(kitHelper.getPlatformOverridesForKit)
+                .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): void {
                     // Verify the returned override info is correct
-                    platformOverrides.should.equal(testPlatformOverridesForDefaultKit);
+                    JSON.stringify(platformOverrides).should.equal(JSON.stringify(testPlatformOverridesForDefaultKit));
                     done();
-                });
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });          
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });          
         });
     });
 
@@ -184,17 +196,14 @@ describe("KitHelper", function (): void {
         it("must return the plugin overrides of the specified kit", function (done: MochaDone): void {
             // Call getDefaultKit() to get the default kitId and pass it as param to getPluginOverridesForKit
             kitHelper.getDefaultKit()
-                .then(function (kitId: string): void {
-                kitHelper.getPluginOverridesForKit(kitId)
-                    .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): void {
+                .then(kitHelper.getPluginOverridesForKit)
+                .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): void {
                     // Verify the returned override info is correct
-                    pluginOverrides.should.equal(testPluginOverridesForDefaultKit);
+                    JSON.stringify(pluginOverrides).should.equal(JSON.stringify(testPluginOverridesForDefaultKit));
                     done();
+                }).catch(function (err: string): void {
+                    done(new Error(err));
                 });
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
         });
     });
 
@@ -202,6 +211,7 @@ describe("KitHelper", function (): void {
         it("must return false when a non-deprecated kit ID is passed", function (done: MochaDone): void {
             // Ensure that the default kit is not deprecated
             var isDeprecated: boolean = kitHelper.isKitDeprecated(testDefaultKitInfo);
+
             isDeprecated.should.equal(false);
             done();
         });
@@ -209,6 +219,7 @@ describe("KitHelper", function (): void {
         it("must return true when a deprecated kit ID is passed", function (done: MochaDone): void {
             // Ensure that for a deprecated kit,  isKitDeprecated() returns true
             var isDeprecated: boolean = kitHelper.isKitDeprecated(testDeprecatedKitInfo);
+
             isDeprecated.should.equal(true);
             done();
         });
@@ -219,13 +230,167 @@ describe("KitHelper", function (): void {
             // Call getTemplateOverrideInfo()
             kitHelper.getTemplateOverrideInfo(testDefaultKitId, testDefaultTemplateId)
                 .then(function (templateOverrideInfo: TacoKits.ITemplateOverrideInfo): void {
-                // Verify the returned override info is correct
-                var stringifiedInfo = JSON.stringify(templateOverrideInfo);
-                stringifiedInfo.should.equal(JSON.stringify(testTemplateOverrideInfo));
-                done();
-            }).catch(function (err: string): void {
-                done(new Error(err));
-            });
+                    // Verify the returned override info is correct
+                    var stringifiedInfo = JSON.stringify(templateOverrideInfo);
+
+                    stringifiedInfo.should.equal(JSON.stringify(testTemplateOverrideInfo));
+                    done();
+                }).catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+    });
+
+    describe("getTemplatesForKit()", function (): void {
+        it("should return the correct list of templates when no kit is specified", function (done: MochaDone): void {
+            // The default kit in the test metadata is 5.0.0-Kit, so we expect the result to be the 5.0.0-Kit templates override
+            var kitId: string = null;
+            var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
+                kitId: "5.0.0-Kit",
+                templates: [
+                    {
+                        kitId: "5.0.0-Kit",
+                        templateId: "blank",
+                        templateInfo: {
+                            name: {
+                                en: "Blank template"
+                            },
+                            url: "templates/5.0.0-Kit/blank.zip"
+                        }
+                    }
+                ]
+            };
+
+            kitHelper.getTemplatesForKit(kitId)
+                .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
+                    // Verify the returned override info is correct
+                    var stringifiedInfo = JSON.stringify(kitOverride);
+
+                    stringifiedInfo.should.equal(JSON.stringify(expectedResult));
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+
+        it("should return the correct list of templates for a kit that doesn't have a template override node in the metadata", function (done: MochaDone): void {
+            var kitId: string = "4.2.0-Kit";
+            var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
+                kitId: "default",
+                templates: [
+                    {
+                        kitId: "default",
+                        templateId: "blank",
+                        templateInfo: {
+                            name: {
+                                en: "Blank template"
+                            },
+                            url: "templates/default/blank.zip"
+                        }
+                    },
+                    {
+                        kitId: "default",
+                        templateId: "typescript",
+                        templateInfo: {
+                            name: {
+                                en: "Blank Typescript template"
+                            },
+                            url: "templates/default/typescript.zip"
+                        }
+                    }
+                ]
+            };
+
+            kitHelper.getTemplatesForKit(kitId)
+                .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
+                    // Verify the returned override info is correct
+                    var stringifiedInfo = JSON.stringify(kitOverride);
+
+                    stringifiedInfo.should.equal(JSON.stringify(expectedResult));
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+
+        it("should return the correct list of templates for a kit that has a template override node in the metadata", function (done: MochaDone): void {
+            var kitId: string = "5.0.0-Kit";
+            var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
+                kitId: "5.0.0-Kit",
+                templates: [
+                    {
+                        kitId: "5.0.0-Kit",
+                        templateId: "blank",
+                        templateInfo: {
+                            name: {
+                                en: "Blank template"
+                            },
+                            url: "templates/5.0.0-Kit/blank.zip"
+                        }
+                    }
+                ]
+            };
+
+            kitHelper.getTemplatesForKit(kitId)
+                .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
+                    // Verify the returned override info is correct
+                    var stringifiedInfo = JSON.stringify(kitOverride);
+
+                    stringifiedInfo.should.equal(JSON.stringify(expectedResult));
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+
+        it("should return the correct error when asking for the templates of a kit that doesn't exist", function (done: MochaDone): void {
+            var kitId: string = "unknown";
+
+            kitHelper.getTemplatesForKit(kitId)
+                .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
+                    done(new Error("The method should have thrown an error, but it succeeeded"));
+                }, function (err: string): void {
+                    err.should.be.exactly("tacoKitsExceptionInvalidKit");
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+    });
+
+    describe("TacoKitMetaData.json", function (): void {
+        function verifyIsValidFileName(name: string): void {
+            try {
+                name.should.be.exactly(sanitize(name));
+            } catch (err) {
+                throw new Error("'" + name + "' is not a valid directory name");
+            }
+        }
+
+        it("should only have kit ids that are suitable for directory names", function (): void {
+            var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
+
+            for (var kitId in metadata.kits) {
+                // Make sure we don't perform our check on objects added in the prototype
+                if (metadata.kits.hasOwnProperty(kitId)) {
+                    verifyIsValidFileName(kitId);
+                }
+            }
+        });
+
+        it("should only have template ids that are suitable for directory names", function (): void {
+            var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
+
+            for (var templateId in metadata.templates) {
+                // Make sure we don't perform our check on objects added in the prototype
+                if (metadata.kits.hasOwnProperty(templateId)) {
+                    verifyIsValidFileName(templateId);
+                }
+            }
         });
     });
 });

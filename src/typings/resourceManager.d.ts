@@ -1,3 +1,11 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 
 declare module TacoUtility {
     class ResourceManager {

@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/tacoUtils.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 
@@ -88,13 +96,13 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("command.notBothLocalRemote"));
-            throw new Error("command.notBothLocalRemote");
+            logger.logErrorLine(resources.getString("commandNotBothLocalRemote"));
+            throw new Error("commandNotBothLocalRemote");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("command.notBothDeviceEmulate"));
-            throw new Error("command.notBothDeviceEmulate");
+            logger.logErrorLine(resources.getString("commandNotBothDeviceEmulate"));
+            throw new Error("commandNotBothDeviceEmulate");
         }
 
         return parsedOptions;
@@ -116,7 +124,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("command.remotePlatformNotKnown", platform));
+                throw new Error(resources.getString("commandRemotePlatformNotKnown", platform));
             }
 
             var buildServerUrl = Settings.getRemoteServerUrl(remoteConfig);
@@ -140,8 +148,8 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 } else if (commandData.options["nobuild"]) {
                     // No info for the remote build: User must build first
                     var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
-                    logger.logErrorLine(resources.getString("NoRemoteBuildIdFound", buildCommandToRun));
-                    throw new Error("NoRemoteBuildIdFound");
+                    logger.logErrorLine(resources.getString("noRemoteBuildIdFound", buildCommandToRun));
+                    throw new Error("noRemoteBuildIdFound");
                 } else {
                     return RemoteBuildClientHelper.build(buildSettings);
                 }

@@ -1,4 +1,12 @@
-﻿// Type definitions for replace
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+// Type definitions for replace
 
 declare module Replace {
     interface IReplaceParameters {

@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/nconf.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
@@ -47,7 +48,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "UsageInformation"));
+        console.info(resources.getStringForLanguage(language, "usageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {

@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/remotebuild.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/remotebuild.d.ts" />
 "use strict";
 
 import HostSpecifics = require ("./hostSpecifics");

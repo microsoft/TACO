@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
@@ -32,7 +33,7 @@ class HostSpecifics {
                     HostSpecifics.CachedSpecifics = require("./win32/win32Specifics");
                     break;
                 default:
-                    throw new Error("UnsupportedPlatform");
+                    throw new Error("unsupportedPlatform");
             }
         }
 

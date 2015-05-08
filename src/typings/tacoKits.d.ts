@@ -1,7 +1,22 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 
 // Typings for taco-kits package
 
 declare module TacoKits {
+    // Basic interface for a KitHelper, for mocking purposes
+    interface IKitHelper {
+        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+    }
+
+    // Metadata-related interfaces
     interface IPluginOverrideMetadata {
         [pluginId: string]: {
             version?: string;
@@ -19,11 +34,19 @@ declare module TacoKits {
 
     interface ITemplateOverrideInfo {
         kitId: string;
+        templateId?: string;
         templateInfo: ITemplateInfo;
     }
 
+    interface IKitTemplatesOverrideInfo {
+        kitId: string;
+        templates: ITemplateOverrideInfo[];
+    }
+
     interface ITemplateInfo {
-        name: string;
+        name: {
+            [language: string]: string;
+        };
         url: string;
     }
 
@@ -120,6 +143,11 @@ declare module TacoKits {
          *   Else -> returns the default template information with id {templateId}
          */
         public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo>;
+
+        /**
+         *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
+         */
+        public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo>;
     }
 }
 

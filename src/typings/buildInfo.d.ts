@@ -1,3 +1,11 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../typings/resourceManager" />
 declare module TacoUtility {
     class BuildInfo {

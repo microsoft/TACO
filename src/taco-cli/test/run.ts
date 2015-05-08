@@ -220,7 +220,7 @@ describe("taco run", function (): void {
         Q(["--remote", "--nobuild", "test"]).then(runRun).done(function (): void {
             mocha(new Error("Run should have failed!"));
         }, function (err: any): void {
-            if (err.message !== "NoRemoteBuildIdFound") {
+            if (err.message !== "noRemoteBuildIdFound") {
                 mocha(err);
             } else {
                 mocha();

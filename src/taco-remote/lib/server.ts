@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
@@ -107,7 +108,7 @@ class Server implements RemoteBuild.IServerModule {
             res.status(202).json(buildInfo.localize(req, self.resources));
         }, function (err: any): void {
                 res.set({ "Content-Type": "application/json" });
-                res.status(err.code || 400).send({ status: self.resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err.toString() });
+                res.status(err.code || 400).send({ status: self.resources.getStringForLanguage(req, "invalidBuildRequest"), errors: err.toString() });
             }).done();
     }
 
@@ -123,7 +124,7 @@ class Server implements RemoteBuild.IServerModule {
 
             res.status(200).json(buildInfo);
         } else {
-            res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(this.resources.getStringForLanguage(req, "buildNotFound", req.params.id));
         }
     }
 
@@ -134,7 +135,7 @@ class Server implements RemoteBuild.IServerModule {
             res.set("Content-Type", "text/plain");
             this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
         } else {
-            res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+            res.status(404).send(this.resources.getStringForLanguage(req, "buildNotFound", req.params.id));
         }
     }
 
@@ -149,12 +150,12 @@ class Server implements RemoteBuild.IServerModule {
         return function (req: express.Request, res: express.Response): void {
             var buildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (!buildInfo) {
-                res.status(404).send(self.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
+                res.status(404).send(self.resources.getStringForLanguage(req, "buildNotFound", req.params.id));
                 return;
             }
 
             if (!buildInfo.buildSuccessful) {
-                res.status(404).send(self.resources.getStringForLanguage(req, "BuildNotCompleted", buildInfo.status));
+                res.status(404).send(self.resources.getStringForLanguage(req, "buildNotCompleted", buildInfo.status));
                 return;
             }
 

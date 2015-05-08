@@ -1,4 +1,12 @@
-﻿/// <reference path="../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts"/>
@@ -39,7 +47,7 @@ module TacoUtility {
                 case "linux":
                     return path.join(process.env["HOME"], ".taco_home");
                 default:
-                    throw new Error("UnexpectedPlatform");
+                    throw new Error("unexpectedPlatform");
             };
         }
 

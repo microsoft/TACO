@@ -1,3 +1,11 @@
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 "use strict";
 import buildInfo = require ("./buildInfo");
 import cordovaConfig = require ("./cordovaConfig");

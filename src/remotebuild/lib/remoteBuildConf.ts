@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/remotebuild.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/remotebuild.d.ts" />
 "use strict";
 
 import nconf = require ("nconf");
@@ -48,7 +56,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
         var serverMods = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
-            console.warn(resources.getString("NoServerModulesSelected"));
+            console.warn(resources.getString("noServerModulesSelected"));
             if (isUnitTest) {
                 this.remoteBuildConf.modules = { };
             } else {

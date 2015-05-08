@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/request.d.ts" />
 /// <reference path="../../../typings/fstream.d.ts" />
@@ -46,7 +47,7 @@ class RemoteBuildClientHelper {
         var buildInfoFilePath = path.join(outputBuildDir, "buildInfo.json");
 
         if (!RemoteBuildClientHelper.isValidBuildServerUrl(settings.buildServerUrl)) {
-            throw new Error(resources.getString("InvalidRemoteBuildUrl", settings.buildServerUrl));
+            throw new Error(resources.getString("invalidRemoteBuildUrl", settings.buildServerUrl));
         }
 
         var changeTimeFile = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
@@ -56,7 +57,7 @@ class RemoteBuildClientHelper {
             .then(function (buildInfo: BuildInfo): void {
             settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
 
-            console.info(resources.getString("IncrementalBuild", !!settings.incrementalBuild));
+            console.info(resources.getString("incrementalBuild", !!settings.incrementalBuild));
             if (!settings.incrementalBuild) {
                 try {
                     fs.unlinkSync(changeTimeFile);
@@ -81,14 +82,14 @@ class RemoteBuildClientHelper {
         })
             .then(function (result: BuildInfo): Q.Promise<BuildInfo> {
             if (result.buildNumber) {
-                console.info(resources.getString("RemoteBuildSuccessful"));
+                console.info(resources.getString("remoteBuildSuccessful"));
                 return RemoteBuildClientHelper.logBuildOutput(result, settings);
             }
         }, function (err: any): Q.Promise<BuildInfo> {
                 if (err.buildInfo) {
                     // If we successfully submitted a build but the remote build server reports an error about the build, then grab the
                     // build log from the remote machine before propagating the reported failure
-                    console.info(resources.getString("RemoteBuildUnSuccessful"));
+                    console.info(resources.getString("remoteBuildUnSuccessful"));
                     return RemoteBuildClientHelper.logBuildOutput(err.buildInfo, settings)
                         .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                         throw err;
@@ -183,7 +184,7 @@ class RemoteBuildClientHelper {
         return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<BuildInfo> {
             request.get((requestOptions), function (error: any, response: { statusCode: number }, body: string): void {
                 if (error) {
-                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "RemoteBuildError"));
+                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "remoteBuildError"));
                 } else if (response.statusCode === 200) {
                     deferred.resolve(buildInfo);
                 } else {
@@ -220,17 +221,17 @@ class RemoteBuildClientHelper {
      */
     private static errorFromRemoteBuildServer(serverUrl: string, requestError: any, fallbackErrorId: string): Error {
         if (requestError.toString().indexOf("CERT_") !== -1) {
-            return new Error(resources.getString("InvalidRemoteBuildClientCert"));
+            return new Error(resources.getString("invalidRemoteBuildClientCert"));
         } else if (serverUrl.indexOf("https://") === 0 && requestError.code === "ECONNRESET") {
-            return new Error(resources.getString("RemoteBuildSslConnectionReset", serverUrl));
+            return new Error(resources.getString("remoteBuildSslConnectionReset", serverUrl));
         } else if (serverUrl.indexOf("http://") === 0 && requestError.code === "ECONNRESET") {
-            return new Error(resources.getString("RemoteBuildNonSslConnectionReset", serverUrl));
+            return new Error(resources.getString("remoteBuildNonSslConnectionReset", serverUrl));
         } else if (requestError.code === "ENOTFOUND") {
             // Host unreachable regardless of whether http or https
-            return new Error(resources.getString("RemoteBuildHostNotFound", serverUrl));
+            return new Error(resources.getString("remoteBuildHostNotFound", serverUrl));
         } else if (requestError.code === "ECONNREFUSED") {
             // Host reachable but connection not established (e.g. Server not running)
-            return new Error(resources.getString("RemoteBuildNoConnection", serverUrl));
+            return new Error(resources.getString("remoteBuildNoConnection", serverUrl));
         }
 
         return new Error(resources.getString(fallbackErrorId, serverUrl, requestError));
@@ -402,15 +403,15 @@ class RemoteBuildClientHelper {
         }
 
         var buildUrl = serverUrl + "/build/tasks?" + querystring.stringify(params);
-        console.info(resources.getString("SubmittingRemoteBuild", buildUrl));
+        console.info(resources.getString("submittingRemoteBuild", buildUrl));
 
         appAsTgzStream.on("error", function (error: any): void {
-            deferred.reject(new Error(resources.getString("ErrorUploadingRemoteBuild", serverUrl, error)));
+            deferred.reject(new Error(resources.getString("errorUploadingRemoteBuild", serverUrl, error)));
         });
         return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<string> {
             appAsTgzStream.pipe(request.post(requestOptions, function (error: any, response: any, body: any): void {
                 if (error) {
-                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "ErrorUploadingRemoteBuild"));
+                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "errorUploadingRemoteBuild"));
                 } else if (response.statusCode === 400) {
                     // Build server sends back http 400 for invalid submissions with response like this. We will fail the build with a formatted message.
                     // {"status": "Invalid build submission", "errors": ["The requested cordova version 3.5.0-0.2.4 is not supported by this build manager. Installed cordova version is 3.4.1-0.1.0"]}
@@ -418,7 +419,7 @@ class RemoteBuildClientHelper {
                     deferred.reject(new Error(errorsJson.status + ": " + errorsJson.errors.toString()));
                 } else if (response.statusCode === 202) {
                     // Expect http 202 for a valid submission which is "Accepted" with a content-location to the Url to check for build status
-                    console.info(resources.getString("NewRemoteBuildInfo", body));
+                    console.info(resources.getString("newRemoteBuildInfo", body));
                     var buildInfo = JSON.parse(body);
                     deferred.resolve(response.headers["content-location"]);
                 } else {
@@ -439,7 +440,7 @@ class RemoteBuildClientHelper {
      */
     private static pollForBuildComplete(settings: BuildSettings, buildingUrl: string, interval: number, attempts: number, logOffset?: number): Q.Promise<BuildInfo> {
         var thisAttempt = attempts + 1;
-        console.info(resources.getString("CheckingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
+        console.info(resources.getString("checkingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
 
         return RemoteBuildClientHelper.httpOptions(buildingUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): Q.Promise<BuildInfo> {
@@ -453,9 +454,9 @@ class RemoteBuildClientHelper {
             if (buildInfo.status === "complete") {
                 return Q(buildInfo);
             } else if (buildInfo.status === "invalid") {
-                throw new Error(resources.getString("InvalidRemoteBuild", buildInfo.message));
+                throw new Error(resources.getString("invalidRemoteBuild", buildInfo.message));
             } else if (buildInfo.status === "error") {
-                var err: any = new Error(resources.getString("RemoteBuildError", buildInfo.message));
+                var err: any = new Error(resources.getString("remoteBuildError", buildInfo.message));
                 err.buildInfo = buildInfo;
                 throw err;
             }
@@ -484,7 +485,7 @@ class RemoteBuildClientHelper {
             var logStream = fs.createWriteStream(logPath, { start: offset, flags: logFlags });
             var countStream = new CountStream();
             logStream.on("finish", function (): void {
-                console.info(resources.getString("BuildLogWrittenTo", logPath));
+                console.info(resources.getString("buildLogWrittenTo", logPath));
             });
             req.on("end", function (): void {
                 buildInfo["logOffset"] = offset + countStream.count;
@@ -524,14 +525,14 @@ class RemoteBuildClientHelper {
         var buildNumber = buildInfo.buildNumber;
         var downloadUrl = serverUrl + "/build/" + buildNumber + "/download";
 
-        console.info(resources.getString("DownloadingRemoteBuild", downloadUrl, toDir));
+        console.info(resources.getString("downloadingRemoteBuild", downloadUrl, toDir));
         var zipFile = path.join(toDir, buildNumber + ".zip");
         var outZip = fs.createWriteStream(zipFile);
         outZip.on("error", function (error: any): void {
-            deferred.reject(new Error(resources.getString("ErrorDownloadingRemoteBuild", toDir, error)));
+            deferred.reject(new Error(resources.getString("errorDownloadingRemoteBuild", toDir, error)));
         });
         outZip.on("finish", function (): void {
-            console.info(resources.getString("DownloadedRemoteBuild", toDir));
+            console.info(resources.getString("downloadedRemoteBuild", toDir));
             deferred.resolve(zipFile);
         });
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).invoke("pipe", outZip).then(function (): Q.Promise<string> {
@@ -543,23 +544,23 @@ class RemoteBuildClientHelper {
      * Unzip the downloaded build
      */
     private static unzipBuildFiles(zipFile: string, toDir: string): Q.Promise<{}> {
-        console.info(resources.getString("ExtractingRemoteBuild", toDir));
+        console.info(resources.getString("extractingRemoteBuild", toDir));
         UtilHelper.createDirectoryIfNecessary(toDir);
         var deferred = Q.defer();
 
         try {
             var zip = new AdmZip(zipFile);
             zip.extractAllTo(toDir, true);
-            console.info(resources.getString("DoneExtractingRemoteBuild", toDir));
+            console.info(resources.getString("doneExtractingRemoteBuild", toDir));
             fs.unlink(zipFile, function (err: NodeJS.ErrnoException): void {
                 if (err) {
-                    console.info(resources.getString("FailedToDeleteRemoteZip", zipFile));
+                    console.info(resources.getString("failedToDeleteRemoteZip", zipFile));
                 }
 
                 deferred.resolve({});
             });
         } catch (error) {
-            deferred.reject(new Error(resources.getString("ErrorDownloadingRemoteBuild", toDir, error)));
+            deferred.reject(new Error(resources.getString("errorDownloadingRemoteBuild", toDir, error)));
         }
 
         return deferred.promise;
@@ -572,21 +573,21 @@ class RemoteBuildClientHelper {
         var deferred = Q.defer<{ response: any; body: string }>();
         request.get(urlOptions, function (error: any, response: any, body: any): void {
             if (error) {
-                deferred.reject(new Error(resources.getString("ErrorHTTPGet", urlOptions.url, error)));
+                deferred.reject(new Error(resources.getString("errorHTTPGet", urlOptions.url, error)));
             } else {
                 if (response.statusCode !== 200 && response.statusCode !== 202) {
                     // see if the response is JSON with a message
                     try {
                         var bodyJson = JSON.parse(response.body);
                         if (bodyJson.message) {
-                            deferred.reject(new Error(resources.getString("HTTPGetFailed", response.statusCode, bodyJson.message)));
+                            deferred.reject(new Error(resources.getString("httpGetFailed", response.statusCode, bodyJson.message)));
                             return;
                         }
                     } catch (e) {
                         // Ignore; the response was not valid JSON
                     }
 
-                    deferred.reject(new Error(resources.getString("HTTPGetFailed", response.statusCode, response.body)));
+                    deferred.reject(new Error(resources.getString("httpGetFailed", response.statusCode, response.body)));
                 }
 
                 deferred.resolve({ response: response, body: body });

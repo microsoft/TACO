@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/nopt.d.ts" />
@@ -42,7 +50,7 @@ class Settings {
         } catch (e) {
             // Unable to read TacoSettings.json: it doesn't exist, or it is corrupt
             if (!suppressFailure) {
-                logger.logErrorLine(resources.getString("command.build.tacoSettingsNotFound"));
+                logger.logErrorLine(resources.getString("commandBuildTacoSettingsNotFound"));
             }
 
             return Q.reject<Settings.ISettings>(e);

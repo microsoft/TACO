@@ -1,4 +1,12 @@
-﻿"use strict";
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+"use strict";
 
 import path = require ("path");
 
@@ -78,7 +86,7 @@ class CordovaHelper {
 
         if (customWww) {
             if (customWww.indexOf("http") === 0) {
-                throw new Error(resources.getString("command.create.onlyLocalCustomWww"));
+                throw new Error(resources.getString("commandCreateOnlyLocalCustomWww"));
             }
 
             // Resolve HOME env path
