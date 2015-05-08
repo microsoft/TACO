@@ -39,7 +39,7 @@ class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
         return promise.then(function (): Q.Promise<TacoRemoteLib.IRemoteLib> {
             return TacoPackageLoader.tacoRequireNoCache<TacoRemoteMultiplexer.ITacoRemoteMultiplexer>(tacoRemoteMux, dynamicDependenciesLocation).then(function (mux: TacoRemoteMultiplexer.ITacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
                 var packageId = mux.getPackageIdForQuery(req.query);
-                return TacoPackageLoader.lazyRequire<TacoRemoteLib.IRemoteLib>(packageId, mux.dependencyJson);
+                return TacoPackageLoader.tacoRequire<TacoRemoteLib.IRemoteLib>(packageId, mux.dependencyJson);
             });
         });
     }

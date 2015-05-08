@@ -12,7 +12,7 @@ import semver = require("semver");
 import path = require("path");
 
 class TacoRemoteMultiplexer implements TacoRemoteMultiplexer.ITacoRemoteMultiplexer {
-    public dependencyJson: string = path.resolve(".", "dynamicDependencies.json");
+    public dependencyJson: string = path.resolve(__dirname, "dynamicDependencies.json");
 
     public getPackageIdForQuery(query: TacoRemoteMultiplexer.IPropertyBag): string {
         // Note: As new scenarios are added, place them at the top of the function and not the bottom.
