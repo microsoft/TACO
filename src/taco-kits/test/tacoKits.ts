@@ -353,7 +353,7 @@ describe("KitHelper", function (): void {
                 .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
                     done(new Error("The method should have thrown an error, but it succeeeded"));
                 }, function (err: string): void {
-                    err.should.be.exactly("taco-kits.exception.InvalidKit");
+                    err.should.be.exactly("tacoKitsExceptionInvalidKit");
                     done();
                 })
                 .catch(function (err: string): void {

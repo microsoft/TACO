@@ -1,10 +1,10 @@
 ﻿/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
@@ -105,13 +105,13 @@ class IOSBuildHelper {
             })
                 .catch(function (err: Error): void {
                 console.info(resources.getString("errorBuilding", currentBuild.buildNumber, err.message));
-                currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
+                currentBuild.updateStatus(BuildInfo.ERROR, "buildFailedWithError", err.message);
             })
                 .done(function (): void {
                 callback(currentBuild);
             });
         } catch (e) {
-            currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", e.message);
+            currentBuild.updateStatus(BuildInfo.ERROR, "buildFailedWithError", e.message);
             callback(currentBuild);
         }
     }

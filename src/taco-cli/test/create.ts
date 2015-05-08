@@ -350,42 +350,42 @@ describe("taco create", function (): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
-            runFailureScenario(scenario, "taco-kits.exception.InvalidKit").then(done, done);
+            runFailureScenario(scenario, "tacoKitsExceptionInvalidKit").then(done, done);
         });
 
         it("Failure scenario 2 [path, template (unknown value)]", function (done: MochaDone): void {
             // If a template is not found, create command should fail with an appropriate message
             var scenario: number = 2;
 
-            runFailureScenario(scenario, "taco-kits.exception.InvalidTemplate").then(done, done);
+            runFailureScenario(scenario, "tacoKitsExceptionInvalidTemplate").then(done, done);
         });
 
         it("Failure scenario 3 [path, template (typescript, with a deprecated kit that doesn't have a typescript template)]", function (done: MochaDone): void {
             // Similar to failure scenario 2 (create command should fail when a template is not found), but for typescript templates we have a specific message
             var scenario: number = 3;
 
-            runFailureScenario(scenario, "taco-kits.exception.TypescriptNotSupported").then(done, done);
+            runFailureScenario(scenario, "tacoKitsExceptionTypescriptNotSupported").then(done, done);
         });
 
         it("Failure scenario 4 [path, kit, template, copy-from]", function (done: MochaDone): void {
             // Create command should fail when both --template and --copy-from are specified
             var scenario: number = 4;
 
-            runFailureScenario(scenario, "command.create.notTemplateIfCustomWww").then(done, done);
+            runFailureScenario(scenario, "commandCreateNotTemplateIfCustomWww").then(done, done);
         });
 
         it("Failure scenario 5 [path, kit, cli]", function (done: MochaDone): void {
             // Create command should fail when both --kit and --cli are specified
             var scenario: number = 5;
 
-            runFailureScenario(scenario, "command.create.notBothCliAndKit").then(done, done);
+            runFailureScenario(scenario, "commandCreateNotBothCliAndKit").then(done, done);
         });
 
         it("Failure scenario 6 [path, cli, template]", function (done: MochaDone): void {
             // Create command should fail when both --cli and --template are specified
             var scenario: number = 6;
 
-            runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
+            runFailureScenario(scenario, "commandCreateNotBothTemplateAndCli").then(done, done);
         });
 
         it("Failure scenario 7 [path (value is an existing project)]", function (done: MochaDone): void {
@@ -412,7 +412,7 @@ describe("taco create", function (): void {
             // Create command should fail when specified cli version doesn't exist
             var scenario: number = 9;
 
-            runFailureScenario(scenario, "packageLoader.invalidPackageVersionSpecifier").then(done, done);
+            runFailureScenario(scenario, "packageLoaderInvalidPackageVersionSpecifier").then(done, done);
         });
 
         it("Failure scenario 10 [path, appId (invalid value)]", function (done: MochaDone): void {
@@ -433,7 +433,7 @@ describe("taco create", function (): void {
             // Create command should fail when an invalid kit is given as an option with the --list flag
             var scenario: number = 12;
 
-            runFailureScenario(scenario, "taco-kits.exception.InvalidKit").then(done, done);
+            runFailureScenario(scenario, "tacoKitsExceptionInvalidKit").then(done, done);
         });
     });
 });
