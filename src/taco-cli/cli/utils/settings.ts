@@ -50,7 +50,7 @@ class Settings {
         } catch (e) {
             // Unable to read TacoSettings.json: it doesn't exist, or it is corrupt
             if (!suppressFailure) {
-                logger.logErrorLine(resources.getString("commandBuildTacoSettingsNotFound"));
+                logger.logErrorLine(resources.getString("CommandBuildTacoSettingsNotFound"));
             }
 
             return Q.reject<Settings.ISettings>(e);

@@ -174,9 +174,9 @@ class TemplateManager {
         // If the specified template is not in the cache, it means we need to extract it to the cache
         if (!fs.existsSync(cachedTemplatePath)) {
             if (!fs.existsSync(templateInfo.url)) {
-                logger.logErrorLine(resources.getString("commandCreateTemplatesUnavailable"));
+                logger.logErrorLine(resources.getString("CommandCreateTemplatesUnavailable"));
 
-                return Q.reject<string>("commandCreateTemplatesUnavailable");
+                return Q.reject<string>("CommandCreateTemplatesUnavailable");
             }
 
             // Cache does not contain the specified template, create the directory tree to cache it

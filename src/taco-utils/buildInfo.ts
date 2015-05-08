@@ -129,7 +129,7 @@ module TacoUtility {
             if (this.messageId) {
                 this.message = resources.getStringForLanguage(req, this.messageId, this.messageArgs);
             } else {
-                this.message = resources.getStringForLanguage(req, "build" + this.status);
+                this.message = resources.getStringForLanguage(req, "Build" + this.status);
             }
 
             return this;

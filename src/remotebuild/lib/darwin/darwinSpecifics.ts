@@ -49,7 +49,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public initialize(conf: RemoteBuildConf): Q.Promise<any> {
         DarwinSpecifics.Config = conf;
         if (process.getuid() === 0) {
-            console.warn(resources.getString("runningAsRootError"));
+            console.warn(resources.getString("RunningAsRootError"));
             process.exit(1);
         }
 
@@ -57,7 +57,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "usageInformation"));
+        console.info(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {

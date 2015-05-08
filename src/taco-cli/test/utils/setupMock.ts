@@ -10,13 +10,13 @@ class SetupMock {
         return {
             question: function (question: string, callback: (answer: string) => void): void {
                 switch (question) {
-                    case "commandSetupRemoteQueryHost":
+                    case "CommandSetupRemoteQueryHost":
                         callback(desiredState.host);
                         break;
-                    case "commandSetupRemoteQueryPort":
+                    case "CommandSetupRemoteQueryPort":
                         callback(desiredState.port.toString());
                         break;
-                    case "commandSetupRemoteQueryPin":
+                    case "CommandSetupRemoteQueryPin":
                         callback(desiredState.pin);
                         break;
                     default:

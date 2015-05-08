@@ -48,7 +48,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "usageInformation"));
+        console.info(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {

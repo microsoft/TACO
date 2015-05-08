@@ -226,7 +226,7 @@ describe("TemplateManager", function (): void {
                     // The promise was resolved, this is an error
                     done(new Error("The operation completed successfully when it should have returned an error"));
                 }, function (error: string): void {
-                    error.should.equal("commandCreateTemplatesUnavailable");
+                    error.should.equal("CommandCreateTemplatesUnavailable");
                     done();
                 })
                 .catch(function (err: string): void {

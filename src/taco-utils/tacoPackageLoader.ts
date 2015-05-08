@@ -79,8 +79,8 @@ module TacoUtility {
                 npmProcess.on("error", function (error: Error): void {
                     if (packageName === "cordova") {
                         logger.log("\n", logger.Level.Normal);
-                        logger.log(resources.getString("packageLoaderErrorMessage"), logger.Level.Error);
-                        logger.log(resources.getString("packageLoaderDownloadErrorMessage", resources.getString("packageLoaderCordovaToolVersion", packageVersion)), logger.Level.Error);
+                        logger.log(resources.getString("PackageLoaderErrorMessage"), logger.Level.Error);
+                        logger.log(resources.getString("packageLoaderDownloadErrorMessage", resources.getString("PackageLoaderCordovaToolVersion", packageVersion)), logger.Level.Error);
                         logger.log("\n", logger.Level.Normal);
                     }
 
@@ -92,15 +92,15 @@ module TacoUtility {
                     if (exitCode === 0) {
                         if (packageName === "cordova") {
                             logger.log("\n", logger.Level.Normal);
-                            logger.log(resources.getString("packageLoaderSuccessMessage"), logger.Level.Success);
-                            logger.log(resources.getString("packageLoaderDownloadCompletedMessage", resources.getString("packageLoaderCordovaToolVersion", packageVersion)), logger.Level.Normal);
+                            logger.log(resources.getString("PackageLoaderSuccessMessage"), logger.Level.Success);
+                            logger.log(resources.getString("packageLoaderDownloadCompletedMessage", resources.getString("PackageLoaderCordovaToolVersion", packageVersion)), logger.Level.Normal);
                             logger.log("\n", logger.Level.Normal);
                         }
 
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
-                            deferred.reject(new Error("npmInstallFailed"));
+                            deferred.reject(new Error("NpmInstallFailed"));
                         });
                     }
                 });
@@ -128,8 +128,8 @@ module TacoUtility {
         private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
             var deferred: Q.Deferred<string> = Q.defer<string>();
             if (specType === PackageSpecType.Error) {
-                logger.log(resources.getString("packageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
-                deferred.reject(resources.getString("packageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName));
+                logger.log(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
+                deferred.reject(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName));
                 return deferred.promise;
             }
 
@@ -155,8 +155,8 @@ module TacoUtility {
 
         private static installPackage(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<any> {
             if (packageName === "cordova") {
-                logger.log(resources.getString("packageLoaderDownloadingMessage", packageVersion), logger.Level.NormalBold);
-                logger.logLine(resources.getString("packageLoaderCordovaToolVersion", packageVersion), logger.Level.Normal);
+                logger.log(resources.getString("PackageLoaderDownloadingMessage", packageVersion), logger.Level.NormalBold);
+                logger.logLine(resources.getString("PackageLoaderCordovaToolVersion", packageVersion), logger.Level.Normal);
                 logger.log("\n", logger.Level.Normal);
             }
 
@@ -170,7 +170,7 @@ module TacoUtility {
                     });
                 case PackageSpecType.Error:
                 default:
-                    return Q.reject(new Error(resources.getString("packageLoaderInvalidPackageVersionSpecifier", packageName, packageVersion)));
+                    return Q.reject(new Error(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageName, packageVersion)));
             }
         }
 

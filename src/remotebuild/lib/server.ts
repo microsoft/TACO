@@ -56,7 +56,7 @@ class Server {
         UtilHelper.createDirectoryIfNecessary(serverDir);
 
         app.get("/", function (req: express.Request, res: express.Response): void {
-            res.status(200).send(resources.getStringForLanguage(req, "indexPageContent", conf.port));
+            res.status(200).send(resources.getStringForLanguage(req, "IndexPageContent", conf.port));
         });
 
         app.get("/certs/:pin", HostSpecifics.hostSpecifics.downloadClientCerts);
@@ -68,7 +68,7 @@ class Server {
             return Server.startupServer(conf, app);
         }).then(Server.registerShutdownHooks)
           .fail(function (err: any): void {
-            console.error(resources.getString("serverStartFailed"), err);
+            console.error(resources.getString("ServerStartFailed"), err);
             if (err.stack) {
                 console.error(err.stack);
             }
@@ -95,9 +95,9 @@ class Server {
         return Server.initializeServerTestCapabilities(conf).then(function (serverTestCaps: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
             return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
                 return modGen.test(conf, moduleConfig, serverTestCaps).then(function (): void {
-                    console.log(resources.getString("testPassed", mod));
+                    console.log(resources.getString("TestPassed", mod));
                 }, function (err: Error): void {
-                    console.error(resources.getString("testFailed", mod));
+                    console.error(resources.getString("TestFailed", mod));
                     console.error(err);
                     throw err;
                 });
@@ -146,7 +146,7 @@ class Server {
     private static loadServerModules(conf: RemoteBuildConf, app: Express.Application, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
         var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
             if (!(<any>req).client.authorized) {
-                res.status(401).send(resources.getStringForLanguage(req, "unauthorizedClientRequest"));
+                res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));
             } else {
                 next();
             }
@@ -171,7 +171,7 @@ class Server {
             try {
                 var modGen: RemoteBuild.IServerModuleFactory = require(mod);
             } catch (e) {
-                console.error(resources.getString("unableToLoadModule", mod));
+                console.error(resources.getString("UnableToLoadModule", mod));
                 return Q.reject(e);
             }
 
@@ -196,7 +196,7 @@ class Server {
                 svr.listen(conf.port, function (): void {
                     Server.ServerInstance = svr;
                     Server.ServerConf = conf;
-                    console.log(resources.getString("insecureServerStarted"), conf.port);
+                    console.log(resources.getString("InsecureServerStarted"), conf.port);
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -242,7 +242,7 @@ class Server {
                 svr.listen(conf.port, function (): void {
                     Server.ServerInstance = svr;
                     Server.ServerConf = conf;
-                    console.log(resources.getString("secureServerStarted"), conf.port);
+                    console.log(resources.getString("SecureServerStarted"), conf.port);
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -252,7 +252,7 @@ class Server {
 
     private static friendlyServerListenError(err: any, conf: RemoteBuildConf): string {
         if (err.code === "EADDRINUSE") {
-            return resources.getString("serverPortInUse", conf.port);
+            return resources.getString("ServerPortInUse", conf.port);
         } else {
             return err.toString();
         }
@@ -267,10 +267,10 @@ class Server {
     private static registerShutdownHooks(): void {
         // It is strongly recommended in a NodeJs server to kill the process off on uncaughtException.
         Server.ErrorShutdown = function (err: Error): void {
-            console.error(resources.getString("uncaughtErrorShutdown"));
+            console.error(resources.getString("UncaughtErrorShutdown"));
             console.error(err);
             console.error((<any>err).stack);
-            console.info(resources.getString("serverShutdown"));
+            console.info(resources.getString("ServerShutdown"));
             
             Server.Modules.forEach(function (mod: RemoteBuild.IServerModule): void {
                 mod.shutdown();
@@ -282,7 +282,7 @@ class Server {
 
         // Opportunity to clean up builds on exit
         Server.Shutdown = function (): void {
-            console.info(resources.getString("serverShutdown"));
+            console.info(resources.getString("ServerShutdown"));
             // BUG: Currently if buildManager.shutdown() is called while a build log is being written, rimraf will throw an exception on windows
             Server.Modules.forEach(function (mod: RemoteBuild.IServerModule): void {
                 mod.shutdown();

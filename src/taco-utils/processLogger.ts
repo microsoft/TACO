@@ -37,7 +37,7 @@ module TacoUtility {
             var pathToLog = path.join(logDir, logFileName);
             this._stream = fs.createWriteStream(pathToLog);
             this._stream.on("error", function (err: any): void {
-                console.error(resources.getStringForLanguage(language, "processLogError"), pathToLog, err);
+                console.error(resources.getStringForLanguage(language, "ProcessLogError"), pathToLog, err);
             });
             var me = this;
             proc.stdout.on("data", function (data: any): void {
@@ -48,7 +48,7 @@ module TacoUtility {
             });
             proc.on("exit", function (code: number): void {
                 if (code) {
-                    me.log(resources.getStringForLanguage(language, "loggedProcessTerminatedWithCode", code));
+                    me.log(resources.getStringForLanguage(language, "LoggedProcessTerminatedWithCode", code));
                 }
 
                 me.end();

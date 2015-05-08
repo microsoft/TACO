@@ -77,15 +77,15 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static remote(setupData: commands.ICommandData): Q.Promise<any> {
         var platform: string = (setupData.remain[1] || "ios").toLowerCase();
 
-        logger.logNormalLine(resources.getString("commandSetupRemoteHeader"));
+        logger.logNormalLine(resources.getString("CommandSetupRemoteHeader"));
 
         return Setup.queryUserForRemoteConfig()
         .then(Setup.acquireCertificateIfRequired)
         .then(Setup.constructRemotePlatformSettings)
         .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
         .then(function (): void {
-            logger.log(logger.colorize(resources.getString("commandSuccessBase"), logger.Level.Success));
-            logger.logLine(" " + resources.getString("commandSetupSettingsStored", Settings.settingsFile));
+            logger.log(logger.colorize(resources.getString("CommandSuccessBase"), logger.Level.Success));
+            logger.logLine(" " + resources.getString("CommandSetupSettingsStored", Settings.settingsFile));
         })
         .catch(function (err: any): void {
             if (err.message) {
@@ -107,26 +107,26 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         var cliSession = Setup.CliSession ? Setup.CliSession : readline.createInterface({ input: process.stdin, output: process.stdout });
 
         // Query the user for the host, port, and PIN, but don't keep asking questions if they input a known-invalid argument
-        cliSession.question(resources.getString("commandSetupRemoteQueryHost"), function (hostAnswer: string): void {
+        cliSession.question(resources.getString("CommandSetupRemoteQueryHost"), function (hostAnswer: string): void {
             hostPromise.resolve({ host: hostAnswer });
         });
         hostPromise.promise.then(function (host: { host: string }): void {
-            cliSession.question(resources.getString("commandSetupRemoteQueryPort"), function (portAnswer: string): void {
+            cliSession.question(resources.getString("CommandSetupRemoteQueryPort"), function (portAnswer: string): void {
                 var port: number = parseInt(portAnswer);
                 if (port > 0) {
                     // Port looks valid
                     portPromise.resolve({ host: host.host, port: port });
                 } else {
-                    portPromise.reject(new Error(resources.getString("commandSetupRemoteInvalidPort", port)));
+                    portPromise.reject(new Error(resources.getString("CommandSetupRemoteInvalidPort", port)));
                 }
             });
         });
         portPromise.promise.then(function (hostAndPort: { host: string; port: number }): void {
-            cliSession.question(resources.getString("commandSetupRemoteQueryPin"), function (pinAnswer: string): void {
+            cliSession.question(resources.getString("CommandSetupRemoteQueryPin"), function (pinAnswer: string): void {
                 var pin: number = parseInt(pinAnswer);
                 if (pinAnswer && !Setup.pinIsValid(pin)) {
                     // A pin was provided but it is invalid
-                    pinPromise.reject(new Error(resources.getString("commandSetupRemoteInvalidPin", pinAnswer)));
+                    pinPromise.reject(new Error(resources.getString("CommandSetupRemoteInvalidPin", pinAnswer)));
                 } else {
                     pinPromise.resolve({ host: hostAndPort.host, port: hostAndPort.port, pin: pin });
                 }
@@ -155,7 +155,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                 } else {
                     if (response.statusCode !== 200) {
                         // Invalid PIN specified
-                        deferred.reject(new Error(resources.getString("commandSetupRemoteRejectedPin")));
+                        deferred.reject(new Error(resources.getString("CommandSetupRemoteRejectedPin")));
                     } else {
                         ConnectionSecurityHelper.saveCertificate(body, hostPortAndPin.host).then(function (certName: string): void {
                             deferred.resolve(certName.trim());
@@ -186,7 +186,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                 if (error) {
                     deferred.reject(Setup.getFriendlyHttpError(error, hostPortAndCert.host, hostPortAndCert.port, mountDiscoveryUrl, !!hostPortAndCert.certName));
                 } else if (response.statusCode !== 200) {
-                    deferred.reject(new Error(resources.getString("commandSetupCantFindRemoteMount", mountDiscoveryUrl)));
+                    deferred.reject(new Error(resources.getString("CommandSetupCantFindRemoteMount", mountDiscoveryUrl)));
                 } else {
                     deferred.resolve(body);
                 }
@@ -228,19 +228,19 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
 
     private static getFriendlyHttpError(error: any, host: string, port: number, url: string, secure: boolean): Error {
         if (error.code === "ECONNREFUSED") {
-            return new Error(resources.getString("commandSetupConnrefused", util.format("http%s://%s:%s", secure ? "s" : "", host, port)));
+            return new Error(resources.getString("CommandSetupConnrefused", util.format("http%s://%s:%s", secure ? "s" : "", host, port)));
         } else if (error.code === "ENOTFOUND") {
-            return new Error(resources.getString("commandSetupNotfound", host));
+            return new Error(resources.getString("CommandSetupNotfound", host));
         } else if (error.code === "ETIMEDOUT") {
-            return new Error(resources.getString("commandSetupTimedout", host));
+            return new Error(resources.getString("CommandSetupTimedout", host));
         } else if (error.code === "ECONNRESET") {
             if (!secure) {
-                return new Error(resources.getString("remoteBuildNonSslConnectionReset", url));
+                return new Error(resources.getString("RemoteBuildNonSslConnectionReset", url));
             } else {
-                return new Error(resources.getString("remoteBuildSslConnectionReset", url));
+                return new Error(resources.getString("RemoteBuildSslConnectionReset", url));
             }
         } else {
-            return new Error(resources.getString("errorHTTPGet", url, error));
+            return new Error(resources.getString("ErrorHTTPGet", url, error));
         }
     }
 }

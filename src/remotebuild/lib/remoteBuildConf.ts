@@ -56,7 +56,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
         var serverMods = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
-            console.warn(resources.getString("noServerModulesSelected"));
+            console.warn(resources.getString("NoServerModulesSelected"));
             if (isUnitTest) {
                 this.remoteBuildConf.modules = { };
             } else {

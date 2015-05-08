@@ -44,10 +44,10 @@ class ConnectionSecurityHelper {
                 certLoadProcess.on("close", function (code: number): void {
                     if (code) {
                         if (code === 1) {
-                            bufferDeferred.reject(new Error(resources.getString("noCertificateFound", connectionInfo.certName)));
+                            bufferDeferred.reject(new Error(resources.getString("NoCertificateFound", connectionInfo.certName)));
                         } else {
                             logger.logErrorLine(output);
-                            bufferDeferred.reject(new Error(resources.getString("getCertificateFailed")));
+                            bufferDeferred.reject(new Error(resources.getString("GetCertificateFailed")));
                         }
                     } else {
                         bufferDeferred.resolve(new Buffer(output, "base64"));
@@ -60,7 +60,7 @@ class ConnectionSecurityHelper {
                 fs.readFile(certPath, bufferDeferred.makeNodeResolver());
                 break;
             default:
-                throw new Error(resources.getString("unsupportedPlatform", os.platform()));
+                throw new Error(resources.getString("UnsupportedPlatform", os.platform()));
         }
 
         return bufferDeferred.promise.then(function (certificate: Buffer): https.Agent {
@@ -130,7 +130,7 @@ class ConnectionSecurityHelper {
                 });
                 break;
             default:
-                deferred.reject(new Error(resources.getString("unsupportedPlatform", os.platform())));
+                deferred.reject(new Error(resources.getString("UnsupportedPlatform", os.platform())));
         }
 
         return deferred.promise;

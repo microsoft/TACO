@@ -129,15 +129,15 @@ module TacoKits {
 
             try {
                 if (!fs.existsSync(KitHelper.KitMetadataFilePath)) {
-                    logger.logErrorLine(resources.getString("tacoKitsExceptionKitMetadataFileNotFound"));
-                    return Q.reject<ITacoKitMetadata>("tacoKitsExceptionKitMetadataFileNotFound");
+                    logger.logErrorLine(resources.getString("TacoKitsExceptionKitMetadataFileNotFound"));
+                    return Q.reject<ITacoKitMetadata>("TacoKitsExceptionKitMetadataFileNotFound");
                 }
 
                 KitHelper.KitMetadata = require(KitHelper.KitMetadataFilePath);
                 return Q(KitHelper.KitMetadata);
             } catch (e) {
-                logger.logErrorLine(resources.getString("tacoKitsExceptionKitMetadataFileMalformed"));
-                return Q.reject<ITacoKitMetadata>("tacoKitsExceptionKitMetadataFileMalformed");
+                logger.logErrorLine(resources.getString("TacoKitsExceptionKitMetadataFileMalformed"));
+                return Q.reject<ITacoKitMetadata>("TacoKitsExceptionKitMetadataFileMalformed");
             }
         }
 
@@ -154,8 +154,8 @@ module TacoKits {
                     deferred.resolve(kits[kitId]);
                 } else {
                     // Error, empty kitId or no kit matching the kit id
-                    logger.logErrorLine(resources.getString("tacoKitsExceptionInvalidKit", kitId));
-                    deferred.reject("tacoKitsExceptionInvalidKit");
+                    logger.logErrorLine(resources.getString("TacoKitsExceptionInvalidKit", kitId));
+                    deferred.reject("TacoKitsExceptionInvalidKit");
                 }
 
                 return deferred.promise;
@@ -266,11 +266,11 @@ module TacoKits {
                             // Error, the kit override does not define the specified template id
                             if (templateId === KitHelper.TsTemplateId) {
                                 // We have a special error message for typescript
-                                logger.logErrorLine(resources.getString("tacoKitsExceptionTypescriptNotSupported"));
-                                deferred.reject("tacoKitsExceptionTypescriptNotSupported");
+                                logger.logErrorLine(resources.getString("TacoKitsExceptionTypescriptNotSupported"));
+                                deferred.reject("TacoKitsExceptionTypescriptNotSupported");
                             } else {
-                                logger.logErrorLine(resources.getString("tacoKitsExceptionInvalidTemplate", templateId));
-                                deferred.reject("tacoKitsExceptionInvalidTemplate");
+                                logger.logErrorLine(resources.getString("TacoKitsExceptionInvalidTemplate", templateId));
+                                deferred.reject("TacoKitsExceptionInvalidTemplate");
                             }
                         }
                     } else if (templates["default"][templateId]) {
@@ -282,8 +282,8 @@ module TacoKits {
                         deferred.resolve(templateOverrideInfo);
                     } else {
                         // Error, no template matching the specified template id
-                        logger.logErrorLine(resources.getString("tacoKitsExceptionInvalidTemplate", templateId));
-                        deferred.reject("tacoKitsExceptionInvalidTemplate");
+                        logger.logErrorLine(resources.getString("TacoKitsExceptionInvalidTemplate", templateId));
+                        deferred.reject("TacoKitsExceptionInvalidTemplate");
                     }
 
                     return deferred.promise;
@@ -387,8 +387,8 @@ module TacoKits {
                 if (kitInfo["cordova-cli"]) {
                     deferred.resolve(kitInfo["cordova-cli"]);
                 } else {
-                    logger.logErrorLine(resources.getString("tacoKitsExceptionNoCliSpecification", kitId));
-                    deferred.reject("tacoKitsExceptionNoCliSpecification");
+                    logger.logErrorLine(resources.getString("TacoKitsExceptionNoCliSpecification", kitId));
+                    deferred.reject("TacoKitsExceptionNoCliSpecification");
                 }
 
                 return deferred.promise;
@@ -406,8 +406,8 @@ module TacoKits {
                     deferred.resolve(templates);
                 } else {
                     // There definitely should be a templates node in the kit metadata
-                    logger.logErrorLine(resources.getString("tacoKitsExceptionKitMetadataFileMalformed"));
-                    return Q.reject<ITemplateMetadata>("tacoKitsExceptionKitMetadataFileMalformed");
+                    logger.logErrorLine(resources.getString("TacoKitsExceptionKitMetadataFileMalformed"));
+                    return Q.reject<ITemplateMetadata>("TacoKitsExceptionKitMetadataFileMalformed");
                 }
 
                 return deferred.promise;
