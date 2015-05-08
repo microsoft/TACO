@@ -451,11 +451,11 @@ class RemoteBuildClientHelper {
             var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
             console.info(buildInfo.status + " - " + buildInfo.message);
             buildInfo["logOffset"] = logOffset || 0;
-            if (buildInfo.status === "complete") {
+            if (buildInfo.status === BuildInfo.COMPLETE) {
                 return Q(buildInfo);
-            } else if (buildInfo.status === "invalid") {
+            } else if (buildInfo.status === BuildInfo.INVALID) {
                 throw new Error(resources.getString("invalidRemoteBuild", buildInfo.message));
-            } else if (buildInfo.status === "error") {
+            } else if (buildInfo.status === BuildInfo.ERROR) {
                 var err: any = new Error(resources.getString("remoteBuildError", buildInfo.message));
                 err.buildInfo = buildInfo;
                 throw err;

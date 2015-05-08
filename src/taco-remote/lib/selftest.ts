@@ -1,4 +1,14 @@
-﻿
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+
 import fs = require ("fs");
 import fstream = require ("fstream");
 import https = require ("https");
@@ -8,6 +18,10 @@ import request = require ("request");
 import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
+
+import tacoUtils = require("taco-utils");
+
+import BuildInfo = tacoUtils.BuildInfo;
 
 class SelfTest {
     /**
@@ -60,10 +74,10 @@ class SelfTest {
                     }
 
                     var build = JSON.parse(body);
-                    if (build["status"] === "error" || build["status"] === "downloaded" || build["status"] === "deleted" || build["status"] === "invalid") {
+                    if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
                         clearInterval(ping);
                         deferred.reject(new Error("Build Failed: " + body));
-                    } else if (build["status"] === "complete") {
+                    } else if (build["status"] === BuildInfo.COMPLETE) {
                         clearInterval(ping);
 
                         if (deviceBuild) {
