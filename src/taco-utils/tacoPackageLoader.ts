@@ -31,7 +31,12 @@ module TacoUtility {
         Error = -1,
         Version = 0,
         Uri = 1,
-        RelativePath = 2
+        FilePath = 2
+    }
+
+    interface IPackageSpec {
+        location: string;
+        name: string;
     }
 
     export class TacoPackageLoader {
@@ -48,26 +53,18 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyRequire<T>(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<T> {
-            options = options || {};
+        public static lazyRequire<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
             var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
             var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
 
-            if (packageSpecType === PackageSpecType.RelativePath) {
-                assert.ok(options.basePath);
-                var relativePath = packageVersion.substring("file://".length);
-                var absolutePath = path.resolve(options.basePath, relativePath);
-                packageVersion = absolutePath;
-            }
-
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, options.logLevel).then(function (): T {
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): T {
                 return TacoPackageLoader.requirePackage<T>(packageTargetPath);
             });
         }
 
-        public static lazyRequireNoCache<T>(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<T> {
+        public static lazyRequireNoCache<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
             var requireCachePaths = Object.keys(require.cache);
-            return TacoPackageLoader.lazyRequire<T>(packageName, packageVersion, options).finally(function (): void {
+            return TacoPackageLoader.lazyRequire<T>(packageName, packageVersion, logLevel).finally(function (): void {
                 // un-cache any files that were just required.
                 Object.keys(require.cache).filter(function (key: string): boolean {
                     return requireCachePaths.indexOf(key) === -1;
@@ -91,24 +88,45 @@ module TacoUtility {
          * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved if the package installed succesfully
          */
 
-        public static forceInstallPackage(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<any> {
-            options = options || {};
+        public static forceInstallPackage(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<any> {
             var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
             var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
-
-            if (packageSpecType === PackageSpecType.RelativePath) {
-                assert.ok(options.basePath);
-                var relativePath = packageVersion.substring("file://".length);
-                var absolutePath = path.resolve(options.basePath, relativePath);
-                packageVersion = absolutePath;
-            }
 
             // Intentionally create the status file, triggering a re-install
             var statusFilePath = TacoPackageLoader.getStatusFilePath(packageTargetPath);
             mkdirp.sync(packageTargetPath);
             fs.writeFileSync(statusFilePath, "Outdated");
 
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, options.logLevel);
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel);
+        }
+
+        /**
+         * These three functions redirect to their corresponding function above after first fetching the appropriate information from the specified mapping file.
+         */
+        public static tacoRequire<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T> {
+            return Q({}).then(function (): Q.Promise<T> {
+                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
+                return TacoPackageLoader.lazyRequire<T>(packageSpec.name, packageSpec.location);
+            });
+        }
+
+        public static tacoRequireNoCache<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T> {
+            return Q({}).then(function (): Q.Promise<T> {
+                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
+                return TacoPackageLoader.lazyRequireNoCache<T>(packageSpec.name, packageSpec.location);
+            });
+        }
+
+        public static forceInstallTacoPackage(packageId: string, dependencyConfigPath: string): Q.Promise<any> {
+            return Q({}).then(function (): Q.Promise<any> {
+                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
+                return TacoPackageLoader.forceInstallPackage(packageSpec.name, packageSpec.location);
+            });
+        }
+
+        private static getPackageSpec(packageId: string, dependencyConfigPath: string): IPackageSpec {
+            var dependencyLookup = require(dependencyConfigPath);
+            return dependencyLookup[packageId];
         }
 
         private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
@@ -174,7 +192,7 @@ module TacoUtility {
                 case PackageSpecType.Version:
                     return path.join(homePackageModulesPath, packageVersion, "node_modules", packageName);
                 case PackageSpecType.Uri:
-                case PackageSpecType.RelativePath:
+                case PackageSpecType.FilePath:
                     return path.join(homePackageModulesPath, encodeURIComponent(packageVersion), "node_modules", packageName);
                 case PackageSpecType.Error:
                 default:
@@ -225,7 +243,8 @@ module TacoUtility {
                         .then(function (): Q.Promise<any> {
                         return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
                         });
-                case PackageSpecType.RelativePath:
+                case PackageSpecType.FilePath:
+                    packageVersion = packageVersion.substring("file://".length);
                     return utils.copyRecursive(packageVersion, targetPath).then(function (): Q.Promise<any> {
                         return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
                     });
@@ -300,8 +319,8 @@ module TacoUtility {
                 return PackageSpecType.Uri;
             }
 
-            if (packageVersion.match(/file:\/\/\..*/)) {
-                return PackageSpecType.RelativePath;
+            if (packageVersion.match(/file:\/\/.*/)) {
+                return PackageSpecType.FilePath;
             }
 
             return PackageSpecType.Error;

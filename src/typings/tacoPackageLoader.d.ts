@@ -26,13 +26,12 @@ declare module TacoUtility {
          * @param {string} packageName The name of the package to load
          * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
          * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
-         * @param {string} basePath Optional parameter which specifies the base path to resolve relative file paths against
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
 
-        static lazyRequire<T>(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<T>;
-        static lazyRequireNoCache<T>(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<T>;
+        static lazyRequire<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T>;
+        static lazyRequireNoCache<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T>;
 
         /**
          * Perform a fresh install of a specified node module, even if it is already cached
@@ -43,10 +42,16 @@ declare module TacoUtility {
          * @param {string} packageName The name of the package to load
          * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
          * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
-         * @param {string} basePath Optional parameter which specifies the base path to resolve relative file paths against
          *
          * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved if the package installed succesfully
          */
-        static forceInstallPackage(packageName: string, packageVersion: string, options?: { logLevel?: string; basePath?: string }): Q.Promise<any>;
+        static forceInstallPackage(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<any>;
+
+        /**
+         * These three functions redirect to their corresponding function above after first fetching the appropriate information from the specified mapping file.
+         */
+        static tacoRequire<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T>;
+        static tacoRequireNoCache<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T>;
+        static forceInstallTacoPackage(packageId: string, dependencyConfigPath: string): Q.Promise<any>;
     }
 }

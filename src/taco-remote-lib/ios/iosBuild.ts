@@ -62,7 +62,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     var cordovaVersion: string = currentBuild["vcordova"];
     buildInfo.updateStatus(BuildInfo.BUILDING, "acquiringCordova");
     process.send(buildInfo);
-    TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", cordovaVersion, { logLevel: buildInfo.logLevel }).done(function (pkg: Cordova.ICordova): void {
+    TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
         cordova = pkg;
 
         cordova.on("results", console.info);

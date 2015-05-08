@@ -6,17 +6,20 @@
 /// <reference path="typings/merge2.d.ts" />
 /// <reference path="typings/gulp-typescript.d.ts" />
 /// <reference path="typings/gulp-sourcemaps.d.ts" />
+/// <reference path="typings/replace.d.ts" />
 
-var runSequence = require("run-sequence");
+var runSequence = require ("run-sequence");
 import gulp = require ("gulp");
+import sourcemaps = require ("gulp-sourcemaps");
+import ts = require ("gulp-typescript");
+import merge = require ("merge2");
+import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
+import replace = require ("replace");
+
 import stylecopUtil = require ("../tools/stylecopUtil");
 import gulpUtils = require ("../tools/GulpUtils");
-import nopt = require ("nopt");
-import sourcemaps = require ("gulp-sourcemaps");
-import merge = require ("merge2");
-import ts = require ("gulp-typescript");
  
 var buildConfig = require("../../src/build_config.json");
 var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
@@ -88,10 +91,19 @@ gulp.task("copy", function (): Q.Promise<any> {
             "/**/templates/**",
             "/**/examples/**",
             "/**/*.ps1",
-            "/**/moduleLookup.json",
-            "/**/tacoRemoteMuxLocation.json"
+            "/**/dynamicDependencies.json"
         ],
-        buildConfig.src, buildConfig.buildPackages);
+        buildConfig.src, buildConfig.buildPackages).then(function (): void {
+            /* replace %TACO_BUILD_PACKAGES% with the absolute path of buildConfig.buildPackages in the built output */
+            replace({
+                regex: /%TACO_BUILD_PACKAGES%/g,
+                replacement: JSON.stringify(path.resolve(buildConfig.buildPackages)).replace(/"/g, ""),
+                paths: [buildConfig.buildPackages],
+                includes: "*.json",
+                recursive: true,
+                silent: false
+            });
+    });
 });
 
 /* Task to run tests */
