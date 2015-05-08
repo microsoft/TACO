@@ -1,4 +1,12 @@
-﻿/// <reference path="./express.d.ts" />
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="./express.d.ts" />
 /// <reference path="./node.d.ts" />
 /// <reference path="./Q.d.ts" />
 

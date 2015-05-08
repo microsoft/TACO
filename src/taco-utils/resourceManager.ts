@@ -1,4 +1,12 @@
-﻿/// <reference path="../typings/node.d.ts" />
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="../typings/node.d.ts" />
 
 import assert = require ("assert");
 import fs = require ("fs");

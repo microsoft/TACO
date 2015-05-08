@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
@@ -45,9 +46,9 @@ class IOSEmulateHelper {
         return Q.fcall(IOSEmulateHelper.cdToAppDir, emulateRequest.appDir)
             .then(IOSEmulateHelper.cordovaEmulate.bind(IOSEmulateHelper, emulateRequest))
             .then(function success(): { status: string; messageId: string; messageArgs?: any } {
-            return { status: BuildInfo.EMULATED, messageId: "EmulateSuccess" };
+            return { status: BuildInfo.EMULATED, messageId: "emulateSuccess" };
         }, function fail(e: Error): { status: string; messageId: string; messageArgs?: any } {
-                return { status: "error", messageId: "EmulateFailedWithError", messageArgs: e.message };
+                return { status: "error", messageId: "emulateFailedWithError", messageArgs: e.message };
             });
     }
 

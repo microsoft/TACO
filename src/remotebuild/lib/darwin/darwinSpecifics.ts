@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/express.d.ts" />
@@ -48,7 +49,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public initialize(conf: RemoteBuildConf): Q.Promise<any> {
         DarwinSpecifics.Config = conf;
         if (process.getuid() === 0) {
-            console.warn(resources.getString("RunningAsRootError"));
+            console.warn(resources.getString("runningAsRootError"));
             process.exit(1);
         }
 
@@ -56,7 +57,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "UsageInformation"));
+        console.info(resources.getStringForLanguage(language, "usageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {

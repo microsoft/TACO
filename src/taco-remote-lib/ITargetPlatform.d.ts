@@ -1,4 +1,12 @@
-﻿/// <reference path="../typings/tacoUtils.d.ts" />
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="../typings/tacoUtils.d.ts" />
 /// <reference path="../typings/express.d.ts" />
 /// <reference path="../typings/node.d.ts" />
 

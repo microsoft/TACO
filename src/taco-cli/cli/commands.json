@@ -1,67 +1,67 @@
-{
+﻿{
     "create": {
         "synopsis": "<PATH> [ID [NAME [CONFIG]]] [options]",
         "modulePath": "./create",
-        "description": "[command.create.description]",
+        "description": "[commandCreateDescription]",
         "args": [
-            { "name": "PATH", "description": "[command.create.args.path]" },
-            { "name": "ID", "description": "[command.create.args.id]" },
-            { "name": "NAME", "description": "[command.create.args.name]" },
-            { "name": "CONFIG", "description": "[command.create.args.config]" }
+            { "name": "PATH", "description": "[commandCreateArgsPath]" },
+            { "name": "ID", "description": "[commandCreateArgsId]" },
+            { "name": "NAME", "description": "[commandCreateArgsName]" },
+            { "name": "CONFIG", "description": "[commandCreateArgsConfig]" }
         ],
         "options": [
-            { "name": "--kit <NAME>", "description": "[command.create.options.kit]" },
-            { "name": "--template <NAME>", "description": "[command.create.options.template]" },
-            { "name": "--cli <VERSION>", "description": "[command.create.options.cli]" },
-            { "name": "--copy-from|src <PATH>", "description": "[command.create.options.copy]" },
-            { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" },
-            { "name": "--list", "description": "[command.create.options.list]" }
+            { "name": "--kit <NAME>", "description": "[commandCreateOptionsKit]" },
+            { "name": "--template <NAME>", "description": "[commandCreateOptionsTemplate]" },
+            { "name": "--cli <VERSION>", "description": "[commandCreateOptionsCli]" },
+            { "name": "--copy-from|src <PATH>", "description": "[commandCreateOptionsCopy]" },
+            { "name": "--link-to <PATH>", "description": "[commandCreateOptionsLinkto]" },
+            { "name": "--list", "description": "[commandCreateOptionsList]" }
         ]
     },
     "help": {
         "synopsis": "[COMMAND]",
         "modulePath": "../cli/help",
-        "description": "[command.help.description]"
+        "description": "[commandHelpDescription]"
     },
     "setup": {
         "synopsis": "remote [PLATFORM]",
         "modulePath": "./setup",
-        "description": "[command.setup.description]",
+        "description": "[commandSetupDescription]",
         "args": [
-            { "name": "PLATFORM", "description": "[command.setup.options.platform]" }
+            { "name": "PLATFORM", "description": "[commandSetupOptionsPlatform]" }
         ]
     },
     "build": {
         "synopsis": "[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]",
         "modulePath": "./build",
-        "description": "[command.build.description]",
+        "description": "[commandBuildDescription]",
         "args": [
-            { "name": "PLATFORM", "description": "[command.build.platform.description]" },
-            { "name": "--remote", "description": "[command.build.remote.description]" },
-            { "name": "--local", "description": "[command.build.local.description]" },
-            { "name": "--clean", "description": "[command.build.clean.description]" },
-            { "name": "--debug", "description": "[command.build.debug.description]" },
-            { "name": "--release", "description": "[command.build.release.description]" },
-            { "name": "--device", "description": "[command.build.device.description]" },
-            { "name": "--emulator", "description": "[command.build.emulator.description]" },
-            { "name": "--target", "description": "[command.build.target.description]" }
+            { "name": "PLATFORM", "description": "[commandBuildPlatformDescription]" },
+            { "name": "--remote", "description": "[commandBuildRemoteDescription]" },
+            { "name": "--local", "description": "[commandBuildLocalDescription]" },
+            { "name": "--clean", "description": "[commandBuildCleanDescription]" },
+            { "name": "--debug", "description": "[commandBuildDebugDescription]" },
+            { "name": "--release", "description": "[commandBuildReleaseDescription]" },
+            { "name": "--device", "description": "[commandBuildDeviceDescription]" },
+            { "name": "--emulator", "description": "[commandBuildEmulatorDescription]" },
+            { "name": "--target", "description": "[commandBuildTargetDescription]" }
         ]
     },
     "run": {
         "synopsis": "[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | -- release] [--device | --emulator | --target=TARGET]",
         "modulePath": "./run",
-        "description": "[command.run.description]",
+        "description": "[commandRunDescription]",
         "args": [
-            { "name": "PLATFORM", "description": "[command.run.platform.description]" },
-            { "name": "--remote", "description": "[command.run.remote.description]" },
-            { "name": "--local", "description": "[command.run.local.description]" },
-            { "name": "--nobuild", "description": "[command.run.nobuild.description]" },
-            { "name": "--debuginfo", "description": "[command.run.json.description]" },
-            { "name": "--debug", "description": "[command.run.debug.description]" },
-            { "name": "--release", "description": "[command.run.release.description]" },
-            { "name": "--device", "description": "[command.run.device.description]" },
-            { "name": "--emulator", "description": "[command.run.emulator.description]" },
-            { "name": "--target", "description": "[command.run.target.description]" }
+            { "name": "PLATFORM", "description": "[commandRunPlatformDescription]" },
+            { "name": "--remote", "description": "[commandRunRemoteDescription]" },
+            { "name": "--local", "description": "[commandRunLocalDescription]" },
+            { "name": "--nobuild", "description": "[commandRunNobuildDescription]" },
+            { "name": "--debuginfo", "description": "[commandRunJsonDescription]" },
+            { "name": "--debug", "description": "[commandRunDebugDescription]" },
+            { "name": "--release", "description": "[commandRunReleaseDescription]" },
+            { "name": "--device", "description": "[commandRunDeviceDescription]" },
+            { "name": "--emulator", "description": "[commandRunEmulatorDescription]" },
+            { "name": "--target", "description": "[commandRunTargetDescription]" }
         ]
     }
 }

@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/nconf.d.ts" />
@@ -62,7 +63,7 @@ function cli(): void {
             return task.execute(remotebuildConf);
         }).done();
     } else {
-        console.info(resources.getString("UnknownCommand"), command);
+        console.info(resources.getString("unknownCommand"), command);
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
         process.exit(0);
     }

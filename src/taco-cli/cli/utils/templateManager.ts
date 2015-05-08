@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/adm-zip.d.ts"/>
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="../../../typings/adm-zip.d.ts"/>
 /// <reference path="../../../typings/replace.d.ts" />
 /// <reference path="../../../typings/resourceManager.d.ts"/>
 /// <reference path="../../../typings/tacoUtils.d.ts"/>
@@ -166,9 +174,9 @@ class TemplateManager {
         // If the specified template is not in the cache, it means we need to extract it to the cache
         if (!fs.existsSync(cachedTemplatePath)) {
             if (!fs.existsSync(templateInfo.url)) {
-                logger.logErrorLine(resources.getString("command.create.templatesUnavailable"));
+                logger.logErrorLine(resources.getString("commandCreateTemplatesUnavailable"));
 
-                return Q.reject<string>("command.create.templatesUnavailable");
+                return Q.reject<string>("commandCreateTemplatesUnavailable");
             }
 
             // Cache does not contain the specified template, create the directory tree to cache it

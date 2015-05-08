@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
@@ -28,7 +36,7 @@ class CordovaWrapper {
         });
         proc.on("close", function (code: number): void {
             if (code) {
-                deferred.reject(new Error(resources.getString("CordovaCommandFailed", code, args.join(" "))));
+                deferred.reject(new Error(resources.getString("cordovaCommandFailed", code, args.join(" "))));
             } else {
                 deferred.resolve({});
             }

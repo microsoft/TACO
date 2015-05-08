@@ -1,3 +1,11 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../typings/resourceManager.d.ts" />
 /// <reference path="../typings/buildInfo.d.ts" />
 /// <reference path="../typings/cordovaConfig.d.ts" />

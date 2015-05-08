@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
@@ -51,7 +52,7 @@ var language: string = null;
 process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: string }): void {
     var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(buildRequest.buildInfo);
     if (currentBuild) {
-        buildInfo.updateStatus(BuildInfo.ERROR, "BuildInvokedTwice");
+        buildInfo.updateStatus(BuildInfo.ERROR, "buildInvokedTwice");
         process.send(buildInfo);
         process.exit(1);
     }
@@ -59,7 +60,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     currentBuild = buildInfo;
     language = buildRequest.language;
     var cordovaVersion: string = currentBuild["vcordova"];
-    buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
+    buildInfo.updateStatus(BuildInfo.BUILDING, "acquiringCordova");
     process.send(buildInfo);
     TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
         cordova = pkg;
@@ -87,23 +88,23 @@ class IOSBuildHelper {
 
         try {
             Q.fcall(IOSBuildHelper.change_directory, currentBuild)
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform"); process.send(currentBuild); })
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "updatingIOSPlatform"); process.send(currentBuild); })
                 .then(IOSBuildHelper.addOrPrepareIOS)
                 .then(function (): void { IOSBuildHelper.applyPreferencesToBuildConfig(cfg); })
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(currentBuild); })
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "copyingNativeOverrides"); process.send(currentBuild); })
                 .then(IOSBuildHelper.prepareNativeOverrides)
                 .then(IOSBuildHelper.updateAppPlistBuildNumber)
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CordovaCompiling"); process.send(currentBuild); })
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "cordovaCompiling"); process.send(currentBuild); })
                 .then(IOSBuildHelper.build_ios)
                 .then(IOSBuildHelper.rename_app)
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(currentBuild); })
+                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "packagingNativeApp"); process.send(currentBuild); })
                 .then(isDeviceBuild ? IOSBuildHelper.package_ios : noOp)
                 .then(function (): void {
-                console.info(resources.getString("DoneBuilding", currentBuild.buildNumber));
+                console.info(resources.getString("doneBuilding", currentBuild.buildNumber));
                 currentBuild.updateStatus(BuildInfo.COMPLETE);
             })
                 .catch(function (err: Error): void {
-                console.info(resources.getString("ErrorBuilding", currentBuild.buildNumber, err.message));
+                console.info(resources.getString("errorBuilding", currentBuild.buildNumber, err.message));
                 currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
             })
                 .done(function (): void {
@@ -210,7 +211,7 @@ class IOSBuildHelper {
 
         var buildConfigDir = path.join("platforms", "ios", "cordova");
         if (!fs.existsSync(buildConfigDir)) {
-            deferred.reject(new Error(resources.getString("ErrorXcconfigDirNotFound")));
+            deferred.reject(new Error(resources.getString("errorXcconfigDirNotFound")));
         } else {
             fs.appendFile(path.join(buildConfigDir, "build.xcconfig"), "\n" + data, function (err: any): void {
                 if (err) {

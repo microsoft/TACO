@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/rimraf.d.ts" />
@@ -21,7 +22,7 @@ class BuildRetention {
 
     constructor(baseBuildDir: string, config: TacoRemoteConfig) {
         this.maxBuildsToKeep = config.maxBuildsToKeep;
-        console.info(resources.getString("BuildRetentionInit"), baseBuildDir, this.maxBuildsToKeep);
+        console.info(resources.getString("buildRetentionInit"), baseBuildDir, this.maxBuildsToKeep);
     }
 
     public purge(builds: { [idx: string]: utils.BuildInfo }): void {
@@ -53,7 +54,7 @@ class BuildRetention {
         var numbersToDelete = eligibleBuilds.slice(0, nBuildsToDelete).map(function (b: utils.BuildInfo): string {
             return b.buildNumber.toString();
         });
-        console.info(resources.getString("BuildRetentionPreDelete"), nBuildsToDelete);
+        console.info(resources.getString("buildRetentionPreDelete"), nBuildsToDelete);
         BuildRetention.deleteBuilds(builds, numbersToDelete, false);
     }
 
@@ -66,7 +67,7 @@ class BuildRetention {
         for (var i = 0; i < toDelete.length; ++i) {
             var idx = toDelete[i];
             var buildInfo = builds[idx];
-            console.info(resources.getString("BuildRetentionDelete"), buildInfo.buildNumber, buildInfo.buildDir);
+            console.info(resources.getString("buildRetentionDelete"), buildInfo.buildNumber, buildInfo.buildDir);
             if (sync) {
                 rimraf.sync(buildInfo.buildDir);
             } else {

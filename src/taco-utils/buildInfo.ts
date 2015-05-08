@@ -1,4 +1,12 @@
-﻿import utilHelper = require ("./utilHelper");
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+import utilHelper = require ("./utilHelper");
 import UtilHelper = utilHelper.UtilHelper;
 import resources = require ("./resourceManager");
 
@@ -121,7 +129,7 @@ module TacoUtility {
             if (this.messageId) {
                 this.message = resources.getStringForLanguage(req, this.messageId, this.messageArgs);
             } else {
-                this.message = resources.getStringForLanguage(req, "Build-" + this.status);
+                this.message = resources.getStringForLanguage(req, "build" + this.status);
             }
 
             return this;

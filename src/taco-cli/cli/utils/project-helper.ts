@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 
 import Q = require ("q");
@@ -25,7 +33,7 @@ class TacoProjectHelper {
             }
         } else {
             if (!versionValue) {
-                deferred.reject(resources.getString("command.create.tacoJsonFileCreationError"));
+                deferred.reject(resources.getString("commandCreateTacoJsonFileCreationError"));
                 return deferred.promise;
             }
 
