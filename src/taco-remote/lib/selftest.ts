@@ -19,7 +19,7 @@ import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
 
-import tacoUtils = require("taco-utils");
+import tacoUtils = require ("taco-utils");
 
 import BuildInfo = tacoUtils.BuildInfo;
 
