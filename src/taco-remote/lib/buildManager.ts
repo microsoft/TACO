@@ -81,7 +81,7 @@ class BuildManager {
         };
         this.currentBuild = null;
         this.queuedBuilds = [];
-        console.info(resources.getString("buildManagerInit"),
+        console.info(resources.getString("BuildManagerInit"),
             this.baseBuildDir, this.maxBuildsInQueue, this.deleteBuildsOnShutdown, allowsEmulate, this.nextBuildNumber);
     }
 
@@ -92,14 +92,14 @@ class BuildManager {
     }
 
     public submitNewBuild(req: express.Request): Q.Promise<BuildInfo> {
-        console.info(resources.getString("newBuildSubmitted"));
+        console.info(resources.getString("NewBuildSubmitted"));
         console.info(req.url);
         console.info(req.headers);
 
         this.buildMetrics.submitted++;
 
         if (this.queuedBuilds.length === this.maxBuildsInQueue) {
-            var message = resources.getString("buildQueueFull", this.maxBuildsInQueue);
+            var message = resources.getString("BuildQueueFull", this.maxBuildsInQueue);
             var error: any = new Error(message);
             error.code = 503;
             throw error;
@@ -133,7 +133,7 @@ class BuildManager {
                 fs.mkdirSync(buildDir);
             }
 
-            console.info(resources.getString("buildManagerDirInit", buildDir));
+            console.info(resources.getString("BuildManagerDirInit", buildDir));
 
             // Pass the build query to the buildInfo, for package-specific config options
             var params = req.query;
@@ -185,7 +185,7 @@ class BuildManager {
 
         var logStream = fs.createReadStream(buildLog, { start: offset });
         logStream.on("error", function (err: any): void {
-            console.info(resources.getString("logFileReadError"));
+            console.info(resources.getString("LogFileReadError"));
             console.info(err);
         });
         logStream.pipe(res);
@@ -205,7 +205,7 @@ class BuildManager {
     public downloadBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         var self = this;
         if (!buildInfo["pkg"]) {
-            res.status(404).send(resources.getStringForLanguage(req, "malformedBuildInfo"));
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
 
@@ -223,12 +223,12 @@ class BuildManager {
 
     public emulateBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         if (!utils.UtilHelper.argToBool(this.serverConf.allowsEmulate)) {
-            res.status(403).send(resources.getStringForLanguage(req, "emulateDisabled"));
+            res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
             return;
         }
 
         if (!buildInfo["pkg"]) {
-            res.status(404).send(resources.getStringForLanguage(req, "malformedBuildInfo"));
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
 
@@ -237,7 +237,7 @@ class BuildManager {
 
     public deployBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo["pkg"]) {
-            res.status(404).send(resources.getStringForLanguage(req, "malformedBuildInfo"));
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
 
@@ -246,7 +246,7 @@ class BuildManager {
 
     public runBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo["pkg"]) {
-            res.status(404).send(resources.getStringForLanguage(req, "malformedBuildInfo"));
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
 
@@ -255,7 +255,7 @@ class BuildManager {
 
     public debugBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
         if (!buildInfo["pkg"]) {
-            res.status(404).send(resources.getStringForLanguage(req, "malformedBuildInfo"));
+            res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
         }
 
@@ -264,18 +264,18 @@ class BuildManager {
 
     private saveUploadedTgzFile(buildInfo: BuildInfo, req: express.Request, callback: Function): void {
         var self = this;
-        console.info(resources.getString("uploadSaving", buildInfo.buildDir));
+        console.info(resources.getString("UploadSaving", buildInfo.buildDir));
         buildInfo.tgzFilePath = path.join(buildInfo.buildDir, "upload_" + buildInfo.buildNumber + ".tgz");
         var tgzFile = fs.createWriteStream(buildInfo.tgzFilePath);
         req.pipe(tgzFile);
         tgzFile.on("finish", function (): void {
             buildInfo.updateStatus(BuildInfo.UPLOADED);
-            console.info(resources.getString("uploadSavedSuccessfully", buildInfo.tgzFilePath));
+            console.info(resources.getString("UploadSavedSuccessfully", buildInfo.tgzFilePath));
             callback(null, buildInfo);
         });
         tgzFile.on("error", function (err: Error): void {
-            buildInfo.updateStatus(BuildInfo.ERROR, "errorSavingTgz", tgzFile, err.message);
-            console.error(resources.getString("errorSavingTgz", tgzFile, err));
+            buildInfo.updateStatus(BuildInfo.ERROR, "ErrorSavingTgz", tgzFile, err.message);
+            console.error(resources.getString("ErrorSavingTgz", tgzFile, err));
             self.buildMetrics.failed++;
             callback(err, buildInfo);
         });
@@ -291,22 +291,22 @@ class BuildManager {
                 fs.mkdirSync(extractToDir);
             }
         } catch (e) {
-            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "failedCreateDirectory", extractToDir, e.message));
-            console.error(resources.getString("failedCreateDirectory", extractToDir, e.message));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
+            console.error(resources.getString("FailedCreateDirectory", extractToDir, e.message));
             self.buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
-            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "noTgzFound", buildInfo.tgzFilePath));
-            console.error(resources.getString("noTgzFound", buildInfo.tgzFilePath));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
+            console.error(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
             self.buildMetrics.failed++;
             return;
         }
 
         var onError = function (err: Error): void {
-            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "tgzExtractError", buildInfo.tgzFilePath, err.message));
-            console.info(resources.getString("tgzExtractError", buildInfo.tgzFilePath, err.message));
+            buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
+            console.info(resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
             self.buildMetrics.failed++;
         };
 
@@ -325,7 +325,7 @@ class BuildManager {
             self.removeDeletedFiles(buildInfo);
 
             buildInfo.updateStatus(BuildInfo.EXTRACTED);
-            console.info(resources.getString("uploadExtractedSuccessfully", extractToDir));
+            console.info(resources.getString("UploadExtractedSuccessfully", extractToDir));
             self.build(buildInfo);
         });
         var unzip = zlib.createGunzip();
@@ -358,11 +358,11 @@ class BuildManager {
     private build(buildInfo: BuildInfo): void {
         var self = this;
         if (self.currentBuild) {
-            console.info(resources.getString("newBuildQueued", buildInfo.buildNumber));
+            console.info(resources.getString("NewBuildQueued", buildInfo.buildNumber));
             self.queuedBuilds.push(buildInfo);
             return;
         } else {
-            console.info(resources.getString("newBuildStarted", buildInfo.buildNumber));
+            console.info(resources.getString("NewBuildStarted", buildInfo.buildNumber));
             self.currentBuild = buildInfo;
         }
 
@@ -370,15 +370,15 @@ class BuildManager {
         this.buildRetention.purge(self.builds);
 
         if (!fs.existsSync(buildInfo.appDir)) {
-            console.info(resources.getString("buildDirectoryNotFound", buildInfo.buildDir));
-            buildInfo.updateStatus(BuildInfo.ERROR, "buildDirectoryNotFound", buildInfo.buildDir);
+            console.info(resources.getString("BuildDirectoryNotFound", buildInfo.buildDir));
+            buildInfo.updateStatus(BuildInfo.ERROR, "BuildDirectoryNotFound", buildInfo.buildDir);
             self.buildMetrics.failed++;
             self.dequeueNextBuild();
             return;
         }
 
         if (!buildInfo["pkg"]) {
-            buildInfo.updateStatus(BuildInfo.ERROR, "malformedBuildInfo");
+            buildInfo.updateStatus(BuildInfo.ERROR, "MalformedBuildInfo");
             self.dequeueNextBuild();
         } else {
             buildInfo["pkg"].build(buildInfo, function (resultBuildInfo: BuildInfo): void {
@@ -398,7 +398,7 @@ class BuildManager {
     }
 
     private dequeueNextBuild(): void {
-        console.info(resources.getString("buildMovingOn"));
+        console.info(resources.getString("BuildMovingOn"));
         this.currentBuild = null;
         var nextBuild = this.queuedBuilds.shift();
         if (nextBuild) {

@@ -132,7 +132,7 @@ describe("taco setup", function (): void {
         Q([]).then(setupRun).then(function (): void {
             mocha(new Error("Should have errored out due to bad input"));
         }, function (e: Error): void {
-            if (e.message === "commandBadArguments") {
+            if (e.message === "CommandBadArguments") {
                 mocha();
             } else {
                 mocha(new Error("Unknown error: " + e));

@@ -33,7 +33,7 @@ class TacoProjectHelper {
             }
         } else {
             if (!versionValue) {
-                deferred.reject(resources.getString("commandCreateTacoJsonFileCreationError"));
+                deferred.reject(resources.getString("CommandCreateTacoJsonFileCreationError"));
                 return deferred.promise;
             }
 

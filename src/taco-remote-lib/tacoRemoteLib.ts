@@ -73,7 +73,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.downloadBuild(buildInfo, req, res, callback);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "unsupportedPlatform"));
+            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
         }
     }
 
@@ -89,7 +89,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.emulateBuild(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "unsupportedPlatform"));
+            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
         }
     }
 
@@ -105,7 +105,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.deployBuildToDevice(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "unsupportedPlatform"));
+            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
         }
     }
 
@@ -121,7 +121,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.runOnDevice(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "unsupportedPlatform"));
+            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
         }
     }
 
@@ -137,7 +137,7 @@ module TacoRemoteLib {
         if (platform) {
             platform.debugBuild(buildInfo, req, res);
         } else {
-            res.status(404).send(resources.getStringForLanguage(req, "unsupportedPlatform"));
+            res.status(404).send(resources.getStringForLanguage(req, "UnsupportedPlatform"));
         }
     }
 
@@ -154,15 +154,15 @@ module TacoRemoteLib {
         var configuration: string = request.query.cfg || "release";
 
         if (!cordovaVersion) {
-            errors.push(resources.getStringForLanguage(request, "buildRequestMissingCordovaVersion"));
+            errors.push(resources.getStringForLanguage(request, "BuildRequestMissingCordovaVersion"));
         }
 
         if (buildCommand !== "build") {
-            errors.push(resources.getStringForLanguage(request, "buildRequestUnsupportedCommand", buildCommand));
+            errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedCommand", buildCommand));
         }
 
         if (supportedBuildConfigurations.indexOf(configuration) === -1) {
-            errors.push(resources.getStringForLanguage(request, "buildRequestUnsupportedConfiguration", configuration));
+            errors.push(resources.getStringForLanguage(request, "BuildRequestUnsupportedConfiguration", configuration));
         }
 
         return errors.length === 0;
@@ -177,7 +177,7 @@ module TacoRemoteLib {
     export function build(buildInfo: BuildInfo, callback: (resultBuildInfo: BuildInfo) => void): void {
         var platform: ITargetPlatform = getPlatform(buildInfo);
         if (!platform) {
-            buildInfo.updateStatus(BuildInfo.INVALID, "unsupportedPlatform");
+            buildInfo.updateStatus(BuildInfo.INVALID, "UnsupportedPlatform");
             callback(buildInfo);
             return;
         }
@@ -212,7 +212,7 @@ module TacoRemoteLib {
         });
         buildProcess.on("exit", function (exitCode: number): void {
             if (buildInfo.status === BuildInfo.BUILDING) {
-                buildInfo.updateStatus(BuildInfo.ERROR, "buildFailedUnexpectedly");
+                buildInfo.updateStatus(BuildInfo.ERROR, "BuildFailedUnexpectedly");
                 callback(buildInfo);
             }
         });
@@ -222,21 +222,21 @@ module TacoRemoteLib {
     // This is basic validation. The build itself will fail if config.xml is not valid, or more detailed problems with the submission.
     function validateCordovaApp(buildInfo: BuildInfo, appDir: string): { id: string; args?: any[] } {
         if (!fs.existsSync(path.join(appDir, "config.xml"))) {
-            return { id: "invalidCordovaAppMissingConfigXml" };
+            return { id: "InvalidCordovaAppMissingConfigXml" };
         }
 
         try {
             var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
             var appName = cfg.name();
             if (!utils.UtilHelper.isValidCordovaAppName(appName)) {
-                return { id: "invalidCordovaAppUnsupportedAppName", args: [appName, utils.UtilHelper.invalidAppNameCharacters()] };
+                return { id: "InvalidCordovaAppUnsupportedAppName", args: [appName, utils.UtilHelper.invalidAppNameCharacters()] };
             }
         } catch (e) {
-            return { id: "invalidCordovaAppBadConfigXml", args: e.message };
+            return { id: "InvalidCordovaAppBadConfigXml", args: e.message };
         }
 
         if (!fs.existsSync(path.join(appDir, "www"))) {
-            return { id: "invalidCordovaAppMissingWww" };
+            return { id: "InvalidCordovaAppMissingWww" };
         }
 
         return null;

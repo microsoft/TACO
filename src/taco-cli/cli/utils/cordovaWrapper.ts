@@ -36,7 +36,7 @@ class CordovaWrapper {
         });
         proc.on("close", function (code: number): void {
             if (code) {
-                deferred.reject(new Error(resources.getString("cordovaCommandFailed", code, args.join(" "))));
+                deferred.reject(new Error(resources.getString("CordovaCommandFailed", code, args.join(" "))));
             } else {
                 deferred.resolve({});
             }

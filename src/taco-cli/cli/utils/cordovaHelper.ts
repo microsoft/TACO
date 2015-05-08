@@ -86,7 +86,7 @@ class CordovaHelper {
 
         if (customWww) {
             if (customWww.indexOf("http") === 0) {
-                throw new Error(resources.getString("commandCreateOnlyLocalCustomWww"));
+                throw new Error(resources.getString("CommandCreateOnlyLocalCustomWww"));
             }
 
             // Resolve HOME env path

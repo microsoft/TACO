@@ -66,7 +66,7 @@ module TacoUtility {
             public static init(commandsInfoPath: string): void {
                 commandsInfoPath = commandsInfoPath;
                 if (!fs.existsSync(commandsInfoPath)) {
-                    throw new Error(resources.getString("tacoUtilsExceptionListingfile"));
+                    throw new Error(resources.getString("TacoUtilsExceptionListingfile"));
                 }
 
                 CommandFactory.Listings = require(commandsInfoPath);
@@ -77,7 +77,7 @@ module TacoUtility {
              */
             public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
                 if (!name || !CommandFactory.Listings) {
-                    throw new Error(resources.getString("tacoUtilsExceptionListingfile"));
+                    throw new Error(resources.getString("TacoUtilsExceptionListingfile"));
                 }
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
@@ -87,7 +87,7 @@ module TacoUtility {
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error(resources.getString("tacoUtilsExceptionMissingcommand", name));
+                    throw new Error(resources.getString("TacoUtilsExceptionMissingcommand", name));
                 }
 
                 var commandMod: any = require(modulePath);
@@ -118,7 +118,7 @@ module TacoUtility {
              * Convert command line arguments into an appropriate format to determine what action to take
              */
             public parseArgs(args: string[]): ICommandData {
-                throw new Error("abstractMethod");
+                throw new Error("AbstractMethod");
             }
 
             /**
@@ -126,7 +126,7 @@ module TacoUtility {
              * Sanity check on arguments to determine whether to pass through to cordova
              */
             public canHandleArgs(data: ICommandData): boolean {
-                throw new Error("abstractMethod");
+                throw new Error("AbstractMethod");
             }
 
             /**
@@ -141,8 +141,8 @@ module TacoUtility {
                 if (subcommand) {
                     return subcommand.run(commandData);
                 } else {
-                    logger.Logger.logErrorLine(resources.getString("commandBadArguments", this.name, commandData.original.toString()));
-                    return Q.reject(new Error("commandBadArguments"));
+                    logger.Logger.logErrorLine(resources.getString("CommandBadArguments", this.name, commandData.original.toString()));
+                    return Q.reject(new Error("CommandBadArguments"));
                 }
             }
 

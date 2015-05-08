@@ -105,13 +105,13 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("commandNotBothLocalRemote"));
-            throw new Error("commandNotBothLocalRemote");
+            logger.logErrorLine(resources.getString("CommandNotBothLocalRemote"));
+            throw new Error("CommandNotBothLocalRemote");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("commandNotBothDeviceEmulate"));
-            throw new Error("commandNotBothDeviceEmulate");
+            logger.logErrorLine(resources.getString("CommandNotBothDeviceEmulate"));
+            throw new Error("CommandNotBothDeviceEmulate");
         }
 
         return parsedOptions;
@@ -147,7 +147,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             // remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
             break;
         default:
-            throw new Error(resources.getString("commandBuildInvalidPlatformLocation", platform.platform));
+            throw new Error(resources.getString("CommandBuildInvalidPlatformLocation", platform.platform));
         }
 
         return promise;
@@ -169,7 +169,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("commandRemotePlatformNotKnown", platform));
+                throw new Error(resources.getString("CommandRemotePlatformNotKnown", platform));
             }
 
             var buildSettings = new RemoteBuildSettings({
@@ -202,7 +202,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
                         default:
-                            return Q.reject(new Error(resources.getString("commandBuildInvalidPlatformLocation", platform.platform)));
+                            return Q.reject(new Error(resources.getString("CommandBuildInvalidPlatformLocation", platform.platform)));
                     }
                 });
             }, Q({}));

@@ -53,17 +53,17 @@ class Certs {
         yesOrNoHandler = yesOrNoHandler || readline.createInterface({ input: process.stdin, output: process.stdout });
         var answerCallback = function (answer: string): void {
             answer = answer.toLowerCase();
-            if (resources.getString("osxResetServerCertResponseYes").split("\n").indexOf(answer) !== -1) {
+            if (resources.getString("OSXResetServerCertResponseYes").split("\n").indexOf(answer) !== -1) {
                 yesOrNoHandler.close();
                 shouldProceedDeferred.resolve(true);
-            } else if (resources.getString("osxResetServerCertResponseNo").split("\n").indexOf(answer) !== -1) {
+            } else if (resources.getString("OSXResetServerCertResponseNo").split("\n").indexOf(answer) !== -1) {
                 yesOrNoHandler.close();
                 shouldProceedDeferred.resolve(false);
             } else {
-                yesOrNoHandler.question(resources.getString("osxResetServerCertPleaseYesNo") + os.EOL, answerCallback);
+                yesOrNoHandler.question(resources.getString("OSXResetServerCertPleaseYesNo") + os.EOL, answerCallback);
             }
         };
-        yesOrNoHandler.question(resources.getString("osxResetServerCertQuery") + os.EOL, answerCallback);
+        yesOrNoHandler.question(resources.getString("OSXResetServerCertQuery") + os.EOL, answerCallback);
         return shouldProceedDeferred.promise.
             then(function (shouldProceed: boolean): Q.Promise<any> {
                 if (shouldProceed) {
@@ -80,7 +80,7 @@ class Certs {
         var caKeyPath = path.join(certsDir, "ca-key.pem");
         var caCertPath = path.join(certsDir, "ca-cert.pem");
         if (!fs.existsSync(caKeyPath) || !fs.existsSync(caCertPath)) {
-            var error = resources.getString("caFilesNotFound", caKeyPath, caCertPath);
+            var error = resources.getString("CAFilesNotFound", caKeyPath, caCertPath);
             return Q(0).thenReject(error);
         }
 
@@ -152,7 +152,7 @@ class Certs {
         if (Certs.CertStore) {
             return Q(Certs.CertStore);
         } else {
-            return Q.reject<HostSpecifics.ICertStore>(new Error(resources.getString("certificatesNotConfigured")));
+            return Q.reject<HostSpecifics.ICertStore>(new Error(resources.getString("CertificatesNotConfigured")));
         }
     }
 
@@ -187,13 +187,13 @@ class Certs {
 
         var pin = parseInt(pinString);
         if (isNaN(pin)) {
-            throw { code: 400, id: "invalidPin" };
+            throw { code: 400, id: "InvalidPin" };
         }
 
         var pinDir = path.join(clientCertsDir, "" + pin);
         var pfx = path.join(pinDir, "client.pfx");
         if (!fs.existsSync(pfx)) {
-            throw { code: 404, id: "clientCertNotFoundForPIN" };
+            throw { code: 404, id: "ClientCertNotFoundForPIN" };
         }
 
         return pfx;
@@ -281,7 +281,7 @@ class Certs {
     private static certOptionsFromConf(conf: RemoteBuildConf): Certs.ICertOptions {
         var options: Certs.ICertOptions = {};
         if (conf.get("certExpirationdays") < 1) {
-            console.info(resources.getString("certExpirationInvalid", conf.get("certExpirationdays"), Certs.CERT_DEFAULTS.days));
+            console.info(resources.getString("CertExpirationInvalid", conf.get("certExpirationdays"), Certs.CERT_DEFAULTS.days));
             options.days = Certs.CERT_DEFAULTS.days;
         } else {
             options.days = conf.get("certExpirationdays");
@@ -345,11 +345,11 @@ class Certs {
         var host = conf.hostname;
         var port = conf.port;
         var pinTimeoutInMinutes = conf.pinTimeout;
-        console.info(resources.getString("osxCertSetupInformation", host, port, pin));
+        console.info(resources.getString("OSXCertSetupInformation", host, port, pin));
         if (pinTimeoutInMinutes) {
-            console.info(resources.getString("osxCertSetupPinTimeout", pinTimeoutInMinutes));
+            console.info(resources.getString("OSXCertSetupPinTimeout", pinTimeoutInMinutes));
         } else {
-            console.info(resources.getString("osxCertSetupNoPinTimeout"));
+            console.info(resources.getString("OSXCertSetupNoPinTimeout"));
         }
 
         console.info("remotebuild generateClientCert");

@@ -63,7 +63,7 @@ function cli(): void {
             return task.execute(remotebuildConf);
         }).done();
     } else {
-        console.info(resources.getString("unknownCommand"), command);
+        console.info(resources.getString("UnknownCommand"), command);
         HostSpecifics.hostSpecifics.printUsage(nconf.get("lang"));
         process.exit(0);
     }

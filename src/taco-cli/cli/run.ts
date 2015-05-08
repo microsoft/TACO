@@ -96,13 +96,13 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("commandNotBothLocalRemote"));
-            throw new Error("commandNotBothLocalRemote");
+            logger.logErrorLine(resources.getString("CommandNotBothLocalRemote"));
+            throw new Error("CommandNotBothLocalRemote");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("commandNotBothDeviceEmulate"));
-            throw new Error("commandNotBothDeviceEmulate");
+            logger.logErrorLine(resources.getString("CommandNotBothDeviceEmulate"));
+            throw new Error("CommandNotBothDeviceEmulate");
         }
 
         return parsedOptions;
@@ -124,7 +124,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("commandRemotePlatformNotKnown", platform));
+                throw new Error(resources.getString("CommandRemotePlatformNotKnown", platform));
             }
 
             var buildServerUrl = Settings.getRemoteServerUrl(remoteConfig);
@@ -148,8 +148,8 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 } else if (commandData.options["nobuild"]) {
                     // No info for the remote build: User must build first
                     var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
-                    logger.logErrorLine(resources.getString("noRemoteBuildIdFound", buildCommandToRun));
-                    throw new Error("noRemoteBuildIdFound");
+                    logger.logErrorLine(resources.getString("NoRemoteBuildIdFound", buildCommandToRun));
+                    throw new Error("NoRemoteBuildIdFound");
                 } else {
                     return RemoteBuildClientHelper.build(buildSettings);
                 }

@@ -31,7 +31,7 @@ class HostSpecifics {
                     HostSpecifics.CachedSpecifics = require("./win32/win32Specifics");
                     break;
                 default:
-                    throw new Error("unsupportedPlatform");
+                    throw new Error("UnsupportedPlatform");
             }
         }
 

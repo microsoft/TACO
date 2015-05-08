@@ -47,7 +47,7 @@ module TacoUtility {
                 case "linux":
                     return path.join(process.env["HOME"], ".taco_home");
                 default:
-                    throw new Error("unexpectedPlatform");
+                    throw new Error("UnexpectedPlatform");
             };
         }
 

@@ -47,7 +47,7 @@ class IosAppRunnerHelper {
             // First find the path of the app on the device
             var filename = stdout.trim();
             if (!/^\/tmp\/[0-9]+\.ideviceinstaller$/.test(filename)) {
-                throw new Error("wrongInstalledAppsFile");
+                throw new Error("WrongInstalledAppsFile");
             }
 
             var list: any[] = pl.parseFileSync(filename);
@@ -59,7 +59,7 @@ class IosAppRunnerHelper {
                 }
             }
 
-            throw new Error("packageNotInstalled");
+            throw new Error("PackageNotInstalled");
         }).then(function (path: string): Q.Promise<net.Socket> { return IosAppRunnerHelper.startAppViaDebugger(proxyPort, path); });
     }
 
@@ -193,10 +193,10 @@ class IosAppRunnerHelper {
                     if (stdout.indexOf("Error:") !== -1) {
                         deferred.resolve({}); // Technically failed, but likely caused by the image already being mounted.
                     } else if (stdout.indexOf("No device found, is it plugged in?") !== -1) {
-                        deferred.reject("noDeviceAttached");
+                        deferred.reject("NoDeviceAttached");
                     }
 
-                    deferred.reject("errorMountingDiskImage");
+                    deferred.reject("ErrorMountingDiskImage");
                 } else {
                     deferred.resolve({});
                 }
@@ -211,7 +211,7 @@ class IosAppRunnerHelper {
             return stdout.trim().substring(0, 3); // Versions for DeveloperDiskImage seem to be X.Y, while some device versions are X.Y.Z
             // NOTE: This will almost certainly be wrong in the next few years, once we hit version 10.0 
         }, function (): void {
-                throw new Error("failedGetDeviceInfo");
+                throw new Error("FailedGetDeviceInfo");
             });
 
         // Attempt to find the path where developer resources exist.
@@ -229,13 +229,13 @@ class IosAppRunnerHelper {
                 var dataStr: string = data.toString();
                 var path = dataStr.split("\n")[0].trim();
                 if (!path) {
-                    deferred.reject("failedFindDeveloperDiskImage");
+                    deferred.reject("FailedFindDeveloperDiskImage");
                 } else {
                     deferred.resolve(path);
                 }
             });
             find.on("close", function (code: number): void {
-                deferred.reject("failedFindDeveloperDiskImage");
+                deferred.reject("FailedFindDeveloperDiskImage");
             });
 
             return deferred.promise;
