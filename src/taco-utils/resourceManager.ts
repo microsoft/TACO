@@ -8,12 +8,12 @@
 
 /// <reference path="../typings/node.d.ts" />
 
-import assert = require ("assert");
-import fs = require ("fs");
-import path = require ("path");
+import assert = require("assert");
+import fs = require("fs");
+import path = require("path");
 
-import resourceSet = require ("./resourceSet");
-import tacoUtility = require ("./utilHelper");
+import resourceSet = require("./resourceSet");
+import tacoUtility = require("./utilHelper");
 
 import ResourceSet = resourceSet.ResourceSet;
 import UtilHelper = tacoUtility.UtilHelper;
@@ -58,23 +58,27 @@ module TacoUtility {
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
+            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            var result = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
+
             if (process.env["TACO_UNIT_TEST"]) {
                 // Mock out resources for unit tests
                 return id;
+            } else {
+                return result;
             }
-
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            return this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
         }
 
         public getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
+            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var result = this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
+
             if (process.env["TACO_UNIT_TEST"]) {
                 // Mock out resources for unit tests
                 return id;
+            } else {
+                return result;
             }
-
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
-            return this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
         }
 
         public getStringForLocale(locale: string, id: string, ...optionalArgs: any[]): string {
