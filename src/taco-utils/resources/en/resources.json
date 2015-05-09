@@ -22,7 +22,7 @@
     "PackageLoaderDownloadCompletedMessage": "{0} downloaded and installed.",
     "_PackageLoaderDownloadCompletedMessage.comment": "Message reporting the success of Cordova tools {0} download.",
     "PackageLoaderInvalidPackageVersionSpecifier": "Error: {0} is an invalid {1} version",
-    "_PackageLoaderInvalidPackageVersionSpecifier.comment": "{0} is the package name, and {1} is the package version"
+    "_PackageLoaderInvalidPackageVersionSpecifier.comment": "{0} is the package name, and {1} is the package version",
     "PackageLoaderNpmInstallFailed": "Error installing {0} via npm. See output for details.",
     "_PackageLoaderNpmInstallFailed.comment": "Message reported when npm install returns a non-zero exit code."
 }

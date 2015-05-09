@@ -201,29 +201,31 @@ module TacoUtility {
         }
 
         private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
-            var deferred: Q.Deferred<string> = Q.defer<string>();
-            if (specType === PackageSpecType.Error) {
-                logger.log(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
-                deferred.reject(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName));
-                return deferred.promise;
-            }
+            return Q({}).then(function (): Q.Promise<string> {
+                var deferred: Q.Deferred<string> = Q.defer<string>();
+                if (specType === PackageSpecType.Error) {
+                    logger.log(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
+                    deferred.reject(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName));
+                    return deferred.promise;
+                }
 
-            if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
-                return Q(targetPath);
-            }
+                if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
+                    return Q(targetPath);
+                }
 
-            // Delete the target path if it already exists and create an empty folder
-            if (fs.existsSync(targetPath)) {
-                rimraf.sync(targetPath);
-            }
+                // Delete the target path if it already exists and create an empty folder
+                if (fs.existsSync(targetPath)) {
+                    rimraf.sync(targetPath);
+                }
 
-            mkdirp.sync(targetPath);
-            // Create a file 
-            fs.closeSync(fs.openSync(TacoPackageLoader.getStatusFilePath(targetPath), "w"));
+                mkdirp.sync(targetPath);
+                // Create a file 
+                fs.closeSync(fs.openSync(TacoPackageLoader.getStatusFilePath(targetPath), "w"));
 
-            return TacoPackageLoader.installPackage(packageName, packageVersion, targetPath, specType, logLevel).then(function (): Q.Promise<string> {
-                return TacoPackageLoader.removeStatusFile(targetPath).then(function (): string {
-                    return targetPath;
+                return TacoPackageLoader.installPackage(packageName, packageVersion, targetPath, specType, logLevel).then(function (): Q.Promise<string> {
+                    return TacoPackageLoader.removeStatusFile(targetPath).then(function (): string {
+                        return targetPath;
+                    });
                 });
             });
         }
