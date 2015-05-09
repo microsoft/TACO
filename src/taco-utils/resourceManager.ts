@@ -8,12 +8,12 @@
 
 /// <reference path="../typings/node.d.ts" />
 
-import assert = require("assert");
-import fs = require("fs");
-import path = require("path");
+import assert = require ("assert");
+import fs = require ("fs");
+import path = require ("path");
 
-import resourceSet = require("./resourceSet");
-import tacoUtility = require("./utilHelper");
+import resourceSet = require ("./resourceSet");
+import tacoUtility = require ("./utilHelper");
 
 import ResourceSet = resourceSet.ResourceSet;
 import UtilHelper = tacoUtility.UtilHelper;
