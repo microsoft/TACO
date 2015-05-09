@@ -9,7 +9,6 @@ import os = require ("os");
 import path = require ("path");
 import rimraf = require ("rimraf");
 
-import resources = require ("../resources/resourceManager");
 import selftest = require ("../lib/selftest");
 import TacoRemote = require ("../lib/server");
 import TacoUtils = require ("taco-utils");
@@ -24,11 +23,11 @@ describe("taco-remote", function (): void {
     var serverDir = path.join(os.tmpdir(), "taco-remote", "build");
     var downloadDir = path.join(serverDir, "selftest");
     var modMountPoint = "Test";
-    var resources: TacoUtils.ResourceManager = null;
+
     before(function (mocha: MochaDone): void {
-        resources = new TacoUtils.ResourceManager(path.join(__dirname, "..", "resources"), "en");
         process.env["TACO_UNIT_TEST"] = true;
         process.env["TACO_HOME"] = serverDir;
+        rimraf.sync(UtilHelper.tacoHome);
         UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
         var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
         fs.writeFileSync(firstRunPath, ""); // Just need the file to exist so the test doesn't try to ask us about installing homebrew
