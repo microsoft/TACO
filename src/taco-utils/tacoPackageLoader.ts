@@ -75,7 +75,7 @@ module TacoUtility {
         }
 
         /**
-         * Perform a fresh install of a specified node module, even if it is already cached
+         * Perform a fresh install of a specified node module, even if it is already cached in the file system
          *
          * This method is resilient against interrupted downloads, but is not safe under concurrency.
          * Until that changes, we should not allow multiple builds at once.

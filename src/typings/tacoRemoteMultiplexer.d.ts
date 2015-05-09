@@ -10,9 +10,13 @@ declare module TacoRemoteMultiplexer {
     interface IPropertyBag {
         [property: string]: string;
     }
-    interface ITacoRemoteMultiplexer {
-        dependencyJson: string;
 
-        getPackageIdForQuery(query: IPropertyBag): string;
+    interface IPackageSpec {
+        location: string;
+        name: string;
+    }
+
+    interface ITacoRemoteMultiplexer {
+        getPackageSpecForQuery(query: IPropertyBag): IPackageSpec;
     }
 }

@@ -22,6 +22,7 @@ declare module TacoUtility {
          * Until that changes, we should not allow multiple builds at once.
          *
          * The second form removes any entries from the require cache that weren't present prior to the call, so any new files will be re-required if necessary.
+         * However it still uses the file system cache. Use forceInstallPackage to update the file system cache if necessary.
          * 
          * @param {string} packageName The name of the package to load
          * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
@@ -34,7 +35,7 @@ declare module TacoUtility {
         static lazyRequireNoCache<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T>;
 
         /**
-         * Perform a fresh install of a specified node module, even if it is already cached
+         * Perform a fresh install of a specified node module, even if it is already cached in the file system
          *
          * This method is resilient against interrupted downloads, but is not safe under concurrency.
          * Until that changes, we should not allow multiple builds at once.

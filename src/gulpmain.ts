@@ -8,7 +8,7 @@
 /// <reference path="typings/gulp-sourcemaps.d.ts" />
 /// <reference path="typings/replace.d.ts" />
 
-var runSequence = require ("run-sequence");
+var runSequence = require("run-sequence");
 import gulp = require ("gulp");
 import sourcemaps = require ("gulp-sourcemaps");
 import ts = require ("gulp-typescript");
