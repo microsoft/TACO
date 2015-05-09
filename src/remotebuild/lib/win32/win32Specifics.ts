@@ -6,7 +6,6 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../../../typings/nconf.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/express.d.ts" />
@@ -16,7 +15,6 @@
 import child_process = require ("child_process");
 import express = require ("express");
 import fs = require ("fs");
-import nconf = require ("nconf");
 import path = require ("path");
 import Q = require ("q");
 

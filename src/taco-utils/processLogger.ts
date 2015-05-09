@@ -6,7 +6,6 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../typings/nconf.d.ts" />
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 "use strict";

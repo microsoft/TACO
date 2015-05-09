@@ -7,7 +7,6 @@
 ﻿ */
 
 /// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />

@@ -8,14 +8,12 @@
 
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
-/// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/expressExtensions.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
 /// <reference path="../../typings/serve-index.d.ts" />
-
 "use strict";
 
 import express = require ("express");
@@ -28,7 +26,6 @@ import util = require ("util");
 
 import BuildManager = require ("./buildManager");
 import HostSpecifics = require ("./hostSpecifics");
-// import resources = require("../resources/resourceManager");
 import selftest = require ("./selftest");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 
