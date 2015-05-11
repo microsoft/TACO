@@ -9,7 +9,7 @@ import nopt = require ("nopt");
 import Q = require ("q");
 
 import resources = require ("../resources/resourceManager");
-import dependencyInstaller = require ("taco-dependency-installer");
+import dependencies = require ("taco-dependency-installer");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
@@ -36,7 +36,7 @@ class InstallDependencies implements commands.IDocumentedCommand {
             return Q.reject(err.message);
         }
 
-        var installer: dependencyInstaller.DependencyInstaller = new dependencyInstaller.DependencyInstaller();
+        var installer: dependencies.DependencyInstaller = new dependencies.DependencyInstaller();
 
         return installer.run(parsed);
     }
@@ -54,10 +54,10 @@ class InstallDependencies implements commands.IDocumentedCommand {
 
     private verifyArguments(data: commands.ICommandData): void {
         // Exactly 1 platform name must be specified
-        if (data.remain.length != 0) {
-            logger.logErrorLine(resources.getString("command.installDependencies.onlyOnePlatform"));
+        if (data.remain.length !== 1) {
+            logger.logErrorLine(resources.getString("CommandInstallDependenciesOnlyOnePlatform"));
 
-            throw new Error("command.installDependencies.onlyOnePlatform");
+            throw new Error("CommandInstallDependenciesOnlyOnePlatform");
         }
     }
 }

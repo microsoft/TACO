@@ -1,13 +1,17 @@
 ﻿/// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/dependencyInstallerInterfaces.d.ts" />
-"use strict"
+
+/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
+
+"use strict";
 
 import Q = require ("q");
+
 import installerBase = require ("../installerBase");
 
-export class iosSimInstaller extends installerBase.InstallerBase {
-    public constructor(installerInfo: DependencyInstallerInterfaces.IInstallerInfo, softwareVersion: string, licenseUrl: string) {
-        super(installerInfo, softwareVersion, licenseUrl);
+export class AntInstaller extends installerBase.InstallerBase {
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string) {
+        super(installerInfo, softwareVersion);
     }
 
     protected downloadInstaller(): Q.Promise<any> {
@@ -18,3 +22,5 @@ export class iosSimInstaller extends installerBase.InstallerBase {
         return Q.resolve({});
     }
 }
+
+/// <enable code="SA1400" />

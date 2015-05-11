@@ -1,6 +1,6 @@
 {
     "create": {
-        "synopsis": "<PATH> [ID [NAME [CONFIG]]] [options]",
+        "synopsis": "<PATH> [ID [NAME [CONFIG]]] [--kit [NAME] | --cli <VERSION>] [--template [NAME] | --copy-from <PATH> | link-to <PATH>]",
         "modulePath": "./create",
         "description": "[command.create.description]",
         "args": [
@@ -10,10 +10,10 @@
             { "name": "CONFIG", "description": "[command.create.args.config]" }
         ],
         "options": [
-            { "name": "--kit <NAME>", "description": "[command.create.options.kit]" },
-            { "name": "--template <NAME>", "description": "[command.create.options.template]" },
+            { "name": "--kit [NAME]", "description": "[command.create.options.kit]" },
+            { "name": "--template [NAME]", "description": "[command.create.options.template]" },
             { "name": "--cli <VERSION>", "description": "[command.create.options.cli]" },
-            { "name": "--copy-from|src <PATH>", "description": "[command.create.options.copy]" },
+            { "name": "--copy-from | src <PATH>", "description": "[command.create.options.copy]" },
             { "name": "--link-to <PATH>", "description": "[command.create.options.linkto]" },
             { "name": "--list", "description": "[command.create.options.list]" }
         ]
@@ -67,9 +67,9 @@
     "install-dependencies": {
         "synopsis": "<PLATFORM>",
         "modulePath": "./installDependencies",
-        "description": "[command.installDependencies.description]",
+        "description": "[CommandInstallDependenciesDescription]",
         "args": [
-            { "name": "PLATFORM", "description": "[command.installDependencies.platform.description]" }
+            { "name": "PLATFORM", "description": "[CommandInstallDependenciesPlatformDescription]" }
         ]
     }
 }

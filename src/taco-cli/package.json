@@ -58,7 +58,7 @@
         "gulp-concat": "^2.4.2",
         "mocha": "latest",
         "should": "*",
-        "cordova": "^4.2.0",
+        "cordova": "4.1.2",
         "rimraf": "^2.2.6"
     },
   "scripts": {

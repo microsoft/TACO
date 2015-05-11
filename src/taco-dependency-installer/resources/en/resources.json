@@ -1,0 +1,25 @@
+{
+    "UnsupportedDependenciesHeader": "The installation of the following dependencies is not supported; please install them manually:",
+    "_UnsupportedDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that can't be installed by taco-cli.",
+    "DependencyLabel": "Dependency: ",
+    "_DependencyLabel.comment": "Label for the name of a dependency. This will be followed by the actual name of the dependency.",
+    "DependencyVersion": "Version: {0}",
+    "_DependencyVersion.comment": "Label and value for the version of a dependency. {0} is the version of the dependency.",
+    "DependencyLicense": "License terms: ",
+    "_DependencyLicense.comment": "Label for the license url of a dependency. This will be followed by a link to the dependency's license / terms of use.",
+    "InstallingDependenciesHeader": "The following dependencies will be installed on your system:",
+    "_InstallingDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that are going to be installed by taco-cli",
+    "LicenseAgreement": "Please type 'yes' to confirm and proceed. Some of the dependencies listed above may require a license agreement. By proceeding, you acknowledge having read, understood and accepted the terms and conditions of each license linked above.",
+    "_LicenseAgreement.comment": "Message displayed after listing the dependencies that will be installed.",
+    "YesExampleString": "[yes]: ",
+    "_YesExampleString.comment": "When the user gets prompted to type 'yes' to accept the agreement, this will be shown as an example of what the user has to type.",
+    "YesString": "yes",
+    "_YesString.comment": "The string that the user needs to type to proceed with the installation.",
+    "InstallationSuccessful": "Success! The installation completed successfully.",
+    "_InstallationSuccessful.comment": "Message shown after all dependencies have been installed and there are no errors",
+
+    "InstallationErrors": "The installation completed with some errors:",
+    "_InstallationErrors.comment": "Message shown after all dependencies have been installed and there were errors.",
+    "LicenseAgreementError": "Error: Must type 'yes' to proceed with the installation.",
+    "_LicenseAgreementError.comment": "Error shown when the user doesn't type the correct acceptance string. In this string, 'yes' should exactly match the value for the 'yesString' string defined in this file."
+}

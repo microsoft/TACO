@@ -148,17 +148,17 @@ class Create implements commands.IDocumentedCommand {
 
         return templates.getTemplatesForKit(kit)
             .then(function (list: templateManager.ITemplateList): void {
-            var kitToPrint: string = kit || list.kitId;
+                var kitToPrint: string = kit || list.kitId;
 
-            logger.logLine(resources.getString("command.create.list.base", kitToPrint));
-            logger.log("\n");
-
-            for (var i: number = 0; i < list.templates.length; i++) {
-                logger.log(list.templates[i].id, level.NormalBold);
-                logger.log(": " + list.templates[i].name);
+                logger.logLine(resources.getString("command.create.list.base", kitToPrint));
                 logger.log("\n");
-            }
-        });
+
+                for (var i: number = 0; i < list.templates.length; i++) {
+                    logger.log(list.templates[i].id, level.NormalBold);
+                    logger.log(": " + list.templates[i].name);
+                    logger.log("\n");
+                }
+            });
     }
 
     /**
@@ -182,38 +182,38 @@ class Create implements commands.IDocumentedCommand {
                 });
         } else {
             return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCliToUse: string): void {
-                cordovaCli = cordovaCliToUse;
-            })
-            .then(function (): Q.Promise<any> {
-                return self.printStatusMessage();
-            })
-            .then(function (): Q.Promise<any> {
-                if (kitId) {
-                    return kitHelper.getKitInfo(kitId);
-                } else {
-                    return Q.resolve(null);
-                }      
-            })
-            .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
-                if (kitInfo && kitHelper.isKitDeprecated(kitInfo)) {
-                    // Warn the user
-                    logger.log("\n");
-                    logger.logLine(resources.getString("command.create.warning.deprecatedKit", kitId), logger.Level.Warn);
-                    logger.log("\n");
-                    logger.logLine(resources.getString("command.create.warning.deprecatedKitSuggestion"), logger.Level.Warn);
-                }
+                    cordovaCli = cordovaCliToUse;
+                })
+                .then(function (): Q.Promise<any> {
+                    return self.printStatusMessage();
+                })
+                .then(function (): Q.Promise<any> {
+                    if (kitId) {
+                        return kitHelper.getKitInfo(kitId);
+                    } else {
+                        return Q.resolve(null);
+                    }      
+                })
+                .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
+                    if (kitInfo && kitHelper.isKitDeprecated(kitInfo)) {
+                        // Warn the user
+                        logger.log("\n");
+                        logger.logLine(resources.getString("command.create.warning.deprecatedKit", kitId), logger.Level.Warn);
+                        logger.log("\n");
+                        logger.logLine(resources.getString("command.create.warning.deprecatedKitSuggestion"), logger.Level.Warn);
+                    }
 
-                if (mustUseTemplate) {
-                    var templates: templateManager = new templateManager(kitHelper);
+                    if (mustUseTemplate) {
+                        var templates: templateManager = new templateManager(kitHelper);
 
-                    return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
-                        .then(function (templateDisplayName: string): Q.Promise<string> {
-                            return Q.resolve(templateDisplayName);
-                        });
-                } else {
-                    return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
-                }
-            });
+                        return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
+                            .then(function (templateDisplayName: string): Q.Promise<string> {
+                                return Q.resolve(templateDisplayName);
+                            });
+                    } else {
+                        return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
+                    }
+                });
         }
     }
 

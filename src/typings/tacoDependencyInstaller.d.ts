@@ -3,7 +3,7 @@
 
 declare module TacoDependencyInstaller {
     class DependencyInstaller {
-        public constructor();
+        constructor();
 
         /**
          * Runs the dependenciesInstaller package to install missing 3rd party software for the current project

@@ -1,18 +1,18 @@
 ﻿declare module DependencyInstallerInterfaces {
-    export interface IInstallerInfo {
-        installFrom: { [platformId: string]: string };
+    export interface IInstallerData {
+        installerSource: { [platformId: string]: string };
         checksum: number;
         bytes: number;
     }
 
-    export interface IDependencyInfo {
+    export interface IDependencyData {
         displayName: string;
         licenseUrl: string;
         prerequesites: string[];
-        installers: { [versionId: string]: IInstallerInfo };
+        installers: { [versionId: string]: IInstallerData };
     }
 
     export interface IDependencyDictionary {
-        [dependencyId: string]: IDependencyInfo;
+        [dependencyId: string]: IDependencyData;
     }
 }

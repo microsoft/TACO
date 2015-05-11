@@ -2,7 +2,9 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 
-"use strict"
+/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
+
+"use strict";
 
 import path = require ("path");
 
@@ -10,40 +12,28 @@ import tacoUtils = require ("taco-utils");
 
 export class InstallerBase {
     protected static MaxDownloadAttempts: number = 1;
-    protected InstallerInfo: DependencyInstallerInterfaces.IInstallerInfo;
-    protected SoftwareVersion: string;
-    protected LicenseUrl: string;
+    protected static DefaultInstallRootPath: string = path.join(tacoUtils.UtilHelper.tacoHome, "bin");
 
-    public constructor(installerInfo: DependencyInstallerInterfaces.IInstallerInfo, softwareVersion: string, licenseUrl: string) {
-        this.InstallerInfo = installerInfo;
-        this.SoftwareVersion = softwareVersion;
-        this.LicenseUrl = licenseUrl;
+    protected installerInfo: DependencyInstallerInterfaces.IInstallerData;
+    protected softwareVersion: string;
+
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string) {
+        this.installerInfo = installerInfo;
+        this.softwareVersion = softwareVersion;
     }
 
-    public run(version: string): Q.Promise<any> {
-        var self = this;
-
+    public run(): Q.Promise<any> {
         return this.downloadInstaller()
-            .then(self.install);
-    }
-
-    public getLicenseUrl(): string {
-        return this.LicenseUrl;
-    }
-
-    public getSoftwareVersion(): string {
-        return this.SoftwareVersion;
+            .then(this.install.bind(this));
     }
 
     protected downloadInstaller(): Q.Promise<any> {
-        throw new Error("Abstract method was called");
+        return Q.resolve({});
     }
 
     protected install(): Q.Promise<any> {
-        throw new Error("Abstract method was called");
-    }
-
-    protected static defaultInstallRootPath(): string {
-        return path.join(tacoUtils.UtilHelper.tacoHome, "bin");
+        return Q.resolve({});
     }
 }
+
+/// <enable code="SA1400" />
