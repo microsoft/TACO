@@ -22,8 +22,8 @@ import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
 
-import tacoUtils = require("taco-utils");
-import resources = require("../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
+import resources = require ("../resources/resourceManager");
 
 import BuildInfo = tacoUtils.BuildInfo;
 import TacoPackageLoader = tacoUtils.TacoPackageLoader;
@@ -44,16 +44,16 @@ class SelfTest {
     public static test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
         var vcordova = "4.3.0";
         var tempFolder = path.join(os.tmpdir(), "taco-remote", "selftest");
+        rimraf.sync(tempFolder);
+        utils.createDirectoryIfNecessary(tempFolder);
+        var cordovaApp = path.join(tempFolder, "helloCordova");
+
         return TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", vcordova).then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-            rimraf.sync(tempFolder);
-            utils.createDirectoryIfNecessary(tempFolder);
-            return cordova.raw.create("helloCordova");
+            return cordova.raw.create(cordovaApp);
         }, function (err: Error): any {
             console.error(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));
             throw err;
         }).then(function (): Q.Promise<any> {
-            var cordovaApp = path.join(tempFolder, "helloCordova");
-
             var tping = 5000;
             var maxPings = 10;
             var vcli = require("../package.json").version;
