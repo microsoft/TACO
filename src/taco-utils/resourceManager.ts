@@ -61,8 +61,8 @@ module TacoUtility {
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             var result = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
 
-            if (process.env["TACO_UNIT_TEST"]) {
-                // Mock out resources for unit tests
+            if (result && process.env["TACO_UNIT_TEST"]) {
+                // Mock out resources for consistency in unit tests, but only if they exist
                 return id;
             } else {
                 return result;
@@ -73,8 +73,8 @@ module TacoUtility {
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
             var result = this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
 
-            if (process.env["TACO_UNIT_TEST"]) {
-                // Mock out resources for unit tests
+            if (result && process.env["TACO_UNIT_TEST"]) {
+                // Mock out resources for consistency in unit tests, but only if they exist
                 return id;
             } else {
                 return result;
