@@ -48,6 +48,10 @@ class CordovaWrapper {
         return CordovaWrapper.cli(["build", platform]);
     }
 
+    public static run(platform: string): Q.Promise<any> {
+        return CordovaWrapper.cli(["run", platform]);
+    }
+
     /**
      * Wrapper for 'cordova create' command.
      *
