@@ -15,6 +15,7 @@
 /// <reference path="../typings/processLogger.d.ts" />
 /// <reference path="../typings/tacoPackageLoader.d.ts" />
 /// <reference path="../typings/countStream.d.ts" />
+/// <reference path="../typings/jsDocHelpPrinter.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoUtility namespace,
 // include a reference to the d.ts file that is generated (as above), and make sure

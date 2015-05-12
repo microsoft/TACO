@@ -50,7 +50,6 @@ module HostSpecifics {
     export interface IHostSpecifics {
         defaults(base: { [key: string]: any }): { [key: string]: any };
         initialize(conf: RemoteBuildConf): Q.Promise<any>;
-        printUsage(language: string): void;
 
         resetServerCert(conf: RemoteBuildConf): Q.Promise<any>;
         generateClientCert(conf: RemoteBuildConf): Q.Promise<number>;

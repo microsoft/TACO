@@ -31,6 +31,9 @@ import TacoRemoteConfig = require ("./tacoRemoteConfig");
 
 import utils = require ("taco-utils");
 
+import JSDocHelpPrinter = utils.JSDocHelpPrinter;
+import Logger = utils.Logger;
+
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
         var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
@@ -46,6 +49,15 @@ class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
         return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ false, serverTestCapabilities.agent).then(function (): Q.Promise<any> {
             return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ true, serverTestCapabilities.agent);
         });
+    }
+
+    public printHelp(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): void {
+        var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
+        var resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"), conf.lang);
+        var jsdoc = new JSDocHelpPrinter(require.resolve("./tacoRemoteConfig.jsdoc.json"), resources);
+
+        console.info(resources.getString("TacoRemoteHelp"));
+        jsdoc.printHelp();
     }
 }
 

@@ -35,12 +35,18 @@ if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
 gulp.task("default", ["install-build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
-gulp.task("compile", function (callback: Function): any {
-    return gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
+gulp.task("compile", function (callback: Function): Q.Promise<any> {
+    return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
         .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(buildConfig.buildPackages));
+        .pipe(gulp.dest(buildConfig.buildPackages)))
+        .then(function (): Q.Promise<any> {
+            return Q.all([
+                gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "taco-remote", "lib", "tacoRemoteConfig.js")),
+                gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "remotebuild", "lib", "remoteBuildConf.js"))
+            ]);
+    });
 });
 
 /* compile + copy */

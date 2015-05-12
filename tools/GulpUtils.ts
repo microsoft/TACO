@@ -5,6 +5,7 @@
 /// <reference path="../src/typings/del.d.ts" />
 /// <reference path="../src/typings/archiver.d.ts" />
 /// <reference path="../src/typings/gulp.d.ts" />
+/// <reference path="../src/typings/jsdoc-parse.d.ts" />
 
 import archiver = require ("archiver");
 import child_process = require ("child_process");
@@ -12,6 +13,7 @@ import del = require ("del");
 import fs = require ("fs");
 import fstream = require ("fstream");
 import gulp = require ("gulp");
+import parse = require ("jsdoc-parse");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
@@ -19,7 +21,6 @@ import util = require ("util");
 import zlib = require ("zlib")
 
 class GulpUtils {
-
     private static TestCommand: string = "test";
 
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
@@ -122,6 +123,22 @@ class GulpUtils {
         return Q.all(promises);
     }
 
+    public static prepareJsdocJson(filename: string): Q.Promise<any> {
+        var outName = path.join(path.dirname(filename), util.format("%s.jsdoc.json", path.basename(filename, ".js")));
+        return GulpUtils.streamToPromise(parse({ src: filename }).pipe(fs.createWriteStream(outName)));
+    }
+
+    public static streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {
+        var deferred = Q.defer();
+        stream.on("finish", function (): void {
+            deferred.resolve({});
+        });
+        stream.on("error", function (e: Error): void {
+            deferred.reject(e);
+        });
+        return deferred.promise;
+    }
+
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
@@ -140,17 +157,6 @@ class GulpUtils {
         console.log("Uninstalling " + moduleName);
         var deferred = Q.defer<Buffer>();
         child_process.exec("npm uninstall " + moduleName, { cwd: installDir }, deferred.makeNodeResolver());
-        return deferred.promise;
-    }
-
-    private static streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {
-        var deferred = Q.defer();
-        stream.on("finish", function (): void {
-            deferred.resolve({});
-        });
-        stream.on("error", function (e: Error): void {
-            deferred.reject(e);
-        });
         return deferred.promise;
     }
 

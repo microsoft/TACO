@@ -83,5 +83,29 @@
     "HomebrewInstallationSuccess": "Successfully installed homebrew packages.\n",
     "_HomebrewInstallationSuccess": "Message displayed when 3rd party dependencies are successfully installed",
     "HomebrewInstallationDeclined": "If you want to enable deploying to devices or debugging apps on devices or the simulator, delete ~/.remotebuild to be asked again.\n",
-    "_HomebrewInstallationDeclined": "Message displayed when the user opts out of installing 3rd party dependencies"
+    "_HomebrewInstallationDeclined": "Message displayed when the user opts out of installing 3rd party dependencies",
+
+    "TacoRemoteHelp": [
+        "taco-remote enables building Apache Cordova projects remotely.",
+        "More documentation for configuring taco remote build can be found at http://go.microsoft.com/fwlink/?LinkId=613345",
+        "",
+        "Options that may be specified in the config file (under { 'modules': { 'taco-remote': { } } )"
+    ],
+    "_TacoRemoteHelp.comment": "Help message for this module",
+    "TacoRemoteConfigAllowsEmulate": "true if server should support running builds in iOS simulator, false if not (defaults to true if not specified)",
+    "_TacoRemoteConfigAllowsEmulate.comment": "Help message printed for --allowsEmulate",
+    "TacoRemoteConfigDeleteBuildsOnShutdown": "Delete all builds when the server is shutdown (defaults to true if not specified)",
+    "_TacoRemoteConfigDeleteBuildsOnShutdown.comment": "Help message printed for --deleteBuildsOnShutdown",
+    "TacoRemoteConfigMaxBuildsInQueue": "Maximum number of builds to allow in build queue. New builds over this limit are rejected (defaults to 10 if not specified)",
+    "_TacoRemoteConfigMaxBuildsInQueue.comment": "Help message printed for --maxBuildsInQueue",
+    "TacoRemoteConfigMaxBuildsToKeep": "Maximum number of builds to retain on disk (defaults to 20 if not specified)",
+    "_TacoRemoteConfigMaxBuildsToKeep.comment": "Help message printed for --maxBuildsToKeep",
+    "TacoRemoteConfigNativeDebugProxyPort": "Port number for native debugger (defaults to 3001 if not specified)",
+    "_TacoRemoteConfigNativeDebugProxyPort.comment": "Help message printed for --nativeDebugProxyPort",
+    "TacoRemoteConfigWebDebugProxyDevicePort": "Port number for webkit debugger device discovery (defaults to 9221 if not specified)",
+    "_TacoRemoteConfigWebDebugProxyDevicePort.comment": "Help message printed for --webDebugProxyDevicePort",
+    "TacoRemoteConfigWebDebugProxyPortMin": "First port number for webkit debugger to assign to devices (defaults to 9222 if not specified)",
+    "_TacoRemoteConfigWebDebugProxyPortMin.comment": "Help message printed for --webDebugProxyPortMin",
+    "TacoRemoteConfigWebDebugProxyPortMax": "Last port number for webkit debugger to assign to devices (defaults to 9322 if not specified)",
+    "_TacoRemoteConfigWebDebugProxyPortMax.comment": "Help message printed for --webDebugProxyPortMax"
 }
