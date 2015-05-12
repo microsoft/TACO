@@ -9,6 +9,8 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../typings/fstream.d.ts" />
 
 import fs = require ("fs");
 import fstream = require ("fstream");
