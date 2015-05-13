@@ -174,7 +174,12 @@ module TacoUtility {
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
-                            deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailed", packageName)));
+                            if (exitCode === 243) {
+                                // error code reported when npm fails due to EACCES
+                                deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailedEaccess", packageName)));
+                            } else {
+                                deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailed", packageName)));
+                            }
                         });
                     }
                 });
