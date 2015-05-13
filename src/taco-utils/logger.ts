@@ -23,7 +23,7 @@ module TacoUtility {
             colors.setTheme({
                 error: "red",
                 warn: "yellow",
-                link: "blue",
+                link: "cyan",
                 normalBold: "bold",
                 success: "green"
             });
