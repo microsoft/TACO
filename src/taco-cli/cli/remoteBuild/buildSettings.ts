@@ -58,6 +58,10 @@ class BuildSettings {
 
         this.agent = ConnectionSecurityHelper.getAgent(args.buildServerInfo);
     }
+
+    public get buildInfoFilePath(): string {
+        return path.join(this.platformConfigurationBldDir, "buildInfo.json");
+    }
 }
 
 module BuildSettings {

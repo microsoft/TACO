@@ -144,7 +144,8 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
             break;
         case Settings.BuildLocationType.Remote:
-            // remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
+            // TODO 1171419: remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
+            // Need to clean out the buildInfo.json at least.
             break;
         default:
             throw new Error(resources.getString("CommandBuildInvalidPlatformLocation", platform.platform));

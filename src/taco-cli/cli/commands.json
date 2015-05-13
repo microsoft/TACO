@@ -56,7 +56,7 @@
             { "name": "--remote", "description": "[CommandRunRemoteDescription]" },
             { "name": "--local", "description": "[CommandRunLocalDescription]" },
             { "name": "--nobuild", "description": "[CommandRunNobuildDescription]" },
-            { "name": "--debuginfo", "description": "[CommandRunJsonDescription]" },
+            { "name": "--debuginfo", "description": "[CommandRunDebuginfoDescription]" },
             { "name": "--debug", "description": "[CommandRunDebugDescription]" },
             { "name": "--release", "description": "[CommandRunReleaseDescription]" },
             { "name": "--device", "description": "[CommandRunDeviceDescription]" },

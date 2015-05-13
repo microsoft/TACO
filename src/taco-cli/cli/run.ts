@@ -142,29 +142,42 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             });
 
             // Find the build that we are supposed to run
-            buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                if (buildInfo) {
-                    return Q(buildInfo);
-                } else if (commandData.options["nobuild"]) {
-                    // No info for the remote build: User must build first
-                    var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
-                    logger.logErrorLine(resources.getString("NoRemoteBuildIdFound", buildCommandToRun));
-                    throw new Error("NoRemoteBuildIdFound");
-                } else {
-                    return RemoteBuildClientHelper.build(buildSettings);
-                }
-            });
+            
+            if (commandData.options["nobuild"]) {
+                buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): BuildInfo {
+                    if (!buildInfo) {
+                        // No info for the remote build: User must build first
+                        var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
+                        logger.logErrorLine(resources.getString("NoRemoteBuildIdFound", buildCommandToRun));
+                        throw new Error("NoRemoteBuildIdFound");
+                    } else {
+                        return buildInfo;
+                    }
+                });
+            } else {
+                // Always do a rebuild, but incrementally if possible.
+                buildInfoPromise = RemoteBuildClientHelper.build(buildSettings);
+            }
 
-            // TODO: do we always configure for debugging?
+            // Default to a simulator/emulator build unless explicitly asked otherwise
+            // This makes sure that our defaults match Cordova's, as well as being consistent between our own build and run.
             var runPromise: Q.Promise<BuildInfo>;
-            if (commandData.options["emulator"]) {
+            if (commandData.options["device"]) {
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                    return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
+                    return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
+                }).then(function (buildInfo: BuildInfo): BuildInfo {
+                    logger.log(resources.getString("CommandSuccessBase") + " " , logger.Level.Success);
+                    logger.logLine(resources.getString("CommandRunRemoteDeviceSuccess"));
+                    return buildInfo;
                 });
             } else {
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                    return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
-                });
+                    return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
+                }).then(function (buildInfo: BuildInfo): BuildInfo {
+                    logger.log(resources.getString("CommandSuccessBase") + " " , logger.Level.Success);
+                    logger.logLine(resources.getString("CommandRunRemoteEmulatorSuccess"));
+                    return buildInfo;
+                });;
             }
 
             return runPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {

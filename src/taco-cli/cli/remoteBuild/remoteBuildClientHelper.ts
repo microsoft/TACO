@@ -44,7 +44,7 @@ class RemoteBuildClientHelper {
      */
     public static build(settings: BuildSettings): Q.Promise<BuildInfo> {
         var outputBuildDir: string = settings.platformConfigurationBldDir;
-        var buildInfoFilePath = path.join(outputBuildDir, "buildInfo.json");
+        var buildInfoFilePath = settings.buildInfoFilePath;
 
         if (!RemoteBuildClientHelper.isValidBuildServerUrl(settings.buildServerUrl)) {
             throw new Error(resources.getString("InvalidRemoteBuildUrl", settings.buildServerUrl));
