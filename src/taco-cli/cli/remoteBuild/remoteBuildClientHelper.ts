@@ -30,6 +30,8 @@ import BuildSettings = require ("./buildSettings");
 import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
 import resources = require ("../../resources/resourceManager");
 import Settings = require ("../utils/settings");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import BuildInfo = tacoUtils.BuildInfo;
@@ -47,7 +49,7 @@ class RemoteBuildClientHelper {
         var buildInfoFilePath = settings.buildInfoFilePath;
 
         if (!RemoteBuildClientHelper.isValidBuildServerUrl(settings.buildServerUrl)) {
-            throw new Error(resources.getString("InvalidRemoteBuildUrl", settings.buildServerUrl));
+            throw errorHelper.get(TacoErrorCodes.InvalidRemoteBuildUrl, settings.buildServerUrl);
         }
 
         var changeTimeFile = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
@@ -89,14 +91,13 @@ class RemoteBuildClientHelper {
                 if (err.buildInfo) {
                     // If we successfully submitted a build but the remote build server reports an error about the build, then grab the
                     // build log from the remote machine before propagating the reported failure
-                    console.info(resources.getString("RemoteBuildUnSuccessful"));
                     return RemoteBuildClientHelper.logBuildOutput(err.buildInfo, settings)
                         .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                        throw err;
+                            throw errorHelper.wrap(TacoErrorCodes.RemoteBuildSuccessful, err);
                     });
                 }
 
-                throw err;
+                throw errorHelper.wrap(TacoErrorCodes.RemoteBuildSuccessful, err);
             })
             .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
             return RemoteBuildClientHelper.downloadRemotePluginFile(buildInfo, settings, path.join(settings.projectSourceDir, "plugins"));
@@ -184,7 +185,7 @@ class RemoteBuildClientHelper {
         return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<BuildInfo> {
             request.get((requestOptions), function (error: any, response: { statusCode: number }, body: string): void {
                 if (error) {
-                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "remoteBuildError"));
+                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, TacoErrorCodes.RemoteBuildError));
                 } else if (response.statusCode === 200) {
                     deferred.resolve(buildInfo);
                 } else {
@@ -219,22 +220,22 @@ class RemoteBuildClientHelper {
     /**
      * Convert errors from error codes to localizable strings
      */
-    private static errorFromRemoteBuildServer(serverUrl: string, requestError: any, fallbackErrorId: string): Error {
+    private static errorFromRemoteBuildServer(serverUrl: string, requestError: any, fallbackErrorCode: TacoErrorCodes): Error {
         if (requestError.toString().indexOf("CERT_") !== -1) {
-            return new Error(resources.getString("InvalidRemoteBuildClientCert"));
+            return errorHelper.get(TacoErrorCodes.InvalidRemoteBuildClientCert);
         } else if (serverUrl.indexOf("https://") === 0 && requestError.code === "ECONNRESET") {
-            return new Error(resources.getString("RemoteBuildSslConnectionReset", serverUrl));
+            return errorHelper.get(TacoErrorCodes.RemoteBuildSslConnectionReset, serverUrl);
         } else if (serverUrl.indexOf("http://") === 0 && requestError.code === "ECONNRESET") {
-            return new Error(resources.getString("RemoteBuildNonSslConnectionReset", serverUrl));
+            return errorHelper.get(TacoErrorCodes.RemoteBuildNonSslConnectionReset, serverUrl);
         } else if (requestError.code === "ENOTFOUND") {
             // Host unreachable regardless of whether http or https
-            return new Error(resources.getString("RemoteBuildHostNotFound", serverUrl));
+            return errorHelper.get(TacoErrorCodes.RemoteBuildHostNotFound, serverUrl);
         } else if (requestError.code === "ECONNREFUSED") {
             // Host reachable but connection not established (e.g. Server not running)
-            return new Error(resources.getString("RemoteBuildNoConnection", serverUrl));
+            return errorHelper.get(TacoErrorCodes.RemoteBuildNoConnection, serverUrl);
         }
 
-        return new Error(resources.getString(fallbackErrorId, serverUrl, requestError));
+        return errorHelper.wrap(fallbackErrorCode, <Error>requestError, serverUrl);
     }
 
     /**
@@ -309,7 +310,7 @@ class RemoteBuildClientHelper {
             deferred.resolve({});
         });
         firstPassReader.on("error", function (err: Error): void {
-            deferred.reject(err);
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedPatchCreation, err));
         });
 
         return deferred.promise.then(function (): zlib.Gzip {
@@ -406,24 +407,24 @@ class RemoteBuildClientHelper {
         console.info(resources.getString("SubmittingRemoteBuild", buildUrl));
 
         appAsTgzStream.on("error", function (error: any): void {
-            deferred.reject(new Error(resources.getString("ErrorUploadingRemoteBuild", serverUrl, error)));
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorUploadingRemoteBuild, error, serverUrl));
         });
         return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<string> {
             appAsTgzStream.pipe(request.post(requestOptions, function (error: any, response: any, body: any): void {
                 if (error) {
-                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, "ErrorUploadingRemoteBuild"));
+                    deferred.reject(RemoteBuildClientHelper.errorFromRemoteBuildServer(serverUrl, error, TacoErrorCodes.ErrorUploadingRemoteBuild));
                 } else if (response.statusCode === 400) {
                     // Build server sends back http 400 for invalid submissions with response like this. We will fail the build with a formatted message.
                     // {"status": "Invalid build submission", "errors": ["The requested cordova version 3.5.0-0.2.4 is not supported by this build manager. Installed cordova version is 3.4.1-0.1.0"]}
                     var errorsJson: { status: string; errors: string[] } = JSON.parse(body);
-                    deferred.reject(new Error(errorsJson.status + ": " + errorsJson.errors.toString()));
+                    deferred.reject(errorHelper.get(TacoErrorCodes.InvalidBuildSubmission400, errorsJson.status, errorsJson.errors.toString()));
                 } else if (response.statusCode === 202) {
                     // Expect http 202 for a valid submission which is "Accepted" with a content-location to the Url to check for build status
                     console.info(resources.getString("NewRemoteBuildInfo", body));
                     var buildInfo = JSON.parse(body);
                     deferred.resolve(response.headers["content-location"]);
                 } else {
-                    deferred.reject(new Error(body));
+                    deferred.reject(errorHelper.get(TacoErrorCodes.FailedUploadingRemoteBuild, body));
                 }
             }));
 
@@ -444,8 +445,8 @@ class RemoteBuildClientHelper {
 
         return RemoteBuildClientHelper.httpOptions(buildingUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): Q.Promise<BuildInfo> {
-            if (responseAndBody.response.statusCode !== 200) {
-                throw new Error("Http " + responseAndBody.response.statusCode + ": " + responseAndBody.body);
+                if (responseAndBody.response.statusCode !== 200) {
+                    throw errorHelper.get(TacoErrorCodes.RemoteBuildStatusPollFailed, responseAndBody.response.statusCode, responseAndBody.body);
             }
 
             var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
@@ -454,9 +455,9 @@ class RemoteBuildClientHelper {
             if (buildInfo.status === BuildInfo.COMPLETE) {
                 return Q(buildInfo);
             } else if (buildInfo.status === BuildInfo.INVALID) {
-                throw new Error(resources.getString("InvalidRemoteBuild", buildInfo.message));
+                throw errorHelper.get(TacoErrorCodes.InvalidRemoteBuild, buildInfo.message);
             } else if (buildInfo.status === BuildInfo.ERROR) {
-                var err: any = new Error(resources.getString("RemoteBuildError", buildInfo.message));
+                var err: any = errorHelper.get(TacoErrorCodes.RemoteBuildError, buildInfo.message);
                 err.buildInfo = buildInfo;
                 throw err;
             }
@@ -529,7 +530,7 @@ class RemoteBuildClientHelper {
         var zipFile = path.join(toDir, buildNumber + ".zip");
         var outZip = fs.createWriteStream(zipFile);
         outZip.on("error", function (error: any): void {
-            deferred.reject(new Error(resources.getString("ErrorDownloadingRemoteBuild", toDir, error)));
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorDownloadingRemoteBuild, error, toDir));
         });
         outZip.on("finish", function (): void {
             console.info(resources.getString("DownloadedRemoteBuild", toDir));
@@ -560,7 +561,7 @@ class RemoteBuildClientHelper {
                 deferred.resolve({});
             });
         } catch (error) {
-            deferred.reject(new Error(resources.getString("ErrorDownloadingRemoteBuild", toDir, error)));
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorDownloadingRemoteBuild, error, toDir));
         }
 
         return deferred.promise;
@@ -573,21 +574,21 @@ class RemoteBuildClientHelper {
         var deferred = Q.defer<{ response: any; body: string }>();
         request.get(urlOptions, function (error: any, response: any, body: any): void {
             if (error) {
-                deferred.reject(new Error(resources.getString("ErrorHTTPGet", urlOptions.url, error)));
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorHttpGet, error, urlOptions.url));
             } else {
                 if (response.statusCode !== 200 && response.statusCode !== 202) {
                     // see if the response is JSON with a message
                     try {
                         var bodyJson = JSON.parse(response.body);
                         if (bodyJson.message) {
-                            deferred.reject(new Error(resources.getString("HTTPGetFailed", response.statusCode, bodyJson.message)));
+                            deferred.reject(errorHelper.get(TacoErrorCodes.HttpGetFailed, response.statusCode, bodyJson.message));
                             return;
                         }
                     } catch (e) {
                         // Ignore; the response was not valid JSON
                     }
 
-                    deferred.reject(new Error(resources.getString("HTTPGetFailed", response.statusCode, response.body)));
+                    deferred.reject(errorHelper.get(TacoErrorCodes.HttpGetFailed, response.statusCode, response.body));
                 }
 
                 deferred.resolve({ response: response, body: body });

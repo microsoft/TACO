@@ -77,7 +77,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
             process.send(resultBuildInfo);
         });
     }, function (err: Error): void {
-            buildInfo.updateStatus(BuildInfo.ERROR, "RequireCordovaFailed", cordovaVersion, err.toString())
+            buildInfo.updateStatus(BuildInfo.ERROR, "RequireCordovaFailed", cordovaVersion, err.toString());
             process.send(buildInfo);
     });
 });

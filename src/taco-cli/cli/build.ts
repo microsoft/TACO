@@ -24,6 +24,8 @@ import CordovaWrapper = require ("./utils/cordovaWrapper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
@@ -105,13 +107,11 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("CommandNotBothLocalRemote"));
-            throw new Error("CommandNotBothLocalRemote");
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("CommandNotBothDeviceEmulate"));
-            throw new Error("CommandNotBothDeviceEmulate");
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
         return parsedOptions;
@@ -148,7 +148,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             // Need to clean out the buildInfo.json at least.
             break;
         default:
-            throw new Error(resources.getString("CommandBuildInvalidPlatformLocation", platform.platform));
+            throw errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform);
         }
 
         return promise;
@@ -170,7 +170,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("CommandRemotePlatformNotKnown", platform));
+                throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
             var buildSettings = new RemoteBuildSettings({
@@ -203,7 +203,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
                         default:
-                            return Q.reject(new Error(resources.getString("CommandBuildInvalidPlatformLocation", platform.platform)));
+                            return Q.reject(errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform));
                     }
                 });
             }, Q({}));

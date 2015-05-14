@@ -225,8 +225,8 @@ describe("TemplateManager", function (): void {
                 .then(function (cachedTemplatePath: string): void {
                     // The promise was resolved, this is an error
                     done(new Error("The operation completed successfully when it should have returned an error"));
-                }, function (error: string): void {
-                    error.should.equal("CommandCreateTemplatesUnavailable");
+                }, function (error: TacoUtility.TacoError): void {
+                    error.message.should.equal("CommandCreateTemplatesUnavailable");
                     done();
                 })
                 .catch(function (err: string): void {

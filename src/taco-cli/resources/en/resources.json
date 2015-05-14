@@ -20,7 +20,7 @@
     "_CommandCreateTemplatesUnavailable.comment": "Error reported when templates cannot be downloaded",
     "CommandCreateOnlyLocalCustomWww": "Error: Only local paths for custom www assets are supported.",
     "_CommandCreateOnlyLocalCustomWww.comment": "Error reported when the specified path to the --copy-from or --link-to parameters is a web URL.",
-    
+
     "CommandCreateStatusProjectName": "Creating a new Cordova project with name ",
     "CommandCreateStatusProjectId": " and id ",
     "CommandCreateStatusProjectPath": " at location ",
@@ -28,12 +28,12 @@
     "CommandCreateStatusCordovaCliUsed": " with Cordova version ",
     "CommandCreateStatusNoKitUsed": " and no Kit",
     "_CommandCreateStatus.comment": "Status message printed while a project is being created.",
-    
+
     "CommandCreateWarningDeprecatedKit": "Warning: Kit {0} has been deprecated.",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation.",
     "CommandCreateWarningDeprecatedKitSuggestion": "Consider changing your project to use a more recent Kit. For deprecation information, see {fwdLink_toDo}",
     "_CommandCreateWarningDeprecatedKitSuggestion.comment": "If the create command succeeds, the success message will start with 'Success!'. The success message needs to be logged over several strings because each part requires different formatting.",
-    
+
     "CommandCreateSuccessProjectTemplate": "Your project using the {0} is ready for use at",
     "_CommandCreateSuccessProjectTemplate.comment": "This sentence follows the word 'Success!' when the create command succeeds if the project was created using a template. {0} is the display name of the template the project was created with.",
     "CommandCreateSuccessProjectCustomWww": "Your project using custom assets from {0} is ready for use at",
@@ -44,9 +44,10 @@
     "_CommandCreateSuccessPath.comment": "This is the part of the success message for the create command. {0} is the path where the project was created.",
     "CommandCreateTacoJsonFileCreationError": "Error: Creation of taco.json file failed",
     "_CommandCreateTacoJsonFileCreationError.comment": "This message is displayed when the taco.json file creation fails.",
+    "CommandCreateTacoJsonFileWriteError": "Failed to write to {0}",
 
     "CommandCreateListBase": "Available templates for kit '{0}':",
-    "_CommandCreateListBase.comment":  "Header at the top of the table showing available templates when the user does 'taco create --list'. {0} is the id of the kit for which to list the templates.",
+    "_CommandCreateListBase.comment": "Header at the top of the table showing available templates when the user does 'taco create --list'. {0} is the id of the kit for which to list the templates.",
 
     "CommandHelpDescription": "Get help for a command",
     "CommandHelpUsageSynopsis": "Synopsis",
@@ -79,8 +80,8 @@
     "_CommandSetupCantFindRemoteMount.comment": "Message printed when unable to find where to query the remote server for future builds. {0} is the URL we tried to contact",
     "CommandSetupSettingsStored": "Settings stored in {0}",
     "_CommandSetupSettingsStored.comment": "Message printed after successfully storing settings. {0} is the location they were stored to",
-    "CommandSetupConnrefused": "Unable to connect to remote server. Make sure that the remotebuild server is running at {0}",
-    "_CommandSetupConnrefused.comment": "Message printed when we fail to connect to the remote server. {0} is the url of the server",
+    "CommandSetupConnectionRefused": "Unable to connect to remote server. Make sure that the remotebuild server is running at {0}",
+    "_CommandSetupConnectionRefused.comment": "Message printed when we fail to connect to the remote server. {0} is the url of the server",
     "CommandSetupNotfound": "Unable to look up host '{0}'. Check that the name is correct.",
     "_CommandSetupNotfound.comment": "Message printed when we fail to look up the user provided hostname. {0} is that hostname",
     "CommandSetupTimedout": "Unable to contact '{0}', please check that the server is reachable.",
@@ -162,7 +163,7 @@
 
 
     "NoRemoteBuildIdFound": "Error: No remote build found. Please run '{0}' first",
-    "_NoRemoteBuildIdFound.comment":  "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",
+    "_NoRemoteBuildIdFound.comment": "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",
 
     "UnsupportedPlatform": "Error: Unsupported platform {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",
@@ -170,6 +171,10 @@
     "_NoCertificateFound.comment": "Message printed when we fail to find a certificate. {0} is the certificate we were looking for",
     "GetCertificateFailed": "Error: unable to find certificate.",
     "_GetCertificateFailed.comment": "Message printed when we fail to find a certificate because of an error",
+    "FailedCertificateLoad": "Failed to load certificate {0}",
+    "FailedCertificatePathChmod": "Failed to change permissions for certificate folder {0}",
+    "FailedCertificateSave": "Failed to save certificate at {0}",
+    "FailedCertificateSaveWithErrorCode": "Failed to save certificate in certficate store. Exit Code: {0}",
 
     "EnsuringCorrectInstallation": "------ Ensuring correct global installation of package from source package directory: {0}",
     "InvalidInstallSourceDirectory": "------ Invalid installation source directory. No package.json found.",
@@ -186,7 +191,6 @@
 
     "ConfigXmlInvalidNameElement": "Validation failed for config.xml. Invalid name element: '{0}'.",
 
-    "UnsupportedPlatform": "------ Unsupported platform type {0}.",
     "UnsupportedBuildCommand": "------ Unsupported build command {0}. Currently, build or prepare are supported.",
 
     "CopyingIconsAndSplashscreens": "------ Copying Icons and Splashscreens for {0}",
@@ -244,11 +248,13 @@
     "RemoteBuildClientCertMissing": "The remote build client certificate is missing. To build your project, you must generate and configure a security PIN. See http://go.microsoft.com/fwlink/?LinkID=511904.",
     "IncrementalBuild": "------ Incremental Build: {0}",
     "SubmittingRemoteBuild": "------ Submitting new build request to: {0}",
-    "ErrorUploadingRemoteBuild": "An error occurred uploading to the build server {0}: {1}",
+    "ErrorUploadingRemoteBuild": "An error occurred uploading to the build server {0}",
+    "FailedPatchCreation": "Failed to parse changed files needed to prepare a build patch",
+    "RemoteBuildStatusPollFailed": "HTTP {0}: {1}",
     "InvalidRemoteBuildClientCert": "The remote build server denied the build request, because the client certificate is invalid or has expired. To build your project, you must generate and configure a security PIN. See http://go.microsoft.com/fwlink/?LinkID=511904",
     "NewRemoteBuildInfo": "------ New Build information: {0}",
     "CheckingRemoteBuildStatus": "------ {0} Checking on build status from {1} [Attempt {2}]",
-    "RemoteBuildError": "Remote build error from the build server {0}: {1}",
+    "RemoteBuildError": "Remote build error from the build server {0}",
     "RemoteBuildSslConnectionReset": "Secure connection to {0} could not be established. Verify that the build server is running in secure mode.",
     "RemoteBuildNonSslConnectionReset": "Non-secure connection to {0} could not be established. Verify that the build server is not running in secure mode.",
     "RemoteBuildHostNotFound": "Host unreachable for build server {0}.",
@@ -256,8 +262,9 @@
     "InvalidRemoteBuild": "Invalid remote build: {0}",
     "DownloadingRemoteBuild": "------ Downloading completed build files from {0} to {1}",
     "DownloadedRemoteBuild": "------ Done downloading the build outputs to {0}",
-    "ErrorDownloadingRemoteBuild": "Error from downloading build outputs to {0}: {1}",
+    "ErrorDownloadingRemoteBuild": "Error from downloading build outputs to {0}",
     "ExtractingRemoteBuild": "------ Extracting the build outputs to {0}",
+    "FailedUploadingRemoteBuild": "An error occurred uploading to the build server {0}.",
     "DoneExtractingRemoteBuild": "------ Done extracting the build outputs to {0}",
     "FailedToDeleteRemoteZip": "------ Failed to delete downloaded zip file {0}. This did not prevent a successful build.",
     "RequestingRemoteiOSEmulate": "Requesting emulate on iOS Simulator for buildNumber {0} on server {1}...",
@@ -270,10 +277,10 @@
     "FailedRemoteiOSDebug": "Failed to Debug iOS remote for build {0} to {1} :\n{2}",
 
     "BuildError": "A build error occurred: {0}",
-    "ErrorHTTPGet": "Error contacting {0}: {1}",
-    "_ErrorHTTPGet.comment": "Error message reported when a web request to url {0} fails. {1} is the error reported.",
-    "HTTPGetFailed": "Http {0}: {1}",
-    "_HTTPGetFailed.comment": "Error message reported when a web request is completed but does not report success. {0} is the error status code, and {1} is the contents of the response",
+    "ErrorHttpGet": "Error contacting {0}",
+    "_ErrorHttpGet.comment": "Error message reported when a web request to url {0} fails. {1} is the error reported.",
+    "HttpGetFailed": "Http {0}: {1}",
+    "_HttpGetFailed.comment": "Error message reported when a web request is completed but does not report success. {0} is the error status code, and {1} is the contents of the response",
 
     "BuildLogWrittenTo": "Remote build log written to {0}",
     "_BuildLogWrittenTo.comment": "Message printed when the build log fetched from the remote machine has finished being written. {0} is the path the file was written to",
@@ -281,9 +288,12 @@
     "_RemoteBuildSuccessful.comment": "Message printed when a remote build completes successfully",
     "RemoteBuildUnsuccessful": "Remote build failed",
     "_RemoteBuildUnsuccessful.comment": "Message printed when a remote build fails",
+    "InvalidBuildSubmission400": "{0}:{1}",
 
     "CordovaCommandFailed": "'cordova {1}' failed with exit code {0}",
     "_CordovaCommandFailed.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
 
+    "CordovaCommandFailedWithError": "'cordova {0}' failed.",
+    "_CordovaCommandFailedWithError.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
     "PerformanceSummary": "------ vs-mda Performance Summary"
 }

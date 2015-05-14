@@ -19,6 +19,8 @@ import Q = require ("q");
 import util = require ("util");
 
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
@@ -48,12 +50,7 @@ class Settings {
             Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
             return Q(Settings.Settings);
         } catch (e) {
-            // Unable to read TacoSettings.json: it doesn't exist, or it is corrupt
-            if (!suppressFailure) {
-                logger.logErrorLine(resources.getString("CommandBuildTacoSettingsNotFound"));
-            }
-
-            return Q.reject<Settings.ISettings>(e);
+            return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
         }
     }
 

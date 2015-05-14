@@ -25,6 +25,8 @@ import wrench = require ("wrench");
 import cordovaHelper = require ("./cordovaHelper");
 import cordovaWrapper = require ("./cordovaWrapper");
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import logger = tacoUtility.Logger;
@@ -174,9 +176,7 @@ class TemplateManager {
         // If the specified template is not in the cache, it means we need to extract it to the cache
         if (!fs.existsSync(cachedTemplatePath)) {
             if (!fs.existsSync(templateInfo.url)) {
-                logger.logErrorLine(resources.getString("CommandCreateTemplatesUnavailable"));
-
-                return Q.reject<string>("CommandCreateTemplatesUnavailable");
+                return Q.reject<string>(errorHelper.get(TacoErrorCodes.CommandCreateTemplatesUnavailable));
             }
 
             // Cache does not contain the specified template, create the directory tree to cache it
