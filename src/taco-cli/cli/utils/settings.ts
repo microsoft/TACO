@@ -19,6 +19,8 @@ import Q = require ("q");
 import util = require ("util");
 
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
@@ -39,7 +41,7 @@ class Settings {
     /*
      * Load data from TACO_HOME/TacoSettings.json
      */
-    public static loadSettings(suppressFailure?: boolean): Q.Promise<Settings.ISettings> {
+    public static loadSettings(): Q.Promise<Settings.ISettings> {
         if (Settings.Settings) {
             return Q(Settings.Settings);
         }
@@ -48,12 +50,7 @@ class Settings {
             Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
             return Q(Settings.Settings);
         } catch (e) {
-            // Unable to read TacoSettings.json: it doesn't exist, or it is corrupt
-            if (!suppressFailure) {
-                logger.logErrorLine(resources.getString("CommandBuildTacoSettingsNotFound"));
-            }
-
-            return Q.reject<Settings.ISettings>(e);
+            return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
         }
     }
 
@@ -77,7 +74,7 @@ class Settings {
      *                 - If a platform exists in /platforms and does not have a remote configuration, then perform a local build
      */
     public static determinePlatform(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Settings.loadSettings(true)
+        return Settings.loadSettings()
         .fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
         .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
             if (options.remain.length > 0) {

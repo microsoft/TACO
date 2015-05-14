@@ -2,8 +2,8 @@
 
 import express = require ("express");
 import fs = require ("fs");
-import http = require("http");
-import expressLogger = require("morgan");
+import http = require ("http");
+import expressLogger = require ("morgan");
 import nconf = require ("nconf");
 import os = require ("os");
 import path = require ("path");

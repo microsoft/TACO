@@ -20,6 +20,8 @@ import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import packageLoader = tacoUtility.TacoPackageLoader;
@@ -32,11 +34,11 @@ class CordovaWrapper {
         var deferred = Q.defer();
         var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
         proc.on("error", function (err: Error): void {
-            deferred.reject(err);
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" ")));
         });
         proc.on("close", function (code: number): void {
             if (code) {
-                deferred.reject(new Error(resources.getString("CordovaCommandFailed", code, args.join(" "))));
+                deferred.reject(errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" ")));
             } else {
                 deferred.resolve({});
             }

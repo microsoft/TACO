@@ -15,6 +15,7 @@ import resourceManager = require ("./resourceManager");
 import jsDocHelpPrinter = require ("./jsDocHelpPrinter");
 import logger = require ("./logger");
 import processLogger = require ("./processLogger");
+import tacoError = require ("./tacoError");
 import tacoPackageLoader = require ("./tacoPackageLoader");
 import utilHelper = require ("./utilHelper");
 
@@ -29,6 +30,7 @@ module TacoUtility {
     export var Logger = logger.Logger;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
+    export var TacoError = tacoError.TacoError;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var UtilHelper = utilHelper.UtilHelper;
     /// <enable code="SA1301" />
