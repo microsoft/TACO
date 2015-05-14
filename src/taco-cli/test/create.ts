@@ -146,9 +146,13 @@ describe("taco create", function (): void {
         return create.run(makeICommandData(scenario, failureScenarios))
             .then(function (): Q.Promise<any> {
                 throw new Error("Scenario succeeded when it should have failed");
-            }, function (err: tacoUtils.TacoError): Q.Promise<any> {
+            }, function (err: any): Q.Promise<any> {
                     if (expectedError) {
-                        err.message.should.equal(expectedError);
+                        if (err instanceof tacoUtils.TacoError) {
+                            (<tacoUtils.TacoError>err).message.should.equal(expectedError);
+                        } else {
+                            err.should.equal(expectedError);
+                        }
                     }
 
                 return Q.resolve(null);
