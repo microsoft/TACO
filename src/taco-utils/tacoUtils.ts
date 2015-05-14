@@ -15,6 +15,7 @@ import utilHelper = require ("./utilHelper");
 import commands = require ("./commands");
 import logger = require ("./logger");
 import processLogger = require ("./processLogger");
+import tacoError = require ("./tacoError");
 import tacoPackageLoader = require ("./tacoPackageLoader");
 
 module TacoUtility {
@@ -27,6 +28,7 @@ module TacoUtility {
     export var Commands = commands.Commands;
     export var Logger = logger.Logger;
     export var ProcessLogger = processLogger.ProcessLogger;
+    export var TacoError = tacoError.TacoError;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var CountStream = countStream.CountStream;
     /// <enable code="SA1301" />

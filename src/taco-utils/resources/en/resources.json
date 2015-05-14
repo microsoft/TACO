@@ -26,5 +26,6 @@
     "PackageLoaderNpmInstallFailed": "Error installing {0} via npm. See output for details.",
     "_PackageLoaderNpmInstallFailed.comment": "Message reported when npm install returns a non-zero exit code.",
     "PackageLoaderNpmInstallFailedEaccess": "Error installing {0} via npm. Check permissions of npm cache.",
-    "_PackageLoaderNpmInstallFailedEaccess.comment": "Message reported when npm install fails due to permissions"
+    "_PackageLoaderNpmInstallFailedEaccess.comment": "Message reported when npm install fails due to permissions",
+    "InnerErrorToString":  "Inner Error:\n{0}"
 }

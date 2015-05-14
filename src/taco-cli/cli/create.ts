@@ -23,6 +23,8 @@ import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
 
@@ -69,7 +71,7 @@ class Create implements commands.IDocumentedCommand {
             this.parseArguments(data);
             this.verifyArguments();
         } catch (err) {
-            return Q.reject(err.message);
+            return Q.reject(err);
         }
 
         if (this.commandParameters.data.options["list"]) {
@@ -129,21 +131,15 @@ class Create implements commands.IDocumentedCommand {
     private verifyArguments(): void {
         // Parameter exclusivity validation and other verifications
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
-            logger.logErrorLine(resources.getString("CommandCreateNotTemplateIfCustomWww"));
-
-            throw new Error("CommandCreateNotTemplateIfCustomWww");
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["kit"]) {
-            logger.logErrorLine(resources.getString("CommandCreateNotBothCliAndKit"));
-
-            throw new Error("CommandCreateNotBothCliAndKit");
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothCliAndKit);
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
-            logger.logErrorLine(resources.getString("CommandCreateNotBothTemplateAndCli"));
-
-            throw new Error("CommandCreateNotBothTemplateAndCli");
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
     }
 

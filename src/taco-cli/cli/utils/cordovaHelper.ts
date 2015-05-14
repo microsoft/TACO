@@ -11,6 +11,8 @@
 import path = require ("path");
 
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 
 module CordovaHelper {
     /* 
@@ -86,7 +88,7 @@ class CordovaHelper {
 
         if (customWww) {
             if (customWww.indexOf("http") === 0) {
-                throw new Error(resources.getString("CommandCreateOnlyLocalCustomWww"));
+                throw errorHelper.get(TacoErrorCodes.CommandCreateOnlyLocalCustomWww);
             }
 
             // Resolve HOME env path

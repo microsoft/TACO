@@ -23,6 +23,8 @@ import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import BuildInfo = tacoUtility.BuildInfo;
@@ -96,13 +98,11 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("CommandNotBothLocalRemote"));
-            throw new Error("CommandNotBothLocalRemote");
+            errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("CommandNotBothDeviceEmulate"));
-            throw new Error("CommandNotBothDeviceEmulate");
+            errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
         return parsedOptions;
@@ -124,7 +124,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("CommandRemotePlatformNotKnown", platform));
+                throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
             var buildServerUrl = Settings.getRemoteServerUrl(remoteConfig);
@@ -148,8 +148,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                     if (!buildInfo) {
                         // No info for the remote build: User must build first
                         var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
-                        logger.logErrorLine(resources.getString("NoRemoteBuildIdFound", buildCommandToRun));
-                        throw new Error("NoRemoteBuildIdFound");
+                        throw errorHelper.get(TacoErrorCodes.NoRemoteBuildIdFound, buildCommandToRun);
                     } else {
                         return buildInfo;
                     }
