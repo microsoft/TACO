@@ -46,7 +46,7 @@ export class StyleCopUtil {
                 var currentPath = path.join(filesRoot, files[i]);
                 if (!fs.statSync(currentPath).isDirectory()) {
                     /* push the typescript files */
-                    if (currentPath.match("d.ts$")) {
+                    if (currentPath.match(/\.d\.ts$/)) {
                         result.push(path.basename(currentPath));
                     }
                 } else {
