@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/express.d.ts" />
@@ -30,7 +31,6 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     private static Config: RemoteBuildConf;
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var osxdefaults: { [key: string]: any } = {
-            serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
             writePidToFile: false,
             lang: process.env.LANG && process.env.LANG.replace(/_.*/, "") || "en", // Convert "en_US.UTF8" to "en", similarly for other locales
             suppressSetupMessage: false,
@@ -53,10 +53,6 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
         }
 
         return Q({});
-    }
-
-    public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {

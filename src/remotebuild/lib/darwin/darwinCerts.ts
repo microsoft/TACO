@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/node.d.ts" />
@@ -279,11 +280,11 @@ class Certs {
 
     private static certOptionsFromConf(conf: RemoteBuildConf): Certs.ICertOptions {
         var options: Certs.ICertOptions = {};
-        if (conf.get("certExpirationdays") < 1) {
-            console.info(resources.getString("CertExpirationInvalid", conf.get("certExpirationdays"), Certs.CERT_DEFAULTS.days));
+        if (conf.certExpirationDays < 1) {
+            console.info(resources.getString("CertExpirationInvalid", conf.certExpirationDays, Certs.CERT_DEFAULTS.days));
             options.days = Certs.CERT_DEFAULTS.days;
         } else {
-            options.days = conf.get("certExpirationdays");
+            options.days = conf.certExpirationDays;
         }
 
         return options;

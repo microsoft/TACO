@@ -1,11 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
-/// <reference path="../../../typings/nconf.d.ts" />
+
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/express.d.ts" />
@@ -15,7 +15,6 @@
 import child_process = require ("child_process");
 import express = require ("express");
 import fs = require ("fs");
-import nconf = require ("nconf");
 import path = require ("path");
 import Q = require ("q");
 
@@ -27,7 +26,6 @@ import utils = require ("taco-utils");
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var win32defaults: { [key: string]: any } = {
-            serverDir: path.join(utils.UtilHelper.tacoHome, "remote-builds"),
             writePidToFile: false,
             lang: "en", // TODO (Devdiv: 1160573), determine appropriate language on windows
             suppressSetupMessage: false,

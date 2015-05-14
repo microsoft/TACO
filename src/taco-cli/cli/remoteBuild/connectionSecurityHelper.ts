@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 "use strict";
@@ -17,6 +18,8 @@ import path = require ("path");
 import Q = require ("q");
 
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import logger = tacoUtils.Logger;
@@ -38,15 +41,15 @@ class ConnectionSecurityHelper {
                     output += data.toString();
                 });
                 certLoadProcess.on("error", function (err: Error): void {
-                    bufferDeferred.reject(err);
+                    bufferDeferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateLoad, err, connectionInfo.certName));
                 });
                 certLoadProcess.on("close", function (code: number): void {
                     if (code) {
                         if (code === 1) {
-                            bufferDeferred.reject(new Error(resources.getString("NoCertificateFound", connectionInfo.certName)));
+                            bufferDeferred.reject(errorHelper.get(TacoErrorCodes.NoCertificateFound, connectionInfo.certName));
                         } else {
                             logger.logErrorLine(output);
-                            bufferDeferred.reject(new Error(resources.getString("GetCertificateFailed")));
+                            bufferDeferred.reject(errorHelper.get(TacoErrorCodes.GetCertificateFailed));
                         }
                     } else {
                         bufferDeferred.resolve(new Buffer(output, "base64"));
@@ -59,7 +62,7 @@ class ConnectionSecurityHelper {
                 fs.readFile(certPath, bufferDeferred.makeNodeResolver());
                 break;
             default:
-                throw new Error(resources.getString("UnsupportedPlatform", os.platform()));
+                throw errorHelper.get(TacoErrorCodes.UnsupportedPlatform, os.platform());
         }
 
         return bufferDeferred.promise.then(function (certificate: Buffer): https.Agent {
@@ -95,18 +98,15 @@ class ConnectionSecurityHelper {
                     console.error(data.toString());
                 });
                 certSaveProcess.on("error", function (err: Error): void {
-                    deferred.reject(err);
+                    deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateSave, err));
                 });
                 certSaveProcess.on("close", function (code: number): void {
                     if (code) {
                         logger.logErrorLine(output);
-                        deferred.reject(new Error("Process exited: " + code));
+                        deferred.reject(errorHelper.get(TacoErrorCodes.FailedCertificateSaveWithErrorCode, code));
                     } else {
                         deferred.resolve(output);
                     }
-                });
-                certSaveProcess.on("error", function (err: any): void {
-                    deferred.reject(err);
                 });
                 break;
             case "linux":
@@ -116,12 +116,13 @@ class ConnectionSecurityHelper {
                 // The folder should only be accessible to the specific user
                 fs.chmod(certPath, "0700", function (err: NodeJS.ErrnoException): void {
                     if (err) {
-                        deferred.reject(err);
+                        deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificatePathChmod, err, certPath));
                     }
 
-                    fs.writeFile(path.join(certPath, "cert.pfx"), certificateData, function (err: NodeJS.ErrnoException): void {
+                    var certFilePath: string = path.join(certPath, "cert.pfx");
+                    fs.writeFile(certFilePath, certificateData, function (err: NodeJS.ErrnoException): void {
                         if (err) {
-                            deferred.reject(err);
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateSave, err, certFilePath));
                         }
 
                         deferred.resolve(host);
@@ -129,7 +130,7 @@ class ConnectionSecurityHelper {
                 });
                 break;
             default:
-                deferred.reject(new Error(resources.getString("UnsupportedPlatform", os.platform())));
+                deferred.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, os.platform()));
         }
 
         return deferred.promise;

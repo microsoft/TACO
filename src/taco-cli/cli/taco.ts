@@ -1,3 +1,11 @@
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
@@ -48,7 +56,13 @@ class Taco {
 
         // if no command found that can handle these args, route args directly to Cordova
         if (command) {
-            command.run(commandData).done();
+            command.run(commandData).done(null, function (reason: any): any {
+                if (reason instanceof tacoUtility.TacoError) {
+                    tacoUtility.Logger.logErrorLine((<tacoUtility.TacoError>reason).toString());
+                } else {
+                    throw reason;
+                }
+            });
         } else {
             cordova.cli(cordovaCliArgs);
         }

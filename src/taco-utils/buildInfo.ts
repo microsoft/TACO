@@ -1,21 +1,29 @@
-﻿import utilHelper = require ("./utilHelper");
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+import utilHelper = require ("./utilHelper");
 import UtilHelper = utilHelper.UtilHelper;
 import resources = require ("./resourceManager");
 
 module TacoUtility {
     export class BuildInfo {
-        public static UPLOADING = "uploading";
-        public static UPLOADED = "uploaded";
-        public static EXTRACTED = "extracted";
-        public static INVALID = "invalid";
-        public static BUILDING = "building";
-        public static COMPLETE = "complete";
-        public static EMULATED = "emulated";
-        public static RUNNING = "running";
-        public static INSTALLED = "installed";
-        public static DEBUGGING = "debugging";
-        public static DOWNLOADED = "downloaded";
-        public static ERROR = "error";
+        public static UPLOADING = "Uploading";
+        public static UPLOADED = "Uploaded";
+        public static EXTRACTED = "Extracted";
+        public static INVALID = "Invalid";
+        public static BUILDING = "Building";
+        public static COMPLETE = "Complete";
+        public static EMULATED = "Emulated";
+        public static RUNNING = "Running";
+        public static INSTALLED = "Installed";
+        public static DEBUGGING = "Debugging";
+        public static DOWNLOADED = "Downloaded";
+        public static ERROR = "Error";
 
         public status: string;
         /**
@@ -121,7 +129,7 @@ module TacoUtility {
             if (this.messageId) {
                 this.message = resources.getStringForLanguage(req, this.messageId, this.messageArgs);
             } else {
-                this.message = resources.getStringForLanguage(req, "Build-" + this.status);
+                this.message = resources.getStringForLanguage(req, "Build" + this.status);
             }
 
             return this;

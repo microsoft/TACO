@@ -10,13 +10,13 @@ class SetupMock {
         return {
             question: function (question: string, callback: (answer: string) => void): void {
                 switch (question) {
-                    case "command.setup.remote.query.host":
+                    case "CommandSetupRemoteQueryHost":
                         callback(desiredState.host);
                         break;
-                    case "command.setup.remote.query.port":
+                    case "CommandSetupRemoteQueryPort":
                         callback(desiredState.port.toString());
                         break;
-                    case "command.setup.remote.query.pin":
+                    case "CommandSetupRemoteQueryPin":
                         callback(desiredState.pin);
                         break;
                     default:
@@ -32,7 +32,7 @@ class SetupMock {
     }
 
     public static saveConfig(platform: string, config: Settings.IRemoteConnectionInfo): Q.Promise<any> {
-        return Settings.loadSettings(true).catch(function (): Settings.ISettings {
+        return Settings.loadSettings().catch(function (): Settings.ISettings {
             return { remotePlatforms: {} };
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {
             settings.remotePlatforms[platform] = config;

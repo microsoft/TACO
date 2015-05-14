@@ -1,20 +1,19 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
-/// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/expressExtensions.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
 /// <reference path="../../typings/serve-index.d.ts" />
-
 "use strict";
 
 import express = require ("express");
@@ -27,11 +26,13 @@ import util = require ("util");
 
 import BuildManager = require ("./buildManager");
 import HostSpecifics = require ("./hostSpecifics");
-// import resources = require("../resources/resourceManager");
 import selftest = require ("./selftest");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 
 import utils = require ("taco-utils");
+
+import JSDocHelpPrinter = utils.JSDocHelpPrinter;
+import Logger = utils.Logger;
 
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
@@ -48,6 +49,15 @@ class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
         return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ false, serverTestCapabilities.agent).then(function (): Q.Promise<any> {
             return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ true, serverTestCapabilities.agent);
         });
+    }
+
+    public printHelp(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): void {
+        var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
+        var resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"), conf.lang);
+        var jsdoc = new JSDocHelpPrinter(require.resolve("./tacoRemoteConfig.jsdoc.json"), resources);
+
+        console.info(resources.getString("TacoRemoteHelp"));
+        jsdoc.printHelp();
     }
 }
 
@@ -107,7 +117,7 @@ class Server implements RemoteBuild.IServerModule {
             res.status(202).json(buildInfo.localize(req, self.resources));
         }, function (err: any): void {
                 res.set({ "Content-Type": "application/json" });
-                res.status(err.code || 400).send({ status: self.resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err });
+                res.status(err.code || 400).send({ status: self.resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err.toString() });
             }).done();
     }
 

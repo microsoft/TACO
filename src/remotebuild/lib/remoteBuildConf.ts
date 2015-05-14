@@ -1,8 +1,17 @@
-﻿/// <reference path="../../typings/remotebuild.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/remotebuild.d.ts" />
 "use strict";
 
 import nconf = require ("nconf");
 import os = require ("os");
+import path = require ("path");
 
 import HostSpecifics = require ("./hostSpecifics");
 import resources = require ("../resources/resourceManager");
@@ -18,6 +27,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         secure: boolean;
         pinTimeout: number;
         hostname: string;
+        certExpirationDays: number;
 
         modules: RemoteBuildConf.IModulesConf;
 
@@ -26,6 +36,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
     constructor(conf: typeof nconf, isUnitTest?: boolean) {
         var defaults: any = {
+            serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
             port: 3000,
             secure: true,
             pinTimeout: 10,
@@ -59,30 +70,72 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         }
     }
 
+    /**
+     * @name config
+     * @LOCTAG RemoteBuildConfConfig
+     */
+    // This getter is never used in code, but we do want to document the parameter.
+    public get config(): string {
+        return this.remoteBuildConf["config"];
+    }
+
+    /**
+     * @name serverDir
+     * @LOCTAG RemoteBuildConfServerDir
+     */
     public get serverDir(): string {
         return this.remoteBuildConf.serverDir;
     }
 
+    /**
+     * @name lang
+     * @LOCTAG RemoteBuildConfLang
+     */
     public get lang(): string {
         return this.remoteBuildConf.lang;
     }
 
+    /**
+     * @name port
+     * @LOCTAG RemoteBuildConfPort
+     */
     public get port(): number {
         return this.remoteBuildConf.port;
     }
 
+    /**
+     * @name secure
+     * @LOCTAG RemoteBuildConfSecure
+     */
     public get secure(): boolean {
         return UtilHelper.argToBool(this.remoteBuildConf.secure);
     }
 
+    /**
+     * @name pinTimeout
+     * @LOCTAG RemoteBuildConfPinTimeout
+     */
     public get pinTimeout(): number {
         return this.remoteBuildConf.pinTimeout;
     }
 
+    /**
+     * @name hostname
+     * @LOCTAG RemoteBuildConfHostname
+     */
     public get hostname(): string {
         return this.remoteBuildConf.hostname;
     }
 
+    /**
+     * @name certExpirationDays
+     * @LOCTAG RemoteBuildConfCertExpirationDays
+     */
+    public get certExpirationDays(): number {
+        return this.remoteBuildConf.certExpirationDays;
+    }
+
+// This is not something that should be specified on the command line directly, although it can be if you try hard enough
     public get modules(): string[] {
         return Object.keys(this.remoteBuildConf.modules);
     }
@@ -103,6 +156,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 module RemoteBuildConf {
     export interface IModuleConf {
         mountPath: string;
+        requirePath?: string;
         [prop: string]: any;
     };
     export interface IModulesConf {

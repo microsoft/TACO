@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/optimist.d.ts" />
@@ -56,6 +57,10 @@ class BuildSettings {
         this.incrementalBuild = null;
 
         this.agent = ConnectionSecurityHelper.getAgent(args.buildServerInfo);
+    }
+
+    public get buildInfoFilePath(): string {
+        return path.join(this.platformConfigurationBldDir, "buildInfo.json");
     }
 }
 

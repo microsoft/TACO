@@ -1,14 +1,16 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
-﻿ * ******************************************************
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../typings/rimraf.d.ts" />
 /// <reference path="../typings/semver.d.ts" />
 "use strict";
 
+import assert = require ("assert");
 import child_process = require ("child_process");
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
@@ -28,7 +30,13 @@ module TacoUtility {
     export enum PackageSpecType {
         Error = -1,
         Version = 0,
-        Uri = 1
+        Uri = 1,
+        FilePath = 2
+    }
+
+    interface IPackageSpec {
+        location: string;
+        name: string;
     }
 
     export class TacoPackageLoader {
@@ -52,6 +60,73 @@ module TacoUtility {
             return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): T {
                 return TacoPackageLoader.requirePackage<T>(packageTargetPath);
             });
+        }
+
+        public static lazyRequireNoCache<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
+            var requireCachePaths = Object.keys(require.cache);
+            return TacoPackageLoader.lazyRequire<T>(packageName, packageVersion, logLevel).finally(function (): void {
+                // un-cache any files that were just required.
+                Object.keys(require.cache).filter(function (key: string): boolean {
+                    return requireCachePaths.indexOf(key) === -1;
+                }).forEach(function (key: string): void {
+                    delete require.cache[key];
+                });
+            });
+        }
+
+        /**
+         * Perform a fresh install of a specified node module, even if it is already cached in the file system
+         *
+         * This method is resilient against interrupted downloads, but is not safe under concurrency.
+         * Until that changes, we should not allow multiple builds at once.
+         * 
+         * @param {string} packageName The name of the package to load
+         * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
+         * @param {string} basePath Optional parameter which specifies the base path to resolve relative file paths against
+         *
+         * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved if the package installed succesfully
+         */
+
+        public static forceInstallPackage(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<any> {
+            var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
+            var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
+
+            // Intentionally create the status file, triggering a re-install
+            var statusFilePath = TacoPackageLoader.getStatusFilePath(packageTargetPath);
+            mkdirp.sync(packageTargetPath);
+            fs.writeFileSync(statusFilePath, "Outdated");
+
+            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel);
+        }
+
+        /**
+         * These three functions redirect to their corresponding function above after first fetching the appropriate information from the specified mapping file.
+         */
+        public static tacoRequire<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T> {
+            return Q({}).then(function (): Q.Promise<T> {
+                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
+                return TacoPackageLoader.lazyRequire<T>(packageSpec.name, packageSpec.location);
+            });
+        }
+
+        public static tacoRequireNoCache<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T> {
+            return Q({}).then(function (): Q.Promise<T> {
+                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
+                return TacoPackageLoader.lazyRequireNoCache<T>(packageSpec.name, packageSpec.location);
+            });
+        }
+
+        public static forceInstallTacoPackage(packageId: string, dependencyConfigPath: string): Q.Promise<any> {
+            return Q({}).then(function (): Q.Promise<any> {
+                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
+                return TacoPackageLoader.forceInstallPackage(packageSpec.name, packageSpec.location);
+            });
+        }
+
+        private static getPackageSpec(packageId: string, dependencyConfigPath: string): IPackageSpec {
+            var dependencyLookup = require(dependencyConfigPath);
+            return dependencyLookup[packageId];
         }
 
         private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
@@ -78,8 +153,8 @@ module TacoUtility {
                 npmProcess.on("error", function (error: Error): void {
                     if (packageName === "cordova") {
                         logger.log("\n", logger.Level.Normal);
-                        logger.log(resources.getString("packageLoader.errorMessage"), logger.Level.Error);
-                        logger.log(resources.getString("packageLoader.downloadErrorMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Error);
+                        logger.log(resources.getString("PackageLoaderErrorMessage"), logger.Level.Error);
+                        logger.log(resources.getString("packageLoaderDownloadErrorMessage", resources.getString("PackageLoaderCordovaToolVersion", packageVersion)), logger.Level.Error);
                         logger.log("\n", logger.Level.Normal);
                     }
 
@@ -91,15 +166,20 @@ module TacoUtility {
                     if (exitCode === 0) {
                         if (packageName === "cordova") {
                             logger.log("\n", logger.Level.Normal);
-                            logger.log(resources.getString("packageLoader.successMessage"), logger.Level.Success);
-                            logger.log(resources.getString("packageLoader.downloadCompletedMessage", resources.getString("packageLoader.cordovaToolVersion", packageVersion)), logger.Level.Normal);
+                            logger.log(resources.getString("PackageLoaderSuccessMessage"), logger.Level.Success);
+                            logger.log(resources.getString("packageLoaderDownloadCompletedMessage", resources.getString("PackageLoaderCordovaToolVersion", packageVersion)), logger.Level.Normal);
                             logger.log("\n", logger.Level.Normal);
                         }
 
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
-                            deferred.reject(new Error("NpmInstallFailed"));
+                            if (exitCode === 243) {
+                                // error code reported when npm fails due to EACCES
+                                deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailedEaccess", packageName)));
+                            } else {
+                                deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailed", packageName)));
+                            }
                         });
                     }
                 });
@@ -117,6 +197,7 @@ module TacoUtility {
                 case PackageSpecType.Version:
                     return path.join(homePackageModulesPath, packageVersion, "node_modules", packageName);
                 case PackageSpecType.Uri:
+                case PackageSpecType.FilePath:
                     return path.join(homePackageModulesPath, encodeURIComponent(packageVersion), "node_modules", packageName);
                 case PackageSpecType.Error:
                 default:
@@ -125,37 +206,39 @@ module TacoUtility {
         }
 
         private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
-            var deferred: Q.Deferred<string> = Q.defer<string>();
-            if (specType === PackageSpecType.Error) {
-                logger.log(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
-                deferred.reject(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageVersion, packageName));
-                return deferred.promise;
-            }
+            return Q({}).then(function (): Q.Promise<string> {
+                var deferred: Q.Deferred<string> = Q.defer<string>();
+                if (specType === PackageSpecType.Error) {
+                    logger.log(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
+                    deferred.reject(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName));
+                    return deferred.promise;
+                }
 
-            if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
-                return Q(targetPath);
-            }
+                if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
+                    return Q(targetPath);
+                }
 
-            // Delete the target path if it already exists and create an empty folder
-            if (fs.existsSync(targetPath)) {
-                rimraf.sync(targetPath);
-            }
+                // Delete the target path if it already exists and create an empty folder
+                if (fs.existsSync(targetPath)) {
+                    rimraf.sync(targetPath);
+                }
 
-            mkdirp.sync(targetPath);
-            // Create a file 
-            fs.closeSync(fs.openSync(TacoPackageLoader.getStatusFilePath(targetPath), "w"));
+                mkdirp.sync(targetPath);
+                // Create a file 
+                fs.closeSync(fs.openSync(TacoPackageLoader.getStatusFilePath(targetPath), "w"));
 
-            return TacoPackageLoader.installPackage(packageName, packageVersion, targetPath, specType, logLevel).then(function (): Q.Promise<string> {
-                return TacoPackageLoader.removeStatusFile(targetPath).then(function (): string {
-                    return targetPath;
+                return TacoPackageLoader.installPackage(packageName, packageVersion, targetPath, specType, logLevel).then(function (): Q.Promise<string> {
+                    return TacoPackageLoader.removeStatusFile(targetPath).then(function (): string {
+                        return targetPath;
+                    });
                 });
             });
         }
 
         private static installPackage(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<any> {
             if (packageName === "cordova") {
-                logger.log(resources.getString("packageLoader.downloadingMessage", packageVersion), logger.Level.NormalBold);
-                logger.logLine(resources.getString("packageLoader.cordovaToolVersion", packageVersion), logger.Level.Normal);
+                logger.log(resources.getString("PackageLoaderDownloadingMessage", packageVersion), logger.Level.NormalBold);
+                logger.logLine(resources.getString("PackageLoaderCordovaToolVersion", packageVersion), logger.Level.Normal);
                 logger.log("\n", logger.Level.Normal);
             }
 
@@ -166,10 +249,15 @@ module TacoUtility {
                     return TacoPackageLoader.cloneGitRepo(packageVersion, targetPath, logLevel)
                         .then(function (): Q.Promise<any> {
                         return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
+                        });
+                case PackageSpecType.FilePath:
+                    packageVersion = packageVersion.substring("file://".length);
+                    return utils.copyRecursive(packageVersion, targetPath).then(function (): Q.Promise<any> {
+                        return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
                     });
                 case PackageSpecType.Error:
                 default:
-                    return Q.reject(new Error(resources.getString("packageLoader.invalidPackageVersionSpecifier", packageName, packageVersion)));
+                    return Q.reject(new Error(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageName, packageVersion)));
             }
         }
 
@@ -236,6 +324,10 @@ module TacoUtility {
 
             if ((gitUrlRegex.exec(packageVersion))) {
                 return PackageSpecType.Uri;
+            }
+
+            if (packageVersion.match(/file:\/\/.*/)) {
+                return PackageSpecType.FilePath;
             }
 
             return PackageSpecType.Error;

@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
@@ -75,6 +76,9 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
         IOSBuildHelper.build(buildInfo, function (resultBuildInfo: BuildInfo): void {
             process.send(resultBuildInfo);
         });
+    }, function (err: Error): void {
+            buildInfo.updateStatus(BuildInfo.ERROR, "RequireCordovaFailed", cordovaVersion, err.toString());
+            process.send(buildInfo);
     });
 });
 

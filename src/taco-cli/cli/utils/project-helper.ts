@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 
 import Q = require ("q");
@@ -7,6 +15,8 @@ import fs = require ("fs");
 
 import resources = require ("../../resources/resourceManager");
 import tacoKits = require ("taco-kits");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import kitHelper = tacoKits.KitHelper;
@@ -18,26 +28,26 @@ class TacoProjectHelper {
         if (isKitProject) {
             if (!versionValue) {
                 return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
-                    return TacoProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
+                    return TacoProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { kit: kitId });
                 });
             } else {
-                return TacoProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: versionValue });
+                return TacoProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { kit: versionValue });
             }
         } else {
             if (!versionValue) {
-                deferred.reject(resources.getString("command.create.tacoJsonFileCreationError"));
+                deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateTacoJsonFileCreationError));
                 return deferred.promise;
             }
 
-            return TacoProjectHelper.createJsonFileWithContents(tacoJsonPath, { cli: versionValue });
+            return TacoProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { cli: versionValue });
         }
     }
 
-    private static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
+    private static createTacoJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
             if (err) {
-                deferred.reject(err);
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.CommandCreateTacoJsonFileWriteError, err, tacoJsonPath));
             }
 
             deferred.resolve({});

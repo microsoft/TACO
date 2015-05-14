@@ -1,4 +1,11 @@
-﻿/// <reference path="../typings/nconf.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 "use strict";

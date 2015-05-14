@@ -1,3 +1,11 @@
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 import fs = require ("fs");
@@ -58,7 +66,7 @@ module TacoUtility {
             public static init(commandsInfoPath: string): void {
                 commandsInfoPath = commandsInfoPath;
                 if (!fs.existsSync(commandsInfoPath)) {
-                    throw new Error(resources.getString("tacoUtils.exception.listingfile"));
+                    throw new Error(resources.getString("TacoUtilsExceptionListingfile"));
                 }
 
                 CommandFactory.Listings = require(commandsInfoPath);
@@ -69,7 +77,7 @@ module TacoUtility {
              */
             public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
                 if (!name || !CommandFactory.Listings) {
-                    throw new Error(resources.getString("tacoUtils.exception.listingfile"));
+                    throw new Error(resources.getString("TacoUtilsExceptionListingfile"));
                 }
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
@@ -79,7 +87,7 @@ module TacoUtility {
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error(resources.getString("tacoUtils.exception.missingcommand", name));
+                    throw new Error(resources.getString("TacoUtilsExceptionMissingcommand", name));
                 }
 
                 var commandMod: any = require(modulePath);
@@ -133,8 +141,8 @@ module TacoUtility {
                 if (subcommand) {
                     return subcommand.run(commandData);
                 } else {
-                    logger.Logger.logErrorLine(resources.getString("command.badArguments", this.name, commandData.original.toString()));
-                    return Q.reject(new Error("command.badArguments"));
+                    logger.Logger.logErrorLine(resources.getString("CommandBadArguments", this.name, commandData.original.toString()));
+                    return Q.reject(new Error("CommandBadArguments"));
                 }
             }
 

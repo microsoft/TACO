@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
@@ -12,6 +20,8 @@ import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import packageLoader = tacoUtility.TacoPackageLoader;
@@ -24,11 +34,11 @@ class CordovaWrapper {
         var deferred = Q.defer();
         var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
         proc.on("error", function (err: Error): void {
-            deferred.reject(err);
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" ")));
         });
         proc.on("close", function (code: number): void {
             if (code) {
-                deferred.reject(new Error(resources.getString("CordovaCommandFailed", code, args.join(" "))));
+                deferred.reject(errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" ")));
             } else {
                 deferred.resolve({});
             }
@@ -40,25 +50,25 @@ class CordovaWrapper {
         return CordovaWrapper.cli(["build", platform]);
     }
 
+    public static run(platform: string): Q.Promise<any> {
+        return CordovaWrapper.cli(["run", platform]);
+    }
+
     /**
      * Wrapper for 'cordova create' command.
      *
-     * @param {string} The ID of the kit to use
-     * @param {string} The path of the project to create
-     * @param {string} The id of the app
-     * @param {string} The name of app
-     * @param {string} A JSON string whose key/value pairs will be added to the cordova config file in <project path>/.cordova/
-     * @param {[option: string]: any} Bag of option flags for the 'cordova create' command
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaCreateParameters} The cordova create options
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(cordovaCli: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
-        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, cordovaCli)
+    public static create(cordovaCliVersion: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, cordovaCliVersion)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
                 cordovaHelper.prepareCordovaConfig(cordovaParameters);
 
-            return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
-        });
+                return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
+            });
     }
 }
 

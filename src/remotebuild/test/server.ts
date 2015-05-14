@@ -169,7 +169,7 @@ describe("server", function (): void {
     it("should load server modules and serve requests from there", function (mocha: MochaDone): void {
         var modPath = path.join("..", "test", "testServerModuleFactory"); // path is relative to lib/server.js since that's where the require is invoked
         var testModules: { [key: string]: any } = {};
-        testModules[modPath] = { mountPath: "testRoute" };
+        testModules["testServerModuleFactory"] = { mountPath: "testRoute", requirePath: modPath };
 
         nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
         server.start(new RemoteBuildConf(nconf, true)).then(function (): void {

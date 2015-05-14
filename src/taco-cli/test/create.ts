@@ -26,6 +26,7 @@ import wrench = require ("wrench");
 
 import Create = require ("../cli/create");
 import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 
@@ -66,7 +67,10 @@ describe("taco create", function (): void {
         10: util.format("%s --cli 4.2.0", getProjectPath(successPrefix, 10)),
         11: util.format("%s --unknownParameter", getProjectPath(successPrefix, 11)),
         12: util.format("%s --kit", getProjectPath(successPrefix, 12)),
-        13: util.format("%s --template typescript", getProjectPath(successPrefix, 13))
+        13: util.format("%s --template typescript", getProjectPath(successPrefix, 13)),
+        14: "--list --kit 4.2.0-Kit",
+        15: "--list --kit 2.2.0-Kit",
+        16: "--list"
     };
     var failureScenarios: IScenarioList = {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
@@ -79,7 +83,8 @@ describe("taco create", function (): void {
         8: util.format("%s --kit 5.0.0-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 8)),
         9: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 9)),
         10: util.format("%s 42", getProjectPath(failurePrefix, 10)),
-        11: "--kit 4.0.0-Kit"
+        11: "--kit 4.0.0-Kit",
+        12: "--list --kit unknown"
     };
 
     function getProjectPath(suitePrefix: string, scenario: number): string {
@@ -100,24 +105,27 @@ describe("taco create", function (): void {
 
     function countProjectItemsRecursive(projectPath: string): number {
         if (!fs.existsSync(projectPath)) {
-            throw new Error("Can't count project items; the specified path does not exist");
+            return 0;
         }
 
         var files: string[] = wrench.readdirSyncRecursive(projectPath);
+
         return files.length;
     }
 
     function verifyTacoJsonFileContents(projectPath: string, tacoJsonFileContents: string): void {
         var tacoJsonPath: string = path.resolve(projectPath, "taco.json");
+
         if (!fs.existsSync(tacoJsonPath)) {
             throw new Error("Taco.json file not found");
         }
 
         var fileContents: string = fs.readFileSync(tacoJsonPath).toString();
+
         fileContents.should.be.exactly(tacoJsonFileContents);
     }
 
-    function runScenario(scenario: number, expectedFileCount: number, tacoJsonFileContents: string): Q.Promise<any> {
+    function runScenario(scenario: number, expectedFileCount: number, tacoJsonFileContents?: string): Q.Promise<any> {
         var create = new Create();
 
         return create.run(makeICommandData(scenario, successScenarios)).then(function (): void {
@@ -125,22 +133,30 @@ describe("taco create", function (): void {
             var fileCount: number = countProjectItemsRecursive(projectPath);
 
             fileCount.should.be.exactly(expectedFileCount);
-            verifyTacoJsonFileContents(projectPath, tacoJsonFileContents);
+
+            if (tacoJsonFileContents) {
+                verifyTacoJsonFileContents(projectPath, tacoJsonFileContents);
+            }
         });
     }
 
     function runFailureScenario(scenario: number, expectedError?: string): Q.Promise<any> {
         var create = new Create();
 
-        return create.run(makeICommandData(scenario, failureScenarios)).then(function (): Q.Promise<any> {
-            throw new Error("Scenario succeeded when it shouldn't have");
-        }, function (err: string): Q.Promise<any> {
-            if (expectedError) {
-                err.should.equal(expectedError);
-            }
+        return create.run(makeICommandData(scenario, failureScenarios))
+            .then(function (): Q.Promise<any> {
+                throw new Error("Scenario succeeded when it should have failed");
+            }, function (err: any): Q.Promise<any> {
+                    if (expectedError) {
+                        if (err instanceof tacoUtils.TacoError) {
+                            (<tacoUtils.TacoError>err).message.should.equal(expectedError);
+                        } else {
+                            err.should.equal(expectedError);
+                        }
+                    }
 
-            return Q.resolve(null);
-        });
+                return Q.resolve(null);
+            });
     }
 
     before(function (done: MochaDone): void {
@@ -166,14 +182,7 @@ describe("taco create", function (): void {
 
     after(function (done: MochaDone): void {
         this.timeout(50000);
-
-        rimraf(runFolder, function (err: Error): void {
-            if (err) {
-                done(err);
-            } else {
-                done();
-            }
-        });
+        rimraf(runFolder, done);
     });
 
     describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
@@ -307,6 +316,36 @@ describe("taco create", function (): void {
             // Total entries: 115
             runScenario(scenario, 115, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
+
+        it("Success scenario 14 [list, kit (that doesn't have a template override in the metadata)]", function (done: MochaDone): void {
+            var scenario: number = 14;
+
+            // Template: none
+            // Kit: none
+            // taco-cli: none
+            // Total entries: 0 (we are only listing templates, no project should be created)
+            runScenario(scenario, 0).then(done, done);
+        });
+
+        it("Success scenario 15 [list, kit (that has a template override in the metadata)]", function (done: MochaDone): void {
+            var scenario: number = 15;
+
+            // Template: none
+            // Kit: none
+            // taco-cli: none
+            // Total entries: 0 (we are only listing templates, no project should be created)
+            runScenario(scenario, 0).then(done, done);
+        });
+
+        it("Success scenario 16 [list]", function (done: MochaDone): void {
+            var scenario: number = 16;
+
+            // Template: none
+            // Kit: none
+            // taco-cli: none
+            // Total entries: 0 (we are only listing templates, no project should be created)
+            runScenario(scenario, 0).then(done, done);
+        });
     });
 
     describe("Failure scenarios", function (): void {
@@ -316,42 +355,42 @@ describe("taco create", function (): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
-            runFailureScenario(scenario, "taco-kits.exception.InvalidKit").then(done, done);
+            runFailureScenario(scenario, "TacoKitsExceptionInvalidKit").then(done, done);
         });
 
         it("Failure scenario 2 [path, template (unknown value)]", function (done: MochaDone): void {
             // If a template is not found, create command should fail with an appropriate message
             var scenario: number = 2;
 
-            runFailureScenario(scenario, "taco-kits.exception.InvalidTemplate").then(done, done);
+            runFailureScenario(scenario, "TacoKitsExceptionInvalidTemplate").then(done, done);
         });
 
         it("Failure scenario 3 [path, template (typescript, with a deprecated kit that doesn't have a typescript template)]", function (done: MochaDone): void {
             // Similar to failure scenario 2 (create command should fail when a template is not found), but for typescript templates we have a specific message
             var scenario: number = 3;
 
-            runFailureScenario(scenario, "taco-kits.exception.TypescriptNotSupported").then(done, done);
+            runFailureScenario(scenario, "TacoKitsExceptionTypescriptNotSupported").then(done, done);
         });
 
         it("Failure scenario 4 [path, kit, template, copy-from]", function (done: MochaDone): void {
             // Create command should fail when both --template and --copy-from are specified
             var scenario: number = 4;
 
-            runFailureScenario(scenario, "command.create.notTemplateIfCustomWww").then(done, done);
+            runFailureScenario(scenario, "CommandCreateNotTemplateIfCustomWww").then(done, done);
         });
 
         it("Failure scenario 5 [path, kit, cli]", function (done: MochaDone): void {
             // Create command should fail when both --kit and --cli are specified
             var scenario: number = 5;
 
-            runFailureScenario(scenario, "command.create.notBothCliAndKit").then(done, done);
+            runFailureScenario(scenario, "CommandCreateNotBothCliAndKit").then(done, done);
         });
 
         it("Failure scenario 6 [path, cli, template]", function (done: MochaDone): void {
             // Create command should fail when both --cli and --template are specified
             var scenario: number = 6;
 
-            runFailureScenario(scenario, "command.create.notBothTemplateAndCli").then(done, done);
+            runFailureScenario(scenario, "CommandCreateNotBothTemplateAndCli").then(done, done);
         });
 
         it("Failure scenario 7 [path (value is an existing project)]", function (done: MochaDone): void {
@@ -378,7 +417,7 @@ describe("taco create", function (): void {
             // Create command should fail when specified cli version doesn't exist
             var scenario: number = 9;
 
-            runFailureScenario(scenario, "packageLoader.invalidPackageVersionSpecifier").then(done, done);
+            runFailureScenario(scenario, "PackageLoaderInvalidPackageVersionSpecifier").then(done, done);
         });
 
         it("Failure scenario 10 [path, appId (invalid value)]", function (done: MochaDone): void {
@@ -393,6 +432,13 @@ describe("taco create", function (): void {
             var scenario: number = 11;
 
             runFailureScenario(scenario).then(done, done);
+        });
+
+        it("Failure scenario 12 [path, list, kit (unknown value)]", function (done: MochaDone): void {
+            // Create command should fail when an invalid kit is given as an option with the --list flag
+            var scenario: number = 12;
+
+            runFailureScenario(scenario, "TacoKitsExceptionInvalidKit").then(done, done);
         });
     });
 });

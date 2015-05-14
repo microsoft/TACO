@@ -1,3 +1,11 @@
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
@@ -15,6 +23,8 @@ import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/project-helper");
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
 
@@ -42,13 +52,13 @@ class Create implements commands.IDocumentedCommand {
         kit: String,
         template: String,
         cli: String,
+        list: Boolean,
         "copy-from": String,
         "link-to": String
     };
     private static ShortHands: Nopt.ShortFlags = {
         src: "--copy-from"
     };
-    private static TacoOnlyOptions: string[] = ["cli", "kit", "template"];
     private static DefaultAppId: string = "io.cordova.hellocordova";
     private static DefaultAppName: string = "HelloTaco";
 
@@ -61,25 +71,30 @@ class Create implements commands.IDocumentedCommand {
             this.parseArguments(data);
             this.verifyArguments();
         } catch (err) {
-            return Q.reject(err.message);
+            return Q.reject(err);
         }
 
-        var self = this;
-        var templateDisplayName: string;
+        if (this.commandParameters.data.options["list"]) {
+            return this.listTemplates();
+        } else {
+            var self = this;
+            var templateDisplayName: string;
 
-        return this.createProject()
-            .then(function (templateUsed: string): Q.Promise<any> {
-            templateDisplayName = templateUsed;
+            return this.createProject()
+                .then(function (templateUsed: string): Q.Promise<any> {
+                    templateDisplayName = templateUsed;
 
-                var kitProject = self.isKitProject();
-                var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
+                    var kitProject = self.isKitProject();
+                    var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
-            }).then(function (): Q.Promise<any> {
-                self.finalize(templateDisplayName);
+                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                })
+                .then(function (): Q.Promise<any> {
+                    self.finalize(templateDisplayName);
 
-                return Q.resolve({});
-            });
+                    return Q.resolve({});
+                });
+        }
     }
 
     /**
@@ -116,22 +131,38 @@ class Create implements commands.IDocumentedCommand {
     private verifyArguments(): void {
         // Parameter exclusivity validation and other verifications
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
-            logger.logErrorLine(resources.getString("command.create.notTemplateIfCustomWww"));
-
-            throw new Error("command.create.notTemplateIfCustomWww");
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["kit"]) {
-            logger.logErrorLine(resources.getString("command.create.notBothCliAndKit"));
-
-            throw new Error("command.create.notBothCliAndKit");
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothCliAndKit);
         }
 
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
-            logger.logErrorLine(resources.getString("command.create.notBothTemplateAndCli"));
-
-            throw new Error("command.create.notBothTemplateAndCli");
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
+    }
+
+    /**
+     * List available templates for the specified kit, or for the default kit if no kit is specified
+     */
+    private listTemplates(): Q.Promise<any> {
+        var kit = this.commandParameters.data.options["kit"];
+        var templates: templateManager = new templateManager(kitHelper);
+
+        return templates.getTemplatesForKit(kit)
+            .then(function (list: templateManager.ITemplateList): void {
+            var kitToPrint: string = kit || list.kitId;
+
+            logger.logLine(resources.getString("CommandCreateListBase", kitToPrint));
+            logger.log("\n");
+
+            for (var i: number = 0; i < list.templates.length; i++) {
+                logger.log(list.templates[i].id, level.NormalBold);
+                logger.log(": " + list.templates[i].name);
+                logger.log("\n");
+            }
+        });
     }
 
     /**
@@ -171,13 +202,15 @@ class Create implements commands.IDocumentedCommand {
                 if (kitInfo && kitHelper.isKitDeprecated(kitInfo)) {
                     // Warn the user
                     logger.log("\n");
-                    logger.logLine(resources.getString("command.create.warning.deprecatedKit", kitId), logger.Level.Warn);
+                    logger.logLine(resources.getString("CommandCreateWarningDeprecatedKit", kitId), logger.Level.Warn);
                     logger.log("\n");
-                    logger.logLine(resources.getString("command.create.warning.deprecatedKitSuggestion"), logger.Level.Warn);
+                    logger.logLine(resources.getString("CommandCreateWarningDeprecatedKitSuggestion"), logger.Level.Warn);
                 }
 
                 if (mustUseTemplate) {
-                    return templateManager.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
+                    var templates: templateManager = new templateManager(kitHelper);
+
+                    return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
                         .then(function (templateDisplayName: string): Q.Promise<string> {
                             return Q.resolve(templateDisplayName);
                         });
@@ -194,20 +227,20 @@ class Create implements commands.IDocumentedCommand {
     private printStatusMessage(): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
-        logger.log(resources.getString("command.create.status.projectName"), logger.Level.Normal);
+        logger.log(resources.getString("CommandCreateStatusProjectName"), logger.Level.Normal);
         logger.log(this.commandParameters.cordovaParameters.appName, logger.Level.NormalBold);
-        logger.log(resources.getString("command.create.status.projectId"), logger.Level.Normal);
+        logger.log(resources.getString("CommandCreateStatusProjectId"), logger.Level.Normal);
         logger.log(this.commandParameters.cordovaParameters.appId, logger.Level.NormalBold);
 
         if (this.commandParameters.cordovaParameters.projectPath) {
-            logger.log(resources.getString("command.create.status.projectPath"), logger.Level.Normal);
+            logger.log(resources.getString("CommandCreateStatusProjectPath"), logger.Level.Normal);
             logger.log(this.commandParameters.cordovaParameters.projectPath, logger.Level.NormalBold);
         }
         
         if (!this.isKitProject()) {
-            logger.log(resources.getString("command.create.status.cordovaCliUsed"), logger.Level.Normal);
+            logger.log(resources.getString("CommandCreateStatusCordovaCliUsed"), logger.Level.Normal);
             logger.log(this.commandParameters.data.options["cli"], logger.Level.NormalBold);
-            logger.log(resources.getString("command.create.status.noKitUsed"), logger.Level.Normal);
+            logger.log(resources.getString("CommandCreateStatusNoKitUsed"), logger.Level.Normal);
             logger.logLine("...", logger.Level.Normal);
             logger.log("\n");
         } else {
@@ -221,7 +254,7 @@ class Create implements commands.IDocumentedCommand {
                         kitId = defaultKitId;
                     }
 
-                    logger.log(resources.getString("command.create.status.kitIdUsed"), logger.Level.Normal);
+                    logger.log(resources.getString("CommandCreateStatusKitIdUsed"), logger.Level.Normal);
                     logger.log(kitId, logger.Level.NormalBold);
                     logger.logLine("...", logger.Level.Normal);
                     logger.log("\n");
@@ -239,22 +272,22 @@ class Create implements commands.IDocumentedCommand {
     private finalize(templateDisplayName: string): void {
         // Report success over multiple loggings for different styles
         logger.log("\n", logger.Level.Normal);
-        logger.log(resources.getString("command.success.base"), logger.Level.Success);
+        logger.log(resources.getString("CommandSuccessBase"), logger.Level.Success);
 
         if (this.isKitProject()) {
             if (templateDisplayName) {
-                logger.log(" " + resources.getString("command.create.success.projectTemplate", templateDisplayName), logger.Level.Normal);
+                logger.log(" " + resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName), logger.Level.Normal);
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] ? this.commandParameters.data.options["copy-from"] : this.commandParameters.data.options["link-to"];
 
-                logger.log(" " + resources.getString("command.create.success.projectCustomWww", customWwwPath), logger.Level.Normal);
+                logger.log(" " + resources.getString("CommandCreateSuccessProjectCustomWww", customWwwPath), logger.Level.Normal);
             }
         } else {
-            logger.log(" " + resources.getString("command.create.success.projectCLI", customWwwPath), logger.Level.Normal);
+            logger.log(" " + resources.getString("CommandCreateSuccessProjectCLI", customWwwPath), logger.Level.Normal);
         }
 
-        logger.logLine(" " + resources.getString("command.create.success.path", this.commandParameters.cordovaParameters.projectPath), logger.Level.NormalBold);
+        logger.logLine(" " + resources.getString("CommandCreateSuccessPath", this.commandParameters.cordovaParameters.projectPath), logger.Level.NormalBold);
     }
 }
 

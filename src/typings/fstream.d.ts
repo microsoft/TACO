@@ -1,4 +1,12 @@
-﻿// Barebones typing for fstream, added as-needed
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+// Barebones typing for fstream, added as-needed
 
 declare module "fstream" {
     export class ReaderProps {

@@ -1,13 +1,35 @@
-﻿
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/request.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../typings/fstream.d.ts" />
+
 import fs = require ("fs");
 import fstream = require ("fstream");
 import https = require ("https");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
+import rimraf = require ("rimraf");
 import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
+
+import tacoUtils = require ("taco-utils");
+import resources = require ("../resources/resourceManager");
+
+import BuildInfo = tacoUtils.BuildInfo;
+import TacoPackageLoader = tacoUtils.TacoPackageLoader;
+import utils = tacoUtils.UtilHelper;
 
 class SelfTest {
     /**
@@ -22,79 +44,90 @@ class SelfTest {
      * @return a promise which is resolved if the build succeeded, or rejected if the build failed.
      */
     public static test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
-        var cordovaApp = path.resolve(__dirname, "..", "examples", "cordovaApp", "helloCordova");
-        var tping = 5000;
-        var maxPings = 10;
         var vcordova = "4.3.0";
-        var vcli = require("../package.json").version;
-        var cfg = "debug";
-        var buildOptions = deviceBuild ? "--device" : "--emulator";
+        var tempFolder = path.join(os.tmpdir(), "taco-remote", "selftest");
+        rimraf.sync(tempFolder);
+        utils.createDirectoryIfNecessary(tempFolder);
+        var cordovaApp = path.join(tempFolder, "helloCordova");
 
-        var tgzProducingStream: NodeJS.ReadableStream = null;
-        var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
-        tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
+        return TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", vcordova).then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            return cordova.raw.create(cordovaApp);
+        }, function (err: Error): any {
+            console.error(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));
+            throw err;
+        }).then(function (): Q.Promise<any> {
+            var tping = 5000;
+            var maxPings = 10;
+            var vcli = require("../package.json").version;
+            var cfg = "debug";
+            var buildOptions = deviceBuild ? "--device" : "--emulator";
 
-        var deferred = Q.defer();
+            var tgzProducingStream: NodeJS.ReadableStream = null;
+            var cordovaAppDirReader = new fstream.Reader({ path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
+            tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
-        var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
-        tgzProducingStream.pipe(request.post({ url: buildUrl, agent: agent }, function (error: any, response: any, body: any): void {
-            if (error) {
-                deferred.reject(error);
-                return;
-            }
+            var deferred = Q.defer();
 
-            var buildingUrl = response.headers["content-location"];
-            if (!buildingUrl) {
-                deferred.reject(new Error(body));
-                return;
-            }
+            var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
+            tgzProducingStream.pipe(request.post({ url: buildUrl, agent: agent }, function (error: any, response: any, body: any): void {
+                if (error) {
+                    deferred.reject(error);
+                    return;
+                }
 
-            var i = 0;
-            var ping = setInterval(function (): void {
-                i++;
-                console.log(util.format("%d...", i));
-                request.get({ url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
-                    if (error) {
-                        clearInterval(ping);
-                        deferred.reject(error);
-                    }
+                var buildingUrl = response.headers["content-location"];
+                if (!buildingUrl) {
+                    deferred.reject(new Error(body));
+                    return;
+                }
 
-                    var build = JSON.parse(body);
-                    if (build["status"] === "error" || build["status"] === "downloaded" || build["status"] === "deleted" || build["status"] === "invalid") {
-                        clearInterval(ping);
-                        deferred.reject(new Error("Build Failed: " + body));
-                    } else if (build["status"] === "complete") {
-                        clearInterval(ping);
-
-                        if (deviceBuild) {
-                            var downloadUrl = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
-                            var buildNumber = build["buildNumber"];
-                            var downloadFile = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
-                            var writeStream = fs.createWriteStream(downloadFile);
-                            writeStream.on("error", function (err: Error): void {
-                                deferred.reject(err);
-                            });
-                            request({ url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
-                                deferred.resolve({});
-                            }).on("error", function (err: Error): void {
-                                deferred.reject(err);
-                            });
-                        } else {
-                            deferred.resolve({});
+                var i = 0;
+                var ping = setInterval(function (): void {
+                    i++;
+                    console.log(util.format("%d...", i));
+                    request.get({ url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
+                        if (error) {
+                            clearInterval(ping);
+                            deferred.reject(error);
                         }
-                    } else if (i > maxPings) {
-                        deferred.reject(new Error("Exceeded max # of pings: " + maxPings));
-                        clearInterval(ping);
-                    }
-                });
-            }, tping);
-        }));
 
-        tgzProducingStream.on("error", function (err: Error): void {
-            deferred.reject(err);
+                        var build = JSON.parse(body);
+                        if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
+                            clearInterval(ping);
+                            deferred.reject(new Error("Build Failed: " + body));
+                        } else if (build["status"] === BuildInfo.COMPLETE) {
+                            clearInterval(ping);
+
+                            if (deviceBuild) {
+                                var downloadUrl = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
+                                var buildNumber = build["buildNumber"];
+                                var downloadFile = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
+                                var writeStream = fs.createWriteStream(downloadFile);
+                                writeStream.on("error", function (err: Error): void {
+                                    deferred.reject(err);
+                                });
+                                request({ url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
+                                    deferred.resolve({});
+                                }).on("error", function (err: Error): void {
+                                    deferred.reject(err);
+                                });
+                            } else {
+                                deferred.resolve({});
+                            }
+                        } else if (i > maxPings) {
+                            deferred.reject(new Error(resources.getString("ExceededMaxPings", maxPings)));
+                            clearInterval(ping);
+                        }
+                    });
+                }, tping);
+            }));
+
+            tgzProducingStream.on("error", function (err: Error): void {
+                deferred.reject(err);
+            });
+
+            return deferred.promise;
         });
-
-        return deferred.promise;
     }
 
     // Archive up what is needed for an ios build and put current process user id on entries

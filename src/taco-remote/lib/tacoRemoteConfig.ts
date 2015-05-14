@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/remotebuild.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/remotebuild.d.ts" />
 "use strict";
 
 import HostSpecifics = require ("./hostSpecifics");
@@ -50,22 +58,71 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
         });
     }
 
+    /**
+     * @name allowsEmulate
+     * @LOCTAG TacoRemoteConfigAllowsEmulate
+     */
     public get allowsEmulate(): boolean {
         return UtilHelper.argToBool(this.tacoRemoteConf.allowsEmulate);
     }
 
+    /**
+     * @name deleteBuildsOnShutdown
+     * @LOCTAG TacoRemoteConfigDeleteBuildsOnShutdown
+     */
     public get deleteBuildsOnShutdown(): boolean {
         return UtilHelper.argToBool(this.tacoRemoteConf.deleteBuildsOnShutdown);
     }
 
+    /**
+     * @name maxBuildsInQueue
+     * @LOCTAG TacoRemoteConfigMaxBuildsInQueue
+     */
     public get maxBuildsInQueue(): number {
         return this.tacoRemoteConf.maxBuildsInQueue;
     }
 
+    /**
+     * @name maxBuildsToKeep
+     * @LOCTAG TacoRemoteConfigMaxBuildsToKeep
+     */
     public get maxBuildsToKeep(): number {
         return this.tacoRemoteConf.maxBuildsToKeep;
     }
 
+    /**
+     * @name nativeDebugProxyPort
+     * @LOCTAG TacoRemoteConfigNativeDebugProxyPort
+     */
+    public get nativeDebugProxyPort(): number {
+        return this.tacoRemoteConf.nativeDebugProxyPort;
+    }
+
+    /**
+     * @name webDebugProxyDevicePort
+     * @LOCTAG TacoRemoteConfigWebDebugProxyDevicePort
+     */
+    public get webDebugProxyDevicePort(): number {
+        return this.tacoRemoteConf.webDebugProxyDevicePort;
+    }
+
+    /**
+     * @name webDebugProxyPortMin
+     * @LOCTAG TacoRemoteConfigWebDebugProxyPortMin
+     */
+    public get webDebugProxyPortMin(): number {
+        return this.tacoRemoteConf.webDebugProxyPortMin;
+    }
+
+    /**
+     * @name webDebugProxyPortMax
+     * @LOCTAG TacoRemoteConfigWebDebugProxyPortMax
+     */
+    public get webDebugProxyPortMax(): number {
+        return this.tacoRemoteConf.webDebugProxyPortMax;
+    }
+
+    // These three properties are inherited from the parent configuration; no need for separate documentation
     public get serverDir(): string {
         return this.tacoRemoteConf.serverDir;
     }

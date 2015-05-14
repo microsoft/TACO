@@ -1,4 +1,12 @@
-﻿/// <reference path="../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../typings/node.d.ts" />
 
 import assert = require ("assert");
 import fs = require ("fs");
@@ -50,23 +58,27 @@ module TacoUtility {
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
-            if (process.env["TACO_UNIT_TEST"]) {
-                // Mock out resources for unit tests
-                return id;
-            }
-
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            return this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
+            var result = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
+
+            if (result && process.env["TACO_UNIT_TEST"]) {
+                // Mock out resources for consistency in unit tests, but only if they exist
+                return id;
+            } else {
+                return result;
+            }
         }
 
         public getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
-            if (process.env["TACO_UNIT_TEST"]) {
-                // Mock out resources for unit tests
-                return id;
-            }
-
             var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
-            return this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
+            var result = this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
+
+            if (result && process.env["TACO_UNIT_TEST"]) {
+                // Mock out resources for consistency in unit tests, but only if they exist
+                return id;
+            } else {
+                return result;
+            }
         }
 
         public getStringForLocale(locale: string, id: string, ...optionalArgs: any[]): string {
