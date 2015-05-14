@@ -20,8 +20,8 @@ import level = logger.Level;
 class Help implements commands.IDocumentedCommand { 
     private indentWidth: number = 3; // indent string
     private indent: string;
-    private charsToDescription: number = 35;  // number of characters from start of line to description text
-    private maxRight = 85;  // maximum characters we're allowing in each line
+    private charsToDescription: number = 25;  // number of characters from start of line to description text
+    private maxRight = 70;  // maximum characters we're allowing in each line
     private tacoString = "taco";
 
     public info: commands.ICommandInfo;
