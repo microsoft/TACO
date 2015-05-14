@@ -26,6 +26,7 @@ import wrench = require ("wrench");
 
 import Create = require ("../cli/create");
 import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 
@@ -145,10 +146,10 @@ describe("taco create", function (): void {
         return create.run(makeICommandData(scenario, failureScenarios))
             .then(function (): Q.Promise<any> {
                 throw new Error("Scenario succeeded when it should have failed");
-            }, function (err: string): Q.Promise<any> {
-                if (expectedError) {
-                    err.should.equal(expectedError);
-                }
+            }, function (err: tacoUtils.TacoError): Q.Promise<any> {
+                    if (expectedError) {
+                        err.message.should.equal(expectedError);
+                    }
 
                 return Q.resolve(null);
             });

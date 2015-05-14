@@ -289,6 +289,7 @@
     "RemoteBuildUnsuccessful": "Remote build failed",
     "_RemoteBuildUnsuccessful.comment": "Message printed when a remote build fails",
     "InvalidBuildSubmission400": "{0}:{1}",
+    "_InvalidBuildSubmission400.comment": "Invalid build submission: ',' seperated errors reported by remote build server",
 
     "CordovaCommandFailed": "'cordova {1}' failed with exit code {0}",
     "_CordovaCommandFailed.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",

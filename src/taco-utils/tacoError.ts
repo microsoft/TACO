@@ -5,20 +5,21 @@ var os = require("os");
 import util = require ("util");
 
 import resourceManager = require ("./resourceManager");
-import resources = require ("./resources/resourceManager");
+import utilResources = require ("./resources/resourceManager");
 import utilHelper = require ("./utilHelper");
 
 import ResourceManager = resourceManager.ResourceManager;
 import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
-    export class TacoError implements Error { 
-        private errorCode: number;
+    export class TacoError implements Error {
+        private static ErrorCodeFixedWidth: string = "0000";
+
         private innerError: Error;
 
-        private static errorCodeFixedWidth: string = "0000";
         public static DefaultErrorPrefix: string = "TACO";
 
+        public errorCode: number;
         public message: string;
         public name: string; 
 
@@ -38,7 +39,7 @@ module TacoUtility {
         public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
             var args: string[] = [];
             if (optionalArgs.length > 0) {
-                args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
+                args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 3);
             }
 
             return TacoError.wrapError(null, errorToken, errorCode, resources, args);
@@ -52,6 +53,8 @@ module TacoUtility {
                 if (errorToken) {
                     message = resources.getString(errorToken, args);
                 }
+            } else {
+                message = errorToken;
             }
 
             return new TacoError(errorCode, message, innerError);
@@ -62,13 +65,14 @@ module TacoUtility {
             if (this.innerError) {
                 var stack: string = (<any>this.innerError).stack;
                 if (stack) {
-                    innerErrorString = resources.getString("InnerErrorToString", stack);
+                    innerErrorString = utilResources.getString("InnerErrorToString", stack);
                 } else if (this.innerError.message) {
-                    innerErrorString = resources.getString("InnerErrorToString", this.innerError.message);
+                    innerErrorString = utilResources.getString("InnerErrorToString", this.innerError.message);
                 }
             }
+
             // Transforms 32 to say "0032" (for fixed width = 4)
-            var errorCodeString: string = (TacoError.errorCodeFixedWidth + this.errorCode).slice(-TacoError.errorCodeFixedWidth.length);
+            var errorCodeString: string = (TacoError.ErrorCodeFixedWidth + this.errorCode).slice(-TacoError.ErrorCodeFixedWidth.length);
             return util.format("%s%s: %s\n%s", TacoError.DefaultErrorPrefix, errorCodeString, this.message, innerErrorString);
         }
     }

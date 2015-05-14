@@ -93,11 +93,11 @@ class RemoteBuildClientHelper {
                     // build log from the remote machine before propagating the reported failure
                     return RemoteBuildClientHelper.logBuildOutput(err.buildInfo, settings)
                         .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                            throw errorHelper.wrap(TacoErrorCodes.RemoteBuildSuccessful, err);
+                            throw errorHelper.wrap(TacoErrorCodes.RemoteBuildUnsuccessful, err);
                     });
                 }
 
-                throw errorHelper.wrap(TacoErrorCodes.RemoteBuildSuccessful, err);
+                throw errorHelper.wrap(TacoErrorCodes.RemoteBuildUnsuccessful, err);
             })
             .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
             return RemoteBuildClientHelper.downloadRemotePluginFile(buildInfo, settings, path.join(settings.projectSourceDir, "plugins"));

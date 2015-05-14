@@ -41,7 +41,7 @@ class Settings {
     /*
      * Load data from TACO_HOME/TacoSettings.json
      */
-    public static loadSettings(suppressFailure?: boolean): Q.Promise<Settings.ISettings> {
+    public static loadSettings(): Q.Promise<Settings.ISettings> {
         if (Settings.Settings) {
             return Q(Settings.Settings);
         }
@@ -74,7 +74,7 @@ class Settings {
      *                 - If a platform exists in /platforms and does not have a remote configuration, then perform a local build
      */
     public static determinePlatform(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Settings.loadSettings(true)
+        return Settings.loadSettings()
         .fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
         .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
             if (options.remain.length > 0) {

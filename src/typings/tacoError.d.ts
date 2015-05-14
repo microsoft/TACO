@@ -1,6 +1,8 @@
 
 declare module TacoUtility {
-    class TacoError implements Error { public message: string;
+    class TacoError implements Error {
+        public errorCode: number;
+        public message: string;
         public name: string;
 
         constructor(errorCode: number, message: string, category?: string, innerError?: Error);

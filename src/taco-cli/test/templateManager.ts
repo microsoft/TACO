@@ -28,6 +28,7 @@ import wrench = require ("wrench");
 import zlib = require ("zlib");
 
 import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 import templateManager = require ("../cli/utils/templateManager");
@@ -226,7 +227,7 @@ describe("TemplateManager", function (): void {
                     // The promise was resolved, this is an error
                     done(new Error("The operation completed successfully when it should have returned an error"));
                 }, function (error: TacoUtility.TacoError): void {
-                    error.message.should.equal("CommandCreateTemplatesUnavailable");
+                    error.errorCode.should.equal(TacoErrorCodes.CommandCreateTemplatesUnavailable);
                     done();
                 })
                 .catch(function (err: string): void {

@@ -189,7 +189,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     private static saveRemotePlatformSettings(platform: string, data: Settings.IRemoteConnectionInfo): Q.Promise<any> {
-        return Settings.loadSettings(true).catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {
