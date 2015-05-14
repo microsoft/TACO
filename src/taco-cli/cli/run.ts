@@ -142,7 +142,6 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             });
 
             // Find the build that we are supposed to run
-            
             if (commandData.options["nobuild"]) {
                 buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): BuildInfo {
                     if (!buildInfo) {
@@ -165,7 +164,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
                 }).then(function (buildInfo: BuildInfo): BuildInfo {
-                    logger.log(resources.getString("CommandSuccessBase") + " " , logger.Level.Success);
+                    logger.log(resources.getString("CommandSuccessBase") + " ", logger.Level.Success);
                     logger.logLine(resources.getString("CommandRunRemoteDeviceSuccess"));
                     return buildInfo;
                 });
@@ -173,10 +172,10 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
                 }).then(function (buildInfo: BuildInfo): BuildInfo {
-                    logger.log(resources.getString("CommandSuccessBase") + " " , logger.Level.Success);
+                    logger.log(resources.getString("CommandSuccessBase") + " ", logger.Level.Success);
                     logger.logLine(resources.getString("CommandRunRemoteEmulatorSuccess"));
                     return buildInfo;
-                });;
+                });
             }
 
             return runPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
