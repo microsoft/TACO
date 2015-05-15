@@ -7,20 +7,22 @@
 
 import Q = require ("q");
 
-import installerBase = require ("../installerBase");
+import InstallerBase = require ("./installerBase");
 
-export class AndroidSdkInstaller extends installerBase.InstallerBase {
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string) {
-        super(installerInfo, softwareVersion);
+class AndroidSdkInstaller extends InstallerBase {
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string) {
+        super(installerInfo, softwareVersion, installTo);
     }
 
-    protected downloadInstaller(): Q.Promise<any> {
+    protected downloadWin32(): Q.Promise<any> {
         return Q.resolve({});
     }
 
-    protected install(): Q.Promise<any> {
+    protected installWin32(): Q.Promise<any> {
         return Q.resolve({});
     }
 }
+
+export = AndroidSdkInstaller;
 
 /// <enable code="SA1400" />

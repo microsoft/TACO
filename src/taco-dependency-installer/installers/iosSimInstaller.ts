@@ -5,22 +5,28 @@
 
 "use strict";
 
+import os = require ("os");
 import Q = require ("q");
 
-import installerBase = require ("../installerBase");
+import InstallerBase = require ("./installerBase");
+import resources = require ("../resources/resourceManager");
 
-export class IosSimInstaller extends installerBase.InstallerBase {
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string) {
-        super(installerInfo, softwareVersion);
+class IosSimInstaller extends InstallerBase {
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string) {
+        super(installerInfo, softwareVersion, installTo);
     }
 
-    protected downloadInstaller(): Q.Promise<any> {
-        return Q.resolve({});
+    protected downloadWin32(): Q.Promise<any> {
+        // This dependency is only useful on Mac OS
+        return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
     }
 
-    protected install(): Q.Promise<any> {
-        return Q.resolve({});
+    protected installWin32(): Q.Promise<any> {
+        // This dependency is only useful on Mac OS
+        return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
     }
 }
+
+export = IosSimInstaller;
 
 /// <enable code="SA1400" />

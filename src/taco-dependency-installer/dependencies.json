@@ -5,62 +5,51 @@
         "prerequesites": [
             "javaJdk"
         ],
-        "installers": {
-        }
+        "versions": {}
     },
     "ant": {
         "displayName": "Apache Ant",
         "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
-        "prerequesites": [
-        ],
-        "installers": {
-        }
+        "prerequesites": [],
+        "versions": {}
     },
     "gradle": {
         "displayName": "Gradle",
         "licenseUrl": "https://gradle.org/license/",
-        "prerequesites": [
-        ],
-        "installers": {
-        }
+        "prerequesites": [],
+        "versions": {}
     },
     "iosDeploy": {
         "displayName": "ios-deploy",
         "licenseUrl": "",
-        "prerequesites": [
-        ],
-        "installers": {
-        }
+        "prerequesites": [],
+        "versions": {}
     },
     "iosSim": {
         "displayName": "ios-sim",
         "licenseUrl": "",
-        "prerequesites": [
-        ],
-        "installers": {
-        }
+        "prerequesites": [],
+        "versions": {}
     },
     "javaJdk": {
         "displayName": "Java SE Development Kit",
         "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
-        "prerequesites": [
-        ],
-        "installers": {
+        "prerequesites": [],
+        "versions": {
             "7u55": {
-                "installerSource": {
-                    "win32": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe"
-                },
-                "checksum": "BB244A96E58724415380877230D2F6B466E9E581",
-                "bytes": 129674656
+                "win32": {
+                    "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
+                    "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
+                    "bytes": 129674656,
+                    "installDestination": "%programfiles(x86)%/Java/foo/jdk1.7.0_55"
+                }
             }
         }
     },
     "msBuild": {
         "displayName": "Microsoft Build Tools",
         "licenseUrl": "",
-        "prerequesites": [
-        ],
-        "installers": {
-        }
+        "prerequesites": [],
+        "versions": {}
     }
 }
