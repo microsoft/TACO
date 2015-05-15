@@ -98,7 +98,7 @@ class ConnectionSecurityHelper {
                     console.error(data.toString());
                 });
                 certSaveProcess.on("error", function (err: Error): void {
-                    deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateSave, err));
+                    deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateSaveWithError, err));
                 });
                 certSaveProcess.on("close", function (code: number): void {
                     if (code) {

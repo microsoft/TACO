@@ -424,7 +424,7 @@ class RemoteBuildClientHelper {
                     var buildInfo = JSON.parse(body);
                     deferred.resolve(response.headers["content-location"]);
                 } else {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.FailedUploadingRemoteBuild, body));
+                    deferred.reject(errorHelper.get(TacoErrorCodes.ErrorUploadingRemoteBuild, body));
                 }
             }));
 
@@ -445,8 +445,8 @@ class RemoteBuildClientHelper {
 
         return RemoteBuildClientHelper.httpOptions(buildingUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): Q.Promise<BuildInfo> {
-                if (responseAndBody.response.statusCode !== 200) {
-                    throw errorHelper.get(TacoErrorCodes.RemoteBuildStatusPollFailed, responseAndBody.response.statusCode, responseAndBody.body);
+            if (responseAndBody.response.statusCode !== 200) {
+                throw errorHelper.get(TacoErrorCodes.RemoteBuildStatusPollFailed, responseAndBody.response.statusCode, responseAndBody.body);
             }
 
             var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
