@@ -23,7 +23,6 @@ module TacoUtility {
         public name: string; 
 
         /**
-         * Begin logging stdout and stderr of a process to a log file
          *
          * @param {number} errorCode  error code for the error say 101
          * @param {string} message user friendly localized error message
@@ -33,6 +32,10 @@ module TacoUtility {
             this.message = message;
             this.name = null;
             this.innerError = innerError;
+        }
+
+        public get isTacoError(): boolean {
+            return true;
         }
 
         public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
@@ -57,10 +60,6 @@ module TacoUtility {
             }
 
             return new TacoError(errorCode, message, innerError);
-        }
-
-        public static isTacoError(error: any): boolean {
-            return error && error.toString().substr(0, TacoError.DefaultErrorPrefix.length) === TacoError.DefaultErrorPrefix;
         }
 
         public toString(): string {

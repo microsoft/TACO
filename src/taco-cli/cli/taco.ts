@@ -57,7 +57,7 @@ class Taco {
         // if no command found that can handle these args, route args directly to Cordova
         if (command) {
             command.run(commandData).done(null, function (reason: any): any {
-                if (tacoUtility.TacoError.isTacoError(reason)) {
+                if (reason && reason.isTacoError) {
                     tacoUtility.Logger.logErrorLine((<tacoUtility.TacoError>reason).toString());
                 } else {
                     throw reason;

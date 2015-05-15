@@ -412,6 +412,7 @@ module TacoKits {
 
     /// <disable code="SA1301" justification="We are exporting classes" />
     export var TacoErrorCode = TacoErrorCodes;
+    /// <enable code="SA1301" />
 }
 
 export = TacoKits;

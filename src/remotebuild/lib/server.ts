@@ -182,8 +182,7 @@ class Server {
     }
 
     private static startupServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
-        var isSsl = utils.ArgsHelper.argToBool(conf.get("secure"));
-        return isSsl ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
+        return conf.secure ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
     }
 
     private static startupPlainHttpServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<http.Server> {

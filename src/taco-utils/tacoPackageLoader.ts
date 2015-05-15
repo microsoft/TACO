@@ -19,13 +19,11 @@ import rimraf = require ("rimraf");
 import semver = require ("semver");
 import Q = require ("q");
 
-import loggerUtil = require ("./logger");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import UtilHelper = require ("./utilHelper");
 
-import logger = loggerUtil.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = UtilHelper.UtilHelper;
 
@@ -278,8 +276,9 @@ module TacoUtility {
                             console.log(error);
                         }
 
-                        rimraf.sync(cloneTargetPath);
-                        deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedGitClone, error, gitUrl));
+                        rimraf(cloneTargetPath, function (): void {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedGitClone, error, gitUrl));
+                        });
                     } else {
                         deferred.resolve(true);
                     }
