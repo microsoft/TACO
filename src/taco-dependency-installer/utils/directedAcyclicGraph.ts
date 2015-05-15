@@ -14,12 +14,6 @@ class DirectedAcyclicGraph {
     private adjacencyListStringIds: DirectedAcyclicGraph.IVertexIdentifier[];
     private vertices: DirectedAcyclicGraph.IVertex[];
 
-    private static removeEdgeFromList(vertex: number, list: number[]): void {
-        list = list.filter(function (value: number): boolean {
-            return value !== vertex;
-        });
-    }
-
     /*
      * Constructs a directed acyclic graph using an adjacency list consisting of string ids for the vertices
      *
@@ -34,7 +28,7 @@ class DirectedAcyclicGraph {
      *
      * @return {string[]} The string identifiers that were given to the constructor of this graph, sorted in topological order
      */
-    public topologicalSort(): string[]{
+    public topologicalSort(): string[] {
         var self = this;
 
         this.buildVertexList();
@@ -80,6 +74,12 @@ class DirectedAcyclicGraph {
         return sortedArray;
     }
 
+    private static removeEdgeFromList(vertex: number, list: number[]): void {
+        list = list.filter(function (value: number): boolean {
+            return value !== vertex;
+        });
+    }
+
     private buildVertexList(): void {
         var self = this;
 
@@ -116,7 +116,7 @@ class DirectedAcyclicGraph {
         var vertexIndex: number = -1;
 
         // array.some() breaks as soon as it finds an element matching the condition, which is why it is preferred over forEach
-        this.adjacencyListStringIds.some(function(value: DirectedAcyclicGraph.IVertexIdentifier, index: number): boolean {
+        this.adjacencyListStringIds.some(function (value: DirectedAcyclicGraph.IVertexIdentifier, index: number): boolean {
             if (value.id === id) {
                 vertexIndex = index;
 

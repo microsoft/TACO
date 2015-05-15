@@ -21,6 +21,10 @@ class AntInstaller extends InstallerBase {
     protected installWin32(): Q.Promise<any> {
         return Q.resolve({});
     }
+
+    protected updateVariablesWin32(): Q.Promise<any> {
+        return Q.resolve({});
+    }
 }
 
 export = AntInstaller;

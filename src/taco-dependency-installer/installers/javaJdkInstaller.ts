@@ -11,7 +11,7 @@ import childProcess = require ("child_process");
 import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
-import request = require("request");
+import request = require ("request");
 import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");

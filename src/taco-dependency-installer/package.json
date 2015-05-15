@@ -3,7 +3,7 @@
     "author": {
         "name": "Microsoft Corp."
     },
-    "description": "strictly internal use to enable require in utility folder",
+    "description": "Install platform-specific third-party dependencies for Cordova development",
     "version": "0.0.1",
     "repository": {
         "type": "git",

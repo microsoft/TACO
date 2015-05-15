@@ -292,26 +292,6 @@ module TacoUtility {
                 callback(error, stdout, stderr);
             });
         }
-
-        /**
-         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
-         *
-         * @param {[option: string]: any} Options dictionary to be cleansed
-         * @param {string[]} Options to exclude from the specified options dictionary
-         *
-         * @return {[option: string]: any } A new options dictionary containing the cleansed options
-         */
-        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any } {
-            var cleansed: { [option: string]: any } = {};
-            
-            for (var opt in options) {
-                if (!exclude || exclude.indexOf(opt) < 0) {
-                    cleansed[opt] = options[opt];
-                }
-            }
-
-            return cleansed;
-        }
     }
 }
 

@@ -82,6 +82,15 @@ module TacoDependencyInstaller {
                 return Q.reject("UnsupportedPlatform");
             }
 
+            // We currently only support installing dependencies for Android
+            var targetPlatform: string = data.remain[0];
+
+            if (targetPlatform !== "android") {
+                logger.logErrorLine(resources.getString("UnsupportedTargetPlatform", targetPlatform));
+
+                return Q.reject("UnsupportedTargetPlatform");
+            }
+
             // Parse dependencies.json
             this.parseDependenciesData();
 
@@ -91,8 +100,10 @@ module TacoDependencyInstaller {
             // Extract Cordova results and transform them to an array of dependency ids
             this.parseMissingDependencies(cordovaResults);
 
-            // Verify if we will need administrator privileges and deal with that accordingly
-            // TODO (DevDiv 1173047)
+            /*
+             * Verify if we will need administrator privileges and deal with that accordingly
+             * TODO (DevDiv 1173047)
+             */
 
             // Warn the user for any dependencies for which installation is not supported
             this.displayUnsupportedWarning();
@@ -286,7 +297,7 @@ module TacoDependencyInstaller {
                 var vertexIdentifier: DirectedAcyclicGraph.IVertexIdentifier = {
                     id: value.id,
                     neighbors: self.dependenciesData[value.id].prerequesites
-                }
+                };
 
                 adjacencyList.push(vertexIdentifier);
             });

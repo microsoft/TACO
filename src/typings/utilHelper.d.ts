@@ -105,13 +105,5 @@ declare module TacoUtility {
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
         public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): void;
-        /**
-         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
-         *
-         * @param {[option: string]: any} Options dictionary to be cleansed
-         *
-         * @return {[option: string]: any} A new options dictionary containing the cleansed options
-         */
-        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any };
     }
 }

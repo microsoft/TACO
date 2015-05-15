@@ -30,8 +30,10 @@
     "SettingSystemVariablesLabel": "Updating system environment variables...",
     "_SettingSystemVariablesLabel.comment": "Progress indicator for when a dependency is being installed via npm.",
 
-    "UnsupportedPlatform": "Error: Unsupported platform: {0}",
+    "UnsupportedPlatform": "Error: Your current platform is not supported: {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform.",
+    "UnsupportedTargetPlatform": "Error: Target platform not supported: {0}",
+    "_UnsupportedTargetPlatform.comment": "Message printed when the install-dependencies command is invoked for a target platform we don't support. {0} is the platform.",
     "InstallationErrors": "The installation completed with some errors:",
     "_InstallationErrors.comment": "Message shown after all dependencies have been installed and there were errors.",
     "LicenseAgreementError": "Error: Must type 'yes' to proceed with the installation.",

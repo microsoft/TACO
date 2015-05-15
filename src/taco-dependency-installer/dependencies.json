@@ -41,7 +41,7 @@
                     "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
                     "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
                     "bytes": 129674656,
-                    "installDestination": "%programfiles(x86)%/Java/foo/jdk1.7.0_55"
+                    "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55"
                 }
             }
         }

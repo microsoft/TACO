@@ -74,21 +74,21 @@ class InstallerUtils {
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
         request(requestOptions)
-            .on("error", function (err: Error) {
+            .on("error", function (err: Error): void {
                 deferred.reject(err);
             })
-            .on("response", function (res: fs.ReadStream) {
+            .on("response", function (res: fs.ReadStream): void {
                 var fws = fs.createWriteStream(filePath);
 
                 res.pipe(fws);
-                fws.on("finish", function () {
+                fws.on("finish", function (): void {
                     // Verify if the file is clean
                     if (InstallerUtils.isInstallerFileClean(filePath, expectedSha1, expectedBytes)) {
                         deferred.resolve({});
                     } else {
                         deferred.reject(new Error(resources.getString("FileCorruptError")));
                     }
-                })
+                });
             });
 
         return deferred.promise;

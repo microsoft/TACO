@@ -25,6 +25,11 @@ class IosDeployInstaller extends InstallerBase {
         // This dependency is only useful on Mac OS
         return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
     }
+
+    protected updateVariablesWin32(): Q.Promise<any> {
+        // This dependency is only useful on Mac OS
+        return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
+    }
 }
 
 export = IosDeployInstaller;
