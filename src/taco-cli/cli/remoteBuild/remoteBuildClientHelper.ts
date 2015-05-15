@@ -310,7 +310,7 @@ class RemoteBuildClientHelper {
             deferred.resolve({});
         });
         firstPassReader.on("error", function (err: Error): void {
-            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedPatchCreation, err));
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorPatchCreation, err));
         });
 
         return deferred.promise.then(function (): zlib.Gzip {

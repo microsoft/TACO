@@ -41,7 +41,7 @@ class ConnectionSecurityHelper {
                     output += data.toString();
                 });
                 certLoadProcess.on("error", function (err: Error): void {
-                    bufferDeferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateLoad, err, connectionInfo.certName));
+                    bufferDeferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateLoad, err, connectionInfo.certName));
                 });
                 certLoadProcess.on("close", function (code: number): void {
                     if (code) {
@@ -98,12 +98,12 @@ class ConnectionSecurityHelper {
                     console.error(data.toString());
                 });
                 certSaveProcess.on("error", function (err: Error): void {
-                    deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateSaveWithError, err));
+                    deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSave, err));
                 });
                 certSaveProcess.on("close", function (code: number): void {
                     if (code) {
                         logger.logErrorLine(output);
-                        deferred.reject(errorHelper.get(TacoErrorCodes.FailedCertificateSaveWithErrorCode, code));
+                        deferred.reject(errorHelper.get(TacoErrorCodes.ErrorCertificateSaveWithErrorCode, code));
                     } else {
                         deferred.resolve(output);
                     }
@@ -116,13 +116,13 @@ class ConnectionSecurityHelper {
                 // The folder should only be accessible to the specific user
                 fs.chmod(certPath, "0700", function (err: NodeJS.ErrnoException): void {
                     if (err) {
-                        deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificatePathChmod, err, certPath));
+                        deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificatePathChmod, err, certPath));
                     }
 
                     var certFilePath: string = path.join(certPath, "cert.pfx");
                     fs.writeFile(certFilePath, certificateData, function (err: NodeJS.ErrnoException): void {
                         if (err) {
-                            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedCertificateSave, err, certFilePath));
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSaveToPath, err, certFilePath));
                         }
 
                         deferred.resolve(host);
