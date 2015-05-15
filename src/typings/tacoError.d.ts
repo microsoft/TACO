@@ -9,6 +9,7 @@ declare module TacoUtility {
 
         public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError;
         public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError;
-        toString(): string;
+        public static isTacoError(error: any): boolean;
+        public toString(): string;
     }
 }

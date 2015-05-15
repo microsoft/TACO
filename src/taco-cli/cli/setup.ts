@@ -71,7 +71,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = UtilHelper.parseArguments(Setup.KnownOptions, Setup.ShortHands, args, 0);
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Setup.KnownOptions, Setup.ShortHands, args, 0);
 
         return parsedOptions;
     }

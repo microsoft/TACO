@@ -222,7 +222,7 @@ class BuildManager {
     }
 
     public emulateBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
-        if (!utils.UtilHelper.argToBool(this.serverConf.allowsEmulate)) {
+        if (!utils.ArgsHelper.argToBool(this.serverConf.allowsEmulate)) {
             res.status(403).send(resources.getStringForLanguage(req, "EmulateDisabled"));
             return;
         }

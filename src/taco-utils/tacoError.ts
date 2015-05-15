@@ -4,20 +4,19 @@ import assert = require ("assert");
 var os = require("os");
 import util = require ("util");
 
+import argsHelper = require ("./argsHelper");
 import resourceManager = require ("./resourceManager");
 import utilResources = require ("./resources/resourceManager");
-import utilHelper = require ("./utilHelper");
 
+import ArgsHelper = argsHelper.ArgsHelper;
 import ResourceManager = resourceManager.ResourceManager;
-import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
     export class TacoError implements Error {
+        private static DefaultErrorPrefix: string = "TACO";
         private static ErrorCodeFixedWidth: string = "0000";
 
         private innerError: Error;
-
-        public static DefaultErrorPrefix: string = "TACO";
 
         public errorCode: number;
         public message: string;
@@ -39,7 +38,7 @@ module TacoUtility {
         public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
             var args: string[] = [];
             if (optionalArgs.length > 0) {
-                args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 3);
+                args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 3);
             }
 
             return TacoError.wrapError(null, errorToken, errorCode, resources, args);
@@ -49,7 +48,7 @@ module TacoUtility {
             var message: string = null; 
             if (optionalArgs.length > 0) {
                 assert(errorToken, "We should have an error token if we intend to use args");
-                var args: string[] = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
+                var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
                 if (errorToken) {
                     message = resources.getString(errorToken, args);
                 }
@@ -58,6 +57,10 @@ module TacoUtility {
             }
 
             return new TacoError(errorCode, message, innerError);
+        }
+
+        public static isTacoError(error: any): boolean {
+            return error && error.toString().substr(0, TacoError.DefaultErrorPrefix.length) === TacoError.DefaultErrorPrefix;
         }
 
         public toString(): string {

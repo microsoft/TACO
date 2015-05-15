@@ -108,7 +108,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
      * @LOCTAG RemoteBuildConfSecure
      */
     public get secure(): boolean {
-        return UtilHelper.argToBool(this.remoteBuildConf.secure);
+        return tacoUtils.ArgsHelper.argToBool(this.remoteBuildConf.secure);
     }
 
     /**
