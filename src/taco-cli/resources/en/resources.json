@@ -240,6 +240,9 @@
     "InvalidBuildSubmission400": "{0}:{1}",
     "_InvalidBuildSubmission400.comment": "Invalid build submission: ',' seperated errors reported by remote build server",
 
+    "CleaningRemoteResources": "Cleaning remote {0} {1} build.",
+    "_CleaningRemoteResources.comment": "Message printed when building --clean for a remote target. {0} is the platform, and {1} is release/debug",
+
     "CordovaCommandFailed": "'cordova {1}' failed with exit code {0}",
     "_CordovaCommandFailed.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
 

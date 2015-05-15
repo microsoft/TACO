@@ -138,7 +138,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 configuration: configuration,
                 buildTarget: buildTarget,
                 language: language,
-                cordovaVersion: require("cordova/package.json").version // TODO (Devdiv 1160583): Use Kit specified version
+                cordovaVersion: require("cordova/package.json").version || "5.0.0" // TODO (Devdiv 1160583): Use Kit specified version
             });
 
             // Find the build that we are supposed to run

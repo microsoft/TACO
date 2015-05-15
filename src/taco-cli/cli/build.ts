@@ -10,6 +10,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../typings/rimraf.d.ts" />
 "use strict";
 
 import assert = require ("assert");
@@ -18,6 +19,7 @@ import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
+import rimraf = require ("rimraf");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/cordovaWrapper");
@@ -121,13 +123,13 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
-                    return Build.cleanPlatform(platform);
+                    return Build.cleanPlatform(platform, commandData);
                 });
             }, Q({}));
         });
     }
 
-    private static cleanPlatform(platform: Settings.IPlatformWithLocation): Q.Promise<any> {
+    private static cleanPlatform(platform: Settings.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
         var promise = Q({});
         switch (platform.location) {
         case Settings.BuildLocationType.Local:
@@ -144,8 +146,25 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
             break;
         case Settings.BuildLocationType.Remote:
-            // TODO 1171419: remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
-            // Need to clean out the buildInfo.json at least.
+            if (!(commandData.options["release"] || commandData.options["debug"])) {
+                // If neither --debug nor --release is specified, then clean both
+                commandData.options["release"] = commandData.options["debug"] = true;
+            }
+            
+            var remotePlatform = path.resolve(".", "remote", platform.platform);
+            var configurations = ["release", "debug"];
+            promise = configurations.reduce(function (promise: Q.Promise<any>, configuration: string): Q.Promise<any> {
+                return promise.then(function (): void {
+                    if (commandData.options[configuration]) {
+                        var remotePlatformConfig = path.join(remotePlatform, configuration);
+                        if (fs.existsSync(remotePlatformConfig)) {
+                            logger.logLine(resources.getString("CleaningRemoteResources", platform.platform, configuration));
+                            rimraf.sync(remotePlatformConfig);
+                        }
+                    }
+                });
+            }, promise);
+
             break;
         default:
             throw errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform);
@@ -181,7 +200,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                 configuration: configuration,
                 buildTarget: buildTarget,
                 language: language,
-                cordovaVersion: require("cordova/package.json").version // TODO (Devdiv 1160583): Use Kit specified version
+                cordovaVersion: require("cordova/package.json").version || "5.0.0" // TODO (Devdiv 1160583): Use Kit specified version
             });
             return Build.RemoteBuild.build(buildSettings);
         });
