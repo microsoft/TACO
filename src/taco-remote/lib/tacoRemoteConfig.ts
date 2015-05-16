@@ -63,7 +63,7 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
      * @LOCTAG TacoRemoteConfigAllowsEmulate
      */
     public get allowsEmulate(): boolean {
-        return UtilHelper.argToBool(this.tacoRemoteConf.allowsEmulate);
+        return tacoUtils.ArgsHelper.argToBool(this.tacoRemoteConf.allowsEmulate);
     }
 
     /**
@@ -71,7 +71,7 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
      * @LOCTAG TacoRemoteConfigDeleteBuildsOnShutdown
      */
     public get deleteBuildsOnShutdown(): boolean {
-        return UtilHelper.argToBool(this.tacoRemoteConf.deleteBuildsOnShutdown);
+        return tacoUtils.ArgsHelper.argToBool(this.tacoRemoteConf.deleteBuildsOnShutdown);
     }
 
     /**

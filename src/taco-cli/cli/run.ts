@@ -94,7 +94,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = UtilHelper.parseArguments(Run.KnownOptions, Run.ShortHands, args, 0);
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Run.KnownOptions, Run.ShortHands, args, 0);
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {

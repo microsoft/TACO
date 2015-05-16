@@ -19,11 +19,12 @@ import rimraf = require ("rimraf");
 import semver = require ("semver");
 import Q = require ("q");
 
-import loggerUtil = require ("./logger");
-import UtilHelper = require ("./utilHelper");
 import resources = require ("./resources/resourceManager");
+import tacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
+import UtilHelper = require ("./utilHelper");
 
-import logger = loggerUtil.Logger;
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = UtilHelper.UtilHelper;
 
 module TacoUtility {
@@ -151,41 +152,26 @@ module TacoUtility {
 
                 var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
                 npmProcess.on("error", function (error: Error): void {
-                    if (packageName === "cordova") {
-                        logger.log("\n", logger.Level.Normal);
-                        logger.log(resources.getString("PackageLoaderErrorMessage"), logger.Level.Error);
-                        logger.log(resources.getString("packageLoaderDownloadErrorMessage", resources.getString("PackageLoaderCordovaToolVersion", packageVersion)), logger.Level.Error);
-                        logger.log("\n", logger.Level.Normal);
-                    }
-
                     rimraf(packageTargetPath, function (): void {
-                        deferred.reject(error);
+                        deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderErrorMessage, error, packageName, packageVersion));
                     });
                 });
                 npmProcess.on("exit", function (exitCode: number): void {
                     if (exitCode === 0) {
-                        if (packageName === "cordova") {
-                            logger.log("\n", logger.Level.Normal);
-                            logger.log(resources.getString("PackageLoaderSuccessMessage"), logger.Level.Success);
-                            logger.log(resources.getString("packageLoaderDownloadCompletedMessage", resources.getString("PackageLoaderCordovaToolVersion", packageVersion)), logger.Level.Normal);
-                            logger.log("\n", logger.Level.Normal);
-                        }
-
                         deferred.resolve({});
                     } else {
                         rimraf(packageTargetPath, function (): void {
                             if (exitCode === 243) {
                                 // error code reported when npm fails due to EACCES
-                                deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailedEaccess", packageName)));
+                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess, packageName, exitCode));
                             } else {
-                                deferred.reject(new Error(resources.getString("PackageLoaderNpmInstallFailed", packageName)));
+                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode, packageName, exitCode));
                             }
                         });
                     }
                 });
             } catch (err) {
-                console.log(err);
-                deferred.reject(err);
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallFailed, err, packageName));
             }
 
             return deferred.promise;
@@ -207,11 +193,8 @@ module TacoUtility {
 
         private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
             return Q({}).then(function (): Q.Promise<string> {
-                var deferred: Q.Deferred<string> = Q.defer<string>();
                 if (specType === PackageSpecType.Error) {
-                    logger.log(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName), logger.Level.Error);
-                    deferred.reject(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageVersion, packageName));
-                    return deferred.promise;
+                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageVersion, packageName));
                 }
 
                 if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
@@ -236,12 +219,6 @@ module TacoUtility {
         }
 
         private static installPackage(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<any> {
-            if (packageName === "cordova") {
-                logger.log(resources.getString("PackageLoaderDownloadingMessage", packageVersion), logger.Level.NormalBold);
-                logger.logLine(resources.getString("PackageLoaderCordovaToolVersion", packageVersion), logger.Level.Normal);
-                logger.log("\n", logger.Level.Normal);
-            }
-
             switch (specType) {
                 case PackageSpecType.Version:
                     return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
@@ -257,7 +234,7 @@ module TacoUtility {
                     });
                 case PackageSpecType.Error:
                 default:
-                    return Q.reject(new Error(resources.getString("PackageLoaderInvalidPackageVersionSpecifier", packageName, packageVersion)));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageVersion, packageName));
             }
         }
 
@@ -299,16 +276,15 @@ module TacoUtility {
                             console.log(error);
                         }
 
-                        rimraf(cloneTargetPath, function (error: Error): void {
-                            deferred.reject(error);
+                        rimraf(cloneTargetPath, function (): void {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedGitClone, error, gitUrl));
                         });
-                        deferred.reject(error);
                     } else {
                         deferred.resolve(true);
                     }
                 });
             } catch (err) {
-                deferred.reject(err);
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedGitClone, err, gitUrl));
             }
 
             return deferred.promise;

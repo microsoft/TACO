@@ -6,9 +6,10 @@
 ﻿ *******************************************************
 ﻿ */
 
-import utilHelper = require ("./utilHelper");
-import UtilHelper = utilHelper.UtilHelper;
+import argsHelper = require ("./argsHelper");
 import resources = require ("./resourceManager");
+
+import ArgsHelper = argsHelper.ArgsHelper;
 
 module TacoUtility {
     export class BuildInfo {
@@ -112,7 +113,7 @@ module TacoUtility {
             this.status = status;
             this.messageId = messageId;
             if (arguments.length > 2) {
-                this.messageArgs = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+                this.messageArgs = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
             }
 
             this.statusTime = new Date();

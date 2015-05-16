@@ -42,7 +42,7 @@ class Taco {
         // get appropriate task
         if (!input) {
             input = "help";
-        }                 
+        }
 
         var cordovaCliArgs = process.argv;
         var commandArgs = process.argv.slice(3);
@@ -57,7 +57,7 @@ class Taco {
         // if no command found that can handle these args, route args directly to Cordova
         if (command) {
             command.run(commandData).done(null, function (reason: any): any {
-                if (reason instanceof tacoUtility.TacoError) {
+                if (reason && reason.isTacoError) {
                     tacoUtility.Logger.logErrorLine((<tacoUtility.TacoError>reason).toString());
                 } else {
                     throw reason;

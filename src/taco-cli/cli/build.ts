@@ -105,7 +105,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = UtilHelper.parseArguments(Build.KnownOptions, Build.ShortHands, args, 0);
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Build.KnownOptions, Build.ShortHands, args, 0);
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {

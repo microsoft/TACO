@@ -182,8 +182,7 @@ class Server {
     }
 
     private static startupServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
-        var isSsl = utils.UtilHelper.argToBool(conf.get("secure"));
-        return isSsl ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
+        return conf.secure ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
     }
 
     private static startupPlainHttpServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<http.Server> {
@@ -259,7 +258,7 @@ class Server {
     }
 
     private static writePid(): void {
-        if (utils.UtilHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
+        if (utils.ArgsHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
             fs.writeFile(path.join(Server.ServerConf.serverDir, "running_process_id"), process.pid);
         }
     }

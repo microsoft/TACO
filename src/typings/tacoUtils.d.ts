@@ -6,6 +6,7 @@
  *******************************************************
  */
 
+/// <reference path="../typings/argsHelper.d.ts" />
 /// <reference path="../typings/resourceManager.d.ts" />
 /// <reference path="../typings/buildInfo.d.ts" />
 /// <reference path="../typings/cordovaConfig.d.ts" />
@@ -14,6 +15,7 @@
 /// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/processLogger.d.ts" />
 /// <reference path="../typings/tacoError.d.ts" />
+/// <reference path="../typings/tacoUtilsErrorCodes.d.ts" />
 /// <reference path="../typings/tacoPackageLoader.d.ts" />
 /// <reference path="../typings/countStream.d.ts" />
 /// <reference path="../typings/jsDocHelpPrinter.d.ts" />

@@ -86,7 +86,7 @@ class Certs {
 
         return Certs.makeClientPinAndSslCert(caKeyPath, caCertPath, certsDir, Certs.certOptionsFromConf(conf), conf).
             then(function (pin: number): number {
-                if (utils.argToBool(conf.get("suppressSetupMessage"))) {
+                if (tacoUtils.ArgsHelper.argToBool(conf.get("suppressSetupMessage"))) {
                     return pin;
                 }
 
