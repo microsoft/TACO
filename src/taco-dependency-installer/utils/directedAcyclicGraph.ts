@@ -1,4 +1,12 @@
-﻿module DirectedAcyclicGraph {
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+module DirectedAcyclicGraph {
     export interface IVertexIdentifier {
         id: string;
         neighbors: string[]

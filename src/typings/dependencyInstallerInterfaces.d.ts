@@ -1,4 +1,12 @@
-﻿declare module DependencyInstallerInterfaces {
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+declare module DependencyInstallerInterfaces {
     export interface IInstallerData {
         installSource: string;
         sha1: string;
@@ -10,11 +18,15 @@
         [platformName: string]: IInstallerData;
     }
 
+    export interface IVersionDictionary {
+        [versionId: string]: IPlatformInstallerDictionary;
+    }
+
     export interface IDependencyData {
         displayName: string;
         licenseUrl: string;
         prerequisites: string[];
-        versions: { [versionId: string]: IPlatformInstallerDictionary };
+        versions: IVersionDictionary;
     }
 
     export interface IDependencyDictionary {

@@ -1,3 +1,11 @@
+/**
+? *******************************************************
+? *                                                     *
+? *   Copyright (C) Microsoft. All rights reserved.     *
+? *                                                     *
+? *******************************************************
+? */
+
 /// <reference path="../../typings/hashFiles.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 

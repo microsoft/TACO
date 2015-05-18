@@ -1,4 +1,12 @@
-﻿/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 
@@ -10,16 +18,10 @@ import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
 
-import AndroidSdkInstaller = require ("./installers/androidSdkInstaller");
-import AntInstaller = require ("./installers/antInstaller");
+import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import DirectedAcyclicGraph = require ("./utils/directedAcyclicGraph");
-import GradleInstaller = require ("./installers/gradleInstaller");
 import InstallerBase = require ("./installers/installerBase");
 import installerUtils = require ("./utils/installerUtils");
-import IosDeployInstaller = require ("./installers/iosDeployInstaller");
-import IosSimInstaller = require ("./installers/iosSimInstaller");
-import JavaJdkInstaller = require ("./installers/javaJdkInstaller");
-import MsBuildInstaller = require ("./installers/msBuildInstaller");
 import resources = require ("./resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
@@ -27,11 +29,11 @@ import logger = tacoUtils.Logger;
 
 interface IDependencyInfo {
     id: string;
-    version?: string;
-    displayName?: string;
+    version: string;
+    displayName: string;
     licenseUrl?: string;
-    installDestination?: string;
-    installer?: InstallerBase;
+    installDestination: string;
+    installer: InstallerBase;
     error?: Error;
 }
 
@@ -62,13 +64,14 @@ module TacoDependencyInstaller {
             msBuild: "./installers/msBuildInstaller"
         };
 
-        private dependenciesData: DependencyInstallerInterfaces.IDependencyDictionary;
+        private dependenciesDataWrapper: DependencyDataWrapper;
         private unsupportedMissingDependencies: any[];
         private missingDependencies: IDependencyInfo[];
         private platform: string;
 
         constructor() {
             this.platform = os.platform();
+            this.dependenciesDataWrapper = new DependencyDataWrapper();
         }
 
         public run(data: tacoUtils.Commands.ICommandData): Q.Promise<any> {
@@ -88,9 +91,6 @@ module TacoDependencyInstaller {
 
                 return Q.reject("UnsupportedTargetPlatform");
             }
-
-            // Parse dependencies.json
-            this.parseDependenciesData();
 
             // Call into Cordova to check missing dependencies for the current project
             var cordovaResults: any[] = DependencyInstaller.callCordovaCheckDependencies(data.remain[0]);
@@ -165,10 +165,6 @@ module TacoDependencyInstaller {
             ];
         }
 
-        private parseDependenciesData(): void {
-            this.dependenciesData = JSON.parse(fs.readFileSync(DependencyInstaller.DataFile, "utf8"));
-        }
-
         private parseMissingDependencies(cordovaChecksResult: any[]): void {
             // Initialize arrays
             this.unsupportedMissingDependencies = [];
@@ -180,14 +176,15 @@ module TacoDependencyInstaller {
             cordovaChecksResult.forEach(function (value: any): void {
                 if (self.canInstallDependency(value)) {
                     var tacoId: string = DependencyInstaller.IdMap[value.id];
-                    var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.firstValidVersion(tacoId);
-                    var installPath: string = path.resolve(installerUtils.expandPath(self.dependenciesData[tacoId].versions[versionToUse][self.platform].installDestination));
+                    var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.firstValidVersion(tacoId);
+                    var installPath: string = path.resolve(installerUtils.expandPath(self.dependenciesDataWrapper.getInstallDirectory(tacoId, versionToUse)));
                     var dependencyInfo: IDependencyInfo = {
                         id: tacoId,
                         version: versionToUse,
-                        displayName: self.dependenciesData[tacoId].displayName,
-                        licenseUrl: self.dependenciesData[tacoId].licenseUrl,
-                        installDestination: installPath
+                        displayName: self.dependenciesDataWrapper.getDisplayName(tacoId),
+                        licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(tacoId),
+                        installDestination: installPath,
+                        installer: null
                     };
 
                     self.missingDependencies.push(dependencyInfo);
@@ -215,14 +212,12 @@ module TacoDependencyInstaller {
 
             if (requestedVersion) {
                 // If we don't have the requested version in the installers for this dependency in our metadata, we don't support this dependency
-                if (!this.dependenciesData[tacoId].versions[requestedVersion]) {
+                if (!this.dependenciesDataWrapper.versionExists(tacoId, requestedVersion)) {
                     return false;
                 }
 
-                // If we don't have an appropriate installer for the user's platform for the requested version, we don't support this depepdency
-                var platforms: DependencyInstallerInterfaces.IPlatformInstallerDictionary = this.dependenciesData[tacoId].versions[requestedVersion];
-
-                if (!platforms[this.platform] && !platforms["default"]) {
+                // If we don't have an appropriate installer for the user's platform for the requested version, we don't support this dependency
+                if (!this.dependenciesDataWrapper.isSystemSupported(tacoId, requestedVersion)) {
                     return false;
                 }
 
@@ -230,30 +225,13 @@ module TacoDependencyInstaller {
                 return true;
             } else {
                 // Cordova did not request a specific version, so look if we have at least one installer version that supports the user's platform
-                if (this.firstValidVersion(tacoId)) {
+                if (this.dependenciesDataWrapper.firstValidVersion(tacoId)) {
                     return true;
                 }
 
                 // If we reach this line, it means we don't have a suitable installer for the user's platform for this dependency
                 return false;
             }
-        }
-
-        private firstValidVersion(dependencyId: string): string {
-            var validVersion: string = null;
-
-            for (var version in this.dependenciesData[dependencyId].versions) {
-                if (this.dependenciesData[dependencyId].versions.hasOwnProperty(version)) {
-                    var platforms: DependencyInstallerInterfaces.IPlatformInstallerDictionary = this.dependenciesData[dependencyId].versions[version];
-
-                    if (platforms[this.platform] || platforms["default"]) {
-                        validVersion = version;
-                        break;
-                    }
-                }
-            }
-
-            return validVersion;
         }
 
         private displayUnsupportedWarning(): void {
@@ -295,17 +273,17 @@ module TacoDependencyInstaller {
                 var bDependsOnA: boolean = self.dependenciesData[b.id].prerequisites[a.id]
 
                 if (aDependsOnB && bDependsOnA) {
-                    logger.logErrorLine(resources.getString("InvalidInstallOrder"));
+                    logger.logErrorLine(resources.getString("NoValidInstallOrder"));
 
-                    throw new Error("InvalidInstallOrder");
-                }
-
-                if (aDependsOnB) {
-                    return 1;
+                    throw new Error("NoValidInstallOrder");
                 }
 
                 if (bDependsOnA) {
                     return -1;
+                }
+
+                if (aDependsOnB) {
+                    return 1;
                 }
 
                 return 0;
@@ -350,8 +328,7 @@ module TacoDependencyInstaller {
 
             this.missingDependencies.forEach(function (value: IDependencyInfo, index: number, array: IDependencyInfo[]): void {
                 // Instantiate and register the installer
-                var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = self.dependenciesData[value.id].versions[value.version][self.platform];
-                var licenseUrl: string = self.dependenciesData[value.id].licenseUrl;
+                var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = self.dependenciesDataWrapper.getInstallerInfo(value.id, value.version);
                 var installerConstructor: any = require(DependencyInstaller.InstallerMap[value.id]);
 
                 value.installer = new installerConstructor(installerInfoToUse, value.version, value.installDestination);
