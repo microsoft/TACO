@@ -187,6 +187,8 @@
 
     "ErrorUploadingRemoteBuild": "An error occurred uploading to the build server {0}",
     "_ErrorUploadingRemoteBuild.comment": "Message reported when we attempt to upload a build and the upload fails. {0} is the URL of the server",
+    "ErrorDuringRemoteBuildSubmission": "Error during build submission: {0}",
+    "_ErrorDuringRemoteBuildSubmission.comment": "Message reported when we hit an internal error when uploading a build. {0} is the reported error.",
     "ErrorPatchCreation": "Failed to parse changed files needed to prepare a build patch",
     "_ErrorPatchCreation.comment": "Error message reported when we fail to construct the list of files to send for a remote build",
     "RemoteBuildStatusPollFailed": "HTTP {0}: {1}",

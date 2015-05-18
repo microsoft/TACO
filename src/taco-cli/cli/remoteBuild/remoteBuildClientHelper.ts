@@ -424,7 +424,7 @@ class RemoteBuildClientHelper {
                     var buildInfo = JSON.parse(body);
                     deferred.resolve(response.headers["content-location"]);
                 } else {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.ErrorUploadingRemoteBuild, body));
+                    deferred.reject(errorHelper.get(TacoErrorCodes.ErrorDuringRemoteBuildSubmission, body));
                 }
             }));
 

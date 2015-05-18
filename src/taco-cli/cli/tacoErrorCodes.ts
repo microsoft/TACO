@@ -26,6 +26,7 @@ enum TacoErrorCode {
     ErrorDownloadingRemoteBuild,
     ErrorHttpGet,
     ErrorUploadingRemoteBuild,
+    ErrorDuringRemoteBuildSubmission,
     ErrorCertificateLoad,
     ErrorCertificatePathChmod,
     ErrorCertificateSave,

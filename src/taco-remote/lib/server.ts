@@ -116,8 +116,12 @@ class Server implements RemoteBuild.IServerModule {
             });
             res.status(202).json(buildInfo.localize(req, self.resources));
         }, function (err: any): void {
-                res.set({ "Content-Type": "application/json" });
-                res.status(err.code || 400).send({ status: self.resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err.toString() });
+                if (err.code) {
+                    res.status(err.code).send(err.toString());
+                } else {
+                    res.set({ "Content-Type": "application/json" });
+                    res.status(400).send({ status: self.resources.getStringForLanguage(req, "InvalidBuildRequest"), errors: err.toString() });
+                }
             }).done();
     }
 
