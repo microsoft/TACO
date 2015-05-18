@@ -63,5 +63,10 @@
             { "name": "--emulator", "description": "[CommandRunEmulatorDescription]" },
             { "name": "--target", "description": "[CommandRunTargetDescription]" }
         ]
+    },
+    "version": {
+        "synopsis": "",
+        "modulePath": "./version",
+        "description": "[CommandVersionDescription]"
     }
-}
+  }
