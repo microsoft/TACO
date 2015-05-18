@@ -13,7 +13,7 @@
     export interface IDependencyData {
         displayName: string;
         licenseUrl: string;
-        prerequesites: string[];
+        prerequisites: string[];
         versions: { [versionId: string]: IPlatformInstallerDictionary };
     }
 

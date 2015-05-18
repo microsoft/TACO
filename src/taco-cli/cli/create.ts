@@ -99,7 +99,7 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = utils.parseArguments(Create.KnownOptions, Create.ShortHands, args.original, 0);
+        var commandData: commands.ICommandData = utils.parseArguments(Create.KnownOptions, {}, args.original, 0);
         var cordovaParams: cordovaHelper.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,

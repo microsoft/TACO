@@ -30,6 +30,10 @@
     "SettingSystemVariablesLabel": "Updating system environment variables...",
     "_SettingSystemVariablesLabel.comment": "Progress indicator for when a dependency is being installed via npm.",
 
+    "FileNotFound": "Error: Could not locate the file to download.",
+    "_FileNotFound.comment": "Error shown when the URL we use to download a file does not result in a successful HTTP request, probably because our metadata is outdated and the file URL has changed.",
+    "InvalidInstallOrder": "Error: Could not establish a valid order in which to install dependencies.",
+    "_InvalidInstallOrder.comment": "Error shown when the dependencies that need to be installed have cyclic prerequisites, so it is not possible to install them. For example: installing A requires to install B first, but installing B requires to install A first.",
     "UnsupportedPlatform": "Error: Your current platform is not supported: {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform.",
     "UnsupportedTargetPlatform": "Error: Target platform not supported: {0}",

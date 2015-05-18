@@ -36,9 +36,15 @@ class JavaJdkInstaller extends InstallerBase {
         // Set installer download path
         this.installerFile = path.join(InstallerBase.InstallerCache, "java", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
+        // Prepare expected installer file properties
+        var expectedProperties: installerUtils.IExpectedProperties = {
+            bytes: this.installerInfo.bytes,
+            sha1: this.installerInfo.sha1
+        }
+
         // If we already have an installer present, verify if the file is uncorrupt
         if (fs.existsSync(this.installerFile)) {
-            if (installerUtils.isInstallerFileClean(this.installerFile, this.installerInfo.sha1, this.installerInfo.bytes)) {
+            if (installerUtils.isInstallerFileClean(this.installerFile, expectedProperties)) {
                 // We already have a clean installer for this version, use this one rather than downloading a new one
                 return Q.resolve({});
             } else {
@@ -64,7 +70,7 @@ class JavaJdkInstaller extends InstallerBase {
             jar: j
         };
 
-        return installerUtils.downloadFile(options, this.installerFile, this.installerInfo.sha1, this.installerInfo.bytes);
+        return installerUtils.downloadFile(options, this.installerFile, expectedProperties);
     }
 
     protected installWin32(): Q.Promise<any> {
@@ -88,6 +94,17 @@ class JavaJdkInstaller extends InstallerBase {
 
     protected updateVariablesWin32(): Q.Promise<any> {
         logger.logLine(resources.getString("SettingSystemVariablesLabel"));
+
+        // JAVA_HOME variable
+        if (process.env["JAVA_HOME"]) {
+            // JAVA_HOME is already defined; prompt the user before overwriting it
+            // TODO
+        } else {
+
+        }
+
+        // Path variable
+
         return Q.resolve({});
     }
 }

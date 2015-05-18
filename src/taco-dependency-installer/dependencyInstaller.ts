@@ -52,14 +52,14 @@ module TacoDependencyInstaller {
         };
 
         // Map the dependency ids to their installer class to easily instantiate the installers
-        private static InstallerMap: { [dependencyId: string]: any } = {
-            androidSdk: AndroidSdkInstaller,
-            ant: AntInstaller,
-            gradle: GradleInstaller,
-            iosDeploy: IosDeployInstaller,
-            iosSim: IosSimInstaller,
-            javaJdk: JavaJdkInstaller,
-            msBuild: MsBuildInstaller
+        private static InstallerMap: { [dependencyId: string]: string } = {
+            androidSdk: "./installers/androidSdkInstaller",
+            ant: "./installers/antInstaller",
+            gradle: "./installers/gradleInstaller",
+            iosDeploy: "./installers/iosDeployInstaller",
+            iosSim: "./installers/iosSimInstaller",
+            javaJdk: "./installers/javaJdkInstaller",
+            msBuild: "./installers/msBuildInstaller"
         };
 
         private dependenciesData: DependencyInstallerInterfaces.IDependencyDictionary;
@@ -74,10 +74,8 @@ module TacoDependencyInstaller {
         public run(data: tacoUtils.Commands.ICommandData): Q.Promise<any> {
             // We currently only support Windows for dependency installation
             // TODO (DevDiv 1172346): Support Mac OS as well
-            var platform: string = os.platform();
-
-            if (platform !== "win32") {
-                logger.logErrorLine(resources.getString("UnsupportedPlatform", platform));
+            if (this.platform !== "win32") {
+                logger.logErrorLine(resources.getString("UnsupportedPlatform", this.platform));
 
                 return Q.reject("UnsupportedPlatform");
             }
@@ -95,7 +93,7 @@ module TacoDependencyInstaller {
             this.parseDependenciesData();
 
             // Call into Cordova to check missing dependencies for the current project
-            var cordovaResults: string[] = DependencyInstaller.callCordovaCheckDependencies(data.remain[0]);
+            var cordovaResults: any[] = DependencyInstaller.callCordovaCheckDependencies(data.remain[0]);
 
             // Extract Cordova results and transform them to an array of dependency ids
             this.parseMissingDependencies(cordovaResults);
@@ -291,12 +289,36 @@ module TacoDependencyInstaller {
 
         private sortDependencies(): void {
             var self = this;
+
+            this.missingDependencies.sort(function (a: IDependencyInfo, b: IDependencyInfo): number {
+                var aDependsOnB: boolean = self.dependenciesData[a.id].prerequisites[b.id];
+                var bDependsOnA: boolean = self.dependenciesData[b.id].prerequisites[a.id]
+
+                if (aDependsOnB && bDependsOnA) {
+                    logger.logErrorLine(resources.getString("InvalidInstallOrder"));
+
+                    throw new Error("InvalidInstallOrder");
+                }
+
+                if (aDependsOnB) {
+                    return 1;
+                }
+
+                if (bDependsOnA) {
+                    return -1;
+                }
+
+                return 0;
+            });
+
+            /*
+            var self = this;
             var adjacencyList: DirectedAcyclicGraph.IVertexIdentifier[] = [];
 
             this.missingDependencies.forEach(function (value: IDependencyInfo): void {
                 var vertexIdentifier: DirectedAcyclicGraph.IVertexIdentifier = {
                     id: value.id,
-                    neighbors: self.dependenciesData[value.id].prerequesites
+                    neighbors: self.dependenciesData[value.id].prerequisites
                 };
 
                 adjacencyList.push(vertexIdentifier);
@@ -320,6 +342,7 @@ module TacoDependencyInstaller {
             });
 
             this.missingDependencies = sortedDependencies;
+            */
         }
 
         private instantiateInstallers(): void {
@@ -329,7 +352,7 @@ module TacoDependencyInstaller {
                 // Instantiate and register the installer
                 var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = self.dependenciesData[value.id].versions[value.version][self.platform];
                 var licenseUrl: string = self.dependenciesData[value.id].licenseUrl;
-                var installerConstructor: any = DependencyInstaller.InstallerMap[value.id];
+                var installerConstructor: any = require(DependencyInstaller.InstallerMap[value.id]);
 
                 value.installer = new installerConstructor(installerInfoToUse, value.version, value.installDestination);
             });
@@ -384,10 +407,8 @@ module TacoDependencyInstaller {
         }
 
         private runInstallers(): Q.Promise<any> {
-            var q = Q<any>({});
-
-            this.missingDependencies.forEach(function (value: IDependencyInfo, index: number, array: IDependencyInfo[]): void {
-                q = q
+            return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyInfo): Q.Promise<any> {
+                return previous
                     .then(function (): Q.Promise<any> {
                         logger.logNormalBoldLine(value.displayName);
 
@@ -399,9 +420,7 @@ module TacoDependencyInstaller {
                     .then(function (): void {
                         logger.log("\n");
                     });
-            });
-
-            return q;
+            }, Q({}));
         }
 
         private printResults(): void {

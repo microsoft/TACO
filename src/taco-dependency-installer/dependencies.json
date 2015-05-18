@@ -2,7 +2,7 @@
     "androidSdk": {
         "displayName": "Android SDK",
         "licenseUrl": "https://developer.android.com/sdk/terms.html",
-        "prerequesites": [
+        "prerequisites": [
             "javaJdk"
         ],
         "versions": {}
@@ -10,31 +10,31 @@
     "ant": {
         "displayName": "Apache Ant",
         "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
-        "prerequesites": [],
+        "prerequisites": [],
         "versions": {}
     },
     "gradle": {
         "displayName": "Gradle",
         "licenseUrl": "https://gradle.org/license/",
-        "prerequesites": [],
+        "prerequisites": [],
         "versions": {}
     },
     "iosDeploy": {
         "displayName": "ios-deploy",
         "licenseUrl": "",
-        "prerequesites": [],
+        "prerequisites": [],
         "versions": {}
     },
     "iosSim": {
         "displayName": "ios-sim",
         "licenseUrl": "",
-        "prerequesites": [],
+        "prerequisites": [],
         "versions": {}
     },
     "javaJdk": {
         "displayName": "Java SE Development Kit",
         "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
-        "prerequesites": [],
+        "prerequisites": [],
         "versions": {
             "7u55": {
                 "win32": {
@@ -49,7 +49,7 @@
     "msBuild": {
         "displayName": "Microsoft Build Tools",
         "licenseUrl": "",
-        "prerequesites": [],
+        "prerequisites": [],
         "versions": {}
     }
 }
