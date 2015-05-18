@@ -41,6 +41,7 @@ var setup = new setupMod();
 describe("taco build", function (): void {
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "build");
+    var originalCwd: string;
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
@@ -54,6 +55,7 @@ describe("taco build", function (): void {
     }
 
     before(function (mocha: MochaDone): void {
+        originalCwd = process.cwd();
         // Set up mocked out resources
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
@@ -74,6 +76,7 @@ describe("taco build", function (): void {
     });
 
     after(function (): void {
+        process.chdir(originalCwd);
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });

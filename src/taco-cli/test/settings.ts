@@ -29,8 +29,10 @@ import utils = TacoUtility.UtilHelper;
 
 describe("taco settings", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");
+    var originalCwd: string;
 
     before(function (mocha: MochaDone): void {
+        originalCwd = process.cwd();
         // Set up mocked out resources
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
@@ -43,8 +45,9 @@ describe("taco settings", function (): void {
         });
     });
 
-    after(function (): void {
-        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+    after(function (done: MochaDone): void {
+        process.chdir(originalCwd);
+        rimraf(tacoHome, done);
     });
 
     it("should correctly report build locations when --local is specified", function (mocha: MochaDone): void {
