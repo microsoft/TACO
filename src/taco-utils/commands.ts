@@ -1,3 +1,11 @@
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 import fs = require ("fs");
@@ -6,8 +14,11 @@ import Q = require ("q");
 
 import logger = require ("./logger");
 import resources = require ("./resources/resourceManager");
+import tacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import utilHelper = require ("./utilHelper");
 
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
@@ -58,7 +69,7 @@ module TacoUtility {
             public static init(commandsInfoPath: string): void {
                 commandsInfoPath = commandsInfoPath;
                 if (!fs.existsSync(commandsInfoPath)) {
-                    throw new Error(resources.getString("tacoUtils.exception.listingfile"));
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
                 }
 
                 CommandFactory.Listings = require(commandsInfoPath);
@@ -69,7 +80,7 @@ module TacoUtility {
              */
             public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
                 if (!name || !CommandFactory.Listings) {
-                    throw new Error(resources.getString("tacoUtils.exception.listingfile"));
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
                 }
 
                 var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
@@ -79,7 +90,7 @@ module TacoUtility {
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
-                    throw new Error(resources.getString("tacoUtils.exception.missingcommand", name));
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionMissingcommand, name);
                 }
 
                 var commandMod: any = require(modulePath);
@@ -110,7 +121,7 @@ module TacoUtility {
              * Convert command line arguments into an appropriate format to determine what action to take
              */
             public parseArgs(args: string[]): ICommandData {
-                throw new Error("AbstractMethod");
+                throw errorHelper.get(TacoErrorCodes.AbstractMethod);
             }
 
             /**
@@ -118,7 +129,7 @@ module TacoUtility {
              * Sanity check on arguments to determine whether to pass through to cordova
              */
             public canHandleArgs(data: ICommandData): boolean {
-                throw new Error("AbstractMethod");
+                throw errorHelper.get(TacoErrorCodes.AbstractMethod);
             }
 
             /**
@@ -133,8 +144,7 @@ module TacoUtility {
                 if (subcommand) {
                     return subcommand.run(commandData);
                 } else {
-                    logger.Logger.logErrorLine(resources.getString("command.badArguments", this.name, commandData.original.toString()));
-                    return Q.reject(new Error("command.badArguments"));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadArguments, this.name, commandData.original.toString()));
                 }
             }
 

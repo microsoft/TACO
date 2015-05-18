@@ -1,4 +1,12 @@
-﻿// Barebones typing for elementtree, added as-needed
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+// Barebones typing for elementtree, added as-needed
 
 declare module "elementtree" {
     export class ElementTree {

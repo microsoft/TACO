@@ -1,0 +1,6 @@
+﻿{
+    "taco-remote-multiplexer" : {
+        "name": "taco-remote-multiplexer",
+        "location": "file://%TACO_BUILD_PACKAGES%/taco-remote-multiplexer"
+    }
+}

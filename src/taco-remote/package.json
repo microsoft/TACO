@@ -18,13 +18,13 @@
         "rimraf": "2.2.6",
         "fstream": "0.1.28",
         "request": "2.36.0",
-        "taco-utils": "file:../taco-utils",
-        "taco-remote-lib": "file:../taco-remote-lib"
+        "taco-utils": "file:../taco-utils"
     },
     "devDependencies": {
         "typescript": "1.3.0",
         "mocha": "2.0.1",
         "should": "4.3.0",
+        "morgan": "1.5.1",
         "nconf": "0.6.9"
     },
     "bundledDependencies": [ "taco-utils" ],

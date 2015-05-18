@@ -1,3 +1,11 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
@@ -7,7 +15,7 @@
 
 declare module TacoRemoteLib {
     interface IRequestRedirector {
-        getPackageToServeRequest(buildInfo: TacoUtility.BuildInfo, req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib>;
+        getPackageToServeRequest(req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib>;
     }
     interface IReadOnlyConf {
         get(prop: string): any;

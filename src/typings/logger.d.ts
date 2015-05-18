@@ -1,3 +1,11 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/colors.d.ts" />
 declare module TacoUtility {

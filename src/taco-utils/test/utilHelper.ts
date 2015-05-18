@@ -13,8 +13,11 @@
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 import mocha = require ("mocha");
 
+import argsHelper = require ("../argsHelper");
 import commands = require ("../commands");
 import utils = require ("../utilHelper");
+
+import ArgsHelper = argsHelper.ArgsHelper;
 
 describe("UtilHelper", function (): void {
     describe("parseArguments()", function (): void {
@@ -23,14 +26,14 @@ describe("UtilHelper", function (): void {
         };
 
         it("shouldn't throw errors for empty and missing parameters", function (): void {
-            utils.UtilHelper.parseArguments({});
-            utils.UtilHelper.parseArguments({}, {});
-            utils.UtilHelper.parseArguments({}, {}, []);
-            utils.UtilHelper.parseArguments({}, {}, [], 0);
+            ArgsHelper.parseArguments({});
+            ArgsHelper.parseArguments({}, {});
+            ArgsHelper.parseArguments({}, {}, []);
+            ArgsHelper.parseArguments({}, {}, [], 0);
         });
 
         it("should parse arguments properly when no flags are specified", function (): void {
-            var parsed: commands.Commands.ICommandData = utils.UtilHelper.parseArguments({}, {}, "create foo baz path a-es--".split(" "), 1);
+            var parsed: commands.Commands.ICommandData = ArgsHelper.parseArguments({}, {}, "create foo baz path a-es--".split(" "), 1);
 
             // Should have detected 0 flags, and have a remain of 4
             Object.keys(parsed.options).length.should.equal(0);
@@ -49,7 +52,7 @@ describe("UtilHelper", function (): void {
                 bar: Boolean,
                 baz: String
             };
-            var parsed: commands.Commands.ICommandData = utils.UtilHelper.parseArguments(knownOptions, {}, "create --bar boo --foo faz doo --baz baz".split(" "), 1);
+            var parsed: commands.Commands.ICommandData = ArgsHelper.parseArguments(knownOptions, {}, "create --bar boo --foo faz doo --baz baz".split(" "), 1);
 
             // Should have detected 3 flags, and have a remain of 2 (boo, doo)
             Object.keys(parsed.options).length.should.equal(3);
@@ -71,7 +74,7 @@ describe("UtilHelper", function (): void {
                 bar: Boolean,
                 baz: String
             };
-            var parsed: commands.Commands.ICommandData = utils.UtilHelper.parseArguments(knownOptions, {}, "create boo --foo --baz --bar baz".split(" "), 1);
+            var parsed: commands.Commands.ICommandData = ArgsHelper.parseArguments(knownOptions, {}, "create boo --foo --baz --bar baz".split(" "), 1);
 
             // Should have detected 3 flags, and have a remain of 2 (boo, baz)
             Object.keys(parsed.options).length.should.equal(3);
@@ -93,7 +96,7 @@ describe("UtilHelper", function (): void {
                 bar: Boolean,
                 kaz: String
             };
-            var parsed: commands.Commands.ICommandData = utils.UtilHelper.parseArguments(knownOptions, {}, "create boo --fo --ka baz --b".split(" "), 1);
+            var parsed: commands.Commands.ICommandData = ArgsHelper.parseArguments(knownOptions, {}, "create boo --fo --ka baz --b".split(" "), 1);
 
             // Should have detected 3 flags, and have a remain of 1 (boo)
             Object.keys(parsed.options).length.should.equal(3);
@@ -115,7 +118,7 @@ describe("UtilHelper", function (): void {
                 kaz: String
             };
             var shortHands: Nopt.ShortFlags = { k4: ["--kaz", "4.0.0"] };
-            var parsed: commands.Commands.ICommandData = utils.UtilHelper.parseArguments(knownOptions, shortHands, "create --ba --foo --k4 boo".split(" "), 1);
+            var parsed: commands.Commands.ICommandData = ArgsHelper.parseArguments(knownOptions, shortHands, "create --ba --foo --k4 boo".split(" "), 1);
 
             // Should have detected 3 flags, and have a remain of 1 (boo)
             Object.keys(parsed.options).length.should.equal(3);
@@ -136,7 +139,7 @@ describe("UtilHelper", function (): void {
                 bar: Boolean,
                 baz: String
             };
-            var parsed: commands.Commands.ICommandData = utils.UtilHelper.parseArguments(knownOptions, {}, "create --ba -baz foo -f boo -fo foo ------foo --foo bar -bar bar foo -bazbaz --baz".split(" "), 1);
+            var parsed: commands.Commands.ICommandData = ArgsHelper.parseArguments(knownOptions, {}, "create --ba -baz foo -f boo -fo foo ------foo --foo bar -bar bar foo -bazbaz --baz".split(" "), 1);
 
             // Should have detected 5 flags: ba, baz, foo, bar, bazbaz
             Object.keys(parsed.options).length.should.equal(5);

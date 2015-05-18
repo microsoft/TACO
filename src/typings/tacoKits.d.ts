@@ -1,3 +1,11 @@
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
 
 // Typings for taco-kits package
 
@@ -141,6 +149,16 @@ declare module TacoKits {
          */
         public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo>;
     }
+
+    enum TacoErrorCode {
+        TacoKitsExceptionInvalidKit,
+        TacoKitsExceptionInvalidTemplate,
+        TacoKitsExceptionKitMetadataFileMalformed,
+        TacoKitsExceptionKitMetadataFileNotFound,
+        TacoKitsExceptionNoCliSpecification,
+        TacoKitsExceptionTypescriptNotSupported
+    }
+
 }
 
 declare module "taco-kits" {

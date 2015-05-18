@@ -6,7 +6,9 @@ var exec = require("child_process").exec,
     npmUtil = require ("../tools/npmInstallerUtil"),
     buildConfig = require('./build_config.json');
 
-var devDependencies = ["del", "gulp", "typescript", "gulp-typescript", "gulp-sourcemaps", "merge2", "ncp", "q", "run-sequence", "archiver", "mocha-teamcity-reporter", "nopt"];
+var devDependencies =
+    ["del", "gulp", "typescript", "gulp-typescript", "gulp-sourcemaps", "merge2", "ncp", "q",
+    "run-sequence", "archiver", "mocha-teamcity-reporter", "nopt", "replace", "jsdoc-parse"];
 
 gulp.on("task_not_found", function (err) {
     console.error("\nPlease run 'gulp prep' to prepare project\n");

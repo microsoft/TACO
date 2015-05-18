@@ -20,10 +20,12 @@ import sanitize = require ("sanitize-filename");
 var should_module = require("should");
 
 import resources = require ("../resources/resourceManager");
+import tacoErrorCodes = require ("../tacoErrorCodes");
 import tacoKits = require ("../tacoKits");
 import tacoUtils = require ("taco-utils");
 
 import kitHelper = tacoKits.KitHelper;
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 describe("KitHelper", function (): void {
     // Important paths
@@ -352,8 +354,8 @@ describe("KitHelper", function (): void {
             kitHelper.getTemplatesForKit(kitId)
                 .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
                     done(new Error("The method should have thrown an error, but it succeeeded"));
-                }, function (err: string): void {
-                    err.should.be.exactly("taco-kits.exception.InvalidKit");
+                }, function (err: tacoUtils.TacoError): void {
+                    err.errorCode.should.be.exactly(TacoErrorCodes.TacoKitsExceptionInvalidKit);
                     done();
                 })
                 .catch(function (err: string): void {

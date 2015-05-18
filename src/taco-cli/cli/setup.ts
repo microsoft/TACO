@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/tacoUtils.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 "use strict";
@@ -15,6 +23,8 @@ import util = require ("util");
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
@@ -61,7 +71,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = UtilHelper.parseArguments(Setup.KnownOptions, Setup.ShortHands, args, 0);
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Setup.KnownOptions, Setup.ShortHands, args, 0);
 
         return parsedOptions;
     }
@@ -69,25 +79,15 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static remote(setupData: commands.ICommandData): Q.Promise<any> {
         var platform: string = (setupData.remain[1] || "ios").toLowerCase();
 
-        logger.logNormalLine(resources.getString("command.setup.remote.header"));
+        logger.logNormalLine(resources.getString("CommandSetupRemoteHeader"));
 
         return Setup.queryUserForRemoteConfig()
         .then(Setup.acquireCertificateIfRequired)
         .then(Setup.constructRemotePlatformSettings)
         .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
         .then(function (): void {
-            logger.log(logger.colorize(resources.getString("command.success.base"), logger.Level.Success));
-            logger.logLine(" " + resources.getString("command.setup.settingsStored", Settings.settingsFile));
-        })
-        .catch(function (err: any): void {
-            if (err.message) {
-                logger.logErrorLine(err.message);
-            } else {
-                logger.logErrorLine(err);
-            }
-
-            // rethrow any errors so we can catch them in test code
-            throw err;
+            logger.log(logger.colorize(resources.getString("CommandSuccessBase"), logger.Level.Success));
+            logger.logLine(" " + resources.getString("CommandSetupSettingsStored", Settings.settingsFile));
         });
     }
 
@@ -99,26 +99,26 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         var cliSession = Setup.CliSession ? Setup.CliSession : readline.createInterface({ input: process.stdin, output: process.stdout });
 
         // Query the user for the host, port, and PIN, but don't keep asking questions if they input a known-invalid argument
-        cliSession.question(resources.getString("command.setup.remote.query.host"), function (hostAnswer: string): void {
+        cliSession.question(resources.getString("CommandSetupRemoteQueryHost"), function (hostAnswer: string): void {
             hostPromise.resolve({ host: hostAnswer });
         });
         hostPromise.promise.then(function (host: { host: string }): void {
-            cliSession.question(resources.getString("command.setup.remote.query.port"), function (portAnswer: string): void {
+            cliSession.question(resources.getString("CommandSetupRemoteQueryPort"), function (portAnswer: string): void {
                 var port: number = parseInt(portAnswer);
                 if (port > 0) {
                     // Port looks valid
                     portPromise.resolve({ host: host.host, port: port });
                 } else {
-                    portPromise.reject(new Error(resources.getString("command.setup.remote.invalidPort", port)));
+                    portPromise.reject(errorHelper.get(TacoErrorCodes.CommandSetupRemoteInvalidPort, port));
                 }
             });
         });
         portPromise.promise.then(function (hostAndPort: { host: string; port: number }): void {
-            cliSession.question(resources.getString("command.setup.remote.query.pin"), function (pinAnswer: string): void {
+            cliSession.question(resources.getString("CommandSetupRemoteQueryPin"), function (pinAnswer: string): void {
                 var pin: number = parseInt(pinAnswer);
                 if (pinAnswer && !Setup.pinIsValid(pin)) {
                     // A pin was provided but it is invalid
-                    pinPromise.reject(new Error(resources.getString("command.setup.remote.invalidPin", pinAnswer)));
+                    pinPromise.reject(errorHelper.get(TacoErrorCodes.CommandSetupRemoteInvalidPin, pinAnswer));
                 } else {
                     pinPromise.resolve({ host: hostAndPort.host, port: hostAndPort.port, pin: pin });
                 }
@@ -147,11 +147,11 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                 } else {
                     if (response.statusCode !== 200) {
                         // Invalid PIN specified
-                        deferred.reject(new Error(resources.getString("command.setup.remote.rejectedPin")));
+                        deferred.reject(errorHelper.get(TacoErrorCodes.CommandSetupRemoteRejectedPin));
                     } else {
                         ConnectionSecurityHelper.saveCertificate(body, hostPortAndPin.host).then(function (certName: string): void {
                             deferred.resolve(certName.trim());
-                        }, function (err: Error): void {
+                        }, function (err: tacoUtility.TacoError): void {
                                 deferred.reject(err);
                             });
                     }
@@ -178,7 +178,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                 if (error) {
                     deferred.reject(Setup.getFriendlyHttpError(error, hostPortAndCert.host, hostPortAndCert.port, mountDiscoveryUrl, !!hostPortAndCert.certName));
                 } else if (response.statusCode !== 200) {
-                    deferred.reject(new Error(resources.getString("command.setup.cantFindRemoteMount", mountDiscoveryUrl)));
+                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandSetupCantFindRemoteMount, mountDiscoveryUrl));
                 } else {
                     deferred.resolve(body);
                 }
@@ -189,7 +189,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     private static saveRemotePlatformSettings(platform: string, data: Settings.IRemoteConnectionInfo): Q.Promise<any> {
-        return Settings.loadSettings(true).catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {
@@ -220,19 +220,19 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
 
     private static getFriendlyHttpError(error: any, host: string, port: number, url: string, secure: boolean): Error {
         if (error.code === "ECONNREFUSED") {
-            return new Error(resources.getString("command.setup.connrefused", util.format("http%s://%s:%s", secure ? "s" : "", host, port)));
+            return errorHelper.get(TacoErrorCodes.CommandSetupConnectionRefused, util.format("%s://%s:%s", secure ? "https" : "http", host, port));
         } else if (error.code === "ENOTFOUND") {
-            return new Error(resources.getString("command.setup.notfound", host));
+            return errorHelper.get(TacoErrorCodes.CommandSetupNotfound, host);
         } else if (error.code === "ETIMEDOUT") {
-            return new Error(resources.getString("command.setup.timedout", host));
+            return errorHelper.get(TacoErrorCodes.CommandSetupTimedout, host);
         } else if (error.code === "ECONNRESET") {
             if (!secure) {
-                return new Error(resources.getString("RemoteBuildNonSslConnectionReset", url));
+                return errorHelper.get(TacoErrorCodes.RemoteBuildNonSslConnectionReset, url);
             } else {
-                return new Error(resources.getString("RemoteBuildSslConnectionReset", url));
+                return errorHelper.get(TacoErrorCodes.RemoteBuildSslConnectionReset, url);
             }
         } else {
-            return new Error(resources.getString("ErrorHTTPGet", url, error));
+            return errorHelper.wrap(TacoErrorCodes.ErrorHttpGet, error, url);
         }
     }
 }

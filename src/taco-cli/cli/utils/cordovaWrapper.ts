@@ -1,4 +1,12 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
@@ -12,6 +20,8 @@ import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import packageLoader = tacoUtility.TacoPackageLoader;
@@ -24,11 +34,11 @@ class CordovaWrapper {
         var deferred = Q.defer();
         var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
         proc.on("error", function (err: Error): void {
-            deferred.reject(err);
+            deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" ")));
         });
         proc.on("close", function (code: number): void {
             if (code) {
-                deferred.reject(new Error(resources.getString("CordovaCommandFailed", code, args.join(" "))));
+                deferred.reject(errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" ")));
             } else {
                 deferred.resolve({});
             }
@@ -38,6 +48,10 @@ class CordovaWrapper {
 
     public static build(platform: string): Q.Promise<any> {
         return CordovaWrapper.cli(["build", platform]);
+    }
+
+    public static run(platform: string): Q.Promise<any> {
+        return CordovaWrapper.cli(["run", platform]);
     }
 
     /**

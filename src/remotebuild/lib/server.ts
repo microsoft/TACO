@@ -1,13 +1,13 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
-/// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/expressExtensions.d.ts" />
@@ -168,7 +168,8 @@ class Server {
         var serverMods = conf.modules;
         return serverMods.reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
             try {
-                var modGen: RemoteBuild.IServerModuleFactory = require(mod);
+                var requirePath = conf.moduleConfig(mod).requirePath || mod;
+                var modGen: RemoteBuild.IServerModuleFactory = require(requirePath);
             } catch (e) {
                 console.error(resources.getString("UnableToLoadModule", mod));
                 return Q.reject(e);
@@ -181,8 +182,7 @@ class Server {
     }
 
     private static startupServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {
-        var isSsl = utils.UtilHelper.argToBool(conf.get("secure"));
-        return isSsl ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
+        return conf.secure ? Server.startupHttpsServer(conf, app) : Server.startupPlainHttpServer(conf, app);
     }
 
     private static startupPlainHttpServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<http.Server> {
@@ -258,7 +258,7 @@ class Server {
     }
 
     private static writePid(): void {
-        if (utils.UtilHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
+        if (utils.ArgsHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
             fs.writeFile(path.join(Server.ServerConf.serverDir, "running_process_id"), process.pid);
         }
     }

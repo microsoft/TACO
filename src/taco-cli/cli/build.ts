@@ -1,7 +1,16 @@
-﻿/// <reference path="../../typings/tacoUtils.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../typings/rimraf.d.ts" />
 "use strict";
 
 import assert = require ("assert");
@@ -10,12 +19,15 @@ import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
+import rimraf = require ("rimraf");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/cordovaWrapper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
@@ -93,17 +105,15 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = UtilHelper.parseArguments(Build.KnownOptions, Build.ShortHands, args, 0);
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Build.KnownOptions, Build.ShortHands, args, 0);
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            logger.logErrorLine(resources.getString("command.notBothLocalRemote"));
-            throw new Error("command.notBothLocalRemote");
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            logger.logErrorLine(resources.getString("command.notBothDeviceEmulate"));
-            throw new Error("command.notBothDeviceEmulate");
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
         return parsedOptions;
@@ -113,13 +123,13 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
-                    return Build.cleanPlatform(platform);
+                    return Build.cleanPlatform(platform, commandData);
                 });
             }, Q({}));
         });
     }
 
-    private static cleanPlatform(platform: Settings.IPlatformWithLocation): Q.Promise<any> {
+    private static cleanPlatform(platform: Settings.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
         var promise = Q({});
         switch (platform.location) {
         case Settings.BuildLocationType.Local:
@@ -136,10 +146,28 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
             break;
         case Settings.BuildLocationType.Remote:
-            // remote clean is not yet implemented, but remote clean should happen along with local clean wherever possible
+            if (!(commandData.options["release"] || commandData.options["debug"])) {
+                // If neither --debug nor --release is specified, then clean both
+                commandData.options["release"] = commandData.options["debug"] = true;
+            }
+            
+            var remotePlatform = path.resolve(".", "remote", platform.platform);
+            var configurations = ["release", "debug"];
+            promise = configurations.reduce(function (promise: Q.Promise<any>, configuration: string): Q.Promise<any> {
+                return promise.then(function (): void {
+                    if (commandData.options[configuration]) {
+                        var remotePlatformConfig = path.join(remotePlatform, configuration);
+                        if (fs.existsSync(remotePlatformConfig)) {
+                            logger.logLine(resources.getString("CleaningRemoteResources", platform.platform, configuration));
+                            rimraf.sync(remotePlatformConfig);
+                        }
+                    }
+                });
+            }, promise);
+
             break;
         default:
-            throw new Error(resources.getString("command.build.invalidPlatformLocation", platform.platform));
+            throw errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform);
         }
 
         return promise;
@@ -161,7 +189,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
-                throw new Error(resources.getString("command.remotePlatformNotKnown", platform));
+                throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
             var buildSettings = new RemoteBuildSettings({
@@ -172,7 +200,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                 configuration: configuration,
                 buildTarget: buildTarget,
                 language: language,
-                cordovaVersion: require("cordova/package.json").version // TODO (Devdiv 1160583): Use Kit specified version
+                cordovaVersion: require("cordova/package.json").version || "5.0.0" // TODO (Devdiv 1160583): Use Kit specified version
             });
             return Build.RemoteBuild.build(buildSettings);
         });
@@ -194,7 +222,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
                         default:
-                            return Q.reject(new Error(resources.getString("command.build.invalidPlatformLocation", platform.platform)));
+                            return Q.reject(errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform));
                     }
                 });
             }, Q({}));

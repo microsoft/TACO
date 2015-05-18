@@ -1,21 +1,47 @@
-﻿/// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/tacoRemoteLib.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 
-import express = require ("express");
+/// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/tacoRemoteLib.d.ts" />
+/// <reference path="../../typings/express.d.ts" />
+/// <reference path="../../typings/tacoRemoteMultiplexer.d.ts" />
+"use strict";
+
 import Q = require ("q");
 
 import tacoUtility = require ("taco-utils");
 
 import BuildInfo = tacoUtility.BuildInfo;
+import TacoPackageLoader = tacoUtility.TacoPackageLoader;
+
+var dynamicDependenciesLocation = require.resolve("../dynamicDependencies.json");
+var tacoRemoteMux = "taco-remote-multiplexer";
+
+var lastCheck = Date.now();
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
-    public getPackageToServeRequest(buildInfo: BuildInfo, req: express.Request): Q.Promise<TacoRemoteLib.IRemoteLib> {
-        // Either argument could be null: buildInfo if this is a request to submit a new build, or req if this is just about to do a build
-        // ALTERNATELY:
-        // Should we just look up the package to service a request once, based on the request, and then stash it in the buildInfo for later reference? Never letting you change?
-        // In that case we would need to be careful when updating buildInfo objects from responses in other processes but that should be workable.
-        // TODO (Devdiv 1160580): Implement interesting behaviours in here
-        return Q(require("taco-remote-lib"));
+    // Update every 4 hours by default, but tests can change this to force updates
+    public checkInterval = 4 * 60 * 60 * 1000;
+
+    public getPackageToServeRequest(req: Express.Request): Q.Promise<TacoRemoteLib.IRemoteLib> {
+        var promise = Q({});
+        var now = Date.now();
+        if (now - lastCheck > this.checkInterval) {
+            lastCheck = now;
+            promise = TacoPackageLoader.forceInstallTacoPackage(tacoRemoteMux, dynamicDependenciesLocation);
+        }
+
+        return promise.then(function (): Q.Promise<TacoRemoteLib.IRemoteLib> {
+            return TacoPackageLoader.tacoRequireNoCache<TacoRemoteMultiplexer.ITacoRemoteMultiplexer>(tacoRemoteMux, dynamicDependenciesLocation).then(function (mux: TacoRemoteMultiplexer.ITacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
+                var packageInfo = mux.getPackageSpecForQuery(req.query);
+                return TacoPackageLoader.lazyRequire<TacoRemoteLib.IRemoteLib>(packageInfo.name, packageInfo.location);
+            });
+        });
     }
 }
 

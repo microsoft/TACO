@@ -1,4 +1,12 @@
-﻿/// <reference path="../../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/zip-stream.d.ts" />
@@ -40,7 +48,7 @@ class IOSAgent implements ITargetPlatform {
         this.webDebugProxyPortMin = config.get("webDebugProxyPortMin") || 9222;
         this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9322;
 
-        if (UtilHelper.argToBool(config.get("allowsEmulate"))) {
+        if (utils.ArgsHelper.argToBool(config.get("allowsEmulate"))) {
             process.env["PATH"] = path.resolve(__dirname, path.join("node_modules", "ios-sim", "build", "release")) + ":" + process.env["PATH"];
             child_process.exec("which ios-sim", function (err: Error, stdout: Buffer, stderr: Buffer): void {
                 if (err) {
@@ -174,20 +182,23 @@ class IOSAgent implements ITargetPlatform {
 
             stdout += dataStr;
         });
+        var errorMessage: string;
         ideviceinstaller.stderr.on("data", function (data: Buffer): void {
             var dataStr: string = data.toString();
-            if (dataStr.toLowerCase().indexOf("error") !== -1) {
+            if (!errorMessage && dataStr.toLowerCase().indexOf("error") !== -1) {
                 if (dataStr.indexOf("No iOS device found, is it plugged in?") > -1) {
-                    res.status(404).send(resources.getStringForLanguage(req, "InstallFailNoDevice"));
+                    errorMessage = resources.getStringForLanguage(req, "InstallFailNoDevice");
                 } else {
-                    res.status(404).send(dataStr);
+                    // Do nothing: the error will be reported in the stderr of the response
                 }
             }
 
             stderr += dataStr;
         });
         ideviceinstaller.on("close", function (code: number): void {
-            if (code !== 0) {
+            if (errorMessage) {
+                res.status(404).send(errorMessage);
+            } else if (code !== 0) {
                 res.status(404).json({ stdout: stdout, stderr: stderr, code: code });
             } else {
                 buildInfo.updateStatus(utils.BuildInfo.INSTALLED, "InstallSuccess");

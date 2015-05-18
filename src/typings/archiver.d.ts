@@ -1,4 +1,12 @@
-﻿// Extremely minimal type definition for archiver package
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+// Extremely minimal type definition for archiver package
 
 declare module Archiver {
     // TODO improve typings for better intellisense

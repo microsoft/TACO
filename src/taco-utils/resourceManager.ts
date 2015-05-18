@@ -1,14 +1,22 @@
-﻿/// <reference path="../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../typings/node.d.ts" />
 
 import assert = require ("assert");
 import fs = require ("fs");
 import path = require ("path");
 
+import argsHelper = require ("./argsHelper");
 import resourceSet = require ("./resourceSet");
-import tacoUtility = require ("./utilHelper");
 
+import ArgsHelper = argsHelper.ArgsHelper;
 import ResourceSet = resourceSet.ResourceSet;
-import UtilHelper = tacoUtility.UtilHelper;
 
 module TacoUtility {
     export class ResourceManager {
@@ -50,30 +58,34 @@ module TacoUtility {
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
-            if (process.env["TACO_UNIT_TEST"]) {
-                // Mock out resources for unit tests
-                return id;
-            }
+            var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            var result = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
 
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            return this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
+            if (result && process.env["TACO_UNIT_TEST"]) {
+                // Mock out resources for consistency in unit tests, but only if they exist
+                return id;
+            } else {
+                return result;
+            }
         }
 
         public getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
-            if (process.env["TACO_UNIT_TEST"]) {
-                // Mock out resources for unit tests
-                return id;
-            }
+            var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var result = this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
 
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
-            return this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
+            if (result && process.env["TACO_UNIT_TEST"]) {
+                // Mock out resources for consistency in unit tests, but only if they exist
+                return id;
+            } else {
+                return result;
+            }
         }
 
         public getStringForLocale(locale: string, id: string, ...optionalArgs: any[]): string {
             var resourceSet: ResourceSet = this.getOrCreateResourceSet(locale);
             assert.notEqual(resourceSet, null, "We should get a non-null resource set");
 
-            var args = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
             return resourceSet.getString(id, args);
         }
 

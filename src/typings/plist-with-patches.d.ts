@@ -1,4 +1,12 @@
-﻿// Barebones typing for plist-with-patches, added as-needed
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+// Barebones typing for plist-with-patches, added as-needed
 
 declare module "plist-with-patches" {
     export function parseFileSync(filename: string): any;

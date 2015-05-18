@@ -1,3 +1,11 @@
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/colors.d.ts" />
 
@@ -15,7 +23,7 @@ module TacoUtility {
             colors.setTheme({
                 error: "red",
                 warn: "yellow",
-                link: "blue",
+                link: "cyan",
                 normalBold: "bold",
                 success: "green"
             });

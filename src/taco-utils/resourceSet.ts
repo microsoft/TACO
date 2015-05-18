@@ -1,8 +1,18 @@
-﻿/// <reference path="../typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+
+/// <reference path="../typings/node.d.ts" />
 
 import path = require ("path");
-import tacoUtility = require ("./utilHelper");
-import UtilHelper = tacoUtility.UtilHelper;
+
+import argsHelper = require ("./argsHelper");
+
+import ArgsHelper = argsHelper.ArgsHelper;
 
 module TacoUtility {
     export class ResourceSet {
@@ -29,7 +39,7 @@ module TacoUtility {
             /*All args passed to current function:
             you can call getString('foo', 'bar', 'baz') or getString('foo',['bar', 'baz']) 
             and the utility function will extract ['bar', 'baz'] as args in both cases*/
-            var args: string[] = UtilHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             if (args) {
                 for (var i: number = 0; i < args.length; i++) {
                     result = result.replace(new RegExp("\\{" + i + "\\}", "g"), args[i]);

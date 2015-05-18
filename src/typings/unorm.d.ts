@@ -1,4 +1,12 @@
-﻿// Barebones typing for unorm, added as-needed
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+// Barebones typing for unorm, added as-needed
 
 interface Object {
     normalize: (form?: string) => string;

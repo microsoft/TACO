@@ -1,4 +1,12 @@
-﻿/// <reference path="./express.d.ts" />
+﻿/**
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
+
+/// <reference path="./express.d.ts" />
 /// <reference path="./node.d.ts" />
 /// <reference path="./Q.d.ts" />
 
@@ -18,6 +26,7 @@ declare module RemoteBuild {
     }
     interface IServerModuleConfiguration {
         mountPath: string;
+        requirePath?: string;
         [prop: string]: any;
     }
     interface ICertStore {
@@ -34,6 +43,7 @@ declare module RemoteBuild {
     interface IServerModuleFactory {
         create(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration, serverCapabilities: IServerCapabilities): Q.Promise<RemoteBuild.IServerModule>;
         test(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration, serverTestCapabilities: IServerTestCapabilities): Q.Promise<any>; // When remotebuild is invoked in testing mode, it will call for the modules to test themselves against a separate instance of the server running in the normal mode
+        printHelp(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration): void;
     }
     interface IServerModule {
         getRouter(): Express.Router;
