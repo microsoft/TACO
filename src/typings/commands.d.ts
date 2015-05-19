@@ -43,17 +43,15 @@ declare module TacoUtility {
          * Factory to create new Commands classes
          */
         class CommandFactory {
-            private static Instance;
-            static Listings: any;
+            public listings: any;
             /**
-             * Factory to create new Commands classes
              * initialize with json file containing commands
              */
-            static init(commandsInfoPath: string): void;
+            constructor(commandsInfoPath: string);
             /**
              * get specific task object, given task name
              */
-            static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand;
+            public getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand;
         }
 
         class TacoCommandBase implements ICommand {

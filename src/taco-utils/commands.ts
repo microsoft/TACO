@@ -59,31 +59,29 @@ module TacoUtility {
          * Factory to create new Commands classes
          */
         export class CommandFactory {
-            private static Instance: IDocumentedCommand;
-            public static Listings: any;
+            public listings: any;
 
             /**
              * Factory to create new Commands classes
              * initialize with json file containing commands
              */
-            public static init(commandsInfoPath: string): void {
-                commandsInfoPath = commandsInfoPath;
+            constructor(commandsInfoPath: string) {
                 if (!fs.existsSync(commandsInfoPath)) {
                     throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
                 }
 
-                CommandFactory.Listings = require(commandsInfoPath);
+                this.listings = require(commandsInfoPath);
             }
 
             /**
              * get specific task object, given task name
              */
-            public static getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
-                if (!name || !CommandFactory.Listings) {
+            public getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
+                if (!name || !this.listings) {
                     throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
                 }
 
-                var moduleInfo: ICommandInfo = CommandFactory.Listings[name];
+                var moduleInfo: ICommandInfo = this.listings[name];
                 if (!moduleInfo) {
                     return null;
                 }
@@ -94,17 +92,12 @@ module TacoUtility {
                 }
 
                 var commandMod: any = require(modulePath);
-                CommandFactory.Instance = new commandMod();
-                CommandFactory.Instance.info = moduleInfo;
+                var moduleInstance: any = new commandMod();
+                moduleInstance.info = moduleInfo;
 
-                var commandData: ICommandData = {
-                    options: {},
-                    original: inputArgs,
-                    remain: inputArgs
-                };
-
-                if (CommandFactory.Instance && CommandFactory.Instance.canHandleArgs(commandData)) {
-                    return CommandFactory.Instance;
+                var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
+                if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
+                    return moduleInstance;
                 } else {
                     return null;
                 }
