@@ -1,11 +1,11 @@
 {
-    "name": "taco-dev",
+    "name": "taco-devDependencies",
     "author": {
         "name": "Microsoft Corp."
     },
     "description": "specifies dependencies needed for developing taco",
     "version": "0.0.1",
-    "dependencies": {
+    "devDependencies": {
         "del": "^1.0.0",
         "gulp": "^3.8.10",
         "typescript": "latest",

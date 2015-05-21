@@ -50,7 +50,7 @@ gulp.task("installDevDependencies", function (callback) {
 gulp.task("uninstallDevDependencies", function (callback) {
     var dependencies = [];
 
-    for (var devPackage in devPackages.dependencies) {
+    for (var devPackage in devPackages.devDependencies) {
         dependencies.push(devPackage);
     }
 
