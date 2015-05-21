@@ -4,11 +4,8 @@ var exec = require("child_process").exec,
     path = require('path'),
     gulp = require("gulp"),
     npmUtil = require ("../tools/npmInstallerUtil"),
-    buildConfig = require('./build_config.json');
-
-var devDependencies =
-    ["del", "gulp", "typescript", "gulp-typescript", "gulp-sourcemaps", "merge2", "ncp", "q",
-    "run-sequence", "archiver", "mocha-teamcity-reporter", "nopt", "replace", "jsdoc-parse"];
+    buildConfig = require('./build_config.json'),
+    devPackages = require('../package.json');
 
 gulp.on("task_not_found", function (err) {
     console.error("\nPlease run 'gulp prep' to prepare project\n");
@@ -44,12 +41,20 @@ gulp.task("unprep", ["uninstallDevDependencies"], function (callback) {
 
 /* install dev dependencies in root folder */
 gulp.task("installDevDependencies", function (callback) {
-    npmUtil.installPackages(devDependencies, "..", callback);
+    exec("npm install", { cwd: ".." }, function (error, stdout, stderr) {
+        callback(error);
+    });
 });
 
 /* uninstall dev dependencies from root folder */
 gulp.task("uninstallDevDependencies", function (callback) {
-    npmUtil.uninstallPackages(devDependencies, "..", callback);
+    var dependencies = [];
+
+    for (var devPackage in devPackages.dependencies) {
+        dependencies.push(devPackage);
+    }
+
+    npmUtil.uninstallPackages(dependencies, "..", callback);
 });
 
 /*  

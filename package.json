@@ -1,0 +1,24 @@
+{
+    "name": "taco-dev",
+    "author": {
+        "name": "Microsoft Corp."
+    },
+    "description": "specifies dependencies needed for developing taco",
+    "version": "0.0.1",
+    "dependencies": {
+        "del": "^1.0.0",
+        "gulp": "^3.8.10",
+        "typescript": "latest",
+        "gulp-typescript": "2.6.0",
+        "gulp-sourcemaps": "^1.5.2",
+        "merge2": "^0.3.5",
+        "ncp": "0.5.1", 
+        "q": "^1.1.2",
+        "run-sequence": "^1.1.0",
+        "archiver": "^0.14.4",
+        "mocha-teamcity-reporter": "^0.0.4",
+        "nopt": "^3.0.1",
+        "replace": "^0.3.0", 
+        "jsdoc-parse": "^1.0.0"
+    }
+}
