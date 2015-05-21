@@ -234,7 +234,7 @@ class Create implements commands.IDocumentedCommand {
 
         if (this.commandParameters.cordovaParameters.projectPath) {
             logger.log(resources.getString("CommandCreateStatusProjectPath"), logger.Level.Normal);
-            logger.log(this.commandParameters.cordovaParameters.projectPath, logger.Level.NormalBold);
+            logger.log(path.resolve(this.commandParameters.cordovaParameters.projectPath), logger.Level.NormalBold);
         }
         
         if (!this.isKitProject()) {
@@ -287,7 +287,7 @@ class Create implements commands.IDocumentedCommand {
             logger.log(" " + resources.getString("CommandCreateSuccessProjectCLI", customWwwPath), logger.Level.Normal);
         }
 
-        logger.logLine(" " + resources.getString("CommandCreateSuccessPath", this.commandParameters.cordovaParameters.projectPath), logger.Level.NormalBold);
+        logger.logLine(" " + resources.getString("CommandCreateSuccessPath", path.resolve(this.commandParameters.cordovaParameters.projectPath)), logger.Level.NormalBold);
     }
 }
 
