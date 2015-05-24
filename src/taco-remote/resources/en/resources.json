@@ -82,7 +82,7 @@
     "_HomebrewPackageVerificationFailed": "Message displayed if after installing the 3rd party dependencies, they do not work. {0} is the contents of the error",
     "HomebrewInstallationSuccess": "Successfully installed homebrew packages.\n",
     "_HomebrewInstallationSuccess": "Message displayed when 3rd party dependencies are successfully installed",
-    "HomebrewInstallationDeclined": "If you want to enable deploying to devices or debugging apps on devices or the simulator, delete ~/.remotebuild to be asked again.\n",
+    "HomebrewInstallationDeclined": "If you want to enable deploying to devices or debugging apps on devices or the simulator, delete {0} to be asked again.\n",
     "_HomebrewInstallationDeclined": "Message displayed when the user opts out of installing 3rd party dependencies",
 
     "TacoRemoteHelp": [
