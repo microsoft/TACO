@@ -1,5 +1,6 @@
 {
     "name": "taco-dev-dependencies",
+    "private": true,
     "author": {
         "name": "Microsoft Corp."
     },
