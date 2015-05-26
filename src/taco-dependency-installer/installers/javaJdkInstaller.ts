@@ -40,7 +40,7 @@ class JavaJdkInstaller extends InstallerBase {
     protected downloadWin32(): Q.Promise<any> {
         // Log progress
         logger.logLine(resources.getString("DownloadingLabel"));
-
+        //return Q.resolve({}); // TEMP
         // Set installer download path
         this.installerFile = path.join(InstallerBase.InstallerCache, "java", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
@@ -48,7 +48,7 @@ class JavaJdkInstaller extends InstallerBase {
         var expectedProperties: installerUtils.IExpectedProperties = {
             bytes: this.installerInfo.bytes,
             sha1: this.installerInfo.sha1
-        }
+        };
 
         // If we already have an installer present, verify if the file is uncorrupt
         if (fs.existsSync(this.installerFile)) {
@@ -82,10 +82,10 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
+        // Log progress
         logger.logLine(resources.getString("InstallingLabel"));
-
-        // More info on installation through command line for Windows 7 at http://docs.oracle.com/javase/7/docs/webnotes/install/windows/jdk-installation-windows.html
-        // For Windows 8: http://docs.oracle.com/javase/8/docs/technotes/guides/install/windows_jdk_install.html#CHDHHBDD
+        //return Q.resolve({}); // TEMP
+        // Run installer
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var commandLine: string = this.installerFile + " /quiet /norestart /lvx %temp%/javajdk7.0.550.13.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
 
@@ -101,19 +101,54 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected updateVariablesWin32(): Q.Promise<any> {
+        // Log progress
         logger.logLine(resources.getString("SettingSystemVariablesLabel"));
 
-        // JAVA_HOME variable
-        if (process.env["JAVA_HOME"]) {
-            // JAVA_HOME is already defined; prompt the user before overwriting it
-            // TODO
-        } else {
+        // Initialize values
+        var javaHomeName: string = "JAVA_HOME";
+        var javaHomeValue: string = this.installDestination;
+        var pathName: string = "Path";
+        var appendToPath: string = "%" + javaHomeName + "%" + path.sep + "bin";
 
+        return this.mustSetJavaHome(javaHomeName)
+            .then(function (mustSetJavaHome: boolean): Q.Promise<any> {
+                // Set JAVA_HOME if needed
+                if (mustSetJavaHome) {
+                    return installerUtils.setEnvironmentVariableWin32(javaHomeName, javaHomeValue);
+                }
+
+                return Q.resolve({});
+            })
+            .then(function (): Q.Promise<any> {
+                // Determine if we need to modify the Path variable
+                var pathValue: string = process.env[pathName];
+
+                if (pathValue.indexOf(appendToPath) !== -1) {
+                    // No need to change the path
+                    return Q.resolve({});
+                }
+
+                pathValue = appendToPath + ";" + pathValue;
+
+                return installerUtils.setEnvironmentVariableWin32(pathName, pathValue);
+            });
+    }
+
+    private mustSetJavaHome(javaHomeName: string): Q.Promise<boolean> {
+        if (!process.env[javaHomeName]) {
+            return Q.resolve(true);
         }
 
-        // Path variable
+        logger.logWarnLine(resources.getString("SystemVariableExists", javaHomeName));
 
-        return Q.resolve({});
+        return installerUtils.promptUser(resources.getString("YesExampleString"))
+            .then(function (answer: string): Q.Promise<boolean> {
+                if (answer === resources.getString("YesString")) {
+                    return Q.resolve(true);
+                } else {
+                    return Q.resolve(false);
+                }
+            });
     }
 }
 

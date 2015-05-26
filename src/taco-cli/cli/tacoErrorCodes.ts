@@ -11,6 +11,7 @@ enum TacoErrorCode {
     CommandCreateTacoJsonFileCreationError,
     CommandCreateTacoJsonFileWriteError,
     CommandCreateTemplatesUnavailable,
+    CommandInstallDependenciesOnlyOnePlatform,
     CommandNotBothDeviceEmulate,
     CommandNotBothLocalRemote,
     CommandRemotePlatformNotKnown,

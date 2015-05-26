@@ -5,7 +5,8 @@
         "prerequisites": [
             "javaJdk"
         ],
-        "versions": {}
+        "versions": { },
+        "temp": "https://dl.google.com/android/installer_r23-windows.exe"
     },
     "ant": {
         "displayName": "Apache Ant",

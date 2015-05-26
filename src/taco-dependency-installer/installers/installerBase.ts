@@ -21,7 +21,11 @@ import Q = require ("q");
 import request = require ("request");
 
 import resources = require ("../resources/resourceManager");
+import tacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
+
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 class InstallerBase {
     protected static InstallerCache: string = path.join(tacoUtils.UtilHelper.tacoHome, "third-party-installers");
@@ -55,15 +59,15 @@ class InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        throw new Error("AbstractMethodCall");
+        throw errorHelper.get(TacoErrorCodes.AbstractMethod);
     }
 
     protected installWin32(): Q.Promise<any> {
-        throw new Error("AbstractMethodCall");
+        throw errorHelper.get(TacoErrorCodes.AbstractMethod);
     }
 
     protected updateVariablesWin32(): Q.Promise<any> {
-        throw new Error("AbstractMethodCall");
+        throw errorHelper.get(TacoErrorCodes.AbstractMethod);
     }
 }
 

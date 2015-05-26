@@ -97,8 +97,8 @@ gulp.task("copy", function (): Q.Promise<any> {
             "/**/templates/**",
             "/**/examples/**",
             "/**/*.ps1",
-            "/**/dynamicDependencies.json"
-            "/**/dependencies.json",
+            "/**/dynamicDependencies.json",
+            "/**/dependencies.json"
         ],
         buildConfig.src, buildConfig.buildPackages).then(function (): void {
             /* replace %TACO_BUILD_PACKAGES% with the absolute path of buildConfig.buildPackages in the built output */

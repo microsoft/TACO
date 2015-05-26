@@ -32,4 +32,16 @@ declare module DependencyInstallerInterfaces {
     export interface IDependencyDictionary {
         [dependencyId: string]: IDependencyData;
     }
+
+    export interface IDependency {
+        id: string;
+        version: string;
+        displayName: string;
+        licenseUrl?: string;
+        installDestination: string;
+    }
+
+    export interface IInstallerConfig {
+        dependencies: IDependency[];
+    }
 }

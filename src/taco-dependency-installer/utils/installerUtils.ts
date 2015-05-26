@@ -1,22 +1,29 @@
 /**
-? *******************************************************
-? *                                                     *
-? *   Copyright (C) Microsoft. All rights reserved.     *
-? *                                                     *
-? *******************************************************
-? */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
 
 /// <reference path="../../typings/hashFiles.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 
 "use strict";
 
+import child_process = require ("child_process");
 import fs = require ("fs");
 import hashFiles = require ("hash-files");
+import os = require ("os");
+import path = require ("path");
 import Q = require ("q");
+import readline = require ("readline");
 import request = require ("request");
 
+import tacoUtils = require ("taco-utils");
 import resources = require ("../resources/resourceManager");
+
+import utils = tacoUtils.UtilHelper;
 
 module InstallerUtils {
     export interface IExpectedProperties {
@@ -71,15 +78,75 @@ class InstallerUtils {
      * Returns a string where the %...% notations in the provided path have been replaced with their actual values. For example, calling this with "%programfiles%\foo"
      * would return "C:\Program Files\foo" (on most systems).
      */
-    public static expandPath(path: string): string {
-        return path.replace(/\%(.+?)\%/g, function (substring: string, ...args: any[]): string {
+    public static expandPath(filePath: string): string {
+        return filePath.replace(/\%(.+?)\%/g, function (substring: string, ...args: any[]): string {
             if (process.env[args[0]]) {
                 return process.env[args[0]];
             } else {
-                // This is not an environment variable, can't replace it
+                // This is not an environment variable, can't replace it so leave it as is
                 return args[0];
             }
         });
+    }
+
+    /*
+     * Sets the specified environment variable to the specified value at the machine level (Windows only). If the calling node.js process does not have administrator privileges,
+     * the spawned process will fail and this method will return a rejected process.
+     */
+    public static setEnvironmentVariableWin32(name: string, value: string): Q.Promise<any> {
+        if (os.platform() !== "win32") {
+            // No-op for platforms other than win32
+            return Q.resolve({});
+        }
+
+        var scriptPath: string = path.resolve(__dirname, "win32", "setSystemVariable.ps1");
+        var commandArgs: string[] = [
+            "powershell",
+            "-executionpolicy",
+            "unrestricted",
+            "-file",
+            utils.quotesAroundIfNecessary(scriptPath),
+            utils.quotesAroundIfNecessary(name),
+            utils.quotesAroundIfNecessary(value)
+        ];
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var errorOutput: string = "";
+        var variableProcess: child_process.ChildProcess = child_process.spawn("powershell", commandArgs);
+
+        variableProcess.stderr.on("data", function (data: any): void {
+            errorOutput += data.toString();
+        });
+        variableProcess.on("error", function (err: Error): void {
+            deferred.reject(err);
+        });
+        variableProcess.on("close", function (code: number): void {
+            if (errorOutput) {
+                deferred.reject(new Error(errorOutput));
+            } else {
+                deferred.resolve({});
+            }
+        });
+
+        return deferred.promise;
+    }
+
+    /*
+     * Prompts the user with the specified message and returns a promise resolved with what the user typed.
+     */
+    public static promptUser(message: string): Q.Promise<string> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        rl.question(message, function (answer: string): void {
+            rl.close();
+
+            deferred.resolve(answer);
+        });
+
+        return deferred.promise;
     }
 
     private static calculateFileSha1(filePath: string): string {

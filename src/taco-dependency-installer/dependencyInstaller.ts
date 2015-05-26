@@ -13,33 +13,28 @@
 "use strict";
 
 import fs = require ("fs");
+import nodeWindows = require ("node-windows");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
-import readline = require ("readline");
+import wrench = require ("wrench");
 
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import DirectedAcyclicGraph = require ("./utils/directedAcyclicGraph");
-import InstallerBase = require ("./installers/installerBase");
 import installerUtils = require ("./utils/installerUtils");
 import resources = require ("./resources/resourceManager");
+import tacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import logger = tacoUtils.Logger;
-
-interface IDependencyInfo {
-    id: string;
-    version: string;
-    displayName: string;
-    licenseUrl?: string;
-    installDestination: string;
-    installer: InstallerBase;
-    error?: Error;
-}
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 module TacoDependencyInstaller {
     export class DependencyInstaller {
         private static DataFile: string = path.resolve(__dirname, "dependencies.json");
+        private static InstallConfigFolder: string = path.resolve(tacoUtils.UtilHelper.tacoHome);
+        private static InstallConfigFile: string = path.join(DependencyInstaller.InstallConfigFolder, "installConfig.json");
 
         // Map the ids that cordova uses for the dependencies to our own ids
         // TODO (DevDiv 1170232): Use the real ids that cordova uses when the check_reqs feature is done
@@ -53,20 +48,9 @@ module TacoDependencyInstaller {
             msbuild: "msBuild",
         };
 
-        // Map the dependency ids to their installer class to easily instantiate the installers
-        private static InstallerMap: { [dependencyId: string]: string } = {
-            androidSdk: "./installers/androidSdkInstaller",
-            ant: "./installers/antInstaller",
-            gradle: "./installers/gradleInstaller",
-            iosDeploy: "./installers/iosDeployInstaller",
-            iosSim: "./installers/iosSimInstaller",
-            javaJdk: "./installers/javaJdkInstaller",
-            msBuild: "./installers/msBuildInstaller"
-        };
-
         private dependenciesDataWrapper: DependencyDataWrapper;
         private unsupportedMissingDependencies: any[];
-        private missingDependencies: IDependencyInfo[];
+        private missingDependencies: DependencyInstallerInterfaces.IDependency[];
         private platform: string;
 
         constructor() {
@@ -78,18 +62,14 @@ module TacoDependencyInstaller {
             // We currently only support Windows for dependency installation
             // TODO (DevDiv 1172346): Support Mac OS as well
             if (this.platform !== "win32") {
-                logger.logErrorLine(resources.getString("UnsupportedPlatform", this.platform));
-
-                return Q.reject("UnsupportedPlatform");
+                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, this.platform));
             }
 
             // We currently only support installing dependencies for Android
             var targetPlatform: string = data.remain[0];
 
             if (targetPlatform !== "android") {
-                logger.logErrorLine(resources.getString("UnsupportedTargetPlatform", targetPlatform));
-
-                return Q.reject("UnsupportedTargetPlatform");
+                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedTargetPlatform, targetPlatform));
             }
 
             // Call into Cordova to check missing dependencies for the current project
@@ -98,24 +78,16 @@ module TacoDependencyInstaller {
             // Extract Cordova results and transform them to an array of dependency ids
             this.parseMissingDependencies(cordovaResults);
 
-            /*
-             * Verify if we will need administrator privileges and deal with that accordingly
-             * TODO (DevDiv 1173047)
-             */
-
             // Warn the user for any dependencies for which installation is not supported
             this.displayUnsupportedWarning();
 
             // Sort the array of dependency ids based on the order in which they need to be installed
             this.sortDependencies();
 
-            // Instantiate the installers that will need to be run
-            this.instantiateInstallers();
-
-            // Print a summary of what is about to be installed, Wait for user confirmation, then run the insallers in order and print the results
+            // Print a summary of what is about to be installed, Wait for user confirmation, then spawn the elevated process which will perform the installations
             return this.printDependenciesToInstall()
-                .then(this.runInstallers.bind(this))
-                .then(this.printResults.bind(this));
+                .then(this.spawnElevatedInstaller.bind(this))
+                .then(this.printSummaryLine.bind(this));
         }
 
         private static callCordovaCheckDependencies(platform: string): any[] {
@@ -178,13 +150,12 @@ module TacoDependencyInstaller {
                     var tacoId: string = DependencyInstaller.IdMap[value.id];
                     var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.firstValidVersion(tacoId);
                     var installPath: string = path.resolve(installerUtils.expandPath(self.dependenciesDataWrapper.getInstallDirectory(tacoId, versionToUse)));
-                    var dependencyInfo: IDependencyInfo = {
+                    var dependencyInfo: DependencyInstallerInterfaces.IDependency = {
                         id: tacoId,
                         version: versionToUse,
                         displayName: self.dependenciesDataWrapper.getDisplayName(tacoId),
                         licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(tacoId),
                         installDestination: installPath,
-                        installer: null
                     };
 
                     self.missingDependencies.push(dependencyInfo);
@@ -266,16 +237,14 @@ module TacoDependencyInstaller {
         }
 
         private sortDependencies(): void {
-            var self = this;
+            /*var self = this;
 
             this.missingDependencies.sort(function (a: IDependencyInfo, b: IDependencyInfo): number {
-                var aDependsOnB: boolean = self.dependenciesData[a.id].prerequisites[b.id];
-                var bDependsOnA: boolean = self.dependenciesData[b.id].prerequisites[a.id]
+                var aDependsOnB: boolean = self.dependenciesDataWrapper.dependsOn(a.id, b.id);
+                var bDependsOnA: boolean = self.dependenciesDataWrapper.dependsOn(b.id, a.id);
 
                 if (aDependsOnB && bDependsOnA) {
-                    logger.logErrorLine(resources.getString("NoValidInstallOrder"));
-
-                    throw new Error("NoValidInstallOrder");
+                    throw errorHelper.get(TacoErrorCodes.NoValidInstallOrder);
                 }
 
                 if (bDependsOnA) {
@@ -287,16 +256,15 @@ module TacoDependencyInstaller {
                 }
 
                 return 0;
-            });
+            });*/
 
-            /*
             var self = this;
             var adjacencyList: DirectedAcyclicGraph.IVertexIdentifier[] = [];
 
-            this.missingDependencies.forEach(function (value: IDependencyInfo): void {
+            this.missingDependencies.forEach(function (value: DependencyInstallerInterfaces.IDependency): void {
                 var vertexIdentifier: DirectedAcyclicGraph.IVertexIdentifier = {
                     id: value.id,
-                    neighbors: self.dependenciesData[value.id].prerequisites
+                    neighbors: self.dependenciesDataWrapper.getPrerequisites(value.id)
                 };
 
                 adjacencyList.push(vertexIdentifier);
@@ -304,7 +272,7 @@ module TacoDependencyInstaller {
 
             var graph: DirectedAcyclicGraph = new DirectedAcyclicGraph(adjacencyList);
             var sortedIds: string[] = graph.topologicalSort();
-            var sortedDependencies: IDependencyInfo[] = [];
+            var sortedDependencies: DependencyInstallerInterfaces.IDependency[] = [];
 
             sortedIds.forEach(function (value: string): void {
                 var nextDependencyIndex: number;
@@ -320,29 +288,18 @@ module TacoDependencyInstaller {
             });
 
             this.missingDependencies = sortedDependencies;
-            */
-        }
-
-        private instantiateInstallers(): void {
-            var self = this;
-
-            this.missingDependencies.forEach(function (value: IDependencyInfo, index: number, array: IDependencyInfo[]): void {
-                // Instantiate and register the installer
-                var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = self.dependenciesDataWrapper.getInstallerInfo(value.id, value.version);
-                var installerConstructor: any = require(DependencyInstaller.InstallerMap[value.id]);
-
-                value.installer = new installerConstructor(installerInfoToUse, value.version, value.installDestination);
-            });
         }
 
         private printDependenciesToInstall(): Q.Promise<any> {
-            var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: IDependencyInfo): boolean {
+            this.buildInstallConfigFile();
+
+            var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: DependencyInstallerInterfaces.IDependency): boolean {
                 // Return true if there is a license url, false if not
                 return !!value.licenseUrl;
             });
 
             logger.logNormalBoldLine(resources.getString("InstallingDependenciesHeader"));
-            this.missingDependencies.forEach(function (value: IDependencyInfo, index: number, array: IDependencyInfo[]): void {
+            this.missingDependencies.forEach(function (value: DependencyInstallerInterfaces.IDependency): void {
                 logger.log(resources.getString("DependencyLabel"));
                 logger.log(value.displayName, logger.Level.NormalBold);
                 logger.log("\n");
@@ -356,68 +313,84 @@ module TacoDependencyInstaller {
                 logger.log("\n");
             });
 
+            logger.logNormalLine("============================================================");
+            logger.log("\n");
+            logger.logNormalLine(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
+            logger.log("\n");
+
             if (needsLicenseAgreement) {
                 logger.logNormalLine(resources.getString("ProceedLicenseAgreement"));
             } else {
                 logger.logNormalLine(resources.getString("Proceed"));
             }
 
-            var deferred: Q.Deferred<any> = Q.defer<any>();
-            var rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout
-            });
+            return installerUtils.promptUser(resources.getString("YesExampleString"))
+                .then(function (answer: string): Q.Promise<any> {
+                    if (answer === resources.getString("YesString")) {
+                        logger.log("\n");
 
-            rl.question(resources.getString("YesExampleString"), function (answer: string): void {
-                rl.close();
+                        return Q.resolve({});
+                    } else {
+                        return Q.reject(errorHelper.get(TacoErrorCodes.LicenseAgreementError));
+                    }
+                });
+        }
 
-                if (answer === resources.getString("YesString")) {
-                    logger.log("\n");
-                    deferred.resolve({});
-                } else {
-                    logger.logErrorLine(resources.getString("LicenseAgreementError"));
-                    deferred.reject("LicenseAgreementError");
+        private buildInstallConfigFile(): void {
+            try {
+                if (fs.existsSync(DependencyInstaller.InstallConfigFile)) {
+                    fs.unlinkSync(DependencyInstaller.InstallConfigFile);
                 }
+            } catch (err) {
+                errorHelper.get(TacoErrorCodes.ErrorDeletingInstallConfig, DependencyInstaller.InstallConfigFile);
+            }
+
+            try {
+                // Create a JSON object wrapper around our array of missing dependencies
+                var jsonWrapper = {
+                    dependencies: this.missingDependencies
+                };
+
+                // Write the json object to the config file
+                wrench.mkdirSyncRecursive(DependencyInstaller.InstallConfigFolder, 511); // 511 decimal is 0777 octal
+                fs.writeFileSync(DependencyInstaller.InstallConfigFile, JSON.stringify(jsonWrapper, null, 4));
+            } catch (err) {
+                errorHelper.get(TacoErrorCodes.ErrorCreatingInstallConfig, DependencyInstaller.InstallConfigFile);
+            }
+        }
+
+        private spawnElevatedInstaller(): Q.Promise<Error> {
+            switch (this.platform) {
+                case "win32":
+                    return this.spawnElevatedInstallerWin32();
+                default:
+                    return Q.reject<Error>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, this.platform));
+            }
+        }
+
+        private spawnElevatedInstallerWin32(): Q.Promise<Error> {
+            var deferred: Q.Deferred<Error> = Q.defer<Error>();
+            var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
+            var command: string = "node " + elevatedInstallerPath + " " + DependencyInstaller.InstallConfigFile;
+
+            nodeWindows.elevate(command, function (error: Error): void {
+                deferred.resolve(error);
             });
 
             return deferred.promise;
         }
 
-        private runInstallers(): Q.Promise<any> {
-            return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyInfo): Q.Promise<any> {
-                return previous
-                    .then(function (): Q.Promise<any> {
-                        logger.logNormalBoldLine(value.displayName);
+        private printSummaryLine(err: Error): Q.Promise<any> {
+            logger.logNormalLine("============================================================");
+            logger.log("\n");
 
-                        return value.installer.run();
-                    })
-                    .catch(function (err: Error): void {
-                        value.error = err;
-                    })
-                    .then(function (): void {
-                        logger.log("\n");
-                    });
-            }, Q({}));
-        }
-
-        private printResults(): void {
-            var dependencyErrors: IDependencyInfo[] = this.missingDependencies.filter(function (value: IDependencyInfo, index: number, array: IDependencyInfo[]): boolean {
-                // Return true if there is an error, false otherwise
-                return !!value.error;
-            });
-
-            if (dependencyErrors.length > 0) {
-                logger.logWarnLine(resources.getString("InstallationErrors"));
-                dependencyErrors.forEach(function (value: IDependencyInfo, index: number, array: IDependencyInfo[]): void {
-                    logger.log(resources.getString("DependencyLabel"));
-                    logger.log(value.displayName, logger.Level.NormalBold);
-                    logger.log("\n");
-                    logger.logErrorLine(value.error.message);
-                    logger.log("\n");
-                });
+            if (err) {
+                logger.logErrorLine(resources.getString("InstallCompletedWithErrors"));
             } else {
-                logger.logSuccessLine(resources.getString("InstallationSuccessful"));
+                logger.logSuccessLine(resources.getString("InstallCompletedSuccessfully"));
             }
+
+            return Q.resolve({});
         }
     }
 }

@@ -1,10 +1,10 @@
 /**
-? *******************************************************
-? *                                                     *
-? *   Copyright (C) Microsoft. All rights reserved.     *
-? *                                                     *
-? *******************************************************
-? */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
 
 /// <reference path="../../typings/dependencyInstallerInterfaces.d.ts" />
 
@@ -60,6 +60,17 @@ class DependencyDataWrapper {
     }
 
     /*
+     * Returns the list of prerequisites for the specified dependency. Will return null if the info is missing in our metadata or if the dependency does not exist.
+     */
+    public getPrerequisites(id: string): string[] {
+        if (this.dependenciesData[id]) {
+            return this.dependenciesData[id].prerequisites;
+        }
+
+        return null;
+    }
+
+    /*
      * Returns the installer info for the specified dependency. Will return null if either the dependency id, the version id or the platform (or the current system
      * platform if no platform is specified) id does not exist.
      */
@@ -69,6 +80,13 @@ class DependencyDataWrapper {
         }
 
         return null;
+    }
+
+    /*
+     * Returns true if the specified dependency exists, false otherwise.
+     */
+    public dependencyExists(id: string): boolean {
+        return !!this.dependenciesData[id];
     }
 
     /*
@@ -117,12 +135,13 @@ class DependencyDataWrapper {
      * Returns true if the first specified dependency depends on the second one, false if not. Will also return false if either of the specified dependencies does
      * not exist in our metadata.
      */
-    public depends(a: string, b: string): boolean {
+    public dependsOn(a: string, b: string): boolean {
+        // TODO make a depth-first search to recursively check dependents
         if (!this.dependenciesData[a] || !this.dependenciesData[b]) {
             return false;
         }
 
-        return !!this.dependenciesData[a].prerequisites[b];
+        return this.dependenciesData[a].prerequisites.indexOf(b) !== -1;
     }
 }
 

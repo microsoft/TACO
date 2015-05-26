@@ -18,6 +18,8 @@ import Q = require ("q");
 
 import resources = require ("../resources/resourceManager");
 import dependencies = require ("taco-dependency-installer");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
@@ -41,7 +43,7 @@ class InstallDependencies implements commands.IDocumentedCommand {
             parsed = this.parseArguments(data);
             this.verifyArguments(parsed);
         } catch (err) {
-            return Q.reject(err.message);
+            return Q.reject(err);
         }
 
         var installer: dependencies.DependencyInstaller = new dependencies.DependencyInstaller();
@@ -57,15 +59,13 @@ class InstallDependencies implements commands.IDocumentedCommand {
     }
 
     private parseArguments(args: commands.ICommandData): commands.ICommandData {
-        return utils.parseArguments(InstallDependencies.KnownOptions, {}, args.original, 0);
+        return tacoUtils.ArgsHelper.parseArguments(InstallDependencies.KnownOptions, {}, args.original, 0);
     }
 
     private verifyArguments(data: commands.ICommandData): void {
         // Exactly 1 platform name must be specified
         if (data.remain.length !== 1) {
-            logger.logErrorLine(resources.getString("CommandInstallDependenciesOnlyOnePlatform"));
-
-            throw new Error("CommandInstallDependenciesOnlyOnePlatform");
+            throw errorHelper.get(TacoErrorCodes.CommandInstallDependenciesOnlyOnePlatform);
         }
     }
 }
