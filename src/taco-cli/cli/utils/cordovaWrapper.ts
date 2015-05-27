@@ -33,9 +33,9 @@ class CordovaWrapper {
     public static cli(args: string[]): Q.Promise<any> {
         var deferred = Q.defer();
         var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
-        proc.on("error", function (err: Error): void {  
+        proc.on("error", function (err: any): void {  
             // ENOENT error thrown if no Cordova.cmd is found
-            if (err.message.indexOf("ENOENT") > -1) {
+            if (err.code == "ENOENT") {
                 tacoUtility.Logger.logErrorLine(resources.getString("CordovaCmdNotFound"));
                 deferred.resolve({});
             }
