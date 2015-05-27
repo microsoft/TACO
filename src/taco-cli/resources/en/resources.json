@@ -254,6 +254,6 @@
     "CordovaCommandFailedWithError": "'cordova {0}' failed.",
     "_CordovaCommandFailedWithError.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
 
-    "CordovaCmdNotFound": "Cordova is not installed, please run 'npm install –g Cordova'",
+    "CordovaCmdNotFound": "Cordova not found, please run 'npm install –g Cordova' to install Cordova globally",
     "_CordovaCmdNotFound.comment": "Error message shown when no Cordova is found on the machine"
 }
