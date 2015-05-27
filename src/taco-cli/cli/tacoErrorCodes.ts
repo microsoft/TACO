@@ -21,6 +21,7 @@ enum TacoErrorCode {
     CommandSetupRemoteInvalidPort,
     CommandSetupRemoteRejectedPin,
     CommandSetupTimedout,
+    CordovaCmdNotFound,
     CordovaCommandFailed,
     CordovaCommandFailedWithError,
     ErrorDownloadingRemoteBuild,

@@ -35,12 +35,10 @@ class CordovaWrapper {
         var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
         proc.on("error", function (err: any): void {  
             // ENOENT error thrown if no Cordova.cmd is found
-            if (err.code === "ENOENT") {
-                tacoUtility.Logger.logErrorLine(resources.getString("CordovaCmdNotFound"));
-                deferred.resolve({});
-            }
-
-            deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" ")));
+            var tacoError = (err.code === "ENOENT") ?
+                errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
+                errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" "));
+            deferred.reject(tacoError);
         });
         proc.on("close", function (code: number): void {
             if (code) {
