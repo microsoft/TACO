@@ -86,15 +86,12 @@ describe("taco meta command tests: ", function (): void {
 
     // Run help for all taco commands
     describe("taco", function (): void {
-        this.timeout(10000);
         Object.keys(commands).forEach(function (command: string): void {
             it("help " + command + " executes with no error", function (done: MochaDone): void {
-                runHelp(command).then(function (): Q.Promise<any> {
+                runHelp(command).then(function (): void {
                     done();
-                    return Q.resolve(null);
-                }, function (err: tacoUtils.TacoError): Q.Promise<any> {
+                }, function (err: tacoUtils.TacoError): void {
                     done(err);
-                    return Q.resolve(null);
                 });
             });
         });
@@ -102,29 +99,23 @@ describe("taco meta command tests: ", function (): void {
 
     // Run help for a cordova command not overriden by taco - ex, "info"
     describe("taco", function (): void {
-        this.timeout(10000);
         it("help info executes with no error", function (done: MochaDone): void {
-            runHelp("info").then(function (): Q.Promise<any> {
+            runHelp("info").then(function (): void {
                 done();
-                return Q.resolve(null);
-            }, function (err: tacoUtils.TacoError): Q.Promise<any> {
-                    done(err);
-                    return Q.resolve(null);
+            }, function (err: tacoUtils.TacoError): void {
+                done(err);
             });
         });
     });
 
     // Run taco command with valid and invalid options
     describe("taco command", function (): void {
-        this.timeout(10000);
         tacoValidArgs.forEach(function (optionString: string[]): void {
             it("with options " + optionString + " executes with no error", function (done: MochaDone): void {
-                Taco.runWithArgs(optionString).then(function (): Q.Promise<any> {
+                Taco.runWithArgs(optionString).then(function (): void {
                     done();
-                    return Q.resolve(null);
-                }, function (err: tacoUtils.TacoError): Q.Promise<any> {
-                        done(err);
-                        return Q.resolve(null);
+                }, function (err: tacoUtils.TacoError): void {
+                   done(err);
                 });
             });
         });
@@ -134,14 +125,12 @@ describe("taco meta command tests: ", function (): void {
                 Taco.runWithArgs(optionString).then(function (): Q.Promise<any> {
                     done(new Error("Passing Invalid options to \'taco\' should have failed"));
                     return Q.resolve(null);
-                }, function (err: any): Q.Promise<any> {
+                }, function (err: any): void {
                     if (err.code = TacoErrorCodes.CordovaCommandFailed) {
                         done();
                     } else {
                         done(new Error("Unexpected error code"));
                     }
-
-                    return Q.resolve(null);
                 });
             });
         });       
@@ -149,14 +138,11 @@ describe("taco meta command tests: ", function (): void {
 
     // Run taco version command
     describe("taco version command", function (): void {
-        this.timeout(10000);
         it("should execute without an error", function (done: MochaDone): void {
-            runVersion().then(function (): Q.Promise<any> {
+            runVersion().then(function (): void {
                 done();
-                return Q.resolve(null);
-            }, function (err: tacoUtils.TacoError): Q.Promise<any> {
+            }, function (err: tacoUtils.TacoError): void {
                 done(err);
-                return Q.resolve(null);
             });
         });
     });
