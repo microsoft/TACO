@@ -20,7 +20,7 @@
     },
     "help": {
         "synopsis": "[COMMAND]",
-        "modulePath": "./help",
+        "modulePath": "../cli/help",
         "description": "[CommandHelpDescription]"
     },
     "setup": {
