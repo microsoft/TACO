@@ -7,7 +7,6 @@
 ﻿ */
 
 /// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 
@@ -51,7 +50,7 @@ class Taco { /*
         });
     }
 
-    // runInternal is for internal test purpose - where the args are passed as parameter
+    // runWithArgs is for internal test purpose - where the args are passed as parameter
     public static runWithArgs(args: string[]): Q.Promise<any> {
         var parsedArgs: IParsedArgs = Taco.parseArgs(args);
         return Taco.executeCommand(parsedArgs);
