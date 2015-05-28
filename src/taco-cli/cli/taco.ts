@@ -7,6 +7,7 @@
 ﻿ */
 
 /// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 
@@ -40,17 +41,7 @@ class Taco { /*
      */
     public static run(): void {
         var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
-        var runPromise: Q.Promise<any> = null;
-
-        // if no command found that can handle these args, route args directly to Cordova
-        if (parsedArgs.command) {
-            var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
-            runPromise = parsedArgs.command.run(commandData);
-        } else {
-            runPromise = cordovaWrapper.cli(parsedArgs.args);
-        }
-
-        runPromise.done(null, function (reason: any): any {
+        Taco.executeCommand(parsedArgs).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason && reason.isTacoError) {
                 tacoUtility.Logger.logErrorLine((<tacoUtility.TacoError>reason).toString());
@@ -58,6 +49,22 @@ class Taco { /*
                 throw reason;
             }
         });
+    }
+
+    // runWithArgs is for internal test purpose - where the args are passed as parameter
+    public static runWithArgs(args: string[]): Q.Promise<any> {
+        var parsedArgs: IParsedArgs = Taco.parseArgs(args);
+        return Taco.executeCommand(parsedArgs);
+    }
+
+    private static executeCommand(parsedArgs: IParsedArgs): Q.Promise<any> {
+        // if no command found that can handle these args, route args directly to Cordova
+        if (parsedArgs.command) {
+            var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
+            return parsedArgs.command.run(commandData);
+        } else {
+            return cordovaWrapper.cli(parsedArgs.args);
+        }
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
