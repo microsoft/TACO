@@ -12,15 +12,17 @@
 
 "use strict";
 
+import childProcess = require ("child_process");
 import fs = require ("fs");
-import nodeWindows = require ("node-windows");
 import os = require ("os");
 import path = require ("path");
+import net = require ("net");
 import Q = require ("q");
 import wrench = require ("wrench");
 
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import DirectedAcyclicGraph = require ("./utils/directedAcyclicGraph");
+import installerProtocol = require ("./installerProtocol");
 import installerUtils = require ("./utils/installerUtils");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
@@ -29,12 +31,14 @@ import tacoUtils = require ("taco-utils");
 
 import logger = tacoUtils.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import utilHelper = tacoUtils.UtilHelper;
 
 module TacoDependencyInstaller {
     export class DependencyInstaller {
         private static DataFile: string = path.resolve(__dirname, "dependencies.json");
-        private static InstallConfigFolder: string = path.resolve(tacoUtils.UtilHelper.tacoHome);
+        private static InstallConfigFolder: string = path.resolve(utilHelper.tacoHome);
         private static InstallConfigFile: string = path.join(DependencyInstaller.InstallConfigFolder, "installConfig.json");
+        private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
 
         // Map the ids that cordova uses for the dependencies to our own ids
         // TODO (DevDiv 1170232): Use the real ids that cordova uses when the check_reqs feature is done
@@ -52,6 +56,9 @@ module TacoDependencyInstaller {
         private unsupportedMissingDependencies: any[];
         private missingDependencies: DependencyInstallerInterfaces.IDependency[];
         private platform: string;
+        
+        private socketHandle: NodeJSNet.Socket;
+        private serverHandle: NodeJSNet.Server;
 
         constructor() {
             this.platform = os.platform();
@@ -86,6 +93,8 @@ module TacoDependencyInstaller {
 
             // Print a summary of what is about to be installed, Wait for user confirmation, then spawn the elevated process which will perform the installations
             return this.printDependenciesToInstall()
+                .then(this.createServer.bind(this))
+                .then(this.connectServer.bind(this))
                 .then(this.spawnElevatedInstaller.bind(this))
                 .then(this.printSummaryLine.bind(this));
         }
@@ -319,10 +328,11 @@ module TacoDependencyInstaller {
             logger.log("\n");
 
             if (needsLicenseAgreement) {
-                logger.logNormalLine(resources.getString("ProceedLicenseAgreement"));
-            } else {
-                logger.logNormalLine(resources.getString("Proceed"));
+                logger.logNormalLine(resources.getString("LicenseAgreement"));
+                logger.log("\n");
             }
+
+            logger.logNormalLine(resources.getString("Proceed"));
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
@@ -359,38 +369,146 @@ module TacoDependencyInstaller {
             }
         }
 
-        private spawnElevatedInstaller(): Q.Promise<Error> {
-            switch (this.platform) {
-                case "win32":
-                    return this.spawnElevatedInstallerWin32();
-                default:
-                    return Q.reject<Error>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, this.platform));
-            }
+        private createServer(): void {
+            var self = this;
+
+            this.serverHandle = net.createServer(function (socket: net.Socket): void {
+                self.socketHandle = socket;
+                socket.on("data", function (data: Buffer): void {
+                    var dataArray: string[] = data.toString().split("\n");
+
+                    dataArray.forEach(function (value: string): void {
+                        if (!value) {
+                            return;
+                        }
+
+                        var parsedData: installerProtocol.IData = JSON.parse(value);
+
+                        switch (parsedData.dataType) {
+                            case installerProtocol.DataType.Output:
+                                self.printOutput(parsedData.message);
+                                break;
+                            case installerProtocol.DataType.Success:
+                                self.printSuccess(parsedData.message);
+                                break;
+                            case installerProtocol.DataType.Bold:
+                                self.printBold(parsedData.message);
+                                break;
+                            case installerProtocol.DataType.Warn:
+                                self.printWarning(parsedData.message);
+                                break;
+                            case installerProtocol.DataType.Error:
+                                self.printError(parsedData.message);
+                                break;
+                            case installerProtocol.DataType.Prompt:
+                                self.promptUser(parsedData.message);
+                                break;
+                        }
+                    });
+                });
+            });
         }
 
-        private spawnElevatedInstallerWin32(): Q.Promise<Error> {
-            var deferred: Q.Deferred<Error> = Q.defer<Error>();
-            var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
-            var command: string = "node " + elevatedInstallerPath + " " + DependencyInstaller.InstallConfigFile;
+        private printOutput(msg: string): void {
+            logger.logNormalLine(msg);
+        }
 
-            nodeWindows.elevate(command, function (error: Error): void {
-                deferred.resolve(error);
+        private printSuccess(msg: string): void {
+            logger.logSuccessLine(msg);
+        }
+
+        private printBold(msg: string): void {
+            logger.log("\n");
+            logger.logNormalBoldLine(msg);
+        }
+
+        private printWarning(msg: string): void {
+            logger.logWarnLine(msg);
+        }
+
+        private printError(msg: string): void {
+            logger.logErrorLine(msg);
+        }
+
+        private promptUser(msg: string): void {
+            var self = this;
+
+            installerUtils.promptUser(msg)
+                .then(function (answer: string): void {
+                    self.socketHandle.write(answer);
+                });
+        }
+
+        private connectServer(): Q.Promise<any> {
+            var deferred = Q.defer();
+
+            this.serverHandle.listen(DependencyInstaller.SocketPath, function (): void {
+                deferred.resolve({});
             });
 
             return deferred.promise;
         }
 
-        private printSummaryLine(err: Error): Q.Promise<any> {
+        private spawnElevatedInstaller(): Q.Promise<number> {
             logger.logNormalLine("============================================================");
             logger.log("\n");
 
-            if (err) {
-                logger.logErrorLine(resources.getString("InstallCompletedWithErrors"));
-            } else {
-                logger.logSuccessLine(resources.getString("InstallCompletedSuccessfully"));
+            switch (this.platform) {
+                case "win32":
+                    return this.spawnElevatedInstallerWin32();
+                default:
+                    return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, this.platform));
             }
+        }
 
-            return Q.resolve({});
+        private spawnElevatedInstallerWin32(): Q.Promise<number> {
+            var self = this;
+            var deferred: Q.Deferred<number> = Q.defer<number>();
+            var launcherPath: string = path.resolve(__dirname, "utils", "win32", "elevatedInstallerLauncher.ps1");
+            var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
+            var command: string = "powershell";
+            var args: string[] = [
+                "-executionpolicy",
+                "unrestricted",
+                "-file",
+                launcherPath,
+                utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
+                utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath),
+                utilHelper.quotesAroundIfNecessary(DependencyInstaller.InstallConfigFile)
+            ];
+            var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+
+            cp.on("exit", function (code: number): void {
+                self.serverHandle.close(function (): void {
+                    deferred.resolve(code);
+                });
+            });
+
+            return deferred.promise;
+        }
+
+        private printSummaryLine(code: number): void {
+            logger.log("\n");
+            logger.logNormalLine("============================================================");
+            logger.log("\n");
+
+            switch (code) {
+                case installerProtocol.ExitCode.CompletedWithErrors:
+                    logger.logErrorLine(resources.getString("InstallCompletedWithErrors"));
+                    break;
+                case installerProtocol.ExitCode.CouldNotConnect:
+                    throw errorHelper.get(TacoErrorCodes.CouldNotConnect);
+                    break;
+                case installerProtocol.ExitCode.NoAdminRights:
+                    throw errorHelper.get(TacoErrorCodes.NoAdminRights);
+                    break;
+                case installerProtocol.ExitCode.Success:
+                    logger.logSuccessLine(resources.getString("InstallCompletedSuccessfully"));
+                    break;
+                default:
+                    throw errorHelper.get(TacoErrorCodes.UnknownExitCode);
+                    break;
+            }
         }
     }
 }

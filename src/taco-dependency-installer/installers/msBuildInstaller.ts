@@ -18,8 +18,8 @@ import Q = require ("q");
 import InstallerBase = require ("./installerBase");
 
 class MsBuildInstaller extends InstallerBase {
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string) {
-        super(installerInfo, softwareVersion, installTo);
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, socketHandle: NodeJSNet.Socket) {
+        super(installerInfo, softwareVersion, installTo, socketHandle);
     }
 
     protected downloadWin32(): Q.Promise<any> {

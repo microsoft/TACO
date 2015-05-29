@@ -33,11 +33,13 @@ class InstallerBase {
     protected installerInfo: DependencyInstallerInterfaces.IInstallerData;
     protected softwareVersion: string;
     protected installDestination: string;
+    protected socketHandle: NodeJSNet.Socket;
 
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string) {
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, socketHandle: NodeJSNet.Socket) {
         this.installerInfo = installerInfo;
         this.softwareVersion = softwareVersion;
         this.installDestination = installTo;
+        this.socketHandle = socketHandle;
     }
 
     public run(): Q.Promise<any> {

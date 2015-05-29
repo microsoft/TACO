@@ -9,13 +9,11 @@
 /// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/sanitize-filename.d.ts" />
-/// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
 
 import fs = require ("fs");
-import nodeWindows = require ("node-windows");
-import os = require ("os");
+import net = require ("net");
 import path = require ("path");
 import Q = require ("q");
 import sanitizeFilename = require ("sanitize-filename");
@@ -23,32 +21,13 @@ import sanitizeFilename = require ("sanitize-filename");
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import InstallerBase = require ("./installers/installerBase");
 import installerUtils = require ("./utils/installerUtils");
+import protocol = require ("./installerProtocol");
 import resources = require ("./resources/resourceManager");
-import tacoUtils = require ("taco-utils");
-
-import logger = tacoUtils.Logger;
 
 interface IDependencyWrapper {
     dependency: DependencyInstallerInterfaces.IDependency;
     installer: InstallerBase;
 }
-
-// TEMP TEMP TEMP TEMP TEMP
-var verbose = true;
-var verboseLevel = 5;
-function logVerbose(message: string, level: number = verboseLevel): void {
-    if (!verbose || level > verboseLevel) {
-        return;
-    }
-
-    logger.logLinkLine(message);
-}
-// /TEMP TEMP TEMP TEMP TEMP
-
-logVerbose("Entered elevatedInstaller", 1);
-logVerbose("process.argv: " + process.argv, 3);
-var installer: ElevatedInstaller = new ElevatedInstaller();
-installer.run();
 
 class ElevatedInstaller {
     // Map the dependency ids to their installer class path
@@ -65,88 +44,97 @@ class ElevatedInstaller {
     private dependenciesDataWrapper: DependencyDataWrapper;
     private missingDependencies: IDependencyWrapper[];
     private errorFlag: boolean;
+    private socketPath: string;
+    private socketHandle: NodeJSNet.Socket;
+    private configFile: string;
 
     constructor() {
-        logVerbose("Entered elevatedInstaller constructor...", 3);
         this.errorFlag = false;
+        this.dependenciesDataWrapper = new DependencyDataWrapper();
+        this.socketPath = process.argv[2];
+        this.configFile = process.argv[3];
     }
 
     public run(): void {
-        logVerbose("Started running the elevated installer", 1);
-        this.verifyAdminRights()
-            .then(this.instantiateDataWrapper.bind(this))
+        this.connectToServer()
             .then(this.parseInstallConfig.bind(this))
             .then(this.runInstallers.bind(this))
             .catch(this.errorHandler.bind(this))
             .then(this.exitProcess.bind(this));
     }
 
-    private verifyAdminRights(): Q.Promise<any> {
-        logVerbose("Verifying administrator privileges...", 2);
-        var deferred: Q.Deferred<any> = Q.defer<any>();
+    private connectToServer(): Q.Promise<any> {
+        if (!this.socketPath) {
+            // If we can't connect to the DependencyInstaller's server, the only way to let the DependencyInstaller know is via exit code
+            process.exit(protocol.ExitCode.CouldNotConnect);
+        }
 
-        nodeWindows.isAdminUser(function (isAdmin: boolean): void {
-            if (isAdmin) {
-                logVerbose("   ...Success! Process has administrator privileges", 4);
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        try {
+            this.socketHandle = net.connect(this.socketPath, function (): void {
                 deferred.resolve({});
-            } else {
-                logVerbose("   ...Error: Process does not have administrator privileges", 4);
-                deferred.reject(new Error(resources.getString("NoAdminRights")));
-            }
-        });
+            });
+        } catch (err) {
+            // If we can't connect to the DependencyInstaller's server, the only way to let the DependencyInstaller know is via exit code
+            process.exit(protocol.ExitCode.CouldNotConnect);
+        }
 
         return deferred.promise;
     }
 
-    private instantiateDataWrapper(): void {
-        logVerbose("Creating the wrapper for the dependencies metadata...", 2);
-        this.dependenciesDataWrapper = new DependencyDataWrapper();
-    }
-
     private parseInstallConfig(): void {
-        logVerbose("Parsing installConfig.json...", 2);
         var self = this;
-        var configFile: string = process.argv[2];
-        logVerbose("installConfig.json path received: " + configFile, 4);
         var parsedData: DependencyInstallerInterfaces.IInstallerConfig = null;
 
-        if (!fs.existsSync(configFile)) {
-            logVerbose("   ...Error: installConfig.json not found", 4);
-            throw new Error(resources.getString("InstallConfigNotFound", configFile));
+        if (!fs.existsSync(this.configFile)) {
+            throw new Error(resources.getString("InstallConfigNotFound", this.configFile));
         }
 
-        logVerbose("   ...Success! installConfig.json found, parsing...", 4);
         try {
-            parsedData = require(configFile);
+            parsedData = require(this.configFile);
         } catch (err) {
-            logVerbose("   ...Error: Unable to parse installConfig.json", 4);
             throw new Error(resources.getString("InstallConfigMalformed"));
         }
 
-        logVerbose("   ...Success! Parsed installConfig.json successfully, building missing dependencies array...", 4);
         this.missingDependencies = [];
         parsedData.dependencies.forEach(function (value: DependencyInstallerInterfaces.IDependency): void {
-            logVerbose("      ...Dependency received: " + value.id, 5);
-            // Validate the information in the installation configuration file
+            // Verify the dependency id exists
             if (!self.dependenciesDataWrapper.dependencyExists(value.id)) {
-                logVerbose("      ...Error: Unknown dependency received: " + value.id, 5);
-                throw new Error(resources.getString("UnkownDependency", value.id));
+                throw new Error(resources.getString("UnknownDependency", value.id));
             }
 
+            // Verify the version exists for the dependency
             if (!self.dependenciesDataWrapper.versionExists(value.id, value.version)) {
-                logVerbose("      ...Error: Unknown version for the dependency: " + value.version, 5);
-                throw new Error(resources.getString("UnkownVersion", value.id, value.version));
+                throw new Error(resources.getString("UnknownVersion", value.id, value.version));
             }
 
-            path.resolve(value.installDestination).split(path.sep).forEach(function (dirName: string): void {
-                if (sanitizeFilename(dirName) !== dirName) {
-                    logVerbose("      ...Error: Invalid installation path: " + value.installDestination, 5);
+            // Verify the path is valid
+            path.resolve(value.installDestination).split(path.sep).forEach(function (dirName: string, index: number): void {
+                var shouldThrow: boolean = false;
+
+                if (index === 0 && /^[a-zA-Z]:$/.test(dirName)) {
+                    // If the first segment is a drive letter, verify that the drive exists
+                    if (!fs.existsSync(dirName)) {
+                        shouldThrow = true;
+                    }
+                } else if (sanitizeFilename(dirName) !== dirName) {
+                    // The current path segment is not a valid directory name
+                    shouldThrow = true;
+                }
+
+                if (shouldThrow) {
                     throw new Error(resources.getString("InvalidInstallPath", value.id, value.installDestination));
                 }
             });
 
+            // Verify the path is empty if it exists
+            if (fs.existsSync(value.installDestination)) {
+                if (fs.readdirSync(value.installDestination).length > 0) {
+                    throw new Error(resources.getString("PathNotEmpty", value.id, value.installDestination));
+                }
+            }
+
             // At this point, the values appear valid, so proceed with the instantiation of the installer for this dependency
-            logVerbose("      ...Adding dependency to our array...", 5);
             var dependencyWrapper: IDependencyWrapper = {
                 dependency: value,
                 installer: self.instantiateInstaller(value)
@@ -154,54 +142,49 @@ class ElevatedInstaller {
 
             // Add the dependency to our list of dependencies to install
             self.missingDependencies.push(dependencyWrapper);
-            logVerbose("      ...Success! Dependency successfully registered", 5);
         });
-        logVerbose("   ...Success! All dependencies registered to our array", 4);
     }
 
     private instantiateInstaller(dependency: DependencyInstallerInterfaces.IDependency): any {
-        logVerbose("   ...Instantiating the installer for the dependency...", 5);
         var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = this.dependenciesDataWrapper.getInstallerInfo(dependency.id, dependency.version);
         var installerConstructor: any = require(ElevatedInstaller.InstallerMap[dependency.id]);
 
-        return new installerConstructor(installerInfoToUse, dependency.version, dependency.installDestination);
+        return new installerConstructor(installerInfoToUse, dependency.version, dependency.installDestination, this.socketHandle);
     }
 
     private runInstallers(): Q.Promise<any> {
-        logVerbose("Running installers...", 2);
         var self = this;
 
         return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyWrapper): Q.Promise<any> {
-            logVerbose("   ...Chaining installer for dependency: " + value.dependency.id, 5);
             return previous
                 .then(function (): Q.Promise<any> {
-                    logger.logNormalBoldLine(value.dependency.displayName);
+                    installerUtils.sendData(self.socketHandle, protocol.DataType.Bold, value.dependency.displayName);
 
-                    logVerbose("   ...Running installer for dependency: " + value.dependency.id, 5);
                     return value.installer.run();
                 })
-                .catch(self.errorHandler.bind(self))
                 .then(function (): void {
-                    logVerbose("   ...Done running installer for dependency: " + value.dependency.id, 5);
-                    logger.log("\n");
-                });
+                    installerUtils.sendData(self.socketHandle, protocol.DataType.Success, resources.getString("Success"));
+                })
+                .catch(self.errorHandler.bind(self));
         }, Q({}));
     }
 
     private errorHandler(err: Error): void {
-        logVerbose("errorHandler has been called", 4);
         this.errorFlag = true;
-        logger.logErrorLine(err.message);
+        installerUtils.sendData(this.socketHandle, protocol.DataType.Error, err.message);
     }
 
     private exitProcess(): void {
-        logVerbose("Exiting elevated installer...", 1);
+        this.socketHandle.end();
+
         if (this.errorFlag) {
-            logVerbose("...Exiting with exit code 1", 1);
-            process.exit(1);
+            process.exit(protocol.ExitCode.CompletedWithErrors);
         } else {
-            logVerbose("...Exiting normally", 1);
-            process.exit();
+            process.exit(protocol.ExitCode.Success);
         }
     }
 }
+
+var elevatedInstaller: ElevatedInstaller = new ElevatedInstaller();
+
+elevatedInstaller.run();

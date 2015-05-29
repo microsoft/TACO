@@ -132,8 +132,8 @@ class DependencyDataWrapper {
     }
 
     /*
-     * Returns true if the first specified dependency depends on the second one, false if not. Will also return false if either of the specified dependencies does
-     * not exist in our metadata.
+     * Returns true if the first specified dependency depends on the second one, false if not. Searches recursively. Will also return false if either of the
+     * specified dependencies does not exist in our metadata.
      */
     public dependsOn(a: string, b: string): boolean {
         // TODO make a depth-first search to recursively check dependents

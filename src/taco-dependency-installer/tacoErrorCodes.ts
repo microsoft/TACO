@@ -13,16 +13,19 @@
 module TacoDependencyInstaller {
     export enum TacoErrorCode {
         AbstractMethod,
+        CouldNotConnect,
+        ErrorCreatingInstallConfig,
+        ErrorDeletingInstallConfig,
         FileCorruptError,
         FileNotFound,
         InstallationErrors,
         LicenseAgreementError,
+        NoAdminRights,
         NoValidInstallOrder,
+        UnknownExitCode,
         UnsupportedPlatform,
         UnsupportedTargetPlatform,
         TacoKitsExceptionTypescriptNotSupported,
-        ErrorDeletingInstallConfig,
-        ErrorCreatingInstallConfig
     }
 }
 

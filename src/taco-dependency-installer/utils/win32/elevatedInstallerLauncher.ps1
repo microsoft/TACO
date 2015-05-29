@@ -1,0 +1,22 @@
+# Spawn elevatedInstaller.js in a new command prompt, as administrator by opening a UAC prompt
+$pinfo = New-Object System.Diagnostics.ProcessStartInfo
+$pinfo.FileName = "node.exe"
+$pinfo.UseShellExecute = $true
+$pinfo.WindowStyle = "Hidden"
+$pinfo.Verb = "RunAs"
+$pinfo.Arguments = "$($args[0]) $($args[1]) $($args[2])"
+
+$p = New-Object System.Diagnostics.Process
+$p.StartInfo = $pinfo
+Try
+{
+	$p.Start() | Out-Null
+	$p.WaitForExit()
+}
+Catch
+{
+	Exit 2674
+}
+
+# Send exit code back to dependencyInstaller.js
+Exit $p.ExitCode
