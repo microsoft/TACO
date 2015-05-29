@@ -316,18 +316,30 @@ class BuildManager {
         // directory in the tar gracefully- they cause an uncaughtException and server shutdown. For safety sake we force 'rwx' for all on everything.
         var tarFilter = function (who: { props: { path: string; mode: number } }): boolean {
             who.props.mode = 511; // "chmod 777"
-            return true;
+
+            // Do not include the /plugins folder
+            return !who.props.path.match(/plugins$/);
         };
 
+        var pluginsOnlyFilter = function (who: { props: { path: string; mode: number; depth: number; Directory: boolean} }): boolean {
+            who.props.mode = 511; // "chmod 0777"
+
+            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || !!who.props.path.match(/plugins/);
+        }
+
+        var extractDeferred = Q.defer();
+        var extractPluginDeferred = Q.defer();
         // strip: 1 means take the top level directory name off when extracting (we want buildInfo.appDir to be the top level dir.)
         var tarExtractor = tar.Extract({ path: extractToDir, strip: 1, filter: tarFilter });
         tarExtractor.on("end", function (): void {
             self.removeDeletedFiles(buildInfo);
-
-            buildInfo.updateStatus(BuildInfo.EXTRACTED);
-            console.info(resources.getString("UploadExtractedSuccessfully", extractToDir));
-            self.build(buildInfo);
+            extractDeferred.resolve({});
         });
+        var pluginExtractor = tar.Extract({ path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
+        pluginExtractor.on("end", function (): void {
+            extractPluginDeferred.resolve({});
+        });
+
         var unzip = zlib.createGunzip();
         var tgzStream = fs.createReadStream(buildInfo.tgzFilePath);
         tarExtractor.on("error", onError);
@@ -335,6 +347,13 @@ class BuildManager {
         tgzStream.on("error", onError);
         tgzStream.pipe(unzip);
         unzip.pipe(tarExtractor).on("error", onError);
+        unzip.pipe(pluginExtractor).on("error", onError);
+
+        Q.all([extractDeferred.promise, extractPluginDeferred.promise]).then(function (): void {
+            buildInfo.updateStatus(BuildInfo.EXTRACTED);
+            console.info(resources.getString("UploadExtractedSuccessfully", extractToDir));
+            self.build(buildInfo);
+        });
     }
 
     private removeDeletedFiles(buildInfo: BuildInfo): void {
@@ -343,10 +362,13 @@ class BuildManager {
             buildInfo.changeList = JSON.parse(fs.readFileSync(changeListFile, { encoding: "utf-8" }));
             if (buildInfo.changeList) {
                 buildInfo.changeList.deletedFiles.forEach(function (deletedFile: string): void {
-                    var fileToDelete: string = path.join(buildInfo.appDir, path.normalize(deletedFile));
+                    if (!deletedFile.match(/^plugins[\/]/)) {
+                        // Don't remove files within the plugins folder; they should be cordova plugin remove'd later on
+                        var fileToDelete: string = path.join(buildInfo.appDir, path.normalize(deletedFile));
 
-                    if (fs.existsSync(fileToDelete)) {
-                        fs.unlinkSync(fileToDelete);
+                        if (fs.existsSync(fileToDelete)) {
+                            fs.unlinkSync(fileToDelete);
+                        }
                     }
                 });
             }
