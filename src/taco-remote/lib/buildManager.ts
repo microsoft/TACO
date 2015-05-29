@@ -318,7 +318,7 @@ class BuildManager {
             who.props.mode = 511; // "chmod 777"
 
             // Do not include the /plugins folder
-            return !who.props.path.match(/plugins$/);
+            return !who.props.path.match(/plugins/);
         };
 
         var pluginsOnlyFilter = function (who: { props: { path: string; mode: number; depth: number; Directory: boolean} }): boolean {

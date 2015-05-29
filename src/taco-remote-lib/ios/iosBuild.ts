@@ -80,7 +80,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     }, function (err: Error): void {
             buildInfo.updateStatus(BuildInfo.ERROR, "RequireCordovaFailed", cordovaVersion, err.toString());
             process.send(buildInfo);
-    });
+        });
 });
 
 class IOSBuildHelper {
@@ -92,6 +92,7 @@ class IOSBuildHelper {
 
         try {
             Q.fcall(IOSBuildHelper.change_directory, currentBuild)
+                .then(IOSBuildHelper.update_plugins)
                 .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform"); process.send(currentBuild); })
                 .then(IOSBuildHelper.addOrPrepareIOS)
                 .then(function (): void { IOSBuildHelper.applyPreferencesToBuildConfig(cfg); })
@@ -179,60 +180,62 @@ class IOSBuildHelper {
         }
     }
 
-    private static update_ios(): Q.Promise<any> {
-        var promise: Q.Promise<any> = Q({});
-        promise = promise.then(function (): Q.Promise<any> {
-            var newAndModifiedPlugins = fs.readdirSync(path.join("remote", "plugins")).filter(function (entry: string): boolean {
-                return fs.statSync(path.join("remote", "plugins", entry)).isDirectory();
-            });
-            var pluginNameRegex = new RegExp("#plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
-            var deletedPlugins = currentBuild.changeList.deletedFiles.filter(function (file: string): boolean {
-                // A plugin is deleted if its plugin.xml is deleted
-                return !!file.match(pluginNameRegex);
-            }).map(function (file: string): string {
-                return file.match(pluginNameRegex)[1];
-            });
+    private static update_plugins(): Q.Promise<any> {
+        var remotePluginsPath = path.join("remote", "plugins");
+        if (!fs.existsSync(remotePluginsPath)) {
+            return Q.resolve({});
+        }
 
-            var deleteOldPlugins = deletedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
-                return soFar.then(function (): Q.Promise<any> {
-                    if (fs.existsSync(path.join("plugins", plugin))) {
-                        return cordova.raw.plugin("remove", plugin).catch(function (err: any): void {
-                            // In the case of an error, don't stop the whole thing; report the error to the log and attempt to continue.
-                            // The plugin may have other plugins depending on it. If so, we are probably going to remove those later on,
-                            // which will then also remove this plugin
-                            console.error(err);
-                        });
-                    } else {
-                        // If the file doesn't exist any more, it may have been a dependent plugin that was removed
-                        // along with another plugin. It's not there any more at least, so lets assume it worked.
-                        return Q.resolve({});
-                    }
-                });
-            }, Q({}));
-
-            return newAndModifiedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
-                return soFar.then(function (): Q.Promise<any> {
-                    var newFolder = path.join("remote", "plugins", plugin);
-                    var installedFolder = path.join("plugins", plugin);
-                    if (fs.existsSync(installedFolder)) {
-                        // The plugin is already installed; overwrite it
-                        // Note that the plugin may have been installed by another plugin that depended on it;
-                        // I don't know what version will have been installed then, but hopefully by
-                        // overwriting it with the one that we have, we'll end up in the correct state.
-                        return UtilHelper.copyRecursive(newFolder, installedFolder);
-                    } else {
-                        // The plugin is not installed; install it
-                        return cordova.raw.plugin("add", newFolder);
-                    }
-                });
-            }, deleteOldPlugins);
-        })
-
-        return promise.then(function (): Q.Promise<any> {
-            // This step is what will push updated files from www/ to platforms/ios/www
-            // It will also clobber any changes to some platform specific files such as platforms/ios/config.xml
-            return cordova.raw.prepare({ platforms: ["ios"] });
+        var newAndModifiedPlugins = fs.readdirSync(remotePluginsPath).filter(function (entry: string): boolean {
+            return fs.statSync(path.join(remotePluginsPath, entry)).isDirectory();
         });
+        var pluginNameRegex = new RegExp("#plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
+        var deletedPlugins = currentBuild.changeList.deletedFiles.filter(function (file: string): boolean {
+            // A plugin is deleted if its plugin.xml is deleted
+            return !!file.match(pluginNameRegex);
+        }).map(function (file: string): string {
+            return file.match(pluginNameRegex)[1];
+        });
+
+        var deleteOldPlugins = deletedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
+            return soFar.then(function (): Q.Promise<any> {
+                if (fs.existsSync(path.join("plugins", plugin))) {
+                    return cordova.raw.plugin("remove", plugin).catch(function (err: any): void {
+                        // In the case of an error, don't stop the whole thing; report the error to the log and attempt to continue.
+                        // The plugin may have other plugins depending on it. If so, we are probably going to remove those later on,
+                        // which will then also remove this plugin
+                        console.error(err);
+                    });
+                } else {
+                    // If the file doesn't exist any more, it may have been a dependent plugin that was removed
+                    // along with another plugin. It's not there any more at least, so lets assume it worked.
+                    return Q.resolve({});
+                }
+            });
+        }, Q({}));
+
+        return newAndModifiedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
+            return soFar.then(function (): Q.Promise<any> {
+                var newFolder = path.join(remotePluginsPath, plugin);
+                var installedFolder = path.join("plugins", plugin);
+                if (fs.existsSync(installedFolder)) {
+                    // The plugin is already installed; overwrite it
+                    // Note that the plugin may have been installed by another plugin that depended on it;
+                    // I don't know what version will have been installed then, but hopefully by
+                    // overwriting it with the one that we have, we'll end up in the correct state.
+                    return UtilHelper.copyRecursive(newFolder, installedFolder);
+                } else {
+                    // The plugin is not installed; install it
+                    return cordova.raw.plugin("add", newFolder);
+                }
+            });
+        }, deleteOldPlugins);
+    }
+
+    private static update_ios(): Q.Promise<any> {
+        // This step is what will push updated files from www/ to platforms/ios/www
+        // It will also clobber any changes to some platform specific files such as platforms/ios/config.xml
+        return cordova.raw.prepare({ platforms: ["ios"] });
     }
 
     private static pluginRemovalErrorHandler(err: any): void {
