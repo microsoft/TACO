@@ -74,7 +74,7 @@ class CliHelper {
         };
     
         // Initialize localization resources
-        resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"), nconf.get("lang"));
+        resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"));
         var remotebuildConf = new RemoteBuildConf(nconf);
 
         var commands = nconf.get("_");

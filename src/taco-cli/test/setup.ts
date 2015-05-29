@@ -141,7 +141,7 @@ describe("taco setup", function (): void {
     });
 
     it("should be able to configure secure connections", function (mocha: MochaDone): void {
-        this.timeout(10000);
+        this.timeout(20000);
         var mockServer = ServerMock.createSecureTestServer();
         var desiredState = {
             host: "localhost",

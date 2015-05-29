@@ -152,8 +152,8 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                         ConnectionSecurityHelper.saveCertificate(body, hostPortAndPin.host).then(function (certName: string): void {
                             deferred.resolve(certName.trim());
                         }, function (err: tacoUtility.TacoError): void {
-                                deferred.reject(err);
-                            });
+                            deferred.reject(err);
+                        });
                     }
                 }
             });

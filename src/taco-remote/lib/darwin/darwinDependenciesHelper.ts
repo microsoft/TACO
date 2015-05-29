@@ -51,7 +51,7 @@ class DarwinDependenciesHelper {
                             process.exit(1);
                         });
                 } else {
-                    console.info(resources.getString("HomebrewInstallationDeclined"));
+                    console.info(resources.getString("HomebrewInstallationDeclined"), firstRunPath);
                     deferred2.resolve(false);
                 }
             });

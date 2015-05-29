@@ -11,11 +11,12 @@
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 "use strict";
+import path = require ("path");
 import Q = require ("q");
 import resources = require ("../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
 
-import commandsFactory = tacoUtility.Commands.CommandFactory;
+import CommandsFactory = tacoUtility.Commands.CommandFactory;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
@@ -31,8 +32,13 @@ class Help implements commands.IDocumentedCommand {
     private charsToDescription: number = 25;  // number of characters from start of line to description text
     private maxRight = 70;  // maximum characters we're allowing in each line
     private tacoString = "taco";
+    private commandsFactory: CommandsFactory = null;
 
     public info: commands.ICommandInfo;
+
+    constructor() {
+        this.commandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
+    }
 
     public canHandleArgs(data: commands.ICommandData): boolean {
         if (!data.original || data.original.length === 0) {
@@ -72,10 +78,10 @@ class Help implements commands.IDocumentedCommand {
         logger.logLine(this.indent + resources.getString("CommandHelpTacoUsage") + "\n", level.Success);
 
         var nameValuePairs: tacoUtility.Commands.INameDescription[] = new Array();
-        for (var i in commandsFactory.Listings) {
+        for (var i in this.commandsFactory.listings) {
             nameValuePairs.push({
                 name: i,
-                description: commandsFactory.Listings[i].description
+                description: this.commandsFactory.listings[i].description
             });
         }
 
@@ -87,13 +93,13 @@ class Help implements commands.IDocumentedCommand {
      * @param {string} command - TACO command being inquired
      */
     public printCommandUsage(command: string): void {
-        if (!commandsFactory.Listings || !commandsFactory.Listings[command]) {
+        if (!this.commandsFactory.listings || !this.commandsFactory.listings[command]) {
             logger.logErrorLine(resources.getString("CommandHelpBadcomand", "'" + command + "'") + "\n");
             this.printGeneralUsage();
             return;
         }
 
-        var list: tacoUtility.Commands.ICommandInfo = commandsFactory.Listings[command];
+        var list: tacoUtility.Commands.ICommandInfo = this.commandsFactory.listings[command];
         logger.logLine(resources.getString("CommandHelpUsageSynopsis") + "\n", level.NormalBold);
         logger.logLine(this.indent + this.tacoString + " " + command + " " + list.synopsis + "\n", level.Success);
         logger.logLine(this.getDescriptionString(list.description) + "\n", level.NormalBold);
@@ -186,7 +192,7 @@ class Help implements commands.IDocumentedCommand {
      * @param {string} id - command to query
      */
     private commandExists(command: string): boolean {
-        for (var i in commandsFactory.Listings) {
+        for (var i in this.commandsFactory.listings) {
             if (i === command) {
                 return true;
             }

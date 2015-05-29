@@ -18,6 +18,8 @@ import tacoUtility = require ("taco-utils");
 
 import BuildInfo = tacoUtility.BuildInfo;
 import TacoPackageLoader = tacoUtility.TacoPackageLoader;
+import TacoError = tacoUtility.TacoError;
+import TacoErrorCode = tacoUtility.TacoErrorCode;
 
 var dynamicDependenciesLocation = require.resolve("../dynamicDependencies.json");
 var tacoRemoteMux = "taco-remote-multiplexer";
@@ -36,11 +38,15 @@ class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
             promise = TacoPackageLoader.forceInstallTacoPackage(tacoRemoteMux, dynamicDependenciesLocation);
         }
 
-        return promise.then(function (): Q.Promise<TacoRemoteLib.IRemoteLib> {
-            return TacoPackageLoader.tacoRequireNoCache<TacoRemoteMultiplexer.ITacoRemoteMultiplexer>(tacoRemoteMux, dynamicDependenciesLocation).then(function (mux: TacoRemoteMultiplexer.ITacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
-                var packageInfo = mux.getPackageSpecForQuery(req.query);
-                return TacoPackageLoader.lazyRequire<TacoRemoteLib.IRemoteLib>(packageInfo.name, packageInfo.location);
-            });
+        return promise.then(function (): Q.Promise<TacoRemoteMultiplexer.ITacoRemoteMultiplexer> {
+            return TacoPackageLoader.tacoRequireNoCache<TacoRemoteMultiplexer.ITacoRemoteMultiplexer>(tacoRemoteMux, dynamicDependenciesLocation);
+        }).then(function (mux: TacoRemoteMultiplexer.ITacoRemoteMultiplexer): Q.Promise<TacoRemoteLib.IRemoteLib> {
+            var packageInfo = mux.getPackageSpecForQuery(req.query);
+            return TacoPackageLoader.lazyRequire<TacoRemoteLib.IRemoteLib>(packageInfo.name, packageInfo.location);
+        }).catch(function (err: any): TacoRemoteLib.IRemoteLib {
+            err.code = 500;
+            throw err;
+            return null;
         });
     }
 }
