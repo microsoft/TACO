@@ -189,8 +189,11 @@ class IOSBuildHelper {
         var newAndModifiedPlugins = fs.readdirSync(remotePluginsPath).filter(function (entry: string): boolean {
             return fs.statSync(path.join(remotePluginsPath, entry)).isDirectory();
         });
-        var pluginNameRegex = new RegExp("#plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
-        var deletedPlugins = currentBuild.changeList.deletedFiles.filter(function (file: string): boolean {
+        var pluginNameRegex = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
+        var deletedPlugins = currentBuild.changeList.deletedFiles.map(function (file: string): string {
+            // Normalize filenames to use this platform's slashes slashes, when the client may have sent back-slashes
+            return path.normalize(path.join.apply(path, file.split("\\")));
+        }).filter(function (file: string): boolean {
             // A plugin is deleted if its plugin.xml is deleted
             return !!file.match(pluginNameRegex);
         }).map(function (file: string): string {
@@ -229,7 +232,10 @@ class IOSBuildHelper {
                     return cordova.raw.plugin("add", newFolder);
                 }
             });
-        }, deleteOldPlugins);
+        }, deleteOldPlugins).finally(function () {
+            // Always clean up after ourselves; we don't want to get confused the next time we do a build.
+            rimraf.sync(remotePluginsPath);
+        });
     }
 
     private static update_ios(): Q.Promise<any> {
