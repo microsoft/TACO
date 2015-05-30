@@ -36,9 +36,6 @@ class GradleInstaller extends InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("DownloadingLabel"));
-
         // Set archive download path
         this.installerArchive = path.join(InstallerBase.InstallerCache, "gradle", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
@@ -59,9 +56,6 @@ class GradleInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("InstallingLabel"));
-
         // Extract the archive
         var templateZip = new admZip(this.installerArchive);
 
@@ -75,9 +69,6 @@ class GradleInstaller extends InstallerBase {
     }
 
     protected updateVariablesWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("SettingSystemVariablesLabel"));
-
         // Initialize values
         var gradleHomeValue: string = path.join(this.installDestination, "gradle-2.4");
         var addToPath: string = path.join(gradleHomeValue, "bin");

@@ -14,9 +14,8 @@
 
 import childProcess = require ("child_process");
 import fs = require ("fs");
-import os = require ("os");
-import path = require ("path");
 import net = require ("net");
+import path = require ("path");
 import Q = require ("q");
 import wrench = require ("wrench");
 
@@ -29,58 +28,53 @@ import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
+import installerDataType = installerProtocol.DataType;
+import installerExitCode = installerProtocol.ExitCode;
 import logger = tacoUtils.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utilHelper = tacoUtils.UtilHelper;
 
 module TacoDependencyInstaller {
     export class DependencyInstaller {
-        private static DataFile: string = path.resolve(__dirname, "dependencies.json");
         private static InstallConfigFolder: string = path.resolve(utilHelper.tacoHome);
         private static InstallConfigFile: string = path.join(DependencyInstaller.InstallConfigFolder, "installConfig.json");
         private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
 
-        // Map the ids that cordova uses for the dependencies to our own ids
-        // TODO (DevDiv 1170232): Use the real ids that cordova uses when the check_reqs feature is done
-        private static IdMap: { [cordovaId: string]: string } = {
-            "android-sdk": "androidSdk",
-            ant: "ant",
-            gradle: "gradle",
-            "ios-deploy": "iosDeploy",
-            "ios-sim": "iosSim",
-            java: "javaJdk",
-            msbuild: "msBuild",
-        };
-
         private dependenciesDataWrapper: DependencyDataWrapper;
         private unsupportedMissingDependencies: any[];
         private missingDependencies: DependencyInstallerInterfaces.IDependency[];
-        private platform: string;
         
         private socketHandle: NodeJSNet.Socket;
         private serverHandle: NodeJSNet.Server;
 
         constructor() {
-            this.platform = os.platform();
             this.dependenciesDataWrapper = new DependencyDataWrapper();
         }
 
-        public run(data: tacoUtils.Commands.ICommandData): Q.Promise<any> {
-            // We currently only support Windows for dependency installation
+        public run(targetPlatforms: string[]): Q.Promise<any> {
+            // Installing dependencies is currently only supported on Windows
             // TODO (DevDiv 1172346): Support Mac OS as well
-            if (this.platform !== "win32") {
-                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, this.platform));
+            if (process.platform !== "win32") {
+                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
 
-            // We currently only support installing dependencies for Android
-            var targetPlatform: string = data.remain[0];
+            // Verify that all specified target platforms are supported
+            // Android is currently the only supported target platform
+            var supportedTargetPlatforms: string[] = [
+                "android"
+            ];
+            var unsupportedTargetPlatforms: string[] = targetPlatforms.filter(function (targetPlatform: string): boolean {
+                // If targetPlatform is in our known platforms, we keep it
+                return supportedTargetPlatforms.indexOf(targetPlatform) !== -1;
+            });
 
-            if (targetPlatform !== "android") {
-                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedTargetPlatform, targetPlatform));
+            if (unsupportedTargetPlatforms.length !== 0) {
+                // Return an error with the first unsupported platform
+                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedTargetPlatform, unsupportedTargetPlatforms[0]));
             }
 
             // Call into Cordova to check missing dependencies for the current project
-            var cordovaResults: any[] = DependencyInstaller.callCordovaCheckDependencies(data.remain[0]);
+            var cordovaResults: any[] = DependencyInstaller.callCordovaCheckDependencies(targetPlatforms);
 
             // Extract Cordova results and transform them to an array of dependency ids
             this.parseMissingDependencies(cordovaResults);
@@ -92,19 +86,19 @@ module TacoDependencyInstaller {
             this.sortDependencies();
 
             // Print a summary of what is about to be installed, Wait for user confirmation, then spawn the elevated process which will perform the installations
-            return this.printDependenciesToInstall()
+            return this.promptUserBeforeInstall()
                 .then(this.createServer.bind(this))
                 .then(this.connectServer.bind(this))
                 .then(this.spawnElevatedInstaller.bind(this))
                 .then(this.printSummaryLine.bind(this));
         }
 
-        private static callCordovaCheckDependencies(platform: string): any[] {
+        private static callCordovaCheckDependencies(targetPlatforms: string[]): any[] {
             // TODO (DevDiv 1170232): Call Cordova when they have added dependency checking
             // TEMP Example of what cordova cheq_reqs could return
             return [
                 {
-                    id: "android-sdk",
+                    id: "androidSdk",
                     name: "Android SDK",
                     metadata: {
                     }
@@ -129,7 +123,7 @@ module TacoDependencyInstaller {
                     }
                 },
                 {
-                    id: "java",
+                    id: "javaJdk",
                     name: "Java SE Development Kit",
                     metadata: {}
                 },
@@ -156,14 +150,13 @@ module TacoDependencyInstaller {
 
             cordovaChecksResult.forEach(function (value: any): void {
                 if (self.canInstallDependency(value)) {
-                    var tacoId: string = DependencyInstaller.IdMap[value.id];
-                    var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.firstValidVersion(tacoId);
-                    var installPath: string = path.resolve(installerUtils.expandPath(self.dependenciesDataWrapper.getInstallDirectory(tacoId, versionToUse)));
+                    var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.firstValidVersion(value.id);
+                    var installPath: string = path.resolve(installerUtils.expandPath(self.dependenciesDataWrapper.getInstallDirectory(value.id, versionToUse)));
                     var dependencyInfo: DependencyInstallerInterfaces.IDependency = {
-                        id: tacoId,
+                        id: value.id,
                         version: versionToUse,
-                        displayName: self.dependenciesDataWrapper.getDisplayName(tacoId),
-                        licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(tacoId),
+                        displayName: self.dependenciesDataWrapper.getDisplayName(value.id),
+                        licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(value.id),
                         installDestination: installPath,
                     };
 
@@ -180,10 +173,7 @@ module TacoDependencyInstaller {
                 return false;
             }
 
-            // If the id is not in our id map, we don't support this dependency
-            var tacoId: string = DependencyInstaller.IdMap[cordovaDependencyResult.id];
-
-            if (!tacoId) {
+            if (!this.dependenciesDataWrapper.dependencyExists(cordovaDependencyResult.id)) {
                 return false;
             }
 
@@ -191,26 +181,11 @@ module TacoDependencyInstaller {
             var requestedVersion: string = cordovaDependencyResult.metadata ? cordovaDependencyResult.metadata.version : null;
 
             if (requestedVersion) {
-                // If we don't have the requested version in the installers for this dependency in our metadata, we don't support this dependency
-                if (!this.dependenciesDataWrapper.versionExists(tacoId, requestedVersion)) {
-                    return false;
-                }
-
-                // If we don't have an appropriate installer for the user's platform for the requested version, we don't support this dependency
-                if (!this.dependenciesDataWrapper.isSystemSupported(tacoId, requestedVersion)) {
-                    return false;
-                }
-
-                // If we reach this line, it means we support this dependency
-                return true;
+                // If Cordova requested a specific version, we support this dependency if we have an installer for that version, and that installer has an entry for the current platform
+                return this.dependenciesDataWrapper.versionExists(cordovaDependencyResult.id, requestedVersion) && this.dependenciesDataWrapper.isSystemSupported(cordovaDependencyResult.id, requestedVersion);
             } else {
                 // Cordova did not request a specific version, so look if we have at least one installer version that supports the user's platform
-                if (this.dependenciesDataWrapper.firstValidVersion(tacoId)) {
-                    return true;
-                }
-
-                // If we reach this line, it means we don't have a suitable installer for the user's platform for this dependency
-                return false;
+                return !!this.dependenciesDataWrapper.firstValidVersion(cordovaDependencyResult.id);
             }
         }
 
@@ -246,27 +221,6 @@ module TacoDependencyInstaller {
         }
 
         private sortDependencies(): void {
-            /*var self = this;
-
-            this.missingDependencies.sort(function (a: IDependencyInfo, b: IDependencyInfo): number {
-                var aDependsOnB: boolean = self.dependenciesDataWrapper.dependsOn(a.id, b.id);
-                var bDependsOnA: boolean = self.dependenciesDataWrapper.dependsOn(b.id, a.id);
-
-                if (aDependsOnB && bDependsOnA) {
-                    throw errorHelper.get(TacoErrorCodes.NoValidInstallOrder);
-                }
-
-                if (bDependsOnA) {
-                    return -1;
-                }
-
-                if (aDependsOnB) {
-                    return 1;
-                }
-
-                return 0;
-            });*/
-
             var self = this;
             var adjacencyList: DirectedAcyclicGraph.IVertexIdentifier[] = [];
 
@@ -299,7 +253,7 @@ module TacoDependencyInstaller {
             this.missingDependencies = sortedDependencies;
         }
 
-        private printDependenciesToInstall(): Q.Promise<any> {
+        private promptUserBeforeInstall(): Q.Promise<any> {
             this.buildInstallConfigFile();
 
             var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: DependencyInstallerInterfaces.IDependency): boolean {
@@ -385,49 +339,29 @@ module TacoDependencyInstaller {
                         var parsedData: installerProtocol.IData = JSON.parse(value);
 
                         switch (parsedData.dataType) {
-                            case installerProtocol.DataType.Output:
-                                self.printOutput(parsedData.message);
+                            case installerDataType.Success:
+                                logger.logSuccessLine(parsedData.message);
                                 break;
-                            case installerProtocol.DataType.Success:
-                                self.printSuccess(parsedData.message);
+                            case installerDataType.Bold:
+                                logger.log("\n");
+                                logger.logNormalBoldLine(parsedData.message);
                                 break;
-                            case installerProtocol.DataType.Bold:
-                                self.printBold(parsedData.message);
+                            case installerDataType.Warn:
+                                logger.logWarnLine(parsedData.message);
                                 break;
-                            case installerProtocol.DataType.Warn:
-                                self.printWarning(parsedData.message);
+                            case installerDataType.Error:
+                                logger.logErrorLine(parsedData.message);
                                 break;
-                            case installerProtocol.DataType.Error:
-                                self.printError(parsedData.message);
-                                break;
-                            case installerProtocol.DataType.Prompt:
+                            case installerDataType.Prompt:
                                 self.promptUser(parsedData.message);
                                 break;
+                            case installerDataType.Output:
+                            default:
+                                logger.logNormalLine(parsedData.message);
                         }
                     });
                 });
             });
-        }
-
-        private printOutput(msg: string): void {
-            logger.logNormalLine(msg);
-        }
-
-        private printSuccess(msg: string): void {
-            logger.logSuccessLine(msg);
-        }
-
-        private printBold(msg: string): void {
-            logger.log("\n");
-            logger.logNormalBoldLine(msg);
-        }
-
-        private printWarning(msg: string): void {
-            logger.logWarnLine(msg);
-        }
-
-        private printError(msg: string): void {
-            logger.logErrorLine(msg);
         }
 
         private promptUser(msg: string): void {
@@ -453,11 +387,11 @@ module TacoDependencyInstaller {
             logger.logNormalLine("============================================================");
             logger.log("\n");
 
-            switch (this.platform) {
+            switch (process.platform) {
                 case "win32":
                     return this.spawnElevatedInstallerWin32();
                 default:
-                    return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, this.platform));
+                    return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
         }
 
@@ -478,6 +412,15 @@ module TacoDependencyInstaller {
             ];
             var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
 
+            cp.on("error", function (err: Error): void {
+                // Handle ENOENT if Powershell is not found
+                if (err.name === "ENOENT") {
+                    deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
+                } else {
+                    deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
+                }
+            });
+
             cp.on("exit", function (code: number): void {
                 self.serverHandle.close(function (): void {
                     deferred.resolve(code);
@@ -493,21 +436,22 @@ module TacoDependencyInstaller {
             logger.log("\n");
 
             switch (code) {
-                case installerProtocol.ExitCode.CompletedWithErrors:
+                case installerExitCode.CompletedWithErrors:
                     logger.logErrorLine(resources.getString("InstallCompletedWithErrors"));
                     break;
-                case installerProtocol.ExitCode.CouldNotConnect:
+                case installerExitCode.CouldNotConnect:
                     throw errorHelper.get(TacoErrorCodes.CouldNotConnect);
                     break;
-                case installerProtocol.ExitCode.NoAdminRights:
+                case installerExitCode.NoAdminRights:
                     throw errorHelper.get(TacoErrorCodes.NoAdminRights);
                     break;
-                case installerProtocol.ExitCode.Success:
+                case installerExitCode.Success:
                     logger.logSuccessLine(resources.getString("InstallCompletedSuccessfully"));
                     break;
+                case installerExitCode.FatalError:
+                    throw errorHelper.get(TacoErrorCodes.FatalError);
                 default:
                     throw errorHelper.get(TacoErrorCodes.UnknownExitCode);
-                    break;
             }
         }
     }

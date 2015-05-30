@@ -48,18 +48,6 @@
             }
         }
     },
-    "iosDeploy": {
-        "displayName": "ios-deploy",
-        "licenseUrl": "",
-        "prerequisites": [],
-        "versions": {}
-    },
-    "iosSim": {
-        "displayName": "ios-sim",
-        "licenseUrl": "",
-        "prerequisites": [],
-        "versions": {}
-    },
     "javaJdk": {
         "displayName": "Java SE Development Kit",
         "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
@@ -74,11 +62,5 @@
                 }
             }
         }
-    },
-    "msBuild": {
-        "displayName": "Microsoft Build Tools",
-        "licenseUrl": "",
-        "prerequisites": [],
-        "versions": {}
     }
 }

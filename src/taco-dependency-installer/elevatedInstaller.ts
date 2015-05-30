@@ -24,6 +24,8 @@ import installerUtils = require ("./utils/installerUtils");
 import protocol = require ("./installerProtocol");
 import resources = require ("./resources/resourceManager");
 
+import installerDataType = protocol.DataType;
+
 interface IDependencyWrapper {
     dependency: DependencyInstallerInterfaces.IDependency;
     installer: InstallerBase;
@@ -56,8 +58,16 @@ class ElevatedInstaller {
     }
 
     public run(): void {
+        var self = this;
+
         this.connectToServer()
             .then(this.parseInstallConfig.bind(this))
+            .catch(function (err: Error): void {
+                // If there was an error during the parsing and validation of the installation config file, we consider this a fatal error and we exit immediately
+                installerUtils.sendData(self.socketHandle, installerDataType.Error, err.message);
+                self.socketHandle.end();
+                process.exit(protocol.ExitCode.FatalError);
+            })
             .then(this.runInstallers.bind(this))
             .catch(this.errorHandler.bind(this))
             .then(this.exitProcess.bind(this));
@@ -158,12 +168,9 @@ class ElevatedInstaller {
         return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyWrapper): Q.Promise<any> {
             return previous
                 .then(function (): Q.Promise<any> {
-                    installerUtils.sendData(self.socketHandle, protocol.DataType.Bold, value.dependency.displayName);
+                    installerUtils.sendData(self.socketHandle, installerDataType.Bold, value.dependency.displayName);
 
                     return value.installer.run();
-                })
-                .then(function (): void {
-                    installerUtils.sendData(self.socketHandle, protocol.DataType.Success, resources.getString("Success"));
                 })
                 .catch(self.errorHandler.bind(self));
         }, Q({}));
@@ -171,7 +178,7 @@ class ElevatedInstaller {
 
     private errorHandler(err: Error): void {
         this.errorFlag = true;
-        installerUtils.sendData(this.socketHandle, protocol.DataType.Error, err.message);
+        installerUtils.sendData(this.socketHandle, installerDataType.Error, err.message);
     }
 
     private exitProcess(): void {

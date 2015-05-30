@@ -16,22 +16,20 @@
 import nopt = require ("nopt");
 import Q = require ("q");
 
-import resources = require ("../resources/resourceManager");
 import dependencies = require ("taco-dependency-installer");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
-import utils = tacoUtils.UtilHelper;
-import logger = tacoUtils.Logger;
+import DependencyInstaller = dependencies.DependencyInstaller;
 
 /*
  * InstallDependencies
  *
  * Handles "taco install-dependencies"
  */
-class InstallDependencies implements commands.IDocumentedCommand {
+class InstallReqs implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.FlagTypeMap = { };
 
     public info: commands.ICommandInfo;
@@ -41,14 +39,13 @@ class InstallDependencies implements commands.IDocumentedCommand {
 
         try {
             parsed = this.parseArguments(data);
-            this.verifyArguments(parsed);
         } catch (err) {
             return Q.reject(err);
         }
 
-        var installer: dependencies.DependencyInstaller = new dependencies.DependencyInstaller();
+        var installer: DependencyInstaller = new DependencyInstaller();
 
-        return installer.run(parsed);
+        return installer.run(parsed.remain);
     }
 
     /**
@@ -59,15 +56,8 @@ class InstallDependencies implements commands.IDocumentedCommand {
     }
 
     private parseArguments(args: commands.ICommandData): commands.ICommandData {
-        return tacoUtils.ArgsHelper.parseArguments(InstallDependencies.KnownOptions, {}, args.original, 0);
-    }
-
-    private verifyArguments(data: commands.ICommandData): void {
-        // Exactly 1 platform name must be specified
-        if (data.remain.length !== 1) {
-            throw errorHelper.get(TacoErrorCodes.CommandInstallDependenciesOnlyOnePlatform);
-        }
+        return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KnownOptions, {}, args.original, 0);
     }
 }
 
-export = InstallDependencies;
+export = InstallReqs;

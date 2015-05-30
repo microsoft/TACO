@@ -7,7 +7,6 @@
 ﻿ */
 
 /// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/tacoUtils.d.ts" />
 
 declare module TacoDependencyInstaller {
     class DependencyInstaller {
@@ -16,11 +15,11 @@ declare module TacoDependencyInstaller {
         /**
          * Runs the dependenciesInstaller package to install missing 3rd party software for the current project
          *
-         * @param {TacoUtility.Commands.ICommandData} Options dictionary to be cleansed
+         * @param {string[]} Target platforms for which to install dependencies
          *
          * @return {Q.Promise<any>} A promise that is resolved if the dependencies install successfully, or rejected otherwise
          */
-        public run(data: TacoUtility.Commands.ICommandData): Q.Promise<any>;
+        public run(targetPlatforms: string[]): Q.Promise<any>;
     }
 }
 

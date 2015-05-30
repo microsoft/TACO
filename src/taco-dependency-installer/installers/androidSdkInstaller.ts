@@ -29,6 +29,8 @@ import installerProtocol = require ("../installerProtocol");
 import installerUtils = require ("../utils/installerUtils");
 import resources = require ("../resources/resourceManager");
 
+import installerDataType = installerProtocol.DataType;
+
 class AndroidSdkInstaller extends InstallerBase {
     private installerArchive: string;
 
@@ -38,16 +40,37 @@ class AndroidSdkInstaller extends InstallerBase {
 
     // Override runWin32() method because we need a post-install configuration step
     protected runWin32(): Q.Promise<any> {
+        var self = this;
+
+        // Log progress
+        installerUtils.sendData(this.socketHandle, installerDataType.Output, resources.getString("DownloadingLabel"));
+
         return this.downloadWin32()
+            .then(function (): void {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("InstallingLabel"));
+            })
             .then(this.installWin32.bind(this))
+            .then(function (): void {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("SettingSystemVariablesLabel"));
+            })
             .then(this.updateVariablesWin32.bind(this))
-            .then(this.postInstallSetup.bind(this));
+            .then(function (androidHomeValue: string): string {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("ConfiguringLabel"));
+
+                // Return android home for the post-install setup
+                return androidHomeValue;
+            })
+            .then(this.postInstallSetup.bind(this))
+            .then(function (): void {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Success, resources.getString("Success"));
+            });
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("DownloadingLabel"));
-
         // Set archive download path
         this.installerArchive = path.join(InstallerBase.InstallerCache, "androidSdk", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
@@ -68,9 +91,6 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("InstallingLabel"));
-
         // Extract the archive
         var templateZip = new admZip(this.installerArchive);
 
@@ -84,9 +104,6 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected updateVariablesWin32(): Q.Promise<string> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("SettingSystemVariablesLabel"));
-
         // Initialize values
         var androidHomeName: string = "ANDROID_HOME";
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-windows");
@@ -107,9 +124,6 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     private postInstallSetup(androidHome: string): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("ConfiguringLabel"));
-
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command: string = path.join(androidHome, "tools", "android.bat");

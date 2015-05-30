@@ -15,7 +15,6 @@
 import childProcess = require ("child_process");
 import fs = require ("fs");
 import hashFiles = require ("hash-files");
-import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
@@ -145,7 +144,7 @@ class InstallerUtils {
      * the spawned process will fail and this method will return a rejected promise.
      */
     public static setEnvironmentVariableWin32(name: string, value: string): Q.Promise<any> {
-        if (os.platform() !== "win32") {
+        if (process.platform !== "win32") {
             // No-op for platforms other than win32
             return Q.resolve({});
         }

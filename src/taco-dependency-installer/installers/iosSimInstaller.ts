@@ -23,21 +23,6 @@ class IosSimInstaller extends InstallerBase {
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, socketHandle: NodeJSNet.Socket) {
         super(installerInfo, softwareVersion, installTo, socketHandle);
     }
-
-    protected downloadWin32(): Q.Promise<any> {
-        // This dependency is only useful on Mac OS
-        return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
-    }
-
-    protected installWin32(): Q.Promise<any> {
-        // This dependency is only useful on Mac OS
-        return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
-    }
-
-    protected updateVariablesWin32(): Q.Promise<any> {
-        // This dependency is only useful on Mac OS
-        return Q.reject(resources.getString("UnsupportedPlatform", os.platform()));
-    }
 }
 
 export = IosSimInstaller;

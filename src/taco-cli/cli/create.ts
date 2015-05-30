@@ -154,7 +154,7 @@ class Create implements commands.IDocumentedCommand {
             .then(function (list: templateManager.ITemplateList): void {
                 var kitToPrint: string = kit || list.kitId;
 
-                logger.logLine(resources.getString("command.create.list.base", kitToPrint));
+                logger.logLine(resources.getString("CommandCreateListBase", kitToPrint));
                 logger.log("\n");
 
                 for (var i: number = 0; i < list.templates.length; i++) {

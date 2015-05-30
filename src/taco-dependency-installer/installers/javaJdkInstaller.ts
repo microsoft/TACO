@@ -38,9 +38,6 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("DownloadingLabel"));
-
         // Set installer download path
         this.installerFile = path.join(InstallerBase.InstallerCache, "java", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
@@ -70,9 +67,6 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("InstallingLabel"));
-
         // Run installer
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var commandLine: string = this.installerFile + " /quiet /norestart /lvx %temp%/javajdk7.0.550.13.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
@@ -89,9 +83,6 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected updateVariablesWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("SettingSystemVariablesLabel"));
-
         // Initialize values
         var javaHomeName: string = "JAVA_HOME";
         var javaHomeValue: string = this.installDestination;

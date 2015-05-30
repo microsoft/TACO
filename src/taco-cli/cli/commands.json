@@ -1,6 +1,6 @@
 ﻿{
     "create": {
-        "synopsis": "<PATH> [ID [NAME [CONFIG]]] [--kit [NAME] | --cli <VERSION>] [--template [NAME] | --copy-from <PATH> | link-to <PATH>]",
+        "synopsis": "<PATH> [ID [NAME [CONFIG]]] [options]",
         "modulePath": "./create",
         "description": "[CommandCreateDescription]",
         "args": [
@@ -10,10 +10,10 @@
             { "name": "CONFIG", "description": "[CommandCreateArgsConfig]" }
         ],
         "options": [
-            { "name": "--kit [NAME]", "description": "[CommandCreateOptionsKit]" },
-            { "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]" },
+            { "name": "--kit NAME", "description": "[CommandCreateOptionsKit]" },
+            { "name": "--template NAME", "description": "[CommandCreateOptionsTemplate]" },
             { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
-            { "name": "--copy-from | src <PATH>", "description": "[CommandCreateOptionsCopy]" },
+            { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
             { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" },
             { "name": "--list", "description": "[CommandCreateOptionsList]" }
         ]
@@ -69,12 +69,12 @@
         "modulePath": "./version",
         "description": "[CommandVersionDescription]"
     },
-    "install-dependencies": {
-        "synopsis": "<PLATFORM>",
-        "modulePath": "./installDependencies",
-        "description": "[CommandInstallDependenciesDescription]",
-        "args": [
-            { "name": "PLATFORM", "description": "[CommandInstallDependenciesPlatformDescription]" }
+    "install-reqs": {
+        "synopsis": "[PLATFORM_1] [PLATFORM_2] ...",
+        "modulePath": "./installReqs",
+        "description": "[CommandInstallReqsDescription]",
+        "options": [
+            { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
         ]
     }
 }

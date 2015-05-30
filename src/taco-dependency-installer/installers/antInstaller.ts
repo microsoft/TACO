@@ -36,9 +36,6 @@ class AntInstaller extends InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("DownloadingLabel"));
-
         // Set archive download path
         this.installerArchive = path.join(InstallerBase.InstallerCache, "ant", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
@@ -59,9 +56,6 @@ class AntInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("InstallingLabel"));
-
         // Extract the archive
         var templateZip = new admZip(this.installerArchive);
 
@@ -75,9 +69,6 @@ class AntInstaller extends InstallerBase {
     }
 
     protected updateVariablesWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, installerProtocol.DataType.Output, resources.getString("SettingSystemVariablesLabel"));
-
         // Initialize values
         var antHomeName: string = "ANT_HOME";
         var antHomeValue: string = path.join(this.installDestination, "apache-ant-1.9.3");

@@ -22,7 +22,7 @@ import stylecopUtil = require ("../tools/stylecopUtil");
 import gulpUtils = require ("../tools/GulpUtils");
  
 var buildConfig = require("../../src/build_config.json");
-var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib", "taco-dependency-installer"];
+var tacoModules = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
@@ -98,7 +98,7 @@ gulp.task("copy", function (): Q.Promise<any> {
             "/**/examples/**",
             "/**/*.ps1",
             "/**/dynamicDependencies.json",
-            "/**/dependencies.json"
+            "/**/platformDependencies.json"
         ],
         buildConfig.src, buildConfig.buildPackages).then(function (): void {
             /* replace %TACO_BUILD_PACKAGES% with the absolute path of buildConfig.buildPackages in the built output */

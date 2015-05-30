@@ -15,16 +15,18 @@
 "use strict";
 
 import fs = require ("fs");
-import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
 
+import installerProtocol = require ("../installerProtocol");
+import installerUtils = require ("../utils/installerUtils");
 import resources = require ("../resources/resourceManager");
 import tacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
+import installerDataType = installerProtocol.DataType;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 class InstallerBase {
@@ -45,19 +47,34 @@ class InstallerBase {
     public run(): Q.Promise<any> {
         // We currently only support Windows for dependency installation
         // TODO (DevDiv 1172346): Support Mac OS as well
-        var platform: string = os.platform();
-
-        if (platform === "win32") {
+        if (process.platform === "win32") {
             return this.runWin32();
         } else {
-            return Q.reject(resources.getString("UnsupportedPlatform", platform));
+            return Q.reject(resources.getString("UnsupportedPlatform", process.platform));
         }
     }
 
     protected runWin32(): Q.Promise<any> {
+        var self = this;
+
+        // Log progress
+        installerUtils.sendData(this.socketHandle, installerDataType.Output, resources.getString("DownloadingLabel"));
+
         return this.downloadWin32()
+            .then(function (): void {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("InstallingLabel"));
+            })
             .then(this.installWin32.bind(this))
-            .then(this.updateVariablesWin32.bind(this));
+            .then(function (): void {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("SettingSystemVariablesLabel"));
+            })
+            .then(this.updateVariablesWin32.bind(this))
+            .then(function (): void {
+                // Log progress
+                installerUtils.sendData(self.socketHandle, installerDataType.Success, resources.getString("Success"));
+            });
     }
 
     protected downloadWin32(): Q.Promise<any> {

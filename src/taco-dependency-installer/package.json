@@ -24,8 +24,6 @@
     },
     "bundledDependencies": ["taco-utils"],
     "devDependencies": {
-        "typescript": ">=1.4.1",
-        "mocha": "2.0.1",
-        "should": "4.3.0"
+        "typescript": ">=1.4.1"
     }
 }

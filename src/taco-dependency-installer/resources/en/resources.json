@@ -52,8 +52,12 @@
     "_NoAdminRights.comment": "Error shown when the installer does not have administrator privileges.",
     "CouldNotConnect": "Error: The installer process could not establish a connection with Taco. Please try again.",
     "_CouldNotConnect.comment": "Error shown when the installer process fails to connect to taco-cli for logging purposes.",
+    "NoPowershell": "Error: The installer process requires Powershell. Please install Powershell and add it to your Path environment variable.",
+    "_NoPowershell.comment": "Error shown if the user does not have Microsoft Powershell on their system.",
     "UnknownExitCode": "Error: The installer process encountered an unknown error. Please try again.",
     "_UnknownExitCode.comment": "Error shown when the exit code of the installer process is not one of the known exit codes.",
+    "FatalError": "Error: Could not install the dependencies. Please see above for details.",
+    "_FatalError.comment": "Error shown when the installer process encounters an error before it even starts attempting to install the dependencies.",
 
     "DownloadingLabel": "Downloading...",
     "_DownloadingLabel.comment": "Progress indicator for when a dependency is being downloaded.",
