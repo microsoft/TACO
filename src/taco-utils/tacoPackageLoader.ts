@@ -118,7 +118,6 @@ module TacoUtility {
         }
 
         private static lazyRequireExpirable<T>(request: IPackageInstallRequest): Q.Promise<T> {
-
             var requireCachePaths: string[] = Object.keys(require.cache);
             return TacoPackageLoader.lazyRequireLatest<T>(request)
                 .finally(function (): void {
@@ -153,6 +152,7 @@ module TacoUtility {
                     if (updateTimestamp) {
                         return TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
                     }
+
                     return Q.resolve<void>(null);
                 })
                 .then(function (): Q.Promise<T> {
