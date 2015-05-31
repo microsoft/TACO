@@ -12,8 +12,8 @@ declare module TacoRemoteMultiplexer {
     }
 
     interface IPackageSpec {
-        location: string;
-        name: string;
+        packageKey: string;
+        dependencyConfigPath: string;
     }
 
     interface ITacoRemoteMultiplexer {

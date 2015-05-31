@@ -1,3 +1,4 @@
+/// <reference path="../src/typings/dynamicDependencyEntry.d.ts" />
 /// <reference path="../src/typings/node.d.ts" />
 /// <reference path="../src/typings/Q.d.ts" />
 /// <reference path="../src/typings/tar.d.ts" />
@@ -5,14 +6,16 @@
 /// <reference path="../src/typings/del.d.ts" />
 /// <reference path="../src/typings/archiver.d.ts" />
 /// <reference path="../src/typings/gulp.d.ts" />
+/// <reference path="../src/typings/gulp-json-editor.d.ts" />
 /// <reference path="../src/typings/jsdoc-parse.d.ts" />
 
-import archiver = require ("archiver");
+import archiver = require("archiver");
 import child_process = require ("child_process");
 import del = require ("del");
 import fs = require ("fs");
 import fstream = require ("fstream");
 import gulp = require ("gulp");
+import jsonEditor = require("gulp-json-editor");
 import parse = require ("jsdoc-parse");
 import os = require ("os");
 import path = require ("path");
@@ -69,6 +72,20 @@ class GulpUtils {
         return Q.all(pathsToCopy.map(function (val: string): Q.Promise<any> {
             return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, val)).pipe(gulp.dest(destPath)));
         }));
+    }
+
+    public static copyDynamicDependenciesJson(fileGlob: string, srcPath: string, destPath: string): Q.Promise<any> {
+        return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, fileGlob))
+            .pipe(jsonEditor(
+                function (json: { [packageKey: string]: IDynamicDependencyEntry }): { [packageKey: string]: IDynamicDependencyEntry } {
+                    Object.keys(json).forEach(function (packageKey: string): void {
+                        var entry: IDynamicDependencyEntry = json[packageKey];
+                        entry.localPath = util.format("file://%s", path.resolve(destPath, entry.packageName));
+                    });
+                    return json;
+                }
+            ))
+            .pipe(gulp.dest(destPath)));
     }
 
     public static deleteDirectoryRecursive(dirPath: string, callback: (err: Error, deletedFiles: string[]) => any) {

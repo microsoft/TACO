@@ -7,15 +7,16 @@ module TacoUtility {
         CommandBadArguments,
         FailedFileRead,
         FailedFileWrite,
-        FailedGitClone,
         FailedRecursiveCopy,
-        PackageLoaderErrorMessage,
         PackageLoaderInvalidPackageVersionSpecifier,
-        PackageLoaderNpmInstallFailed,
+        PackageLoaderNpmInstallErrorMessage,
         PackageLoaderNpmInstallFailedEaccess,
         PackageLoaderNpmInstallFailedWithCode,
+        PackageLoaderNpmUpdateErrorMessage,
+        PackageLoaderNpmUpdateFailedEaccess,
+        PackageLoaderNpmUpdateFailedWithCode,
         TacoUtilsExceptionListingfile,
-        TacoUtilsExceptionMissingcommand
+        TacoUtilsExceptionMissingcommand,
     }
 }
 

@@ -8,6 +8,8 @@
 
 /// <reference path="../typings/rimraf.d.ts" />
 /// <reference path="../typings/semver.d.ts" />
+/// <reference path="../typings/dynamicDependencyEntry.d.ts" />
+
 "use strict";
 
 import assert = require ("assert");
@@ -22,23 +24,58 @@ import Q = require ("q");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
+import tacoError = require ("./tacoError");
 import UtilHelper = require ("./utilHelper");
 
+import TacoError = tacoError.TacoError;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = UtilHelper.UtilHelper;
 
 module TacoUtility {
     export enum PackageSpecType {
         Error = -1,
-        Version = 0,
+        Registry = 0,
         Uri = 1,
         FilePath = 2
     }
 
-    interface IPackageSpec {
-        location: string;
-        name: string;
-    }
+    interface IPackageInstallRequest {
+        /**
+         * name of the package specified in package.json
+         */
+        packageName: string;
+
+        /**
+         * id given to npm command, say npm install foo@0.1 or npm install https://github.com/apache/cordova-cli
+         */
+        packageId: string;
+
+        /**
+         * type of package src, url, localpath or npm repository
+         */
+        type: PackageSpecType;
+
+        /**
+         * targetPath where we expect installed package.json 
+         */
+        targetPath: string;
+
+        /**
+         * any command flags needed for npm install/update
+         */
+        commandFlags: string[];
+
+        /**
+         * expiration interval in hours. 
+         * if expirationIntervalInHours>0, package is checked for updates
+         */
+        expirationIntervalInHours: number;
+
+        /**
+         * log verbosity requested for the operation
+         */
+        logLevel: string;
+    };
 
     export class TacoPackageLoader {
         /**
@@ -54,188 +91,244 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyRequire<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
-            var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
-            var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
-
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel).then(function (): T {
-                return TacoPackageLoader.requirePackage<T>(packageTargetPath);
-            });
-        }
-
-        public static lazyRequireNoCache<T>(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<T> {
-            var requireCachePaths = Object.keys(require.cache);
-            return TacoPackageLoader.lazyRequire<T>(packageName, packageVersion, logLevel).finally(function (): void {
-                // un-cache any files that were just required.
-                Object.keys(require.cache).filter(function (key: string): boolean {
-                    return requireCachePaths.indexOf(key) === -1;
-                }).forEach(function (key: string): void {
-                    delete require.cache[key];
-                });
-            });
+        public static lazyRequire<T>(packageName: string, packageId: string, logLevel?: string): Q.Promise<T> {
+            return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
         }
 
         /**
-         * Perform a fresh install of a specified node module, even if it is already cached in the file system
+         * Load a taco package with specified packageKey. 
+         * For development scenario, dependencyConfigPath maps a packageKey to a local folder on disk
+         * For production scenario, dependencyConfigPath maps a packageKey to packageName@packageVersion or git url
          *
-         * This method is resilient against interrupted downloads, but is not safe under concurrency.
-         * Until that changes, we should not allow multiple builds at once.
-         * 
-         * @param {string} packageName The name of the package to load
-         * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} packageKey a key to lookup in dependencyConfigPath, can be a packageName or any random string
+         * @param {string} dependencyConfigPath Path to a json file which specifies key to packageId information along with other metadata like expirationIntervalInHours
          * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
-         * @param {string} basePath Optional parameter which specifies the base path to resolve relative file paths against
          *
-         * @returns {Q.Promise<any>} A promise which is either rejected with a failure to install, or resolved if the package installed succesfully
+         * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
+        public static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, logLevel?: string): Q.Promise<T> {
+            var request: IPackageInstallRequest = TacoPackageLoader.createTacoPackageInstallRequest(packageKey, dependencyConfigPath, logLevel);
+            assert.notEqual(request, null, "Invalid Package request");
 
-        public static forceInstallPackage(packageName: string, packageVersion: string, logLevel?: string): Q.Promise<any> {
-            var packageSpecType = TacoPackageLoader.getPackageSpecType(packageVersion);
-            var packageTargetPath = TacoPackageLoader.getPackageTargetPath(packageName, packageVersion, packageSpecType);
+            if (!request.expirationIntervalInHours || request.expirationIntervalInHours <= 0) {
+                return TacoPackageLoader.lazyRequireInternal<T>(request);
+            }
 
-            // Intentionally create the status file, triggering a re-install
-            var statusFilePath = TacoPackageLoader.getStatusFilePath(packageTargetPath);
-            mkdirp.sync(packageTargetPath);
-            fs.writeFileSync(statusFilePath, "Outdated");
-
-            return TacoPackageLoader.installPackageIfNeeded(packageName, packageVersion, packageTargetPath, packageSpecType, logLevel);
+            return TacoPackageLoader.lazyRequireExpirable<T>(request);
         }
 
-        /**
-         * These three functions redirect to their corresponding function above after first fetching the appropriate information from the specified mapping file.
-         */
-        public static tacoRequire<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T> {
-            return Q({}).then(function (): Q.Promise<T> {
-                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
-                return TacoPackageLoader.lazyRequire<T>(packageSpec.name, packageSpec.location);
-            });
-        }
+        private static lazyRequireExpirable<T>(request: IPackageInstallRequest): Q.Promise<T> {
 
-        public static tacoRequireNoCache<T>(packageId: string, dependencyConfigPath: string): Q.Promise<T> {
-            return Q({}).then(function (): Q.Promise<T> {
-                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
-                return TacoPackageLoader.lazyRequireNoCache<T>(packageSpec.name, packageSpec.location);
-            });
-        }
-
-        public static forceInstallTacoPackage(packageId: string, dependencyConfigPath: string): Q.Promise<any> {
-            return Q({}).then(function (): Q.Promise<any> {
-                var packageSpec = TacoPackageLoader.getPackageSpec(packageId, dependencyConfigPath);
-                return TacoPackageLoader.forceInstallPackage(packageSpec.name, packageSpec.location);
-            });
-        }
-
-        private static getPackageSpec(packageId: string, dependencyConfigPath: string): IPackageSpec {
-            var dependencyLookup = require(dependencyConfigPath);
-            return dependencyLookup[packageId];
-        }
-
-        private static installPackageViaNPM(packageName: string, packageVersion: string, packageTargetPath: string, specType: PackageSpecType, logLevel?: string): Q.Promise<any> {
-            var deferred = Q.defer();
-            try {
-                mkdirp.sync(packageTargetPath);
-
-                var args: string[] = ["install"];
-                var cwd = packageTargetPath;
-                // When installing from the online npm repo, we need to provide the package name and version, and 
-                // we need to allow for the node_modules/ packagename folders to be added
-                if (specType === PackageSpecType.Version) {
-                    args.push(packageName + "@" + packageVersion);
-                    cwd = path.resolve(cwd, "..", "..");
-                }
-
-                if (logLevel) {
-                    args.push("--loglevel", logLevel);
-                }
-
-                var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-
-                var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
-                npmProcess.on("error", function (error: Error): void {
-                    rimraf(packageTargetPath, function (): void {
-                        deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderErrorMessage, error, packageName, packageVersion));
-                    });
-                });
-                npmProcess.on("exit", function (exitCode: number): void {
-                    if (exitCode === 0) {
-                        deferred.resolve({});
-                    } else {
-                        rimraf(packageTargetPath, function (): void {
-                            if (exitCode === 243) {
-                                // error code reported when npm fails due to EACCES
-                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess, packageName, exitCode));
-                            } else {
-                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode, packageName, exitCode));
-                            }
-                        });
+            var requireCachePaths: string[] = Object.keys(require.cache);
+            return TacoPackageLoader.lazyRequireLatest<T>(request)
+                .finally(function (): void {
+                // un-cache any files that were just required.
+                Object.keys(require.cache).forEach(function (key: string): void {
+                    if (requireCachePaths.indexOf(key) === -1) {
+                        delete require.cache[key];
                     }
                 });
-            } catch (err) {
-                deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallFailed, err, packageName));
+            });
+        }
+
+        private static lazyRequireLatest<T>(request: IPackageInstallRequest): Q.Promise<T> {
+            assert.notEqual(request.type, PackageSpecType.Uri, "update is not supported for git URIs");
+
+            var updateTimestamp: boolean = false;
+            var packageObj: T = null;
+
+            // Check if update is needed
+            return TacoPackageLoader.getLastCheckTimestamp(request.targetPath)
+                .then(function (lastCheckTimestamp: number): Q.Promise<T> {
+                    // Note that needsUpdate is false if package is not present
+                    var updateNeeded: boolean = (lastCheckTimestamp > 0) && (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
+                    updateTimestamp = updateNeeded || lastCheckTimestamp <= 0;
+                    return TacoPackageLoader.lazyRequireInternal<T>(request, updateNeeded);
+                })
+                .then(function (obj: T): void {
+                    packageObj = obj;
+                })
+                // update last check timestamp 
+                .then(function (): Q.Promise<void> {
+                    if (updateTimestamp) {
+                        return TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
+                    }
+                    return Q.resolve<void>(null);
+                })
+                .then(function (): Q.Promise<T> {
+                    return Q(packageObj);
+                });
+        }
+
+        private static lazyRequireInternal<T>(request: IPackageInstallRequest, needsUpdate?: boolean): Q.Promise<T> {
+            assert.notEqual(request, null);
+
+            return Q({})
+                .then(function (): Q.Promise<void> {
+                    if (needsUpdate) {
+                        // for test scenarios, where test checks expirationIntervalInHours functionality and provide a local package
+                        if (request.type === PackageSpecType.FilePath) {
+                            return TacoPackageLoader.installPackageViaNPM(request);
+                        }
+
+                        return TacoPackageLoader.updatePackageViaNPM(request.packageName, request.targetPath, request.logLevel);
+                    }
+
+                    return TacoPackageLoader.installPackageIfNeeded(request);
+                })
+                .then(function (): T {
+                    return TacoPackageLoader.requirePackage<T>(request.targetPath);
+                });
+        }
+
+        private static createPackageInstallRequest(packageName: string, packageId: string, logLevel: string, expirationIntervalInHours?: number): IPackageInstallRequest {
+            var packageType: PackageSpecType = PackageSpecType.Error;
+            // The packageId can either be a GIT url, a local file path or name@version (cordova@4.3)
+            var gitUrlRegex = new RegExp("^http(s?)\\:\/\/.*|.*\.git$");
+            if ((gitUrlRegex.exec(packageId))) {
+                packageType = PackageSpecType.Uri;
+            } else if (packageId.match(/file:\/\/.*/)) {
+                packageId = packageId.substring("file://".length);
+                if (fs.existsSync(packageId)) {
+                    packageType = PackageSpecType.FilePath;
+                }
+            } else {
+                // moving this down after Uri/FilePath because both can have '@'. Parse the packageId to retrieve packageVersion
+                var packageVersion: string = packageId.split("@")[1];
+                if (!packageVersion || semver.valid(packageVersion)) {
+                    packageType = PackageSpecType.Registry;
+                }
             }
+
+            var homePackageModulesPath = path.join(utils.tacoHome, "node_modules");
+            switch (packageType) {
+                case PackageSpecType.Registry:
+                    var versionSubFolder: string = packageId.split("@")[1] || "latest";
+                    return <IPackageInstallRequest>{
+                        packageName: packageName,
+                        type: packageType,
+                        packageId: packageId,
+                        targetPath: path.join(homePackageModulesPath, versionSubFolder, "node_modules", packageName),
+                        expirationIntervalInHours: expirationIntervalInHours
+                    };
+
+                case PackageSpecType.Uri:
+                case PackageSpecType.FilePath:
+                    return <IPackageInstallRequest>{
+                        packageName: packageName,
+                        type: packageType,
+                        packageId: packageId,
+                        targetPath: path.join(homePackageModulesPath, encodeURIComponent(packageId), "node_modules", packageName),
+                        commandFlags: ["--production"],
+                        expirationIntervalInHours: expirationIntervalInHours
+                    };
+                    break;
+
+                case PackageSpecType.Error:
+                    throw errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageId.split("@")[1], packageName);
+            }
+        }
+
+        private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel?: string): IPackageInstallRequest {
+            if (fs.existsSync(dependencyConfigPath)) {
+                try {
+                    var dependencyLookup: any = require(dependencyConfigPath);
+                    var packageEntry: IDynamicDependencyEntry = dependencyLookup[packageKey];
+                    if (packageEntry) {
+                        // if a local path is specified use that otherwise fallback to packageName@packageVersion
+                        var packageId: string = packageEntry.localPath || packageEntry.packageId;
+                        return TacoPackageLoader.createPackageInstallRequest(packageEntry.packageName, packageId, logLevel, packageEntry.expirationIntervalInHours);
+                    }
+                } catch (exception) {
+                }
+            }
+
+            return null;
+        }
+
+        private static runNpmCommand(npmCommand: string, packageId: string, cwd: string, flags: string[], logLevel?: string): Q.Promise<number> {
+            var deferred: Q.Deferred<number> = Q.defer<number>();
+            var args: string[] = [npmCommand, packageId];
+
+            if (logLevel) {
+                args.push("--loglevel", logLevel);
+            }
+
+            if (flags) {
+                args = args.concat(flags);
+            }
+
+            var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+            var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
+            npmProcess.on("error", function (error: Error): void {
+                deferred.reject(error);
+            });
+            npmProcess.on("exit", function (exitCode: number): void {
+                if (exitCode === 0) {
+                    deferred.resolve(0);
+                } else {
+                    deferred.reject(exitCode);
+                }
+            });
 
             return deferred.promise;
         }
 
-        private static getPackageTargetPath(packageName: string, packageVersion: string, packageSpecType: PackageSpecType): string {
-            var homePackageModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
-            switch (packageSpecType) {
-                case PackageSpecType.Version:
-                    return path.join(homePackageModulesPath, packageVersion, "node_modules", packageName);
-                case PackageSpecType.Uri:
-                case PackageSpecType.FilePath:
-                    return path.join(homePackageModulesPath, encodeURIComponent(packageVersion), "node_modules", packageName);
-                case PackageSpecType.Error:
-                default:
-                    return null;
-            }
-        }
+        private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
+            return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
+                var cwd: string = path.resolve(request.targetPath, "..", "..");
+                return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).catch(function (err: any): void {
+                    rimraf(request.targetPath, function (): Q.Promise<void> {
+                        if (isFinite(err)) {
+                            // error code reported when npm fails due to EACCES
+                            if (err === 243) {
+                                return Q.reject<void>(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess, request.packageName, err));
+                            }
 
-        private static installPackageIfNeeded(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<string> {
-            return Q({}).then(function (): Q.Promise<string> {
-                if (specType === PackageSpecType.Error) {
-                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageVersion, packageName));
-                }
+                            return Q.reject<void>(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode, request.packageName, err));
+                        }
 
-                if (!TacoPackageLoader.packageNeedsInstall(targetPath)) {
-                    return Q(targetPath);
-                }
-
-                // Delete the target path if it already exists and create an empty folder
-                if (fs.existsSync(targetPath)) {
-                    rimraf.sync(targetPath);
-                }
-
-                mkdirp.sync(targetPath);
-                // Create a file 
-                fs.closeSync(fs.openSync(TacoPackageLoader.getStatusFilePath(targetPath), "w"));
-
-                return TacoPackageLoader.installPackage(packageName, packageVersion, targetPath, specType, logLevel).then(function (): Q.Promise<string> {
-                    return TacoPackageLoader.removeStatusFile(targetPath).then(function (): string {
-                        return targetPath;
+                        return Q.reject<void>(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallErrorMessage, err, request.packageName));
                     });
                 });
             });
         }
 
-        private static installPackage(packageName: string, packageVersion: string, targetPath: string, specType: PackageSpecType, logLevel: string): Q.Promise<any> {
-            switch (specType) {
-                case PackageSpecType.Version:
-                    return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
-                case PackageSpecType.Uri:
-                    return TacoPackageLoader.cloneGitRepo(packageVersion, targetPath, logLevel)
-                        .then(function (): Q.Promise<any> {
-                        return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
-                        });
-                case PackageSpecType.FilePath:
-                    packageVersion = packageVersion.substring("file://".length);
-                    return utils.copyRecursive(packageVersion, targetPath).then(function (): Q.Promise<any> {
-                        return TacoPackageLoader.installPackageViaNPM(packageName, packageVersion, targetPath, specType, logLevel);
-                    });
-                case PackageSpecType.Error:
-                default:
-                    return Q.reject(errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageVersion, packageName));
-            }
+        private static updatePackageViaNPM(packageName: string, targetPath: string, logLevel?: string): Q.Promise<void> {
+            var cwd: string = path.resolve(targetPath, "..", "..");
+            return TacoPackageLoader.runNpmCommand("update", packageName, cwd, null /* commandFlags */, logLevel).catch(function (err: any): void {
+                if (isFinite(err)) {
+                    // error code reported when npm fails due to EACCES
+                    if (err === 243) {
+                        throw errorHelper.get(TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess, packageName, err);
+                    }
+
+                    throw errorHelper.get(TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode, packageName, err);
+                }
+
+                throw errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName);
+            });
+        }
+
+        private static installPackageIfNeeded(request: IPackageInstallRequest): Q.Promise<void> {
+            return Q({}).then(function (): Q.Promise<void> {
+                if (!TacoPackageLoader.packageNeedsInstall(request.targetPath)) {
+                    return Q.resolve<void>(null);
+                }
+
+                // Delete the target path if it already exists and create an empty folder
+                if (fs.existsSync(request.targetPath)) {
+                    rimraf.sync(request.targetPath);
+                }
+
+                mkdirp.sync(request.targetPath);
+                // Create a file 
+                fs.closeSync(fs.openSync(TacoPackageLoader.getStatusFilePath(request.targetPath), "w"));
+
+                return TacoPackageLoader.installPackageViaNPM(request).then(function (): Q.Promise<void> {
+                    return TacoPackageLoader.removeStatusFile(request.targetPath);
+                });
+            });
         }
 
         private static requirePackage<T>(packageTargetPath: string): T {
@@ -251,69 +344,32 @@ module TacoUtility {
             return Q.denodeify(fs.unlink)(statusFilePath);
         }
 
-        private static cloneGitRepo(gitUrl: string, cloneTargetPath: string, logLevel?: string): Q.Promise<boolean> {
-            var deferred = Q.defer<boolean>();
-            try {
-                // Delete the target path if it already exists
-                if (fs.existsSync(cloneTargetPath)) {
-                    mkdirp.sync(cloneTargetPath);
-                }
-
-                var gitCommand = "git clone " + gitUrl + " " + cloneTargetPath;
-                if (["verbose", "silly"].indexOf(logLevel) !== -1) {
-                    gitCommand += " --verbose";
-                }
-
-                // Clone the GIT repository to the target path
-                child_process.exec(gitCommand, {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-                    if (error) {
-                        if (logLevel !== "silent") {
-                            if (logLevel !== "warn") {
-                                console.warn(stdout);
-                            }
-
-                            console.warn(stderr);
-                            console.log(error);
-                        }
-
-                        rimraf(cloneTargetPath, function (): void {
-                            deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedGitClone, error, gitUrl));
-                        });
-                    } else {
-                        deferred.resolve(true);
-                    }
-                });
-            } catch (err) {
-                deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedGitClone, err, gitUrl));
-            }
-
-            return deferred.promise;
-        }
-
-        private static getPackageSpecType(packageVersion: string): PackageSpecType {
-            // The package specification can either be a GIT url or an npm package version number
-            var gitUrlRegex = new RegExp("^http(s?)\\:\/\/.*|.*\.git$");
-
-            if (semver.valid(packageVersion)) {
-                return PackageSpecType.Version;
-            }
-
-            if ((gitUrlRegex.exec(packageVersion))) {
-                return PackageSpecType.Uri;
-            }
-
-            if (packageVersion.match(/file:\/\/.*/)) {
-                return PackageSpecType.FilePath;
-            }
-
-            return PackageSpecType.Error;
-        }
-
         private static packageNeedsInstall(targetPath: string): boolean {
             var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
             // if package.json doesn't exist or status file is still lingering around
             // it is an invalid installation
             return !fs.existsSync(path.join(targetPath, "package.json")) || fs.existsSync(statusFilePath);
+        }
+
+        private static getTimestampFilePath(targetPath: string): string {
+            return path.resolve(targetPath, "..", "timestamp.txt");
+        }
+
+        private static getLastCheckTimestamp(targetPath: string): Q.Promise<number> {
+            return Q.denodeify(fs.readFile)(TacoPackageLoader.getTimestampFilePath(targetPath))
+                .then(function (data: Buffer): number {
+                    return parseInt(data.toString());
+                })
+                .catch(function (error: any): number {
+                    return -1;
+                });
+        }
+
+        private static updateLastCheckTimestamp(targetPath: string): Q.Promise<void> {
+            return Q.denodeify(fs.writeFile)(TacoPackageLoader.getTimestampFilePath(targetPath), Date.now().toString())
+                .catch(function (): any {
+                    return Q.resolve<void>(null);
+            });
         }
     }
 }

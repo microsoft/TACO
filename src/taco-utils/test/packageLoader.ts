@@ -11,6 +11,7 @@
 "use strict";
 import should = require ("should");
 import mocha = require ("mocha");
+import Q = require ("q");
 
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
@@ -38,9 +39,9 @@ describe("TacoPackageLoader", function (): void {
 
     it("should load packages from npm", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
-        var packageJsonFile = path.join(testHome, "node_modules", "is-empty", "0.0.1", "node_modules", "is-empty", "package.json");
+        var packageJsonFile = path.join(testHome, "node_modules", "0.0.1", "node_modules", "is-empty", "package.json");
         fs.existsSync(packageJsonFile).should.be.false;
-        TacoPackageLoader.lazyRequire<any>("is-empty", "0.0.1").then(function (pkg: any): void {
+        TacoPackageLoader.lazyRequire<any>("is-empty", "is-empty@0.0.1").then(function (pkg: any): void {
             should(typeof pkg).not.equal("undefined");
             var funcContents: String = pkg.toString();
             funcContents.should.match(/function isEmpty/);
@@ -53,7 +54,7 @@ describe("TacoPackageLoader", function (): void {
     it("should load packages from git", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
         var gitUrl = "https://github.com/ianstormtaylor/is-empty.git";
-        var packageJsonFile = path.join(testHome, "node_modules", "is-empty", encodeURIComponent(gitUrl), "node_modules", "is-empty", "package.json");
+        var packageJsonFile = path.join(testHome, "node_modules", encodeURIComponent(gitUrl), "node_modules", "is-empty", "package.json");
         fs.existsSync(packageJsonFile).should.be.false;
         TacoPackageLoader.lazyRequire<any>("is-empty", gitUrl).then(function (pkg: any): void {
             should(typeof pkg).not.equal("undefined");
@@ -64,4 +65,87 @@ describe("TacoPackageLoader", function (): void {
             done();
         }, done);
     });
+
+    it("should be able to update npm package", function (done: MochaDone): void { // test doesn't expect an updated package but exercises the code paths for any regressions
+        var packageName: string = "is-empty";
+        var dynamicDependenciesPath: string = path.join(testHome, "dynamicDependencies.json");
+        fs.writeFileSync(dynamicDependenciesPath,
+            "{\"is-empty\": { \"packageName\": \"is-empty\", \"packageId\": \"is-empty@0.0.1\",\"expirationIntervalInHours\": " + 10 / (60 * 60 * 1000) + "}}");
+
+        TacoPackageLoader.lazyTacoRequire("is-empty", dynamicDependenciesPath)
+        .then(function (): Q.Promise<any> {
+            return delay(1000);
+        })
+        .then(function (): Q.Promise<any> {
+            return TacoPackageLoader.lazyTacoRequire("is-empty", dynamicDependenciesPath);
+        })
+        .done(function (): void {
+            done();
+        }, done);
+    });
+
+    it("should update local expirable package", function (done: MochaDone): void { // create a package on the fly
+        var packagePath: string = path.join(testHome, "foo");
+        mkdirp.sync(packagePath);
+        var indexJsPath: string = path.join(packagePath, "index.js");
+        fs.writeFileSync(path.join(packagePath, "package.json"), "{ \"name\": \"foo\", \"version\": \"1.0.0\" }");
+        fs.writeFileSync(indexJsPath, "module.exports = \"foo\"");
+
+        // add a dynamicDependencies file
+        var dynamicDependenciesPath: string = path.join(testHome, "dynamicDependenciesFoo.json");
+        fs.writeFileSync(dynamicDependenciesPath,
+            "{\"foo\": \
+                { \"packageName\": \"foo\", \
+                  \"localPath\": \"file://" + packagePath.replace(/\\/g, "\\\\") + "\", \
+                  \"expirationIntervalInHours\": " + 100 / (60 * 60 * 1000) +
+            "} \
+            }");
+
+        // 1. require package and verify package exports "foo"
+        // 2. update package to export "bar"
+        // 3. require again after expiration and verify "bar"
+        // 4. update pacakge to export "baz"
+        // 5. require again before expiration and verify not "bar"
+        TacoPackageLoader.lazyTacoRequire("foo", dynamicDependenciesPath)
+        .then(function (pkg: any): void {
+            should(typeof pkg).not.equal("undefined");
+            pkg.toString().should.equal("foo", "expected foo in installed package");
+        })
+        .then(function (): Q.Promise<any> {
+            return Q.denodeify(fs.writeFile)(indexJsPath, "module.exports = \"bar\"");
+        })
+        .then(function (): Q.Promise<any> {
+            return delay(1000);
+        })
+        .then(function (): Q.Promise<any> {
+            return TacoPackageLoader.lazyTacoRequire("foo", dynamicDependenciesPath);
+        })
+        .then(function (pkg: any): void {
+            should(typeof pkg).not.equal("undefined");
+            pkg.toString().should.equal("bar", "expected bar in installed package");
+        })
+        .then(function (): Q.Promise<any> {
+            return Q.denodeify(fs.writeFile)(indexJsPath, "module.exports = \"baz\"");
+        })
+        .then(function (): Q.Promise<any> {
+            // short delay
+            return delay(5);
+        })
+        .then(function (): Q.Promise<any> {
+            return TacoPackageLoader.lazyTacoRequire("foo", dynamicDependenciesPath);
+        })
+        .then(function (pkg: any): void {
+            should(typeof pkg).not.equal("undefined");
+            should(pkg.toString()).not.equal("baz", "Didn't expect baz in installed package");
+        })
+        .done(function (): void {
+            done();
+        }, done);
+    });
+
+    function delay(ms: number): Q.Promise<any> {
+        var deferred = Q.defer();
+        setTimeout(deferred.resolve, ms);
+        return deferred.promise;
+    };
 });

@@ -10,6 +10,7 @@
         "del": "latest",
         "gulp": "latest",
         "typescript": "latest",
+        "gulp-json-editor": "latest",
         "gulp-typescript": "latest",
         "gulp-sourcemaps": "latest",
         "merge2": "latest",

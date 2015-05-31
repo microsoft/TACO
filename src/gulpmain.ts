@@ -86,30 +86,21 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
 
 /* copy package.json and resources.json files from source to bin */
 gulp.task("copy", function (): Q.Promise<any> {
-    return gulpUtils.copyFiles(
-        [
-            "/**/package.json",
-            "/**/resources.json",
-            "/**/test/**",
-            "/**/commands.json",
-            "/**/TacoKitMetaData.json",
-            "/**/bin/**",
-            "/**/templates/**",
-            "/**/examples/**",
-            "/**/*.ps1",
-            "/**/dynamicDependencies.json"
-        ],
-        buildConfig.src, buildConfig.buildPackages).then(function (): void {
-            /* replace %TACO_BUILD_PACKAGES% with the absolute path of buildConfig.buildPackages in the built output */
-            replace({
-                regex: /%TACO_BUILD_PACKAGES%/g,
-                replacement: JSON.stringify(path.resolve(buildConfig.buildPackages)).replace(/"/g, ""),
-                paths: [buildConfig.buildPackages],
-                includes: "*.json",
-                recursive: true,
-                silent: false
-            });
-    });
+    var filesToCopy: string[] = [
+        "/**/package.json",
+        "/**/resources.json",
+        "/**/test/**",
+        "/**/commands.json",
+        "/**/TacoKitMetaData.json",
+        "/**/bin/**",
+        "/**/templates/**",
+        "/**/examples/**",
+        "/**/*.ps1",
+    ];
+    return Q.all([
+        gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),
+        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages)
+    ]);
 });
 
 /* Task to run tests */

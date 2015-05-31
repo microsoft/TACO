@@ -1,6 +1,7 @@
 ﻿{
-    "taco-remote-multiplexer" : {
-        "name": "taco-remote-multiplexer",
-        "location": "file://%TACO_BUILD_PACKAGES%/taco-remote-multiplexer"
-    }
+  "taco-remote-multiplexer": {
+    "packageName": "taco-remote-multiplexer",
+    "packageId": "taco-remote-multiplexer@0.0.1",
+    "expirationIntervalInHours": 4
+  }
 }

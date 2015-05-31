@@ -62,7 +62,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     var cordovaVersion: string = currentBuild["vcordova"];
     buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
     process.send(buildInfo);
-    TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
+    TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
         cordova = pkg;
 
         cordova.on("results", console.info);
@@ -79,7 +79,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     }, function (err: Error): void {
             buildInfo.updateStatus(BuildInfo.ERROR, "RequireCordovaFailed", cordovaVersion, err.toString());
             process.send(buildInfo);
-    });
+        });
 });
 
 class IOSBuildHelper {
