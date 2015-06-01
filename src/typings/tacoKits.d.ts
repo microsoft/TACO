@@ -16,20 +16,25 @@ declare module TacoKits {
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
     }
 
+    interface IPluginOverrideInfo {
+        name?: string;
+        version?: string;
+        src?: string;
+        platforms?: string;
+    }
+
+    interface IPlatformOverrideInfo {
+        version: string;
+        src?: string;
+    }
+
     // Metadata-related interfaces
     interface IPluginOverrideMetadata {
-        [pluginId: string]: {
-            version?: string;
-            src?: string;
-            platforms?: string;
-        };
+        [pluginId: string]: IPluginOverrideInfo;
     }
 
     interface IPlatformOverrideMetadata {
-        [platformName: string]: {
-            version: string;
-            src: string;
-        };
+        [platformName: string]: IPlatformOverrideInfo;
     }
 
     interface ITemplateOverrideInfo {

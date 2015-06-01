@@ -42,6 +42,6 @@ declare module TacoUtility {
         static logNormalLine(msg: string): void;
         static logNormalBoldLine(msg: string): void;
         static logSuccessLine(msg: string): void;
-        static RepeatString(msg: string, num: number, level: Logger.Level): void;
+        static repeatString(msg: string, num: number, level: Logger.Level): void;
     }
 }

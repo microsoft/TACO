@@ -93,11 +93,12 @@ module TacoUtility {
             Logger.logLine(msg, Logger.Level.Success);
         }
 
-        public static RepeatString(msg: string, num: number, level: Logger.Level = Logger.Level.Normal): void {
+        public static repeatString(msg: string, num: number, level: Logger.Level = Logger.Level.Normal): void {
             var sequence: string = "";
             for (var i: number = 0; i < num; i++) {
                 sequence = sequence + msg;
             }
+
             Logger.log(sequence, level);
         }
     };

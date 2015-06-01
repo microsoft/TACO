@@ -55,7 +55,7 @@ module ProjectHelper {
             }
         }
 
-        public static GetProjectInfo(projectPath: string): Q.Promise<IProjectInfo> {
+        public static getProjectInfo(projectPath: string): Q.Promise<IProjectInfo> {
             var deferred: Q.Deferred<IProjectInfo> = Q.defer<IProjectInfo>();
             var projectInfo: IProjectInfo = {
                 isKitProject: false,
@@ -78,8 +78,7 @@ module ProjectHelper {
                         deferred.resolve(projectInfo);
                         return deferred.promise;
                     });
-                }
-                else if (tacoJson.cli) {
+                } else if (tacoJson.cli) {
                     projectInfo.isKitProject = true;
                     projectInfo.cordovaCliVersion = tacoJson.cli;
                     deferred.resolve(projectInfo);

@@ -44,7 +44,10 @@
             "cordova-cli": "4.0.0",
             "taco-min": "1.0.0",
             "releaseNotesUri": "http://cordova.apache.org/4.0.0/release.md",
-            "name": "4.0.0 Kit for Cordova Development",
+            "name": {
+                "default": "4.0.0 Kit for Cordova Development",
+                "es-mx": "4.0.0 Kit for Cordova Development"
+            },
             "deprecated": true,
             "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
             "plugins": {
@@ -76,7 +79,10 @@
             "taco-min": "1.0.0",
             "default": true,
             "releaseNotesUri": "http://cordova.apache.org/5.0.0/release.md",
-            "name": "5.0.0 Kit for Cordova Development",
+            "name": {
+                "default": "5.0.0 Kit for Cordova Development",
+                "es-mx": "5.0.0 Kit for Cordova Development"
+            },
             "platforms": {
                 "android": {
                     "version": "4.2.1",

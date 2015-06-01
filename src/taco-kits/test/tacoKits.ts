@@ -40,7 +40,10 @@ describe("KitHelper", function (): void {
         "cordova-cli": "4.0.0",
         "taco-min": "1.0.0",
         releaseNotesUri: "http://cordova.apache.org/4.0.0/release.md",
-        name: localizableName,
+        name: {
+            default: "4.0.0 Kit for Cordova Development",
+            "es-mx": "4.0.0 Kit for Cordova Development"
+        },
         deprecated: true,
         deprecatedReasonUri: "http://cordova.apache.org/blog/2014102310023",
         plugins: {
@@ -92,12 +95,12 @@ describe("KitHelper", function (): void {
     };
 
     var localizableName: tacoKits.ILocalizableString = {
-        "default": "4.2.0 + Cordova Windows 10 Beta Kit",
+        default: "4.2.0 + Cordova Windows 10 Beta Kit",
         "es-mx": "4.2.0 + Cordova de Windows 10 Beta Kit"
     };
 
     var localizableDescription: tacoKits.ILocalizableString = {
-        "default": "A toolkit of plugins and platforms designed to work with the beta version of the Cordova Windows 10 platform.",
+        default: "A toolkit of plugins and platforms designed to work with the beta version of the Cordova Windows 10 platform.",
         "es-mx": "Instantánea de plugins y plataformas diseñadas para trabajar con la versión beta de la plataforma de Windows 10 Cordova."
     };
 
@@ -106,7 +109,10 @@ describe("KitHelper", function (): void {
         "taco-min": "1.0.0",
         default: true,
         releaseNotesUri: "http://cordova.apache.org/5.0.0/release.md",
-        name: localizableName,
+        name: {
+            default: "5.0.0 Kit for Cordova Development",
+            "es-mx": "5.0.0 Kit for Cordova Development"
+        },
         platforms: testPlatformOverridesForDefaultKit,
         plugins: testPluginOverridesForDefaultKit
     };
@@ -130,15 +136,15 @@ describe("KitHelper", function (): void {
     describe("getKitMetadata()", function (): void {
         it("must return the right kit metadata", function (done: MochaDone): void {
             // Call getKitMetadata()
-            /*kitHelper.getKitMetadata()
-                .then(function (kitInfo: TacoKits.ITacoKitMetadata): void {
+            kitHelper.getKitMetadata()
+                .then(function (kitMetadata: tacoKits.ITacoKitMetadata): void {
                     // Verify the returned kit metadata is expected
-                    kitInfo.should.equal(require(kitHelper.KitMetadataFilePath));
+                    kitMetadata.should.equal(require(kitHelper.KitMetadataFilePath));
                     done();
                 })
                 .catch(function (err: string): void {
                     done(new Error(err));
-                });*/
+                });
         });
     });
 

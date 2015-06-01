@@ -38,7 +38,7 @@ module TacoKits {
 
     export interface IPlatformOverrideInfo {
         version: string;
-        src: string;
+        src?: string;
     }
 
     // Metadata-related interfaces

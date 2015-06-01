@@ -13,18 +13,16 @@
 /// <reference path="../../typings/tacoKits.d.ts" />
 "use strict";
 
-import assert = require("assert");
-import fs = require("fs");
-import nopt = require("nopt");
-import path = require("path");
-import Q = require("q");
+import nopt = require ("nopt");
+import path = require ("path");
+import Q = require ("q");
 
-import errorHelper = require("./tacoErrorHelper");
-import projectHelper = require("./utils/project-helper");
-import resources = require("../resources/resourceManager");
-import TacoErrorCodes = require("./tacoErrorCodes");
-import tacoKits = require("taco-kits");
-import tacoUtility = require("taco-utils");
+import errorHelper = require ("./tacoErrorHelper");
+import projectHelper = require ("./utils/project-helper");
+import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import tacoKits = require ("taco-kits");
+import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
@@ -44,15 +42,15 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     };
     private static ShortHands: Nopt.ShortFlags = {};
 
-    private static indentWidth: number = 3; // indent string
-    private static maxTextWidth = 20;
+    private static IndentWidth: number = 3; // indent string
+    private static MaxTextWidth = 20;
 
     public subcommands: commands.ICommand[] = [
         {
             // List kits
             run: Kit.list,
             canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.options["json"];
+                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "list";
             }
         },
     ];
@@ -64,10 +62,6 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
-        if (data.original.indexOf("--json") !== -1 && data.original.indexOf("--cli") === -1) {
-            return false;
-        }
-
         return true;
     }
 
@@ -76,17 +70,17 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["json"] && parsedOptions.options["cli"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
+            throw errorHelper.get(TacoErrorCodes.CommandKitInvalidCommandCombination);
         }
 
         return parsedOptions;
     }
 
      /**
-     * Pretty prints the current Kit/Cordova CLI info
-     */
+      * Pretty prints the current Kit/Cordova CLI info
+      */
     private static printCurrentKitInfo(): void {
-        tacoProjectHelper.GetProjectInfo(__dirname).then(function (projectInfo: projectHelper.IProjectInfo): void {
+        tacoProjectHelper.getProjectInfo(__dirname).then(function (projectInfo: projectHelper.IProjectInfo): void {
             if (!projectInfo.isKitProject) {
                 return;
             }
@@ -95,14 +89,15 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                 logger.logLine(resources.getString("CommandKitListCurrentKit") + "\n", level.NormalBold);
                 logger.log(projectInfo.tacoKitId);
             }
+
             logger.logLine(resources.getString("CommandKitListCurrentCordovaCli") + "\n", level.NormalBold);
             logger.log(projectInfo.cordovaCliVersion);
         });
     }
 
      /**
-     * Pretty prints the Kit name and description info
-     */
+      * Pretty prints the Kit name and description info
+      */
     private static printKitNameAndDescription(kitId: string, kitInfo: tacoKits.IKitInfo): void {
         if (kitId) {
             var title: string = kitId;
@@ -110,16 +105,18 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             logger.log("\n");
             logger.log(title, level.Success);
             if (kitInfo.default) {
-                logger.log(resources.getString("CommandKitListDefaultKit") + "\n", level.Warn);
+                logger.log(resources.getString("CommandKitListDefaultKit"), level.Warn);
                 titleLength += resources.getString("CommandKitListDefaultKit").length;
-            }
-            else if (kitInfo.deprecated) {
-                logger.log(resources.getString("CommandKitListDeprecatedKit") + "\n", level.Error);
+            } else if (kitInfo.deprecated) {
+                logger.log(resources.getString("CommandKitListDeprecatedKit"), level.Error);
                 titleLength += resources.getString("CommandKitListDeprecatedKit").length;
             }
+
             logger.log("\n");
-            logger.RepeatString("-", titleLength, level.Normal);          
+            logger.repeatString("-", titleLength, level.Normal);
+            logger.log("\n");          
         }
+
         if (kitInfo.description) {
             var description: string = Kit.getLocalizedString(kitInfo.description);
             logger.logLine(description + "\n", level.Normal);
@@ -127,8 +124,8 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
      /**
-     * Pretty prints the Cordova CLI version info
-     */
+      * Pretty prints the Cordova CLI version info
+      */
     private static printCordovaCliVersion(kitInfo: tacoKits.IKitInfo): void {
         if (kitInfo["cordova-cli"]) {
             logger.log("\n");
@@ -139,48 +136,50 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
      /**
-     * Pretty prints the platform version override info
-     */
-    private static  printPlatformOverrideInfo(kitInfo: tacoKits.IKitInfo): void {
+      * Pretty prints the platform version override info
+      */
+    private static printPlatformOverrideInfo(kitInfo: tacoKits.IKitInfo): void {
         if (kitInfo.platforms) {
             logger.logLine(resources.getString("CommandKitListPlatformOverridesForKit"), level.NormalBold);
             Object.keys(kitInfo.platforms).forEach(function (platformName: string): void {
-                var remain: number = Kit.maxTextWidth - (platformName.length + Kit.indentWidth);
+                var remain: number = Kit.MaxTextWidth - (platformName.length + Kit.IndentWidth);
                 var versionInfo = kitInfo.platforms[platformName].version ? kitInfo.platforms[platformName].version : kitInfo.platforms[platformName].src;
-                logger.RepeatString(" ", Kit.indentWidth, level.Normal); 
-                logger.log(platformName, level.Warn);
-                logger.RepeatString("-", remain, level.Normal); 
+                logger.repeatString(" ", Kit.IndentWidth, level.Normal); 
+                logger.log(platformName, level.Normal);
+                logger.repeatString("-", remain, level.Normal); 
                 logger.log(": " + versionInfo + "\n", level.Normal);
             });
+            logger.log("\n"); 
         }
     }
 
      /**
-     * Pretty prints the plugin version override info
-     */
+      * Pretty prints the plugin version override info
+      */
     private static printPluginOverrideInfo(kitInfo: tacoKits.IKitInfo): void {
         if (kitInfo.plugins) {
             logger.logLine(resources.getString("CommandKitListPluginOverridesForKit"), level.NormalBold);
             Object.keys(kitInfo.plugins).forEach(function (pluginId: string): void {
-                var remain: number = Kit.maxTextWidth - (pluginId.length + Kit.indentWidth);
+                var remain: number = Kit.MaxTextWidth - (pluginId.length + Kit.IndentWidth);
                 var versionInfo = kitInfo.plugins[pluginId].version ? kitInfo.plugins[pluginId].version : kitInfo.plugins[pluginId].src;
-                logger.RepeatString(" ", Kit.indentWidth, level.Normal);
-                logger.log(pluginId, level.Warn);
-                logger.RepeatString("-", remain, level.Normal);
+                logger.repeatString(" ", Kit.IndentWidth, level.Normal);
+                logger.log(pluginId, level.Normal);
+                logger.repeatString("-", remain, level.Normal);
                 logger.log(": " + versionInfo + "\n", level.Normal);
             });
+            logger.log("\n"); 
         }
     }
 
      /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
+      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
+      */
     private static getLocalizedString(localizedStringObj: tacoKits.ILocalizableString): string {
         return localizedStringObj["default"];
     }
 
     private static printKitsInfo(): void {
-        logger.logLine(resources.getString("CommandKitList") + "\n", level.Normal);
+        logger.logLine("\n" + resources.getString("CommandKitList") + "\n", level.Normal);
         kitHelper.getKitMetadata().then(function (metadata: tacoKits.ITacoKitMetadata): void {
             var kits: tacoKits.IKitMetadata = metadata.kits;
             Object.keys(kits).forEach(function (kitId: string): void {
