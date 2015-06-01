@@ -51,16 +51,18 @@ declare module TacoKits {
     }
 
     interface ITemplateMetadata {
-        [kitId: string]: {
-            [templateIdd: string]: ITemplateInfo;
-        }
+        [kitId: string]: string;
+    }
+
+    interface ILocalizableString {
+        [lang: string]: string;
     }
 
     interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;
-        name?: string;
-        description?: string;
+        name?: ILocalizableString;
+        description?: ILocalizableString;
         releaseNotesUri?: string;
         deprecated?: boolean;
         deprecatedReasonUri?: string;
@@ -119,6 +121,11 @@ declare module TacoKits {
          *  Returns 'true' if a kit is deprecated, 'false' otherwise
          */
         public static isKitDeprecated(kitInfo: IKitInfo): boolean;
+
+        /**
+         *  Returns 'true' if a kit is the default one, 'false' otherwise
+         */
+        public static isKitDefault(kitInfo: IKitInfo): boolean;
 
         /**
          *   Returns a promise resolved by a valid cordova Cli for the kitId

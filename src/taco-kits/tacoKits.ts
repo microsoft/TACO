@@ -29,21 +29,25 @@ module TacoKits {
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
     }
 
+    export interface IPluginOverrideInfo {
+        name?: string;
+        version?: string;
+        src?: string;
+        platforms?: string;
+    }
+
+    export interface IPlatformOverrideInfo {
+        version: string;
+        src: string;
+    }
+
     // Metadata-related interfaces
     export interface IPluginOverrideMetadata {
-        [pluginId: string]: {
-            name?: string;
-            version?: string;
-            src?: string;
-            platforms?: string;
-        };
+        [pluginId: string]: IPluginOverrideInfo;
     }
 
     export interface IPlatformOverrideMetadata {
-        [platformName: string]: {
-            version: string;
-            src: string;
-        };
+        [platformName: string]: IPlatformOverrideInfo;
     }
 
     export interface ITemplateOverrideInfo {
@@ -70,11 +74,15 @@ module TacoKits {
         }
     }
 
+    export interface ILocalizableString {
+        [lang: string]: string;
+    }
+
     export interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;
-        name?: string;
-        description?: string;
+        name?: ILocalizableString;
+        description?: ILocalizableString;
         releaseNotesUri?: string;
         deprecated?: boolean;
         deprecatedReasonUri?: string;
@@ -167,6 +175,13 @@ module TacoKits {
          */
         public static isKitDeprecated(kitInfo: IKitInfo): boolean {
             return kitInfo.deprecated ? true : false;
+        }
+
+        /**
+         *  Returns 'true' if a kit is the default one, 'false' otherwise
+         */
+        public static isKitDefault(kitInfo: IKitInfo): boolean {
+            return kitInfo.default ? true : false;
         }
 
         /**
