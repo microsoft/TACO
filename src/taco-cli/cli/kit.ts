@@ -18,7 +18,7 @@ import path = require ("path");
 import Q = require ("q");
 
 import errorHelper = require ("./tacoErrorHelper");
-import projectHelper = require ("./utils/project-helper");
+import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoKits = require ("taco-kits");
@@ -68,7 +68,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     public parseArgs(args: string[]): commands.ICommandData {
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Kit.KnownOptions, Kit.ShortHands, args, 0);
 
-        // Raise errors for invalid command line parameters
+        // Raise errors for invalid command line parameter combinations
         if (parsedOptions.options["json"] && parsedOptions.options["cli"]) {
             throw errorHelper.get(TacoErrorCodes.CommandKitInvalidCommandCombination);
         }
@@ -79,19 +79,20 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      /**
       * Pretty prints the current Kit/Cordova CLI info
       */
-    private static printCurrentKitInfo(): void {
-        tacoProjectHelper.getProjectInfo(__dirname).then(function (projectInfo: projectHelper.IProjectInfo): void {
+    private static printCurrentKitInfo(): Q.Promise<any> {
+        logger.log("\n");
+        return tacoProjectHelper.getProjectInfo(path.resolve(".")).then(function (projectInfo: projectHelper.IProjectInfo): void {
             if (!projectInfo.isKitProject) {
                 return;
             }
 
             if (projectInfo.tacoKitId) {
-                logger.logLine(resources.getString("CommandKitListCurrentKit") + "\n", level.NormalBold);
-                logger.log(projectInfo.tacoKitId);
+                logger.log(resources.getString("CommandKitListCurrentKit"), level.NormalBold);
+                logger.log(projectInfo.tacoKitId + "\n");
             }
 
-            logger.logLine(resources.getString("CommandKitListCurrentCordovaCli") + "\n", level.NormalBold);
-            logger.log(projectInfo.cordovaCliVersion);
+            logger.log(resources.getString("CommandKitListCurrentCordovaCli"), level.NormalBold);
+            logger.log(projectInfo.cordovaCliVersion + "\n");
         });
     }
 
@@ -192,9 +193,9 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
-        Kit.printCurrentKitInfo();
-        Kit.printKitsInfo();
-        return Q({});
+        return Kit.printCurrentKitInfo().then(function (): void {
+            Kit.printKitsInfo();
+        });
     }
 }
 

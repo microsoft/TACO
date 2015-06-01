@@ -20,7 +20,7 @@ import Q = require ("q");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
-import projectHelper = require ("./utils/project-helper");
+import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("./tacoErrorCodes");

@@ -71,18 +71,16 @@ module ProjectHelper {
 
                 var tacoJson: ITacoJsonMetadata = require(tacoJsonPath);
                 if (tacoJson.kit) {
-                    kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): Q.Promise<IProjectInfo> {
+                    kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
                         projectInfo.isKitProject = true;
                         projectInfo.tacoKitId = tacoJson.kit;
                         projectInfo.cordovaCliVersion = cordovaCli;
                         deferred.resolve(projectInfo);
-                        return deferred.promise;
                     });
                 } else if (tacoJson.cli) {
                     projectInfo.isKitProject = true;
                     projectInfo.cordovaCliVersion = tacoJson.cli;
                     deferred.resolve(projectInfo);
-                    return deferred.promise;
                 }
             } catch (e) {
                 deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateTacoJsonFileCreationError));
