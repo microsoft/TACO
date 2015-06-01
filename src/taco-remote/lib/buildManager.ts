@@ -326,7 +326,7 @@ class BuildManager {
             who.props.mode = 511; // "chmod 0777"
 
             return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || !!who.props.path.match(/plugins/);
-        }
+        };
 
         var extractDeferred = Q.defer();
         var extractPluginDeferred = Q.defer();
@@ -344,6 +344,7 @@ class BuildManager {
         var unzip = zlib.createGunzip();
         var tgzStream = fs.createReadStream(buildInfo.tgzFilePath);
         tarExtractor.on("error", onError);
+        pluginExtractor.on("error", onError);
         unzip.on("error", onError);
         tgzStream.on("error", onError);
         tgzStream.pipe(unzip);

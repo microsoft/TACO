@@ -232,7 +232,7 @@ class IOSBuildHelper {
                     return cordova.raw.plugin("add", newFolder);
                 }
             });
-        }, deleteOldPlugins).finally(function () {
+        }, deleteOldPlugins).finally(function (): void {
             // Always clean up after ourselves; we don't want to get confused the next time we do a build.
             rimraf.sync(remotePluginsPath);
         });
