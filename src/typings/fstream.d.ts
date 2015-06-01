@@ -8,12 +8,20 @@
 
 // Barebones typing for fstream, added as-needed
 
-declare module "fstream" {
-    export class ReaderProps {
-        path: string
+declare module Fstream {
+    export interface IReaderProps {
+        path: string;
+    }
+    export interface IProps {
+        mtime: Date;
+        type: string;
+        path: string;
+        mode?: number;
+        depth?: number;
+        Directory?: boolean;
     }
     export class Reader extends Abstract {
-        constructor(props: ReaderProps, currentStat?: any);
+        constructor(props: IReaderProps, currentStat?: any);
         constructor(props: string, currentStat?: any);
 
         pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean; }): T;
@@ -25,11 +33,7 @@ declare module "fstream" {
         root: Reader;
         basename: string;
         dirname: string;
-        props: {
-            mtime: Date;
-            type: string;
-        }
-
+        props: IProps;
     }
 
     export class Writer extends Abstract implements NodeJS.WritableStream {
@@ -42,6 +46,8 @@ declare module "fstream" {
         end(buffer: Buffer, cb?: Function): void;
         end(str: string, cb?: Function): void;
         end(str: string, encoding?: string, cb?: Function): void;
+
+        props: IProps;
     }
 
     export class Abstract implements NodeJS.EventEmitter {
@@ -54,4 +60,8 @@ declare module "fstream" {
         listeners(event: string): Function[];
         emit(event: string, ...args: any[]): boolean;
     }
+}
+
+declare module "fstream" {
+    export = Fstream;
 }
