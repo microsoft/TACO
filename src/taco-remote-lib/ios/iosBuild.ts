@@ -190,15 +190,18 @@ class IOSBuildHelper {
             return fs.statSync(path.join(remotePluginsPath, entry)).isDirectory();
         });
         var pluginNameRegex = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
-        var deletedPlugins = currentBuild.changeList.deletedFiles.map(function (file: string): string {
-            // Normalize filenames to use this platform's slashes, when the client may have sent back-slashes
-            return path.normalize(path.join.apply(path, file.split("\\")));
-        }).filter(function (file: string): boolean {
-            // A plugin is deleted if its plugin.xml is deleted
-            return !!file.match(pluginNameRegex);
-        }).map(function (file: string): string {
-            return file.match(pluginNameRegex)[1];
-        });
+        var deletedPlugins: string[] = [];
+        if (currentBuild.changeList && currentBuild.changeList.deletedFiles) {
+            deletedPlugins = currentBuild.changeList.deletedFiles.map(function (file: string): string {
+                // Normalize filenames to use this platform's slashes, when the client may have sent back-slashes
+                return path.normalize(path.join.apply(path, file.split("\\")));
+            }).filter(function (file: string): boolean {
+                // A plugin is deleted if its plugin.xml is deleted
+                return !!file.match(pluginNameRegex);
+            }).map(function (file: string): string {
+                return file.match(pluginNameRegex)[1];
+            });
+        }
 
         var deleteOldPlugins = deletedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
