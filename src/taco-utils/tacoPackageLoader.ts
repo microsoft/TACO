@@ -243,7 +243,7 @@ module TacoUtility {
                         return TacoPackageLoader.createPackageInstallRequest(packageEntry.packageName, packageId, logLevel, packageEntry.expirationIntervalInHours);
                     }
                 } catch (exception) {
-                    assert(exception);
+                    assert.fail(exception, null, "dynamic dependencies file " + dependencyConfigPath + " is missing or corrupted");
                 }
             }
 
