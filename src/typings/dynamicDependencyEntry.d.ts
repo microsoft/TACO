@@ -13,4 +13,5 @@ interface IDynamicDependencyEntry {
     packageId: string;
     localPath: string; // for development scenarios
     expirationIntervalInHours?: number;
+    dev: boolean;
 }

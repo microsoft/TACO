@@ -39,7 +39,7 @@ describe("TacoPackageLoader", function (): void {
 
     it("should load packages from npm", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
-        var packageJsonFile = path.join(testHome, "node_modules", "0.0.1", "node_modules", "is-empty", "package.json");
+        var packageJsonFile = path.join(testHome, "node_modules", "is-empty", "0.0.1", "node_modules", "is-empty", "package.json");
         fs.existsSync(packageJsonFile).should.be.false;
         TacoPackageLoader.lazyRequire<any>("is-empty", "is-empty@0.0.1").then(function (pkg: any): void {
             should(typeof pkg).not.equal("undefined");
@@ -54,7 +54,7 @@ describe("TacoPackageLoader", function (): void {
     it("should load packages from git", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
         var gitUrl = "https://github.com/ianstormtaylor/is-empty.git";
-        var packageJsonFile = path.join(testHome, "node_modules", encodeURIComponent(gitUrl), "node_modules", "is-empty", "package.json");
+        var packageJsonFile = path.join(testHome, "node_modules", "is-empty", encodeURIComponent(gitUrl), "node_modules", "is-empty", "package.json");
         fs.existsSync(packageJsonFile).should.be.false;
         TacoPackageLoader.lazyRequire<any>("is-empty", gitUrl).then(function (pkg: any): void {
             should(typeof pkg).not.equal("undefined");

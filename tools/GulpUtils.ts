@@ -80,7 +80,9 @@ class GulpUtils {
                 function (json: { [packageKey: string]: IDynamicDependencyEntry }): { [packageKey: string]: IDynamicDependencyEntry } {
                     Object.keys(json).forEach(function (packageKey: string): void {
                         var entry: IDynamicDependencyEntry = json[packageKey];
-                        entry.localPath = util.format("file://%s", path.resolve(destPath, entry.packageName));
+                        if (entry.dev) {
+                            entry.localPath = util.format("file://%s", path.resolve(destPath, entry.packageName));
+                        }
                     });
                     return json;
                 }

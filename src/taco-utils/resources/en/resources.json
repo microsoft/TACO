@@ -39,9 +39,5 @@
     "_PackageLoaderNpmUpdateFailedWithCode.comment": "Message reported when npm update fails with an exit code.",
     "PackageLoaderNpmUpdateFailedEaccess": "Error updating {0} via npm. Exit Code: {1}. Check permissions of npm cache. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=613751.",
     "_PackageLoaderNpmUpdateFailedEaccess.comment": "Message reported when npm update fails due to permissions",
-    "InnerErrorToString": "Inner Error:\n{0}",
-    "MissingTacoDependencyConfigFile": "Missing taco dependency configuration file {0} is either missing or corrupted",
-    "_MissingTacoDependencyConfigFile.comment": "",
-    "MissingTacoDependencySpecification": "Missing specification for {0} in taco dependency configuration file {1}",
-    "_MissingTacoDependencySpecification.comment": ""
+    "InnerErrorToString": "Inner Error:\n{0}"
 }

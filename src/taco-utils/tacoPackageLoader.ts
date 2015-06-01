@@ -78,6 +78,9 @@ module TacoUtility {
     };
 
     export class TacoPackageLoader {
+        private static GitUriRegex: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
+        private static FileUriRegex: RegExp = /^file:\/\/.*/;
+
         /**
          * Load a node package with specified version. If the package is not already downloaded,
          * then first download the package and cache it locally for future loads. The loaded package is cast to type T
@@ -160,7 +163,7 @@ module TacoUtility {
                 });
         }
 
-        private static lazyRequireInternal<T>(request: IPackageInstallRequest, needsUpdate?: boolean): Q.Promise<T> {
+        private static lazyRequireInternal<T>(request: IPackageInstallRequest, needsUpdate: boolean = false): Q.Promise<T> {
             assert.notEqual(request, null);
 
             return Q({})
@@ -183,11 +186,11 @@ module TacoUtility {
 
         private static createPackageInstallRequest(packageName: string, packageId: string, logLevel: string, expirationIntervalInHours?: number): IPackageInstallRequest {
             var packageType: PackageSpecType = PackageSpecType.Error;
+
             // The packageId can either be a GIT url, a local file path or name@version (cordova@4.3)
-            var gitUrlRegex = new RegExp("^http(s?)\\:\/\/.*|.*\.git$");
-            if ((gitUrlRegex.exec(packageId))) {
+            if ((TacoPackageLoader.GitUriRegex.test(packageId))) {
                 packageType = PackageSpecType.Uri;
-            } else if (packageId.match(/file:\/\/.*/)) {
+            } else if (TacoPackageLoader.FileUriRegex.test(packageId)) {
                 packageId = packageId.substring("file://".length);
                 if (fs.existsSync(packageId)) {
                     packageType = PackageSpecType.FilePath;
@@ -200,7 +203,7 @@ module TacoUtility {
                 }
             }
 
-            var homePackageModulesPath = path.join(utils.tacoHome, "node_modules");
+            var homePackageModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
             switch (packageType) {
                 case PackageSpecType.Registry:
                     var versionSubFolder: string = packageId.split("@")[1] || "latest";
@@ -240,6 +243,7 @@ module TacoUtility {
                         return TacoPackageLoader.createPackageInstallRequest(packageEntry.packageName, packageId, logLevel, packageEntry.expirationIntervalInHours);
                     }
                 } catch (exception) {
+                    assert(exception);
                 }
             }
 
@@ -352,7 +356,7 @@ module TacoUtility {
         }
 
         private static getTimestampFilePath(targetPath: string): string {
-            return path.resolve(targetPath, "..", "timestamp.txt");
+            return path.resolve(targetPath, "..", "..", "timestamp.txt");
         }
 
         private static getLastCheckTimestamp(targetPath: string): Q.Promise<number> {
