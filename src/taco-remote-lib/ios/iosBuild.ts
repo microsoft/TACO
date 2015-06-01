@@ -191,7 +191,7 @@ class IOSBuildHelper {
         });
         var pluginNameRegex = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
         var deletedPlugins = currentBuild.changeList.deletedFiles.map(function (file: string): string {
-            // Normalize filenames to use this platform's slashes slashes, when the client may have sent back-slashes
+            // Normalize filenames to use this platform's slashes, when the client may have sent back-slashes
             return path.normalize(path.join.apply(path, file.split("\\")));
         }).filter(function (file: string): boolean {
             // A plugin is deleted if its plugin.xml is deleted

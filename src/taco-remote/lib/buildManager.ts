@@ -6,11 +6,12 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/expressExtensions.d.ts" />
+/// <reference path="../../typings/fstream.d.ts" />
+/// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/tacoRemoteLib.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tar.d.ts" />
 /// <reference path="./requestRedirector.ts" />
 "use strict";
@@ -314,14 +315,14 @@ class BuildManager {
         // extracting to unix, causing the extract to fail because the directory cannot be navigated. 
         // Also, the tar module does not handle an 'error' event from it's underlying stream, so we have no way of catching errors like an unwritable
         // directory in the tar gracefully- they cause an uncaughtException and server shutdown. For safety sake we force 'rwx' for all on everything.
-        var tarFilter = function (who: { props: { path: string; mode: number } }): boolean {
+        var tarFilter = function (who: Fstream.Writer): boolean {
             who.props.mode = 511; // "chmod 777"
 
             // Do not include the /plugins folder
             return !who.props.path.match(/plugins/);
         };
 
-        var pluginsOnlyFilter = function (who: { props: { path: string; mode: number; depth: number; Directory: boolean} }): boolean {
+        var pluginsOnlyFilter = function (who: Fstream.Writer): boolean {
             who.props.mode = 511; // "chmod 0777"
 
             return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || !!who.props.path.match(/plugins/);
