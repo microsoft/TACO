@@ -21,12 +21,14 @@ import rimraf = require ("rimraf");
 import semver = require ("semver");
 import Q = require ("q");
 
+import loggerUtil = require("./logger");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoError = require ("./tacoError");
 import UtilHelper = require ("./utilHelper");
 
+import logger = loggerUtil.Logger;
 import TacoError = tacoError.TacoError;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = UtilHelper.UtilHelper;
@@ -38,6 +40,15 @@ module TacoUtility {
         Uri = 1,
         FilePath = 2
     }
+    export enum InstallLogLevel {
+        silent,
+        warn,
+        info,
+        verbose,
+        silly,
+        pretty,
+    }
+
 
     interface IPackageInstallRequest {
         /**
@@ -74,7 +85,7 @@ module TacoUtility {
         /**
          * log verbosity requested for the operation
          */
-        logLevel: string;
+        logLevel: InstallLogLevel;
     };
 
     export class TacoPackageLoader {
@@ -90,11 +101,14 @@ module TacoUtility {
          *
          * @param {string} packageName The name of the package to load
          * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
-         * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
+         * @param {string} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
+         * 
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyRequire<T>(packageName: string, packageId: string, logLevel?: string): Q.Promise<T> {
+        public static lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T> {
             return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
         }
 
@@ -109,7 +123,7 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, logLevel?: string): Q.Promise<T> {
+        public static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, logLevel?: InstallLogLevel): Q.Promise<T> {
             var request: IPackageInstallRequest = TacoPackageLoader.createTacoPackageInstallRequest(packageKey, dependencyConfigPath, logLevel);
             assert.notEqual(request, null, "Invalid Package request");
 
@@ -184,7 +198,7 @@ module TacoUtility {
                 });
         }
 
-        private static createPackageInstallRequest(packageName: string, packageId: string, logLevel: string, expirationIntervalInHours?: number): IPackageInstallRequest {
+        private static createPackageInstallRequest(packageName: string, packageId: string, logLevel: InstallLogLevel, expirationIntervalInHours?: number): IPackageInstallRequest {
             var packageType: PackageSpecType = PackageSpecType.Error;
 
             // The packageId can either be a GIT url, a local file path or name@version (cordova@4.3)
@@ -212,7 +226,8 @@ module TacoUtility {
                         type: packageType,
                         packageId: packageId,
                         targetPath: path.join(homePackageModulesPath, versionSubFolder, "node_modules", packageName),
-                        expirationIntervalInHours: expirationIntervalInHours
+                        expirationIntervalInHours: expirationIntervalInHours,
+                        logLevel: logLevel
                     };
 
                 case PackageSpecType.Uri:
@@ -223,7 +238,8 @@ module TacoUtility {
                         packageId: packageId,
                         targetPath: path.join(homePackageModulesPath, encodeURIComponent(packageId), "node_modules", packageName),
                         commandFlags: ["--production"],
-                        expirationIntervalInHours: expirationIntervalInHours
+                        expirationIntervalInHours: expirationIntervalInHours,
+                        logLevel: logLevel
                     };
                     break;
 
@@ -232,7 +248,7 @@ module TacoUtility {
             }
         }
 
-        private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel?: string): IPackageInstallRequest {
+        private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel?: InstallLogLevel): IPackageInstallRequest {
             if (fs.existsSync(dependencyConfigPath)) {
                 try {
                     var dependencyLookup: any = require(dependencyConfigPath);
@@ -250,12 +266,12 @@ module TacoUtility {
             return null;
         }
 
-        private static runNpmCommand(npmCommand: string, packageId: string, cwd: string, flags: string[], logLevel?: string): Q.Promise<number> {
+        private static runNpmCommand(npmCommand: string, packageId: string, cwd: string, flags: string[], logLevel?: InstallLogLevel): Q.Promise<number> {
             var deferred: Q.Deferred<number> = Q.defer<number>();
             var args: string[] = [npmCommand, packageId];
 
-            if (logLevel) {
-                args.push("--loglevel", logLevel);
+            if (logLevel && logLevel != InstallLogLevel.pretty) {
+                args.push("--loglevel", InstallLogLevel[logLevel]);
             }
 
             if (flags) {
@@ -279,38 +295,65 @@ module TacoUtility {
         }
 
         private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
+            if (request.logLevel == InstallLogLevel.pretty) {
+                logger.log(resources.getString("PackageLoaderDownloadingMessage"), logger.Level.NormalBold);
+                logger.logLine(request.packageId + "\n");
+            }
+
             return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
                 var cwd: string = path.resolve(request.targetPath, "..", "..");
-                return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).catch(function (err: any): void {
-                    rimraf(request.targetPath, function (): Q.Promise<void> {
+                return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).then(function () {
+                    if (request.logLevel == InstallLogLevel.pretty) {
+                        logger.log("\n" + resources.getString("PackageLoaderSuccessMessage"), logger.Level.Success);
+                        logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId) + "\n");
+                    }
+                }).catch(function (err: any): Q.Promise<void> { 
+                    var deferred: Q.Deferred<void> = Q.defer<void>();
+                    rimraf(request.targetPath, function (): void {
+
+                        if (request.logLevel == InstallLogLevel.pretty) {
+                            logger.logErrorLine("\n" +
+                                resources.getString("PackageLoaderErrorMessage") +
+                                "\n" +
+                                resources.getString("PackageLoaderDownloadError", request.packageId) +
+                                "\n");
+                        }
+
                         if (isFinite(err)) {
                             // error code reported when npm fails due to EACCES
                             if (err === 243) {
-                                return Q.reject<void>(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess, request.packageName, err));
+                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess, request.packageName, err));
+                            } else {
+                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode, request.packageName, err));
                             }
-
-                            return Q.reject<void>(errorHelper.get(TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode, request.packageName, err));
+                        } else {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallErrorMessage, err, request.packageName));
                         }
-
-                        return Q.reject<void>(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallErrorMessage, err, request.packageName));
                     });
+                    return deferred.promise;
                 });
             });
         }
 
-        private static updatePackageViaNPM(packageName: string, targetPath: string, logLevel?: string): Q.Promise<void> {
+        private static updatePackageViaNPM(packageName: string, targetPath: string, logLevel?: InstallLogLevel): Q.Promise<any> {
             var cwd: string = path.resolve(targetPath, "..", "..");
-            return TacoPackageLoader.runNpmCommand("update", packageName, cwd, null /* commandFlags */, logLevel).catch(function (err: any): void {
-                if (isFinite(err)) {
-                    // error code reported when npm fails due to EACCES
-                    if (err === 243) {
-                        throw errorHelper.get(TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess, packageName, err);
-                    }
+            return TacoPackageLoader.runNpmCommand("update", packageName, cwd, null /* commandFlags */, logLevel)
+                .catch(function (err: any): Q.Promise<void> {
+                    var deferred: Q.Deferred<void> = Q.defer<void>();
+                    rimraf(targetPath, function (): void {
 
-                    throw errorHelper.get(TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode, packageName, err);
-                }
-
-                throw errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName);
+                        if (isFinite(err)) {
+                            // error code reported when npm fails due to EACCES
+                            if (err === 243) {
+                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess, packageName, err));
+                            } else {
+                                deferred.reject(errorHelper.get(TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode, packageName, err));
+                            }
+                        } else {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName));
+                        }
+                    });
+                    return deferred.promise;
             });
         }
 

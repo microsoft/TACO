@@ -13,6 +13,16 @@ declare module TacoUtility {
         Version = 0,
         Uri = 1,
     }
+
+    enum InstallLogLevel {
+        silent,
+        warn,
+        info,
+        verbose,
+        silly,
+        pretty,
+    }
+
     class TacoPackageLoader {
         /**
          * Load a node package with specified version. If the package is not already downloaded,
@@ -26,11 +36,13 @@ declare module TacoUtility {
          * 
          * @param {string} packageName The name of the package to load
          * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
-         * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
+         * @param {LogLevel} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        static lazyRequire<T>(packageName: string, packageId: string, logLevel?: string): Q.Promise<T>;
+        static lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
 
         /**
          * Load a taco package with specified packageKey. 
@@ -39,10 +51,12 @@ declare module TacoUtility {
          *
          * @param {string} packageKey a key to lookup in dependencyConfigPath, can be a packageName or any random string
          * @param {string} dependencyConfigPath Path to a json file which specifies key to packageId information along with other metadata like expirationIntervalInHours
-         * @param {string} logLevel Optional parameter which determines how much output from npm and git is filtered out. Follows the npm syntax: silent, warn, info, verbose, silly
+         * @param {LogLevel} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, npmLogLevel?: string): Q.Promise<T>;
+        static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, logLevel?: InstallLogLevel): Q.Promise<T>;
     }
 }

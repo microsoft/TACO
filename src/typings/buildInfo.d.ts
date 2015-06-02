@@ -51,7 +51,7 @@ declare module TacoUtility {
         message: string;
         tgzFilePath: string;
         appDir: string;
-        logLevel: string;
+        logLevel: InstallLogLevel;
 
         constructor(params: {
             buildNumber?: number;

@@ -31,6 +31,7 @@ module TacoUtility {
     export var CountStream = countStream.CountStream;
     export var JSDocHelpPrinter = jsDocHelpPrinter.JSDocHelpPrinter;
     export var Logger = logger.Logger;
+    export var InstallLogLevel = tacoPackageLoader.InstallLogLevel;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;
