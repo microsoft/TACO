@@ -1,21 +1,32 @@
 ﻿{
+    "2.2.0-Kit": "2.2.0 Cordova Kit",
+    "2.2.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v2.2.0.",
+    "4.2.0-Win10-Beta": "4.2.0 + Cordova Windows 10 Beta Kit",
+    "4.2.0-Win10-Beta-desc": "A toolkit of plugins and platforms designed to work with the beta version of the Cordova Windows 10 platform.",
+    "4.0.0-Kit": "4.0.0 Cordova Kit",
+    "4.0.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v4.0.0.",
+    "4.2.0-Kit": "4.2.0 Cordova Kit",
+    "4.2.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v4.2.0.",
+    "5.0.0-Kit": "5.0.0 Cordova Kit",
+    "5.0.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v5.0.0.",
+
     "TacoKitsExceptionKitMetadataFileNotFound": "Error: The kit metadata file is not found. Please fix this by re-installing taco-kits from npm.",
     "_TacoKitsExceptionKitMetadataFileNotFound.comment": "Error thrown when the TacoKitMetadata.json file is not found",
     "TacoKitsExceptionKitMetadataFileMalformed": "Error: The kit metadata file is corrupt. Please fix this by re-installing taco-kits from npm.",
     "_TacoKitsExceptionKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
-    "TacoKitsExceptionInvalidKit": "Error: {0} is not a known Kit." ,
+    "TacoKitsExceptionInvalidKit": "Error: {0} is not a known Kit.",
     "_TacoKitsExceptionInvalidKit.comment": "Error shown when the user specifies an unknown kit identifier. {0} is the kit identifier that the user specified as parameter in the command line.",
-    "TacoKitsExceptionDeprecatedKitWarning": "Warning: Kit {0} has been deprecated" ,
+    "TacoKitsExceptionDeprecatedKitWarning": "Warning: Kit {0} has been deprecated",
     "_TacoKitsExceptionDeprecatedKitWarning.comment": "Error shown when the user specifies a kit that is deprecated.",
-    "TacoKitsExceptionDeprecatedKitMessage": "Consider changing your project to use a more recent Kit. For deprecation information, see {todo_fwdLink}" ,
+    "TacoKitsExceptionDeprecatedKitMessage": "Consider changing your project to use a more recent Kit. For deprecation information, see {todo_fwdLink}",
     "_TacoKitsExceptionDeprecatedKitMessage.comment": "Helpful message shown when the user specifies deprecated kit identifier.",
-    
+
     "TacoKitsExceptionNoDefaultKit": "Error: No default kit found. Please fix this by re-installing taco-kits from npm or run \"taco kit list\" to see the list of available kits",
     "_TacoKitsExceptionNoDefaultKit.comment": "Error thrown when no default kit is specified in the kit metadata file, TacoKitMetadata.json",
     "TacoKitsExceptionNoCliSpecification": "Error: No Cordova CLI specification is found for kit {0}. The kit metadata file appears to be corrupt. Please fix this by re-installing taco-kits from npm or run \"taco kit list\" to see the list of available kits",
     "_TacoKitsExceptionNoCliSpecification.comment": "Error thrown when no Cordova CLI is specified for the kit {0} in the kit metadata file, TacoKitMetadata.json",
-    "TacoKitsExceptionInvalidTemplate": "Error: No template matching [--template {0}] found" ,
+    "TacoKitsExceptionInvalidTemplate": "Error: No template matching [--template {0}] found",
     "_TacoKitsExceptionInvalidTemplate.comment": "Error shown when the user specifies an unknown template identifier. {0} is the template identifier that the user specified as parameter in the command line.",
-    "TacoKitsExceptionTypescriptNotSupported": "Error: This version of Cordova does not contain a TypeScript template" ,
+    "TacoKitsExceptionTypescriptNotSupported": "Error: This version of Cordova does not contain a TypeScript template",
     "_TacoKitsExceptionTypescriptNotSupported.comment": "Error shown when the user specifies a TypeScript template, but there is no such template available for the selected kit."
 }

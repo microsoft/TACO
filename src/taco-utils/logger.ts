@@ -93,12 +93,19 @@ module TacoUtility {
             Logger.logLine(msg, Logger.Level.Success);
         }
 
-        public static repeatString(msg: string, num: number, level: Logger.Level = Logger.Level.Normal): void {
+        public static logIndentedString(msg: string, num: number, indent: Logger.Indent = Logger.Indent.Left, level: Logger.Level = Logger.Level.Normal): void {
             var sequence: string = "";
-            for (var i: number = 0; i < num; i++) {
-                sequence = sequence + msg;
+            if (indent === Logger.Indent.Left) {
+                sequence = Array(num + 1).join(" ") + msg;
+            } else {
+                sequence = msg + Array(num + 1).join(" ");
             }
 
+            Logger.log(sequence, level);
+        }
+
+        public static logRepeatedString(msg: string, num: number, level: Logger.Level = Logger.Level.Normal): void {
+            var sequence: string = Array(num + 1).join(msg);
             Logger.log(sequence, level);
         }
     };
@@ -108,6 +115,7 @@ module TacoUtility {
          * Warning levels
          */
         export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
+        export enum Indent { Left, Right };
     }
 }
 

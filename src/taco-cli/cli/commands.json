@@ -23,7 +23,6 @@
         "modulePath": "./help",
         "description": "[CommandHelpDescription]"
     },
-
     "kit": {
         "synopsis": "[COMMAND] [--json]",
         "modulePath": "./kit",
@@ -33,7 +32,6 @@
             { "name": "--json", "description": "[CommandKitJsonOptionDescription]" }
         ]
     },
-
     "setup": {
         "synopsis": "remote [PLATFORM]",
         "modulePath": "./setup",

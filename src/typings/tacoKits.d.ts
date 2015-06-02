@@ -1,14 +1,12 @@
 ﻿/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
-
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 
 // Typings for taco-kits package
-
 declare module TacoKits {
     // Basic interface for a KitHelper, for mocking purposes
     interface IKitHelper {
@@ -59,15 +57,11 @@ declare module TacoKits {
         [kitId: string]: string;
     }
 
-    interface ILocalizableString {
-        [lang: string]: string;
-    }
-
     interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;
-        name?: ILocalizableString;
-        description?: ILocalizableString;
+        name?: string;
+        description?: string;
         releaseNotesUri?: string;
         deprecated?: boolean;
         deprecatedReasonUri?: string;
@@ -123,16 +117,6 @@ declare module TacoKits {
         public static getDefaultKit(): Q.Promise<string>;
 
         /**
-         *  Returns 'true' if a kit is deprecated, 'false' otherwise
-         */
-        public static isKitDeprecated(kitInfo: IKitInfo): boolean;
-
-        /**
-         *  Returns 'true' if a kit is the default one, 'false' otherwise
-         */
-        public static isKitDefault(kitInfo: IKitInfo): boolean;
-
-        /**
          *   Returns a promise resolved by a valid cordova Cli for the kitId
          *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
          *   Otherwise, returns the cordovaCli used by the default kit
@@ -170,7 +154,6 @@ declare module TacoKits {
         TacoKitsExceptionNoCliSpecification,
         TacoKitsExceptionTypescriptNotSupported
     }
-
 }
 
 declare module "taco-kits" {

@@ -34,6 +34,7 @@ enum TacoErrorCode {
     ErrorCertificateSave,
     ErrorCertificateSaveToPath,
     ErrorCertificateSaveWithErrorCode,
+    ErrorTacoJsonMissingOrMalformed,
     ErrorPatchCreation,
     GetCertificateFailed,
     HttpGetFailed,

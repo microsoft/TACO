@@ -192,6 +192,9 @@
 
     "NoRemoteBuildIdFound": "Error: No remote build found. Please run '{0}' first",
     "_NoRemoteBuildIdFound.comment": "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",
+    "NotACordovaProject": "Error: Current working directory is not a Cordova-based project",
+    "_NotACordovaProject.comment": "Message printed when attempting to run a taco command in a directory which is not a Cordova-based project ",
+
 
     "UnsupportedPlatform": "Error: Unsupported platform {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",
@@ -199,6 +202,8 @@
     "_NoCertificateFound.comment": "Message printed when we fail to find a certificate. {0} is the certificate we were looking for",
     "GetCertificateFailed": "Error: unable to find certificate.",
     "_GetCertificateFailed.comment": "Message printed when we fail to find a certificate because of an error",
+    "ErrorTacoJsonMissingOrMalformed": "Error: Project properties file taco.json is missing or malformed.",
+    "_ErrorTacoJsonMissingOrMalformed.comment": "Message printed when we find that taco.json file is either missing or malformed",
     "ErrorCertificateLoad": "Failed to load certificate {0}",
     "_ErrorCertificateLoad.comment": "Message printed when we fail to load a certificate. {0} is the name of the certificate",
     "ErrorCertificatePathChmod": "Failed to change permissions for certificate folder {0}",

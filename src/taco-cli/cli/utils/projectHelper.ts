@@ -34,9 +34,10 @@ module ProjectHelper {
     }
 
     export class TacoProjectHelper {
+        private static TacoJsonFileName: string = "taco.json";
         public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
             var deferred: Q.Deferred<any> = Q.defer<any>();
-            var tacoJsonPath: string = path.resolve(projectPath, "taco.json");
+            var tacoJsonPath: string = path.resolve(projectPath, TacoProjectHelper.TacoJsonFileName);
             if (isKitProject) {
                 if (!versionValue) {
                     return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
@@ -63,13 +64,28 @@ module ProjectHelper {
                 tacoKitId: ""
             };
 
-            var tacoJsonPath: string = path.resolve(projectPath, "taco.json");
+            var tacoJsonPath: string = path.resolve(projectPath, TacoProjectHelper.TacoJsonFileName);
             try {
-                if (!fs.existsSync(tacoJsonPath)) {
-                    deferred.resolve(projectInfo);
+                var parentPath: string;
+                var atRootFolder: boolean = false;
+                while (!atRootFolder && fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, TacoProjectHelper.tacoJsonFileName))) {
+                    // Navigate up one level until either taco.json is found or the parent path is invalid
+                    parentPath = path.resolve(projectPath, "..");
+                    if (parentPath !== projectPath) {
+                        atRootFolder = true;
+                        projectPath = parentPath;
+                    } else {
+                        break;
+                    }
                 }
 
-                var tacoJson: ITacoJsonMetadata = require(tacoJsonPath);
+                if (atRootFolder) {
+                    // We reached the root, so the project path passed was not a Cordova-based project directory
+                    deferred.resolve(projectInfo);
+                    return deferred.promise;
+                }
+               
+                var tacoJson: ITacoJsonMetadata = require(path.join(projectPath, TacoProjectHelper.tacoJsonFileName));
                 if (tacoJson.kit) {
                     kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
                         projectInfo.isKitProject = true;
@@ -81,9 +97,11 @@ module ProjectHelper {
                     projectInfo.isKitProject = true;
                     projectInfo.cordovaCliVersion = tacoJson.cli;
                     deferred.resolve(projectInfo);
+                } else {
+                    deferred.resolve(projectInfo);
                 }
             } catch (e) {
-                deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateTacoJsonFileCreationError));
+                deferred.reject(errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed));
             }
 
             return deferred.promise;

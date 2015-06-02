@@ -81,8 +81,8 @@ module TacoKits {
     export interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;
-        name?: ILocalizableString;
-        description?: ILocalizableString;
+        name?: string;
+        description?: string;
         releaseNotesUri?: string;
         deprecated?: boolean;
         deprecatedReasonUri?: string;
@@ -119,6 +119,7 @@ module TacoKits {
         private static TsTemplateId: string = "typescript";
         private static DefaultKitId: string;
         private static KitFileName: string = "TacoKitMetadata.json";
+        private static KitDesciptionSuffix: string = "-desc";
 
          /*
           * The following member is public static to expose access to automated tests
@@ -160,6 +161,8 @@ module TacoKits {
             return KitHelper.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
                 kits = metadata.kits;
                 if (kitId && kits && kits[kitId]) {
+                    kits[kitId].name = resources.getString(kitId);
+                    kits[kitId].description = resources.getString(kitId + KitHelper.KitDesciptionSuffix);
                     deferred.resolve(kits[kitId]);
                 } else {
                     // Error, empty kitId or no kit matching the kit id
@@ -168,20 +171,6 @@ module TacoKits {
 
                 return deferred.promise;
             });
-        }
-
-        /**
-         *  Returns 'true' if a kit is deprecated, 'false' otherwise
-         */
-        public static isKitDeprecated(kitInfo: IKitInfo): boolean {
-            return kitInfo.deprecated ? true : false;
-        }
-
-        /**
-         *  Returns 'true' if a kit is the default one, 'false' otherwise
-         */
-        public static isKitDefault(kitInfo: IKitInfo): boolean {
-            return kitInfo.default ? true : false;
         }
 
         /**
