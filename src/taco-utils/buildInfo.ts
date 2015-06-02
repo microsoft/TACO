@@ -8,8 +8,10 @@
 
 import argsHelper = require ("./argsHelper");
 import resources = require ("./resourceManager");
+import installLogLevel = require ("./installLogLevel");
 
 import ArgsHelper = argsHelper.ArgsHelper;
+import InstallLogLevel = installLogLevel.InstallLogLevel;
 
 module TacoUtility {
     export class BuildInfo {
@@ -58,7 +60,7 @@ module TacoUtility {
 
         public tgzFilePath: string;
         public appDir: string;
-        public logLevel: string;
+        public logLevel: InstallLogLevel;
 
         constructor(params: { buildNumber?: number; status?: string; buildCommand?: string; configuration?: string; options?: any; buildDir?: string; buildLang?: string; buildPlatform?: string; logLevel?: string; [index: string]: any }) {
             var self = this;
@@ -73,7 +75,29 @@ module TacoUtility {
             this.buildDir = params.buildDir;
             this.buildLang = params.buildLang;
             this.buildPlatform = params.buildPlatform;
-            this.logLevel = params.logLevel;
+
+            switch (params.logLevel) {
+                case "silent":
+                    this.logLevel = InstallLogLevel.silent;
+                    break;
+                case "warn":
+                    this.logLevel = InstallLogLevel.warn;
+                    break;
+                case "info":
+                    this.logLevel = InstallLogLevel.info;
+                    break;
+                case "verbose":
+                    this.logLevel = InstallLogLevel.verbose;
+                    break;
+                case "silly":
+                    this.logLevel = InstallLogLevel.silly;
+                    break;
+                case "pretty":
+                    this.logLevel = InstallLogLevel.pretty;
+                    break;
+                default:
+                    this.logLevel = -1;
+            }
 
             this.submissionTime = new Date();
             this.changeList = null;

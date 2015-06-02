@@ -7,20 +7,13 @@
  */
 
 /// <reference path="../typings/Q.d.ts" />
+/// <reference path="../typings/installLogLevel.d.ts" />
+
 declare module TacoUtility {
     enum PackageSpecType {
         Error = -1,
         Version = 0,
         Uri = 1,
-    }
-
-    enum InstallLogLevel {
-        silent,
-        warn,
-        info,
-        verbose,
-        silly,
-        pretty,
     }
 
     class TacoPackageLoader {
