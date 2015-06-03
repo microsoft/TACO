@@ -122,9 +122,8 @@ describe("taco meta command tests: ", function (): void {
 
         tacoInvalidArgs.forEach(function (optionString: string[]): void {
             it("with invalid options " + optionString + " executes with expected error", function (done: MochaDone): void {
-                Taco.runWithArgs(optionString).then(function (): Q.Promise<any> {
+                Taco.runWithArgs(optionString).then(function (): void {
                     done(new Error("Passing Invalid options to \'taco\' should have failed"));
-                    return Q.resolve(null);
                 }, function (err: any): void {
                     if (err.code = TacoErrorCodes.CordovaCommandFailed) {
                         done();

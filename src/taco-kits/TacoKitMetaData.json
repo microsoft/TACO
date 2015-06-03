@@ -1,14 +1,6 @@
 ﻿{
     "plugins": {
         "org.apache.cordova.camera": {
-            "name": {
-                "default": "Camera Plugin",
-                "es-mx": "Cámara Plugin"
-            },
-            "description": {
-                "default": "This plugin defines a global navigator.camera object, which provides an API for taking pictures and for choosing images from the system's image library.",
-                "es-mx": "Este plugin proporciona una API para tomar fotografías y por elegir imágenes de biblioteca de imágenes del sistema."
-            },
             "platforms": "ios, android, wp8, windows8"
         }
     },
@@ -27,14 +19,6 @@
             "cordova-cli": "4.2.0",
             "taco-min": "15.1.2",
             "releaseNotesUri": "http://cordova.apache.org/4.2.0/release.md",
-            "name": {
-                "default": "4.2.0 + Cordova Windows 10 Beta Kit",
-                "es-mx": "4.2.0 + Cordova de Windows 10 Beta Kit"
-            },
-            "description": {
-                "default": "A toolkit of plugins and platforms designed to work with the beta version of the Cordova Windows 10 platform.",
-                "es-mx": "Instantánea de plugins y plataformas diseñadas para trabajar con la versión beta de la plataforma de Windows 10 Cordova."
-            },
             "plugins": {
                 "org.apache.cordova.camera": {
                     "version": "0.2.28",
@@ -73,10 +57,18 @@
             "cordova-cli": "5.0.0",
             "default": true,
             "platforms": {
-                "android": "4.2.1",
-                "ios": "4.2.2",
-                "windows": "4.0.0",
-                "wp8": "4.0.2"
+                "android": {
+                    "version": "4.2.3"
+                },
+                "ios": {
+                    "version": "4.2.2"
+                },
+                "windows": {
+                    "version": "4.0.0"
+                },
+                "wp8": {
+                    "version": "4.0.2"
+                }
             },
             "plugins": {
                 "org.apache.cordova.camera": {

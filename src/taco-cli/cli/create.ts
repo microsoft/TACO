@@ -20,7 +20,7 @@ import Q = require ("q");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
-import projectHelper = require ("./utils/project-helper");
+import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("./tacoErrorCodes");
@@ -32,6 +32,7 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
+import tacoProjectHelper = projectHelper.TacoProjectHelper;
 import utils = tacoUtility.UtilHelper;
 
 /* 
@@ -87,7 +88,7 @@ class Create implements commands.IDocumentedCommand {
                     var kitProject = self.isKitProject();
                     var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                    return tacoProjectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
                 })
                 .then(function (): Q.Promise<any> {
                     self.finalize(templateDisplayName);
@@ -198,8 +199,8 @@ class Create implements commands.IDocumentedCommand {
                     return Q.resolve(null);
                 }      
             })
-            .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
-                if (kitInfo && kitHelper.isKitDeprecated(kitInfo)) {
+                .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
+                if (kitInfo && !!kitInfo.deprecated) {
                     // Warn the user
                     logger.log("\n");
                     logger.logLine(resources.getString("CommandCreateWarningDeprecatedKit", kitId), logger.Level.Warn);
