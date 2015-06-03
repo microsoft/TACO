@@ -82,7 +82,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
       */
     private static printCurrentKitInfo(): Q.Promise<any> {
         logger.log("\n");
-        return tacoProjectHelper.getProjectInfo(path.resolve(".")).then(function (projectInfo: projectHelper.IProjectInfo): void {
+        return tacoProjectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): void {
             if (!projectInfo.isTacoProject) {
                 return;
             }
