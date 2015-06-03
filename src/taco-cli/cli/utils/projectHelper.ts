@@ -68,7 +68,7 @@ module ProjectHelper {
             try {
                 var parentPath: string;
                 var atRootFolder: boolean = false;
-                while (!atRootFolder && fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, TacoProjectHelper.tacoJsonFileName))) {
+                while (!atRootFolder && fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, TacoProjectHelper.TacoJsonFileName))) {
                     // Navigate up one level until either taco.json is found or the parent path is invalid
                     parentPath = path.resolve(projectPath, "..");
                     if (parentPath !== projectPath) {
@@ -85,7 +85,7 @@ module ProjectHelper {
                     return deferred.promise;
                 }
                
-                var tacoJson: ITacoJsonMetadata = require(path.join(projectPath, TacoProjectHelper.tacoJsonFileName));
+                var tacoJson: ITacoJsonMetadata = require(path.join(projectPath, TacoProjectHelper.TacoJsonFileName));
                 if (tacoJson.kit) {
                     kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
                         projectInfo.isKitProject = true;
