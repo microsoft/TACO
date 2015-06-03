@@ -71,7 +71,6 @@ module ProjectHelper {
          */ 
         public static getProjectRoot(): string {
             var projectPath: string = process.cwd();
-            var tacoJsonPath: string = path.resolve(projectPath, TacoProjectHelper.TacoJsonFileName);
             var parentPath: string;
             var atFsRoot: boolean = false;
             while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, TacoProjectHelper.TacoJsonFileName))) {
