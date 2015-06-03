@@ -96,7 +96,7 @@ module TacoUtility {
          * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
          * @param {string} logLevel Optional parameter which determines how much output from npm is filtered out. 
          *                  Follows the npm syntax: silent, warn, info, verbose, silly
-         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
+         *                  loglevel can also be used as "taco" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
          * 
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
@@ -263,7 +263,7 @@ module TacoUtility {
             var deferred: Q.Deferred<number> = Q.defer<number>();
             var args: string[] = [npmCommand, packageId];
 
-            if (logLevel && logLevel !== InstallLogLevel.pretty) {
+            if (logLevel && logLevel !== InstallLogLevel.taco) {
                 args.push("--loglevel", InstallLogLevel[logLevel]);
             }
 
@@ -288,7 +288,7 @@ module TacoUtility {
         }
 
         private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
-            if (request.logLevel === InstallLogLevel.pretty) {
+            if (request.logLevel >= InstallLogLevel.taco) {
                 logger.log(resources.getString("PackageLoaderDownloadingMessage"), logger.Level.NormalBold);
                 logger.logLine(request.packageId + "\n");
             }
@@ -296,14 +296,14 @@ module TacoUtility {
             return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
                 var cwd: string = path.resolve(request.targetPath, "..", "..");
                 return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
-                    if (request.logLevel === InstallLogLevel.pretty) {
+                    if (request.logLevel >= InstallLogLevel.taco) {
                         logger.log("\n" + resources.getString("PackageLoaderSuccessMessage"), logger.Level.Success);
                         logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId) + "\n");
                     }
                 }).catch(function (err: any): Q.Promise<void> { 
                     var deferred: Q.Deferred<void> = Q.defer<void>();
                     rimraf(request.targetPath, function (): void {
-                        if (request.logLevel === InstallLogLevel.pretty) {
+                        if (request.logLevel >= InstallLogLevel.taco) {
                             logger.logErrorLine("\n" + resources.getString("PackageLoaderDownloadError", request.packageId) + "\n");
                         }
 

@@ -9,11 +9,12 @@
 
 declare module TacoUtility {
    enum InstallLogLevel {
-        silent,
-        warn,
-        info,
-        verbose,
-        silly,
-        pretty,
+       silent,
+       error,
+       warn,
+       taco,
+       info,
+       verbose,
+       silly,
     }
 }
