@@ -1,14 +1,6 @@
 ﻿{
     "plugins": {
         "org.apache.cordova.camera": {
-            "name": {
-                "default": "Camera Plugin",
-                "es-mx": "Cámara Plugin"
-            },
-            "description": {
-                "default": "This plugin defines a global navigator.camera object, which provides an API for taking pictures and for choosing images from the system's image library.",
-                "es-mx": "Este plugin proporciona una API para tomar fotografías y por elegir imágenes de biblioteca de imágenes del sistema."
-            },
             "platforms": "ios, android, wp8, windows8"
         }
     },
