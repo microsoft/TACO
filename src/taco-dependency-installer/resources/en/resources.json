@@ -1,5 +1,5 @@
 {
-    "UnsupportedDependenciesHeader": "The installation of the following dependencies is not supported; please install them manually:",
+    "UnsupportedDependenciesHeader": "The installation of the following dependencies is not supported, please install them manually:",
     "_UnsupportedDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that can't be installed by taco-cli.",
     "DependencyLabel": "Dependency: ",
     "_DependencyLabel.comment": "Label for the name of a dependency. This will be followed by the actual name of the dependency.",
@@ -19,6 +19,10 @@
     "_Proceed.comment": "Message displayed after listing the dependencies that will be installed.",
     "InstallCompletedSuccessfully": "The third-party dependencies have been installed successfully.",
     "_InstallCompletedSuccessfully.comment": "Message shown after all dependencies have been installed and there are no errors",
+    "NothingToInstall": "There are no dependencies to install for your current project.",
+    "_NothingToInstall.comment": "Message shown if there are no dependencies to install (everything that we support is already installed).",
+    "RestartCommandPrompt": "Please restart the command prompt to ensure that any newly installed software can be used correctly.",
+    "_RestartCommandPrompt.comment": "Message shown after running the dependency installer if at least 1 dependency was successfully installed.",
 
     "YesExampleString": "[yes]: ",
     "_YesExampleString.comment": "When the user gets prompted to type 'yes' to accept a prompt, this will be shown as an example of what the user has to type. This must be localized to exactly the localized YesString string in this file, surrounded with square brackets.",
@@ -36,8 +40,6 @@
     "_NoValidInstallOrder.comment": "Error shown when the dependencies that need to be installed have cyclic prerequisites, so it is not possible to install them. For example: installing A requires installing B first, but installing B requires installing A first.",
     "UnsupportedPlatform": "Error: Your current platform is not supported: {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform.",
-    "UnsupportedTargetPlatform": "Error: Target platform not supported: {0}",
-    "_UnsupportedTargetPlatform.comment": "Message printed when the install-dependencies command is invoked for a target platform we don't support. {0} is the platform.",
     "InstallationErrors": "There were some errors in the isntallation process. Please see above for details.",
     "_InstallationErrors.comment": "Message shown after all dependencies have been installed and there were errors.",
     "LicenseAgreementError": "Error: User refused to proceed with the installation.",
@@ -90,5 +92,7 @@
     "InvalidInstallPath": "Error: Invalid installation path for dependency '{0}': {1}",
     "_InvalidInstallPath.comment": "Error shown when the install config file contains an installation destination path that is invalid for one of the dependencies. {0} is the dependency's id, {1} is the install path.",
     "PathNotEmpty": "Error: The specified install destination for dependency '{0}' is not empty: {1}",
-    "_PathNotEmpty.comment": "Error shown when the install config file contains an installation destination path that exists and is not empty. {0} is the dependency's id, {1} is the install path."
+    "_PathNotEmpty.comment": "Error shown when the install config file contains an installation destination path that exists and is not empty. {0} is the dependency's id, {1} is the install path.",
+    "PathNotUnique": "Error: '{0}' has the same install destination as '{1}'.",
+    "_PathNotUnique.comment": "Error shown when 2 dependencies have the same install destination in the install configuration file. {0} and {1} are the display names of the 2 dependencies that have the same install destination."
 }

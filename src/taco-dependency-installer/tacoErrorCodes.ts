@@ -26,7 +26,6 @@ module TacoDependencyInstaller {
         NoValidInstallOrder,
         UnknownExitCode,
         UnsupportedPlatform,
-        UnsupportedTargetPlatform,
         TacoKitsExceptionTypescriptNotSupported,
     }
 }

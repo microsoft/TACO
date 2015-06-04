@@ -23,8 +23,8 @@ class DependencyDataWrapper {
     }
 
     /*
-     * Returns the installation destination for the specified dependency id, version id and platform id (or the current system platform if no platform is specified).
-     * Will return null if the info is missing from our metadata or if either the dependency id, the version id or the platform id does not exist.
+     * Returns the installation destination for the specified dependency ID, version ID and platform ID (or the current system platform if no platform is specified).
+     * Will return null if the info is missing from our metadata or if either the dependency ID, the version ID or the platform ID does not exist.
      */
     public getInstallDirectory(id: string, version: string, platform: string = process.platform): string {
         if (this.dependenciesData[id] && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
@@ -68,12 +68,28 @@ class DependencyDataWrapper {
     }
 
     /*
-     * Returns the installer info for the specified dependency. Will return null if either the dependency id, the version id or the platform (or the current system
-     * platform if no platform is specified) id does not exist.
+     * Returns the installer info for the specified dependency. Will return null if either the dependency ID, the version ID or the platform (or the current system
+     * platform if no platform is specified) ID does not exist.
      */
     public getInstallerInfo(id: string, version: string, platform: string = process.platform): DependencyInstallerInterfaces.IInstallerData {
         if (this.dependenciesData[id] && this.dependenciesData[id].versions[version]) {
             return this.dependenciesData[id].versions[version][platform];
+        }
+
+        return null;
+    }
+
+    /*
+     * Looks into the specified dependency node and returns the first version ID that contains a node for either the specified platform (or the current system
+     * platform if no platform is specified) or the "default" platform. Returns null if no such version ID exists.
+     */
+    public getFirstValidVersion(id: string, platform: string = process.platform): string {
+        for (var version in this.dependenciesData[id].versions) {
+            if (this.dependenciesData[id].versions.hasOwnProperty(version)) {
+                if (this.isSystemSupported(id, version, platform)) {
+                    return version;
+                }
+            }
         }
 
         return null;
@@ -110,43 +126,12 @@ class DependencyDataWrapper {
     }
 
     /*
-     * Looks into the specified dependency node and returns the first version id that contains a node for either the specified platform (or the current system
-     * platform if no platform is specified) or the "default" platform. Returns null if no such version id exists.
+     * Returns true if the specified dependency is implicit, false if it isn't or if the specified ID does not exist. A dependency is implicit if it is installed as part of a different dependency. For
+     * example, Android packages (android-21, android-platform-tools, etc) are installed directly as part of installing Android SDK in this dependency installer, so we don't want to do extra processing
+     * to handle these packages specifically. Thus, they are marked as implicit dependencies.
      */
-    public firstValidVersion(id: string, platform: string = process.platform): string {
-        for (var version in this.dependenciesData[id].versions) {
-            if (this.dependenciesData[id].versions.hasOwnProperty(version)) {
-                if (this.isSystemSupported(id, version, platform)) {
-                    return version;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /*
-     * Returns true if the first specified dependency depends on the second one, false if not. Searches recursively. Will also return false if either of the
-     * specified dependencies does not exist in our metadata.
-     */
-    public dependsOn(a: string, b: string): boolean {
-        if (!this.dependenciesData[a] || !this.dependenciesData[b]) {
-            return false;
-        }
-
-        return this.dependsOnRecursive(a, b);
-    }
-
-    private dependsOnRecursive(currentDependency: string, lookingForDependency: string): boolean {
-        if (this.dependenciesData[currentDependency].prerequisites.indexOf(lookingForDependency) !== -1) {
-            return true;
-        }
-
-        var self = this;
-
-        return this.dependenciesData[currentDependency].prerequisites.some(function (value: string): boolean {
-            return self.dependsOnRecursive(value, lookingForDependency);
-        });
+    public isImplicit(id: string): boolean {
+        return this.dependenciesData[id] && this.dependenciesData[id].isImplicit;
     }
 }
 

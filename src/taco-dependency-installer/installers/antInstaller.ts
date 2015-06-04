@@ -36,9 +36,28 @@ class AntInstaller extends InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Set archive download path
-        this.installerArchive = path.join(InstallerBase.InstallerCache, "ant", this.softwareVersion, path.basename(this.installerInfo.installSource));
+        this.installerArchive = path.join(InstallerBase.InstallerCache, "ant", "win32", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
+        return this.downloadDefault();
+    }
+
+    protected installWin32(): Q.Promise<any> {
+        return this.installDefault();
+    }
+
+    protected updateVariablesWin32(): Q.Promise<any> {
+        // Initialize values
+        var antHomeName: string = "ANT_HOME";
+        var antHomeValue: string = path.join(this.installDestination, "apache-ant-1.9.3");
+        var addToPath: string = path.join(antHomeValue, "bin");
+
+        return installerUtils.setEnvironmentVariableIfNeededWin32(antHomeName, antHomeValue, this.socketHandle)
+            .then(function (): Q.Promise<any> {
+                return installerUtils.addToPathIfNeededWin32(addToPath);
+            });
+    }
+
+    private downloadDefault(): Q.Promise<any> {
         // Prepare expected archive file properties
         var expectedProperties: installerUtils.IExpectedProperties = {
             bytes: this.installerInfo.bytes,
@@ -55,7 +74,7 @@ class AntInstaller extends InstallerBase {
         return installerUtils.downloadFile(options, this.installerArchive, expectedProperties);
     }
 
-    protected installWin32(): Q.Promise<any> {
+    private installDefault(): Q.Promise<any> {
         // Extract the archive
         var templateZip = new admZip(this.installerArchive);
 
@@ -66,18 +85,6 @@ class AntInstaller extends InstallerBase {
         templateZip.extractAllTo(this.installDestination);
 
         return Q.resolve({});
-    }
-
-    protected updateVariablesWin32(): Q.Promise<any> {
-        // Initialize values
-        var antHomeName: string = "ANT_HOME";
-        var antHomeValue: string = path.join(this.installDestination, "apache-ant-1.9.3");
-        var addToPath: string = path.join(antHomeValue, "bin");
-
-        return installerUtils.setEnvironmentVariableIfNeededWin32(antHomeName, antHomeValue, this.socketHandle)
-            .then(function (): Q.Promise<any> {
-                return installerUtils.addToPathIfNeededWin32(addToPath);
-            });
     }
 }
 

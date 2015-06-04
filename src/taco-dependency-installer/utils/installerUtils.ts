@@ -22,9 +22,12 @@ import request = require ("request");
 import wrench = require ("wrench");
 
 import InstallerProtocol = require ("../installerProtocol");
+import tacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 import resources = require ("../resources/resourceManager");
 
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 
 module InstallerUtils {
@@ -95,12 +98,12 @@ class InstallerUtils {
      * would return "C:\Program Files\foo" (on most systems).
      */
     public static expandPath(filePath: string): string {
-        return filePath.replace(/\%(.+?)\%/g, function (substring: string, ...args: any[]): string {
+        return filePath.replace(/%(.+?)%/g, function (substring: string, ...args: any[]): string {
             if (process.env[args[0]]) {
                 return process.env[args[0]];
             } else {
                 // This is not an environment variable, can't replace it so leave it as is
-                return args[0];
+                return "%" + args[0] + "%";
             }
         });
     }
@@ -154,24 +157,29 @@ class InstallerUtils {
 
         // Set variable for the system
         var scriptPath: string = path.resolve(__dirname, "win32", "setSystemVariable.ps1");
+        var command: string = "powershell";
         var commandArgs: string[] = [
-            "powershell",
             "-executionpolicy",
             "unrestricted",
             "-file",
             utils.quotesAroundIfNecessary(scriptPath),
-            utils.quotesAroundIfNecessary(name),
-            utils.quotesAroundIfNecessary(value)
+            name,
+            value
         ];
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var errorOutput: string = "";
-        var variableProcess: childProcess.ChildProcess = childProcess.spawn("powershell", commandArgs);
+        var variableProcess: childProcess.ChildProcess = childProcess.spawn(command, commandArgs);
 
         variableProcess.stderr.on("data", function (data: any): void {
             errorOutput += data.toString();
         });
         variableProcess.on("error", function (err: Error): void {
-            deferred.reject(err);
+            // Handle ENOENT if Powershell is not found
+            if (err.name === "ENOENT") {
+                deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
+            } else {
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
+            }
         });
         variableProcess.on("close", function (code: number): void {
             if (errorOutput) {
@@ -216,8 +224,11 @@ class InstallerUtils {
     }
 
     private static mustSetSystemVariable(name: string, value: string, socket: NodeJSNet.Socket): Q.Promise<boolean> {
-        if (!process.env[name] || process.env[name] === value) {
+        if (!process.env[name]) {
             return Q.resolve(true);
+        } else if (process.env[name] === value) {
+            // If this environment variable is already defined, but it is already set to what we need, we don't need to set it again
+            return Q.resolve(false);
         }
 
         return InstallerUtils.promptForOverwrite(name, value, socket)

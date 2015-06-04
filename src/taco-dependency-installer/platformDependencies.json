@@ -3,7 +3,7 @@
         "displayName": "Android SDK",
         "licenseUrl": "https://developer.android.com/sdk/terms.html",
         "prerequisites": [
-            "javaJdk"
+            "java"
         ],
         "versions": {
             "r24.2": {
@@ -16,10 +16,13 @@
             }
         }
     },
+    "androidTarget": {
+        "isImplicit": true
+    },
     "ant": {
         "displayName": "Apache Ant",
         "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
-        "prerequisites": [ ],
+        "prerequisites": [],
         "versions": {
             "1.9.3": {
                 "win32": {
@@ -32,23 +35,9 @@
         }
     },
     "gradle": {
-        "displayName": "Gradle",
-        "licenseUrl": "https://gradle.org/license/",
-        "prerequisites": [ 
-            "javaJdk"
-        ],
-        "versions": {
-            "2.4": {
-                "win32": {
-                    "installSource": "https://services.gradle.org/distributions/gradle-2.4-bin.zip",
-                    "sha1": "af9980ee01671a4a9e567421732c277e3c2a581c",
-                    "bytes": 45383133,
-                    "installDestination": "%programfiles(x86)%/gradle"
-                }
-            }
-        }
+        "isImplicit":  true
     },
-    "javaJdk": {
+    "java": {
         "displayName": "Java SE Development Kit",
         "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
         "prerequisites": [],

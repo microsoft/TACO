@@ -10,8 +10,8 @@
             { "name": "CONFIG", "description": "[CommandCreateArgsConfig]" }
         ],
         "options": [
-            { "name": "--kit NAME", "description": "[CommandCreateOptionsKit]" },
-            { "name": "--template NAME", "description": "[CommandCreateOptionsTemplate]" },
+            { "name": "--kit <NAME>", "description": "[CommandCreateOptionsKit]" },
+            { "name": "--template <NAME>", "description": "[CommandCreateOptionsTemplate]" },
             { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
             { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
             { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" },

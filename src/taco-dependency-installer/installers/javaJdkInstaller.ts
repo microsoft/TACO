@@ -38,32 +38,9 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Set installer download path
-        this.installerFile = path.join(InstallerBase.InstallerCache, "java", this.softwareVersion, path.basename(this.installerInfo.installSource));
+        this.installerFile = path.join(InstallerBase.InstallerCache, "javaJdk", "win32", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
-        // Prepare expected installer file properties
-        var expectedProperties: installerUtils.IExpectedProperties = {
-            bytes: this.installerInfo.bytes,
-            sha1: this.installerInfo.sha1
-        };
-
-        // Set up cookie
-        var cookieContents: string = "oraclelicense=accept-securebackup-cookie; domain=.oracle.com; path=/";
-        var cookieUrl: string = "http://oracle.com";
-        var j: request.CookieJar = request.jar();
-        var cookie: request.Cookie = request.cookie(cookieContents);
-
-        j.setCookie(cookie, cookieUrl);
-
-        // Prepare download options
-        var options: request.Options = {
-            uri: this.installerInfo.installSource,
-            method: "GET",
-            jar: j
-        };
-
-        // Download the installer
-        return installerUtils.downloadFile(options, this.installerFile, expectedProperties);
+        return this.downloadDefault();
     }
 
     protected installWin32(): Q.Promise<any> {
@@ -92,6 +69,32 @@ class JavaJdkInstaller extends InstallerBase {
             .then(function (): Q.Promise<any> {
                 return installerUtils.addToPathIfNeededWin32(addToPath);
             });
+    }
+
+    private downloadDefault(): Q.Promise<any> {
+        // Prepare expected installer file properties
+        var expectedProperties: installerUtils.IExpectedProperties = {
+            bytes: this.installerInfo.bytes,
+            sha1: this.installerInfo.sha1
+        };
+
+        // Set up cookie
+        var cookieContents: string = "oraclelicense=accept-securebackup-cookie; domain=.oracle.com; path=/";
+        var cookieUrl: string = "http://oracle.com";
+        var j: request.CookieJar = request.jar();
+        var cookie: request.Cookie = request.cookie(cookieContents);
+
+        j.setCookie(cookie, cookieUrl);
+
+        // Prepare download options
+        var options: request.Options = {
+            uri: this.installerInfo.installSource,
+            method: "GET",
+            jar: j
+        };
+
+        // Download the installer
+        return installerUtils.downloadFile(options, this.installerFile, expectedProperties);
     }
 }
 

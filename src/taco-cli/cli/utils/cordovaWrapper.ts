@@ -6,9 +6,10 @@
 ﻿ *******************************************************
 ﻿ */
 
+/// <reference path="../../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
-/// <reference path="../../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../../typings/semver.d.ts" />
 
 "use strict";
 
@@ -16,6 +17,7 @@ import child_process = require ("child_process");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import semver = require ("semver");
 import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
@@ -30,9 +32,13 @@ class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CordovaNpmPackageName: string = "cordova";
 
-    public static cli(args: string[]): Q.Promise<any> {
+    public static cli(args: string[], captureOutput: boolean = false): Q.Promise<any> {
         var deferred = Q.defer();
-        var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, { stdio: "inherit" });
+        var output: string = "";
+        var errorOutput: string = "";
+        var options: child_process.IExecOptions = captureOutput ? {} : { stdio: "inherit" };
+        var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, options);
+
         proc.on("error", function (err: any): void {  
             // ENOENT error thrown if no Cordova.cmd is found
             var tacoError = (err.code === "ENOENT") ?
@@ -40,11 +46,35 @@ class CordovaWrapper {
                 errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" "));
             deferred.reject(tacoError);
         });
+
+        if (captureOutput) {
+            proc.stdout.on("data", function (data: Buffer): void {
+                output += data.toString();
+            });
+            proc.stderr.on("data", function (data: Buffer): void {
+                errorOutput += data.toString();
+            });
+        }
+
         proc.on("close", function (code: number): void {
             if (code) {
-                deferred.reject(errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" ")));
+                // Special handling for 'cordova requirements': this Cordova command returns an error when some requirements are not installed, when technically this is not really an error (the command executes
+                // correctly and reports that some requirements are missing). In that case, if the captureOutput flag is set, we don't want to report an error. To detect this case, we have to parse the returned
+                // error output because there is no specific error code for this case.
+                if (captureOutput && output && args[0] === "requirements" && code === 1 && errorOutput && errorOutput.indexOf("Some of requirements check failed") !== -1) {
+                    deferred.resolve(output);
+                } else {
+                    var tacoError = errorOutput ?
+                        errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, new Error(errorOutput), args.join(" ")) :
+                        errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" "));
+                    deferred.reject(tacoError);
+                }
             } else {
-                deferred.resolve({});
+                if (captureOutput && output) {
+                    deferred.resolve(output);
+                } else {
+                    deferred.resolve({});
+                }
             }
         });
         return deferred.promise;
@@ -56,6 +86,30 @@ class CordovaWrapper {
 
     public static run(platform: string): Q.Promise<any> {
         return CordovaWrapper.cli(["run", platform]);
+    }
+
+    public static requirements(platforms: string[]): Q.Promise<string> {
+        var minCordovaVersion: string = "5.1.0";
+
+        // First check the cordova version, because we want to fail gracefully if the user's cordova is too old for the 'cordova requirements' command
+        // TODO (DevDiv: 1170232) Use the project's CLI version if available, fall back to global install if not
+        return CordovaWrapper.cli(["-v"], true)
+            .then(function (version: string): Q.Promise<any> {
+                if (!semver.gte(version, minCordovaVersion)) {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld));
+                }
+
+                return Q.resolve({});
+            })
+            .then(function (): Q.Promise<string> {
+                var args: string[] = ["requirements"];
+
+                if (platforms) {
+                    args = args.concat(platforms);
+                }
+
+                return CordovaWrapper.cli(args, true);
+            });
     }
 
     /**

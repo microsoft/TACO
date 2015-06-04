@@ -23,10 +23,11 @@ declare module DependencyInstallerInterfaces {
     }
 
     export interface IDependencyData {
-        displayName: string;
-        licenseUrl: string;
-        prerequisites: string[];
-        versions: IVersionDictionary;
+        displayName?: string;
+        isImplicit?: boolean;
+        licenseUrl?: string;
+        prerequisites?: string[];
+        versions?: IVersionDictionary;
     }
 
     export interface IDependencyDictionary {

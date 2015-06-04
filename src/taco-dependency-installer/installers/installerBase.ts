@@ -65,12 +65,16 @@ class InstallerBase {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("InstallingLabel"));
             })
-            .then(this.installWin32.bind(this))
+            .then(function (): Q.Promise<any> {
+                return self.installWin32();
+            })
             .then(function (): void {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("SettingSystemVariablesLabel"));
             })
-            .then(this.updateVariablesWin32.bind(this))
+            .then(function (): Q.Promise<any> {
+                return self.updateVariablesWin32();
+            })
             .then(function (): void {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Success, resources.getString("Success"));

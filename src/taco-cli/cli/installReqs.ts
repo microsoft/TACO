@@ -16,6 +16,7 @@
 import nopt = require ("nopt");
 import Q = require ("q");
 
+import cordovaWrapper = require ("./utils/cordovaWrapper");
 import dependencies = require ("taco-dependency-installer");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -43,9 +44,12 @@ class InstallReqs implements commands.IDocumentedCommand {
             return Q.reject(err);
         }
 
-        var installer: DependencyInstaller = new DependencyInstaller();
+        return cordovaWrapper.requirements(parsed.remain)
+            .then(function (result: any): Q.Promise<any> {
+                var installer: DependencyInstaller = new DependencyInstaller();
 
-        return installer.run(parsed.remain);
+                return installer.run(result);
+            });
     }
 
     /**

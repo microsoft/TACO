@@ -175,6 +175,11 @@ module TacoUtility {
          * @returns {string} Either the input string unchanged, or the input string surrounded by double quotes and with any initial double quotes escaped
          */
         public static quotesAroundIfNecessary(input: string): string {
+            if (input.indexOf("\"") === 0 && input.lastIndexOf("\"") === input.length - 1) {
+                // String is already quoted, don't do anything
+                return input;
+            }
+
             return (input.indexOf(" ") > -1) ? "\"" + input.replace(/"/g, "\\\"") + "\"" : input;
         }
 

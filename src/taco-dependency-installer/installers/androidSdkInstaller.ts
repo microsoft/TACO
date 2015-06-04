@@ -40,22 +40,26 @@ class AndroidSdkInstaller extends InstallerBase {
 
     // Override runWin32() method because we need a post-install configuration step
     protected runWin32(): Q.Promise<any> {
-        var self = this;
-
         // Log progress
         installerUtils.sendData(this.socketHandle, installerDataType.Output, resources.getString("DownloadingLabel"));
+
+        var self = this;
 
         return this.downloadWin32()
             .then(function (): void {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("InstallingLabel"));
             })
-            .then(this.installWin32.bind(this))
+            .then(function (): Q.Promise<any> {
+                return self.installWin32();
+            })
             .then(function (): void {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("SettingSystemVariablesLabel"));
             })
-            .then(this.updateVariablesWin32.bind(this))
+            .then(function (): Q.Promise<any> {
+                return self.updateVariablesWin32();
+            })
             .then(function (androidHomeValue: string): string {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("ConfiguringLabel"));
@@ -63,7 +67,9 @@ class AndroidSdkInstaller extends InstallerBase {
                 // Return android home for the post-install setup
                 return androidHomeValue;
             })
-            .then(this.postInstallSetup.bind(this))
+            .then(function (androidHomeValue: string): Q.Promise<any> {
+                return self.postInstallSetup(androidHomeValue);
+            })
             .then(function (): void {
                 // Log progress
                 installerUtils.sendData(self.socketHandle, installerDataType.Success, resources.getString("Success"));
@@ -71,36 +77,13 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        // Set archive download path
-        this.installerArchive = path.join(InstallerBase.InstallerCache, "androidSdk", this.softwareVersion, path.basename(this.installerInfo.installSource));
+        this.installerArchive = path.join(InstallerBase.InstallerCache, "androidSdk", "win32", this.softwareVersion, path.basename(this.installerInfo.installSource));
 
-        // Prepare expected archive file properties
-        var expectedProperties: installerUtils.IExpectedProperties = {
-            bytes: this.installerInfo.bytes,
-            sha1: this.installerInfo.sha1
-        };
-
-        // Prepare download options
-        var options: request.Options = {
-            uri: this.installerInfo.installSource,
-            method: "GET",
-        };
-
-        // Download the archive
-        return installerUtils.downloadFile(options, this.installerArchive, expectedProperties);
+        return this.downloadDefault();
     }
 
     protected installWin32(): Q.Promise<any> {
-        // Extract the archive
-        var templateZip = new admZip(this.installerArchive);
-
-        if (!fs.existsSync(this.installDestination)) {
-            wrench.mkdirSyncRecursive(this.installDestination, 511); // 511 decimal is 0777 octal
-        }
-
-        templateZip.extractAllTo(this.installDestination);
-
-        return Q.resolve({});
+        return this.installDefault();
     }
 
     protected updateVariablesWin32(): Q.Promise<string> {
@@ -123,6 +106,36 @@ class AndroidSdkInstaller extends InstallerBase {
             });
     }
 
+    private downloadDefault(): Q.Promise<any> {
+        // Prepare expected archive file properties
+        var expectedProperties: installerUtils.IExpectedProperties = {
+            bytes: this.installerInfo.bytes,
+            sha1: this.installerInfo.sha1
+        };
+
+        // Prepare download options
+        var options: request.Options = {
+            uri: this.installerInfo.installSource,
+            method: "GET",
+        };
+
+        // Download the archive
+        return installerUtils.downloadFile(options, this.installerArchive, expectedProperties);
+    }
+
+    private installDefault(): Q.Promise<any> {
+        // Extract the archive
+        var templateZip = new admZip(this.installerArchive);
+
+        if (!fs.existsSync(this.installDestination)) {
+            wrench.mkdirSyncRecursive(this.installDestination, 511); // 511 decimal is 0777 octal
+        }
+
+        templateZip.extractAllTo(this.installDestination);
+
+        return Q.resolve({});
+    }
+
     private postInstallSetup(androidHome: string): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
@@ -134,8 +147,10 @@ class AndroidSdkInstaller extends InstallerBase {
             "extra-android-m2repository",
             "build-tools-19.1.0",
             "build-tools-21.1.2",
+            "build-tools-22.0.1",
             "android-19",
             "android-21",
+            "android-22",
             "sys-img-armeabi-v7a-android-19",
             "sys-img-x86-android-19",
             "addon-google_apis_x86-google-19",

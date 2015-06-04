@@ -36,11 +36,7 @@ class ElevatedInstaller {
     private static InstallerMap: { [dependencyId: string]: string } = {
         androidSdk: "./installers/androidSdkInstaller",
         ant: "./installers/antInstaller",
-        gradle: "./installers/gradleInstaller",
-        iosDeploy: "./installers/iosDeployInstaller",
-        iosSim: "./installers/iosSimInstaller",
-        javaJdk: "./installers/javaJdkInstaller",
-        msBuild: "./installers/msBuildInstaller"
+        java: "./installers/javaJdkInstaller"
     };
 
     private dependenciesDataWrapper: DependencyDataWrapper;
@@ -61,16 +57,24 @@ class ElevatedInstaller {
         var self = this;
 
         this.connectToServer()
-            .then(this.parseInstallConfig.bind(this))
+            .then(function (): void {
+                self.parseInstallConfig();
+            })
             .catch(function (err: Error): void {
                 // If there was an error during the parsing and validation of the installation config file, we consider this a fatal error and we exit immediately
                 installerUtils.sendData(self.socketHandle, installerDataType.Error, err.message);
                 self.socketHandle.end();
                 process.exit(protocol.ExitCode.FatalError);
             })
-            .then(this.runInstallers.bind(this))
-            .catch(this.errorHandler.bind(this))
-            .then(this.exitProcess.bind(this));
+            .then(function (): Q.Promise<any> {
+                return self.runInstallers();
+            })
+            .catch(function (err: Error): void {
+                self.errorHandler(err);
+            })
+            .then(function (): void {
+                self.exitProcess();
+            });
     }
 
     private connectToServer(): Q.Promise<any> {
@@ -106,6 +110,8 @@ class ElevatedInstaller {
             throw new Error(resources.getString("InstallConfigMalformed"));
         }
 
+        var installPaths: { path: string; displayName: string; }[] = [];
+
         this.missingDependencies = [];
         parsedData.dependencies.forEach(function (value: DependencyInstallerInterfaces.IDependency): void {
             // Verify the dependency id exists
@@ -133,15 +139,33 @@ class ElevatedInstaller {
                 }
 
                 if (shouldThrow) {
-                    throw new Error(resources.getString("InvalidInstallPath", value.id, value.installDestination));
+                    throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
                 }
             });
 
             // Verify the path is empty if it exists
             if (fs.existsSync(value.installDestination)) {
                 if (fs.readdirSync(value.installDestination).length > 0) {
-                    throw new Error(resources.getString("PathNotEmpty", value.id, value.installDestination));
+                    throw new Error(resources.getString("PathNotEmpty", value.displayName, value.installDestination));
                 }
+            }
+
+            // Verify that this path is not already used by another dependency
+            var dependencyWithSamePath: string;
+            var isPathUnique: boolean = !installPaths.some(function (previousInstallPath: { path: string; displayName: string; }): boolean {
+                var path1: string = path.resolve(previousInstallPath.path);
+                var path2: string = path.resolve(value.installDestination);
+
+                if (path1 === path2) {
+                    dependencyWithSamePath = previousInstallPath.displayName;
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (!isPathUnique) {
+                throw new Error(resources.getString("PathNotUnique", value.displayName, dependencyWithSamePath));
             }
 
             // At this point, the values appear valid, so proceed with the instantiation of the installer for this dependency
@@ -152,6 +176,9 @@ class ElevatedInstaller {
 
             // Add the dependency to our list of dependencies to install
             self.missingDependencies.push(dependencyWrapper);
+
+            // Cache install path
+            installPaths.push({ displayName: value.displayName, path: value.installDestination });
         });
     }
 
