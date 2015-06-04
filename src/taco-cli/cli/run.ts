@@ -30,7 +30,6 @@ import tacoUtility = require ("taco-utils");
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
-import level = logger.Level;
 import UtilHelper = tacoUtility.UtilHelper;
 
 /*
@@ -164,16 +163,14 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
                 }).then(function (buildInfo: BuildInfo): BuildInfo {
-                    logger.log(resources.getString("CommandSuccessBase") + " ", logger.Level.Success);
-                    logger.logLine(resources.getString("CommandRunRemoteDeviceSuccess"));
+                    logger.log(resources.getString("CommandRunRemoteDeviceSuccess"));
                     return buildInfo;
                 });
             } else {
                 runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
                 }).then(function (buildInfo: BuildInfo): BuildInfo {
-                    logger.log(resources.getString("CommandSuccessBase") + " ", logger.Level.Success);
-                    logger.logLine(resources.getString("CommandRunRemoteEmulatorSuccess"));
+                    logger.log(resources.getString("CommandRunRemoteEmulatorSuccess"));
                     return buildInfo;
                 });
             }

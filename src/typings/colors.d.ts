@@ -14,9 +14,9 @@ declare module colors {
     export function cyan(text: string): string;
     export function white(text: string): string;
     export function gray(text: string): string;
-    export function grey(text: string): string;    
-
-    
+    export function grey(text: string): string;
+    export function error(text: string): string;
+    export function warn(text: string): string;
 }
 
 interface String {

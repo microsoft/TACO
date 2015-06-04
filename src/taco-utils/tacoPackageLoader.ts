@@ -289,22 +289,22 @@ module TacoUtility {
 
         private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
             if (request.logLevel >= InstallLogLevel.taco) {
-                logger.log(resources.getString("PackageLoaderDownloadingMessage"), logger.Level.NormalBold);
-                logger.logLine(request.packageId + "\n");
+                logger.log(resources.getString("PackageLoaderDownloadingMessage", request.packageId));
             }
 
             return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
                 var cwd: string = path.resolve(request.targetPath, "..", "..");
                 return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
                     if (request.logLevel >= InstallLogLevel.taco) {
-                        logger.log("\n" + resources.getString("PackageLoaderSuccessMessage"), logger.Level.Success);
-                        logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId) + "\n");
+                        logger.logLine();
+                        logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId));
                     }
                 }).catch(function (err: any): Q.Promise<void> { 
                     var deferred: Q.Deferred<void> = Q.defer<void>();
                     rimraf(request.targetPath, function (): void {
                         if (request.logLevel >= InstallLogLevel.taco) {
-                            logger.logErrorLine("\n" + resources.getString("PackageLoaderDownloadError", request.packageId) + "\n");
+                            logger.logLine();
+                            logger.logError(resources.getString("PackageLoaderDownloadError", request.packageId));
                         }
 
                         if (isFinite(err)) {
