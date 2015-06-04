@@ -48,7 +48,7 @@ class ConnectionSecurityHelper {
                         if (code === 1) {
                             bufferDeferred.reject(errorHelper.get(TacoErrorCodes.NoCertificateFound, connectionInfo.certName));
                         } else {
-                            logger.logErrorLine(output);
+                            logger.logError(output);
                             bufferDeferred.reject(errorHelper.get(TacoErrorCodes.GetCertificateFailed));
                         }
                     } else {
@@ -102,7 +102,7 @@ class ConnectionSecurityHelper {
                 });
                 certSaveProcess.on("close", function (code: number): void {
                     if (code) {
-                        logger.logErrorLine(output);
+                        logger.logError(output);
                         deferred.reject(errorHelper.get(TacoErrorCodes.ErrorCertificateSaveWithErrorCode, code));
                     } else {
                         deferred.resolve(output);

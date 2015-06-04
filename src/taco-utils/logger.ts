@@ -8,97 +8,158 @@
 
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/colors.d.ts" />
+/// <reference path="../typings/nameDescription.d.ts" />
 
-import fs = require ("fs");
-import path = require ("path");
-import colors = require ("colors");
+import assert = require ("assert");
+var colors = require("colors/safe");
+import os = require ("os");
+import util = require ("util");
+
+colors.setTheme({
+    error: ["red", "bold"],
+    warn: ["yellow", "bold"],
+    link: "cyan",
+    title: "bold",
+    success: ["green", "bold"],
+    key: ["yellow", "bold"],
+    id: "bold",
+    description: "bold",
+    helptitle: "bold",
+    synopsis: ["green", "bold"],
+});
 
 module TacoUtility {
     export class Logger {
-        /**
-         * returns colorized string
-         * wrapping "colors" module because not yet possible to combine themes, i.e. ["yellow", "bold"]:  https://github.com/Marak/colors.js/issues/72
-         */
-        public static colorize(msg: string, level: Logger.Level): string {
-            colors.setTheme({
-                error: "red",
-                warn: "yellow",
-                link: "cyan",
-                normalBold: "bold",
-                success: "green"
-            });
+        public static TagRegex: string = "<\/?([a-z]+)\/?>";
 
-            switch (level) {
-                case Logger.Level.Error: return msg.error.bold;
-                case Logger.Level.Warn: return msg.warn.bold;
-                case Logger.Level.Link: return msg.link.underline;
-                case Logger.Level.Normal: return msg;
-                case Logger.Level.NormalBold: return msg.normalBold;
-                case Logger.Level.Success: return msg.success.bold;
+        /**
+         * message can be any string with xml type tags in it.
+         * supported tags can be seen in logger.ts
+         * <blue><bold>Hello World!!!</bold></blue>
+         * list of supported style tags: error, warn, link, title, success, key, id, description, helptitle, synopsis, br
+         * if using any kind of formatting, make sure that it is well formatted
+         */
+        public static log(message: string): void {
+            Logger.logFormattedString(Logger.converBrTags(message));
+        }
+
+        /**
+         * Logs an error string following by a newline on stderr
+         * input string can only have <br/> tags
+         */
+        public static logError(message: string): void {
+            Logger.stderr(colors.error(Logger.converBrTags(message)) + os.EOL);
+        }
+
+        /**
+         * Logs a warning string following by a newline on stderr
+         * input string can only have <br/> tags
+         */
+        public static logWarning(message: string): void {
+            Logger.stderr(colors.warn(Logger.converBrTags(message)) + os.EOL);
+        }
+
+        /**
+         * Logs an empty line on console
+         */
+        public static logLine(): void {
+            Logger.stdout(os.EOL);
+        }
+
+        /**
+         * msg can be any string with styles classes defined in xml tags
+         * <blue><bold>Hello World!!!</bold></blue>
+         * if using any kind of formatting, make sure that it is well formatted
+         * Ideally we should prefer using styles (for e.g. <title>, <success>) instead of bold, red, green kind of tags.
+         * special tag <br> is supported to allow line breaks
+         */
+        private static logFormattedString(msg: string): void {
+            // handle <br/>
+            if (msg) {
+                msg = msg.replace("<br/>", os.EOL);
+
+                var stylesStack: string[] = [];
+                var startIndex: number = 0;
+                // loop over all tags in the input string,
+                // for start tag, push on the stack, for end tag pop from the stack
+                // for every string section in between, print it with current styles on the stack
+                Logger.forEachTagMatch(msg, function (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number): void { 
+                    // log current section of the string
+                    Logger.colorize(msg.substring(startIndex, tagStartIndex), stylesStack);
+
+                        startIndex = tagEndIndex;
+                        if (isStartTag) {
+                            stylesStack.push(tag);
+                        } else {
+                            // verify same tag
+                            if (stylesStack.length > 0 && stylesStack[stylesStack.length - 1] === tag) {
+                                stylesStack.pop();
+                            } else {
+                                assert.fail(util.format("Invalid format specified in %s. mismatched tag %s. stylestack %s", msg, tag, stylesStack));
+                            }
+                        }
+                });
+
+                assert.equal(stylesStack.length, 0, util.format("Invalid format specified in %s. mismatched tags %s.", msg, stylesStack));
+ 
+                // print remaing string, outside any tags
+                if (startIndex < msg.length) {
+                    Logger.colorize(msg.substring(startIndex, msg.length), stylesStack);
+                }
             }
-        }          
 
-        /**
-         * log
-         */
-        public static log(msg: string, level: Logger.Level = Logger.Level.Normal): void {
-            if (!msg) {
-                return;
-            }
+            Logger.stdout(os.EOL);
+        }
 
-            msg = Logger.colorize(msg, level);
-            switch (level) {
-                case Logger.Level.Error:
-                case Logger.Level.Warn:
-                    process.stderr.write(msg);
-                    return;
+        private static forEachTagMatch(msg: string, callback: (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number) => void): void {
+            // regex to match again all start/end tags strictly without spaces
+            var regex = new RegExp(Logger.TagRegex, "gm");
+            var match: RegExpExecArray;
 
-                case Logger.Level.Link:
-                case Logger.Level.Success:
-                case Logger.Level.Normal:
-                case Logger.Level.NormalBold:
-                    process.stdout.write(msg);
-                    break;
+            // iterate over all start/end tags <foo>, </foo> 
+            // push start tags on stack and remove start tags when end tags are encountered
+            while ((match = regex.exec(msg))) {
+                var tagMatch: string = match[0];
+                var style: string = match[1];
+                var tagRightIndex: number = regex.lastIndex;
+                var tagLeftIndex: number = tagRightIndex - match[0].length;
+                var isStartTag: boolean = tagMatch.charAt(1) !== "/";
+
+                callback(style, isStartTag, tagLeftIndex, tagRightIndex);
             }
         }
-        
-        /**
-         * for quick logging use
-         */
-        public static logLine(msg: string, level: Logger.Level = Logger.Level.Normal): void {
-            Logger.log(msg + "\n", level);
+
+        private static colorize(str: string, styles: string[]): void {
+            if (styles.length > 0) {
+                var styleFunction: any = colors;
+                styles.forEach(function (style: string): void {
+                    // ignore if specified style is not availble
+                    // say input string is <random>foo</random>, since random is not a style, colorize will ignore it
+                    if (styleFunction[style]) {
+                        styleFunction = styleFunction[style];
+                    }
+                });
+                Logger.stdout(styleFunction(str));
+            } else {
+                Logger.stdout(str);
+            }
         }
 
-        public static logErrorLine(msg: string): void {
-            Logger.logLine(msg, Logger.Level.Error);
+        private static stdout(msg: string): void {
+            process.stdout.write(msg);
         }
 
-        public static logWarnLine(msg: string): void {
-            Logger.logLine(msg, Logger.Level.Warn);
+        private static stderr(msg: string): void {
+            process.stderr.write(msg);
         }
 
-        public static logLinkLine(msg: string): void {
-            Logger.logLine(msg, Logger.Level.Link);
+        private static converBrTags(msg: string): string {
+            return msg.replace("<br/>", os.EOL);
         }
 
-        public static logNormalLine(msg: string): void {
-            Logger.logLine(msg, Logger.Level.Normal);
+        private static repeat(c: string, n: number): string {
+            return (n > 0) ? Array(n + 1).join(c) : "";
         }
-
-        public static logNormalBoldLine(msg: string): void {
-            Logger.logLine(msg, Logger.Level.NormalBold);
-        }
-
-        public static logSuccessLine(msg: string): void {
-            Logger.logLine(msg, Logger.Level.Success);
-        }
-    };
-
-    export module Logger {
-        /**
-         * Warning levels
-         */
-        export enum Level { Warn, Error, Link, Normal, Success, NormalBold };
     }
 }
 

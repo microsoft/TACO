@@ -15,6 +15,7 @@ import countStream = require ("./countStream");
 import resourceManager = require ("./resourceManager");
 import jsDocHelpPrinter = require ("./jsDocHelpPrinter");
 import logger = require ("./logger");
+import loggerHelper = require ("./loggerHelper");
 import processLogger = require ("./processLogger");
 import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
@@ -31,6 +32,7 @@ module TacoUtility {
     export var CountStream = countStream.CountStream;
     export var JSDocHelpPrinter = jsDocHelpPrinter.JSDocHelpPrinter;
     export var Logger = logger.Logger;
+    export var LoggerHelper = loggerHelper.LoggerHelper;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;
