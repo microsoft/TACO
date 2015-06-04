@@ -10,10 +10,10 @@
 /// <reference path="../typings/colors.d.ts" />
 /// <reference path="../typings/nameDescription.d.ts" />
 
-import assert = require("assert");
+import assert = require ("assert");
 var colors = require("colors/safe");
-import os = require("os")
-import util = require("util");
+import os = require ("os");
+import util = require ("util");
 
 colors.setTheme({
     error: ["red", "bold"],
@@ -32,9 +32,7 @@ colors.setTheme({
 });
 
 module TacoUtility {
-
     export class Logger {
-
         public static TagRegex: string = "<\/?([a-z]+)\/?>";
 
         /**
@@ -80,20 +78,19 @@ module TacoUtility {
         private static logFormattedString(msg: string): void {
             var underlineNeeded: boolean = false;
             if (msg) {
-
                 // handle <br/>
                 msg = msg.replace("<br/>", os.EOL);
-                underlineNeeded = msg.indexOf("<underline/>") == 0;
+                underlineNeeded = msg.indexOf("<underline/>") === 0;
                 if (underlineNeeded) {
                     msg = msg.substr("<underline/>".length);
                 }
+
                 var stylesStack: string[] = [];
                 var startIndex: number = 0;
                 // loop over all tags in the input string,
                 // for start tag, push on the stack, for end tag pop from the stack
                 // for every string section in between, print it with current styles on the stack
                 Logger.forEachTagMatch(msg, function (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number): void {
-
                     // log current section of the string
                     Logger.colorize(msg.substring(startIndex, tagStartIndex), stylesStack);
 
@@ -108,7 +105,6 @@ module TacoUtility {
                             assert.fail(util.format("Invalid format specified in %s. mismatched tag %s. stylestack %s", msg, tag, stylesStack));
                         }
                     }
-
                 });
 
                 assert.equal(stylesStack.length, 0, util.format("Invalid format specified in %s. mismatched tags %s.", msg, stylesStack));
@@ -118,6 +114,7 @@ module TacoUtility {
                     Logger.colorize(msg.substring(startIndex, msg.length), stylesStack);
                 }
             }
+
             Logger.stdout(os.EOL);
             if (underlineNeeded) {
                 var regex = new RegExp(Logger.TagRegex, "gm");
@@ -125,15 +122,14 @@ module TacoUtility {
             }
         }
 
-        private static forEachTagMatch(msg: string, callback: (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number) => void) {
+        private static forEachTagMatch(msg: string, callback: (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number) => void): void {
             // regex to match again all start/end tags strictly without spaces
             var regex = new RegExp(Logger.TagRegex, "gm");
             var match: RegExpExecArray;
 
             // iterate over all start/end tags <foo>, </foo> 
             // push start tags on stack and remove start tags when end tags are encountered
-            while ((match = regex.exec(msg)) !== null) {
-
+            while ((match = regex.exec(msg))) {
                 var tagMatch: string = match[0];
                 var style: string = match[1];
                 var tagRightIndex: number = regex.lastIndex;
@@ -147,7 +143,7 @@ module TacoUtility {
         private static colorize(str: string, styles: string[]): void {
             if (styles.length > 0) {
                 var styleFunction: any = colors;
-                styles.forEach(function (style: string) {
+                styles.forEach(function (style: string): void {
                     // ignore if specified style is not availble
                     // say input string is <random>foo</random>, since random is not a style, colorize will ignore it
                     if (styleFunction[style]) {
@@ -163,6 +159,7 @@ module TacoUtility {
         private static stdout(msg: string): void {
             process.stdout.write(msg);
         }
+
         private static stderr(msg: string): void {
             process.stderr.write(msg);
         }
@@ -174,6 +171,7 @@ module TacoUtility {
         private static repeat(c: string, n: number): string {
             return (n > 0) ? Array(n + 1).join(c) : "";
         }
+
         private static stripUnderlineTag(msg: string): string {
             var len1: number = "<underline>".length;
             var len2: number = "</underline>".length;

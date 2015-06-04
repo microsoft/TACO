@@ -100,7 +100,6 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * Pretty prints the Kit name and description info
      */
     private static printKitNameAndDescription(kitId: string, kitInfo: tacoKits.IKitInfo): void {
-
         var title: string = kitId;
         var titleLength: number = title.length;
         var suffix: string = "";
@@ -133,7 +132,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Pretty prints the platform version override info
      */
-    private static printPlatformOverrideInfo(kitInfo: tacoKits.IKitInfo): void {
+    private static printPlatformOverrideInfo(kitInfo: tacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.platforms) {
             logger.log(resources.getString("CommandKitListPlatformOverridesForKit"));
             LoggerHelper.logNameValueTable(
@@ -141,8 +140,8 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                     return <INameDescription>{
                         name: platformName,
                         description: kitInfo.platforms[platformName].version || kitInfo.platforms[platformName].src
-                    }
-                }), LoggerHelper.DefaultIndent, 35);
+                    };
+                }), LoggerHelper.DefaultIndent, valuesIndent);
             logger.logLine();
         }
     }
@@ -150,7 +149,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Pretty prints the plugin version override info
      */
-    private static printPluginOverrideInfo(kitInfo: tacoKits.IKitInfo): void {
+    private static printPluginOverrideInfo(kitInfo: tacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.plugins) {
             logger.log(resources.getString("CommandKitListPluginOverridesForKit"));
             LoggerHelper.logNameValueTable(
@@ -158,8 +157,8 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                     return <INameDescription>{
                         name: pluginId,
                         description: kitInfo.plugins[pluginId].version || kitInfo.plugins[pluginId].src
-                    }
-                }));
+                    };
+                }), LoggerHelper.DefaultIndent, valuesIndent);
             logger.logLine();
         }
     }
@@ -170,18 +169,45 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         return kitHelper.getKitMetadata().then(function (metadata: tacoKits.ITacoKitMetadata): Q.Promise<tacoKits.IKitMetadata> {
             return Q.resolve(metadata.kits);
         }).then(function (kits: tacoKits.IKitMetadata): Q.Promise<any> {
-            Object.keys(kits).forEach(function (kitId: string): void {
-                if (kitId) {
-                    kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-                        Kit.printKitNameAndDescription(kitId, kitInfo);
-                        Kit.printCordovaCliVersion(kitInfo);
-                        Kit.printPlatformOverrideInfo(kitInfo);
-                        Kit.printPluginOverrideInfo(kitInfo);
+                return Kit.getMaxPlatformPluginLength(kits).then(function (maxLength): void {
+                    var indent2 = Math.max(LoggerHelper.DefaultIndent + maxLength + LoggerHelper.MinimumDots + 2, LoggerHelper.MinRightIndent);
+                    Object.keys(kits).forEach(function (kitId: string): void {
+                        if (kitId) {
+                            kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
+                                Kit.printKitNameAndDescription(kitId, kitInfo);
+                                Kit.printCordovaCliVersion(kitInfo);
+                                Kit.printPlatformOverrideInfo(kitInfo, indent2);
+                                Kit.printPluginOverrideInfo(kitInfo, indent2);
+                            });
+                        }
                     });
-                }
-            });
-            return Q({});
+                });
         });
+    }
+
+    private static getMaxPlatformPluginLength(kits: tacoKits.IKitMetadata): Q.Promise<number> {
+        var maxLength: number = 0;
+        Object.keys(kits).forEach(function (kitId: string): void {
+            if (kitId) {
+                kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
+                    if (kitInfo.platforms) {
+                        Object.keys(kitInfo.platforms).forEach(function (platformName): void {
+                            if (platformName.length > maxLength) {
+                                maxLength = platformName.length;
+                            }
+                        });
+                    }
+                    if (kitInfo.plugins) {
+                        Object.keys(kitInfo.plugins).forEach(function (pluginId): void {
+                            if (pluginId.length > maxLength) {
+                                maxLength = pluginId.length;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        return Q(35);
     }
 
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
