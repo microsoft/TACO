@@ -23,10 +23,11 @@ import gulpUtils = require ("../tools/GulpUtils");
  
 var buildConfig = require("../../src/build_config.json");
 var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
+var allModules = tacoModules.concat(["taco-remote-multiplexer"]);
 
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
-var options: any = nopt({ moduleFilter: String, }, {}, process.argv);
+var options: any = nopt({ moduleFilter: String, drop: String}, {}, process.argv);
 if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
     tacoModules = [options.moduleFilter];
 }
@@ -52,6 +53,16 @@ gulp.task("compile", function (callback: Function): Q.Promise<any> {
 /* compile + copy */
 gulp.task("build", ["prepare-templates"], function (callback: Function): void {
     runSequence("compile", "copy", callback);
+});
+
+gulp.task("package", ["build"], function (): Q.Promise<any> {
+    return gulpUtils.updateLocalPackageFilePaths("/**/package.json", buildConfig.src, buildConfig.buildPackages, options.drop || buildConfig.buildPackages).then(function (): void {
+	// npm pack each folder, put the tgz in the parent folder
+	gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
+    }).catch(function (err: any): any {
+	console.error("Error packaging: " + err);
+	throw err;
+    });
 });
 
 /* full clean build */
@@ -99,7 +110,7 @@ gulp.task("copy", function (): Q.Promise<any> {
     ];
     return Q.all([
         gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),
-        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages)
+        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop)
     ]);
 });
 

@@ -74,20 +74,75 @@ class GulpUtils {
         }));
     }
 
-    public static copyDynamicDependenciesJson(fileGlob: string, srcPath: string, destPath: string): Q.Promise<any> {
+    public static copyDynamicDependenciesJson(fileGlob: string, srcPath: string, destPath: string, droplocation: string): Q.Promise<any> {
         return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, fileGlob))
             .pipe(jsonEditor(
                 function (json: { [packageKey: string]: IDynamicDependencyEntry }): { [packageKey: string]: IDynamicDependencyEntry } {
                     Object.keys(json).forEach(function (packageKey: string): void {
                         var entry: IDynamicDependencyEntry = json[packageKey];
                         if (entry.dev) {
-                            entry.localPath = util.format("file://%s", path.resolve(destPath, entry.packageName));
+			    entry.localPath = util.format("file://%s", path.resolve(droplocation || destPath, entry.packageName));
                         }
                     });
                     return json;
                 }
             ))
             .pipe(gulp.dest(destPath)));
+    }
+
+    public static updateLocalPackageFilePaths(fileGlob: string, srcPath: string, destPath: string, dropLocation: string): Q.Promise<any> {
+        return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, fileGlob))
+            .pipe(jsonEditor(
+                function (json: { dependencies: {[key: string]: string}; optionalDependencies: {[key: string]: string} }): any {
+                    Object.keys(json.dependencies || {}).forEach(function (packageKey: string): void {
+                        if (json.dependencies[packageKey].indexOf("file:") == 0) {
+			    json.dependencies[packageKey] = util.format("file:%s", path.resolve	(dropLocation, packageKey + ".tgz"));
+                        }
+                    });
+		    Object.keys(json.optionalDependencies || {}).forEach(function (packageKey: string): void {
+                        if (json.optionalDependencies[packageKey].indexOf("file:") == 0) {
+			    json.optionalDependencies[packageKey] = util.format("file:%s", path.resolve	(dropLocation, packageKey + ".tgz"));
+                        }
+                    });
+                    return json;
+                }
+            ))
+            .pipe(gulp.dest(destPath)));
+
+    }
+
+    public static packageModules(srcPath: string, modules: string[], destPath: string): Q.Promise<any> {
+	var deferred = Q.defer();
+	var resolvedModules = modules.map(function(module: string): string { return path.resolve(srcPath, module);});
+	var npmproc = child_process.spawn(os.platform() === "win32" ? "npm.cmd" : "npm", ["pack"].concat(resolvedModules), {cwd: destPath, stdio: "inherit"});
+	npmproc.on("error", function (err: any) : void {
+	    console.info("NPM pack error: " + err);
+	    deferred.reject(err);
+	});
+	npmproc.on("exit", function (code: number): void {
+	    if (code) {
+		console.info("NPM pack exited non-zero " + code);
+		deferred.reject(code);
+	    } else {
+		deferred.resolve({});
+	    }
+	});
+
+	return deferred.promise.then(function (): void {
+	    modules.forEach(function (module: string): void {
+		var packagejson = require(path.resolve(srcPath, module, "package.json"));
+		var version = packagejson.version;
+		var packed = path.resolve(destPath, module + "-" + version + ".tgz");
+		var bare = path.resolve(destPath, module + ".tgz");
+		if (fs.existsSync(packed)) {
+		    fs.renameSync(packed, bare);
+		}
+	    });
+	}).catch(function (err: any): any {
+	    console.info("ERROR: " + err);
+	    throw err;
+	});
+	
     }
 
     public static deleteDirectoryRecursive(dirPath: string, callback: (err: Error, deletedFiles: string[]) => any) {
