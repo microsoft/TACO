@@ -20,7 +20,7 @@ import Q = require ("q");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
-import projectHelper = require ("./utils/project-helper");
+import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("./tacoErrorCodes");
@@ -32,6 +32,7 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import level = logger.Level;
+import tacoProjectHelper = projectHelper.TacoProjectHelper;
 import utils = tacoUtility.UtilHelper;
 
 /* 
@@ -87,7 +88,7 @@ class Create implements commands.IDocumentedCommand {
                     var kitProject = self.isKitProject();
                     var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                    return tacoProjectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
                 })
                 .then(function (): Q.Promise<any> {
                     self.finalize(templateDisplayName);
@@ -152,17 +153,17 @@ class Create implements commands.IDocumentedCommand {
 
         return templates.getTemplatesForKit(kit)
             .then(function (list: templateManager.ITemplateList): void {
-                var kitToPrint: string = kit || list.kitId;
+            var kitToPrint: string = kit || list.kitId;
 
-                logger.logLine(resources.getString("CommandCreateListBase", kitToPrint));
+            logger.logLine(resources.getString("CommandCreateListBase", kitToPrint));
+            logger.log("\n");
+
+            for (var i: number = 0; i < list.templates.length; i++) {
+                logger.log(list.templates[i].id, level.NormalBold);
+                logger.log(": " + list.templates[i].name);
                 logger.log("\n");
-
-                for (var i: number = 0; i < list.templates.length; i++) {
-                    logger.log(list.templates[i].id, level.NormalBold);
-                    logger.log(": " + list.templates[i].name);
-                    logger.log("\n");
-                }
-            });
+            }
+        });
     }
 
     /**
@@ -186,38 +187,38 @@ class Create implements commands.IDocumentedCommand {
                 });
         } else {
             return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCliToUse: string): void {
-                    cordovaCli = cordovaCliToUse;
-                })
-                .then(function (): Q.Promise<any> {
-                    return self.printStatusMessage();
-                })
-                .then(function (): Q.Promise<any> {
-                    if (kitId) {
-                        return kitHelper.getKitInfo(kitId);
-                    } else {
-                        return Q.resolve(null);
-                    }      
-                })
+                cordovaCli = cordovaCliToUse;
+            })
+            .then(function (): Q.Promise<any> {
+                return self.printStatusMessage();
+            })
+            .then(function (): Q.Promise<any> {
+                if (kitId) {
+                    return kitHelper.getKitInfo(kitId);
+                } else {
+                    return Q.resolve(null);
+                }      
+            })
                 .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
-                    if (kitInfo && kitHelper.isKitDeprecated(kitInfo)) {
-                        // Warn the user
-                        logger.log("\n");
-                        logger.logLine(resources.getString("CommandCreateWarningDeprecatedKit", kitId), logger.Level.Warn);
-                        logger.log("\n");
-                        logger.logLine(resources.getString("CommandCreateWarningDeprecatedKitSuggestion"), logger.Level.Warn);
-                    }
+                if (kitInfo && !!kitInfo.deprecated) {
+                    // Warn the user
+                    logger.log("\n");
+                    logger.logLine(resources.getString("CommandCreateWarningDeprecatedKit", kitId), logger.Level.Warn);
+                    logger.log("\n");
+                    logger.logLine(resources.getString("CommandCreateWarningDeprecatedKitSuggestion"), logger.Level.Warn);
+                }
 
-                    if (mustUseTemplate) {
-                        var templates: templateManager = new templateManager(kitHelper);
+                if (mustUseTemplate) {
+                    var templates: templateManager = new templateManager(kitHelper);
 
-                        return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
-                            .then(function (templateDisplayName: string): Q.Promise<string> {
-                                return Q.resolve(templateDisplayName);
-                            });
-                    } else {
-                        return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
-                    }
-                });
+                    return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
+                        .then(function (templateDisplayName: string): Q.Promise<string> {
+                            return Q.resolve(templateDisplayName);
+                        });
+                } else {
+                    return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
+                }
+            });
         }
     }
 

@@ -1,10 +1,10 @@
 ﻿/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/colors.d.ts" />
@@ -21,7 +21,13 @@ declare module TacoUtility {
             Success = 4,
             NormalBold = 5,
         }
+
+        enum Indent {
+            Left = 0,
+            Right = 1
+        }
     }
+
     class Logger {
         /**
          * returns colorized string
@@ -42,5 +48,7 @@ declare module TacoUtility {
         static logNormalLine(msg: string): void;
         static logNormalBoldLine(msg: string): void;
         static logSuccessLine(msg: string): void;
+        static logIndentedString(msg: string, num: number, indent?: Logger.Indent, level?: Logger.Level): void;
+        static logRepeatedString(msg: string, num: number, level?: Logger.Level): void;
     }
 }
