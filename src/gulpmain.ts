@@ -27,7 +27,7 @@ var allModules = tacoModules.concat(["taco-remote-multiplexer"]);
 
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
-var options: any = nopt({ moduleFilter: String, drop: String}, {}, process.argv);
+var options: any = nopt({ moduleFilter: String, drop: String }, {}, process.argv);
 if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
     tacoModules = [options.moduleFilter];
 }
@@ -55,13 +55,17 @@ gulp.task("build", ["prepare-templates"], function (callback: Function): void {
     runSequence("compile", "copy", callback);
 });
 
-gulp.task("package", ["build"], function (): Q.Promise<any> {
+gulp.task("package", [], function (callback: Function): void {
+    runSequence("build", "just-package", callback);
+});
+
+gulp.task("just-package", [], function (): Q.Promise<any> {
     return gulpUtils.updateLocalPackageFilePaths("/**/package.json", buildConfig.src, buildConfig.buildPackages, options.drop || buildConfig.buildPackages).then(function (): void {
-	// npm pack each folder, put the tgz in the parent folder
-	gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
-    }).catch(function (err: any): any {
-	console.error("Error packaging: " + err);
-	throw err;
+        // npm pack each folder, put the tgz in the parent folder
+        gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
+   }).catch(function (err: any): any {
+        console.error("Error packaging: " + err);
+        throw err;
     });
 });
 
