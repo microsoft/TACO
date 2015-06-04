@@ -92,8 +92,8 @@ module TacoUtility {
                 case "silly":
                     this.logLevel = InstallLogLevel.silly;
                     break;
-                case "pretty":
-                    this.logLevel = InstallLogLevel.pretty;
+                case "taco":
+                    this.logLevel = InstallLogLevel.taco;
                     break;
                 default:
                     this.logLevel = -1;
