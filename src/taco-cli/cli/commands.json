@@ -40,7 +40,31 @@
             { "name": "PLATFORM", "description": "[CommandSetupOptionsPlatform]" }
         ]
     },
-
+    "platform": {
+        "synopsis": "[COMMAND] [--usegit] [--save] [--link]",
+        "modulePath": "./platform",
+        "description": "[CommandPlatformDescription]",
+        "args": [
+            { "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]" },
+            { "name": "add <plat-spec>", "description": "[CommandPlatformAddSubcommandDescription]" },
+            { "name": "remove <platform>", "description": "[CommandPlatformRemoveSubcommandDescription]" },
+            { "name": "list", "description": "[CommandPlatformListSubcommandDescription]" },
+            { "name": "update <plat-spec>", "description": "[CommandPlatformUpdateSubcommandDescription]" },
+            { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+            { "name": "--save", "description": "[CommandPlatformSaveDescription]" },
+            { "name": "--link", "description": "[CommandPlatformLinkDescription]" }
+        ],
+        "syntax": [
+            { "name": "plat-spec", "description": "[CommandPlatformOptPlatSpecDescription]" },
+            { "name": "platform-ver", "description": "[CommandPlatformOptPlatVersionDescription]" },
+            { "name": "platform", "description": "[CommandPlatformOptPlatformDescription]" },
+            { "name": "path", "description": "[CommandPlatformOptPathDescription]" },
+            { "name": "git-url", "description": "[CommandPlatformOptGitUrlDescription]" },
+            { "name": "url", "description": "[CommandPlatformOptUrlDescription]" },
+            { "name": "version", "description": "[CommandPlatformOptVersionDescription]" },
+            { "name": "branch", "description": "[CommandPlatformOptBranchDescription]" }
+        ]
+    },
     "build": {
         "synopsis": "[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]",
         "modulePath": "./build",

@@ -41,6 +41,15 @@ module CordovaHelper {
         copyFrom?: string;
         linkTo?: string;
     }
+
+    export interface ICordovaDownloadOptions {
+        projectPath: string;
+        appId: string;
+        appName: string;
+        cordovaConfig: any;
+        copyFrom?: string;
+        linkTo?: string;
+    }
 }
 
 class CordovaHelper {
