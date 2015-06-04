@@ -60,10 +60,13 @@ gulp.task("package", [], function (callback: Function): void {
 });
 
 gulp.task("just-package", [], function (): Q.Promise<any> {
-    return gulpUtils.updateLocalPackageFilePaths("/**/package.json", buildConfig.src, buildConfig.buildPackages, options.drop || buildConfig.buildPackages).then(function (): void {
+    return Q.all([
+        gulpUtils.updateLocalPackageFilePaths("/**/package.json", buildConfig.src, buildConfig.buildPackages, options.drop || buildConfig.buildPackages),
+        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop, true)
+    ]).then(function (): Q.Promise<any> {
         // npm pack each folder, put the tgz in the parent folder
-        gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
-   }).catch(function (err: any): any {
+        return gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
+    }).catch(function (err: any): any {
         console.error("Error packaging: " + err);
         throw err;
     });
@@ -114,7 +117,7 @@ gulp.task("copy", function (): Q.Promise<any> {
     ];
     return Q.all([
         gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),
-        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop)
+        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop && path.join(options.drop, "node_modules"))
     ]);
 });
 
