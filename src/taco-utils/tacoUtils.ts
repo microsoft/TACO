@@ -13,6 +13,7 @@ import commands = require ("./commands");
 import cordovaConfig = require ("./cordovaConfig");
 import countStream = require ("./countStream");
 import resourceManager = require ("./resourceManager");
+import installLogLevel = require ("./installLogLevel");
 import jsDocHelpPrinter = require ("./jsDocHelpPrinter");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
@@ -33,6 +34,7 @@ module TacoUtility {
     export var JSDocHelpPrinter = jsDocHelpPrinter.JSDocHelpPrinter;
     export var Logger = logger.Logger;
     export var LoggerHelper = loggerHelper.LoggerHelper;
+    export var InstallLogLevel = installLogLevel.InstallLogLevel;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;

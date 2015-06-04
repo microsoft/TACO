@@ -23,6 +23,15 @@
         "modulePath": "./help",
         "description": "<description>[CommandHelpDescription]</description>"
     },
+    "kit": {
+        "synopsis": "[COMMAND] [--json]",
+        "modulePath": "./kit",
+        "description": "[CommandKitDescription]",
+        "args": [
+            { "name": "COMMAND", "description": "[CommandKitSubcommandDescription]" },
+            { "name": "--json", "description": "[CommandKitJsonOptionDescription]" }
+        ]
+    },
     "setup": {
         "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
         "modulePath": "./setup",
@@ -31,6 +40,7 @@
             { "name": "PLATFORM", "description": "[CommandSetupOptionsPlatform]" }
         ]
     },
+
     "build": {
         "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./build",

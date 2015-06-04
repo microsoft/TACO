@@ -14,7 +14,6 @@ declare module TacoUtility {
          * message can be any string with xml type tags in it.
          * supported tags can be seen in logger.ts
          * <blue><bold>Hello World!!!</bold></blue>
-         * list of supported style tags: error, warn, link, title, success, key, id, description, helptitle, synopsis, br
          * if using any kind of formatting, make sure that it is well formatted
          */
         public static log(message: string): void;

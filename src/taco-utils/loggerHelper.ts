@@ -32,11 +32,16 @@ module TacoUtility {
          * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
          * @param {number} indent2 position at which value should start, if not specified some calculations are done to get the right indent
          */
-        public static logNameValueTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void { 
+        public static logNameValueTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void {
             // 0 is a valid indent on the left
             if (indent1 !== 0) {
                 indent1 = indent1 || LoggerHelper.DefaultIndent;
             }
+
+            // Filter out invalid keys if any
+            nameValuePairs = nameValuePairs.filter(function (nvp: INameDescription): boolean {
+                return !!nvp.name;
+            });
 
             if (!indent2) {
                 var maxKeyLength: number = 0;

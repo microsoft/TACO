@@ -40,7 +40,6 @@ describe("KitHelper", function (): void {
         "cordova-cli": "4.0.0",
         "taco-min": "1.0.0",
         releaseNotesUri: "http://cordova.apache.org/4.0.0/release.md",
-        name: "4.0.0 Kit for Cordova Development",
         deprecated: true,
         deprecatedReasonUri: "http://cordova.apache.org/blog/2014102310023",
         plugins: {
@@ -52,7 +51,9 @@ describe("KitHelper", function (): void {
                 version: "0.3.4",
                 platforms: "ios, android, windows, windows8"
             }
-        }
+        },
+        name: "4.0.0-Kit",
+        description: "4.0.0-Kit-desc"
     };
 
     var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-Kit", "blank.zip");
@@ -96,9 +97,10 @@ describe("KitHelper", function (): void {
         "taco-min": "1.0.0",
         default: true,
         releaseNotesUri: "http://cordova.apache.org/5.0.0/release.md",
-        name: "5.0.0 Kit for Cordova Development",
         platforms: testPlatformOverridesForDefaultKit,
-        plugins: testPluginOverridesForDefaultKit
+        plugins: testPluginOverridesForDefaultKit,
+        name: "5.0.0-Kit",
+        description: "5.0.0-Kit-desc"
     };
 
     before(function (): void {
@@ -121,9 +123,9 @@ describe("KitHelper", function (): void {
         it("must return the right kit metadata", function (done: MochaDone): void {
             // Call getKitMetadata()
             kitHelper.getKitMetadata()
-                .then(function (kitInfo: TacoKits.ITacoKitMetadata): void {
+                .then(function (kitMetadata: tacoKits.ITacoKitMetadata): void {
                     // Verify the returned kit metadata is expected
-                    kitInfo.should.equal(require(kitHelper.KitMetadataFilePath));
+                    kitMetadata.should.equal(require(kitHelper.KitMetadataFilePath));
                     done();
                 })
                 .catch(function (err: string): void {
@@ -206,24 +208,6 @@ describe("KitHelper", function (): void {
                 }).catch(function (err: string): void {
                     done(new Error(err));
                 });
-        });
-    });
-
-    describe("isKitDeprecated()", function (): void {
-        it("must return false when a non-deprecated kit ID is passed", function (done: MochaDone): void {
-            // Ensure that the default kit is not deprecated
-            var isDeprecated: boolean = kitHelper.isKitDeprecated(testDefaultKitInfo);
-
-            isDeprecated.should.equal(false);
-            done();
-        });
-
-        it("must return true when a deprecated kit ID is passed", function (done: MochaDone): void {
-            // Ensure that for a deprecated kit,  isKitDeprecated() returns true
-            var isDeprecated: boolean = kitHelper.isKitDeprecated(testDeprecatedKitInfo);
-
-            isDeprecated.should.equal(true);
-            done();
         });
     });
 
