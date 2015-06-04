@@ -16,8 +16,8 @@
 import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
-import util = require ("util");
 import Q = require ("q");
+import util = require ("util");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
@@ -154,10 +154,11 @@ class Create implements commands.IDocumentedCommand {
 
         return templates.getTemplatesForKit(kit)
             .then(function (list: templateManager.ITemplateList): void {
-            var kitToPrint: string = kit || list.kitId;
-
-            logger.log(resources.getString("CommandCreateListBase", kitToPrint));
-            LoggerHelper.logNameValueTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
+                var kitToPrint: string = kit || list.kitId;
+                logger.logLine();
+                logger.log(resources.getString("CommandCreateListBase", kitToPrint));
+                logger.logLine();
+                LoggerHelper.logNameValueTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
                 return <INameDescription>{ name: value.id, description: value.name };
             }));
         });

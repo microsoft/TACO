@@ -19,13 +19,13 @@ declare module TacoUtility {
         public static log(message: string): void;
 
         /**
-         * Logs an error string following by a newline on stderr
+         * Logs an error string followed by a newline on stderr
          * input string can only have <br/> tags
          */
         public static logError(msg: string): void;
 
         /**
-         * Logs a warning string following by a newline on stderr
+         * Logs a warning string followed by a newline on stderr
          * input string can only have <br/> tags
          */
         public static logWarning(msg: string): void;

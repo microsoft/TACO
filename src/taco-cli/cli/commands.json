@@ -24,9 +24,9 @@
         "description": "<description>[CommandHelpDescription]</description>"
     },
     "kit": {
-        "synopsis": "[COMMAND] [--json]",
+        "synopsis": "<synopsis>[COMMAND] [--json]</synopsis>",
         "modulePath": "./kit",
-        "description": "[CommandKitDescription]",
+        "description": "<description>[CommandKitDescription]</description>",
         "args": [
             { "name": "COMMAND", "description": "[CommandKitSubcommandDescription]" },
             { "name": "--json", "description": "[CommandKitJsonOptionDescription]" }
@@ -75,7 +75,7 @@
         ]
     },
     "version": {
-        "synopsis": "",
+        "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
         "modulePath": "./version",
         "description": "<description>[CommandVersionDescription]</description>"
     }

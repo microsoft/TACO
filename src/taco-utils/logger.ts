@@ -42,23 +42,23 @@ module TacoUtility {
          * if using any kind of formatting, make sure that it is well formatted
          */
         public static log(message: string): void {
-            Logger.logFormattedString(Logger.converBrTags(message));
+            Logger.logFormattedString(Logger.convertBrTags(message));
         }
 
         /**
-         * Logs an error string following by a newline on stderr
+         * Logs an error string followed by a newline on stderr
          * input string can only have <br/> tags
          */
         public static logError(message: string): void {
-            Logger.stderr(colors.error(Logger.converBrTags(message)) + os.EOL);
+            Logger.stderr(colors.error(Logger.convertBrTags(message)) + os.EOL);
         }
 
         /**
-         * Logs a warning string following by a newline on stderr
+         * Logs a warning string followed by a newline on stderr
          * input string can only have <br/> tags
          */
         public static logWarning(message: string): void {
-            Logger.stderr(colors.warn(Logger.converBrTags(message)) + os.EOL);
+            Logger.stderr(colors.warn(Logger.convertBrTags(message)) + os.EOL);
         }
 
         /**
@@ -164,7 +164,7 @@ module TacoUtility {
             process.stderr.write(msg);
         }
 
-        private static converBrTags(msg: string): string {
+        private static convertBrTags(msg: string): string {
             return msg.replace("<br/>", os.EOL);
         }
 

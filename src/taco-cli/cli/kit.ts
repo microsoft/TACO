@@ -169,45 +169,41 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         return kitHelper.getKitMetadata().then(function (metadata: tacoKits.ITacoKitMetadata): Q.Promise<tacoKits.IKitMetadata> {
             return Q.resolve(metadata.kits);
         }).then(function (kits: tacoKits.IKitMetadata): Q.Promise<any> {
-                return Kit.getMaxPlatformPluginLength(kits).then(function (maxLength): void {
-                    var indent2 = Math.max(LoggerHelper.DefaultIndent + maxLength + LoggerHelper.MinimumDots + 2, LoggerHelper.MinRightIndent);
-                    Object.keys(kits).forEach(function (kitId: string): void {
-                        if (kitId) {
-                            kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-                                Kit.printKitNameAndDescription(kitId, kitInfo);
-                                Kit.printCordovaCliVersion(kitInfo);
-                                Kit.printPlatformOverrideInfo(kitInfo, indent2);
-                                Kit.printPluginOverrideInfo(kitInfo, indent2);
-                            });
-                        }
-                    });
+                return Kit.getLongestPlatformPluginLength(kits)
+                    .then(function (maxLength: number): void {
+                        var indent2 = Math.max(LoggerHelper.DefaultIndent + maxLength + LoggerHelper.MinimumDots + 2, LoggerHelper.MinRightIndent);
+                        Object.keys(kits).forEach(function (kitId: string): void {
+                            if (kitId) {
+                                kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
+                                    Kit.printKitNameAndDescription(kitId, kitInfo);
+                                    Kit.printCordovaCliVersion(kitInfo);
+                                    Kit.printPlatformOverrideInfo(kitInfo, indent2);
+                                    Kit.printPluginOverrideInfo(kitInfo, indent2);
+                                });
+                            }
+                        });
                 });
         });
     }
 
-    private static getMaxPlatformPluginLength(kits: tacoKits.IKitMetadata): Q.Promise<number> {
-        var maxLength: number = 0;
-        Object.keys(kits).forEach(function (kitId: string): void {
-            if (kitId) {
-                kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-                    if (kitInfo.platforms) {
-                        Object.keys(kitInfo.platforms).forEach(function (platformName): void {
-                            if (platformName.length > maxLength) {
-                                maxLength = platformName.length;
-                            }
-                        });
-                    }
-                    if (kitInfo.plugins) {
-                        Object.keys(kitInfo.plugins).forEach(function (pluginId): void {
-                            if (pluginId.length > maxLength) {
-                                maxLength = pluginId.length;
-                            }
-                        });
-                    }
-                });
-            }
-        });
-        return Q(35);
+    private static getLongestPlatformPluginLength(kits: tacoKits.IKitMetadata): Q.Promise<number> {
+        return Object.keys(kits).reduce<Q.Promise<number>>(function (longest: Q.Promise<number>, kitId: string): Q.Promise<number> {
+            return Q.all([longest, kitHelper.getKitInfo(kitId)]).spread<number>(function (longest: number, kitInfo: tacoKits.IKitInfo): number {
+                if (kitInfo.platforms) {
+                    longest = Object.keys(kitInfo.platforms).reduce(function (longest: number, platformName: string): number {
+                        return Math.max(longest, platformName.length);
+                    }, longest);
+                }
+
+                if (kitInfo.plugins) {
+                    longest = Object.keys(kitInfo.plugins).reduce(function (longest: number, pluginId: string): number {
+                        return Math.max(longest, pluginId.length);
+                    }, longest);
+                }
+
+                return longest;
+            });
+        }, Q(0));
     }
 
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
