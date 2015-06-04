@@ -24,11 +24,7 @@ module InstallerProtocol {
     }
 
     export enum DataType {
-        Output,
-        Bold,
-        Success,
-        Warn,
-        Error,
+        Log,
         Prompt
     }
 

@@ -62,7 +62,7 @@ class ElevatedInstaller {
             })
             .catch(function (err: Error): void {
                 // If there was an error during the parsing and validation of the installation config file, we consider this a fatal error and we exit immediately
-                installerUtils.sendData(self.socketHandle, installerDataType.Error, err.message);
+                installerUtils.sendData(self.socketHandle, "<error>" + err.message + "</error>");
                 self.socketHandle.end();
                 process.exit(protocol.ExitCode.FatalError);
             })
@@ -195,7 +195,7 @@ class ElevatedInstaller {
         return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyWrapper): Q.Promise<any> {
             return previous
                 .then(function (): Q.Promise<any> {
-                    installerUtils.sendData(self.socketHandle, installerDataType.Bold, value.dependency.displayName);
+                    installerUtils.sendData(self.socketHandle, "<br/><id>" + value.dependency.displayName + "</id>");
 
                     return value.installer.run();
                 })
@@ -205,7 +205,7 @@ class ElevatedInstaller {
 
     private errorHandler(err: Error): void {
         this.errorFlag = true;
-        installerUtils.sendData(this.socketHandle, installerDataType.Error, err.message);
+        installerUtils.sendData(this.socketHandle, "<error" + err.message + "</error>");
     }
 
     private exitProcess(): void {

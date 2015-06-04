@@ -27,6 +27,7 @@ import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 import resources = require ("../resources/resourceManager");
 
+import installerDataType = InstallerProtocol.DataType;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 
@@ -214,7 +215,7 @@ class InstallerUtils {
     /*
      * Sends data over the provided socket using the InstallerProtocol format
      */
-    public static sendData(socketHandle: NodeJSNet.Socket, dataType: InstallerProtocol.DataType, message: string): void {
+    public static sendData(socketHandle: NodeJSNet.Socket, message: string, dataType: installerDataType = installerDataType.Log): void {
         var data: InstallerProtocol.IData = {
             dataType: dataType,
             message: message
@@ -234,11 +235,11 @@ class InstallerUtils {
         return InstallerUtils.promptForOverwrite(name, value, socket)
             .then(function (answer: string): Q.Promise<boolean> {
                 if (answer === resources.getString("YesString")) {
-                    InstallerUtils.sendData(socket, InstallerProtocol.DataType.Output, resources.getString("OverwritingVariable", name));
+                    InstallerUtils.sendData(socket, resources.getString("OverwritingVariable", name));
 
                     return Q.resolve(true);
                 } else {
-                    InstallerUtils.sendData(socket, InstallerProtocol.DataType.Output, resources.getString("SkipOverwriteWarning", name, value));
+                    InstallerUtils.sendData(socket, resources.getString("SkipOverwriteWarning", name, value));
 
                     return Q.resolve(false);
                 }
@@ -255,9 +256,9 @@ class InstallerUtils {
             deferred.resolve(stringData);
         };
 
-        InstallerUtils.sendData(socket, InstallerProtocol.DataType.Warn, resources.getString("SystemVariableExists", name));
+        InstallerUtils.sendData(socket, resources.getString("SystemVariableExists", name));
         socket.on("data", dataListener);
-        InstallerUtils.sendData(socket, InstallerProtocol.DataType.Prompt, resources.getString("YesExampleString"));
+        InstallerUtils.sendData(socket, resources.getString("YesExampleString"), installerDataType.Prompt);
 
         return deferred.promise;
     }

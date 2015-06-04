@@ -41,28 +41,28 @@ class AndroidSdkInstaller extends InstallerBase {
     // Override runWin32() method because we need a post-install configuration step
     protected runWin32(): Q.Promise<any> {
         // Log progress
-        installerUtils.sendData(this.socketHandle, installerDataType.Output, resources.getString("DownloadingLabel"));
+        installerUtils.sendData(this.socketHandle, resources.getString("DownloadingLabel"));
 
         var self = this;
 
         return this.downloadWin32()
             .then(function (): void {
                 // Log progress
-                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("InstallingLabel"));
+                installerUtils.sendData(self.socketHandle, resources.getString("InstallingLabel"));
             })
             .then(function (): Q.Promise<any> {
                 return self.installWin32();
             })
             .then(function (): void {
                 // Log progress
-                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("SettingSystemVariablesLabel"));
+                installerUtils.sendData(self.socketHandle, resources.getString("SettingSystemVariablesLabel"));
             })
             .then(function (): Q.Promise<any> {
                 return self.updateVariablesWin32();
             })
             .then(function (androidHomeValue: string): string {
                 // Log progress
-                installerUtils.sendData(self.socketHandle, installerDataType.Output, resources.getString("ConfiguringLabel"));
+                installerUtils.sendData(self.socketHandle, resources.getString("ConfiguringLabel"));
 
                 // Return android home for the post-install setup
                 return androidHomeValue;
@@ -72,7 +72,7 @@ class AndroidSdkInstaller extends InstallerBase {
             })
             .then(function (): void {
                 // Log progress
-                installerUtils.sendData(self.socketHandle, installerDataType.Success, resources.getString("Success"));
+                installerUtils.sendData(self.socketHandle, resources.getString("Success"));
             });
     }
 

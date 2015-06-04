@@ -78,7 +78,7 @@ module TacoDependencyInstaller {
 
             // If there are no supported missing dependencies, we are done
             if (!this.missingDependencies.length) {
-                logger.logNormalBoldLine(resources.getString("NothingToInstall"));
+                logger.log(resources.getString("NothingToInstall"));
 
                 return Q.resolve({});
             }
@@ -105,7 +105,8 @@ module TacoDependencyInstaller {
         }
 
         private parseMissingDependencies(cordovaChecksResult: any): void {
-            // Extract dependency IDs from Cordova results
+            // Extract dependency IDs from Cordova results. Depending on whether we were able to require() Cordova or not, this result can be either an array of ICordovaRequirement objects, or a string
+            // representing the raw output of invoking 'cordova requirements'.
             var isArray: boolean = Object.prototype.toString.call(cordovaChecksResult) === "[object Array]";
             var dependencyIds: ICordovaRequirement[];
 
@@ -150,8 +151,8 @@ module TacoDependencyInstaller {
         }
 
         private parseFromString(output: string): ICordovaRequirement[] {
-            // If we parse the output, we are going to be dealing with display names rather than IDs for the dependencies, so we need a dictionary mapping names to IDs
-            // These are taken directly from Cordova; they need to be updated here if Cordova every changes them!
+            // If we parse the output, we are going to be dealing with display names rather than IDs for the dependencies, so we need a dictionary mapping names to IDs. These are taken directly from Cordova,
+            // so they need to be updated here if Cordova ever changes them.
             var namesToIds: { [name: string]: string } = {
                 "Java JDK": "java",
                 "Android SDK": "androidSdk",
@@ -226,7 +227,7 @@ module TacoDependencyInstaller {
 
         private displayUnsupportedWarning(): void {
             if (this.unsupportedMissingDependencies.length > 0) {
-                logger.logWarnLine(resources.getString("UnsupportedDependenciesHeader"));
+                logger.log(resources.getString("UnsupportedDependenciesHeader"));
 
                 this.unsupportedMissingDependencies.forEach(function (value: ICordovaRequirement): void {
                     var displayName: string = value.name || value.id;
@@ -237,20 +238,12 @@ module TacoDependencyInstaller {
                         return;
                     }
 
-                    logger.log(resources.getString("DependencyLabel"));
-                    logger.log(displayName, logger.Level.NormalBold);
+                    logger.log(resources.getString("DependencyLabel", displayName));
 
                     if (version) {
-                        logger.log("\n");
                         logger.log(resources.getString("DependencyVersion", version));
                     }
-
-                    logger.log("\n");
-                    logger.log("\n");
                 });
-
-                logger.log("============================================================\n");
-                logger.log("\n");
             }
         }
 
@@ -310,37 +303,31 @@ module TacoDependencyInstaller {
                 return !!value.licenseUrl;
             });
 
-            logger.logNormalBoldLine(resources.getString("InstallingDependenciesHeader"));
+            logger.log(resources.getString("Separator"));
+            logger.log(resources.getString("InstallingDependenciesHeader"));
             this.missingDependencies.forEach(function (value: IDependency): void {
-                logger.log(resources.getString("DependencyLabel"));
-                logger.log(value.displayName, logger.Level.NormalBold);
-                logger.log("\n");
-                logger.logNormalLine(resources.getString("DependencyVersion", value.version));
-                logger.logNormalLine(resources.getString("InstallDestination", value.installDestination));
+                logger.log(resources.getString("DependencyLabel", value.displayName));
+                logger.log(resources.getString("DependencyVersion", value.version));
+                logger.log(resources.getString("InstallDestination", value.installDestination));
 
                 if (value.licenseUrl) {
-                    logger.logNormalLine(resources.getString("DependencyLicense", value.licenseUrl));
+                    logger.log(resources.getString("DependencyLicense", value.licenseUrl));
                 }
-
-                logger.log("\n");
             });
 
-            logger.logNormalLine("============================================================");
-            logger.log("\n");
-            logger.logNormalLine(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
-            logger.log("\n");
+            logger.log(resources.getString("Separator"));
+            logger.log(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
 
             if (needsLicenseAgreement) {
-                logger.logNormalLine(resources.getString("LicenseAgreement"));
-                logger.log("\n");
+                logger.log(resources.getString("LicenseAgreement"));
             }
 
-            logger.logNormalLine(resources.getString("Proceed"));
+            logger.log(resources.getString("Proceed"));
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
                     if (answer === resources.getString("YesString")) {
-                        logger.log("\n");
+                        logger.log(resources.getString("Separator"));
 
                         return Q.resolve({});
                     } else {
@@ -393,25 +380,11 @@ module TacoDependencyInstaller {
                         var parsedData: installerProtocol.IData = JSON.parse(value);
 
                         switch (parsedData.dataType) {
-                            case installerDataType.Success:
-                                logger.logSuccessLine(parsedData.message);
-                                break;
-                            case installerDataType.Bold:
-                                logger.log("\n");
-                                logger.logNormalBoldLine(parsedData.message);
-                                break;
-                            case installerDataType.Warn:
-                                logger.logWarnLine(parsedData.message);
-                                break;
-                            case installerDataType.Error:
-                                logger.logErrorLine(parsedData.message);
-                                break;
                             case installerDataType.Prompt:
                                 self.promptUser(parsedData.message);
                                 break;
-                            case installerDataType.Output:
                             default:
-                                logger.logNormalLine(parsedData.message);
+                                logger.log(parsedData.message);
                         }
                     });
                 });
@@ -438,9 +411,6 @@ module TacoDependencyInstaller {
         }
 
         private spawnElevatedInstaller(): Q.Promise<number> {
-            logger.logNormalLine("============================================================");
-            logger.log("\n");
-
             switch (process.platform) {
                 case "win32":
                     return this.spawnElevatedInstallerWin32();
@@ -485,13 +455,11 @@ module TacoDependencyInstaller {
         }
 
         private printSummaryLine(code: number): void {
-            logger.log("\n");
-            logger.logNormalLine("============================================================");
-            logger.log("\n");
+            logger.log(resources.getString("Separator"));
 
             switch (code) {
                 case installerExitCode.CompletedWithErrors:
-                    logger.logErrorLine(resources.getString("InstallCompletedWithErrors"));
+                    logger.log(resources.getString("InstallCompletedWithErrors"));
                     break;
                 case installerExitCode.CouldNotConnect:
                     throw errorHelper.get(TacoErrorCodes.CouldNotConnect);
@@ -500,7 +468,7 @@ module TacoDependencyInstaller {
                     throw errorHelper.get(TacoErrorCodes.NoAdminRights);
                     break;
                 case installerExitCode.Success:
-                    logger.logSuccessLine(resources.getString("InstallCompletedSuccessfully"));
+                    logger.log(resources.getString("InstallCompletedSuccessfully"));
                     break;
                 case installerExitCode.FatalError:
                     throw errorHelper.get(TacoErrorCodes.FatalError);
@@ -509,8 +477,7 @@ module TacoDependencyInstaller {
             }
 
             if (code === installerExitCode.Success || code === installerExitCode.CompletedWithErrors) {
-                logger.log("\n");
-                logger.logWarnLine(resources.getString("RestartCommandPrompt"));
+                logger.log(resources.getString("RestartCommandPrompt"));
             }
         }
     }
