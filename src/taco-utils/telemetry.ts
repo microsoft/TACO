@@ -97,7 +97,7 @@ module TacoUtility {
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
                     .setAutoCollectPerformance(false)
-                    .setAutoCollectExceptions(false)
+                    .setAutoCollectExceptions(true)
                     .start();
                 AppInsights.client.config.maxBatchIntervalMs = 100;
                 TelemetryHelper.configstore = new Configstore('./taco-cli-telemetry');
