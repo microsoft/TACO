@@ -74,6 +74,36 @@ class CordovaWrapper {
                 return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
             });
     }
+
+    /**
+     * Wrapper for 'cordova platform' command.
+     *
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaPlatformParameters} The cordova platform options
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static platform(cordovaCliVersion: string, platformCmdParameters: cordovaHelper.ICordovaPlatformParameters): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets.join(" "), platformCmdParameters.downloadOptions);
+        });
+    }
+
+    /**
+     * Wrapper for 'cordova platform' command.
+     *
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaPlatformParameters} The cordova platform options
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static plugin(cordovaCliVersion: string, platformCmdParameters: cordovaHelper.ICordovaPlatformParameters): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+        });
+    }
 }
 
 export = CordovaWrapper;

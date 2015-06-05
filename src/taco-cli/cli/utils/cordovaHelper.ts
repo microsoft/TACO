@@ -42,13 +42,25 @@ module CordovaHelper {
         linkTo?: string;
     }
 
-    export interface ICordovaDownloadOptions {
-        projectPath: string;
-        appId: string;
-        appName: string;
-        cordovaConfig: any;
-        copyFrom?: string;
-        linkTo?: string;
+    export interface ICordovaRawCliVars {
+        [name: string]: string;
+    }
+
+    export interface ICordovaPlatformDownloadOptions {
+        searchpath: string;
+        noregistry: boolean;
+        usegit: boolean;
+        cli_variables: ICordovaRawCliVars;
+        browserify: string;
+        link: string;
+        save: boolean;
+        shrinkwrap: boolean;
+    }
+
+    export interface ICordovaPlatformParameters {
+        subCommand: string;
+        targets: string[];
+        downloadOptions: ICordovaPlatformDownloadOptions;
     }
 }
 
