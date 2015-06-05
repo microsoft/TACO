@@ -216,7 +216,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just build local, and failures are failures
-                            return CordovaWrapper.build(platform.platform);
+                            return CordovaWrapper.build(platform.platform, commandData);
                         case Settings.BuildLocationType.Remote:
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);

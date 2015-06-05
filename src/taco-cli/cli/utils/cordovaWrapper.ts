@@ -25,6 +25,7 @@ import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import packageLoader = tacoUtility.TacoPackageLoader;
+import commands = tacoUtility.Commands;
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
@@ -50,12 +51,49 @@ class CordovaWrapper {
         return deferred.promise;
     }
 
-    public static build(platform: string): Q.Promise<any> {
-        return CordovaWrapper.cli(["build", platform]);
+    public static build(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+        var additionalArguments = [];
+        if (commandData.options["target"]) {
+            additionalArguments.push("--target");
+            additionalArguments.push(commandData.options["target"]);
+        }
+        if (commandData.options["device"]) {
+            additionalArguments.push("--device");
+        }
+        if (commandData.options["emulator"]) {
+            additionalArguments.push("--emulator");
+        }
+        if (commandData.options["debug"]) {
+            additionalArguments.push("--debug");
+        }
+        if (commandData.options["release"]) {
+            additionalArguments.push("--release");
+        }
+        return CordovaWrapper.cli(["build", platform].concat(additionalArguments));
     }
 
-    public static run(platform: string): Q.Promise<any> {
-        return CordovaWrapper.cli(["run", platform]);
+    public static run(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+        var additionalArguments = [];
+        if (commandData.options["target"]) {
+            additionalArguments.push("--target");
+            additionalArguments.push(commandData.options["target"]);
+        }
+        if (commandData.options["device"]) {
+            additionalArguments.push("--device");
+        }
+        if (commandData.options["emulator"]) {
+            additionalArguments.push("--emulator");
+        }
+        if (commandData.options["debug"]) {
+            additionalArguments.push("--debug");
+        }
+        if (commandData.options["release"]) {
+            additionalArguments.push("--release");
+        }
+        if (commandData.options["nobuild"]) {
+            additionalArguments.push("--nobuild");
+        }
+        return CordovaWrapper.cli(["run", platform].concat(additionalArguments));
     }
 
     /**

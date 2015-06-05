@@ -207,7 +207,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                         return Run.runRemotePlatform(platform.platform, commandData);
                     };
                     var localRunFunc = function (): Q.Promise<any> {
-                        return CordovaWrapper.run(platform.platform);
+                        return CordovaWrapper.run(platform.platform, commandData);
                     };
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
