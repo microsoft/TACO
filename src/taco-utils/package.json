@@ -1,29 +1,32 @@
 {
-    "name": "taco-utils",
-    "author": {
-        "name": "Microsoft Corp."
-    },
-    "description": "strictly internal use to enable require in utility folder",
-    "version": "0.0.1",
-    "main": "tacoUtils.js",
-    "scripts": {
-        "test": "mocha"
-    },
-    "dependencies": {
-        "colors": "^1.0.3",
-        "elementtree": "0.1.6",
-        "nopt": "^3.0.1",
-        "q": "^1.1.2",
-        "unorm": "1.3.3",
-        "mkdirp": "0.5.0",
-        "ncp": "0.5.1",
-        "rimraf": "2.2.6",
-        "semver": "2.3.1"
-    },
-    "private": true,
-    "devDependencies": {
-        "typescript": ">=1.4.1",
-        "mocha": "2.0.1",
-        "should": "4.3.0"
-    }
+  "name": "taco-utils",
+  "author": {
+    "name": "Microsoft Corp."
+  },
+  "description": "strictly internal use to enable require in utility folder",
+  "version": "0.0.1",
+  "main": "tacoUtils.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "applicationinsights": "0.15.2",
+    "colors": "^1.0.3",
+    "configstore": "^1.0.0",
+    "elementtree": "0.1.6",
+    "mkdirp": "0.5.0",
+    "ncp": "0.5.1",
+    "nopt": "^3.0.1",
+    "q": "^1.1.2",
+    "rimraf": "2.2.6",
+    "semver": "2.3.1",
+    "unorm": "1.3.3",
+    "windows-no-runnable": "0.0.6"
+  },
+  "private": true,
+  "devDependencies": {
+    "typescript": ">=1.4.1",
+    "mocha": "2.0.1",
+    "should": "4.3.0"
+  }
 }
