@@ -41,18 +41,37 @@
         ]
     },
     "platform": {
-        "synopsis": "[COMMAND] [--usegit] [--save] [--link]",
+        "synopsis": "<synopsis>[COMMAND] [--usegit] [--save] [--link]</synopsis>",
         "modulePath": "./platform",
-        "description": "[CommandPlatformDescription]",
+        "description": "<description>[CommandPlatformDescription]</description>",
         "args": [
             { "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]" },
-            { "name": "add <plat-spec>", "description": "[CommandPlatformAddSubcommandDescription]" },
-            { "name": "remove <platform>", "description": "[CommandPlatformRemoveSubcommandDescription]" },
+            {
+                "name": "add <PLAT-SPEC>",
+                "description": "[CommandPlatformAddSubcommandDescription]",
+                "options": [
+                    { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+                    { "name": "--save", "description": "[CommandPlatformSaveAddDescription]" },
+                    { "name": "--link", "description": "[CommandPlatformLinkDescription]" }
+                ]
+            },
+            {
+                "name": "remove <PLATFORM>",
+                "description": "[CommandPlatformRemoveSubcommandDescription]",
+                "options": [
+                    { "name": "--save", "description": "[CommandPlatformSaveRemoveDescription]" }
+                ]
+            },
             { "name": "list", "description": "[CommandPlatformListSubcommandDescription]" },
-            { "name": "update <plat-spec>", "description": "[CommandPlatformUpdateSubcommandDescription]" },
-            { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
-            { "name": "--save", "description": "[CommandPlatformSaveDescription]" },
-            { "name": "--link", "description": "[CommandPlatformLinkDescription]" }
+            {
+                "name": "update <PLAT-SPEC>",
+                "description": "[CommandPlatformUpdateSubcommandDescription]",
+                "options": [
+                    { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+                    { "name": "--save", "description": "[CommandPlatformSaveUpdateDescription]" }
+                ]
+            },
+            { "name": "check", "description": "[CommandPlatformCheckSubcommandDescription]" }
         ],
         "syntax": [
             { "name": "plat-spec", "description": "[CommandPlatformOptPlatSpecDescription]" },
@@ -63,6 +82,44 @@
             { "name": "url", "description": "[CommandPlatformOptUrlDescription]" },
             { "name": "version", "description": "[CommandPlatformOptVersionDescription]" },
             { "name": "branch", "description": "[CommandPlatformOptBranchDescription]" }
+        ],
+        "aliases": [
+            { "alias": "platforms", "command": "platform" },
+            { "alias": "rm", "command": "remove" },
+            { "alias": "ls", "command": "list" }
+        ]
+    },
+    "plugin": {
+        "synopsis": "<synopsis>[COMMAND] [--usegit] [--save] [--link]</synopsis>",
+        "modulePath": "./plugin",
+        "description": "<description>[CommandPluginDescription]</description>",
+        "args": [
+            { "name": "COMMAND", "description": "[CommandPluginSubcommandDescription]" },
+            {
+                "name": "add <PLAT-SPEC>",
+                "description": "[CommandPluginAddSubcommandDescription]",
+                "options": [
+                    { "name": "[--searchpath <DIRECTORY>", "description": "[CommandPluginSearchPathDescription]" },
+                    { "name": "[--noregistry]", "description": "[CommandPluginNoRegistryDescription]" },
+                    { "name": "[--link]", "description": "[CommandPluginLinkDescription]" },
+                    { "name": "[--save]", "description": "[CommandPluginSaveAddDescription]" },
+                    { "name": "[--shrinkwrap]", "description": "[CommandPluginShrinkwrapDescription]" }
+                ]
+            },
+            {
+                "name": "remove <PLUGINID> [...]",
+                "description": "[CommandPluginRemoveSubcommandDescription]",
+                "options": [
+                    { "name": "[--save]", "description": "[CommandPluginSaveRemoveDescription]" }
+                ]
+            },
+            { "name": "list", "description": "[CommandPluginListSubcommandDescription]" },
+            { "name": "search", "description": "[CommandPluginSearchSubcommandDescription]" }
+        ],
+        "aliases": [
+            { "alias": "plugins", "command": "plugin" },
+            { "alias": "rm", "command": "remove" },
+            { "alias": "ls", "command": "list" }
         ]
     },
     "build": {

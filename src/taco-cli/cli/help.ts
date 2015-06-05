@@ -75,15 +75,15 @@ class Help implements commands.IDocumentedCommand {
     public printGeneralUsage(): void {
         Help.printCommandHeader(resources.getString("CommandHelpTacoUsage"));
 
-        var nameValuePairs: INameDescription[] = new Array();
+        var commandDescriptions: ICommandDescription[] = new Array();
         for (var i in this.commandsFactory.listings) {
-            nameValuePairs.push({
+            commandDescriptions.push({
                 name: i,
                 description: this.commandsFactory.listings[i].description
             });
         }
 
-        Help.printCommandTable(nameValuePairs);
+        Help.printCommandTable(commandDescriptions);
     }
 
     /**
@@ -129,21 +129,38 @@ class Help implements commands.IDocumentedCommand {
             logger.log(resources.getString("CommandHelpUsageOptions"));
             Help.printCommandTable(list.options, 2 * LoggerHelper.DefaultIndent, indent2);
         }
+
+        if (list.aliases) {
+            logger.log(resources.getString("CommandHelpUsageAliases"));
+            Help.printAliasTable(list.aliases, 2 * LoggerHelper.DefaultIndent, indent2);
+        }
     }
 
-    private static printCommandTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void {
-        nameValuePairs.forEach(nvp => {
-            nvp.description = Help.getDescriptionString(nvp.description);
+    private static printCommandTable(commandDescriptions: ICommandDescription[], indent1?: number, indent2?: number): void {
+        commandDescriptions.forEach(metadata => {
+            metadata.description = Help.getDescriptionString(metadata.description);
+            if (metadata.options) {
+                metadata.options.forEach(option => {
+                    option.description = Help.getDescriptionString(option.description);
+                });
+            }
         });
-        LoggerHelper.logNameValueTable(nameValuePairs, indent1, indent2);
+        LoggerHelper.logCommandTable(commandDescriptions, indent1, indent2);
     }
 
     private static printCommandHeader(synopsis: string, description?: string): void {
         logger.log(resources.getString("CommandHelpUsageSynopsis"));
         logger.log(util.format("   <synopsis>%s</synopsis><br/>", synopsis));
         if (description) {
-            logger.log(Help.getDescriptionString(description) + "<br/");
+            logger.log(Help.getDescriptionString(description) + "<br/>");
         }
+    }
+
+    private static printAliasTable(commandAliases: ICommandAlias[], indent1: number, indent2: number): void {
+        var leftIndent: string = Array(indent1 + 1).join(" ");
+        commandAliases.forEach(cmdAliasPair => {
+            logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdAliasPair.alias, "->", cmdAliasPair.command));
+        });
     }
 
     /**

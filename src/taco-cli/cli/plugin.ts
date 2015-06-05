@@ -31,7 +31,6 @@ import templateManager = require("./utils/templateManager");
 import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
-import level = logger.Level;
 import tacoProjectHelper = projectHelper.TacoProjectHelper;
 import utils = tacoUtility.UtilHelper;
 

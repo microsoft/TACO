@@ -12,3 +12,12 @@ interface INameDescription {
     name: string;
     description: string;
 }
+
+interface ICommandDescription extends INameDescription {
+    options?: INameDescription[];
+}
+
+interface ICommandAlias {
+    alias: string;
+    command: string;
+}

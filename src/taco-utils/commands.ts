@@ -28,6 +28,15 @@ module TacoUtility {
             description: string;
         }
 
+        export interface ICommandDescription extends INameDescription {
+            options: INameDescription[];
+        }
+
+        export interface ICommandAlias {
+            alias: string;
+            command: string;
+        }
+
         export interface ICommandInfo {
             synopsis: string;
             modulePath: string;
