@@ -32,7 +32,6 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
-import level = logger.Level;
 import UtilHelper = tacoUtility.UtilHelper;
 
 /*
@@ -139,7 +138,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                 promise = promise.then(function (): Q.Promise<any> {
                     return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any): void {
                         // If we can't run the script, then show a warning but continue
-                        logger.logWarnLine(err.toString());
+                        logger.logWarning(err.toString());
                     });
                 });
             }
@@ -158,7 +157,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                     if (commandData.options[configuration]) {
                         var remotePlatformConfig = path.join(remotePlatform, configuration);
                         if (fs.existsSync(remotePlatformConfig)) {
-                            logger.logLine(resources.getString("CleaningRemoteResources", platform.platform, configuration));
+                            logger.log(resources.getString("CleaningRemoteResources", platform.platform, configuration));
                             rimraf.sync(remotePlatformConfig);
                         }
                     }
