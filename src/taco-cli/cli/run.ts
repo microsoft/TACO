@@ -119,7 +119,8 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.loadSettings().then(function (settings: Settings.ISettings): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
-            var buildTarget = commandData.options["target"] || "iphone 5"; // TODO (Devdiv: 1160573): Select an appropriate default for non-iOS platforms, or leave target unspecified and have the server pick a default
+            var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
+            // TODO (Devdiv: 1160573): Select an appropriate default for non-iOS platforms, or leave target unspecified and have the server pick a default
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
