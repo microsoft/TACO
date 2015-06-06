@@ -23,18 +23,20 @@ import request = require ("request");
 import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");
-import installerProtocol = require ("../installerProtocol");
+import installerProtocol = require ("../elevatedInstallerProtocol");
 import installerUtils = require ("../utils/installerUtils");
+import installerUtilsWin32 = require ("../utils/win32/installerUtilsWin32");
 import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
+import ILogger = installerProtocol.ILogger;
 import utils = tacoUtils.UtilHelper;
 
 class JavaJdkInstaller extends InstallerBase {
     private installerFile: string;
 
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, socketHandle: NodeJSNet.Socket) {
-        super(installerInfo, softwareVersion, installTo, socketHandle);
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger) {
+        super(installerInfo, softwareVersion, installTo, logger);
     }
 
     protected downloadWin32(): Q.Promise<any> {
@@ -44,13 +46,22 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
+        var self = this;
+
         // Run installer
         var deferred: Q.Deferred<any> = Q.defer<any>();
+
         var commandLine: string = this.installerFile + " /quiet /norestart /lvx %temp%/javajdk7.0.550.13.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
 
-        childProcess.exec(commandLine, function (error: Error): void {
-            if (error) {
-                deferred.reject(error);
+        childProcess.exec(commandLine, function (err: Error): void {
+            if (err) {
+                var code: number = (<any>err).code;
+
+                if (code) {
+                    deferred.reject(new Error(resources.getString("InstallerError", self.installerFile, code)));
+                } else {
+                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerFile, err.name)));
+                }
             } else {
                 deferred.resolve({});
             }
@@ -65,15 +76,15 @@ class JavaJdkInstaller extends InstallerBase {
         var javaHomeValue: string = this.installDestination;
         var addToPath: string = path.join(javaHomeValue, "bin");
 
-        return installerUtils.setEnvironmentVariableIfNeededWin32(javaHomeName, javaHomeValue, this.socketHandle)
+        return installerUtilsWin32.setEnvironmentVariableIfNeededWin32(javaHomeName, javaHomeValue, this.logger)
             .then(function (): Q.Promise<any> {
-                return installerUtils.addToPathIfNeededWin32(addToPath);
+                return installerUtilsWin32.addToPathIfNeededWin32([addToPath]);
             });
     }
 
     private downloadDefault(): Q.Promise<any> {
         // Prepare expected installer file properties
-        var expectedProperties: installerUtils.IExpectedProperties = {
+        var expectedProperties: installerUtils.IFileSignature = {
             bytes: this.installerInfo.bytes,
             sha1: this.installerInfo.sha1
         };

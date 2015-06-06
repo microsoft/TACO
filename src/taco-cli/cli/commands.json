@@ -80,9 +80,9 @@
         "description": "<description>[CommandVersionDescription]</description>"
     },
     "install-reqs": {
-        "synopsis": "[PLATFORM_1] [PLATFORM_2] ...",
+        "synopsis": "<synopsis>[PLATFORM_1] [PLATFORM_2] ...</synopsis>",
         "modulePath": "./installReqs",
-        "description": "[CommandInstallReqsDescription]",
+        "description": "<description>[CommandInstallReqsDescription]</description>",
         "options": [
             { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
         ]

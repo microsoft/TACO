@@ -31,12 +31,13 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CordovaNpmPackageName: string = "cordova";
+    private static CordovaRequirementsMinVersion: string = "5.1.0";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<any> {
         var deferred = Q.defer();
         var output: string = "";
         var errorOutput: string = "";
-        var options: child_process.IExecOptions = captureOutput ? {} : { stdio: "inherit" };
+        var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
         var proc = child_process.spawn(CordovaWrapper.CordovaCommandName, args, options);
 
         proc.on("error", function (err: any): void {  
@@ -89,13 +90,11 @@ class CordovaWrapper {
     }
 
     public static requirements(platforms: string[]): Q.Promise<string> {
-        var minCordovaVersion: string = "5.1.0";
-
         // First check the cordova version, because we want to fail gracefully if the user's cordova is too old for the 'cordova requirements' command
-        // TODO (DevDiv: 1170232) Use the project's CLI version if available, fall back to global install if not
+        // TODO (DevDiv 1170232): Use the project's CLI version if available, fall back to global install if not
         return CordovaWrapper.cli(["-v"], true)
             .then(function (version: string): Q.Promise<any> {
-                if (!semver.gte(version, minCordovaVersion)) {
+                if (!semver.gte(version, CordovaWrapper.CordovaRequirementsMinVersion)) {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld));
                 }
 

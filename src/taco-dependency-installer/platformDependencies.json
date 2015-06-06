@@ -1,6 +1,7 @@
 ﻿{
     "androidSdk": {
         "displayName": "Android SDK",
+        "installerPath": "./installers/androidSdkInstaller",
         "licenseUrl": "https://developer.android.com/sdk/terms.html",
         "prerequisites": [
             "java"
@@ -19,26 +20,12 @@
     "androidTarget": {
         "isImplicit": true
     },
-    "ant": {
-        "displayName": "Apache Ant",
-        "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
-        "prerequisites": [],
-        "versions": {
-            "1.9.3": {
-                "win32": {
-                    "installSource": "https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.3-bin.zip",
-                    "sha1": "ae5d0b236ddeb8646db92dd33524e724d4e5d499",
-                    "bytes": 8264969,
-                    "installDestination": "%programfiles(x86)%/ant"
-                }
-            }
-        }
-    },
     "gradle": {
         "isImplicit":  true
     },
     "java": {
         "displayName": "Java SE Development Kit",
+        "installerPath": "./installers/javaJdkInstaller",
         "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
         "prerequisites": [],
         "versions": {

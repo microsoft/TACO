@@ -9,6 +9,7 @@
 /// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/sanitize-filename.d.ts" />
+/// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
 
@@ -21,7 +22,7 @@ import sanitizeFilename = require ("sanitize-filename");
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import InstallerBase = require ("./installers/installerBase");
 import installerUtils = require ("./utils/installerUtils");
-import protocol = require ("./installerProtocol");
+import protocol = require ("./elevatedInstallerProtocol");
 import resources = require ("./resources/resourceManager");
 
 import installerDataType = protocol.DataType;
@@ -31,20 +32,51 @@ interface IDependencyWrapper {
     installer: InstallerBase;
 }
 
-class ElevatedInstaller {
-    // Map the dependency ids to their installer class path
-    private static InstallerMap: { [dependencyId: string]: string } = {
-        androidSdk: "./installers/androidSdkInstaller",
-        ant: "./installers/antInstaller",
-        java: "./installers/javaJdkInstaller"
-    };
+// Internal class for an ILogger specifically designed for the communication between the elevatedInstaller and the dependencyInstaller
+class InstallerLogger implements protocol.ILogger {
+    private socketHandle: NodeJSNet.Socket;
 
+    constructor(socket: NodeJSNet.Socket) {
+        this.socketHandle = socket;
+    }
+
+    public log(message: string): void {
+        installerUtils.sendData(this.socketHandle, message);
+    }
+
+    public logWarning(message: string): void {
+        installerUtils.sendData(this.socketHandle, message, installerDataType.Warning);
+    }
+
+    public logError(message: string): void {
+        installerUtils.sendData(this.socketHandle, message, installerDataType.Error);
+    }
+
+    public promptForEnvVariableOverwrite(name: string): Q.Promise<any> {
+        return installerUtils.promptForEnvVariableOverwrite(name, this.socketHandle);
+    }
+}
+
+/*
+ * Takes care of installing the missing third-party dependencies on the user's system. This file should be executed inside a separate process that has administrator privileges. DependencyInstaller.ts
+ * is responsible for starting that elevated process.
+ * 
+ * This script starts by parsing the installation configuration file that DependencyInstaller created in taco_home. The file contains information on what dependencies need to be installed. After
+ * parsing and validating the content, specialized installers that know how to handle specific dependencies are instantiated. The user is then presented with a summary of what is about to be
+ * installed, and is prompted for confirmation. The specialized installers are then run in order of prerequisites (for example, java needs to be installed before Android SDK). Finally, this process
+ * exits with the proper exit code (exit codes are defined in ElevatedInstallerProtocol).
+ *
+ * Because this is a separate process, and because it is not possible to intercept the stdio of an elevated process from a non-elevated one, the communication between this and DependencyInstaller is
+ * made via a local socket that this script connects to and that DependencyInstaller listens to.
+ */
+class ElevatedInstaller {    
     private dependenciesDataWrapper: DependencyDataWrapper;
     private missingDependencies: IDependencyWrapper[];
     private errorFlag: boolean;
     private socketPath: string;
     private socketHandle: NodeJSNet.Socket;
     private configFile: string;
+    private logger: protocol.ILogger;
 
     constructor() {
         this.errorFlag = false;
@@ -58,6 +90,7 @@ class ElevatedInstaller {
 
         this.connectToServer()
             .then(function (): void {
+                self.logger = new InstallerLogger(self.socketHandle);
                 self.parseInstallConfig();
             })
             .catch(function (err: Error): void {
@@ -125,20 +158,21 @@ class ElevatedInstaller {
             }
 
             // Verify the path is valid
-            path.resolve(value.installDestination).split(path.sep).forEach(function (dirName: string, index: number): void {
-                var shouldThrow: boolean = false;
+            var resolvedPath: string = path.resolve(value.installDestination);
+            var root: string = (<any>path).parse(resolvedPath).root;
 
-                if (index === 0 && /^[a-zA-Z]:$/.test(dirName)) {
-                    // If the first segment is a drive letter, verify that the drive exists
-                    if (!fs.existsSync(dirName)) {
-                        shouldThrow = true;
-                    }
-                } else if (sanitizeFilename(dirName) !== dirName) {
-                    // The current path segment is not a valid directory name
-                    shouldThrow = true;
+            if (root && !fs.existsSync(root)) {
+                throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
+            }
+
+            resolvedPath.split(path.sep).forEach(function (dirName: string, index: number): void {
+                // Don't test the very first segment if we had a root
+                if (index === 0 && root) {
+                    return;
                 }
 
-                if (shouldThrow) {
+                if (sanitizeFilename(dirName) !== dirName) {
+                    // The current path segment is not a valid directory name
                     throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
                 }
             });
@@ -182,11 +216,12 @@ class ElevatedInstaller {
         });
     }
 
-    private instantiateInstaller(dependency: DependencyInstallerInterfaces.IDependency): any {
+    private instantiateInstaller(dependency: DependencyInstallerInterfaces.IDependency): InstallerBase {
         var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = this.dependenciesDataWrapper.getInstallerInfo(dependency.id, dependency.version);
-        var installerConstructor: any = require(ElevatedInstaller.InstallerMap[dependency.id]);
+        var installerRequirePath: string = path.join(__dirname, this.dependenciesDataWrapper.getInstallerPath(dependency.id));
+        var installerConstructor: any = require(installerRequirePath);
 
-        return new installerConstructor(installerInfoToUse, dependency.version, dependency.installDestination, this.socketHandle);
+        return new installerConstructor(installerInfoToUse, dependency.version, dependency.installDestination, this.logger);
     }
 
     private runInstallers(): Q.Promise<any> {
@@ -205,7 +240,7 @@ class ElevatedInstaller {
 
     private errorHandler(err: Error): void {
         this.errorFlag = true;
-        installerUtils.sendData(this.socketHandle, "<error" + err.message + "</error>");
+        installerUtils.sendData(this.socketHandle, "<error>" + err.message + "</error>");
     }
 
     private exitProcess(): void {

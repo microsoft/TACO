@@ -24,6 +24,7 @@ declare module DependencyInstallerInterfaces {
 
     export interface IDependencyData {
         displayName?: string;
+        installerPath?: string;
         isImplicit?: boolean;
         licenseUrl?: string;
         prerequisites?: string[];

@@ -46,6 +46,17 @@ class DependencyDataWrapper {
     }
 
     /*
+     * Returns the path to the specialized installer class of the specified dependency, or null if the dependency doesn't exist.
+     */
+    public getInstallerPath(id: string): string {
+        if (this.dependenciesData[id]) {
+            return this.dependenciesData[id].installerPath;
+        }
+
+        return null;
+    }
+
+    /*
      * Returns the license url for the specified dependency. Will return null if the info is missing in our metadata or if the dependency does not exist.
      */
     public getLicenseUrl(id: string): string {

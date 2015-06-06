@@ -31,5 +31,10 @@ declare module TacoUtility {
          * @param {number} indent2 position at which value should start, if not specified default value (25) is used
          */
         public static logNameValue(name: string, value: string, indent1?: number, indent2?: number): void;
+
+        /**
+         * Logs a separator line in the form of "==============...", with a line break before and after
+         */
+        public static logSeparator(): void;
     }
 }

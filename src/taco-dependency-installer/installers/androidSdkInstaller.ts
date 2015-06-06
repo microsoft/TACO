@@ -19,61 +19,26 @@
 import admZip = require ("adm-zip");
 import childProcess = require ("child_process");
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
 import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");
-import installerProtocol = require ("../installerProtocol");
+import installerProtocol = require ("../elevatedInstallerProtocol");
 import installerUtils = require ("../utils/installerUtils");
+import installerUtilsWin32 = require ("../utils/win32/installerUtilsWin32");
 import resources = require ("../resources/resourceManager");
 
-import installerDataType = installerProtocol.DataType;
+import ILogger = installerProtocol.ILogger;
 
 class AndroidSdkInstaller extends InstallerBase {
     private installerArchive: string;
+    private androidHomeValue: string;
 
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, socketHandle: NodeJSNet.Socket) {
-        super(installerInfo, softwareVersion, installTo, socketHandle);
-    }
-
-    // Override runWin32() method because we need a post-install configuration step
-    protected runWin32(): Q.Promise<any> {
-        // Log progress
-        installerUtils.sendData(this.socketHandle, resources.getString("DownloadingLabel"));
-
-        var self = this;
-
-        return this.downloadWin32()
-            .then(function (): void {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("InstallingLabel"));
-            })
-            .then(function (): Q.Promise<any> {
-                return self.installWin32();
-            })
-            .then(function (): void {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("SettingSystemVariablesLabel"));
-            })
-            .then(function (): Q.Promise<any> {
-                return self.updateVariablesWin32();
-            })
-            .then(function (androidHomeValue: string): string {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("ConfiguringLabel"));
-
-                // Return android home for the post-install setup
-                return androidHomeValue;
-            })
-            .then(function (androidHomeValue: string): Q.Promise<any> {
-                return self.postInstallSetup(androidHomeValue);
-            })
-            .then(function (): void {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("Success"));
-            });
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger) {
+        super(installerInfo, softwareVersion, installTo, logger);
     }
 
     protected downloadWin32(): Q.Promise<any> {
@@ -93,53 +58,21 @@ class AndroidSdkInstaller extends InstallerBase {
         var addToPathTools: string = path.join(androidHomeValue, "tools");
         var addToPathPlatformTools: string = path.join(androidHomeValue, "platform-tools");
 
-        return installerUtils.setEnvironmentVariableIfNeededWin32(androidHomeName, androidHomeValue, this.socketHandle)
+        this.androidHomeValue = androidHomeValue;
+
+        return installerUtilsWin32.setEnvironmentVariableIfNeededWin32(androidHomeName, androidHomeValue, this.logger)
             .then(function (): Q.Promise<any> {
-                return installerUtils.addToPathIfNeededWin32(addToPathTools);
-            })
-            .then(function (): Q.Promise<any> {
-                return installerUtils.addToPathIfNeededWin32(addToPathPlatformTools);
-            })
-            .then(function (): Q.Promise<string> {
-                // Because there is a post-install configuration step, we need to resolve this promise chain with the android home location
-                return Q.resolve(androidHomeValue);
+                return installerUtilsWin32.addToPathIfNeededWin32([addToPathTools, addToPathPlatformTools]);
             });
     }
 
-    private downloadDefault(): Q.Promise<any> {
-        // Prepare expected archive file properties
-        var expectedProperties: installerUtils.IExpectedProperties = {
-            bytes: this.installerInfo.bytes,
-            sha1: this.installerInfo.sha1
-        };
+    protected postInstall(): Q.Promise<any> {
+        // For post-install step we have to do the progress logging manually
+        this.logger.log(resources.getString("ConfiguringLabel"));
 
-        // Prepare download options
-        var options: request.Options = {
-            uri: this.installerInfo.installSource,
-            method: "GET",
-        };
-
-        // Download the archive
-        return installerUtils.downloadFile(options, this.installerArchive, expectedProperties);
-    }
-
-    private installDefault(): Q.Promise<any> {
-        // Extract the archive
-        var templateZip = new admZip(this.installerArchive);
-
-        if (!fs.existsSync(this.installDestination)) {
-            wrench.mkdirSyncRecursive(this.installDestination, 511); // 511 decimal is 0777 octal
-        }
-
-        templateZip.extractAllTo(this.installDestination);
-
-        return Q.resolve({});
-    }
-
-    private postInstallSetup(androidHome: string): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = path.join(androidHome, "tools", "android.bat");
+        var command: string = path.join(this.androidHomeValue, "tools", "android.bat");
         var androidPackages: string[] = [
             "tools",
             "platform-tools",
@@ -172,7 +105,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
             if (/\[y\/n\]:/.test(stringData)) {
                 // Accept license terms
-                cp.stdin.write("y\n");
+                cp.stdin.write("y" + os.EOL);
             }
         });
         cp.stderr.on("data", function (data: Buffer): void {
@@ -190,6 +123,36 @@ class AndroidSdkInstaller extends InstallerBase {
         });
 
         return deferred.promise;
+    }
+
+    private downloadDefault(): Q.Promise<any> {
+        // Prepare expected archive file properties
+        var expectedProperties: installerUtils.IFileSignature = {
+            bytes: this.installerInfo.bytes,
+            sha1: this.installerInfo.sha1
+        };
+
+        // Prepare download options
+        var options: request.Options = {
+            uri: this.installerInfo.installSource,
+            method: "GET",
+        };
+
+        // Download the archive
+        return installerUtils.downloadFile(options, this.installerArchive, expectedProperties);
+    }
+
+    private installDefault(): Q.Promise<any> {
+        // Extract the archive
+        var templateZip = new admZip(this.installerArchive);
+
+        if (!fs.existsSync(this.installDestination)) {
+            wrench.mkdirSyncRecursive(this.installDestination, 511); // 511 decimal is 0777 octal
+        }
+
+        templateZip.extractAllTo(this.installDestination);
+
+        return Q.resolve({});
     }
 }
 

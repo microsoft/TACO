@@ -181,7 +181,7 @@
     "_CommandVersionDescription.comment":  "Description of the -v/--v/--version arguments to taco",
 
     "CommandInstallReqsDescription": "Install platform-specific third-party dependencies",
-    "_CommandInstallReqsDescription.comment": "Description for 'taco install-dependencies'",
+    "_CommandInstallReqsDescription.comment": "Description for 'taco install-reqs'",
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option(s) of 'taco install-reqs'",
 

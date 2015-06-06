@@ -16,23 +16,26 @@
 import childProcess = require ("child_process");
 import fs = require ("fs");
 import net = require ("net");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import toposort = require ("toposort");
 import wrench = require ("wrench");
 
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
-import installerProtocol = require ("./installerProtocol");
+import installerProtocol = require ("./elevatedInstallerProtocol");
 import installerUtils = require ("./utils/installerUtils");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
+import util = require ("util");
 
 import installerDataType = installerProtocol.DataType;
 import installerExitCode = installerProtocol.ExitCode;
 import IDependency = DependencyInstallerInterfaces.IDependency;
 import logger = tacoUtils.Logger;
+import loggerHelper = tacoUtils.LoggerHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utilHelper = tacoUtils.UtilHelper;
 
@@ -107,10 +110,9 @@ module TacoDependencyInstaller {
         private parseMissingDependencies(cordovaChecksResult: any): void {
             // Extract dependency IDs from Cordova results. Depending on whether we were able to require() Cordova or not, this result can be either an array of ICordovaRequirement objects, or a string
             // representing the raw output of invoking 'cordova requirements'.
-            var isArray: boolean = Object.prototype.toString.call(cordovaChecksResult) === "[object Array]";
             var dependencyIds: ICordovaRequirement[];
 
-            if (isArray) {
+            if (util.isArray(cordovaChecksResult)) {
                 dependencyIds = (<ICordovaRequirement[]>cordovaChecksResult).filter(function (value: ICordovaRequirement): boolean {
                     // We only keep requirements that are not installed
                     return !value.installed;
@@ -133,7 +135,17 @@ module TacoDependencyInstaller {
                     // this dependency installer.
                     if (!self.dependenciesDataWrapper.isImplicit(value.id)) {
                         var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.getFirstValidVersion(value.id);
-                        var installPath: string = path.resolve(installerUtils.expandPath(self.dependenciesDataWrapper.getInstallDirectory(value.id, versionToUse)));
+                        var installPath: string = self.dependenciesDataWrapper.getInstallDirectory(value.id, versionToUse);
+
+                        // Handle %programfiles(x86)% for Windows 32-bit architecture
+                        if (os.platform() === "win32" && os.arch() === "ia32") {
+                            installPath = installPath.replace(/%programfiles\(x86\)%/g, function (substring: string): string {
+                                return "%programfiles%";
+                            });
+                        }
+
+                        installPath = path.resolve(utilHelper.expandEnvironmentVariables(installPath));
+
                         var dependencyInfo: IDependency = {
                             id: value.id,
                             version: versionToUse,
@@ -262,12 +274,12 @@ module TacoDependencyInstaller {
                 var prerequisites: string[] = self.dependenciesDataWrapper.getPrerequisites(dependency.id);
 
                 prerequisites.forEach(function (prereq: string): void {
-                    // Only create an edge if prereq is the list of missing dependencies
-                    var mustCreateEdge: boolean = self.missingDependencies.some(function (dep: IDependency): boolean {
+                    // Only create an edge if prereq is in the list of missing dependencies
+                    var isPrereqMissing: boolean = self.missingDependencies.some(function (dep: IDependency): boolean {
                         return dep.id === prereq;
                     });
 
-                    if (mustCreateEdge) {
+                    if (isPrereqMissing) {
                         edges.push([dependency.id, prereq]);
                     }
                 });
@@ -303,7 +315,7 @@ module TacoDependencyInstaller {
                 return !!value.licenseUrl;
             });
 
-            logger.log(resources.getString("Separator"));
+            loggerHelper.logSeparator();
             logger.log(resources.getString("InstallingDependenciesHeader"));
             this.missingDependencies.forEach(function (value: IDependency): void {
                 logger.log(resources.getString("DependencyLabel", value.displayName));
@@ -315,19 +327,19 @@ module TacoDependencyInstaller {
                 }
             });
 
-            logger.log(resources.getString("Separator"));
+            loggerHelper.logSeparator();
             logger.log(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
 
             if (needsLicenseAgreement) {
                 logger.log(resources.getString("LicenseAgreement"));
             }
 
-            logger.log(resources.getString("Proceed"));
+            logger.log(resources.getString("InstallationProceedQuestion"));
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
                     if (answer === resources.getString("YesString")) {
-                        logger.log(resources.getString("Separator"));
+                        loggerHelper.logSeparator();
 
                         return Q.resolve({});
                     } else {
@@ -342,7 +354,7 @@ module TacoDependencyInstaller {
                     fs.unlinkSync(DependencyInstaller.InstallConfigFile);
                 }
             } catch (err) {
-                errorHelper.get(TacoErrorCodes.ErrorDeletingInstallConfig, DependencyInstaller.InstallConfigFile);
+                throw errorHelper.get(TacoErrorCodes.ErrorDeletingInstallConfig, DependencyInstaller.InstallConfigFile);
             }
 
             try {
@@ -355,7 +367,7 @@ module TacoDependencyInstaller {
                 wrench.mkdirSyncRecursive(DependencyInstaller.InstallConfigFolder, 511); // 511 decimal is 0777 octal
                 fs.writeFileSync(DependencyInstaller.InstallConfigFile, JSON.stringify(jsonWrapper, null, 4));
             } catch (err) {
-                errorHelper.get(TacoErrorCodes.ErrorCreatingInstallConfig, DependencyInstaller.InstallConfigFile);
+                throw errorHelper.get(TacoErrorCodes.ErrorCreatingInstallConfig, DependencyInstaller.InstallConfigFile);
             }
         }
 
@@ -370,20 +382,26 @@ module TacoDependencyInstaller {
                     // are short enough that this works, but if messages ever start becoming bigger, we may end up in a situation where the last message is truncated an sent
                     // in 2 different "data" events. If this ever happens, we will need to modify this event handler logic to wait until we have received an outer closing
                     // curly brace before processing a message.
-                    var dataArray: string[] = data.toString().split("\n");
+                    var dataArray: string[] = data.toString().split(os.EOL);
 
                     dataArray.forEach(function (value: string): void {
                         if (!value) {
                             return;
                         }
 
-                        var parsedData: installerProtocol.IData = JSON.parse(value);
+                        var parsedData: installerProtocol.IElevatedInstallerMessage = JSON.parse(value);
 
                         switch (parsedData.dataType) {
                             case installerDataType.Prompt:
                                 self.promptUser(parsedData.message);
                                 break;
-                            default:
+                            case installerDataType.Error:
+                                logger.logError(parsedData.message);
+                                break;
+                            case installerDataType.Warning:
+                                logger.logWarning(parsedData.message);
+                                break;
+                            case installerDataType.Log:
                                 logger.log(parsedData.message);
                         }
                     });
@@ -455,7 +473,7 @@ module TacoDependencyInstaller {
         }
 
         private printSummaryLine(code: number): void {
-            logger.log(resources.getString("Separator"));
+            loggerHelper.logSeparator();
 
             switch (code) {
                 case installerExitCode.CompletedWithErrors:

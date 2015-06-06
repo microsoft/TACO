@@ -73,5 +73,14 @@ declare module TacoUtility {
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
         public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): void;
+        /*
+         * Returns a string where the %...% notations in the provided string have been replaced with their actual values. For example, calling this with "%programfiles%\foo"
+         * would return "C:\Program Files\foo" (on most systems). Values that don't exist are not replaced.
+         *
+         * @param {string} str The string for which to expand environment variables
+         *
+         * @return {string} A new string where the environment variables were replaced with their actual value
+         */
+        public static expandEnvironmentVariables(str: string): string;
     }
 }

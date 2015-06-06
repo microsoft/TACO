@@ -175,11 +175,6 @@ module TacoUtility {
          * @returns {string} Either the input string unchanged, or the input string surrounded by double quotes and with any initial double quotes escaped
          */
         public static quotesAroundIfNecessary(input: string): string {
-            if (input.indexOf("\"") === 0 && input.lastIndexOf("\"") === input.length - 1) {
-                // String is already quoted, don't do anything
-                return input;
-            }
-
             return (input.indexOf(" ") > -1) ? "\"" + input.replace(/"/g, "\\\"") + "\"" : input;
         }
 
@@ -195,6 +190,25 @@ module TacoUtility {
                 }
 
                 callback(error, stdout, stderr);
+            });
+        }
+
+        /*
+         * Returns a string where the %...% notations in the provided string have been replaced with their actual values. For example, calling this with "%programfiles%\foo"
+         * would return "C:\Program Files\foo" (on most systems). Values that don't exist are not replaced.
+         *
+         * @param {string} str The string for which to expand environment variables
+         *
+         * @return {string} A new string where the environment variables were replaced with their actual value
+         */
+        public static expandEnvironmentVariables(str: string): string {
+            return str.replace(/%(.+?)%/g, function (substring: string, ...args: any[]): string {
+                if (process.env[args[0]]) {
+                    return process.env[args[0]];
+                } else {
+                    // This is not an environment variable, can't replace it so leave it as is
+                    return "%" + args[0] + "%";
+                }
             });
         }
     }

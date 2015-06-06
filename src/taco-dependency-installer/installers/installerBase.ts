@@ -19,14 +19,14 @@ import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
 
-import installerProtocol = require ("../installerProtocol");
+import installerProtocol = require ("../elevatedInstallerProtocol");
 import installerUtils = require ("../utils/installerUtils");
 import resources = require ("../resources/resourceManager");
 import tacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
-import installerDataType = installerProtocol.DataType;
+import ILogger = installerProtocol.ILogger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 class InstallerBase {
@@ -35,13 +35,13 @@ class InstallerBase {
     protected installerInfo: DependencyInstallerInterfaces.IInstallerData;
     protected softwareVersion: string;
     protected installDestination: string;
-    protected socketHandle: NodeJSNet.Socket;
+    protected logger: ILogger;
 
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, socketHandle: NodeJSNet.Socket) {
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger) {
         this.installerInfo = installerInfo;
         this.softwareVersion = softwareVersion;
         this.installDestination = installTo;
-        this.socketHandle = socketHandle;
+        this.logger = logger;
     }
 
     public run(): Q.Promise<any> {
@@ -58,27 +58,31 @@ class InstallerBase {
         var self = this;
 
         // Log progress
-        installerUtils.sendData(this.socketHandle, resources.getString("DownloadingLabel"));
+        this.logger.log(resources.getString("DownloadingLabel"));
 
         return this.downloadWin32()
-            .then(function (): void {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("InstallingLabel"));
-            })
             .then(function (): Q.Promise<any> {
+                self.logger.log(resources.getString("InstallingLabel"));
+
                 return self.installWin32();
             })
-            .then(function (): void {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("SettingSystemVariablesLabel"));
-            })
             .then(function (): Q.Promise<any> {
+                self.logger.log(resources.getString("SettingSystemVariablesLabel"));
+
                 return self.updateVariablesWin32();
             })
+            .then(function (): Q.Promise<any> {
+                // For now, there is no need to have a different post-install step for each platform
+                return self.postInstall();
+            })
             .then(function (): void {
-                // Log progress
-                installerUtils.sendData(self.socketHandle, resources.getString("Success"));
+                self.logger.log(resources.getString("Success"));
             });
+    }
+
+    protected postInstall(): Q.Promise<any> {
+        // Default behavior is no-op
+        return Q.resolve({});
     }
 
     protected downloadWin32(): Q.Promise<any> {
