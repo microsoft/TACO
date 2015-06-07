@@ -39,6 +39,6 @@
     "_PackageLoaderNpmUpdateFailedEaccess.comment": "Message reported when npm update fails due to permissions",
     "InnerErrorToString": "Inner Error:\n{0}",
     "_InnerErrorToString.comment": "token prefix to an inner error",
-    "PackageLoaderDownloadCompletedMessage": "<success>Success!</<success> {0} downloaded and installed.",
+    "PackageLoaderDownloadCompletedMessage": "<success>Success!</success> {0} downloaded and installed.",
     "_PackageLoaderDownloadCompletedMessage.comment": "Message reporting the success of package download and install."
 }
