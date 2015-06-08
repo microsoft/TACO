@@ -13,6 +13,9 @@ import path = require ("path");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
+import tacoUtility = require ("taco-utils");
+
+import commands = tacoUtility.Commands;
 
 module CordovaHelper {
     /* 
@@ -44,6 +47,36 @@ module CordovaHelper {
 }
 
 class CordovaHelper {
+    // Cordova's known parameters
+    private static booleanParameters =
+    {
+        'verbose': Boolean
+        , 'version': Boolean
+        , 'help': Boolean
+        , 'silent': Boolean
+        , 'experimental': Boolean
+        , 'noregistry': Boolean
+        , 'shrinkwrap': Boolean
+        , 'usegit': Boolean
+        , 'link': Boolean
+        , 'debug': Boolean
+        , 'release': Boolean
+        , 'device': Boolean
+        , 'emulator': Boolean
+        , 'browserify': Boolean
+        , 'nobuild': Boolean
+        , 'list': Boolean
+    };
+    private static valueParameters =
+    {
+        'copy-from': String
+        , 'link-to': path
+        , 'searchpath': String
+        , 'variable': Array
+        , 'archs': String
+        , 'target': String
+    };
+
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
      */
@@ -109,6 +142,72 @@ class CordovaHelper {
         }
 
         parameters.cordovaConfig = config;
+    }
+
+    /**
+     * Given a command line to Taco, construct a command line for Cordova with the same specified parameters
+     * Note that this assumes that all arguments after a "--" are not for this command, but something else and so should be passed on.
+     * With a command like "taco build --debug --remote -- ios android" this assumption isn't quite true
+     */
+    public static marshallCordovaCliArguments(commandData: commands.ICommandData): string[] {
+        var cordovaArgs: string[] = [];
+        Object.keys(CordovaHelper.booleanParameters).forEach(function (key: string): void {
+            if (commandData.options[key]) {
+                cordovaArgs.push("--" + key);
+            }
+        });
+        Object.keys(CordovaHelper.valueParameters).forEach(function (key: string): void {
+            if(commandData.options[key]) {
+                cordovaArgs.push("--" + key);
+                cordovaArgs.push(commandData.options[key]);
+            }
+        });
+
+        // Append all arguments after and including a lone "--"
+        return cordovaArgs.concat(commandData.original.slice(commandData.original.indexOf("--")));
+    }
+
+    /**
+     * Construct the options for programatically calling emulate, build, parepare, compile, or run via cordova.raw.X
+     */
+    public static mashallCordovaRawArguments(platform: string, commandData: commands.ICommandData): Cordova.ICordovaRawOptions {
+        var opts: Cordova.ICordovaRawOptions = {
+            platforms: [platform],
+            options: [],
+            verbose: commandData.options["verbose"],
+            silent: commandData.options["silent"],
+            browserify: commandData.options["browserify"]
+        }
+
+        // Reconstruct the args to be passed along to platform scripts.
+        // This is an ugly temporary fix. The code spawning or otherwise
+        // calling into platform code should be dealing with this based
+        // on the parsed args object.
+        var downstreamArgs: string[] = [];
+        var argNames =
+            ['debug'
+            , 'release'
+            , 'device'
+            , 'emulator'
+            , 'nobuild'
+            , 'list'
+            ];
+        argNames.forEach(function (flag) {
+            if (commandData.options[flag]) {
+                downstreamArgs.push('--' + flag);
+            }
+        });
+
+        if (commandData.options["target"]) {
+            downstreamArgs.push('--target=' + commandData.options["target"]);
+        }
+        if (commandData.options["archs"]) {
+            downstreamArgs.push('--archs=' + commandData.options["archs"]);
+        }
+        // Include all arguments after, but not including, a lone "--"
+        opts.options = downstreamArgs.concat(commandData.original.slice(commandData.original.indexOf("--") + 1));
+
+        return opts;
     }
 }
 

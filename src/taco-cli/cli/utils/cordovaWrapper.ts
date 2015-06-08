@@ -19,13 +19,16 @@ import Q = require ("q");
 import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
+import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
-import packageLoader = tacoUtility.TacoPackageLoader;
 import commands = tacoUtility.Commands;
+import packageLoader = tacoUtility.TacoPackageLoader;
+import tacoProjectHelper = projectHelper.TacoProjectHelper;
+
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
@@ -52,48 +55,29 @@ class CordovaWrapper {
     }
 
     public static build(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
-        var additionalArguments = [];
-        if (commandData.options["target"]) {
-            additionalArguments.push("--target");
-            additionalArguments.push(commandData.options["target"]);
-        }
-        if (commandData.options["device"]) {
-            additionalArguments.push("--device");
-        }
-        if (commandData.options["emulator"]) {
-            additionalArguments.push("--emulator");
-        }
-        if (commandData.options["debug"]) {
-            additionalArguments.push("--debug");
-        }
-        if (commandData.options["release"]) {
-            additionalArguments.push("--release");
-        }
-        return CordovaWrapper.cli(["build", platform].concat(additionalArguments));
+        return tacoProjectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                        return cordova.raw.build(cordovaHelper.mashallCordovaRawArguments(platform, commandData));
+                });
+            } else {
+                return CordovaWrapper.cli(["build", platform].concat(cordovaHelper.marshallCordovaCliArguments(commandData)));
+            }
+        });
     }
 
     public static run(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
-        var additionalArguments = [];
-        if (commandData.options["target"]) {
-            additionalArguments.push("--target");
-            additionalArguments.push(commandData.options["target"]);
-        }
-        if (commandData.options["device"]) {
-            additionalArguments.push("--device");
-        }
-        if (commandData.options["emulator"]) {
-            additionalArguments.push("--emulator");
-        }
-        if (commandData.options["debug"]) {
-            additionalArguments.push("--debug");
-        }
-        if (commandData.options["release"]) {
-            additionalArguments.push("--release");
-        }
-        if (commandData.options["nobuild"]) {
-            additionalArguments.push("--nobuild");
-        }
-        return CordovaWrapper.cli(["run", platform].concat(additionalArguments));
+        return tacoProjectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    return cordova.raw.run(cordovaHelper.mashallCordovaRawArguments(platform, commandData));
+                });
+            } else {
+                return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.marshallCordovaCliArguments(commandData)));
+            }
+        });
     }
 
     /**
