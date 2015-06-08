@@ -46,7 +46,7 @@ class Taco { /*
         Taco.executeCommand(parsedArgs).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason && reason.isTacoError) {
-                tacoUtility.Logger.logErrorLine((<tacoUtility.TacoError>reason).toString());
+                tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
             } else {
                 throw reason;
             }

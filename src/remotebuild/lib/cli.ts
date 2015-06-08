@@ -95,7 +95,7 @@ class CliHelper {
                 return task.execute(remotebuildConf);
             }).done();
         } else {
-            Logger.logErrorLine(resources.getString("UnknownCommand", command));
+            Logger.logError(resources.getString("UnknownCommand", command));
             CliHelper.printHelp(remotebuildConf);
             process.exit(1);
         }
@@ -110,10 +110,10 @@ class CliHelper {
                     mod.printHelp(conf, moduleConfig);
                     return;
                 } catch (e) {
-                    Logger.logErrorLine(resources.getString("UnableToFindModule", topic));
+                    Logger.logError(resources.getString("UnableToFindModule", topic));
                 }
             } else {
-                Logger.logErrorLine(resources.getString("UnableToFindModule", topic));
+                Logger.logError(resources.getString("UnableToFindModule", topic));
             }
         }
 

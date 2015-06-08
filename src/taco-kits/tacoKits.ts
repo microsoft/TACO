@@ -29,21 +29,25 @@ module TacoKits {
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
     }
 
+    export interface IPluginOverrideInfo {
+        name?: string;
+        version?: string;
+        src?: string;
+        platforms?: string;
+    }
+
+    export interface IPlatformOverrideInfo {
+        version: string;
+        src?: string;
+    }
+
     // Metadata-related interfaces
     export interface IPluginOverrideMetadata {
-        [pluginId: string]: {
-            name?: string;
-            version?: string;
-            src?: string;
-            platforms?: string;
-        };
+        [pluginId: string]: IPluginOverrideInfo;
     }
 
     export interface IPlatformOverrideMetadata {
-        [platformName: string]: {
-            version: string;
-            src: string;
-        };
+        [platformName: string]: IPlatformOverrideInfo;
     }
 
     export interface ITemplateOverrideInfo {
@@ -68,6 +72,10 @@ module TacoKits {
         [kitId: string]: {
             [templateId: string]: ITemplateInfo;
         }
+    }
+
+    export interface ILocalizableString {
+        [lang: string]: string;
     }
 
     export interface IKitInfo {
@@ -111,6 +119,7 @@ module TacoKits {
         private static TsTemplateId: string = "typescript";
         private static DefaultKitId: string;
         private static KitFileName: string = "TacoKitMetadata.json";
+        private static KitDesciptionSuffix: string = "-desc";
 
          /*
           * The following member is public static to expose access to automated tests
@@ -152,6 +161,8 @@ module TacoKits {
             return KitHelper.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<IKitInfo> {
                 kits = metadata.kits;
                 if (kitId && kits && kits[kitId]) {
+                    kits[kitId].name = resources.getString(kitId);
+                    kits[kitId].description = resources.getString(kitId + KitHelper.KitDesciptionSuffix);
                     deferred.resolve(kits[kitId]);
                 } else {
                     // Error, empty kitId or no kit matching the kit id
@@ -160,13 +171,6 @@ module TacoKits {
 
                 return deferred.promise;
             });
-        }
-
-        /**
-         *  Returns 'true' if a kit is deprecated, 'false' otherwise
-         */
-        public static isKitDeprecated(kitInfo: IKitInfo): boolean {
-            return kitInfo.deprecated ? true : false;
         }
 
         /**

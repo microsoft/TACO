@@ -15,7 +15,6 @@ import resources = require ("../resources/resourceManager");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
-import level = logger.Level;
 
 /*
  * Version
@@ -42,7 +41,7 @@ class Version implements commands.IDocumentedCommand {
      * prints out Taco Version
      */
     private printTacoVersion(): void {
-        logger.logLine(require("../package.json").version, level.Normal);
+        logger.log(require("../package.json").version);
     }
 }
 

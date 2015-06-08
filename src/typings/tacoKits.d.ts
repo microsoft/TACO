@@ -1,14 +1,12 @@
 ﻿/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
-
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 
 // Typings for taco-kits package
-
 declare module TacoKits {
     // Basic interface for a KitHelper, for mocking purposes
     interface IKitHelper {
@@ -16,20 +14,25 @@ declare module TacoKits {
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
     }
 
+    interface IPluginOverrideInfo {
+        name?: string;
+        version?: string;
+        src?: string;
+        platforms?: string;
+    }
+
+    interface IPlatformOverrideInfo {
+        version: string;
+        src?: string;
+    }
+
     // Metadata-related interfaces
     interface IPluginOverrideMetadata {
-        [pluginId: string]: {
-            version?: string;
-            src?: string;
-            platforms?: string;
-        };
+        [pluginId: string]: IPluginOverrideInfo;
     }
 
     interface IPlatformOverrideMetadata {
-        [platformName: string]: {
-            version: string;
-            src: string;
-        };
+        [platformName: string]: IPlatformOverrideInfo;
     }
 
     interface ITemplateOverrideInfo {
@@ -51,9 +54,7 @@ declare module TacoKits {
     }
 
     interface ITemplateMetadata {
-        [kitId: string]: {
-            [templateIdd: string]: ITemplateInfo;
-        }
+        [kitId: string]: string;
     }
 
     interface IKitInfo {
@@ -116,11 +117,6 @@ declare module TacoKits {
         public static getDefaultKit(): Q.Promise<string>;
 
         /**
-         *  Returns 'true' if a kit is deprecated, 'false' otherwise
-         */
-        public static isKitDeprecated(kitInfo: IKitInfo): boolean;
-
-        /**
          *   Returns a promise resolved by a valid cordova Cli for the kitId
          *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
          *   Otherwise, returns the cordovaCli used by the default kit
@@ -158,7 +154,6 @@ declare module TacoKits {
         TacoKitsExceptionNoCliSpecification,
         TacoKitsExceptionTypescriptNotSupported
     }
-
 }
 
 declare module "taco-kits" {

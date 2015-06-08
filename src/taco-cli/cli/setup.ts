@@ -29,7 +29,6 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
-import level = logger.Level;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface ICliSession {
@@ -79,15 +78,14 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static remote(setupData: commands.ICommandData): Q.Promise<any> {
         var platform: string = (setupData.remain[1] || "ios").toLowerCase();
 
-        logger.logNormalLine(resources.getString("CommandSetupRemoteHeader"));
+        logger.log(resources.getString("CommandSetupRemoteHeader"));
 
         return Setup.queryUserForRemoteConfig()
         .then(Setup.acquireCertificateIfRequired)
         .then(Setup.constructRemotePlatformSettings)
         .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
         .then(function (): void {
-            logger.log(logger.colorize(resources.getString("CommandSuccessBase"), logger.Level.Success));
-            logger.logLine(" " + resources.getString("CommandSetupSettingsStored", Settings.settingsFile));
+            logger.log(resources.getString("CommandSetupSettingsStored", Settings.settingsFile));
         });
     }
 

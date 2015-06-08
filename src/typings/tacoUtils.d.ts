@@ -12,6 +12,7 @@
 /// <reference path="../typings/cordovaConfig.d.ts" />
 /// <reference path="../typings/utilHelper.d.ts" />
 /// <reference path="../typings/logger.d.ts" />
+/// <reference path="../typings/loggerHelper.d.ts" />
 /// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/processLogger.d.ts" />
 /// <reference path="../typings/tacoError.d.ts" />
