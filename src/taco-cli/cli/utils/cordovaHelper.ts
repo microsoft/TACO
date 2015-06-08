@@ -164,7 +164,8 @@ class CordovaHelper {
         });
 
         // Append all arguments after and including a lone "--"
-        return cordovaArgs.concat(commandData.original.slice(commandData.original.indexOf("--")));
+        var additionalArguments: string[] = commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--")) : [];
+        return cordovaArgs.concat(additionalArguments);
     }
 
     /**
@@ -174,9 +175,9 @@ class CordovaHelper {
         var opts: Cordova.ICordovaRawOptions = {
             platforms: [platform],
             options: [],
-            verbose: commandData.options["verbose"],
-            silent: commandData.options["silent"],
-            browserify: commandData.options["browserify"]
+            verbose: commandData.options["verbose"] || false,
+            silent: commandData.options["silent"] || false,
+            browserify: commandData.options["browserify"] || false
         }
 
         // Reconstruct the args to be passed along to platform scripts.
@@ -205,7 +206,8 @@ class CordovaHelper {
             downstreamArgs.push('--archs=' + commandData.options["archs"]);
         }
         // Include all arguments after, but not including, a lone "--"
-        opts.options = downstreamArgs.concat(commandData.original.slice(commandData.original.indexOf("--") + 1));
+        var additionalArguments: string[] = commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : [];
+        opts.options = downstreamArgs.concat(additionalArguments);
 
         return opts;
     }
