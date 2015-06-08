@@ -35,20 +35,19 @@ class Platform extends cordovaCommandBase.CordovaCommandBase {
         return kitHelper.getPlatformOverridesForKit(kitId).then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): Q.Promise<any> {
             // For each of the platforms specified at command-line, check for overrides in the current kit
             self.cordovaCommandParams.targets.forEach(function (platformName: string): void {
-                var suffix: string = "";
+                var platformSpec: string = platformName;
                 if (platformName.length > 0) {
                     // Now, if the user has overridden the desired platform with a version number, do not look further
                     if (self.shouldCheckForOverride(platformName)) {
                         saveVersion = true;
                         if (platformOverrides[platformName]) {
-                            suffix = "@" + platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
+                            platformSpec = platformSpec + "@" + platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
                         }
                     }
 
-                    targetString.push(platformName + suffix);
+                    targetString.push(platformSpec);
                 }
             });
-            console.log("Target String : " + targetString);
             self.cordovaCommandParams.targets = targetString;
 
             // Do not overwrite the save preference, if the user explicitly passed the --save flag on command-line
