@@ -74,34 +74,26 @@ class CordovaWrapper {
                 return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
             });
     }
-
+    
     /**
-     * Wrapper for 'cordova platform' command.
+     * Static method to invoke a cordova command. Used to invole the 'platform' or 'plugin' command
      *
+     * @param {string} The name of the cordova command to be invoked
      * @param {string} The version of the cordova CLI to use
-     * @param {ICordovaPlatformParameters} The cordova platform options
+     * @param {ICordovaCommandParameters} The cordova command parameters
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static platform(cordovaCliVersion: string, platformCmdParameters: cordovaHelper.ICordovaPlatformParameters): Q.Promise<any> {
+    public static InvokeCommand(command: string, cordovaCliVersion: string, platformCmdParameters: cordovaHelper.ICordovaCommandParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-            return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets.join(" "), platformCmdParameters.downloadOptions);
-        });
-    }
-
-    /**
-     * Wrapper for 'cordova platform' command.
-     *
-     * @param {string} The version of the cordova CLI to use
-     * @param {ICordovaPlatformParameters} The cordova platform options
-     *
-     * @return {Q.Promise<any>} An empty promise
-     */
-    public static plugin(cordovaCliVersion: string, platformCmdParameters: cordovaHelper.ICordovaPlatformParameters): Q.Promise<any> {
-        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-            return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+                if (command == "platform") {
+                    return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets.join(" "), platformCmdParameters.downloadOptions);
+                } else if (command == "plugin") {
+                    return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets.join(" "), platformCmdParameters.downloadOptions);
+                } else {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
+                }
         });
     }
 }

@@ -46,7 +46,7 @@ module CordovaHelper {
         [name: string]: string;
     }
 
-    export interface ICordovaPlatformDownloadOptions {
+    export interface ICordovaDownloadOptions {
         searchpath: string;
         noregistry: boolean;
         usegit: boolean;
@@ -57,10 +57,10 @@ module CordovaHelper {
         shrinkwrap: boolean;
     }
 
-    export interface ICordovaPlatformParameters {
+    export interface ICordovaCommandParameters {
         subCommand: string;
         targets: string[];
-        downloadOptions: ICordovaPlatformDownloadOptions;
+        downloadOptions: ICordovaDownloadOptions;
     }
 }
 
@@ -130,6 +130,12 @@ class CordovaHelper {
         }
 
         parameters.cordovaConfig = config;
+    }
+
+    /**
+     * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
+     */
+    public static prepareCordovaCommandParameters(command: string, parameters: CordovaHelper.ICordovaCommandParameters): void {
     }
 }
 

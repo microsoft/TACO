@@ -52,6 +52,7 @@ enum TacoErrorCode {
     RemoteBuildStatusPollFailed,
     RemoteBuildUnsuccessful,
     UnsupportedPlatform,
+    UnimplementedAbstractMethod
 }
 
 export = TacoErrorCode;

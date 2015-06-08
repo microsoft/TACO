@@ -340,5 +340,7 @@
     "_CordovaCommandFailedWithError.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
 
     "CordovaCmdNotFound": "Cordova not found, please run 'npm install –g Cordova' to install Cordova globally",
-    "_CordovaCmdNotFound.comment": "Error message shown when no Cordova is found on the machine"
+    "_CordovaCmdNotFound.comment": "Error message shown when no Cordova is found on the machine",
+    "UnimplementedAbstractMethod": "This is an abstract method and should be implemented by a derived overload",
+    "_UnimplementedAbstractMethod.comment": "Error thrown for an unimplemented method"
 }

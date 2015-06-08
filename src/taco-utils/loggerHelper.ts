@@ -34,12 +34,12 @@ module TacoUtility {
          */
         public static logCommandTable(commandDescriptions: ICommandDescription[], indent1?: number, indent2?: number): void {
             commandDescriptions.forEach(metadata => {
-                LoggerHelper.logNameValueTable(<INameDescription[]>[{ name:metadata.name, description: metadata.description }], indent1, indent2);
+                LoggerHelper.logNameValueTable(<INameDescription[]>[{ name: metadata.name, description: metadata.description }], indent1, indent2);
                 if (metadata.options) {
                     metadata.options.forEach(option => {
                         LoggerHelper.logNameValueTable(<INameDescription[]>[{ name: option.name, description: option.description }], indent1 * 2, indent2);
                     });
-                    Logger.logLine()
+                    Logger.logLine();
                 }
             });
         }
