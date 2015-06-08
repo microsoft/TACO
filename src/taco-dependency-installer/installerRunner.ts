@@ -177,7 +177,7 @@ class InstallerRunner {
                 .then(function (): Q.Promise<any> {
                 var baseHeaderString: string = currentIndex === 0 ? "" : "<br/>";
 
-                self.logger.log(baseHeaderString + "<id>" + value.dependency.displayName + "</id>");
+                self.logger.log(baseHeaderString + "<highlight>" + value.dependency.displayName + "</highlight>");
 
                 return value.installer.run();
             })

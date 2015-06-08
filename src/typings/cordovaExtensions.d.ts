@@ -32,6 +32,10 @@ declare module Cordova {
         restore(target: any, args: any): Q.Promise<any>;
     }
 
+    export interface ICordovaRaw510 extends ICordovaRaw {
+        requirements(platforms: string[]): Q.Promise<any>;
+    }
+
     export interface ICordova {
         on(event: string, ...args: any[]): void;
         off(event: string, ...args: any[]): void;
@@ -40,6 +44,11 @@ declare module Cordova {
         cli(args: string[]): void;
         raw: ICordovaRaw;
     }
+
+    export interface ICordova510 extends ICordova {
+        raw: ICordovaRaw510;
+    }
+
     export function on(event: string, ...args: any[]): void;
     export function off(event: string, ...args: any[]): void;
     export function emit(event: string, ...args: any[]): void;
