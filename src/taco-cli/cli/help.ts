@@ -142,7 +142,7 @@ class Help implements commands.IDocumentedCommand {
         logger.log(resources.getString("CommandHelpUsageSynopsis"));
         logger.log(util.format("   <synopsis>%s</synopsis><br/>", synopsis));
         if (description) {
-            logger.log(Help.getDescriptionString(description) + "<br/");
+            logger.log(Help.getDescriptionString(description) + "<br/>");
         }
     }
 

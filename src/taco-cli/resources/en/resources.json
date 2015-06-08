@@ -21,7 +21,7 @@
     "CommandCreateOnlyLocalCustomWww": "Error: Only local paths for custom www assets are supported.",
     "_CommandCreateOnlyLocalCustomWww.comment": "Error reported when the specified path to the --copy-from or --link-to parameters is a web URL.",
 
-    "CommandCreateStatusKitIdUsed": "Creating a new Cordova project with name <id>{0}</id> and id <id>{1}</id> at location <id>{2}</id> using Kit <id>{3}</id>...",
+    "CommandCreateStatusKitIdUsed": "Creating a new Cordova project with name <highlight>{0}</highlight> and id <highlight>{1}</highlight> at location <highlight>{2}</highlight> using Kit <highlight>{3}</highlight>...",
     "_CommandCreateStatusKitIdUsed.comment": "Status message shown while creating a kit based project. {0} is project name, {1} is project id, 2 is the full path where project is created and {3} is the name of the kit used",
     "CommandCreateStatusCordovaCliUsed": "Creating a new Cordova project with name {0} and id {1} at location {2} with Cordova version {3} and no Kit...",
     "_CommandCreateStatusCordovaCliUsed.comment": "Status message shown while creating a cli based project.  {0} is project name, {1} is project id, 2 is the full path where project is created and {3} is the cordova version used ",
@@ -29,11 +29,11 @@
     "CommandCreateWarningDeprecatedKit": "<br/>Warning: Kit {0} has been deprecated.<br/>Consider changing your project to use a more recent Kit. For deprecation information, see {fwdLink_toDo}",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation. {0} is the name of deprecated kit",
 
-    "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <id>{1}</id>",
+    "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <highlight>{1}</highlight>",
     "_CommandCreateSuccessProjectTemplate.comment": "Success message if the project was created using a template. {0} is the display name of the template the project was created with and {1} is the location where project is created",
-    "CommandCreateSuccessProjectCustomWww": "<br/><success>Success!</success> Your project using custom assets from {0} is ready for use at <id>{1}</id>",
+    "CommandCreateSuccessProjectCustomWww": "<br/><success>Success!</success> Your project using custom assets from {0} is ready for use at <highlight>{1}</highlight>",
     "_CommandCreateSuccessProjectCustomWww.comment": "Success message when the create command succeeds if the project was created using custom www assets. {0} is the path to the custom www assets provided by the user and {1} is the location where project is created.",
-    "CommandCreateSuccessProjectCLI": "<br/><success>Success!</success> Your project is ready for use at <id>{0}</id>",
+    "CommandCreateSuccessProjectCLI": "<br/><success>Success!</success> Your project is ready for use at <highlight>{0}</highlight>",
     "_CommandCreateSuccessProjectCLI.comment": "Success message shown if the project was created using the --cli parameter. {0} is the location of created project",
     "CommandCreateTacoJsonFileCreationError": "Error: Creation of taco.json file failed",
     "_CommandCreateTacoJsonFileCreationError.comment": "This message is displayed when the taco.json file creation fails.",
