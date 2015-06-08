@@ -48,33 +48,33 @@ module CordovaHelper {
 
 class CordovaHelper {
     // Cordova's known parameters
-    private static booleanParameters =
+    private static BooleanParameters =
     {
-        'verbose': Boolean
-        , 'version': Boolean
-        , 'help': Boolean
-        , 'silent': Boolean
-        , 'experimental': Boolean
-        , 'noregistry': Boolean
-        , 'shrinkwrap': Boolean
-        , 'usegit': Boolean
-        , 'link': Boolean
-        , 'debug': Boolean
-        , 'release': Boolean
-        , 'device': Boolean
-        , 'emulator': Boolean
-        , 'browserify': Boolean
-        , 'nobuild': Boolean
-        , 'list': Boolean
+        verbose: Boolean,
+        version: Boolean,
+        help: Boolean,
+        silent: Boolean,
+        experimental: Boolean,
+        noregistry: Boolean,
+        shrinkwrap: Boolean,
+        usegit: Boolean,
+        link: Boolean,
+        debug: Boolean,
+        release: Boolean,
+        device: Boolean,
+        emulator: Boolean,
+        browserify: Boolean,
+        nobuild: Boolean,
+        list: Boolean
     };
-    private static valueParameters =
+    private static ValueParameters =
     {
-        'copy-from': String
-        , 'link-to': path
-        , 'searchpath': String
-        , 'variable': Array
-        , 'archs': String
-        , 'target': String
+        "copy-from": String,
+        "link-to": path,
+        searchpath: String,
+        variable: Array,
+        archs: String,
+        target: String
     };
 
     /**
@@ -151,13 +151,13 @@ class CordovaHelper {
      */
     public static marshallCordovaCliArguments(commandData: commands.ICommandData): string[] {
         var cordovaArgs: string[] = [];
-        Object.keys(CordovaHelper.booleanParameters).forEach(function (key: string): void {
+        Object.keys(CordovaHelper.BooleanParameters).forEach(function (key: string): void {
             if (commandData.options[key]) {
                 cordovaArgs.push("--" + key);
             }
         });
-        Object.keys(CordovaHelper.valueParameters).forEach(function (key: string): void {
-            if(commandData.options[key]) {
+        Object.keys(CordovaHelper.ValueParameters).forEach(function (key: string): void {
+            if (commandData.options[key]) {
                 cordovaArgs.push("--" + key);
                 cordovaArgs.push(commandData.options[key]);
             }
@@ -178,33 +178,28 @@ class CordovaHelper {
             verbose: commandData.options["verbose"] || false,
             silent: commandData.options["silent"] || false,
             browserify: commandData.options["browserify"] || false
-        }
+        };
 
         // Reconstruct the args to be passed along to platform scripts.
         // This is an ugly temporary fix. The code spawning or otherwise
         // calling into platform code should be dealing with this based
         // on the parsed args object.
         var downstreamArgs: string[] = [];
-        var argNames =
-            ['debug'
-            , 'release'
-            , 'device'
-            , 'emulator'
-            , 'nobuild'
-            , 'list'
-            ];
-        argNames.forEach(function (flag) {
+        var argNames = ["debug", "release", "device", "emulator", "nobuild", "list"];
+        argNames.forEach(function (flag: string): void {
             if (commandData.options[flag]) {
-                downstreamArgs.push('--' + flag);
+                downstreamArgs.push("--" + flag);
             }
         });
 
         if (commandData.options["target"]) {
-            downstreamArgs.push('--target=' + commandData.options["target"]);
+            downstreamArgs.push("--target=" + commandData.options["target"]);
         }
+
         if (commandData.options["archs"]) {
-            downstreamArgs.push('--archs=' + commandData.options["archs"]);
+            downstreamArgs.push("--archs=" + commandData.options["archs"]);
         }
+
         // Include all arguments after, but not including, a lone "--"
         var additionalArguments: string[] = commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : [];
         opts.options = downstreamArgs.concat(additionalArguments);

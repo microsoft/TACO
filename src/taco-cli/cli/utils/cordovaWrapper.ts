@@ -29,7 +29,6 @@ import commands = tacoUtility.Commands;
 import packageLoader = tacoUtility.TacoPackageLoader;
 import tacoProjectHelper = projectHelper.TacoProjectHelper;
 
-
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CordovaNpmPackageName: string = "cordova";
