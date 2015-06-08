@@ -8,6 +8,7 @@
 
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
+/// <reference path="../../../typings/semver.d.ts" />
 /// <reference path="../../../typings/tacoKits.d.ts" />
 
 "use strict";
@@ -62,7 +63,7 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
 
     /**
      * Abstract method to be implemented by the derived class.
-     * Derived classes should override this method for custom override check functionality
+     * Derived classes should override this method for kit override check functionality
      */
     public checkForKitOverrides(kitId: string): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
@@ -99,7 +100,7 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
         })
             .then(function (): Q.Promise<any> {
             if (!projectInfo.isTacoProject) {
-                return Q({});
+                return Q.reject(errorHelper.get(TacoErrorCodes.NotACordovaProject));
             }
         })
             .then(function (): Q.Promise<any> {
@@ -109,7 +110,7 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
             }
         })
             .then(function (): Q.Promise<any> {
-            return cordovaWrapper.InvokeCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams);
+                return cordovaWrapper.invokeCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams);
         });
     }
 
@@ -134,15 +135,18 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
         };
 
         var variables: Array<string> = commandData.options["variable"];
+        
+        // Sanitize the --variable option flags
         if (variables) {
             var self = this;
-            variables.forEach(function (s) {
-                var keyval = s.split("=");
+            variables.forEach(function (variable: string): void {
+                var keyval = variable.split("=");
                 var key = keyval[0].toUpperCase();
                 self.downloadOptions.cli_variables[key] = keyval[1];
             });
         }
 
+        // Set appropriate subcommand, target and download options
         this.cordovaCommandParams = {
             subCommand: commandData.remain[0],
             targets: targets,
@@ -151,10 +155,9 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
     }
 
     /**
-     * Prints the project creation status message
+     * Prints the platform/plugin addition/removal status message
      */
-    private printStatusMessage(platformName: string, version: string): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        return deferred.promise;
+    private printStatusMessage(componentName: string, action: string, packageSpec: string): void {
+        /* TODO - Print status messages with the right theme after string review */
     }
 }

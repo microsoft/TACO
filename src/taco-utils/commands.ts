@@ -29,7 +29,7 @@ module TacoUtility {
         }
 
         export interface ICommandDescription extends INameDescription {
-            options: INameDescription[];
+            options?: INameDescription[];
         }
 
         export interface ICommandAlias {
@@ -43,6 +43,7 @@ module TacoUtility {
             description: string;
             args: INameDescription[];
             options: INameDescription[];
+            aliases: ICommandAlias[];
         }
 
         export interface ICommandData {

@@ -13,33 +13,18 @@
 
 "use strict";
 
-import fs = require ("fs");
-import nopt = require ("nopt");
-import path = require ("path");
 import Q = require ("q");
 
 import cordovaCommandBase = require ("./utils/cordovaCommandBase");
-import cordovaHelper = require ("./utils/cordovaHelper");
-import cordovaWrapper = require ("./utils/cordovaWrapper");
-import projectHelper = require ("./utils/projectHelper");
-import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
-import TacoErrorCodes = require ("./tacoErrorCodes");
-import errorHelper = require ("./tacoErrorHelper");
-import tacoUtility = require ("taco-utils");
-import templateManager = require ("./utils/templateManager");
 
-import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
-import logger = tacoUtility.Logger;
-import tacoProjectHelper = projectHelper.TacoProjectHelper;
-import utils = tacoUtility.UtilHelper;
 
-/*
- * Platform
- *
- * Handles "taco platform"
- */
+/**
+  * Platform
+  *
+  * Handles "taco platform"
+  */
 class Platform extends cordovaCommandBase.CordovaCommandBase {
     public name: string = "platform";
 
