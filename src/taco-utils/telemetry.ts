@@ -14,8 +14,8 @@
  
 import os = require ("os");
 import appInsights = require ("applicationinsights");
-import configstore = require("configstore");
-import crypto = require("crypto");
+import configstore = require ("configstore");
+import crypto = require ("crypto");
 
 module TacoUtility {
     export module Telemetry {
@@ -121,25 +121,6 @@ module TacoUtility {
                 event.properties["sessionId"] = TelemetryHelper.SessionId;
             }       
 
-            private static getOrCreateId(idType: IdType): string {
-                var configKey: string = idType === IdType.User ? TelemetryHelper.CONFIGSTORE_USERID_KEY : TelemetryHelper.CONFIGSTORE_MACHINEID_KEY;
-                var registryKey: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_KEY : TelemetryHelper.REGISTRY_MACHINEID_KEY;
-                var registryValue: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_VALUE : TelemetryHelper.REGISTRY_MACHINEID_VALUE;
-
-                var id = TelemetryHelper.Configstore.get(configKey);
-                if (!id) {
-                    if (os.platform() === "win32") {
-                        id = TelemetryHelper.getRegistryValue(registryKey, registryValue);
-                    }
-
-                    id = id ? id.replace(/[{}]/g, "") : TelemetryHelper.generateGuid();
-
-                    TelemetryHelper.Configstore.set(configKey, id);
-                }
-
-                return id;
-            }
-
             public static getRegistryValue(key: string, value: string): string {
                 var windows = require("windows-no-runnable");
                 var regKey = windows.registry(key);
@@ -161,6 +142,25 @@ module TacoUtility {
                 // "Set the two most significant bits (bits 6 and 7) of the clock_seq_hi_and_reserved to zero and one, respectively"
                 var clockSequenceHi = hexValues[8 + (Math.random() * 4) | 0];
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
+            }
+
+            private static getOrCreateId(idType: IdType): string {
+                var configKey: string = idType === IdType.User ? TelemetryHelper.CONFIGSTORE_USERID_KEY : TelemetryHelper.CONFIGSTORE_MACHINEID_KEY;
+                var registryKey: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_KEY : TelemetryHelper.REGISTRY_MACHINEID_KEY;
+                var registryValue: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_VALUE : TelemetryHelper.REGISTRY_MACHINEID_VALUE;
+
+                var id = TelemetryHelper.Configstore.get(configKey);
+                if (!id) {
+                    if (os.platform() === "win32") {
+                        id = TelemetryHelper.getRegistryValue(registryKey, registryValue);
+                    }
+
+                    id = id ? id.replace(/[{}]/g, "") : TelemetryHelper.generateGuid();
+
+                    TelemetryHelper.Configstore.set(configKey, id);
+                }
+
+                return id;
             }
         };
     };
