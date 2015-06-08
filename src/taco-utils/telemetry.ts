@@ -13,8 +13,9 @@
 /// <reference path="../typings/configstore.d.ts" />
  
 import os = require ("os");
-import AppInsights = require ("applicationinsights");
-import Configstore = require ("configstore");
+import appInsights = require ("applicationinsights");
+import configstore = require("configstore");
+import crypto = require("crypto");
 
 module TacoUtility {
     export module Telemetry {
@@ -22,6 +23,9 @@ module TacoUtility {
             [propertyName: string]: any;
         };
 
+        /**
+         * TelemetryEvent represents a basic telemetry data point
+         */
         export class TelemetryEvent {
             private static PII_HASH_KEY = "959069c9-9e93-4fa1-bf16-3f8120d7db0c";
             private eventId: string;
@@ -35,15 +39,12 @@ module TacoUtility {
                 this.eventId = TelemetryHelper.generateGuid();
             }
 
-            public setPiiProperty(name: string, value: string): void {
-                var crypto = require("crypto");
+            public setPiiProperty(name: string, value: string): void {                
                 var hmac = crypto.createHmac("sha256", new Buffer(TelemetryEvent.PII_HASH_KEY, "utf8"));
                 var hashedValue = hmac.update(value).digest("hex");
 
+                // TODO: Task 1184230:Support for sending unhashed values for internal users
                 this.properties[name] = hashedValue;
-
-                // TODO: this should only be for internal users
-                this.properties[name + ".nothashed"] = value;
             }
 
             public post(): void {
@@ -51,6 +52,9 @@ module TacoUtility {
             }
         };
 
+        /**
+         * TelemetryActivity automatically includes timing data, use for scenarios where we want to track performance.
+         */
         export class TelemetryActivity extends TelemetryEvent {
             private start: number[];
 
@@ -75,14 +79,20 @@ module TacoUtility {
 
         export function send(event: TelemetryEvent): void {
             TelemetryHelper.addCommonProperties(event);
-            AppInsights.client.trackEvent(event.name, event.properties);
+            appInsights.client.trackEvent(event.name, event.properties);
+        }
+
+        enum IdType {
+            Machine,
+            User
         }
 
         class TelemetryHelper {
             private static SessionId: string;
             private static UserId: string;
             private static MachineId: string;
-            private static Configstore: Configstore;
+            private static Configstore: configstore;
+            private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae";
             private static CONFIGSTORE_USERID_KEY = "taco-cli-userid";
             private static CONFIGSTORE_MACHINEID_KEY = "taco-cli-machineid";
             private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
@@ -91,17 +101,17 @@ module TacoUtility {
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
 
             public static init(): void {
-                AppInsights.setup("1917bf1c-325d-408e-a31c-4b724d099cae")
+                appInsights.setup(TelemetryHelper.APPINSIGHTS_INSTRUMENTATIONKEY)
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
                     .setAutoCollectPerformance(false)
                     .setAutoCollectExceptions(true)
                     .start();
-                AppInsights.client.config.maxBatchIntervalMs = 100;
-                TelemetryHelper.Configstore = new Configstore("./taco-cli-telemetry");
+                appInsights.client.config.maxBatchIntervalMs = 100;
+                TelemetryHelper.Configstore = new configstore("./taco-cli-telemetry");
 
-                TelemetryHelper.UserId = TelemetryHelper.getUserId();
-                TelemetryHelper.MachineId = TelemetryHelper.getMachineId();
+                TelemetryHelper.UserId = TelemetryHelper.getOrCreateId(IdType.User);
+                TelemetryHelper.MachineId = TelemetryHelper.getOrCreateId(IdType.Machine);
                 TelemetryHelper.SessionId = TelemetryHelper.generateGuid();
             }
 
@@ -109,44 +119,22 @@ module TacoUtility {
                 event.properties["userId"] = TelemetryHelper.UserId;
                 event.properties["machineId"] = TelemetryHelper.MachineId;
                 event.properties["sessionId"] = TelemetryHelper.SessionId;
-            }
+            }       
 
-            public static getUserId(): string {
-                var id = TelemetryHelper.Configstore.get(TelemetryHelper.CONFIGSTORE_USERID_KEY);
+            private static getOrCreateId(idType: IdType): string {
+                var configKey: string = idType === IdType.User ? TelemetryHelper.CONFIGSTORE_USERID_KEY : TelemetryHelper.CONFIGSTORE_MACHINEID_KEY;
+                var registryKey: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_KEY : TelemetryHelper.REGISTRY_MACHINEID_KEY;
+                var registryValue: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_VALUE : TelemetryHelper.REGISTRY_MACHINEID_VALUE;
+
+                var id = TelemetryHelper.Configstore.get(configKey);
                 if (!id) {
                     if (os.platform() === "win32") {
-                        id = TelemetryHelper.getRegistryValue(TelemetryHelper.REGISTRY_USERID_KEY, TelemetryHelper.REGISTRY_USERID_VALUE);
-                        if (id) {
-                            id = id.replace(/[{}]/g, "");
-                        }
+                        id = TelemetryHelper.getRegistryValue(registryKey, registryValue);
                     }
 
-                    if (!id) {
-                        id = TelemetryHelper.generateGuid();
-                    }
+                    id = id ? id.replace(/[{}]/g, "") : TelemetryHelper.generateGuid();
 
-                    TelemetryHelper.Configstore.set(TelemetryHelper.CONFIGSTORE_USERID_KEY, id);
-                }
-
-                return id;
-            }
-
-            public static getMachineId(): string {
-                var id = TelemetryHelper.Configstore.get(TelemetryHelper.CONFIGSTORE_MACHINEID_KEY);
-                if (!id) {
-                    if (os.platform() === "win32") {
-                        id = TelemetryHelper.getRegistryValue(TelemetryHelper.REGISTRY_MACHINEID_KEY, TelemetryHelper.REGISTRY_MACHINEID_VALUE);
-                        if (id) {
-                            id = id.replace(/[{}]/g, "");
-                        }
-                    }
-
-                    if (!id) {
-                        // TODO: use MAC as machine id
-                        id = TelemetryHelper.generateGuid();
-                    }
-
-                    TelemetryHelper.Configstore.set(TelemetryHelper.CONFIGSTORE_MACHINEID_KEY, id);
+                    TelemetryHelper.Configstore.set(configKey, id);
                 }
 
                 return id;
@@ -154,16 +142,17 @@ module TacoUtility {
 
             public static getRegistryValue(key: string, value: string): string {
                 var windows = require("windows-no-runnable");
-                var regkey = windows.registry(key);
-                if (regkey[value] && regkey[value].value) {
-                    return regkey[value].value;
+                var regKey = windows.registry(key);
+                if (regKey && regKey[value] && regKey[value].value) {
+                    return regKey[value].value;
                 }
             }
 
             public static generateGuid(): string {
                 var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
                 // c.f. rfc4122 (UUID version 4 = xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx)
-                var oct = "", tmp: number;
+                var oct = "";
+                var tmp: number;
                 for (var a = 0; a < 4; a++) {
                     tmp = (4294967296 * Math.random()) | 0;
                     oct += hexValues[tmp & 0xF] + hexValues[tmp >> 4 & 0xF] + hexValues[tmp >> 8 & 0xF] + hexValues[tmp >> 12 & 0xF] + hexValues[tmp >> 16 & 0xF] + hexValues[tmp >> 20 & 0xF] + hexValues[tmp >> 24 & 0xF] + hexValues[tmp >> 28 & 0xF];
