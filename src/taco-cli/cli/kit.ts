@@ -30,7 +30,6 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
-import tacoProjectHelper = projectHelper.TacoProjectHelper;
 
 /**
  * kit
@@ -83,7 +82,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
       */
     private static printCurrentKitInfo(): Q.Promise<void> {
         logger.logLine();
-        return tacoProjectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): void {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): void {
             if (!projectInfo.isTacoProject) {
                 return;
             }

@@ -20,7 +20,7 @@ import Q = require ("q");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/CordovaWrapper");
-import ProjectHelper = require ("./utils/projectHelper");
+import projectHelper = require ("./utils/projectHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -31,7 +31,6 @@ import tacoUtility = require ("taco-utils");
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
-import TacoProjectHelper = ProjectHelper.TacoProjectHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
 /*
@@ -119,7 +118,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
-        return Q.all([Settings.loadSettings(), TacoProjectHelper.getProjectInfo()]).spread<any>(function (settings: Settings.ISettings, projectInfo: ProjectHelper.IProjectInfo): Q.Promise<any> {
+        return Q.all([Settings.loadSettings(), projectHelper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
             var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
             var language = settings.language || "en";
@@ -139,7 +138,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 configuration: configuration,
                 buildTarget: buildTarget,
                 language: language,
-                cordovaVersion: projectInfo.cordovaCliVersion || "5.0.0"
+                cordovaVersion: cordovaVersion
             });
 
             // Find the build that we are supposed to run
