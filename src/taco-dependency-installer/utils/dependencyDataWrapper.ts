@@ -11,6 +11,7 @@
 "use strict";
 
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 
 class DependencyDataWrapper {
@@ -26,9 +27,9 @@ class DependencyDataWrapper {
      * Returns the installation destination for the specified dependency ID, version ID and platform ID (or the current system platform if no platform is specified).
      * Will return null if the info is missing from our metadata or if either the dependency ID, the version ID or the platform ID does not exist.
      */
-    public getInstallDirectory(id: string, version: string, platform: string = process.platform): string {
+    public getInstallDirectory(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): string {
         if (this.dependenciesData[id] && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
-            return this.dependenciesData[id].versions[version][platform].installDestination;
+            return this.dependenciesData[id].versions[version][platform][architecture].installDestination;
         }
 
         return null;
@@ -82,9 +83,9 @@ class DependencyDataWrapper {
      * Returns the installer info for the specified dependency. Will return null if either the dependency ID, the version ID or the platform (or the current system
      * platform if no platform is specified) ID does not exist.
      */
-    public getInstallerInfo(id: string, version: string, platform: string = process.platform): DependencyInstallerInterfaces.IInstallerData {
-        if (this.dependenciesData[id] && this.dependenciesData[id].versions[version]) {
-            return this.dependenciesData[id].versions[version][platform];
+    public getInstallerInfo(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IInstallerData {
+        if (this.dependenciesData[id] && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
+            return this.dependenciesData[id].versions[version][platform][architecture];
         }
 
         return null;
@@ -121,19 +122,14 @@ class DependencyDataWrapper {
     }
 
     /*
-     * Returns true if the specified dependency has a node for the specified version and that version has a node for the specified platform (or the current system
-     * platform if no platform is specified), false otherwise.
-     */
-    public platformExistsForVersion(id: string, version: string, platform: string): boolean {
-        return !!this.dependenciesData[id] && !!this.dependenciesData[id].versions[version] && !!this.dependenciesData[id].versions[version][platform];
-    }
-
-    /*
      * Returns true if the specified dependency has a node for the specified version and that version has a node for either the specified platform (or the current
      * system platform if no platform is specified), or the "default" platform. Returns false otherwise.
      */
-    public isSystemSupported(id: string, version: string, platform: string = process.platform): boolean {
-        return this.platformExistsForVersion(id, version, platform) || this.platformExistsForVersion(id, version, "default");
+    public isSystemSupported(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): boolean {
+        return this.dependenciesData[id]
+            && this.dependenciesData[id].versions[version]
+            && this.dependenciesData[id].versions[version][platform]
+            && !!this.dependenciesData[id].versions[version][platform][architecture]; // TS compiler doesn't like implicit cast of the last condition to boolean, so !! operator is used for explicit cast
     }
 
     /*

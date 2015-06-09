@@ -68,6 +68,13 @@ module TacoUtility {
         }
 
         /**
+         * Returns a string composed of the specified character repeated the specified number of times
+         */
+        public static repeat(c: string, n: number): string {
+            return (n > 0) ? Array(Math.ceil(n) + 1).join(c) : "";
+        }
+
+        /**
          * msg can be any string with styles classes defined in xml tags
          * <blue><bold>Hello World!!!</bold></blue>
          * if using any kind of formatting, make sure that it is well formatted
@@ -165,10 +172,6 @@ module TacoUtility {
 
         private static convertBrTags(msg: string): string {
             return msg.replace("<br/>", os.EOL);
-        }
-
-        private static repeat(c: string, n: number): string {
-            return (n > 0) ? Array(n + 1).join(c) : "";
         }
 
         private static stripUnderlineTag(msg: string): string {

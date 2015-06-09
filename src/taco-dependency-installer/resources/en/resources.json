@@ -29,7 +29,7 @@
     "YesString": "yes",
     "_YesString.comment": "The string that the user needs to type to confirm various prompts during the installation. This string is not shown to the user; this string is what we use internally to compare with the user's input during prompts. So, even though it is not user facing, it still needs to be localized.",
 
-    "InstallCompletedWithErrors": "<error>There were some errors while installing the third-party dependencies. Please see above for details.</error>",
+    "InstallCompletedWithErrors": "There were some errors while installing the third-party dependencies. Please see above for details.",
     "_InstallCompletedWithErrors.comment": "Message shown at the end of the installation run if an error occured for at least one of the dependencies.",
 
     "AbstractMethod": "This is an abstract method and should be implemented by a derived overload",

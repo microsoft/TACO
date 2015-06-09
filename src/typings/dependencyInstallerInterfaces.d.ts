@@ -14,8 +14,12 @@ declare module DependencyInstallerInterfaces {
         installDestination: string;
     }
 
+    export interface IArchitectureInstallerDictionary {
+        [architectureName: string]: IInstallerData;
+    }
+
     export interface IPlatformInstallerDictionary {
-        [platformName: string]: IInstallerData;
+        [platformName: string]: IArchitectureInstallerDictionary;
     }
 
     export interface IVersionDictionary {

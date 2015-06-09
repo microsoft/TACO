@@ -81,8 +81,9 @@ module TacoUtility {
          * Logs a separator line in the form of "==============...", with a line break before and after
          */
         public static logSeparator(): void {
-            var sep: string = "<br/>" + Array(this.MaxRight * 0.5 + 1).join("=") + "<br/>";
-            Logger.log(sep);
+            var separatorString: string = Logger.repeat("=", this.MaxRight * 0.6 + 1);
+
+            Logger.log("<br/>" + separatorString + "<br/>");
         }
 
         private static wordWrapString(str: string, indent: number, maxWidth: number): string {

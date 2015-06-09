@@ -136,22 +136,14 @@ module TacoDependencyInstaller {
                     if (!self.dependenciesDataWrapper.isImplicit(value.id)) {
                         var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.getFirstValidVersion(value.id);
                         var installPath: string = self.dependenciesDataWrapper.getInstallDirectory(value.id, versionToUse);
-
-                        // Handle %programfiles(x86)% for Windows 32-bit architecture
-                        if (os.platform() === "win32" && os.arch() === "ia32") {
-                            installPath = installPath.replace(/%programfiles\(x86\)%/g, function (substring: string): string {
-                                return "%programfiles%";
-                            });
-                        }
-
-                        installPath = path.resolve(utilHelper.expandEnvironmentVariables(installPath));
+                        var expandedInstallPath: string = path.resolve(utilHelper.expandEnvironmentVariables(installPath));
 
                         var dependencyInfo: IDependency = {
                             id: value.id,
                             version: versionToUse,
                             displayName: self.dependenciesDataWrapper.getDisplayName(value.id),
                             licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(value.id),
-                            installDestination: installPath,
+                            installDestination: expandedInstallPath,
                         };
 
                         self.missingDependencies.push(dependencyInfo);
@@ -289,22 +281,9 @@ module TacoDependencyInstaller {
             var sortedIds: string[] = toposort.array<string>(nodes, edges).reverse();
 
             // Reorder the missing dependencies based on the sorted IDs
-            var sortedDependencies: IDependency[] = [];
-
-            sortedIds.forEach(function (id: string): void {
-                // Look for the IDependency that has the specified id, and push it to the array; we use array.some() to perform this as it breaks when it finds the correct element
-                self.missingDependencies.some(function (dependency: IDependency): boolean {
-                    if (dependency.id === id) {
-                        sortedDependencies.push(dependency);
-
-                        return true;
-                    }
-
-                    return false;
-                });
+            this.missingDependencies.sort(function (a: IDependency, b: IDependency): number {
+                return sortedIds.indexOf(a.id) - sortedIds.indexOf(b.id);
             });
-
-            this.missingDependencies = sortedDependencies;
         }
 
         private promptUserBeforeInstall(): Q.Promise<any> {
@@ -477,7 +456,7 @@ module TacoDependencyInstaller {
 
             switch (code) {
                 case installerExitCode.CompletedWithErrors:
-                    logger.log(resources.getString("InstallCompletedWithErrors"));
+                    logger.logError(resources.getString("InstallCompletedWithErrors"));
                     break;
                 case installerExitCode.CouldNotConnect:
                     throw errorHelper.get(TacoErrorCodes.CouldNotConnect);
