@@ -49,8 +49,7 @@ module TacoUtility {
          * input string can only have <br/> tags
          */
         public static logError(message: string): void {
-            Logger.stderr(colors.error(Logger.convertBrTags(message)));
-            Logger.logLine();
+            Logger.stderr(colors.error(Logger.convertBrTags(message)) + os.EOL);
         }
 
         /**
@@ -58,8 +57,7 @@ module TacoUtility {
          * input string can only have <br/> tags
          */
         public static logWarning(message: string): void {
-            Logger.stderr(colors.warn(Logger.convertBrTags(message)));
-            Logger.logLine();
+            Logger.stderr(colors.warn(Logger.convertBrTags(message)) + os.EOL);
         }
 
         /**
@@ -167,7 +165,7 @@ module TacoUtility {
         }
 
         private static convertBrTags(msg: string): string {
-            return msg.replace(/<br\/>/, os.EOL);
+            return msg.replace(/<br\/>/g, os.EOL);
         }
 
         private static repeat(c: string, n: number): string {
