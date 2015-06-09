@@ -222,7 +222,7 @@ class Create implements commands.IDocumentedCommand {
      */
     private printStatusMessage(): Q.Promise<any> {
         var cordovaParameters = this.commandParameters.cordovaParameters;
-        var projectPath: string = path.resolve(cordovaParameters.projectPath);
+        var projectPath: string = cordovaParameters.projectPath ? path.resolve(cordovaParameters.projectPath) : "''";
 
         if (!this.isKitProject()) {
             logger.log(resources.getString("CommandCreateStatusCordovaCliUsed", cordovaParameters.appName, cordovaParameters.appId, projectPath, this.commandParameters.data.options["cli"]));

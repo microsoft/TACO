@@ -19,12 +19,15 @@ import Q = require ("q");
 import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
+import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
+import commands = tacoUtility.Commands;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import tacoProjectHelper = projectHelper.TacoProjectHelper;
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
@@ -50,12 +53,30 @@ class CordovaWrapper {
         return deferred.promise;
     }
 
-    public static build(platform: string): Q.Promise<any> {
-        return CordovaWrapper.cli(["build", platform]);
+    public static build(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+        return tacoProjectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                        return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(platform, commandData));
+                });
+            } else {
+                return CordovaWrapper.cli(["build", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
+            }
+        });
     }
 
-    public static run(platform: string): Q.Promise<any> {
-        return CordovaWrapper.cli(["run", platform]);
+    public static run(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+        return tacoProjectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(platform, commandData));
+                });
+            } else {
+                return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
+            }
+        });
     }
 
     /**

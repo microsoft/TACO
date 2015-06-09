@@ -94,6 +94,22 @@ module ProjectHelper {
         }
 
         /**
+         * Helper function to change the current directory to the project root, if possible.
+         * If we can't find a taco.json then it will not change directory
+         */
+        public static cdToProjectRoot(): void {
+            var tacoRoot = TacoProjectHelper.getProjectRoot();
+            if (tacoRoot) {
+                process.chdir(tacoRoot);
+                // Cordova checks for process.env.PWD before checkign process.cwd, and process.env.PWD is not changed by process.chdir()
+                // If we happened to be in a scenario where a taco project contained a separate cordova project, this way we ensure that
+                // both taco and cordova will operate on the same project rather than our own taco stuff modifying things in tacoRoot and
+                // cordova commands modifying things somewhere else.
+                process.env.PWD = tacoRoot;
+            }
+        }
+
+        /**
          *  Helper to get info regarding the current project.  
          *  An object of type IProjectInfo is returned to the caller.
          */
