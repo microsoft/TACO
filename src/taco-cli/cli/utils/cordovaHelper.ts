@@ -149,7 +149,7 @@ class CordovaHelper {
      * Note that this assumes that all arguments after a "--" are not for this command, but something else and so should be passed on.
      * With a command like "taco build --debug --remote -- ios android" this assumption isn't quite true
      */
-    public static marshallCordovaCliArguments(commandData: commands.ICommandData): string[] {
+    public static toCordovaCliArguments(commandData: commands.ICommandData): string[] {
         var cordovaArgs: string[] = [];
         Object.keys(CordovaHelper.BooleanParameters).forEach(function (key: string): void {
             if (commandData.options[key]) {
@@ -168,10 +168,21 @@ class CordovaHelper {
         return cordovaArgs.concat(additionalArguments);
     }
 
+
+    public static toCordovaRunArguments(platform: string, commandData: commands.ICommandData): Cordova.ICordovaRawOptions {
+        // Run, build, emulate, prepare and compile all use the same format at the moment
+        return CordovaHelper.toCordovaArgumentsInternal(platform, commandData);
+    }
+
+    public static toCordovaBuildArguments(platform: string, commandData: commands.ICommandData): Cordova.ICordovaRawOptions {
+        // Run, build, emulate, prepare and compile all use the same format at the moment
+        return CordovaHelper.toCordovaArgumentsInternal(platform, commandData);
+    }
+
     /**
-     * Construct the options for programatically calling emulate, build, parepare, compile, or run via cordova.raw.X
+     * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
      */
-    public static mashallCordovaRawArguments(platform: string, commandData: commands.ICommandData): Cordova.ICordovaRawOptions {
+    private static toCordovaArgumentsInternal(platform: string, commandData: commands.ICommandData): Cordova.ICordovaRawOptions {
         var opts: Cordova.ICordovaRawOptions = {
             platforms: [platform],
             options: [],

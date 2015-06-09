@@ -58,10 +58,10 @@ class CordovaWrapper {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
                     .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                        return cordova.raw.build(cordovaHelper.mashallCordovaRawArguments(platform, commandData));
+                        return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(platform, commandData));
                 });
             } else {
-                return CordovaWrapper.cli(["build", platform].concat(cordovaHelper.marshallCordovaCliArguments(commandData)));
+                return CordovaWrapper.cli(["build", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
             }
         });
     }
@@ -71,10 +71,10 @@ class CordovaWrapper {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
                     .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                    return cordova.raw.run(cordovaHelper.mashallCordovaRawArguments(platform, commandData));
+                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(platform, commandData));
                 });
             } else {
-                return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.marshallCordovaCliArguments(commandData)));
+                return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
             }
         });
     }
