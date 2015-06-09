@@ -56,7 +56,7 @@ class InstallerUtilsWin32 {
         var pathValue: string = process.env[pathName];
 
         addToPath.forEach(function (value: string): void {
-            if (!installerUtils.pathContains(pathValue, value)) {
+            if (!installerUtils.pathContains(value)) {
                 pathValue = value + path.delimiter + pathValue;
             }
         });

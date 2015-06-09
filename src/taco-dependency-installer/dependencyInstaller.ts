@@ -290,7 +290,7 @@ module TacoDependencyInstaller {
             this.buildInstallConfigFile();
 
             var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: IDependency): boolean {
-                // Return true if there is a license url, false if not
+                // Return true if at least one of the missing dependencies has a license url, false if not
                 return !!value.licenseUrl;
             });
 

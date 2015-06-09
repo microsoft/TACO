@@ -7,7 +7,7 @@
     "_DependencyVersion.comment": "Label and value for the version of a dependency. {0} is the version of the dependency.",
     "InstallDestination": "Install to: {0}",
     "_InstallDestination.comment": "Label and value for the installation directory of a dependency. {0} is the path where the dependency will be installed.",
-    "DependencyLicense": "License terms: {0}",
+    "DependencyLicense": "License terms: <link>{0}</link>",
     "_DependencyLicense.comment": "Label and value for the url to the license terms of a dependency. {0} is the url.",
     "InstallingDependenciesHeader": "<title>The following dependencies will be installed on your system:</title>",
     "_InstallingDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that are going to be installed by taco-cli",

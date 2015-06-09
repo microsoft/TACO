@@ -41,7 +41,7 @@ module InstallerUtils {
 }
 
 class InstallerUtils {
-    /*
+    /**
      * Verifies if the specified file is valid by comparing its sha1 signature and its size in bytes with the provided expectedSha1 and expectedBytes.
      *
      * @param {string} filePath Path to the file to verify
@@ -65,7 +65,7 @@ class InstallerUtils {
         return isClean;
     }
 
-    /*
+    /**
      * Uses the request.Options object provided to download a file from a url and save it to filepath. Verifies that the downloaded file is valid using expectedSha1 and expectedBytes.
      * If the download fails, it will try again up to a maximum of maxDownloadAttempts (defaults to 1).
      *
@@ -108,7 +108,7 @@ class InstallerUtils {
         return promise;
     }
 
-    /*
+    /**
      * Prompts the user with the specified message and returns a promise resolved with what the user typed.
      *
      * @param {string} message The message that should be used to question the user for the prompt
@@ -131,7 +131,7 @@ class InstallerUtils {
         return deferred.promise;
     }
 
-    /*
+    /**
      * Determines whether the specified environment variable needs to be set or not. If the variable doesn't exist, the result is true. If the variable already exists but is set to the desired value, the
      * result is false. If it exists but is different than what is desired, the user will be prompted for overwrite, and the result will depend on the user's answer. The result is wrapped in a promise.
      *
@@ -163,7 +163,7 @@ class InstallerUtils {
             });
     }
 
-    /*
+    /**
      * Prompts the user for permission to overwrite the specified system environment variable. Uses the specified socket for communication.
      *
      * @param {string} name The name of the environment variable to set
@@ -188,21 +188,21 @@ class InstallerUtils {
         return deferred.promise;
     }
 
-    /*
-     * Prompts the user for permission to overwrite the specified system environment variable. Uses the specified socket for communication.
+    /**
+     * Searches the provided Path environment variable value for the specified value
      *
-     * @param {string} path The current value of the Path variable
      * @param {string} valueToCheck The value to check for in the Path environment variable
+     * @param {string} pathValue The current value of the Path variable
      *
      * @return {boolean} A boolean set to true if the Path system variable already contains the specified value in one of its segments
      */
-    public static pathContains(pathValue: string, valueToCheck: string): boolean {
+    public static pathContains(valueToCheck: string, pathValue: string = process.env["Path"]): boolean {
         return pathValue.split(path.delimiter).some(function (segment: string): boolean {
             return path.resolve(segment) === path.resolve(valueToCheck);
         });
     }
 
-    /*
+    /**
      * Sends data over the provided socket using the InstallerProtocol format
      *
      * @param {NodeJSNet.Socket} socketHandle The socket to use for the communication
