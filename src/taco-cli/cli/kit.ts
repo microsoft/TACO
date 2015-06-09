@@ -111,7 +111,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         }
 
         logger.logLine();//
-        logger.log(util.format("<underline/><kitid>%s</kitid> %s", title, suffix));
+        logger.log(util.format("<kitid>%s</kitid> %s<underline/>", title, suffix));
         logger.log(kitInfo.name);
         logger.logLine();
         logger.log(kitInfo.description);
