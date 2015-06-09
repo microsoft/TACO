@@ -252,6 +252,10 @@ class Create implements commands.IDocumentedCommand {
         if (this.isKitProject()) {
             if (templateDisplayName) {
                 logger.log(resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath));
+
+                if (this.commandParameters.data.options["template"] === "typescript") {
+                    logger.log(resources.getString("CommandCreateInstallGulp"));
+                }
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"];
