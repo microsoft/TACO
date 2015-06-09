@@ -185,7 +185,7 @@ class IOSAgent implements ITargetPlatform {
         var errorMessage: string;
         ideviceinstaller.stderr.on("data", function (data: Buffer): void {
             var dataStr: string = data.toString();
-            if (!errorMessage && dataStr.toLowerCase().indexOf("error") !== -1) {
+            if (!errorMessage) {
                 if (dataStr.indexOf("No iOS device found, is it plugged in?") > -1) {
                     errorMessage = resources.getStringForLanguage(req, "InstallFailNoDevice");
                 } else {
