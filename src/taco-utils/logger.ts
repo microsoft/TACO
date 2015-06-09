@@ -49,7 +49,8 @@ module TacoUtility {
          * input string can only have <br/> tags
          */
         public static logError(message: string): void {
-            Logger.stderr(colors.error(Logger.convertBrTags(message)) + os.EOL);
+            Logger.stderr(colors.error(Logger.convertBrTags(message)));
+            Logger.logLine();
         }
 
         /**
@@ -57,7 +58,8 @@ module TacoUtility {
          * input string can only have <br/> tags
          */
         public static logWarning(message: string): void {
-            Logger.stderr(colors.warn(Logger.convertBrTags(message)) + os.EOL);
+            Logger.stderr(colors.warn(Logger.convertBrTags(message)));
+            Logger.logLine();
         }
 
         /**
@@ -77,13 +79,6 @@ module TacoUtility {
         private static logFormattedString(msg: string): void {
             var underlineNeeded: boolean = false;
             if (msg) {
-                // handle <br/>
-                msg = msg.replace("<br/>", os.EOL);
-                underlineNeeded = msg.indexOf("<underline/>") === 0;
-                if (underlineNeeded) {
-                    msg = msg.substr("<underline/>".length);
-                }
-
                 var stylesStack: string[] = [];
                 var startIndex: number = 0;
                 // loop over all tags in the input string,
@@ -105,20 +100,26 @@ module TacoUtility {
                         }
                     }
                 });
-
-                assert.equal(stylesStack.length, 0, util.format("Invalid format specified in %s. mismatched tags %s.", msg, stylesStack));
  
                 // print remaing string, outside any tags
                 if (startIndex < msg.length) {
                     Logger.colorize(msg.substring(startIndex, msg.length), stylesStack);
                 }
+
+                // special handling for underline in the end
+                if (stylesStack.length === 1) {
+                    var tag: string = stylesStack.pop();
+                    if (tag === "underline") {
+                        var msgLength: number = msg.replace(new RegExp(Logger.TagRegex, "gm"), "").length;
+                        Logger.logLine();
+                        Logger.stdout(Logger.repeat("-", msgLength));
+                    }
+                }
+
+                assert.equal(stylesStack.length, 0, util.format("Invalid format specified in %s. mismatched tags %s.", msg, stylesStack));
             }
 
-            Logger.stdout(os.EOL);
-            if (underlineNeeded) {
-                var regex = new RegExp(Logger.TagRegex, "gm");
-                Logger.stdout(Logger.repeat("-", msg.replace(regex, "").length) + os.EOL);
-            }
+            Logger.logLine();
         }
 
         private static forEachTagMatch(msg: string, callback: (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number) => void): void {
@@ -147,6 +148,8 @@ module TacoUtility {
                     // say input string is <random>foo</random>, since random is not a style, colorize will ignore it
                     if (styleFunction[style]) {
                         styleFunction = styleFunction[style];
+                    } else {
+                        assert(false, "unknown logger style " + style);
                     }
                 });
                 Logger.stdout(styleFunction(str));
@@ -164,17 +167,11 @@ module TacoUtility {
         }
 
         private static convertBrTags(msg: string): string {
-            return msg.replace("<br/>", os.EOL);
+            return msg.replace(/<br\/>/, os.EOL);
         }
 
         private static repeat(c: string, n: number): string {
             return (n > 0) ? Array(n + 1).join(c) : "";
-        }
-
-        private static stripUnderlineTag(msg: string): string {
-            var len1: number = "<underline>".length;
-            var len2: number = "</underline>".length;
-            return msg.substring(len1, msg.length - len2);
         }
     }
 }
