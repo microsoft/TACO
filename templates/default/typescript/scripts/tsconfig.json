@@ -1,9 +1,5 @@
 {
 	"tsCompileOptions" : {
-		"noImplicitAny" : true,
-		"noEmitOnError" : true,
-		"target" : "ES5",
-		"module" : "commonjs",
-		"sortOutput" : true
+		"module" : "commonjs"
 	}
 }
