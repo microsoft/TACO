@@ -23,6 +23,7 @@ import rimraf = require ("rimraf");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/cordovaWrapper");
+import ProjectHelper = require ("./utils/projectHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -32,7 +33,9 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
+import TacoProjectHelper = ProjectHelper.TacoProjectHelper;
 import UtilHelper = tacoUtility.UtilHelper;
+
 
 /*
  * Build
@@ -184,7 +187,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         var configuration = commandData.options["release"] ? "release" : "debug";
         var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
-        return Settings.loadSettings().then(function (settings: Settings.ISettings): Q.Promise<any> {
+        return Q.all([Settings.loadSettings(), TacoProjectHelper.getProjectInfo()]).spread<any>(function (settings: Settings.ISettings, projectInfo: ProjectHelper.IProjectInfo): Q.Promise<any> {
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
@@ -199,7 +202,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                 configuration: configuration,
                 buildTarget: buildTarget,
                 language: language,
-                cordovaVersion: require("cordova/package.json").version || "5.0.0" // TODO (Devdiv 1160583): Use Kit specified version
+                cordovaVersion: projectInfo.cordovaCliVersion || "5.0.0"
             });
             return Build.RemoteBuild.build(buildSettings);
         });
