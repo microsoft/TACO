@@ -39,6 +39,9 @@ interface IScenarioList {
 }
 
 describe("taco create", function (): void {
+    // Mocha constants
+    var createTimeout: number = 80000;
+
     // Project info
     var testAppId: string = "testId";
     var testAppName: string = "testAppName";
@@ -158,7 +161,7 @@ describe("taco create", function (): void {
     }
 
     before(function (done: MochaDone): void {
-        this.timeout(50000);
+        this.timeout(createTimeout);
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
@@ -179,12 +182,12 @@ describe("taco create", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(50000);
+        this.timeout(createTimeout);
         rimraf(runFolder, done);
     });
 
     describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
-        this.timeout(50000);
+        this.timeout(createTimeout);
 
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
             var scenario: number = 1;
@@ -347,7 +350,7 @@ describe("taco create", function (): void {
     });
 
     describe("Failure scenarios", function (): void {
-        this.timeout(50000);
+        this.timeout(createTimeout);
 
         it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {     
             // Create command should fail if --kit was specified with an unknown value

@@ -9,6 +9,16 @@
     "4.2.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v4.2.0.",
     "5.0.0-Kit": "5.0.0 Cordova Kit",
     "5.0.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v5.0.0.",
+    "_comment": "Localized names / descriptions for the available kits.",
+
+    "default_blank": "Blank template",
+    "default_typescript": "Blank TypeScript template",
+    "2.2.0-Kit_blank": "Blank template",
+    "4.0.0-Kit_blank": "Blank template",
+    "4.0.0-Kit_typescript": "Blank TypeScript template",
+    "5.0.0-Kit_blank": "Blank template",
+    "5.0.0-Kit_typescript": "Blank TypeScript template",
+    "_comment": "Localized names / descriptions for the available templates.",
 
     "TacoKitsExceptionKitMetadataFileNotFound": "Error: The kit metadata file is not found. Please fix this by re-installing taco-kits from npm.",
     "_TacoKitsExceptionKitMetadataFileNotFound.comment": "Error thrown when the TacoKitMetadata.json file is not found",

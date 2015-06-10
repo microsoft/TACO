@@ -62,9 +62,7 @@ module TacoKits {
     }
 
     export interface ITemplateInfo {
-        name: {
-            [language: string]: string;
-        };
+        name: string;
         url: string;
     }
 
@@ -120,6 +118,7 @@ module TacoKits {
         private static DefaultKitId: string;
         private static KitFileName: string = "TacoKitMetadata.json";
         private static KitDesciptionSuffix: string = "-desc";
+        private static defaultTemplateKitOverride: string = "default";
 
          /*
           * The following member is public static to expose access to automated tests
@@ -214,7 +213,7 @@ module TacoKits {
                     var kitOverride: string = kit;
 
                     if (!templates[kitOverride]) {
-                        kitOverride = "default";
+                        kitOverride = KitHelper.defaultTemplateKitOverride;
                     }
 
                     templatesForKit = templates[kitOverride];
@@ -227,6 +226,7 @@ module TacoKits {
                                 templateInfo: templatesForKit[templateId]
                             };
 
+                            templateOverrideInfo.templateInfo.name = KitHelper.getLocalizedTemplateName(kitOverride, templateId);
                             templateList.push(templateOverrideInfo);
                         }
                     }
@@ -263,6 +263,9 @@ module TacoKits {
                             // Found the specified template
                             templateOverrideInfo = KitHelper.createTemplateOverrideInfo(kitId, templates[kitId][templateId]);
 
+                            // Properly assign the localized template name
+                            templateOverrideInfo.templateInfo.name = KitHelper.getLocalizedTemplateName(kitId, templateId);
+
                             // Convert the url from relative to absolute local path
                             templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
                             deferred.resolve(templateOverrideInfo);
@@ -275,9 +278,12 @@ module TacoKits {
                                 deferred.reject(errorHelper.get(TacoErrorCodes.TacoKitsExceptionInvalidTemplate, templateId));
                             }
                         }
-                    } else if (templates["default"][templateId]) {
+                    } else if (templates[KitHelper.defaultTemplateKitOverride][templateId]) {
                         // Found a default template matching the specified template id
-                        templateOverrideInfo = KitHelper.createTemplateOverrideInfo("default", templates["default"][templateId]);
+                        templateOverrideInfo = KitHelper.createTemplateOverrideInfo(KitHelper.defaultTemplateKitOverride, templates[KitHelper.defaultTemplateKitOverride][templateId]);
+
+                        // Properly assign the localized template name
+                        templateOverrideInfo.templateInfo.name = KitHelper.getLocalizedTemplateName(KitHelper.defaultTemplateKitOverride, templateId);
 
                         // Convert the url from relative to absolute local path
                         templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
@@ -354,12 +360,12 @@ module TacoKits {
             var templateOverrideInfo: ITemplateOverrideInfo = {
                 kitId: kit,
                 templateInfo: {
-                    name: {},
+                    name: "",
                     url: ""
                 }
             };
 
-            // Deep copy the provided ITemplateInfo to the returned override object. Since we know ITemplateInfo only contains strings (and objects made of more strings),
+            // Deep copy the provided ITemplateInfo to the returned override object. Since we know ITemplateInfo only contains strings,
             // and are relatively small, it is safe to deep copy via JSON serialization
             templateOverrideInfo.templateInfo = JSON.parse(JSON.stringify(template));
 
@@ -411,6 +417,10 @@ module TacoKits {
 
                 return deferred.promise;
             });
+        }
+
+        private static getLocalizedTemplateName(kitId: string, templateId: string): string {
+            return resources.getString(kitId + "_" + templateId);
         }
     }
 

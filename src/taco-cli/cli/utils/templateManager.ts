@@ -76,7 +76,7 @@ class TemplateManager {
             .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
                 var templateInfo = templateOverrideForKit.templateInfo;
 
-                templateName = TemplateManager.getLocalizedTemplateName(templateInfo);
+                templateName = templateInfo.name
 
                 return self.findTemplatePath(templateId, templateOverrideForKit.kitId, templateInfo);
             })
@@ -117,7 +117,7 @@ class TemplateManager {
             for (var i: number = 0; i < kitOverride.templates.length; i++) {
                 var templateDescriptor: TemplateManager.ITemplateDescriptor = {
                     id: kitOverride.templates[i].templateId,
-                    name: TemplateManager.getLocalizedTemplateName(kitOverride.templates[i].templateInfo)
+                    name: kitOverride.templates[i].templateInfo.name
                 };
 
                 list.templates.push(templateDescriptor);
@@ -125,24 +125,6 @@ class TemplateManager {
 
             return Q.resolve(list);
         });
-    }
-
-    /**
-     * Returns the best localized name to use for the specified template.
-     */
-    private static getLocalizedTemplateName(templateInfo: TacoKits.ITemplateInfo): string {
-        // Get the best language to use from the available localizations in the template's name
-        var availableLanguages: string[] = [];
-
-        for (var language in templateInfo.name) {
-            if (templateInfo.name.hasOwnProperty(language)) {
-                availableLanguages.push(language);
-            }
-        }
-
-        var useLanguage: string = tacoUtility.ResourceManager.getBestAvailableLocale(availableLanguages);
-
-        return templateInfo.name[useLanguage];
     }
 
     private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {

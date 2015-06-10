@@ -47,9 +47,7 @@ declare module TacoKits {
     }
 
     interface ITemplateInfo {
-        name: {
-            [language: string]: string;
-        };
+        name: string;
         url: string;
     }
 
