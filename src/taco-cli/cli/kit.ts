@@ -170,7 +170,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         }).then(function (kits: tacoKits.IKitMetadata): Q.Promise<any> {
                 return Kit.getLongestPlatformPluginLength(kits)
                     .then(function (maxLength: number): void {
-                        var indent2 = Math.max(LoggerHelper.DefaultIndent + maxLength + LoggerHelper.MinimumDots + 2, LoggerHelper.MinRightIndent);
+                        var indent2 = LoggerHelper.getNameValueTableIndent2(maxLength);
                         Object.keys(kits).forEach(function (kitId: string): void {
                             if (kitId) {
                                 kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {

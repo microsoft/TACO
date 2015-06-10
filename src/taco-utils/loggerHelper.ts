@@ -20,10 +20,10 @@ import Logger = logger.Logger;
 module TacoUtility {
     export class LoggerHelper {
         private static MaxRight: number = 0.9 * (<any>process.stdout)["columns"];  // maximum characters we're allowing in each line
+        private static MinimumDots: number = 4;
+        private static MinRightIndent: number = 25;
 
         public static DefaultIndent: number = 3;
-        public static MinimumDots: number = 4;
-        public static MinRightIndent: number = 25;
 
         /**
          * Helper method to log an array of name/value pairs with proper indentation
@@ -51,8 +51,7 @@ module TacoUtility {
                     }
                 });
 
-                // +2 for spaces around dots
-                indent2 = Math.max(indent1 + maxKeyLength + LoggerHelper.MinimumDots + 2, LoggerHelper.MinRightIndent);
+                indent2 = LoggerHelper.getNameValueTableIndent2(maxKeyLength, indent1);
             }
 
             nameValuePairs.forEach(nvp => {
@@ -75,6 +74,20 @@ module TacoUtility {
             var dots: string = LoggerHelper.repeat(".", indent2 - indent1 - key.length - 2); // -2, for spaces around "..."
             value = LoggerHelper.wordWrapString(value, indent2, LoggerHelper.MaxRight);
             Logger.log(util.format("%s<key>%s</key> %s %s", leftIndent, key, dots, value));
+        }
+
+        /**
+         * Helper method to get correct indent where values should be aligned
+         * @param {number} length of the longest key to be used in the Name/Value Table <br/>
+         * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
+         */
+        public static getNameValueTableIndent2(maxKeyLength: number, indent1?: number): number {
+            if (indent1 !== 0) {
+                indent1 = indent1 || LoggerHelper.DefaultIndent;
+            }
+
+            // +2 for spaces around dots
+            return Math.max(LoggerHelper.DefaultIndent + maxKeyLength + 1 + LoggerHelper.MinimumDots + 1, LoggerHelper.MinRightIndent);
         }
 
         private static wordWrapString(str: string, indent: number, maxWidth: number): string {
