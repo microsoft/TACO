@@ -11,11 +11,15 @@
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/applicationinsights.d.ts" />
 /// <reference path="../typings/configstore.d.ts" />
- 
+
+import fs = require ("fs");
 import os = require ("os");
+import path = require ("path");
 import appInsights = require ("applicationinsights");
-import configstore = require ("configstore");
 import crypto = require ("crypto");
+import utilHelper = require ("./utilHelper");
+
+import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
     export module Telemetry {
@@ -87,20 +91,34 @@ module TacoUtility {
             User
         }
 
+        interface ITelemetrySettings {
+            [settingKey: string]: string;
+            userId?: string;
+            machineId?: string;
+        }
+
         class TelemetryHelper {
+            private static TacoVersion: string;
             private static SessionId: string;
             private static UserId: string;
             private static MachineId: string;
-            private static Configstore: configstore;
+            private static TelemetrySettings: ITelemetrySettings = null;
+            private static TelemetrySettingsFileName = "TelemetrySettings.json";
             private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae";
-            private static CONFIGSTORE_USERID_KEY = "taco-cli-userid";
-            private static CONFIGSTORE_MACHINEID_KEY = "taco-cli-machineid";
+            private static SETTINGS_USERID_KEY = "userId";
+            private static SETTINGS_MACHINEID_KEY = "machineId";
             private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE = "UserId";
             private static REGISTRY_MACHINEID_KEY = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
 
+            private static get telemetrySettingsFile(): string {
+                return path.join(UtilHelper.tacoHome, TelemetryHelper.TelemetrySettingsFileName);
+            }
+
             public static init(): void {
+                TelemetryHelper.loadSettings();
+
                 appInsights.setup(TelemetryHelper.APPINSIGHTS_INSTRUMENTATIONKEY)
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
@@ -108,25 +126,20 @@ module TacoUtility {
                     .setAutoCollectExceptions(true)
                     .start();
                 appInsights.client.config.maxBatchIntervalMs = 100;
-                TelemetryHelper.Configstore = new configstore("./taco-cli-telemetry");
 
                 TelemetryHelper.UserId = TelemetryHelper.getOrCreateId(IdType.User);
                 TelemetryHelper.MachineId = TelemetryHelper.getOrCreateId(IdType.Machine);
                 TelemetryHelper.SessionId = TelemetryHelper.generateGuid();
+                TelemetryHelper.TacoVersion = require("../../package.json").version;
+
+                TelemetryHelper.saveSettings();
             }
 
             public static addCommonProperties(event: any): void {
                 event.properties["userId"] = TelemetryHelper.UserId;
                 event.properties["machineId"] = TelemetryHelper.MachineId;
                 event.properties["sessionId"] = TelemetryHelper.SessionId;
-            }       
-
-            public static getRegistryValue(key: string, value: string): string {
-                var windows = require("windows-no-runnable");
-                var regKey = windows.registry(key);
-                if (regKey && regKey[value] && regKey[value].value) {
-                    return regKey[value].value;
-                }
+                event.properties["tacoVersion"] = TelemetryHelper.TacoVersion;
             }
 
             public static generateGuid(): string {
@@ -144,12 +157,42 @@ module TacoUtility {
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
             }
 
+            private static getRegistryValue(key: string, value: string): string {
+                var windows = require("windows-no-runnable");
+                var regKey = windows.registry(key);
+                if (regKey && regKey[value] && regKey[value].value) {
+                    return regKey[value].value;
+                }
+            }
+
+            /*
+             * Load settings data from TACO_HOME/TelemetrySettings.json
+             */
+            private static loadSettings(): ITelemetrySettings {
+                try {
+                    TelemetryHelper.TelemetrySettings = JSON.parse(UtilHelper.readFileContentsSync(TelemetryHelper.telemetrySettingsFile));
+                } catch (e) {
+                    // if file does not exist or fails to parse then assume no settings are saved and start over
+                    TelemetryHelper.TelemetrySettings = {};
+                }
+
+                return TelemetryHelper.TelemetrySettings;
+            }
+            
+            /*
+             * Save settings data in TACO_HOME/TelemetrySettings.json
+             */
+            private static saveSettings(): void {
+                UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
+                fs.writeFileSync(TelemetryHelper.telemetrySettingsFile, JSON.stringify(TelemetryHelper.TelemetrySettings));
+            }
+
             private static getOrCreateId(idType: IdType): string {
-                var configKey: string = idType === IdType.User ? TelemetryHelper.CONFIGSTORE_USERID_KEY : TelemetryHelper.CONFIGSTORE_MACHINEID_KEY;
+                var settingsKey: string = idType === IdType.User ? TelemetryHelper.SETTINGS_USERID_KEY : TelemetryHelper.SETTINGS_MACHINEID_KEY;
                 var registryKey: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_KEY : TelemetryHelper.REGISTRY_MACHINEID_KEY;
                 var registryValue: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_VALUE : TelemetryHelper.REGISTRY_MACHINEID_VALUE;
 
-                var id = TelemetryHelper.Configstore.get(configKey);
+                var id: string = TelemetryHelper.TelemetrySettings[settingsKey];
                 if (!id) {
                     if (os.platform() === "win32") {
                         id = TelemetryHelper.getRegistryValue(registryKey, registryValue);
@@ -157,7 +200,7 @@ module TacoUtility {
 
                     id = id ? id.replace(/[{}]/g, "") : TelemetryHelper.generateGuid();
 
-                    TelemetryHelper.Configstore.set(configKey, id);
+                    TelemetryHelper.TelemetrySettings[settingsKey] = id;
                 }
 
                 return id;
