@@ -140,20 +140,18 @@ module TacoUtility {
 
         private static colorize(str: string, styles: string[]): void {
             if (styles.length > 0) {
-                var styleFunction: any = colors;
                 styles.forEach(function (style: string): void {
                     // ignore if specified style is not availble
                     // say input string is <random>foo</random>, since random is not a style, colorize will ignore it
-                    if (styleFunction[style]) {
-                        str = styleFunction[style](str);
+                    if (colors[style]) {
+                        str = colors[style](str);
                     } else {
                         assert(false, "unknown logger style " + style);
                     }
                 });
-                Logger.stdout(str);
-            } else {
-                Logger.stdout(str);
             }
+
+            Logger.stdout(str);
         }
 
         private static stdout(msg: string): void {

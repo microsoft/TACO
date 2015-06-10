@@ -11,8 +11,6 @@
 declare module TacoUtility {
     class LoggerHelper {
         public static DefaultIndent: number;
-        public static MinimumDots: number;
-        public static MinRightIndent: number;
 
         /**
          * Helper method to log an array of name/value pairs with proper indentation
@@ -31,5 +29,12 @@ declare module TacoUtility {
          * @param {number} indent2 position at which value should start, if not specified default value (25) is used
          */
         public static logNameValue(name: string, value: string, indent1?: number, indent2?: number): void;
+
+        /**
+         * Helper method to get correct indent where values should be aligned
+         * @param {number} length of the longest key to be used in the Name/Value Table <br/>
+         * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
+         */
+        public static getNameValueTableIndent2(maxKeyLength: number, indent1?: number): number;
     }
 }
