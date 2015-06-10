@@ -98,7 +98,7 @@ class Help implements commands.IDocumentedCommand {
         }
 
         var list: tacoUtility.Commands.ICommandInfo = this.commandsFactory.listings[command];
-        Help.printCommandHeader(util.format("%s %s %s", Help.TacoString, command, list.synopsis), list.description);
+        Help.printCommandHeader(util.format("<synopsis>%s %s</synopsis> %s", Help.TacoString, command, list.synopsis), list.description);
 
         // if both needs to be printed we need to calculate an indent ourselves
         // to make sure args.values have same indenation as options.values
@@ -140,7 +140,7 @@ class Help implements commands.IDocumentedCommand {
 
     private static printCommandHeader(synopsis: string, description?: string): void {
         logger.log(resources.getString("CommandHelpUsageSynopsis"));
-        logger.log(util.format("   <synopsis>%s</synopsis><br/>", synopsis));
+        logger.log(util.format("   %s<br/>", synopsis));
         if (description) {
             logger.log(Help.getDescriptionString(description) + "<br/>");
         }
