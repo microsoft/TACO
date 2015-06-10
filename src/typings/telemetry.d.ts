@@ -26,7 +26,7 @@ declare module TacoUtility {
             constructor(name: string, properties?: TelemetryProperties);
             end(): void;
         }
-        function init(): void;
+        function init(appVersion?: string): void;
         function sendSimpleEvent(eventName: string, properties?: TelemetryProperties): void;
         function send(event: TelemetryEvent): void;
     }

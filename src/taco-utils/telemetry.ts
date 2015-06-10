@@ -73,8 +73,8 @@ module TacoUtility {
             }
         };
 
-        export function init(): void {
-            TelemetryHelper.init();
+        export function init(appVersion?: string): void {
+            TelemetryHelper.init(appVersion);
         }
 
         export function sendSimpleEvent(eventName: string, properties?: ITelemetryProperties): void {
@@ -98,7 +98,6 @@ module TacoUtility {
         }
 
         class TelemetryHelper {
-            private static TacoVersion: string;
             private static SessionId: string;
             private static UserId: string;
             private static MachineId: string;
@@ -116,9 +115,9 @@ module TacoUtility {
                 return path.join(UtilHelper.tacoHome, TelemetryHelper.TelemetrySettingsFileName);
             }
 
-            public static init(): void {
+            public static init(appVersion: string): void {
                 TelemetryHelper.loadSettings();
-
+                
                 appInsights.setup(TelemetryHelper.APPINSIGHTS_INSTRUMENTATIONKEY)
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
@@ -127,10 +126,14 @@ module TacoUtility {
                     .start();
                 appInsights.client.config.maxBatchIntervalMs = 100;
 
+                if (appVersion) {
+                    var context: Context = appInsights.client.context;
+                    context.tags[context.keys.applicationVersion] = appVersion;
+                }
+
                 TelemetryHelper.UserId = TelemetryHelper.getOrCreateId(IdType.User);
                 TelemetryHelper.MachineId = TelemetryHelper.getOrCreateId(IdType.Machine);
                 TelemetryHelper.SessionId = TelemetryHelper.generateGuid();
-                TelemetryHelper.TacoVersion = require("../../package.json").version;
 
                 TelemetryHelper.saveSettings();
             }
@@ -139,7 +142,6 @@ module TacoUtility {
                 event.properties["userId"] = TelemetryHelper.UserId;
                 event.properties["machineId"] = TelemetryHelper.MachineId;
                 event.properties["sessionId"] = TelemetryHelper.SessionId;
-                event.properties["tacoVersion"] = TelemetryHelper.TacoVersion;
             }
 
             public static generateGuid(): string {

@@ -45,7 +45,7 @@ class Taco { /*
     public static run(): void {
         var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
         TacoProjectHelper.cdToProjectRoot();
-        telemetry.init();
+        telemetry.init(require("../package.json").version);
         Taco.executeCommand(parsedArgs).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason && reason.isTacoError) {
