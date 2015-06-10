@@ -72,10 +72,6 @@ module TacoKits {
         }
     }
 
-    export interface ILocalizableString {
-        [lang: string]: string;
-    }
-
     export interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;

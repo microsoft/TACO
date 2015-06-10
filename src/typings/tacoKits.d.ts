@@ -6,56 +6,60 @@
 ﻿ *******************************************************
 ﻿ */
 
+interface IKitHelper {
+    getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+    getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+}
+
 // Typings for taco-kits package
 declare module TacoKits {
     // Basic interface for a KitHelper, for mocking purposes
-    interface IKitHelper {
-        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
-        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
-    }
+    
 
-    interface IPluginOverrideInfo {
+    export interface IPluginOverrideInfo {
         name?: string;
         version?: string;
         src?: string;
         platforms?: string;
     }
 
-    interface IPlatformOverrideInfo {
+    export interface IPlatformOverrideInfo {
         version: string;
         src?: string;
     }
 
     // Metadata-related interfaces
-    interface IPluginOverrideMetadata {
+    export interface IPluginOverrideMetadata {
         [pluginId: string]: IPluginOverrideInfo;
     }
 
-    interface IPlatformOverrideMetadata {
+    export interface IPlatformOverrideMetadata {
         [platformName: string]: IPlatformOverrideInfo;
     }
 
-    interface ITemplateOverrideInfo {
+    export interface ITemplateOverrideInfo {
         kitId: string;
         templateId?: string;
         templateInfo: ITemplateInfo;
     }
 
-    interface IKitTemplatesOverrideInfo {
+    export interface IKitTemplatesOverrideInfo {
         kitId: string;
         templates: ITemplateOverrideInfo[];
     }
 
-    interface ITemplateInfo {
+    export interface ITemplateInfo {
         name: string;
         url: string;
     }
 
-    interface ITemplateMetadata {
-        [kitId: string]: string;
+    export interface ITemplateMetadata {
+        [kitId: string]: {
+            [templateId: string]: ITemplateInfo;
+        }
     }
 
-    interface IKitInfo {
+    export interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;
         name?: string;
@@ -68,28 +72,30 @@ declare module TacoKits {
         platforms?: IPlatformOverrideMetadata;
     }
 
-    interface IKitMetadata {
+    export interface IKitMetadata {
         [kitId: string]: IKitInfo;
     }
 
-    interface IPluginInfo {
-        pluginId: string;
+    export interface IPluginInfo {
         name: string;
         description?: string;
         platforms?: string[];
     }
 
-    interface IPluginMetadata {
+    export interface IPluginMetadata {
         [pluginId: string]: IPluginInfo;
     }
 
-    interface ITacoKitMetadata {
+    export interface ITacoKitMetadata {
         plugins?: IPluginMetadata;
         kits: IKitMetadata;
         templates: ITemplateMetadata;
     }
 
-    class KitHelper {
+    /**
+     *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
+     */
+    export class KitHelper {
         public static KitMetadataFilePath: string;
         /**
          *   Initializes resource manager with the locale for resource strings
