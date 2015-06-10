@@ -23,7 +23,6 @@ import rimraf = require ("rimraf");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/cordovaWrapper");
-import projectHelper = require ("./utils/projectHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -185,7 +184,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         var configuration = commandData.options["release"] ? "release" : "debug";
         var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
-        return Q.all([Settings.loadSettings(), projectHelper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
+        return Q.all([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {

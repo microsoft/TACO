@@ -138,20 +138,6 @@ class ProjectHelper {
         return deferred.promise;
     }
 
-    public static getCordovaVersion(): Q.Promise<string> {
-        return ProjectHelper.getProjectInfo().then(function (projectInfo: ProjectHelper.IProjectInfo): Q.Promise<string> {
-            if (projectInfo.cordovaCliVersion) {
-                return Q.resolve(projectInfo.cordovaCliVersion);
-            } else {
-                // projectHelper.ts is require'd by cordovaWrapper.ts, and we want to avoid cyclic dependencies. Thus we delay the require until necessary.
-                var cordovaWrapper = require("./cordovaWrapper");
-                return cordovaWrapper.cli(["-v"], true).then(function (output: string): string {
-                    return output.split("\n")[0];
-                });
-            }
-        });
-    }
-
     /**
      *  Private helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
      */

@@ -20,7 +20,6 @@ import Q = require ("q");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/CordovaWrapper");
-import projectHelper = require ("./utils/projectHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -118,7 +117,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
-        return Q.all([Settings.loadSettings(), projectHelper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
+        return Q.all([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
             var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
             var language = settings.language || "en";
