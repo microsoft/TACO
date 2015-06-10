@@ -145,12 +145,12 @@ module TacoUtility {
                     // ignore if specified style is not availble
                     // say input string is <random>foo</random>, since random is not a style, colorize will ignore it
                     if (styleFunction[style]) {
-                        styleFunction = styleFunction[style];
+                        str = styleFunction[style](str);
                     } else {
                         assert(false, "unknown logger style " + style);
                     }
                 });
-                Logger.stdout(styleFunction(str));
+                Logger.stdout(str);
             } else {
                 Logger.stdout(str);
             }
