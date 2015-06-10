@@ -189,11 +189,11 @@ describe("taco create", function (): void {
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
             var scenario: number = 1;
 
-            // Template 4.0.0-Kit typescript: 84 files and 26 folders
+            // Template 4.0.0-Kit typescript: 86 files and 26 folders
             // Kit 4.0.0-Kit: Cordova adds 2 files and 4 folders
             // taco-cli: adds 1 file
-            // Total entries: 117
-            runScenario(scenario, 117, "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
+            // Total entries: 119
+            runScenario(scenario, 119, "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
@@ -209,11 +209,11 @@ describe("taco create", function (): void {
         it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
             var scenario: number = 3;
 
-            // Template default typescript: 84 files and 26 folders
+            // Template default typescript: 86 files and 26 folders
             // Kit 4.2.0-Kit: Cordova adds 2 files and 4 folders
             // taco-cli: adds 1 file
-            // Total entries: 117
-            runScenario(scenario, 117, "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
+            // Total entries: 119
+            runScenario(scenario, 119, "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
@@ -308,11 +308,11 @@ describe("taco create", function (): void {
         it("Success scenario 13 [path, template (typescript)]", function (done: MochaDone): void {
             var scenario: number = 13;
 
-            // Template 5.0.0-Kit typescript: 84 files and 26 folders
+            // Template 5.0.0-Kit typescript: 86 files and 26 folders
             // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
             // taco-cli: adds 1 file
-            // Total entries: 115
-            runScenario(scenario, 115, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Total entries: 117
+            runScenario(scenario, 117, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 14 [list, kit (that doesn't have a template override in the metadata)]", function (done: MochaDone): void {
