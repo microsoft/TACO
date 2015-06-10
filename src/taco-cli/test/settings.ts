@@ -12,7 +12,6 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import os = require ("os");
@@ -20,12 +19,15 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 
+import createMod = require ("../cli/create");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("../cli/utils/settings");
 import SetupMock = require ("./utils/setupMock");
 import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
+
+var create = new createMod();
 
 describe("taco settings", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");
@@ -46,6 +48,7 @@ describe("taco settings", function (): void {
     });
 
     after(function (done: MochaDone): void {
+        this.timeout(50000);
         process.chdir(originalCwd);
         rimraf(tacoHome, done);
     });
@@ -100,6 +103,7 @@ describe("taco settings", function (): void {
     });
 
     it("should correctly report build locations when no platforms are specified", function (mocha: MochaDone): void {
+        this.timeout(50000);
         var data: TacoUtility.Commands.ICommandData = {
             options: {
             },
@@ -109,7 +113,11 @@ describe("taco settings", function (): void {
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         Q.denodeify(del)("example").then(function (): Q.Promise<any> {
-            return cordova.raw.create("example");
+            return create.run({
+                options: {},
+                original: ["example"],
+                remain: []
+            });
         }).then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
             fs.mkdirSync(path.join("platforms", "foo"));
