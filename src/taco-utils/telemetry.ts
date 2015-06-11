@@ -51,29 +51,33 @@ module TacoUtility {
                 // TODO: Task 1184230:Support for sending unhashed values for internal users
                 this.properties[name] = hashedValue;
             }
-
-            public post(): void {
-                Telemetry.send(this);
-            }
         };
 
         /**
          * TelemetryActivity automatically includes timing data, used for scenarios where we want to track performance.
-         * Call end() to include reserved.activity.duration property which represents time in ms for the activity.
+         * Calls to start() and end() are optional, if not called explicitly then the constructor will be the start and send will be the end.
+         * This event will include a property called reserved.activity.duration which represents time in milliseconds.
          */
         export class TelemetryActivity extends TelemetryEvent {
-            private start: number[];
+            private startTime: number[];
+            private endTime: number[];
 
             constructor(name: string, properties?: ITelemetryProperties) {
                 super(name, properties);
-                this.start = process.hrtime();
+                this.start();     
+            }
+
+            public start(): void {
+                this.startTime = process.hrtime();
             }
 
             public end(): void {
-                var end = process.hrtime(this.start);
+                if (!this.endTime) {
+                    this.endTime = process.hrtime(this.startTime);
                 
-                // convert [seconds, nanoseconds] to milliseconds and include as property
-                this.properties["reserved.activity.duration"] = end[0] * 1000 + end[1] / 1000000;
+                    // convert [seconds, nanoseconds] to milliseconds and include as property
+                    this.properties["reserved.activity.duration"] = this.endTime[0] * 1000 + this.endTime[1] / 1000000;
+                }
             }
         };
 
@@ -81,12 +85,13 @@ module TacoUtility {
             TelemetryHelper.init(appVersion);
         }
 
-        export function sendSimpleEvent(eventName: string, properties?: ITelemetryProperties): void {
-            Telemetry.send(new TelemetryEvent(eventName, properties));
-        }
-
         export function send(event: TelemetryEvent): void {
             TelemetryHelper.addCommonProperties(event);
+
+            if (event instanceof TelemetryActivity) {
+                (<TelemetryActivity>event).end();
+            }
+
             appInsights.client.trackEvent(event.name, event.properties);
         }
 

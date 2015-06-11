@@ -23,19 +23,20 @@ declare module TacoUtility {
             properties: ITelemetryProperties;
             constructor(name: string, properties?: ITelemetryProperties);
             setPiiProperty(name: string, value: string): void;
-            post(): void;
         }
         /**
          * TelemetryActivity automatically includes timing data, used for scenarios where we want to track performance.
-         * Call end() to include reserved.activity.duration property which represents time in ms for the activity.
+         * Calls to start() and end() are optional, if not called explicitly then the constructor will be the start and send will be the end.
+         * This event will include a property called reserved.activity.duration which represents time in milliseconds.
          */
         class TelemetryActivity extends TelemetryEvent {
-            private start;
+            private startTime;
+            private endTime;
             constructor(name: string, properties?: ITelemetryProperties);
+            start(): void;
             end(): void;
         }
         function init(appVersion?: string): void;
-        function sendSimpleEvent(eventName: string, properties?: ITelemetryProperties): void;
         function send(event: TelemetryEvent): void;
     }
 }
