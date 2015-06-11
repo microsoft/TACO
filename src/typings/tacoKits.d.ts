@@ -6,60 +6,58 @@
 ﻿ *******************************************************
 ﻿ */
 
-interface IKitHelper {
-    getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
-    getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
-}
-
 // Typings for taco-kits package
 declare module TacoKits {
     // Basic interface for a KitHelper, for mocking purposes
-    
+    interface IKitHelper {
+        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+    }
 
-    export interface IPluginOverrideInfo {
+    interface IPluginOverrideInfo {
         name?: string;
         version?: string;
         src?: string;
         platforms?: string;
     }
 
-    export interface IPlatformOverrideInfo {
+    interface IPlatformOverrideInfo {
         version: string;
         src?: string;
     }
 
     // Metadata-related interfaces
-    export interface IPluginOverrideMetadata {
+    interface IPluginOverrideMetadata {
         [pluginId: string]: IPluginOverrideInfo;
     }
 
-    export interface IPlatformOverrideMetadata {
+    interface IPlatformOverrideMetadata {
         [platformName: string]: IPlatformOverrideInfo;
     }
 
-    export interface ITemplateOverrideInfo {
+    interface ITemplateOverrideInfo {
         kitId: string;
         templateId?: string;
         templateInfo: ITemplateInfo;
     }
 
-    export interface IKitTemplatesOverrideInfo {
+    interface IKitTemplatesOverrideInfo {
         kitId: string;
         templates: ITemplateOverrideInfo[];
     }
 
-    export interface ITemplateInfo {
+    interface ITemplateInfo {
         name: string;
         url: string;
     }
 
-    export interface ITemplateMetadata {
+    interface ITemplateMetadata {
         [kitId: string]: {
             [templateId: string]: ITemplateInfo;
         }
     }
 
-    export interface IKitInfo {
+    interface IKitInfo {
         "cordova-cli": string;
         "taco-min"?: string;
         name?: string;
@@ -72,21 +70,21 @@ declare module TacoKits {
         platforms?: IPlatformOverrideMetadata;
     }
 
-    export interface IKitMetadata {
+    interface IKitMetadata {
         [kitId: string]: IKitInfo;
     }
 
-    export interface IPluginInfo {
+    interface IPluginInfo {
         name: string;
         description?: string;
         platforms?: string[];
     }
 
-    export interface IPluginMetadata {
+    interface IPluginMetadata {
         [pluginId: string]: IPluginInfo;
     }
 
-    export interface ITacoKitMetadata {
+    interface ITacoKitMetadata {
         plugins?: IPluginMetadata;
         kits: IKitMetadata;
         templates: ITemplateMetadata;
