@@ -70,7 +70,7 @@
     "CordovaAcquisitionFailed": "Failed to load cordova {0}: {1}",
     "_CordovaAcquisitionFailed.comment": "Message printed when dynamically acquiring cordova for the self test fails. {0} is the cordova version, and {1} is the error message",
 
-    "FirstRunDependencyConfiguration": "Configuring first-run dependencies.\nTo deploy to physical iOS devices, or to debug a device or simulator, we need some packages from Homebrew.\nInstalling Homebrew may ask you for an admin password. Do you want to continue?",
+    "FirstRunDependencyConfiguration": "Configuring first-run dependencies.\nTo deploy to physical iOS devices, or to debug a device or simulator, we need some packages from Homebrew, a third party package manager.\nInstalling Homebrew may ask you for an admin password. Do you want to continue?",
     "_FirstRunDependencyConfiguration.comment": "Message displayed the first time remotebuild is run, asking for permission to install 3rd party dependencies",
     "HomebrewInstallationQuery": "[y]/n? ",
     "_HomebrewInstallationQuery.comment": "Message asking the user whether to install 3rd party dependencies. Hitting return will default to yes",
