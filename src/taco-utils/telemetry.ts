@@ -12,11 +12,12 @@
 /// <reference path="../typings/applicationinsights.d.ts" />
 /// <reference path="../typings/configstore.d.ts" />
 
+import appInsights = require ("applicationinsights");
+import crypto = require("crypto");
 import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
-import appInsights = require ("applicationinsights");
-import crypto = require ("crypto");
+
 import utilHelper = require ("./utilHelper");
 
 import UtilHelper = utilHelper.UtilHelper;
@@ -57,7 +58,8 @@ module TacoUtility {
         };
 
         /**
-         * TelemetryActivity automatically includes timing data, use for scenarios where we want to track performance.
+         * TelemetryActivity automatically includes timing data, used for scenarios where we want to track performance.
+         * Call end() to include reserved.activity.duration property which represents time in ms for the activity.
          */
         export class TelemetryActivity extends TelemetryEvent {
             private start: number[];
@@ -69,6 +71,8 @@ module TacoUtility {
 
             public end(): void {
                 var end = process.hrtime(this.start);
+                
+                // convert [seconds, nanoseconds] to milliseconds and include as property
                 this.properties["reserved.activity.duration"] = end[0] * 1000 + end[1] / 1000000;
             }
         };
