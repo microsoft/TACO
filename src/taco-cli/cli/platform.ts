@@ -34,14 +34,15 @@ class Platform extends cordovaCommandBase.CordovaCommandBase {
         var saveVersion: boolean = false;
         return kitHelper.getPlatformOverridesForKit(kitId).then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): Q.Promise<any> {
             // For each of the platforms specified at command-line, check for overrides in the current kit
+            console.log("Platform targets: " + self.cordovaCommandParams.targets);
             self.cordovaCommandParams.targets.forEach(function (platformName: string): void {
-                var platformSpec: string = platformName;
                 if (platformName.length > 0) {
+                    var platformSpec: string = platformName;
                     // Now, if the user has overridden the desired platform with a version number, do not look further
                     if (self.shouldCheckForOverride(platformName)) {
                         saveVersion = true;
                         if (platformOverrides[platformName]) {
-                            platformSpec = platformSpec + "@" + platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
+                            platformSpec = platformSpec + "@" + (platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src);
                         }
                     }
 

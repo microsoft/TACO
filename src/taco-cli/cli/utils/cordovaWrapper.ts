@@ -97,7 +97,7 @@ class CordovaWrapper {
     }
     
     /**
-     * Static method to invoke a cordova command. Used to invole the 'platform' or 'plugin' command
+     * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
      *
      * @param {string} The name of the cordova command to be invoked
      * @param {string} The version of the cordova CLI to use

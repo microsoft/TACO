@@ -41,7 +41,7 @@
         ]
     },
     "platform": {
-        "synopsis": "<synopsis>[COMMAND] [--usegit] [--save] [--link]</synopsis>",
+        "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
         "modulePath": "./platform",
         "description": "<description>[CommandPlatformDescription]</description>",
         "args": [
@@ -90,7 +90,7 @@
         ]
     },
     "plugin": {
-        "synopsis": "<synopsis>[COMMAND] [--usegit] [--save] [--link]</synopsis>",
+        "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
         "modulePath": "./plugin",
         "description": "<description>[CommandPluginDescription]</description>",
         "args": [

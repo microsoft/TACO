@@ -154,11 +154,11 @@
     "_CommandPluginListSubcommandDescription.comment": "Description for 'taco Plugin list'",
     "CommandPluginSearchSubcommandDescription": "Search the plugin registry for plugins matching the keywords",
     "_CommandPluginSearchSubcommandDescription.comment": "Description for 'taco plugin search'",
-    "CommandPluginSearchPathDescription": "When looking up plugins by ID, look in this directory and each of its subdirectories for the plugin before hitting the registry.Multiple search paths can be used by either specifying the flag multiple times, or by seperating paths with a delimiter (: on Unic, ; on Windows).",
+    "CommandPluginSearchPathDescription": "When looking up plugins by ID, look in this directory and each of its subdirectories for the plugin before hitting the registry.Multiple search paths can be used by either specifying the flag multiple times, or by seperating paths with a delimiter (: on Unix, ; on Windows).",
     "_CommandPluginSearchPathDescription.comment": "Description of  --searchpath argument to 'taco Plugin add'",
     "CommandPluginSaveAddDescription": "Save the information for specified plugin into config.xml",
     "_CommandPluginSaveAddDescription.comment": "Description of the --save argument to 'taco plugin add'",
-    "CommandPluginSaveRemoveDescription": "Remove the information for the specified plugin into config.xml",
+    "CommandPluginSaveRemoveDescription": "Remove the information for the specified plugin from config.xml",
     "_CommandPluginSaveRemoveDescription.comment": "Description of the --save argument to 'taco plugin remove'",
     "CommandPluginNoRegistryDescription": "Don't search the registry for plugins",
     "_CommandPluginNoRegistryDescription.comment": "Description of the --noregistry argument to 'taco Plugin update'",
@@ -249,7 +249,6 @@
     "_NoRemoteBuildIdFound.comment": "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",
     "NotACordovaProject": "Error: Current working directory is not a Cordova-based project",
     "_NotACordovaProject.comment": "Message printed when attempting to run a taco command in a directory which is not a Cordova-based project ",
-
 
     "UnsupportedPlatform": "Error: Unsupported platform {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",
