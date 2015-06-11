@@ -222,7 +222,7 @@ module TacoKits {
                                 templateInfo: templatesForKit[templateId]
                             };
 
-                            templateOverrideInfo.templateInfo.name = KitHelper.getLocalizedTemplateName(kitOverride, templateId);
+                            templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
                             templateList.push(templateOverrideInfo);
                         }
                     }
@@ -260,7 +260,7 @@ module TacoKits {
                             templateOverrideInfo = KitHelper.createTemplateOverrideInfo(kitId, templates[kitId][templateId]);
 
                             // Properly assign the localized template name
-                            templateOverrideInfo.templateInfo.name = KitHelper.getLocalizedTemplateName(kitId, templateId);
+                            templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
 
                             // Convert the url from relative to absolute local path
                             templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
@@ -279,7 +279,7 @@ module TacoKits {
                         templateOverrideInfo = KitHelper.createTemplateOverrideInfo(KitHelper.defaultTemplateKitOverride, templates[KitHelper.defaultTemplateKitOverride][templateId]);
 
                         // Properly assign the localized template name
-                        templateOverrideInfo.templateInfo.name = KitHelper.getLocalizedTemplateName(KitHelper.defaultTemplateKitOverride, templateId);
+                        templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
 
                         // Convert the url from relative to absolute local path
                         templateOverrideInfo.templateInfo.url = path.resolve(__dirname, templateOverrideInfo.templateInfo.url);
@@ -415,8 +415,8 @@ module TacoKits {
             });
         }
 
-        private static getLocalizedTemplateName(kitId: string, templateId: string): string {
-            return resources.getString(kitId + "_" + templateId);
+        private static getLocalizedTemplateName(templateInfo: ITemplateInfo): string {
+            return resources.getString(templateInfo.name);
         }
     }
 

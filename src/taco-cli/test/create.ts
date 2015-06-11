@@ -29,7 +29,9 @@ import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
+import TemplateManager = require ("../cli/utils/templateManager");
 
+import kitHelper = tacoKits.KitHelper;
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
@@ -39,8 +41,18 @@ interface IScenarioList {
 }
 
 describe("taco create", function (): void {
-    // Mocha constants
-    var createTimeout: number = 80000;
+    // Test constants
+    var createTimeout: number = 60000;
+    var tacoFileCount: number = 1;
+    var cordovaDefaultProjectFileCount: number = 13; // 6 files and 7 folders
+    var cordovaFileCounts: { [kitId: string]: number } = {
+        "4.0.0-Kit": 6, // 2 file and 4 folders
+        "4.2.0-Kit": 6, // 2 files and 4 folders
+        "5.0.0-Kit": 4 // 1 file and 3 folders
+    };
+
+    // Persistent TemplateManager to count template entries
+    var templateManager: TemplateManager;
 
     // Project info
     var testAppId: string = "testId";
@@ -130,19 +142,29 @@ describe("taco create", function (): void {
         fileContents.should.be.exactly(tacoJsonFileContents);
     }
 
-    function runScenario(scenario: number, expectedFileCount: number, tacoJsonFileContents?: string): Q.Promise<any> {
+    function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: string): Q.Promise<any> {
         var create = new Create();
 
-        return create.run(makeICommandData(scenario, successScenarios)).then(function (): void {
-            var projectPath: string = getProjectPath(successPrefix, scenario);
-            var fileCount: number = countProjectItemsRecursive(projectPath);
+        return create.run(makeICommandData(scenario, successScenarios))
+            .then(function (): void {
+                var projectPath: string = getProjectPath(successPrefix, scenario);
+                var fileCount: number = countProjectItemsRecursive(projectPath);
 
-            fileCount.should.be.exactly(expectedFileCount);
+                fileCount.should.be.exactly(expectedFileCount);
 
-            if (tacoJsonFileContents) {
-                verifyTacoJsonFileContents(projectPath, tacoJsonFileContents);
-            }
-        });
+                if (tacoJsonFileContents) {
+                    verifyTacoJsonFileContents(projectPath, tacoJsonFileContents);
+                }
+            });
+    }
+
+    function runScenario(scenario: number, kitUsed: string, templateUsed: string, tacoJsonFileContents?: string): Q.Promise<any> {
+        return templateManager.getTemplateEntriesCount(kitUsed, templateUsed)
+                .then(function (templateEntries: number): Q.Promise<any> {
+                    var totalEntries: number = templateEntries + tacoFileCount + cordovaFileCounts[kitUsed];
+
+                    return runScenarioWithExpectedFileCount(scenario, totalEntries, tacoJsonFileContents);
+                });
     }
 
     function runFailureScenario<T>(scenario: number, expectedErrorCode?: T): Q.Promise<any> {
@@ -169,6 +191,9 @@ describe("taco create", function (): void {
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
+        // Instantiate the persistent templateManager
+        templateManager = new TemplateManager(kitHelper);
+
         // Delete existing run folder if necessary
         rimraf(runFolder, function (err: Error): void {
             if (err) {
@@ -192,81 +217,57 @@ describe("taco create", function (): void {
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
             var scenario: number = 1;
 
-            // Template 4.0.0-Kit typescript: 84 files and 26 folders
-            // Kit 4.0.0-Kit: Cordova adds 2 files and 4 folders
-            // taco-cli: adds 1 file
-            // Total entries: 117
-            runScenario(scenario, 117, "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
+            // Should use kit 4.0.0-Kit and template typescript
+            runScenario(scenario, "4.0.0-Kit", "typescript", "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
             var scenario: number = 2;
 
-            // Template 5.0.0-Kit blank: 64 files and 22 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 91
-            runScenario(scenario, 91, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template blank
+            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
             var scenario: number = 3;
 
-            // Template default typescript: 84 files and 26 folders
-            // Kit 4.2.0-Kit: Cordova adds 2 files and 4 folders
-            // taco-cli: adds 1 file
-            // Total entries: 117
-            runScenario(scenario, 117, "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
+            // Should use kit 4.2.0-Kit and template typescript
+            runScenario(scenario, "4.2.0-Kit", "typescript", "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
             var scenario: number = 4;
 
-            // Template default blank: 64 files and 22 folders
-            // Kit 4.2.0-Kit: Cordova adds 2 files and 4 folders
-            // taco-cli: adds 1 file
-            // Total entries: 93
-            runScenario(scenario, 93, "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
+            // Should use kit 4.2.0-Kit and template blank
+            runScenario(scenario, "4.2.0-Kit", "blank", "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 5 [path, kit, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 5;
 
-            // Template 5.0.0-Kit blank: 64 files and 22 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 91
-            runScenario(scenario, 91, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template blank
+            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
             var scenario: number = 6;
 
-            // Template 4.0.0-Kit blank: 64 files and 22 folders
-            // Kit 4.0.0-Kit: Cordova adds 2 files and 4 folders
-            // taco-cli: adds 1 file
-            // Total entries: 93
-            runScenario(scenario, 93, "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
+            // Should use kit 4.0.0-Kit and template blank
+            runScenario(scenario, "4.0.0-Kit", "blank", "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
         });
 
-        it("Success scenario 7 [path, template blank]", function (done: MochaDone): void {
+        it("Success scenario 7 [path, template]", function (done: MochaDone): void {
             var scenario: number = 7;
 
-            // Template 5.0.0-Kit blank: 64 files and 22 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 91
-            runScenario(scenario, 91, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template blank
+            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 8 [path, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 8;
 
-            // Template 5.0.0-Kit blank: 64 files and 22 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 91
-            runScenario(scenario, 91, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template blank
+            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 9 [path, copy-from]", function (done: MochaDone): void {
@@ -274,78 +275,61 @@ describe("taco create", function (): void {
 
             // copy-from custom assets: 2 files and 1 folder
             // Kit 5.0.0-Kit: Cordova adds 2 files and 4 folders
-            // taco-cli: adds 1 file
-            // Total entries: 10
-            runScenario(scenario, 10, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            var totalEntries = 9 + tacoFileCount;
+
+            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 10 [path, cli]", function (done: MochaDone): void {
             var scenario: number = 10;
 
-            // CLI 4.2.0 + default Cordova project: Cordova adds 6 files and 7 folders
+            // CLI 4.2.0 + default Cordova project
             // taco-cli: adds 1 file
-            // Total entries: 14
-            runScenario(scenario, 14, "{\"cli\":\"4.2.0\"}").then(done, done);
+            var totalEntries = cordovaDefaultProjectFileCount + tacoFileCount;
+
+            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"cli\":\"4.2.0\"}").then(done, done);
         });
 
         it("Success scenario 11 [path, extra unknown parameter]", function (done: MochaDone): void {
             var scenario: number = 11;
 
-            // Template 5.0.0-Kit blank: 64 files and 22 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 91
-            runScenario(scenario, 91, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template blank
+            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 12 [path, kit (empty)]", function (done: MochaDone): void {
             var scenario: number = 12;
 
-            // Template 5.0.0-Kit blank: 64 files and 22 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 91
-            runScenario(scenario, 91, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template blank
+            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 13 [path, template (typescript)]", function (done: MochaDone): void {
             var scenario: number = 13;
 
-            // Template 5.0.0-Kit typescript: 84 files and 26 folders
-            // Kit 5.0.0-Kit: Cordova adds 1 file and 3 folders
-            // taco-cli: adds 1 file
-            // Total entries: 115
-            runScenario(scenario, 115, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.0.0-Kit and template typescript
+            runScenario(scenario, "5.0.0-Kit", "typescript", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
 
         it("Success scenario 14 [list, kit (that doesn't have a template override in the metadata)]", function (done: MochaDone): void {
             var scenario: number = 14;
 
-            // Template: none
-            // Kit: none
-            // taco-cli: none
-            // Total entries: 0 (we are only listing templates, no project should be created)
-            runScenario(scenario, 0).then(done, done);
+            // We are only listing templates, no project should be created)
+            runScenarioWithExpectedFileCount(scenario, 0).then(done, done);
         });
 
         it("Success scenario 15 [list, kit (that has a template override in the metadata)]", function (done: MochaDone): void {
             var scenario: number = 15;
 
-            // Template: none
-            // Kit: none
-            // taco-cli: none
-            // Total entries: 0 (we are only listing templates, no project should be created)
-            runScenario(scenario, 0).then(done, done);
+            // We are only listing templates, no project should be created)
+            runScenarioWithExpectedFileCount(scenario, 0).then(done, done);
         });
 
         it("Success scenario 16 [list]", function (done: MochaDone): void {
             var scenario: number = 16;
 
-            // Template: none
-            // Kit: none
-            // taco-cli: none
-            // Total entries: 0 (we are only listing templates, no project should be created)
-            runScenario(scenario, 0).then(done, done);
+            // We are only listing templates, no project should be created)
+            runScenarioWithExpectedFileCount(scenario, 0).then(done, done);
         });
     });
 

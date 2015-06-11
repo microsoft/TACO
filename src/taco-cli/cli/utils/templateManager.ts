@@ -127,6 +127,23 @@ class TemplateManager {
         });
     }
 
+    /**
+     * Get the number of entries in the specified template
+     *
+     * @param {string} kitId The id of the desired kit
+     * @param {string} templateId The id of the desired template
+     *
+     * @return {Q.Promise<number>} A promise resolved with the number of entries in the template
+     */
+    public getTemplateEntriesCount(kitId: string, templateId: string): Q.Promise<number> {
+        return this.kitHelper.getTemplateOverrideInfo(kitId, templateId)
+            .then(function (templateOverrideInfo: TacoKits.ITemplateOverrideInfo): number {
+                var templateZip = new admZip(templateOverrideInfo.templateInfo.url);
+
+                return templateZip.getEntries().length - 1; // We substract 1, because the returned count includes the root folder of the template
+            });
+    }
+
     private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
         var replaceParams: Replace.IReplaceParameters = {
             regex: "",
