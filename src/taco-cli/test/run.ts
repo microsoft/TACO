@@ -13,8 +13,6 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
@@ -24,6 +22,7 @@ import Q = require ("q");
 import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 
+import createMod = require ("../cli/create");
 import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
 import ServerMock = require ("./utils/serverMock");
@@ -34,6 +33,7 @@ import TacoUtility = require ("taco-utils");
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
 
+var create = new createMod();
 var run = new runMod();
 var setup = new setupMod();
 
@@ -41,13 +41,19 @@ describe("taco run", function (): void {
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;
+    var vcordova = "4.0.0";
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
-            return cordova.raw.create("example");
+            var args = ["example", "--cli", vcordova];
+            return create.run({
+                options: {},
+                original: args,
+                remain: args
+            });
         })
             .then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
@@ -79,6 +85,7 @@ describe("taco run", function (): void {
     });
 
     beforeEach(function (mocha: MochaDone): void {
+        this.timeout(50000);
         Q.fcall(createCleanProject).done(function (): void {
             mocha();
         }, function (err: any): void {

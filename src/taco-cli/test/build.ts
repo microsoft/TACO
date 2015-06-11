@@ -13,8 +13,6 @@
 "use strict";
 var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
-// TODO (Devdiv 1160579) Use dynamically acquired cordova versions
-import cordova = require ("cordova");
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
@@ -26,6 +24,7 @@ import rimraf = require ("rimraf");
 import util = require ("util");
 
 import buildMod = require ("../cli/build");
+import createMod = require ("../cli/create");
 import setupMod = require ("../cli/setup");
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
@@ -36,19 +35,26 @@ import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
 
 var build = new buildMod();
+var create = new createMod();
 var setup = new setupMod();
 
 describe("taco build", function (): void {
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "build");
     var originalCwd: string;
+    var vcordova: string = "4.0.0";
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
-            return cordova.raw.create("example");
+            var args = ["example", "--cli", vcordova];
+            return create.run({
+                options: {},
+                original: args,
+                remain: args
+            });
         }).then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
         });
@@ -83,6 +89,7 @@ describe("taco build", function (): void {
 
     beforeEach(function (mocha: MochaDone): void {
         // Start each test with a pristine cordova project
+        this.timeout(50000);
         Q.fcall(createCleanProject).done(function (): void {
             mocha();
         }, function (err: any): void {
@@ -107,7 +114,6 @@ describe("taco build", function (): void {
     it("should make the correct sequence of calls for 'taco build --remote test'", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12340;
         
         // Mock out the server on the other side
@@ -198,7 +204,6 @@ describe("taco build", function (): void {
     it("should report an error if the remote build fails", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12341;
         
         // Mock out the server on the other side
@@ -278,7 +283,6 @@ describe("taco build", function (): void {
     it("should attempt incremental builds where possible", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
-        var vcordova = require("cordova/package.json").version;
         var buildNumber = 12342;
 
         var buildInfoDir = path.join("remote", "test", configuration);

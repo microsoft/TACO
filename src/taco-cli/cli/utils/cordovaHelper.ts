@@ -189,7 +189,6 @@ class CordovaHelper {
         return cordovaArgs.concat(additionalArguments);
     }
 
-
     public static toCordovaRunArguments(platform: string, commandData: commands.ICommandData): Cordova.ICordovaRawOptions {
         // Run, build, emulate, prepare and compile all use the same format at the moment
         return CordovaHelper.toCordovaArgumentsInternal(platform, commandData);

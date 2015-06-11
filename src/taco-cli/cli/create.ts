@@ -33,7 +33,6 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
-import tacoProjectHelper = projectHelper.TacoProjectHelper;
 import utils = tacoUtility.UtilHelper;
 
 /* 
@@ -89,7 +88,7 @@ class Create implements commands.IDocumentedCommand {
                     var kitProject = self.isKitProject();
                     var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                    return tacoProjectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
                 })
                 .then(function (): Q.Promise<any> {
                     self.finalize(templateDisplayName);
@@ -252,6 +251,10 @@ class Create implements commands.IDocumentedCommand {
         if (this.isKitProject()) {
             if (templateDisplayName) {
                 logger.log(resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath));
+
+                if (this.commandParameters.data.options["template"] === "typescript") {
+                    logger.log(resources.getString("CommandCreateInstallGulp"));
+                }
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"];
