@@ -13,7 +13,7 @@
 /// <reference path="../typings/configstore.d.ts" />
 
 import appInsights = require ("applicationinsights");
-import crypto = require("crypto");
+import crypto = require ("crypto");
 import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
