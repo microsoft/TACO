@@ -143,6 +143,12 @@
     "_CommandPlatformOptVersionDescription.comment": "Description of the <VERSION> argument in the syntax description",
     "CommandPlatformOptBranchDescription": "Name of the branch to checkout after cloning the git repo; If none is specified, the 'master' branch will be checked out",
     "_CommandPlatformOptBranchDescription.comment": "Description of the <BRANCH> argument in the syntax description",
+    "CommandPlatformStatusAddingFromNPM": "Adding platform <highlight>{0}</highlight> <highlight>{1}</highlight> to Cordova project...",
+    "_CommandPlatformStatusAddingFromNPM.comment": "Status message shown while adding a platform {0} of version {1} from NPM",
+    "CommandPlatformStatusAddingFromURI": "Adding platform <highlight>{0}</highlight> from <highlight>{1}</highlight> to Cordova project...",
+    "_CommandPlatformStatusAddingFromURI.comment": "Status message shown while adding a platform {0} of version {1} from a GIT URI",
+    "CommandPlatformStatusAdded": "<success>Success!</success> Platform {0} added to {1}",
+    "_CommandPlatformStatusAdded.comment": "Status message after successfully adding platform {0} to {1}",
 
     "CommandPluginDescription": "Manage project plugins",
     "_CommandPluginDescription.comment": "Description for 'taco plugin'",
@@ -170,7 +176,13 @@
     "_CommandPluginShrinkwrapDescription.comment": "Description of the --shrinkwrap argument to 'taco plugin add'",
     "CommandPluginBrowserifyDescription": "Plugins javascript gets loaded at build time instead of runtime using browserify, Replace cordovajs file with one that included the JS of the installed plugins.",
     "_CommandPluginBrowserifyDescription.comment": "Description of the <path> argument in the syntax description",
-    
+    "CommandPluginStatusAddingFromNPM": "Adding plugin <highlight>{0}</highlight> version <highlight>{1}</highlight> to Cordova project...",
+    "_CommandPluginStatusAddingFromNPM.comment": "Status message shown while adding a plugin {0} of version {1} from NPM",
+    "CommandPluginStatusAddingFromURI": "Adding plugin <highlight>{0}</highlight> from <highlight>{1}</highlight> to Cordova project...",
+    "_CommandPluginStatusAddingFromURI.comment": "Status message shown while adding a platform {0} of version {1} from a GIT URI",
+    "CommandPluginStatusAdded": "<success>Success!</success> plugin {0} added to project",
+    "_CommandPluginStatusAdded.comment": "Status message after successfully adding plugin {0} to project",
+
     "CommandBuildDescription": "Build a cordova project",
     "_CommandBuildDescription.comment": "Description for 'taco build'",
     "CommandBuildPlatformDescription": "The platform that you wish to build",
@@ -307,6 +319,9 @@
     "_DoneExtractingRemoteBuild.comment": "Message printed after successfully unpacking the downloaded build artifacts. {0} is the location they were unpacked to.",
     "FailedToDeleteRemoteZip": "------ Failed to delete downloaded zip file {0}. This did not prevent a successful build.",
     "_FailedToDeleteRemoteZip.comment": "Message printed if deleting the packed build artifacts fails after already unpacking them. {0} is the location of the packed archive.",
+    "ErrorKitMetadataFileMalformed": "Error: The kit metadata file used by TACO is corrupt. Please fix this by re-installing taco-cli from npm.",
+    "_ErrorKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
+
 
     "IncrementalBuild": "------ Incremental Build: {0}",
     "_IncrementalBuild.comment": "Message printed when we start a remote build. {0} is either true or false, depending on whether the build is incremental",

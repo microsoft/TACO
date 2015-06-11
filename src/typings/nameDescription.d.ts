@@ -13,10 +13,6 @@ interface INameDescription {
     description: string;
 }
 
-interface ICommandDescription extends INameDescription {
-    options?: INameDescription[];
-}
-
 interface ICommandAlias {
     alias: string;
     command: string;

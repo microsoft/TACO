@@ -43,7 +43,7 @@
     "platform": {
         "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
         "modulePath": "./platform",
-        "description": "<description>[CommandPlatformDescription]</description>",
+        "description": "<helptitle>[CommandPlatformDescription]</helptitle>",
         "args": [
             { "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]" },
             {
@@ -92,14 +92,14 @@
     "plugin": {
         "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
         "modulePath": "./plugin",
-        "description": "<description>[CommandPluginDescription]</description>",
+        "description": "<helptitle>[CommandPluginDescription]</helptitle>",
         "args": [
             { "name": "COMMAND", "description": "[CommandPluginSubcommandDescription]" },
             {
                 "name": "add <PLAT-SPEC>",
                 "description": "[CommandPluginAddSubcommandDescription]",
                 "options": [
-                    { "name": "[--searchpath <DIRECTORY>", "description": "[CommandPluginSearchPathDescription]" },
+                    { "name": "[--searchpath <DIRECTORY>]", "description": "[CommandPluginSearchPathDescription]" },
                     { "name": "[--noregistry]", "description": "[CommandPluginNoRegistryDescription]" },
                     { "name": "[--link]", "description": "[CommandPluginLinkDescription]" },
                     { "name": "[--save]", "description": "[CommandPluginSaveAddDescription]" },

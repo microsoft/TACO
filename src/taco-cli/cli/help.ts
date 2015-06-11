@@ -32,6 +32,7 @@ import LoggerHelper = tacoUtility.LoggerHelper;
  */
 class Help implements commands.IDocumentedCommand {
     private static TacoString: string = "taco";
+    private static OptionIndent: number = 5;
     private commandsFactory: CommandsFactory = null;
 
     public info: commands.ICommandInfo;
@@ -75,15 +76,15 @@ class Help implements commands.IDocumentedCommand {
     public printGeneralUsage(): void {
         Help.printCommandHeader(resources.getString("CommandHelpTacoUsage"));
 
-        var commandDescriptions: ICommandDescription[] = new Array();
+        var nameValuePairs: INameDescription[] = new Array();
         for (var i in this.commandsFactory.listings) {
-            commandDescriptions.push({
+            nameValuePairs.push({
                 name: i,
                 description: this.commandsFactory.listings[i].description
             });
         }
 
-        Help.printCommandTable(commandDescriptions);
+        Help.printCommandTable(nameValuePairs);
     }
 
     /**
@@ -97,12 +98,37 @@ class Help implements commands.IDocumentedCommand {
             return;
         }
 
+        // Prepare a flattened list of name/description values of args and options for each of the args.
+        // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>,<arg2>, <arg2.options>
+        var argList: INameDescription[] = [];
+        var args: any = <INameDescription[]>this.commandsFactory.listings[command].args;
+        for (var i in args) {
+            // Push the arg first
+            argList.push({
+                name: args[i].name,
+                description: args[i].description
+            });
+            if (args[i].options) {
+                var options: INameDescription[] = <INameDescription[]>args[i].options;
+                options.forEach(nvp => {
+                    var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
+                    nvp.name = optionsLeftIndent + nvp.name;
+                    argList.push({
+                        name: nvp.name,
+                        description: nvp.description
+                    });
+                });
+            }
+        }
+
         var list: tacoUtility.Commands.ICommandInfo = this.commandsFactory.listings[command];
         Help.printCommandHeader(util.format("%s %s %s", Help.TacoString, command, list.synopsis), list.description);
 
         // if both needs to be printed we need to calculate an indent ourselves
         // to make sure args.values have same indenation as options.values
         // we need to also account for extra indenation given to options
+        list.args = argList;
+
         var maxKeyLength: number = 0;
         if (list.args) {
             list.args.forEach(nvp => {
@@ -136,16 +162,11 @@ class Help implements commands.IDocumentedCommand {
         }
     }
 
-    private static printCommandTable(commandDescriptions: ICommandDescription[], indent1?: number, indent2?: number): void {
-        commandDescriptions.forEach(metadata => {
-            metadata.description = Help.getDescriptionString(metadata.description);
-            if (metadata.options) {
-                metadata.options.forEach(option => {
-                    option.description = Help.getDescriptionString(option.description);
-                });
-            }
+    private static printCommandTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void {
+        nameValuePairs.forEach(item => {
+            item.description = Help.getDescriptionString(item.description);
         });
-        LoggerHelper.logCommandTable(commandDescriptions, indent1, indent2);
+        LoggerHelper.logNameValueTable(nameValuePairs, indent1, indent2);
     }
 
     private static printCommandHeader(synopsis: string, description?: string): void {

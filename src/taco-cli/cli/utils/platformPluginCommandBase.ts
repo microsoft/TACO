@@ -31,15 +31,14 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
-import tacoProjectHelper = projectHelper.TacoProjectHelper;
 import utils = tacoUtility.UtilHelper;
 
 /*
-* CordovaCommandBase
+* PlatfromPluginCommandBase
 *
 * Base handler for platform and plugin commands
 */
-export class CordovaCommandBase implements commands.IDocumentedCommand {
+export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.CommandData = {
         searchpath: String,
         noregistry: String,
@@ -57,8 +56,8 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
     };
     public name: string;
     
-    public cordovaCommandParams: cordovaHelper.ICordovaCommandParameters;
-    public downloadOptions: cordovaHelper.ICordovaDownloadOptions;
+    public cordovaCommandParams: Cordova.ICordovaCommandParameters;
+    public downloadOptions: Cordova.ICordovaDownloadOptions;
     public info: commands.ICommandInfo;
 
     /**
@@ -95,7 +94,7 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
 
         var self = this;
         var projectInfo: projectHelper.IProjectInfo;
-        return tacoProjectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
+        return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
             projectInfo = info;
         })
             .then(function (): Q.Promise<any> {
@@ -119,7 +118,7 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
      */
     private parseArguments(args: commands.ICommandData): void {
         console.log("args.original : " + args.original + "\n");
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(CordovaCommandBase.KnownOptions, CordovaCommandBase.ShortHands, args.original, 0);
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KnownOptions, PlatformPluginCommandBase.ShortHands, args.original, 0);
         var subCommand: string = commandData.remain[0];
         var remain: string = commandData.remain.slice(1).join();
         var targets: string[] = remain.trim().split(",");
@@ -157,7 +156,7 @@ export class CordovaCommandBase implements commands.IDocumentedCommand {
     /**
      * Prints the platform/plugin addition/removal status message
      */
-    private printStatusMessage(componentName: string, action: string, packageSpec: string): void {
+    private printStatusMessage(componentName: string, action: string, spec: string, specType: TacoUtility.PackageSpecType): void {
         /* TODO - Print status messages with the right theme after string review */
     }
 }

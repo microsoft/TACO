@@ -65,7 +65,7 @@ class TemplateManager {
      *
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
-    public createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCliVersion: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<string> {
+    public createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<string> {
         var self = this;
         var templateName: string = null;
         var templateSrcPath: string = null;

@@ -21,50 +21,7 @@ module CordovaHelper {
     /* 
      * Interfaces for the cordova create command
      */
-    export interface ICordovaLibMetadata {
-        url?: string;
-        version?: string;
-        id?: string;
-        link?: boolean;
-    }
-
-    export interface ICordovaConfigMetadata {
-        id?: string;
-        name?: string;
-        lib?: {
-            www?: ICordovaLibMetadata;
-        };
-    }
-
-    export interface ICordovaCreateParameters {
-        projectPath: string;
-        appId: string;
-        appName: string;
-        cordovaConfig: any;
-        copyFrom?: string;
-        linkTo?: string;
-    }
-
-    export interface ICordovaRawCliVars {
-        [name: string]: string;
-    }
-
-    export interface ICordovaDownloadOptions {
-        searchpath: string;
-        noregistry: boolean;
-        usegit: boolean;
-        cli_variables: ICordovaRawCliVars;
-        browserify: string;
-        link: string;
-        save: boolean;
-        shrinkwrap: boolean;
-    }
-
-    export interface ICordovaCommandParameters {
-        subCommand: string;
-        targets: string[];
-        downloadOptions: ICordovaDownloadOptions;
-    }
+    
 }
 
 class CordovaHelper {
@@ -101,7 +58,7 @@ class CordovaHelper {
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
      */
-    public static prepareCordovaConfig(parameters: CordovaHelper.ICordovaCreateParameters): void {
+    public static prepareCordovaConfig(parameters: Cordova.ICordovaCreateParameters): void {
         /*
         Re-implementation of Cordova's code:
 
@@ -130,7 +87,7 @@ class CordovaHelper {
         }
         */
 
-        var config: CordovaHelper.ICordovaConfigMetadata = {};
+        var config: Cordova.ICordovaConfigMetadata = {};
 
         // Verify if user specified a cordovaConfig parameter on the command line
         if (parameters.cordovaConfig) {
@@ -152,7 +109,7 @@ class CordovaHelper {
 
             customWww = path.resolve(customWww);
 
-            var wwwCfg: CordovaHelper.ICordovaLibMetadata = { url: customWww };
+            var wwwCfg: Cordova.ICordovaLibMetadata = { url: customWww };
 
             if (parameters.linkTo) {
                 wwwCfg.link = true;

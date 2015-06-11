@@ -15,9 +15,13 @@
 
 import Q = require ("q");
 
-import cordovaCommandBase = require ("./utils/cordovaCommandBase");
-import tacoKits = require ("taco-kits");
+import commandBase = require("./utils/platformPluginCommandBase");
+import errorHelper = require("./tacoErrorHelper");
+import tacoKits = require("taco-kits");
+import tacoUtility = require("taco-utils");
+import TacoErrorCodes = require("./tacoErrorCodes");
 
+import packageLoader = tacoUtility.TacoPackageLoader;
 import kitHelper = tacoKits.KitHelper;
 
 /**
@@ -25,7 +29,7 @@ import kitHelper = tacoKits.KitHelper;
   *
   * Handles "taco platform"
   */
-class Platform extends cordovaCommandBase.CordovaCommandBase {
+class Platform extends commandBase.PlatformPluginCommandBase {
     public name: string = "platform";
 
     public checkForKitOverrides(kitId: string): Q.Promise<any> {
@@ -42,6 +46,16 @@ class Platform extends cordovaCommandBase.CordovaCommandBase {
                     if (self.shouldCheckForOverride(platformName)) {
                         saveVersion = true;
                         if (platformOverrides[platformName]) {
+                            if (platformOverrides[platformName].version) {
+                                platformSpec = platformSpec + "@" + platformOverrides[platformName].version;
+                                //logger.log(resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath));
+                            } else if (platformOverrides[platformName].src) {
+                                platformSpec = platformSpec + "@" + platformOverrides[platformName].src;
+                                //logger.log(resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath));
+                            } else {
+                                // Some one messed up the tacokit metadata file
+                                throw errorHelper.get(TacoErrorCodes.ErrorKitMetadataFileMalformed);
+                            }
                             platformSpec = platformSpec + "@" + (platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src);
                         }
                     }

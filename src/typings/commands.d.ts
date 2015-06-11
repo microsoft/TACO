@@ -17,6 +17,7 @@ declare module TacoUtility {
             description: string;
             args: INameDescription[];
             options: INameDescription[];
+            syntax: INameDescription[];
             aliases: ICommandAlias[];
         }
         interface ICommandData {

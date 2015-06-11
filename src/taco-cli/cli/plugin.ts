@@ -15,8 +15,10 @@
 
 import Q = require("q");
 
-import cordovaCommandBase = require("./utils/cordovaCommandBase");
+import commandBase = require("./utils/platformPluginCommandBase");
 import tacoKits = require("taco-kits");
+import TacoErrorCodes = require("./tacoErrorCodes");
+import errorHelper = require("./tacoErrorHelper");
 
 import kitHelper = tacoKits.KitHelper;
 
@@ -25,7 +27,7 @@ import kitHelper = tacoKits.KitHelper;
   *
   * Handles "taco plugin"
   */
-class Plugin extends cordovaCommandBase.CordovaCommandBase {
+class Plugin extends commandBase.PlatformPluginCommandBase {
     public name: string = "plugin";
 
     public checkForKitOverrides(kitId: string): Q.Promise<any> {
@@ -43,8 +45,11 @@ class Plugin extends cordovaCommandBase.CordovaCommandBase {
                         if (pluginOverrides[spec]) {
                             if (pluginOverrides[spec].version) {
                                 pluginSpec = spec + "@" + pluginOverrides[spec].version;
-                            } else {
+                            } else if (pluginOverrides[spec].src) {
                                 pluginSpec = pluginOverrides[spec].src;
+                            } else {
+                                // Some one messed up the tacokit metadata file
+                                throw errorHelper.get(TacoErrorCodes.ErrorKitMetadataFileMalformed);
                             }
                         }
                     }

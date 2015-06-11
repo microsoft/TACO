@@ -39,7 +39,7 @@ import utils = tacoUtility.UtilHelper;
  * Wrapper interface for create command parameters
  */
 interface ICreateParameters {
-    cordovaParameters: cordovaHelper.ICordovaCreateParameters;
+    cordovaParameters: Cordova.ICordovaCreateParameters;
     data: commands.ICommandData;
 }
 
@@ -111,7 +111,7 @@ class Create implements commands.IDocumentedCommand {
 
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, {}, args.original, 0);
-        var cordovaParams: cordovaHelper.ICordovaCreateParameters = {
+        var cordovaParams: Cordova.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
             appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,

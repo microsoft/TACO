@@ -114,7 +114,7 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(cordovaCliVersion: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
+    public static create(cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
                 cordovaHelper.prepareCordovaConfig(cordovaParameters);
@@ -144,7 +144,7 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static invokeCommand(command: string, cordovaCliVersion: string, platformCmdParameters: cordovaHelper.ICordovaCommandParameters): Q.Promise<any> {
+    public static invokeCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
             if (command === "platform") {

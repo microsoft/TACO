@@ -21,6 +21,51 @@ declare module Cordova {
         browserify?: boolean;
     }
 
+    export interface ICordovaLibMetadata {
+        url?: string;
+        version?: string;
+        id?: string;
+        link?: boolean;
+    }
+
+    export interface ICordovaConfigMetadata {
+        id?: string;
+        name?: string;
+        lib?: {
+            www?: ICordovaLibMetadata;
+        };
+    }
+
+    export interface ICordovaCreateParameters {
+        projectPath: string;
+        appId: string;
+        appName: string;
+        cordovaConfig: any;
+        copyFrom?: string;
+        linkTo?: string;
+    }
+
+    export interface ICordovaRawCliVars {
+        [name: string]: string;
+    }
+
+    export interface ICordovaDownloadOptions {
+        searchpath: string;
+        noregistry: boolean;
+        usegit: boolean;
+        cli_variables: ICordovaRawCliVars;
+        browserify: string;
+        link: string;
+        save: boolean;
+        shrinkwrap: boolean;
+    }
+
+    export interface ICordovaCommandParameters {
+        subCommand: string;
+        targets: string[];
+        downloadOptions: ICordovaDownloadOptions;
+    }
+
     export interface ICordovaRaw {
         build(options: ICordovaRawOptions): Q.Promise<any>;
         config: any;
