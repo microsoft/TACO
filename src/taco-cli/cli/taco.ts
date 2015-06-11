@@ -26,7 +26,6 @@ import logger = tacoUtility.Logger;
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
-import TacoProjectHelper = projectHelper.TacoProjectHelper;
 import telemetry = tacoUtility.Telemetry;
 
 interface IParsedArgs {
@@ -44,7 +43,7 @@ class Taco { /*
      */
     public static run(): void {
         var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
-        TacoProjectHelper.cdToProjectRoot();
+        projectHelper.cdToProjectRoot();
         telemetry.init(require("../package.json").version);
         Taco.executeCommand(parsedArgs).done(null, function (reason: any): any {
             // Pretty print taco Errors
