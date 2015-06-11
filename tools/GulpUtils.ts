@@ -91,17 +91,18 @@ class GulpUtils {
     }
 
     public static updateLocalPackageFilePaths(fileGlob: string, srcPath: string, destPath: string, dropLocation: string): Q.Promise<any> {
+        var uncPathPadding = dropLocation.indexOf("\\\\") === 0 ? "\\\\" : "";
         return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, fileGlob))
             .pipe(jsonEditor(
                 function (json: { dependencies: { [key: string]: string }; optionalDependencies: { [key: string]: string } }): any {
                     Object.keys(json.dependencies || {}).forEach(function (packageKey: string): void {
                         if (json.dependencies[packageKey].indexOf("file:") == 0) {
-                            json.dependencies[packageKey] = util.format("file:%s", path.resolve(dropLocation, packageKey + ".tgz"));
+                            json.dependencies[packageKey] = util.format("file:%s%s", uncPathPadding, path.resolve(dropLocation, packageKey + ".tgz"));
                         }
                     });
                     Object.keys(json.optionalDependencies || {}).forEach(function (packageKey: string): void {
                         if (json.optionalDependencies[packageKey].indexOf("file:") == 0) {
-                            json.optionalDependencies[packageKey] = util.format("file:%s", path.resolve(dropLocation, packageKey + ".tgz"));
+                            json.optionalDependencies[packageKey] = util.format("file:%s%s", uncPathPadding, path.resolve(dropLocation, packageKey + ".tgz"));
                         }
                     });
                     return json;
