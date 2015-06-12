@@ -53,32 +53,6 @@ class Taco { /*
                 throw reason;
             }
         });
-
-        // Simple event
-        telemetry.send(new telemetry.TelemetryEvent("taco/cli/simpleEvent", { "taco.cli.property": "value" }));
-
-        // Event with several properties including some which contain PII
-        var event = new telemetry.TelemetryEvent("taco/cli/anotherEvent", { "taco.cli.property1": "value for prop1" });
-        event.properties["taco.cli.property2"] = "value for prop2";
-        event.properties["taco.cli.property3"] = "value for prop3";
-        event.setPiiProperty("taco.cli.projectName", "My Secret Cordova App"); // the value is hashed in the telemetry payload
-
-        telemetry.send(event);
-
-        // Event with perf data
-        var activity = new telemetry.TelemetryActivity("taco/cli/myperffeature", { "taco.cli.property1": "value for prop1" });
-        for (var i = 0; i < 10000000; i++);
-        activity.properties["taco.cli.propertyICanAddNow"] = "value";
-        telemetry.send(activity);
-
-        var activity2 = new telemetry.TelemetryActivity("taco/cli/myperffeature2", { "taco.cli.property1": "value for prop1" });
-        for (i = 0; i < 10000000; i++);
-        activity2.start();
-        for (i = 0; i < 10000000; i++);
-        activity2.end();
-        activity2.properties["taco.cli.propertyICanAddNow"] = "value";
-        telemetry.send(activity2);
-
     }
 
     // runWithArgs is for internal test purpose - where the args are passed as parameter
