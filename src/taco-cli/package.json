@@ -49,7 +49,6 @@
         "taco-kits": "file:../taco-kits",
         "wrench": "^1.5.8"
     },
-    "bundledDependencies": ["taco-utils"],
     "devDependencies": {
         "typescript": "latest",
         "del": "^1.0.0",
