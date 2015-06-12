@@ -27,8 +27,6 @@
         "morgan": "1.5.1",
         "nconf": "0.6.9"
     },
-    "bundledDependencies": [ "taco-utils" ],
-
     "scripts": {
         "test": "mocha"
     },
