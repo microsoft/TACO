@@ -78,6 +78,26 @@ module TacoUtility {
 
             return data;
         }
+
+        /**
+         * Get the vs:plugin elements specified in the config along with their param-s
+         *
+         * @returns {[key: string]: {[param: string]: string} } A dictionary mapping plugin ids to a param name/value map
+         */
+        public plugins(): { [key: string]: { [param: string]: string }} {
+            var data: { [key: string]: { [param: string]: string } } = {};
+            var plugins = this._doc.findall("vs:plugin");
+            plugins.forEach(function (plugin: et.XMLElement): void {
+                var params: { [params: string]: string } = {};
+                plugin._children.forEach(function (property: et.XMLElement): void {
+                    if (property.tag === "param") {
+                        params[property.attrib["name"]] = property.attrib["value"];
+                    }
+                });
+                data[plugin.attrib["name"]] = params;
+            });
+            return data;
+        }
     }
 }
 
