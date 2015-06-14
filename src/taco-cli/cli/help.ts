@@ -66,7 +66,8 @@ class Help implements commands.IDocumentedCommand {
      * prints out Microsoft header
      */
     public printHeader(): void {
-        logger.log("<br/>=================================================================");
+        logger.logLine();
+        LoggerHelper.logSeperatorLine();
     }
 
     /**
@@ -103,8 +104,11 @@ class Help implements commands.IDocumentedCommand {
         // if both needs to be printed we need to calculate an indent ourselves
         // to make sure args.values have same indenation as options.values
         // we need to also account for extra indenation given to options
-        var longestKeyLength: number = Math.max(Help.getLongestName(list.args), Help.getLongestName(list.options) + LoggerHelper.DefaultIndent);
+        var longestArgsLength: number = LoggerHelper.getLongestNameLength(list.args);
+        var longestOptionsLength: number = LoggerHelper.getLongestNameLength(list.options);
+        var longestKeyLength: number = Math.max(longestArgsLength, longestOptionsLength + LoggerHelper.DefaultIndent);
         var indent2 = LoggerHelper.getNameValueTableIndent2(longestKeyLength);
+
         if (list.args) {
             Help.printCommandTable(list.args, LoggerHelper.DefaultIndent, indent2);
         }
@@ -141,19 +145,6 @@ class Help implements commands.IDocumentedCommand {
             id = id.slice(1, id.length - 1);
             return resources.getString(id);
         });
-    }
-
-    private static getLongestName(arr: INameDescription[]): number {
-        var maxLength: number = 0;
-        if (arr) {
-            arr.forEach(nvp => {
-                if (nvp.name.length > maxLength) {
-                    maxLength = nvp.name.length;
-                }
-            });
-        }
-
-        return maxLength;
     }
 
     /**
