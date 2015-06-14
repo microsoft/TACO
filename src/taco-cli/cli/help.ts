@@ -76,15 +76,15 @@ class Help implements commands.IDocumentedCommand {
     public printGeneralUsage(): void {
         Help.printCommandHeader(resources.getString("CommandHelpTacoUsage"));
 
-        var nameValuePairs: INameDescription[] = new Array();
+        var nameDescriptionPairs: INameDescription[] = new Array();
         for (var i in this.commandsFactory.listings) {
-            nameValuePairs.push({
+            nameDescriptionPairs.push({
                 name: i,
                 description: this.commandsFactory.listings[i].description
             });
         }
 
-        Help.printCommandTable(nameValuePairs);
+        Help.printCommandTable(nameDescriptionPairs);
     }
 
     /**
@@ -107,7 +107,7 @@ class Help implements commands.IDocumentedCommand {
         var longestArgsLength: number = LoggerHelper.getLongestNameLength(list.args);
         var longestOptionsLength: number = LoggerHelper.getLongestNameLength(list.options);
         var longestKeyLength: number = Math.max(longestArgsLength, longestOptionsLength + LoggerHelper.DefaultIndent);
-        var indent2 = LoggerHelper.getNameValueTableIndent2(longestKeyLength);
+        var indent2 = LoggerHelper.getDescriptionColumnIndent(longestKeyLength);
 
         if (list.args) {
             Help.printCommandTable(list.args, LoggerHelper.DefaultIndent, indent2);
@@ -119,11 +119,11 @@ class Help implements commands.IDocumentedCommand {
         }
     }
 
-    private static printCommandTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void {
-        nameValuePairs.forEach(nvp => {
+    private static printCommandTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number): void {
+        nameDescriptionPairs.forEach(nvp => {
             nvp.description = Help.getDescriptionString(nvp.description);
         });
-        LoggerHelper.logNameValueTable(nameValuePairs, indent1, indent2);
+        LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1, indent2);
     }
 
     private static printCommandHeader(synopsis: string, description?: string): void {

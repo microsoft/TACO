@@ -134,7 +134,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static printPlatformOverrideInfo(kitInfo: tacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.platforms) {
             logger.log(resources.getString("CommandKitListPlatformOverridesForKit"));
-            LoggerHelper.logNameValueTable(
+            LoggerHelper.logNameDescriptionTable(
                 Object.keys(kitInfo.platforms).map(function (platformName: string): INameDescription {
                     return <INameDescription>{
                         name: platformName,
@@ -151,7 +151,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static printPluginOverrideInfo(kitInfo: tacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.plugins) {
             logger.log(resources.getString("CommandKitListPluginOverridesForKit"));
-            LoggerHelper.logNameValueTable(
+            LoggerHelper.logNameDescriptionTable(
                 Object.keys(kitInfo.plugins).map(function (pluginId: string): INameDescription {
                     return <INameDescription>{
                         name: pluginId,
@@ -170,7 +170,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         }).then(function (kits: tacoKits.IKitMetadata): Q.Promise<any> {
                 return Kit.getLongestPlatformPluginLength(kits)
                     .then(function (maxLength: number): void {
-                        var indent2 = LoggerHelper.getNameValueTableIndent2(maxLength);
+                        var indent2 = LoggerHelper.getDescriptionColumnIndent(maxLength);
                         Object.keys(kits).forEach(function (kitId: string): void {
                             if (kitId) {
                                 kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {

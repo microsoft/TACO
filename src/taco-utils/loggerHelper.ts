@@ -34,20 +34,20 @@ module TacoUtility {
          * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
          * @param {number} indent2 position at which value should start, if not specified some calculations are done to get the right indent
          */
-        public static logNameValueTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void {
+        public static logNameDescriptionTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number): void {
             // 0 is a valid indent on the left
             if (indent1 !== 0) {
                 indent1 = indent1 || LoggerHelper.DefaultIndent;
             }
 
             if (!indent2) {
-                var maxNameLength: number = LoggerHelper.getLongestNameLength(nameValuePairs);
-                indent2 = LoggerHelper.getNameValueTableIndent2(maxNameLength, indent1);
+                var maxNameLength: number = LoggerHelper.getLongestNameLength(nameDescriptionPairs);
+                indent2 = LoggerHelper.getDescriptionColumnIndent(maxNameLength, indent1);
             }
 
-            nameValuePairs.forEach(nvp => {
+            nameDescriptionPairs.forEach(nvp => {
                 if (nvp.name) {
-                    LoggerHelper.logNameValue(nvp.name, nvp.description, indent1, indent2);
+                    LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2);
                 }
             });
         }
@@ -59,7 +59,7 @@ module TacoUtility {
          * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
          * @param {number} indent2 position at which value should start, if not specified default value (25) is used
          */
-        public static logNameValue(key: string, value: string, indent1: number, indent2: number): void {
+        public static logNameDescription(key: string, value: string, indent1: number, indent2: number): void {
             indent1 = indent1 || LoggerHelper.DefaultIndent;
             indent2 = indent2 || LoggerHelper.MinRightIndent;
 
@@ -80,9 +80,9 @@ module TacoUtility {
          * Helper method to get length of longest name in the array
          * @param {INameDescription[]} array of name/description pairs
          */
-        public static getLongestNameLength(nameValuePairs: INameDescription[]): number {
-            if (nameValuePairs) {
-                return nameValuePairs.reduce(function (longest: number, nvp: INameDescription): number {
+        public static getLongestNameLength(nameDescriptionPairs: INameDescription[]): number {
+            if (nameDescriptionPairs) {
+                return nameDescriptionPairs.reduce(function (longest: number, nvp: INameDescription): number {
                     return nvp.name ? Math.max(longest, nvp.name.length) : longest;
                 }, 0 /* initialValue */);
             }
@@ -95,7 +95,7 @@ module TacoUtility {
          * @param {number} length of the longest key to be used in the Name/Value Table <br/>
          * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
          */
-        public static getNameValueTableIndent2(maxKeyLength: number, indent1?: number): number {
+        public static getDescriptionColumnIndent(maxKeyLength: number, indent1?: number): number {
             if (indent1 !== 0) {
                 indent1 = indent1 || LoggerHelper.DefaultIndent;
             }
