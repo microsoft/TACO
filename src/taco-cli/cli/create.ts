@@ -157,7 +157,7 @@ class Create implements commands.IDocumentedCommand {
                 logger.logLine();
                 logger.log(resources.getString("CommandCreateListBase", kitToPrint));
                 logger.logLine();
-                LoggerHelper.logNameValueTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
+                LoggerHelper.logNameDescriptionTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
                     return <INameDescription>{ name: value.id, description: value.name };
                 }));
             });

@@ -112,9 +112,10 @@ class CliHelper {
                 } catch (e) {
                     Logger.logError(resources.getString("UnableToFindModule", topic));
                 }
-            } else {
-                Logger.logError(resources.getString("UnableToFindModule", topic));
             }
+            // If they do --help [nothing or not-understood-module] then don't give an error
+            // instead just print out general help
+            // e.g. "remotebuild --help" should not give an error that it could not find help for module "true"
         }
 
         console.info(resources.getString("UsageInformation1"));

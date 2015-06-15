@@ -36,15 +36,15 @@ module TacoUtility {
             // We want to make sure that we allocate space for maxLength characters, plus a space to separate the description
             // Simplest approach is to make an array with that many gaps, and thus maxLength + 2 entries, and fill the gaps with spaces
             var self = this;
-            var nameValuePairs: INameDescription[] = new Array();
+            var nameDescriptionPairs: INameDescription[] = new Array();
             helpDocs.forEach(function (value: JSDocHelpPrinter.IJSDocEntry): void {
                 var loctag = value.customTags.filter(function (tag: JSDocHelpPrinter.IJSDocCustomTag): boolean {
                     return tag.tag === "loctag";
                 })[0];
 
-                nameValuePairs.push({ name: prefix + value.name, description: self.resources.getString(loctag.value) });
+                nameDescriptionPairs.push({ name: prefix + value.name, description: self.resources.getString(loctag.value) });
             });
-            LoggerHelper.logNameValueTable(nameValuePairs);
+            LoggerHelper.logNameDescriptionTable(nameDescriptionPairs);
         }
     }
 
