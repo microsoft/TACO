@@ -90,7 +90,7 @@
     "CommandSetupRemoteQueryPort": "Port number: ",
     "_CommandSetupRemoteQueryPort.comment": "Query asking the user to enter the port number of the remote server",
     "CommandSetupRemoteQueryPin": "PIN (leave blank for insecure servers): ",
-    "CommandSetupRemoteInvalidPort": "Invalid port '{0}': ports must be positive integers",
+    "CommandSetupRemoteInvalidPort": "Invalid port '{0}': ports must be integers greater than 0 and less than 65536",
     "_CommandSetupRemoteInvalidPort.comment": "Message printed when an invalid port is specified. {0} is the value the user entered",
     "CommandSetupRemoteInvalidPin": "Invalid PIN '{0}': PINs are 6 digit integers",
     "_CommandSetupRemoteInvalidPin.comment": "Message printed when an invalid pin is specified. {0} is the value the user entered",

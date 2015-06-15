@@ -6,6 +6,8 @@
     "_NoServerModulesSelected.comment": "Warning printed to console when the configuration does not specify what server modules to load",
     "UnableToLoadModule": "Error: Unable to load module {0}. Try running 'npm install {0}' or specifying the full path to the package",
     "_UnableToLoadModule.comment": "Error printed when we try to load a user-provided module and the require() fails. {0} is the name of the module",
+    "InvalidPortSpecified": "Invalid port '{0}' specified. Must be an integer between 0 and 65536",
+    "_InvalidPortSpecified.comment": "Error message printed when the user has specified an invalid port to listen on. {0} is the specified port",
 
     "UnauthorizedClientRequest": "The remote build server denied the build request, because the client certificate is invalid or has expired.  To build your project, you must generate and configure a security PIN. See http://go.microsoft.com/fwlink/?LinkID=511904.",
     "_UnauthorizedClientRequest.comment": "Message sent back to Visual Studio when a build request is submitted to a secure server with invalid client certificate",

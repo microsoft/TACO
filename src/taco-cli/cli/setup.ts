@@ -100,18 +100,20 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         cliSession.question(resources.getString("CommandSetupRemoteQueryHost"), function (hostAnswer: string): void {
             hostPromise.resolve({ host: hostAnswer });
         });
-        hostPromise.promise.then(function (host: { host: string }): void {
+        hostPromise.promise.done(function (host: { host: string }): void {
             cliSession.question(resources.getString("CommandSetupRemoteQueryPort"), function (portAnswer: string): void {
                 var port: number = parseInt(portAnswer);
-                if (port > 0) {
+                if (port > 0 && port < 65536) {
                     // Port looks valid
                     portPromise.resolve({ host: host.host, port: port });
                 } else {
-                    portPromise.reject(errorHelper.get(TacoErrorCodes.CommandSetupRemoteInvalidPort, port));
+                    portPromise.reject(errorHelper.get(TacoErrorCodes.CommandSetupRemoteInvalidPort, portAnswer));
                 }
             });
+        }, function (err: any): void {
+            portPromise.reject(err);
         });
-        portPromise.promise.then(function (hostAndPort: { host: string; port: number }): void {
+        portPromise.promise.done(function (hostAndPort: { host: string; port: number }): void {
             cliSession.question(resources.getString("CommandSetupRemoteQueryPin"), function (pinAnswer: string): void {
                 var pin: number = parseInt(pinAnswer);
                 if (pinAnswer && !Setup.pinIsValid(pin)) {
@@ -121,6 +123,8 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
                     pinPromise.resolve({ host: hostAndPort.host, port: hostAndPort.port, pin: pin });
                 }
             });
+        }, function (err: any): void {
+            pinPromise.reject(err);
         });
         return pinPromise.promise.finally(function (): void {
             // Make sure to close the session regardless of error conditions otherwise the node process won't terminate.
