@@ -171,7 +171,6 @@ class Create implements commands.IDocumentedCommand {
         if (fs.existsSync(resolvedPath) && fs.readdirSync(resolvedPath).length > 0) {
             throw errorHelper.get(TacoErrorCodes.CommandCreatePathNotEmpty);
         }
-
     }
 
     /**

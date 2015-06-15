@@ -85,8 +85,10 @@ describe("taco create", function (): void {
         8: util.format("%s --kit 5.0.0-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 8)),
         9: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 9)),
         10: util.format("%s 42", getProjectPath(failurePrefix, 10)),
-        11: "--kit 4.0.0-Kit",
-        12: "--list --kit unknown"
+        11: "",
+        12: "--list --kit unknown",
+        13: "invalid*project?path",
+        14: util.format("%s", getProjectPath(failurePrefix, 14)),
     };
 
     function getProjectPath(suitePrefix: string, scenario: number): string {
@@ -425,11 +427,11 @@ describe("taco create", function (): void {
             runFailureScenario(scenario).then(done, done);
         });
 
-        it("Failure scenario 11 [(NO path), kit]", function (done: MochaDone): void {
-            // Cordova should give an error when no path is specified
+        it("Failure scenario 11 [(NO path)]", function (done: MochaDone): void {
+            // Create command should fail gracefully when the user doesn't provide a path to 'taco create'
             var scenario: number = 11;
 
-            runFailureScenario(scenario).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNoPath).then(done, done);
         });
 
         it("Failure scenario 12 [path, list, kit (unknown value)]", function (done: MochaDone): void {
@@ -437,6 +439,22 @@ describe("taco create", function (): void {
             var scenario: number = 12;
 
             runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit).then(done, done);
+        });
+
+        it("Failure scenario 13 [path (invalid)]", function (done: MochaDone): void {
+            // Create command should fail gracefully when the user provides an invalid path to 'taco create'
+            var scenario: number = 13;
+
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateInvalidPath).then(done, done);
+        });
+
+        it("Failure scenario 14 [path (existing)]", function (done: MochaDone): void {
+            // Create command should fail gracefully when the user provides an existing, non-empty path to 'taco create'
+            var scenario: number = 14;
+            var projectPath: string = getProjectPath(failurePrefix, scenario);
+
+            wrench.mkdirSyncRecursive(path.join(projectPath, "temp"), 511); // 511 decimal is 0777 octal
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreatePathNotEmpty).then(done, done);
         });
     });
 });
