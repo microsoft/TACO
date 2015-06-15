@@ -42,6 +42,7 @@ interface ICliSession {
  * handles "taco setup"
  */
 class Setup extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+    private static httpTimeoutMS: number = 20000;
     private static KnownOptions: Nopt.CommandData = {};
     private static ShortHands: Nopt.ShortFlags = {};
     /**
@@ -138,7 +139,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
             var certificateUrl = util.format("https://%s:%d/certs/%d", hostPortAndPin.host, hostPortAndPin.port, hostPortAndPin.pin);
             var deferred = Q.defer<string>();
             // Note: we set strictSSL to be false here because we don't yet know who the server is. We are vulnerable to a MITM attack in this first instance here
-            request.get({ uri: certificateUrl, strictSSL: false, encoding: null }, function (error: any, response: any, body: Buffer): void {
+            request.get({ uri: certificateUrl, strictSSL: false, encoding: null, timeout: httpTimeoutMS }, function (error: any, response: any, body: Buffer): void {
                 if (error) {
                     // Error contacting the build server
                     deferred.reject(Setup.getFriendlyHttpError(error, hostPortAndPin.host, hostPortAndPin.port, certificateUrl, !!hostPortAndPin.pin));
@@ -168,7 +169,8 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         return ConnectionSecurityHelper.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
             var options: request.Options = {
                 url: mountDiscoveryUrl,
-                agent: agent
+                agent: agent,
+                timeout: httpTimeoutMS
             };
 
             var deferred = Q.defer<string>();
@@ -222,7 +224,7 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         } else if (error.code === "ENOTFOUND") {
             return errorHelper.get(TacoErrorCodes.CommandSetupNotfound, host);
         } else if (error.code === "ETIMEDOUT") {
-            return errorHelper.get(TacoErrorCodes.CommandSetupTimedout, host);
+            return errorHelper.get(TacoErrorCodes.CommandSetupTimedout, host, port);
         } else if (error.code === "ECONNRESET") {
             if (!secure) {
                 return errorHelper.get(TacoErrorCodes.RemoteBuildNonSslConnectionReset, url);
