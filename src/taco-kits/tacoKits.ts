@@ -114,7 +114,7 @@ module TacoKits {
         private static DefaultKitId: string;
         private static KitFileName: string = "TacoKitMetadata.json";
         private static KitDesciptionSuffix: string = "-desc";
-        private static defaultTemplateKitOverride: string = "default";
+        private static DefaultTemplateKitOverride: string = "default";
 
          /*
           * The following member is public static to expose access to automated tests
@@ -209,7 +209,7 @@ module TacoKits {
                     var kitOverride: string = kit;
 
                     if (!templates[kitOverride]) {
-                        kitOverride = KitHelper.defaultTemplateKitOverride;
+                        kitOverride = KitHelper.DefaultTemplateKitOverride;
                     }
 
                     templatesForKit = templates[kitOverride];
@@ -274,9 +274,9 @@ module TacoKits {
                                 deferred.reject(errorHelper.get(TacoErrorCodes.TacoKitsExceptionInvalidTemplate, templateId));
                             }
                         }
-                    } else if (templates[KitHelper.defaultTemplateKitOverride][templateId]) {
+                    } else if (templates[KitHelper.DefaultTemplateKitOverride][templateId]) {
                         // Found a default template matching the specified template id
-                        templateOverrideInfo = KitHelper.createTemplateOverrideInfo(KitHelper.defaultTemplateKitOverride, templates[KitHelper.defaultTemplateKitOverride][templateId]);
+                        templateOverrideInfo = KitHelper.createTemplateOverrideInfo(KitHelper.DefaultTemplateKitOverride, templates[KitHelper.DefaultTemplateKitOverride][templateId]);
 
                         // Properly assign the localized template name
                         templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);

@@ -76,7 +76,7 @@ class TemplateManager {
             .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
                 var templateInfo = templateOverrideForKit.templateInfo;
 
-                templateName = templateInfo.name
+                templateName = templateInfo.name;
 
                 return self.findTemplatePath(templateId, templateOverrideForKit.kitId, templateInfo);
             })

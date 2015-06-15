@@ -11,13 +11,8 @@
     "5.0.0-Kit-desc": "A toolkit of plugins and platforms that work with Cordova CLI v5.0.0.",
     "_KitNames.comment": "Localized names and descriptions for the different Cordova kits that taco-cli offers.",
 
-    "TemplateNameDefaultBlank": "Blank template",
-    "TemplateNameDefaultTypescript": "Blank TypeScript template",
-    "TemplateName2.2.0-KitBlank": "Blank template",
-    "TemplateName4.0.0-KitBlank": "Blank template",
-    "TemplateName4.0.0-KitTypescript": "Blank TypeScript template",
-    "TemplateName5.0.0-KitBlank": "Blank template",
-    "TemplateName5.0.0-KitTypescript": "Blank TypeScript template",
+    "BlankTemplateName": "Blank template",
+    "TypescriptTemplateName": "Blank TypeScript template",
     "_TemplateName.comment": "Localized display names for the available project templates. The users can specify a template when creating a Cordova project with taco-cli, and the localized name of the specified template is then printed as part of a summary / confirmation message after project creation.",
 
     "TacoKitsExceptionKitMetadataFileNotFound": "Error: The kit metadata file is not found. Please fix this by re-installing taco-kits from npm.",

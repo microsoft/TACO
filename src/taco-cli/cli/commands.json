@@ -1,6 +1,6 @@
 ﻿{
     "create": {
-        "synopsis": "<synopsis><PATH> [ID [NAME [CONFIG]]] [--kit [NAME] | --cli <VERSION>] [--template [NAME] | --copy-from <PATH> | --link-to <PATH>]</synopsis>",
+        "synopsis": "<synopsis><PATH> [ID [NAME [CONFIG]]] [options]</synopsis>",
         "modulePath": "./create",
         "description": "<helptitle>[CommandCreateDescription]</helptitle>",
         "args": [

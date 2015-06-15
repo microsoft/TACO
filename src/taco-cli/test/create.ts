@@ -45,10 +45,13 @@ describe("taco create", function (): void {
     var createTimeout: number = 60000;
     var tacoFileCount: number = 1;
     var cordovaDefaultProjectFileCount: number = 13; // 6 files and 7 folders
+
+    // The following numbers are for: "plugins", "hooks", "platforms" and ".cordova" folders, and "hooks\readme.md" and ".cordova\cordova.config" files. If our templates ever start to include
+    // these files, then to avoid double counting them, we must reduce the counts in this dictionary.
     var cordovaFileCounts: { [kitId: string]: number } = {
         "4.0.0-Kit": 6, // 2 file and 4 folders
         "4.2.0-Kit": 6, // 2 files and 4 folders
-        "5.0.0-Kit": 4 // 1 file and 3 folders
+        "5.0.0-Kit": 4 // 1 file and 3 folders (no ".cordova\" and ".cordova\cordova.config")
     };
 
     // Persistent TemplateManager to count template entries
