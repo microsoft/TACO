@@ -23,7 +23,6 @@
 		"mocha": "2.0.1",
 		"should":  "4.3.0"
 	},
-	"bundledDependencies": ["taco-utils"],
 	"optionalDependencies": {
 		"ios-sim": "2.0.1"
 	},

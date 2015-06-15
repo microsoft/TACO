@@ -47,14 +47,14 @@ declare module TacoKits {
     }
 
     interface ITemplateInfo {
-        name: {
-            [language: string]: string;
-        };
+        name: string;
         url: string;
     }
 
     interface ITemplateMetadata {
-        [kitId: string]: string;
+        [kitId: string]: {
+            [templateId: string]: ITemplateInfo;
+        }
     }
 
     interface IKitInfo {
@@ -75,7 +75,6 @@ declare module TacoKits {
     }
 
     interface IPluginInfo {
-        pluginId: string;
         name: string;
         description?: string;
         platforms?: string[];
@@ -91,7 +90,10 @@ declare module TacoKits {
         templates: ITemplateMetadata;
     }
 
-    class KitHelper {
+    /**
+     *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
+     */
+    export class KitHelper {
         public static KitMetadataFilePath: string;
         /**
          *   Initializes resource manager with the locale for resource strings

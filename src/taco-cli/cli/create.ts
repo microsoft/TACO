@@ -112,7 +112,7 @@ class Create implements commands.IDocumentedCommand {
     }
 
     private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, {}, args.original, 0);
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, Create.ShortHands, args.original, 0);
         var cordovaParams: cordovaHelper.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
             appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
@@ -188,9 +188,9 @@ class Create implements commands.IDocumentedCommand {
                 logger.log(resources.getString("CommandCreateListBase", kitToPrint));
                 logger.logLine();
                 LoggerHelper.logNameDescriptionTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
-                return <INameDescription>{ name: value.id, description: value.name };
-            }));
-        });
+                    return <INameDescription>{ name: value.id, description: value.name };
+                }));
+            });
     }
 
     /**
