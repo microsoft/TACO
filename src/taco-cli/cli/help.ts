@@ -120,7 +120,7 @@ class Help implements commands.IDocumentedCommand {
     }
 
     private static printCommandTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number): void {
-        nameDescriptionPairs.forEach(nvp => {
+        nameDescriptionPairs.forEach(function (nvp: INameDescription): void {
             nvp.description = Help.getDescriptionString(nvp.description);
         });
         LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1, indent2);

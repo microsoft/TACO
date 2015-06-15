@@ -45,7 +45,7 @@ module TacoUtility {
                 indent2 = LoggerHelper.getDescriptionColumnIndent(maxNameLength, indent1);
             }
 
-            nameDescriptionPairs.forEach(nvp => {
+            nameDescriptionPairs.forEach(function (nvp: INameDescription): void {
                 if (nvp.name) {
                     LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2);
                 }

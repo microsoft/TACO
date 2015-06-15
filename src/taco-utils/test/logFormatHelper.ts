@@ -20,32 +20,33 @@ import logFormathelper = require ("../logFormatHelper");
 import LogFormatHelper = logFormathelper.LogFormatHelper;
 
 describe("logFormathelper", function (): void {
-    it("should allow all supported styles for a correctly formatted string", function (): void { 
-        // Sample input string expanded...
-        //  <error>The </error>
-        //  <warn> quick <br/>
-        //  <link>brown </link>
-        //  fox
-        //  <title> jumps
-        //  <link> over </link>a
-        //  </title>
-        //  lazy
-        //  </warn>
-        //  <success> dog
-        //  <key> </key>
-        //  </success>.
-        //  <key> The </key>
-        //  <highlight>
-        //  <helptitle>quick <br/>brown </helptitle>
-        //  <synopsis> <br/>
-        //  <kitid> fox </kitid> jumps
-        //  <deprecatedkit> over </deprecatedkit>
-        //  </synopsis>
-        //  <defaultkit> a lazy dog</defaultkit>
-        //  </highlight>
-        //  <underline />
-        var input: string = "<error>The</error><warn>quick <br/><link>brown</link> fox <title>jumps <link>over </link>a </title> lazy</warn><success>dog<key></key></success>.<key>The</key> <highlight><helptitle>quick <br/>brown</helptitle> <synopsis><br/><kitid>fox</kitid> jumps<deprecatedkit> over</deprecatedkit></synopsis> <defaultkit>a lazy dog</defaultkit></highlight><underline/>";
-        var formatted: string = LogFormatHelper.toFormattedString(input);
+    // Sample input string expanded...
+    //  <error>The </error>
+    //  <warn> quick <br/>
+    //  <link>brown </link>
+    //  fox
+    //  <title> jumps
+    //  <link> over </link> the
+    //  </title>
+    //  lazy
+    //  </warn>
+    //  <success> dog
+    //  <key> </key>
+    //  </success>.
+    //  <key> The </key>
+    //  <highlight>
+    //  <helptitle>quick <br/>brown </helptitle>
+    //  <synopsis> <br/>
+    //  <kitid> fox </kitid> jumps
+    //  <deprecatedkit> over </deprecatedkit>
+    //  </synopsis>
+    //  <defaultkit> a lazy dog</defaultkit>
+    //  </highlight>
+    //  <underline />
+    var validInputString: string = "<error>The</error><warn>quick <br/><link>brown</link> fox <title>jumps <link>over </link>the </title> lazy</warn><success>dog<key></key></success>.<key>The</key> <highlight><helptitle>quick <br/>brown</helptitle> <synopsis><br/><kitid>fox</kitid> jumps<deprecatedkit> over</deprecatedkit></synopsis> <defaultkit>a lazy dog</defaultkit></highlight><underline/>";
+
+    it("should allow all supported styles for a correctly formatted string", function (): void {
+        var formatted: string = LogFormatHelper.toFormattedString(validInputString);
         should(formatted).be.not.equal(null);
     });
 
@@ -66,19 +67,19 @@ describe("logFormathelper", function (): void {
     });
 
     it("should fail for missing helptitle start tag", function (): void {
-        verifyFailureScenario("<error>The</error><warn>quick <br/><link>brown</link> fox <title>jumps <link>over </link>a </title> lazy</warn><success>dog<key></key></success>.<key>The</key> <highlight>quick <br/>brown</helptitle> <synopsis><br/><kitid>fox</kitid> jumps<deprecatedkit> over</deprecatedkit></synopsis> <defaultkit>a lazy dog</defaultkit></highlight><underline/>");
+        verifyFailureScenario(validInputString.replace(/<helptitle>/g, ""));
     });
 
     it("should fail for missing synopsis end tag", function (): void {
-        verifyFailureScenario("<error>The</error><warn>quick <br/><link>brown</link> fox <title>jumps <link>over </link>a </title> lazy</warn><success>dog<key></key></success>.<key>The</key> <highlight><helptitle>quick <br/>brown</helptitle> <synopsis><br/><kitid>fox</kitid> jumps<deprecatedkit> over</deprecatedkit> <defaultkit>a lazy dog</defaultkit></highlight><underline/>");
+        verifyFailureScenario(validInputString.replace(/<\/synopsis>/g, ""));
     });
 
     it("should fail for no end tags", function (): void {
-        verifyFailureScenario("<error>The<warn>quick <br/><link>brown fox <title>jumps <link>over a lazy<success>dog");
+        verifyFailureScenario(validInputString.replace(/<\/[^>]*>/g, ""));
     });
 
     it("should fail for no start tags", function (): void {
-        verifyFailureScenario(" The</warn>quick <br/></link>brown fox </title>jumps </link>over a lazy</success>dog");
+        verifyFailureScenario(validInputString.replace(/<[^>^\/]*>/g, ""));
     });
 
     it("should fail for unknown tags", function (): void {
