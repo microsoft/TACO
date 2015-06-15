@@ -6,10 +6,11 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+/// <reference path="../../typings/sanitize-filename.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/tacoKits.d.ts" />
 
 "use strict";
 
@@ -23,6 +24,7 @@ import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
+import sanitizeFilename = require ("sanitize-filename");
 import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -130,7 +132,7 @@ class Create implements commands.IDocumentedCommand {
      * Verify that the right combination of options is passed
      */
     private verifyArguments(): void {
-        // Parameter exclusivity validation and other verifications
+        // Parameter exclusivity validation
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
@@ -142,6 +144,34 @@ class Create implements commands.IDocumentedCommand {
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
+
+        // Make sure a path was provided
+        var createPath: string = this.commandParameters.cordovaParameters.projectPath;
+        if (!createPath) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNoPath);
+        }
+
+        // Make sure the provided path contains only valid directory names
+        var resolvedPath: string = path.resolve(createPath);
+        var root: string = (<any>path).parse(resolvedPath).root;
+
+        resolvedPath.split(path.sep).forEach(function (dirName: string, index: number): void {
+            // Don't test the very first segment if we had a root
+            if (index === 0 && root) {
+                return;
+            }
+
+            if (sanitizeFilename(dirName) !== dirName) {
+                // The current path segment is not a valid directory name
+                throw errorHelper.get(TacoErrorCodes.CommandCreateInvalidPath);
+            }
+        });
+
+        // Make sure the provided path is empty if it exists
+        if (fs.existsSync(resolvedPath) && fs.readdirSync(resolvedPath).length > 0) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreatePathNotEmpty);
+        }
+
     }
 
     /**
