@@ -44,6 +44,11 @@ module TacoUtility {
                 locale = ResourceManager.findMatchingLocale(availableLocales, inputLocales);
             }
 
+            // Next look at our own TACO_LANG environment variable
+            if (!locale && process.env.TACO_LANG) {
+                locale = ResourceManager.findMatchingLocale(availableLocales, [process.env.TACO_LANG]);
+            }
+
             // Next look at system locale, for UNIX based systems look for LANG variable
             if (!locale && process.env.LANG) {
                 locale = ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG]);
@@ -120,7 +125,7 @@ module TacoUtility {
          * self explanatory. Use LANG environment variable otherwise fall back to Default ("en")
          */
         private getCurrentLocale(): string {
-            return (this.initialLocale || process.env.LANG || ResourceManager.DefaultLocale).toLowerCase();
+            return (this.initialLocale || process.env.TACO_LANG || process.env.LANG || ResourceManager.DefaultLocale).toLowerCase();
         }
 
         /**

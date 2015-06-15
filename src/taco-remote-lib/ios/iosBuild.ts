@@ -48,7 +48,6 @@ function afterCompile(data: any): void {
 // All stderr/stdout messages are captured by the parent process and logged to a file.
 var currentBuild: BuildInfo = null;
 var cfg: CordovaConfig = null;
-var language: string = null;
 
 process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: string }): void {
     var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(buildRequest.buildInfo);
@@ -59,7 +58,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     }
 
     currentBuild = buildInfo;
-    language = buildRequest.language;
+    process.env.TACO_LANG = buildRequest.language;
     var cordovaVersion: string = currentBuild["vcordova"];
     buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
     process.send(buildInfo);
