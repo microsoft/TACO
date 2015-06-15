@@ -70,6 +70,10 @@ class Create implements commands.IDocumentedCommand {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
+        if (this.commandParameters.data.options["list"]) {
+            return this.listTemplates();
+        }
+
         try {
             this.parseArguments(data);
             this.verifyArguments();
@@ -77,27 +81,23 @@ class Create implements commands.IDocumentedCommand {
             return Q.reject(err);
         }
 
-        if (this.commandParameters.data.options["list"]) {
-            return this.listTemplates();
-        } else {
-            var self = this;
-            var templateDisplayName: string;
+        var self = this;
+        var templateDisplayName: string;
 
-            return this.createProject()
-                .then(function (templateUsed: string): Q.Promise<any> {
-                    templateDisplayName = templateUsed;
+        return this.createProject()
+            .then(function (templateUsed: string): Q.Promise<any> {
+                templateDisplayName = templateUsed;
 
-                    var kitProject = self.isKitProject();
-                    var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
+                var kitProject = self.isKitProject();
+                var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
-                })
-                .then(function (): Q.Promise<any> {
-                    self.finalize(templateDisplayName);
+                return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+            })
+            .then(function (): Q.Promise<any> {
+                self.finalize(templateDisplayName);
 
-                    return Q.resolve({});
-                });
-        }
+                return Q.resolve({});
+            });
     }
 
     /**
@@ -147,6 +147,7 @@ class Create implements commands.IDocumentedCommand {
 
         // Make sure a path was provided
         var createPath: string = this.commandParameters.cordovaParameters.projectPath;
+
         if (!createPath) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNoPath);
         }
