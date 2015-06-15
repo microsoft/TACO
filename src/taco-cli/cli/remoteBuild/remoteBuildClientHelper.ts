@@ -500,12 +500,12 @@ class RemoteBuildClientHelper {
      * Download the <platform>.json file that tracks the installed plugins on the remote machine.
      * This file is used by vs-mda/vs-tac, but it is also good for checking what plugins are actually installed remotely.
      */
-    private static downloadRemotePluginFile(buildInfo: BuildInfo, settings: BuildSettings, toDir: String): Q.Promise<BuildInfo> {
+    private static downloadRemotePluginFile(buildInfo: BuildInfo, settings: BuildSettings, toDir: string): Q.Promise<BuildInfo> {
         var serverUrl = settings.buildServerUrl;
         var deferred = Q.defer<BuildInfo>();
         var buildNumber = buildInfo.buildNumber;
         var downloadUrl = util.format("%s/files/%d/cordovaApp/plugins/%s.json", serverUrl, buildNumber, settings.platform);
-
+        UtilHelper.createDirectoryIfNecessary(toDir);
         var remotePluginStream = fs.createWriteStream(path.join(toDir, util.format("remote_%s.json", settings.platform)));
         remotePluginStream.on("finish", function (): void {
             deferred.resolve(buildInfo);
