@@ -25,7 +25,7 @@
     "CommandCreatePathNotEmpty": "Error: Could not create the project because the provided path already exists and is not empty: {0}",
     "_CommandCreatePathNotEmpty.comment": "Error reported when the specified path at which to create the cordova project is an existing directory and isn't empty. {0} is the path that was given by the user.",
     "CommandCreateNoPath": "Error: A directory name must be specified in order to create a project. See 'taco help create'.",
-    "_CommandCreateNoPath.comment": "Error reported when the user ran 'taco create' without providing a path at which to create the project.",
+    "_CommandCreateNoPath.comment": "Error reported when the user runs 'taco create' without providing a path at which to create the project.",
     "CommandCreateInvalidPath": "Error: The specified path contains invalid directory names: {0}",
     "_CommandCreateInvalidPath.comment": "Error reported when the specified path at which to create the cordova project has segments that are invalid directory names for the current OS. {0} is the path that was given by the user.",
 
