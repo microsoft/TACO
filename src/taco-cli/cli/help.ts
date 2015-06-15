@@ -66,7 +66,8 @@ class Help implements commands.IDocumentedCommand {
      * prints out Microsoft header
      */
     public printHeader(): void {
-        logger.log("<br/>=================================================================");
+        logger.logLine();
+        LoggerHelper.logSeperatorLine();
     }
 
     /**
@@ -75,15 +76,15 @@ class Help implements commands.IDocumentedCommand {
     public printGeneralUsage(): void {
         Help.printCommandHeader(resources.getString("CommandHelpTacoUsage"));
 
-        var nameValuePairs: INameDescription[] = new Array();
+        var nameDescriptionPairs: INameDescription[] = new Array();
         for (var i in this.commandsFactory.listings) {
-            nameValuePairs.push({
+            nameDescriptionPairs.push({
                 name: i,
                 description: this.commandsFactory.listings[i].description
             });
         }
 
-        Help.printCommandTable(nameValuePairs);
+        Help.printCommandTable(nameDescriptionPairs);
     }
 
     /**
@@ -103,24 +104,11 @@ class Help implements commands.IDocumentedCommand {
         // if both needs to be printed we need to calculate an indent ourselves
         // to make sure args.values have same indenation as options.values
         // we need to also account for extra indenation given to options
-        var maxKeyLength: number = 0;
-        if (list.args) {
-            list.args.forEach(nvp => {
-                if (nvp.name.length > maxKeyLength) {
-                    maxKeyLength = nvp.name.length;
-                }
-            });
-        }
+        var longestArgsLength: number = LoggerHelper.getLongestNameLength(list.args);
+        var longestOptionsLength: number = LoggerHelper.getLongestNameLength(list.options);
+        var longestKeyLength: number = Math.max(longestArgsLength, longestOptionsLength + LoggerHelper.DefaultIndent);
+        var indent2 = LoggerHelper.getDescriptionColumnIndent(longestKeyLength);
 
-        if (list.options) {
-            list.options.forEach(nvp => {
-                if ((nvp.name.length + LoggerHelper.DefaultIndent) > maxKeyLength) {
-                    maxKeyLength = nvp.name.length + LoggerHelper.DefaultIndent;
-                }
-            });
-        }
-
-        var indent2 = Math.max(LoggerHelper.DefaultIndent + maxKeyLength + LoggerHelper.MinimumDots + 2, LoggerHelper.MinRightIndent);
         if (list.args) {
             Help.printCommandTable(list.args, LoggerHelper.DefaultIndent, indent2);
         }
@@ -131,11 +119,11 @@ class Help implements commands.IDocumentedCommand {
         }
     }
 
-    private static printCommandTable(nameValuePairs: INameDescription[], indent1?: number, indent2?: number): void {
-        nameValuePairs.forEach(nvp => {
+    private static printCommandTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number): void {
+        nameDescriptionPairs.forEach(function (nvp: INameDescription): void {
             nvp.description = Help.getDescriptionString(nvp.description);
         });
-        LoggerHelper.logNameValueTable(nameValuePairs, indent1, indent2);
+        LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1, indent2);
     }
 
     private static printCommandHeader(synopsis: string, description?: string): void {
