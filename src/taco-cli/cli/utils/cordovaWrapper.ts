@@ -27,16 +27,16 @@ import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
+import commands = tacoUtility.Commands;
 import packageLoader = tacoUtility.TacoPackageLoader;
-import tacoProjectHelper = projectHelper.TacoProjectHelper;
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CordovaNpmPackageName: string = "cordova";
     private static CordovaRequirementsMinVersion: string = "5.1.0";
 
-    public static cli(args: string[], captureOutput: boolean = false): Q.Promise<any> {
-        var deferred = Q.defer();
+    public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
+        var deferred = Q.defer<string>();
         var output: string = "";
         var errorOutput: string = "";
         var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
@@ -76,26 +76,44 @@ class CordovaWrapper {
                 if (captureOutput && output) {
                     deferred.resolve(output);
                 } else {
-                    deferred.resolve({});
+                    deferred.resolve("");
                 }
             }
         });
         return deferred.promise;
     }
 
-    public static build(platform: string): Q.Promise<any> {
-        return CordovaWrapper.cli(["build", platform]);
+    public static build(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                        return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(platform, commandData));
+                });
+            } else {
+                return CordovaWrapper.cli(["build", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
+            }
+        });
     }
 
-    public static run(platform: string): Q.Promise<any> {
-        return CordovaWrapper.cli(["run", platform]);
+    public static run(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(platform, commandData));
+                });
+            } else {
+                return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
+            }
+        });
     }
 
     public static requirements(platforms: string[]): Q.Promise<any> {
         // Try to see if we are in a taco project
         var projectInfo: projectHelper.IProjectInfo;
 
-        return tacoProjectHelper.getProjectInfo()
+        return projectHelper.getProjectInfo()
             .then(function (pi: projectHelper.IProjectInfo): Q.Promise<any> {
                 projectInfo = pi;
 
@@ -150,6 +168,18 @@ class CordovaWrapper {
 
                 return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
             });
+    }
+
+    public static getCordovaVersion(): Q.Promise<string> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
+            if (projectInfo.cordovaCliVersion) {
+                return Q.resolve(projectInfo.cordovaCliVersion);
+            } else {
+                return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
+                    return output.split("\n")[0];
+                });
+            }
+        });
     }
 }
 

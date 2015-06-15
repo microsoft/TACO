@@ -1,8 +1,9 @@
 /// <reference path="../../typings/node.d.ts" />
 "use strict";
 
+// Error Codes: 1000- 1999
 enum TacoErrorCode {
-    CordovaCmdNotFound,
+    CordovaCmdNotFound = 1001,
     CordovaCommandFailed,
     CordovaCommandFailedWithError,
     CommandBuildInvalidPlatformLocation,

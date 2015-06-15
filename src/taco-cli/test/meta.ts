@@ -110,6 +110,7 @@ describe("taco meta command tests: ", function (): void {
 
     // Run taco command with valid and invalid options
     describe("taco command", function (): void {
+        this.timeout(10000);
         tacoValidArgs.forEach(function (optionString: string[]): void {
             it("with options " + optionString + " executes with no error", function (done: MochaDone): void {
                 Taco.runWithArgs(optionString).then(function (): void {

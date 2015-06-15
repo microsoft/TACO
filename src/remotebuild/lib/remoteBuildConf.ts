@@ -56,7 +56,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         }
 
         this.remoteBuildConf = conf.get();
-        process.env.LANG = this.lang;
+        process.env.TACO_LANG = this.lang;
 
         var serverMods = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
