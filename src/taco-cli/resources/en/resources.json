@@ -104,8 +104,8 @@
     "_CommandSetupConnectionRefused.comment": "Message printed when we fail to connect to the remote server. {0} is the url of the server",
     "CommandSetupNotfound": "Unable to look up host '{0}'. Check that the name is correct.",
     "_CommandSetupNotfound.comment": "Message printed when we fail to look up the user provided hostname. {0} is that hostname",
-    "CommandSetupTimedout": "Unable to contact '{0}', please check that the server is reachable.",
-    "_CommandSetupTimedout.comment": "Message printed when a connection times out. {0} is the host name",
+    "CommandSetupTimedout": "Unable to contact '{0}:{1}', please check that the server is reachable.",
+    "_CommandSetupTimedout.comment": "Message printed when a connection times out. {0} is the host name and {1} is the port number",
 
     "CommandBuildDescription": "Build a cordova project",
     "_CommandBuildDescription.comment": "Description for 'taco build'",

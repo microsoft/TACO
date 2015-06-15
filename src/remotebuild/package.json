@@ -32,8 +32,6 @@
         "should": "4.3.0",
         "request": "2.36.0"
     },
-    "bundledDependencies": [ "taco-utils" ],
-
     "scripts": {
         "test": "mocha"
     },
