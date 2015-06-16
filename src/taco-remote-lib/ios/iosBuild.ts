@@ -220,7 +220,7 @@ class IOSBuildHelper {
             });
         }, Q({}));
 
-        var fetchJson: { [key: string]: { variables?: { [key: string]: string } } } = {};
+        var fetchJson: Cordova.IFetchJson = {};
         var fetchJsonPath = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
@@ -242,7 +242,7 @@ class IOSBuildHelper {
                     return UtilHelper.copyRecursive(newFolder, installedFolder);
                 } else {
                     // The plugin is not installed; install it
-                    var cli_variables: { [key: string]: string } = {};
+                    var cli_variables: Cordova.IKeyValueStore<string> = {};
 
                     // Check to see if the plugin is mentioned in fetch.json and has variables
                     if (plugin in fetchJson && fetchJson[plugin].variables) {
