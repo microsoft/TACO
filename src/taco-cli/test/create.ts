@@ -1,10 +1,11 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/rimraf.d.ts"/>
@@ -87,10 +88,7 @@ describe("taco create", function (): void {
         10: util.format("%s --cli 4.2.0", getProjectPath(successPrefix, 10)),
         11: util.format("%s --unknownParameter", getProjectPath(successPrefix, 11)),
         12: util.format("%s --kit", getProjectPath(successPrefix, 12)),
-        13: util.format("%s --template typescript", getProjectPath(successPrefix, 13)),
-        14: "--list --kit 4.2.0-Kit",
-        15: "--list --kit 2.2.0-Kit",
-        16: "--list"
+        13: util.format("%s --template typescript", getProjectPath(successPrefix, 13))
     };
     var failureScenarios: IScenarioList = {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
@@ -104,9 +102,8 @@ describe("taco create", function (): void {
         9: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 9)),
         10: util.format("%s 42", getProjectPath(failurePrefix, 10)),
         11: "",
-        12: "--list --kit unknown",
-        13: "invalid*project?path",
-        14: util.format("%s", getProjectPath(failurePrefix, 14)),
+        12: util.format("%s/invalid/project/path", getProjectPath(failurePrefix, 12)),
+        13: util.format("%s", getProjectPath(failurePrefix, 13)),
     };
 
     function getProjectPath(suitePrefix: string, scenario: number): string {
@@ -177,11 +174,11 @@ describe("taco create", function (): void {
 
         return create.run(makeICommandData(scenario, failureScenarios))
             .then(function (): Q.Promise<any> {
-            throw new Error("Scenario succeeded when it should have failed");
+                throw new Error("Scenario succeeded when it should have failed");
             }, function (err: tacoUtils.TacoError): Q.Promise<any> {
-                    if (expectedErrorCode) {
-                        err.errorCode.should.equal(expectedErrorCode);
-                    }
+                if (expectedErrorCode) {
+                    err.errorCode.should.equal(expectedErrorCode);
+                }
 
                 return Q.resolve(null);
             });
@@ -315,27 +312,6 @@ describe("taco create", function (): void {
             // Should use kit 5.0.0-Kit and template typescript
             runScenario(scenario, "5.0.0-Kit", "typescript", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
         });
-
-        it("Success scenario 14 [list, kit (that doesn't have a template override in the metadata)]", function (done: MochaDone): void {
-            var scenario: number = 14;
-
-            // We are only listing templates, no project should be created)
-            runScenarioWithExpectedFileCount(scenario, 0).then(done, done);
-        });
-
-        it("Success scenario 15 [list, kit (that has a template override in the metadata)]", function (done: MochaDone): void {
-            var scenario: number = 15;
-
-            // We are only listing templates, no project should be created)
-            runScenarioWithExpectedFileCount(scenario, 0).then(done, done);
-        });
-
-        it("Success scenario 16 [list]", function (done: MochaDone): void {
-            var scenario: number = 16;
-
-            // We are only listing templates, no project should be created)
-            runScenarioWithExpectedFileCount(scenario, 0).then(done, done);
-        });
     });
 
     describe("Failure scenarios", function (): void {
@@ -424,26 +400,19 @@ describe("taco create", function (): void {
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNoPath).then(done, done);
         });
 
-        it("Failure scenario 12 [path, list, kit (unknown value)]", function (done: MochaDone): void {
-            // Create command should fail when an invalid kit is given as an option with the --list flag
-            var scenario: number = 12;
-
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit).then(done, done);
-        });
-
-        it("Failure scenario 13 [path (invalid)]", function (done: MochaDone): void {
+        it("Failure scenario 12 [path (invalid)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user provides an invalid path to 'taco create'
-            var scenario: number = 13;
+            var scenario: number = 12;
 
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateInvalidPath).then(done, done);
         });
 
-        it("Failure scenario 14 [path (existing)]", function (done: MochaDone): void {
+        it("Failure scenario 13 [path (existing)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user provides an existing, non-empty path to 'taco create'
-            var scenario: number = 14;
+            var scenario: number = 13;
             var projectPath: string = getProjectPath(failurePrefix, scenario);
 
-            wrench.mkdirSyncRecursive(path.join(projectPath, "temp"), 511); // 511 decimal is 0777 octal
+            wrench.mkdirSyncRecursive(path.join(projectPath, "some", "nested", "folders"), 511); // 511 decimal is 0777 octal
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreatePathNotEmpty).then(done, done);
         });
     });

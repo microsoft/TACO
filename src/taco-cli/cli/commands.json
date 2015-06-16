@@ -14,8 +14,15 @@
             { "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]" },
             { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
             { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
-            { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" },
-            { "name": "--list", "description": "[CommandCreateOptionsList]" }
+            { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" }
+        ]
+    },
+    "templates": {
+        "synopsis": "<synopsis>[--kit [NAME]]</synopsis>",
+        "modulePath": "./templates",
+        "description": "<helptitle>[CommandTemplatesDescription]</helptitle>",
+        "options": [
+            { "name": "--kit [NAME]", "description": "[CommandTemplatesOptionsKit]" }
         ]
     },
     "help": {

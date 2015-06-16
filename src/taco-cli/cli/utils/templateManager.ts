@@ -128,6 +128,32 @@ class TemplateManager {
     }
 
     /**
+     * Get a list of all available templates
+     *
+     * @return {ITemplateList} An object containing the kitId and its available templates
+     */
+    public getAllTemplates(): Q.Promise<TemplateManager.ITemplateList> {
+        return this.kitHelper.getAllTemplates()
+            .then(function (results: TacoKits.ITemplateOverrideInfo[]): Q.Promise<TemplateManager.ITemplateList> {
+                var list: TemplateManager.ITemplateList = {
+                    kitId: "",
+                    templates: []
+                };
+
+                results.forEach(function (templateInfo: TacoKits.ITemplateOverrideInfo): void {
+                    var templateDescriptor: TemplateManager.ITemplateDescriptor = {
+                        id: templateInfo.templateId,
+                        name: templateInfo.templateInfo.name
+                    };
+
+                    list.templates.push(templateDescriptor);
+                });
+
+                return Q.resolve(list);
+            });
+    }
+
+    /**
      * Get the number of entries in the specified template
      *
      * @param {string} kitId The id of the desired kit

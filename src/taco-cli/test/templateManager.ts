@@ -104,6 +104,12 @@ describe("TemplateManager", function (): void {
             };
 
             return Q.resolve(kitTemplatesOverrideInfo);
+        },
+
+        getAllTemplates: function (): Q.Promise<TacoKits.ITemplateOverrideInfo[]> {
+            var templateOverrides: TacoKits.ITemplateOverrideInfo[] = [testTemplateOverrideInfo, testTemplateOverrideInfo2, testTemplateOverrideInfo3];
+
+            return Q.resolve(templateOverrides);
         }
     };
 
@@ -309,6 +315,42 @@ describe("TemplateManager", function (): void {
             var expectedResultStringified: string = JSON.stringify(expectedResult);
 
             templates.getTemplatesForKit(testKitId)
+                .then(function (templateList: templateManager.ITemplateList): void {
+                    JSON.stringify(templateList).should.equal(expectedResultStringified);
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+    });
+
+    describe("getAllTemplates()", function (): void {
+        it("should return all available templates", function (done: MochaDone): void {
+            // Create a test TemplateManager
+            var templates: templateManager = new templateManager(mockKitHelper, templateCache);
+
+            // Build the expected result
+            var expectedResult: templateManager.ITemplateList = {
+                kitId: "",
+                templates: [
+                    {
+                        id: testTemplateOverrideInfo.templateId,
+                        name: testTemplateOverrideInfo.templateInfo.name
+                    },
+                    {
+                        id: testTemplateOverrideInfo2.templateId,
+                        name: testTemplateOverrideInfo2.templateInfo.name
+                    },
+                    {
+                        id: testTemplateOverrideInfo3.templateId,
+                        name: testTemplateOverrideInfo3.templateInfo.name
+                    }
+                ]
+            };
+            var expectedResultStringified: string = JSON.stringify(expectedResult);
+
+            templates.getAllTemplates()
                 .then(function (templateList: templateManager.ITemplateList): void {
                     JSON.stringify(templateList).should.equal(expectedResultStringified);
                     done();

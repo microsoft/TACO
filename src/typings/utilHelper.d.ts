@@ -82,5 +82,13 @@ declare module TacoUtility {
          * @return {[option: string]: any } A new options dictionary containing the cleansed options
          */
         public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any };
+        /**
+         * Validates the given path, ensuring all segments are valid directory / file names
+         *
+         * @param {string} pathToTest The path to validate
+         *
+         * @return {boolean} A boolean set to true if the path is valid, false if not
+         */
+        public static isPathValid(pathToTest: string): boolean;
     }
 }

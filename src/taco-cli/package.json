@@ -45,7 +45,6 @@
         "querystring": "0.2.0",
         "replace": "^0.3.0",
         "rimraf": "2.2.6",
-        "sanitize-filename": "^1.3.0",
         "taco-utils": "file:../taco-utils",
         "taco-kits": "file:../taco-kits",
         "wrench": "^1.5.8"

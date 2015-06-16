@@ -8,7 +8,6 @@
 
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
-/// <reference path="../../typings/sanitize-filename.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tacoKits.d.ts" />
 
@@ -24,7 +23,6 @@ import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
-import sanitizeFilename = require ("sanitize-filename");
 import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -55,7 +53,6 @@ class Create implements commands.IDocumentedCommand {
         kit: String,
         template: String,
         cli: String,
-        list: Boolean,
         "copy-from": String,
         "link-to": String
     };
@@ -70,10 +67,6 @@ class Create implements commands.IDocumentedCommand {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
-        if (this.commandParameters.data.options["list"]) {
-            return this.listTemplates();
-        }
-
         try {
             this.parseArguments(data);
             this.verifyArguments();
@@ -145,52 +138,22 @@ class Create implements commands.IDocumentedCommand {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
 
-        // Make sure a path was provided
+        // Make sure a path was specified
         var createPath: string = this.commandParameters.cordovaParameters.projectPath;
 
         if (!createPath) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNoPath);
         }
 
-        // Make sure the provided path contains only valid directory names
-        var resolvedPath: string = path.resolve(createPath);
-        var root: string = (<any>path).parse(resolvedPath).root;
-
-        resolvedPath.split(path.sep).forEach(function (dirName: string, index: number): void {
-            // Don't test the very first segment if we had a root
-            if (index === 0 && root) {
-                return;
-            }
-
-            if (sanitizeFilename(dirName) !== dirName) {
-                // The current path segment is not a valid directory name
-                throw errorHelper.get(TacoErrorCodes.CommandCreateInvalidPath);
-            }
-        });
-
-        // Make sure the provided path is empty if it exists
-        if (fs.existsSync(resolvedPath) && fs.readdirSync(resolvedPath).length > 0) {
-            throw errorHelper.get(TacoErrorCodes.CommandCreatePathNotEmpty);
+        // Make sure the specified path is valid
+        if (!utils.isPathValid(createPath) || !fs.existsSync(path.dirname(createPath))) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreateInvalidPath, createPath);
         }
-    }
 
-    /**
-     * List available templates for the specified kit, or for the default kit if no kit is specified
-     */
-    private listTemplates(): Q.Promise<any> {
-        var kit = this.commandParameters.data.options["kit"];
-        var templates: templateManager = new templateManager(kitHelper);
-
-        return templates.getTemplatesForKit(kit)
-            .then(function (list: templateManager.ITemplateList): void {
-                var kitToPrint: string = kit || list.kitId;
-                logger.logLine();
-                logger.log(resources.getString("CommandCreateListBase", kitToPrint));
-                logger.logLine();
-                LoggerHelper.logNameDescriptionTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
-                    return <INameDescription>{ name: value.id, description: value.name };
-                }));
-            });
+        // Make sure the specified path is empty if it exists
+        if (fs.existsSync(createPath) && fs.readdirSync(createPath).length > 0) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreatePathNotEmpty, createPath);
+        }
     }
 
     /**
@@ -226,7 +189,7 @@ class Create implements commands.IDocumentedCommand {
                     return Q.resolve(null);
                 }      
             })
-                .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
+            .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
                 if (kitInfo && !!kitInfo.deprecated) {
                     // Warn the user
                     logger.logWarning(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
@@ -268,7 +231,7 @@ class Create implements commands.IDocumentedCommand {
                 })
                 .then(function (kitIdUsed: string): void {
                     logger.log(resources.getString("CommandCreateStatusKitIdUsed", cordovaParameters.appName, cordovaParameters.appId, projectPath, kitIdUsed));
-            });
+                });
         }
     }
 

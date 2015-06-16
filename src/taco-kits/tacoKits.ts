@@ -27,6 +27,7 @@ module TacoKits {
     export interface IKitHelper {
         getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+        getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;
     }
 
     export interface IPluginOverrideInfo {
@@ -233,6 +234,38 @@ module TacoKits {
                     };
 
                     return Q.resolve(kitTemplatesOverrideInfo);
+                });
+        }
+
+        /**
+         *   Returns a promise resolved with an ITemplateOverrideInfo[] that contains all the available templates regardless of kits
+         */
+        public static getAllTemplates(): Q.Promise<ITemplateOverrideInfo[]> {
+            return KitHelper.getTemplateMetadata()
+                .then(function (templateMetadata: ITemplateMetadata): Q.Promise<ITemplateOverrideInfo[]> {
+                    var templateList: ITemplateOverrideInfo[] = [];
+                    var knownTemplates: { [id: string]: boolean } = {};
+
+                    for (var kitId in templateMetadata) {
+                        if (templateMetadata.hasOwnProperty(kitId)) {
+                            for (var templateId in templateMetadata[kitId]) {
+                                if (templateMetadata[kitId].hasOwnProperty(templateId)) {
+                                    if (!knownTemplates[templateId]) {
+                                        var templateInfo: ITemplateOverrideInfo = {
+                                            kitId: kitId,
+                                            templateId: templateId,
+                                            templateInfo: templateMetadata[kitId][templateId]
+                                        };
+
+                                        templateList.push(templateInfo);
+                                        knownTemplates[templateId] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return Q.resolve(templateList);
                 });
         }
 

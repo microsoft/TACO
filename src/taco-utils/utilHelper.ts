@@ -6,20 +6,23 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
+/// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/nopt.d.ts" />
+/// <reference path="../typings/Q.d.ts" />
+/// <reference path="../typings/rimraf.d.ts"/>
 
 "use strict";
 import child_process = require ("child_process");
+import crypto = require ("crypto");
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
 import ncp = require ("ncp");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import rimraf = require ("rimraf");
 
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -211,6 +214,55 @@ module TacoUtility {
             }
 
             return cleansed;
+        }
+
+        /**
+         * Validates the given path, ensuring all segments are valid directory / file names
+         *
+         * @param {string} pathToTest The path to validate
+         *
+         * @return {boolean} A boolean set to true if the path is valid, false if not
+         */
+        public static isPathValid(pathToTest: string): boolean {
+            // Set up test folder
+            var tmpDir: string = os.tmpdir();
+            var testDir: string = crypto.pseudoRandomBytes(20).toString("hex");
+
+            while (fs.existsSync(path.join(tmpDir, testDir))) {
+                testDir = crypto.pseudoRandomBytes(20).toString("hex");
+            }
+
+            // Test each segment of the path
+            var currentPath: string = path.join(tmpDir, testDir);
+            var hasInvalidSegments: boolean;
+
+            fs.mkdirSync(currentPath);
+            hasInvalidSegments = pathToTest.split(path.sep).some(function (segment: string, index: number): boolean {
+                // Don't test the very first segment if it is a drive letter (windows only)
+                if (index === 0 && os.platform() === "win32" && /^[a-zA-Z]:$/.test(segment)) {
+                    return false;
+                }
+
+                try {
+                    var nextPath: string = path.join(currentPath, segment);
+
+                    fs.mkdirSync(nextPath);
+                    currentPath = nextPath;
+                } catch (err) {
+                    // If we catch an ENOENT, it means the segment is an invalid filename. For any other exception, we can't be sure, so we try to be permissive.
+                    if (err.code === "ENOENT") {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            // Attempt to delete our test folders, but don't throw if it doesn't work
+            rimraf(currentPath, function (error: Error): void { });
+
+            // Return the result
+            return !hasInvalidSegments;
         }
     }
 }
