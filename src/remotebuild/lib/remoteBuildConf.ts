@@ -60,7 +60,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
         if (!(this.port > 0 && this.port < 65536)) {
             // Negated positve checks is important to catch NaN
-            throw new Error(resources.getString("InvalidPortSpecified",this.port));
+            throw new Error(resources.getString("InvalidPortSpecified", this.port));
         }
 
         var serverMods = this.remoteBuildConf.modules;
