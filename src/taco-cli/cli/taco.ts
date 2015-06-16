@@ -40,7 +40,7 @@ interface IParsedArgs {
  */
 class Taco { 
     /*
-     * Initialize all other config classes, Invoke task to be run
+     * Runs taco with command line args, catches "known" taco errors
      */
     public static run(): void {
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
@@ -53,7 +53,9 @@ class Taco {
         });
     }
 
-    // runWithArgs is for internal test purpose - where the args are passed as parameter
+    /*
+     * runs taco with passed array of args ensuring proper initialization
+     */
     public static runWithArgs(args: string[]): Q.Promise<any> {
         return Q({})
             .then(function (): Q.Promise<any> {
