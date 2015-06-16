@@ -115,6 +115,10 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
             throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
+        if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothDebugRelease);
+        }
+
         return parsedOptions;
     }
 
