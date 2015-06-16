@@ -42,16 +42,5 @@ declare module TacoUtility {
         preferences(): {
             [key: string]: string;
         };
-
-        /**
-         * Get the vs:plugin elements specified in the config along with their param-s
-         *
-         * @returns {[key: string]: {[param: string]: string} } A dictionary mapping plugin ids to a param name/value map
-         */
-        public plugins(): {
-            [key: string]: {
-                [param: string]: string
-            }
-        };
     }
 }
