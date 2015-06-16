@@ -38,14 +38,12 @@ interface IParsedArgs {
  *
  * Main Taco class
  */
-class Taco { /*
+class Taco { 
+    /*
      * Initialize all other config classes, Invoke task to be run
      */
     public static run(): void {
-        var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
-        projectHelper.cdToProjectRoot();
-        telemetry.init(require("../package.json").version);
-        Taco.executeCommand(parsedArgs).done(null, function (reason: any): any {
+        Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason && reason.isTacoError) {
                 tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
@@ -57,18 +55,21 @@ class Taco { /*
 
     // runWithArgs is for internal test purpose - where the args are passed as parameter
     public static runWithArgs(args: string[]): Q.Promise<any> {
-        var parsedArgs: IParsedArgs = Taco.parseArgs(args);
-        return Taco.executeCommand(parsedArgs);
-    }
+        return Q({})
+            .then(function (): Q.Promise<any> {
+                var parsedArgs: IParsedArgs = Taco.parseArgs(args);
 
-    private static executeCommand(parsedArgs: IParsedArgs): Q.Promise<any> {
-        // if no command found that can handle these args, route args directly to Cordova
-        if (parsedArgs.command) {
-            var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
-            return parsedArgs.command.run(commandData);
-        } else {
-            return cordovaWrapper.cli(parsedArgs.args);
-        }
+                projectHelper.cdToProjectRoot();
+                telemetry.init(require("../package.json").version);
+
+                // if no command found that can handle these args, route args directly to Cordova
+                if (parsedArgs.command) {
+                    var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
+                    return parsedArgs.command.run(commandData);
+                } else {
+                    return cordovaWrapper.cli(parsedArgs.args);
+                }
+        });
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
