@@ -43,6 +43,7 @@ class Taco {
      * Runs taco with command line args, catches "known" taco errors
      */
     public static run(): void {
+        telemetry.init(require("../package.json").version);
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason && reason.isTacoError) {
@@ -60,9 +61,7 @@ class Taco {
         return Q({})
             .then(function (): Q.Promise<any> {
                 var parsedArgs: IParsedArgs = Taco.parseArgs(args);
-
                 projectHelper.cdToProjectRoot();
-                telemetry.init(require("../package.json").version);
 
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
