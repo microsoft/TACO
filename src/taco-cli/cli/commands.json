@@ -49,7 +49,7 @@
     },
 
     "build": {
-        "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./build",
         "description": "<helptitle>[CommandBuildDescription]</helptitle>",
         "args": [
@@ -65,7 +65,7 @@
         ]
     },
     "run": {
-        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./run",
         "description": "<helptitle>[CommandRunDescription]</helptitle>",
         "args": [
@@ -82,7 +82,7 @@
         ]
     },
     "version": {
-        "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
+        "synopsis": "<synopsis></synopsis>",
         "modulePath": "./version",
         "description": "<helptitle>[CommandVersionDescription]</helptitle>"
     }
