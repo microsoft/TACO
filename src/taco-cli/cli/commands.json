@@ -18,12 +18,9 @@
         ]
     },
     "templates": {
-        "synopsis": "<synopsis>[--kit [NAME]]</synopsis>",
+        "synopsis": "<synopsis></synopsis>",
         "modulePath": "./templates",
-        "description": "<helptitle>[CommandTemplatesDescription]</helptitle>",
-        "options": [
-            { "name": "--kit [NAME]", "description": "[CommandTemplatesOptionsKit]" }
-        ]
+        "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
     },
     "help": {
         "synopsis": "<synopsis>[COMMAND]</synopsis>",

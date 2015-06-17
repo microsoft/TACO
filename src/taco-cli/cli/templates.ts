@@ -31,34 +31,15 @@ import LoggerHelper = tacoUtility.LoggerHelper;
  * Handles "taco templates"
  */
 class Templates implements commands.IDocumentedCommand {
-    private static KnownOptions: Nopt.FlagTypeMap = {
-        kit: String
-    };
-
-    private useKit: boolean;
-    private kitId: string;
-
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
         var self = this;
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Templates.KnownOptions, {}, data.original, 0);
-
-        this.useKit = commandData.options.hasOwnProperty("kit");
-        this.kitId = commandData.options["kit"];
 
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {
                 logger.logLine();
-
-                if (self.useKit) {
-                    var kitToPrint: string = self.kitId || templateList.kitId;
-
-                    logger.log(resources.getString("CommandTemplatesHeaderKit", kitToPrint));
-                } else {
-                    logger.log(resources.getString("CommandTemplatesHeader"));
-                }
-
+                logger.log(resources.getString("CommandTemplatesHeader"));
                 logger.logLine();
                 LoggerHelper.logNameDescriptionTable(templateList.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
                     return <INameDescription>{ name: value.id, description: value.name };
@@ -76,10 +57,6 @@ class Templates implements commands.IDocumentedCommand {
 
     private getTemplatesToPrint(): Q.Promise<templateManager.ITemplateList> {
         var templates: templateManager = new templateManager(kitHelper);
-
-        if (this.useKit) {
-            return templates.getTemplatesForKit(this.kitId);
-        }
 
         return templates.getAllTemplates();
     }

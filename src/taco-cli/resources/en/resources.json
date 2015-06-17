@@ -47,9 +47,7 @@
     "CommandCreateTacoJsonFileWriteError": "Failed to write to {0}",
 
     "CommandTemplatesDescription": "List available taco templates",
-    "CommandTemplatesOptionsKit": "List available templates for the specified kit, or for the default kit if no kit name is specified",
-    "CommandTemplatesHeaderKit": "Available templates for kit '{0}':",
-    "_CommandTemplatesHeaderKit.comment": "Header at the top of the table showing available templates for the specified kit when the user does 'taco templates --kit <id>'. {0} is the id of the kit for which to list the templates.",
+    "_CommandTemplatesDescription.comment": "Description of the 'taco templates' command when the user types 'taco help templates'.",
     "CommandTemplatesHeader": "Available templates:",
     "_CommandTemplatesHeader.comment": "Header at the top of the table showing available templates 'taco templates'.",
 

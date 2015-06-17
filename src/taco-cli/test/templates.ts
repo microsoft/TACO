@@ -32,33 +32,4 @@ describe("templates", function (): void {
 
         templates.run(data).then(done, done);
     });
-
-    it("'taco templates --kit' should not throw any error", function (done: MochaDone): void {
-        var templates = new Templates();
-        var data: commands = {
-            options: {},
-            original: ["--kit"],
-            remain: []
-        };
-
-        templates.run(data).then(done, done);
-    });
-
-    it("'taco templates --kit unknown' should throw an error about not finding the specified kit", function (done: MochaDone): void {
-        var templates = new Templates();
-        var data: commands = {
-            options: {},
-            original: ["--kit unknown"],
-            remain: []
-        };
-
-        templates.run(data)
-            .then(function (): void {
-                done();
-            }, function (err: tacoError): void {
-                err.errorCode.should.be.exactly(TacoKitsErrorCodes.TacoKitsExceptionInvalidKit);
-                done();
-            })
-            .catch(done);
-    });
 });

@@ -246,24 +246,20 @@ module TacoKits {
                     var templateList: ITemplateOverrideInfo[] = [];
                     var knownTemplates: { [id: string]: boolean } = {};
 
-                    for (var kitId in templateMetadata) {
-                        if (templateMetadata.hasOwnProperty(kitId)) {
-                            for (var templateId in templateMetadata[kitId]) {
-                                if (templateMetadata[kitId].hasOwnProperty(templateId)) {
-                                    if (!knownTemplates[templateId]) {
-                                        var templateInfo: ITemplateOverrideInfo = {
-                                            kitId: kitId,
-                                            templateId: templateId,
-                                            templateInfo: templateMetadata[kitId][templateId]
-                                        };
+                    Object.keys(templateMetadata).forEach(function (kitId: string): void {
+                        Object.keys(templateMetadata[kitId]).forEach(function (templateId: string): void {
+                            if (!knownTemplates[templateId]) {
+                                var templateInfo: ITemplateOverrideInfo = {
+                                    kitId: kitId,
+                                    templateId: templateId,
+                                    templateInfo: templateMetadata[kitId][templateId]
+                                };
 
-                                        templateList.push(templateInfo);
-                                        knownTemplates[templateId] = true;
-                                    }
-                                }
+                                templateList.push(templateInfo);
+                                knownTemplates[templateId] = true;
                             }
-                        }
-                    }
+                        });
+                    });
 
                     return Q.resolve(templateList);
                 });
