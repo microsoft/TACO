@@ -104,6 +104,10 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
             errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
+        if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothDebugRelease);
+        }
+
         return parsedOptions;
     }
 
