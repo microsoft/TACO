@@ -20,6 +20,8 @@ declare module "elementtree" {
     export class XMLElement {
         attrib: { [key: string]: string };
         text: string;
+        tag: string;
+        _children: XMLElement[];
     }
 
     export function XML(data: string): XMLElement;

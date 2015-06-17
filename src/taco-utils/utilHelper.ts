@@ -197,23 +197,22 @@ module TacoUtility {
         }
 
         /**
-         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
+         * Returns a string where the %...% notations in the provided string have been replaced with their actual values. For example, calling this with "%programfiles%\foo"
+         * would return "C:\Program Files\foo" (on most systems). Values that don't exist are not replaced.
          *
-         * @param {[option: string]: any} Options dictionary to be cleansed
-         * @returns {string[]} Options to exclude from the specified options dictionary
+         * @param {string} str The string for which to expand environment variables
          *
-         * @return {[option: string]: any } A new options dictionary containing the cleansed options
+         * @return {string} A new string where the environment variables were replaced with their actual value
          */
-        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any } {
-            var cleansed: { [option: string]: any } = {};
-            
-            for (var opt in options) {
-                if (!exclude || exclude.indexOf(opt) < 0) {
-                    cleansed[opt] = options[opt];
+        public static expandEnvironmentVariables(str: string): string {
+            return str.replace(/%(.+?)%/g, function (substring: string, ...args: any[]): string {
+                if (process.env[args[0]]) {
+                    return process.env[args[0]];
+                } else {
+                    // This is not an environment variable, can't replace it so leave it as is
+                    return "%" + args[0] + "%";
                 }
-            }
-
-            return cleansed;
+            });
         }
 
         /**

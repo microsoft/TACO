@@ -298,7 +298,7 @@ class Server {
         var modConfig = Server.ServerConf.moduleConfig(mod);
         if (mod && modConfig && modConfig.mountPath ) {
             var mountLocation = modConfig.mountPath;
-            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.host, Server.ServerConf.port, mountLocation);
+            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.hostname, Server.ServerConf.port, mountLocation);
             res.set({
                 "Content-Location": contentLocation
             });

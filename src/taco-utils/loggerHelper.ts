@@ -72,7 +72,7 @@ module TacoUtility {
         /**
          * Logs a separator line "==============="
          */
-        public static logSeperatorLine(): void {
+        public static logSeparatorLine(): void {
             Logger.log(LogFormatHelper.repeat("=", LoggerHelper.MaxRight));
         }
 

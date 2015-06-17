@@ -21,7 +21,6 @@ declare module Express {
     export interface Response { }
     export interface Application { }
 
-
     interface IRoute {
         path: string;
         stack: any;
@@ -77,7 +76,7 @@ declare module Express {
 
         /**
          * Special-cased "all" method, applying the given route `path`,
-         * middleware, and callback to _every_ NodeJSHttp method.
+         * middleware, and callback to _every_ HTTP method.
          *
          * @param path
          * @param fn
@@ -343,6 +342,11 @@ declare module Express {
         /**
          * Parse the "Host" header field hostname.
          */
+        hostname: string;
+
+        /**
+         * @deprecated Use hostname instead.
+         */
         host: string;
 
         /**
@@ -418,30 +422,30 @@ declare module Express {
          * @param code
          */
         status(code: number): Response;
-            
+
         /**
-         * Set the response NodeJSHttp status code to `statusCode` and send its string representation as the response body.
-         * @link NodeJSHttp://expressjs.com/4x/api.html#res.sendStatus
-         * 
+         * Set the response HTTP status code to `statusCode` and send its string representation as the response body.
+         * @link http://expressjs.com/4x/api.html#res.sendStatus
+         *
          * Examples:
-         * 
+         *
          *    res.sendStatus(200); // equivalent to res.status(200).send('OK')
          *    res.sendStatus(403); // equivalent to res.status(403).send('Forbidden')
          *    res.sendStatus(404); // equivalent to res.status(404).send('Not Found')
          *    res.sendStatus(500); // equivalent to res.status(500).send('Internal Server Error')
-         * 
+         *
          * @param code
          */
-        sendStatus(code: number): Send;
-            
+        sendStatus(code: number): Response;
+
         /**
          * Set Link header field with the given `links`.
          *
          * Examples:
          *
          *    res.links({
-         *      next: 'NodeJSHttp://api.example.com/users?page=2',
-         *      last: 'NodeJSHttp://api.example.com/users?page=5'
+         *      next: 'http://api.example.com/users?page=2',
+         *      last: 'http://api.example.com/users?page=5'
          *    });
          *
          * @param links
@@ -508,7 +512,7 @@ declare module Express {
          *  The following example illustrates how `res.sendFile()` may
          *  be used as an alternative for the `static()` middleware for
          *  dynamic situations. The code backing `res.sendFile()` is actually
-         *  the same code, so NodeJSHttp cache support etc is identical.
+         *  the same code, so HTTP cache support etc is identical.
          *
          *     app.get('/user/:uid/photos/:file', function(req, res){
          *       var uid = req.params.uid
@@ -531,19 +535,19 @@ declare module Express {
         sendFile(path: string, options: any, fn: Errback): void;
 
         /**
-         * deprecated, use sendFile instead.
+         * @deprecated Use sendFile instead.
          */
         sendfile(path: string): void;
         /**
-         * deprecated, use sendFile instead.
+         * @deprecated Use sendFile instead.
          */
         sendfile(path: string, options: any): void;
         /**
-         * deprecated, use sendFile instead.
+         * @deprecated Use sendFile instead.
          */
         sendfile(path: string, fn: Errback): void;
         /**
-         * deprecated, use sendFile instead.
+         * @deprecated Use sendFile instead.
          */
         sendfile(path: string, options: any, fn: Errback): void;
 
@@ -675,6 +679,9 @@ declare module Express {
         header(field: any): Response;
         header(field: string, value?: string): Response;
 
+        // Property indicating if HTTP headers has been sent for the response.
+        headersSent: boolean;
+
         /**
          * Get value for header `field`.
          *
@@ -721,7 +728,7 @@ declare module Express {
          * Examples:
          *
          *    res.location('/foo/bar').;
-         *    res.location('NodeJSHttp://example.com');
+         *    res.location('http://example.com');
          *    res.location('../login'); // /blog/post/1 -> /blog/login
          *
          * Mounting:
@@ -752,9 +759,9 @@ declare module Express {
          * Examples:
          *
          *    res.redirect('/foo/bar');
-         *    res.redirect('NodeJSHttp://example.com');
-         *    res.redirect(301, 'NodeJSHttp://example.com');
-         *    res.redirect('NodeJSHttp://example.com', 301);
+         *    res.redirect('http://example.com');
+         *    res.redirect(301, 'http://example.com');
+         *    res.redirect('http://example.com', 301);
          *    res.redirect('../login'); // /blog/post/1 -> /blog/login
          */
         redirect(url: string): void;
@@ -983,18 +990,18 @@ declare module Express {
         /**
          * Listen for connections.
          *
-         * A node `NodeJSHttp.Server` is returned, with this
+         * A node `http.Server` is returned, with this
          * application (which is a `Function`) as its
-         * callback. If you wish to create both an NodeJSHttp
-         * and HTTPS server you may do so with the "NodeJSHttp"
+         * callback. If you wish to create both an HTTP
+         * and HTTPS server you may do so with the "http"
          * and "https" modules as shown here:
          *
-         *    var NodeJSHttp = require('NodeJSHttp')
+         *    var http = require('http')
          *      , https = require('https')
          *      , express = require('express')
          *      , app = express();
          *
-         *    NodeJSHttp.createServer(app).listen(80);
+         *    http.createServer(app).listen(80);
          *    https.createServer({ ... }, app).listen(443);
          */
         listen(port: number, hostname: string, backlog: number, callback?: Function): NodeJSHttp.Server;
@@ -1017,7 +1024,7 @@ declare module Express {
 
         /**
          * The app.routes object houses all of the routes defined mapped by the
-         * associated NodeJSHttp verb. This object may be used for introspection
+         * associated HTTP verb. This object may be used for introspection
          * capabilities, for example Express uses this internally not only for
          * routing but to provide default OPTIONS behaviour unless app.options()
          * is used. Your application or framework may also remove routes by

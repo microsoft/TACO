@@ -67,7 +67,7 @@ class Help implements commands.IDocumentedCommand {
      */
     public printHeader(): void {
         logger.logLine();
-        LoggerHelper.logSeperatorLine();
+        LoggerHelper.logSeparatorLine();
     }
 
     /**

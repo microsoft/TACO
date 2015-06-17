@@ -82,5 +82,13 @@
         "synopsis": "<synopsis></synopsis>",
         "modulePath": "./version",
         "description": "<helptitle>[CommandVersionDescription]</helptitle>"
+    },
+    "install-reqs": {
+        "synopsis": "<synopsis>[PLATFORM_1] [PLATFORM_2] ...</synopsis>",
+        "modulePath": "./installReqs",
+        "description": "<helptitle>[CommandInstallReqsDescription]</helptitle>",
+        "options": [
+            { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
+        ]
     }
-  }
+}

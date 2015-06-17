@@ -36,6 +36,7 @@ import tacoUtils = require ("taco-utils");
 
 import BuildInfo = tacoUtils.BuildInfo;
 import CountStream = tacoUtils.CountStream;
+import NewlineNormalizerStream = tacoUtils.NewlineNormalizerStream;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class RemoteBuildClientHelper {
@@ -483,15 +484,22 @@ class RemoteBuildClientHelper {
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
             var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
-            var logStream = fs.createWriteStream(logPath, { start: offset, flags: logFlags });
+            var endOfFile = 0;
+            if (offset > 0 && fs.existsSync(logPath)) {
+                var logFileStat = fs.statSync(logPath);
+                endOfFile = logFileStat.size;
+            }
+
+            var logStream = fs.createWriteStream(logPath, { start: endOfFile, flags: logFlags });
             var countStream = new CountStream();
+            var newlineNormalizerStream = new NewlineNormalizerStream();
             logStream.on("finish", function (): void {
                 console.info(resources.getString("BuildLogWrittenTo", logPath));
             });
             req.on("end", function (): void {
                 buildInfo["logOffset"] = offset + countStream.count;
                 deferred.resolve(buildInfo);
-            }).pipe(countStream).pipe(logStream);
+            }).pipe(countStream).pipe(newlineNormalizerStream).pipe(logStream);
             return deferred.promise;
         });
     }

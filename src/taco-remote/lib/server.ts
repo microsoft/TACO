@@ -109,7 +109,7 @@ class Server implements RemoteBuild.IServerModule {
         var modPath = this.modPath;
         var self = this;
         this.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
-            var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.host, port, modPath, buildInfo.buildNumber);
+            var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.hostname, port, modPath, buildInfo.buildNumber);
             res.set({
                 "Content-Type": "application/json",
                 "Content-Location": contentLocation
