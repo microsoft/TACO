@@ -226,7 +226,9 @@ class IOSBuildHelper {
             try {
                 fetchJson = JSON.parse(<any>fs.readFileSync(fetchJsonPath));
             } catch (e) {
-                // fetch.json is malformed; try to ignore it
+                // fetch.json is malformed; act as though no plugins are installed
+                // If it turns out we do need variables from the fetch.json, then cordova will throw an error
+                // and report exactly what variables were required.
             }
         }
 
