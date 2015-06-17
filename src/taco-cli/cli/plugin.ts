@@ -16,11 +16,16 @@
 import Q = require("q");
 
 import commandBase = require("./utils/platformPluginCommandBase");
-import tacoKits = require("taco-kits");
-import TacoErrorCodes = require("./tacoErrorCodes");
 import errorHelper = require("./tacoErrorHelper");
+import resources = require("../resources/resourceManager");
+import tacoKits = require("taco-kits");
+import tacoUtility = require("taco-utils");
+import TacoErrorCodes = require("./tacoErrorCodes");
 
 import kitHelper = tacoKits.KitHelper;
+import logger = tacoUtility.Logger;
+import packageLoader = tacoUtility.TacoPackageLoader;
+import CommandOperationStatus = commandBase.CommandOperationStatus;
 
 /**
   * Plugin
@@ -63,6 +68,70 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         });
         this.cordovaCommandParams.targets = targetString;
         return Q.resolve({});
+    }
+
+    /**
+     * Prints the plugin addition/removal operation progress message
+     */
+    public printInProgressMessage(plugins: string, operation: string): void {
+        switch (operation) {
+            case "add": {
+                logger.log(resources.getString("CommandPluginStatusAdding", plugins));
+            }
+            case "remove":
+            case "rm": {
+                logger.log(resources.getString("CommandPluginStatusRemoving", plugins));
+                break;
+            }
+            case "update": {
+                logger.log(resources.getString("CommandPluginStatusUpdating", plugins));
+                break;
+            }
+        }
+    }
+
+    /**
+     * Prints the plugin addition/removal operation success message
+     */
+    public printSuccessMessage(plugins: string, operation: string): void {
+        switch (operation) {
+            case "add": {
+                logger.log(resources.getString("CommandPlatformStatusAdded", plugins));
+                break;
+            }
+            case "remove":
+            case "rm": {
+                logger.log(resources.getString("CommandPlatformStatusRemoved", plugins));
+                break;
+            }
+            case "update": {
+                logger.log(resources.getString("CommandPlatformStatusUpdated", plugins));
+                break;
+            }
+        }
+    }
+
+    /**
+     * Prints the plugin addition/removal status message
+     */
+    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
+        // Parse the target string for plugin names and print success message
+        var plugins: string = "";
+
+        if (!(targets.length == 1 && targets[0].indexOf("@") !== 0 && packageLoader.GitUriRegex.test(targets[0]) && packageLoader.FileUriRegex.test(targets[0]))) {
+            plugins = targets.join(",");
+        }
+
+        switch (status) {
+            case CommandOperationStatus.InProgress: {
+                this.printInProgressMessage(plugins, operation);
+                break;
+            }
+            case CommandOperationStatus.Success: {
+                this.printSuccessMessage(plugins, operation);
+                break;
+            }
+        }
     }
 }
 

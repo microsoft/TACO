@@ -8,6 +8,7 @@
 
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
+/// <reference path="../../../typings/cordovaLib.d.ts" />
 /// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
 "use strict";
@@ -132,6 +133,93 @@ class CordovaWrapper {
                     return output.split("\n")[0];
                 });
             }
+        });
+    }
+
+    /**
+     * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
+     *
+     * @param {string} The name of the cordova command to be invoked
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaCommandParameters} The cordova command parameters
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
+                var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+                var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(pluginId);
+                var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
+                return Q.resolve(versionSpec);
+        });
+    }
+
+    public static addPluginVersionSpec(pluginId: string, attribs: Cordova.ICordovaPlatformPuginInfo, variables: Cordova.ICordovaVariable[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
+                var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+
+                var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(pluginId);
+                if (pluginEntry) {
+                    configParser.removePlugin(pluginId);
+                }
+                configParser.addPlugin(attribs, variables);
+                configParser.write();
+                return Q.resolve({});
+        });
+    }
+
+    public static removePluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
+                var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+                configParser.removePlugin(pluginId);
+                configParser.write();
+                return Q.resolve({});
+        });
+    }
+
+    public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
+            var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+           
+            var engineSpec: string = "";
+            var engines: Cordova.ICordovaPlatformPuginInfo[] = configParser.getEngines();
+            engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPuginInfo): void {
+                if (engineInfo.name.toLowerCase() === platform.toLowerCase()) {
+                    engineSpec = engineInfo.spec;
+                }
+            });
+            return Q.resolve(engineSpec);
+        });
+    }
+
+    public static addEngineVersionSpec(platform: string, spec: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
+            var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+            configParser.removeEngine(platform);
+            configParser.addEngine(platform, spec);
+            configParser.write();
+            return Q.resolve({});
+        });
+    }
+
+    public static removeEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
+            var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+            configParser.removeEngine(platform);
+            configParser.write();
+            return Q.resolve({});
         });
     }
 

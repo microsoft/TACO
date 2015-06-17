@@ -33,6 +33,12 @@ import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 import utils = tacoUtility.UtilHelper;
 
+export enum CommandOperationStatus {
+    Error = -1,
+    InProgress = 0,
+    Success = 1
+};
+
 /*
 * PlatfromPluginCommandBase
 *
@@ -54,6 +60,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         rm: "remove",
         ls: "list"
     };
+
     public name: string;
     
     public cordovaCommandParams: Cordova.ICordovaCommandParameters;
@@ -69,6 +76,14 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
     }
 
     /**
+     * Abstract method to be implemented by the derived class.
+     * Prints the status message indicating the platform/plugin addition process
+     */
+    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
+        throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
+    }
+
+    /**
      * Checks the component (platform/plugin) specification to determine if the user has attempted an override.
      * Overrides can be packageSpec@<version> / packageSpec@<git-url> / packageSpec@<filepath>
      * Do not check for overrides from kit metadata if user explicitly overrides the package on command-line
@@ -76,6 +91,8 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
     public shouldCheckForOverride(platformSpec: string): boolean {
         var packageVersion: string = platformSpec.indexOf("@") !== 0 ? platformSpec.split("@")[1] : null;
         return !(packageLoader.GitUriRegex.test(platformSpec) || packageLoader.FileUriRegex.test(platformSpec) || (packageVersion && semver.valid(packageVersion)));
+
+        // Also, check config.xml for override values - If there are, then we should not override with kit values
     }
    
     /**
@@ -110,7 +127,11 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         })
             .then(function (): Q.Promise<any> {
                 return cordovaWrapper.invokeCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams);
-        });
+        })
+            .then(function (): Q.Promise<any> {
+                self.printStatusMessage(self.cordovaCommandParams.targets, self.cordovaCommandParams.subCommand, CommandOperationStatus.Success);
+                return Q({});
+        })
     }
 
     /**
@@ -151,12 +172,5 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
             targets: targets,
             downloadOptions: this.downloadOptions
         };
-    }
-
-    /**
-     * Prints the platform/plugin addition/removal status message
-     */
-    private printStatusMessage(componentName: string, action: string, spec: string, specType: TacoUtility.PackageSpecType): void {
-        /* TODO - Print status messages with the right theme after string review */
     }
 }
