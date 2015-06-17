@@ -34,10 +34,5 @@ declare module TacoUtility {
          * Logs an empty line on console
          */
         public static logLine(): void;
-
-        /**
-         * Returns a string composed of the specified character repeated the specified number of times
-         */
-        public static repeat(c: string, n: number): string;
     }
 }
