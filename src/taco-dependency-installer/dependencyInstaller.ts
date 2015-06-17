@@ -39,7 +39,7 @@ import loggerHelper = tacoUtils.LoggerHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utilHelper = tacoUtils.UtilHelper;
 
-// This represents the objects in the array that cordova.raw.requirements() returns. If Cordova ever changes their data format for missing requirements, this will need to be updated.
+// This represents the objects in the arrays that cordova.raw.requirements() returns. If Cordova ever changes their data format for missing requirements, this will need to be updated.
 interface ICordovaRequirement {
     id?: string;
     name?: string;
@@ -47,6 +47,11 @@ interface ICordovaRequirement {
     metadata?: {
         version?: string;
     }
+}
+
+// This dictionary represents the collection of results returned by cordova.raw.requirements(). Each tested platform either contains a rejected reason, or an array of ICordovaRequirement objects.
+interface ICordovaRequirementsResult {
+    [platform: string]: ICordovaRequirement[];
 }
 
 module TacoDependencyInstaller {
@@ -108,18 +113,10 @@ module TacoDependencyInstaller {
         }
 
         private parseMissingDependencies(cordovaChecksResult: any): void {
-            // Extract dependency IDs from Cordova results. Depending on whether we were able to require() Cordova or not, this result can be either an array of ICordovaRequirement objects, or a string
+            // Extract dependency IDs from Cordova results. Depending on whether we were able to require() Cordova or not, this result can be either a dictionary of ICordovaRequirement objects, or a string
             // representing the raw output of invoking 'cordova requirements'.
-            var dependencyIds: ICordovaRequirement[];
-
-            if (util.isArray(cordovaChecksResult)) {
-                dependencyIds = (<ICordovaRequirement[]>cordovaChecksResult).filter(function (value: ICordovaRequirement): boolean {
-                    // We only keep requirements that are not installed
-                    return !value.installed;
-                });
-            } else {
-                dependencyIds = this.parseFromString(cordovaChecksResult);
-            }
+            var isString: boolean = typeof cordovaChecksResult === "string" || cordovaChecksResult instanceof String;
+            var dependencyIds: ICordovaRequirement[] = isString ? this.parseFromString(cordovaChecksResult) : this.parseFromRawResult(cordovaChecksResult);
 
             // Initialize arrays
             this.unsupportedMissingDependencies = [];
@@ -197,6 +194,22 @@ module TacoDependencyInstaller {
 
                 dependencies.push(req);
             }
+
+            return dependencies;
+        }
+
+        private parseFromRawResult(results: ICordovaRequirementsResult): ICordovaRequirement[] {
+            var dependencies: ICordovaRequirement[] = [];
+
+            Object.keys(results).forEach(function (key: string): void {
+                if (util.isArray(results[key])) {
+                    // If the key is an array, it means the check was successful for this platform, so we add the results to our dependency IDs
+                    dependencies = dependencies.concat(results[key].filter(function (value: ICordovaRequirement): boolean {
+                        // We only keep requirements that are not installed
+                        return !value.installed;
+                    }));
+                }
+            });
 
             return dependencies;
         }
@@ -294,7 +307,9 @@ module TacoDependencyInstaller {
                 return !!value.licenseUrl;
             });
 
-            loggerHelper.logSeperatorLine();
+            logger.logLine();
+            loggerHelper.logSeparatorLine();
+            logger.logLine();
             logger.log(resources.getString("InstallingDependenciesHeader"));
             this.missingDependencies.forEach(function (value: IDependency): void {
                 logger.log(resources.getString("DependencyLabel", value.displayName));
@@ -306,7 +321,9 @@ module TacoDependencyInstaller {
                 }
             });
 
-            loggerHelper.logSeperatorLine();
+            logger.logLine();
+            loggerHelper.logSeparatorLine();
+            logger.logLine();
             logger.log(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
 
             if (needsLicenseAgreement) {
@@ -318,7 +335,9 @@ module TacoDependencyInstaller {
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
                     if (answer === resources.getString("YesString")) {
-                        loggerHelper.logSeperatorLine();
+                        logger.logLine();
+                        loggerHelper.logSeparatorLine();
+                        logger.logLine();
 
                         return Q.resolve({});
                     } else {
@@ -452,7 +471,9 @@ module TacoDependencyInstaller {
         }
 
         private printSummaryLine(code: number): void {
-            loggerHelper.logSeperatorLine();
+            logger.logLine();
+            loggerHelper.logSeparatorLine();
+            logger.logLine();
 
             switch (code) {
                 case installerExitCode.CompletedWithErrors:

@@ -65,7 +65,7 @@
     "_DownloadingLabel.comment": "Progress indicator for when a dependency is being downloaded.",
     "InstallingLabel": "Installing...",
     "_InstallingLabel.comment": "Progress indicator for when a dependency is being installed.",
-    "ConfiguringLabel": "Configuring...",
+    "ConfiguringLabel": "Configuring (this may take several minutes)...",
     "_ConfiguringLabel.comment": "Progress indicator for when a dependency is being configured after the installation is done.",
     "SettingSystemVariablesLabel": "Updating system environment variables...",
     "_SettingSystemVariablesLabel.comment": "Progress indicator for when a dependency is being installed via npm.",
