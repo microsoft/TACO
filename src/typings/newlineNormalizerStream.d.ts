@@ -9,12 +9,10 @@
 /// <reference path="../typings/node.d.ts" />
 declare module TacoUtility {
     /**
-     * This class counts how many bytes pass through it in a pipe stream.
+     * This class converts all newlines it encounters to either windows or unix style newlines, depending on the OS
      * Example usage:
-     * var cs = new CountStream();
-     * readableStream.pipe(cs).pipe(writableStream);
-     * [... later]
-     * console.log(cs.count + " bytes written");
+     * var nns = new NewlineNormalizerStream();
+     * readableStream.pipe(nns).pipe(writableStream);
      */
     class NewlineNormalizerStream extends NodeJSStream.Transform {
         constructor(options?: NodeJSStream.TransformOptions);

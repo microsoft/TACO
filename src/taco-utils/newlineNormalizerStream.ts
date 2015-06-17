@@ -16,10 +16,8 @@ module TacoUtility {
     /**
      * This class converts all newlines it encounters to either windows or unix style newlines, depending on the OS
      * Example usage:
-     * var cs = new CountStream();
-     * readableStream.pipe(cs).pipe(writableStream);
-     * [... later]
-     * console.log(cs.count + " bytes written");
+     * var nns = new NewlineNormalizerStream();
+     * readableStream.pipe(nns).pipe(writableStream);
      */
     export class NewlineNormalizerStream extends Transform {
         public _transform(chunk: any, encoding: string, callback: (err: Error, buf: string) => void): void {
