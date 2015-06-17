@@ -223,6 +223,11 @@ module TacoUtility {
          * @return {boolean} A boolean set to true if the path is valid, false if not
          */
         public static isPathValid(pathToTest: string): boolean {
+            // If path is a network location ("\\...") or starts with "\\?\" notation, it is not a valid path for the purposes of this CLI
+            if (pathToTest.indexOf("\\\\") === 0) {
+                return false;
+            }
+
             // Set up test folder
             var tmpDir: string = os.tmpdir();
             var testDir: string = crypto.pseudoRandomBytes(20).toString("hex");
@@ -237,7 +242,7 @@ module TacoUtility {
 
             fs.mkdirSync(currentPath);
             hasInvalidSegments = pathToTest.split(path.sep).some(function (segment: string, index: number): boolean {
-                // Don't test the very first segment if it is a drive letter (windows only)
+                // Exceptions for Windows platform for the very first segment: skip drive letter
                 if (index === 0 && os.platform() === "win32" && /^[a-zA-Z]:$/.test(segment)) {
                     return false;
                 }

@@ -8,7 +8,6 @@
 
 /// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/sanitize-filename.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
@@ -16,15 +15,16 @@
 import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
-import sanitizeFilename = require ("sanitize-filename");
 
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import InstallerBase = require ("./installers/installerBase");
 import protocol = require ("./elevatedInstallerProtocol");
 import resources = require ("./resources/resourceManager");
+import tacoUtils = require ("taco-utils");
 
 import ExitCode = protocol.ExitCode;
 import ILogger = protocol.ILogger;
+import utilHelper = tacoUtils.UtilHelper;
 
 interface IDependencyWrapper {
     dependency: DependencyInstallerInterfaces.IDependency;
@@ -104,23 +104,10 @@ class InstallerRunner {
 
             // Verify the path is valid
             var resolvedPath: string = path.resolve(value.installDestination);
-            var root: string = (<any>path).parse(resolvedPath).root;
 
-            if (root && !fs.existsSync(root)) {
+            if (!utilHelper.isPathValid(resolvedPath)) {
                 throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
             }
-
-            resolvedPath.split(path.sep).forEach(function (dirName: string, index: number): void {
-                // Don't test the very first segment if we had a root
-                if (index === 0 && root) {
-                    return;
-                }
-
-                if (sanitizeFilename(dirName) !== dirName) {
-                    // The current path segment is not a valid directory name
-                    throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
-                }
-            });
 
             // Verify the path is empty if it exists
             if (fs.existsSync(value.installDestination)) {

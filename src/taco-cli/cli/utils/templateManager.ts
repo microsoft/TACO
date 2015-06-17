@@ -135,7 +135,7 @@ class TemplateManager {
     public getAllTemplates(): Q.Promise<TemplateManager.ITemplateList> {
         return this.kitHelper.getAllTemplates()
             .then(function (results: TacoKits.ITemplateOverrideInfo[]): Q.Promise<TemplateManager.ITemplateList> {
-                var list: TemplateManager.ITemplateList = {
+                var templatesContainer: TemplateManager.ITemplateList = {
                     kitId: "",
                     templates: []
                 };
@@ -146,10 +146,10 @@ class TemplateManager {
                         name: templateInfo.templateInfo.name
                     };
 
-                    list.templates.push(templateDescriptor);
+                    templatesContainer.templates.push(templateDescriptor);
                 });
 
-                return Q.resolve(list);
+                return Q.resolve(templatesContainer);
             });
     }
 

@@ -244,6 +244,8 @@ module TacoKits {
             return KitHelper.getTemplateMetadata()
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<ITemplateOverrideInfo[]> {
                     var templateList: ITemplateOverrideInfo[] = [];
+
+                    // As we are printing the union of the templates defined in all of the kit overrides, we need a dictionary of template IDs we already added to our list to avoid duplication
                     var knownTemplates: { [id: string]: boolean } = {};
 
                     Object.keys(templateMetadata).forEach(function (kitId: string): void {

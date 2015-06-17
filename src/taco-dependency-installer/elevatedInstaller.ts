@@ -8,7 +8,6 @@
 
 /// <reference path="../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/sanitize-filename.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
@@ -17,7 +16,6 @@ import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
 import Q = require ("q");
-import sanitizeFilename = require ("sanitize-filename");
 
 import DependencyDataWrapper = require ("./utils/dependencyDataWrapper");
 import InstallerBase = require ("./installers/installerBase");
