@@ -50,7 +50,13 @@ class Settings {
             Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
             return Q(Settings.Settings);
         } catch (e) {
-            return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
+            if (e.code === "ENOENT") {
+                // File doesn't exist, no need for a stack trace.
+                return Q.reject<Settings.ISettings>(errorHelper.get(TacoErrorCodes.CommandBuildTacoSettingsNotFound));
+            } else {
+                // Couldn't open the file, not sure why, so we'll keep the error around for the user
+                return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
+            }
         }
     }
 
