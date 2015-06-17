@@ -219,6 +219,16 @@ class IOSBuildHelper {
             });
         }, Q({}));
 
+        var fetchJson: Cordova.IFetchJson = {};
+        var fetchJsonPath = path.join(remotePluginsPath, "fetch.json");
+        if (fs.existsSync(fetchJsonPath)) {
+            try {
+                fetchJson = JSON.parse(fs.readFileSync(fetchJsonPath).toString());
+            } catch (e) {
+                // fetch.json is malformed; try to ignore it
+            }
+        }
+
         return newAndModifiedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
                 var newFolder = path.join(remotePluginsPath, plugin);
@@ -231,7 +241,16 @@ class IOSBuildHelper {
                     return UtilHelper.copyRecursive(newFolder, installedFolder);
                 } else {
                     // The plugin is not installed; install it
-                    return cordova.raw.plugin("add", newFolder);
+                    var cli_variables: Cordova.IKeyValueStore<string> = {};
+
+                    // Check to see if the plugin is mentioned in fetch.json and has variables
+                    if (plugin in fetchJson && fetchJson[plugin].variables) {
+                        Object.keys(fetchJson[plugin].variables).forEach(function (key: string): void {
+                            cli_variables[key] = fetchJson[plugin].variables[key];
+                        });
+                    }
+
+                    return cordova.raw.plugin("add", newFolder, { cli_variables: cli_variables });
                 }
             });
         }, deleteOldPlugins).finally(function (): void {
