@@ -9,6 +9,7 @@ enum TacoErrorCode {
     CommandBuildInvalidPlatformLocation,
     CommandBuildTacoSettingsNotFound,
     CommandNotBothDeviceEmulate,
+    CommandNotBothDebugRelease,
     CommandNotBothLocalRemote,
     CommandRemotePlatformNotKnown,
     CommandKitInvalidCommandCombination,

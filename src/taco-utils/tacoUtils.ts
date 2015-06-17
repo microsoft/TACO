@@ -17,6 +17,7 @@ import installLogLevel = require ("./installLogLevel");
 import jsDocHelpPrinter = require ("./jsDocHelpPrinter");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
+import newlineNormalizerStream = require ("./newlineNormalizerStream");
 import processLogger = require ("./processLogger");
 import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
@@ -35,6 +36,7 @@ module TacoUtility {
     export var JSDocHelpPrinter = jsDocHelpPrinter.JSDocHelpPrinter;
     export var Logger = logger.Logger;
     export var LoggerHelper = loggerHelper.LoggerHelper;
+    export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
     export var InstallLogLevel = installLogLevel.InstallLogLevel;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
