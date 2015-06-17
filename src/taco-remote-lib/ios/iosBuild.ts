@@ -224,7 +224,7 @@ class IOSBuildHelper {
         var fetchJsonPath = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
-                fetchJson = JSON.parse(<any>fs.readFileSync(fetchJsonPath));
+                fetchJson = JSON.parse(fs.readFileSync(fetchJsonPath).toString());
             } catch (e) {
                 // fetch.json is malformed; try to ignore it
             }
