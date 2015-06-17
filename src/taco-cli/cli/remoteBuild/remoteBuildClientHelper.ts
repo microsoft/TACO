@@ -484,7 +484,13 @@ class RemoteBuildClientHelper {
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
             var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
-            var logStream = fs.createWriteStream(logPath, { start: offset, flags: logFlags });
+            var endOfFile = 0;
+            if (offset > 0 && fs.existsSync(logPath)) {
+                var logFileStat = fs.statSync(logPath);
+                endOfFile = logFileStat.size;
+            }
+
+            var logStream = fs.createWriteStream(logPath, { start: endOfFile, flags: logFlags });
             var countStream = new CountStream();
             var newlineNormalizerStream = new NewlineNormalizerStream();
             logStream.on("finish", function (): void {
