@@ -60,9 +60,7 @@ describe("KitHelper", function (): void {
     var testTemplateOverrideInfo: tacoKits.ITemplateOverrideInfo = {
         kitId: "5.0.0-Kit",
         templateInfo: {
-            name: {
-                en: "Blank template"
-            },
+            name: "BlankTemplateName",
             url: templateSrcPath
         }
     };
@@ -238,9 +236,7 @@ describe("KitHelper", function (): void {
                         kitId: "5.0.0-Kit",
                         templateId: "blank",
                         templateInfo: {
-                            name: {
-                                en: "Blank template"
-                            },
+                            name: "BlankTemplateName",
                             url: "templates/5.0.0-Kit/blank.zip"
                         }
                     }
@@ -269,9 +265,7 @@ describe("KitHelper", function (): void {
                         kitId: "default",
                         templateId: "blank",
                         templateInfo: {
-                            name: {
-                                en: "Blank template"
-                            },
+                            name: "BlankTemplateName",
                             url: "templates/default/blank.zip"
                         }
                     },
@@ -279,9 +273,7 @@ describe("KitHelper", function (): void {
                         kitId: "default",
                         templateId: "typescript",
                         templateInfo: {
-                            name: {
-                                en: "Blank Typescript template"
-                            },
+                            name: "TypescriptTemplateName",
                             url: "templates/default/typescript.zip"
                         }
                     }
@@ -310,9 +302,7 @@ describe("KitHelper", function (): void {
                         kitId: "5.0.0-Kit",
                         templateId: "blank",
                         templateInfo: {
-                            name: {
-                                en: "Blank template"
-                            },
+                            name: "BlankTemplateName",
                             url: "templates/5.0.0-Kit/blank.zip"
                         }
                     }

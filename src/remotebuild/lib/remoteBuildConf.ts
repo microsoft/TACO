@@ -58,6 +58,11 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         this.remoteBuildConf = conf.get();
         process.env.TACO_LANG = this.lang;
 
+        if (!(this.port > 0 && this.port < 65536)) {
+            // Negated positve checks is important to catch NaN
+            throw new Error(resources.getString("InvalidPortSpecified", this.port));
+        }
+
         var serverMods = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
             console.warn(resources.getString("NoServerModulesSelected"));

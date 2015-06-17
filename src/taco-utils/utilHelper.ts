@@ -181,8 +181,8 @@ module TacoUtility {
         /**
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
-        public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): void {
-            child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): child_process.ChildProcess {
+            return child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {
                     console.error(command);
                     console.error(stdout);

@@ -10,8 +10,8 @@
             { "name": "CONFIG", "description": "[CommandCreateArgsConfig]" }
         ],
         "options": [
-            { "name": "--kit <NAME>", "description": "[CommandCreateOptionsKit]" },
-            { "name": "--template <NAME>", "description": "[CommandCreateOptionsTemplate]" },
+            { "name": "--kit [NAME]", "description": "[CommandCreateOptionsKit]" },
+            { "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]" },
             { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
             { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
             { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" },
@@ -42,7 +42,7 @@
     },
 
     "build": {
-        "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./build",
         "description": "<helptitle>[CommandBuildDescription]</helptitle>",
         "args": [
@@ -58,7 +58,7 @@
         ]
     },
     "run": {
-        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./run",
         "description": "<helptitle>[CommandRunDescription]</helptitle>",
         "args": [
@@ -75,7 +75,7 @@
         ]
     },
     "version": {
-        "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
+        "synopsis": "<synopsis></synopsis>",
         "modulePath": "./version",
         "description": "<helptitle>[CommandVersionDescription]</helptitle>"
     },

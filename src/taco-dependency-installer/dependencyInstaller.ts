@@ -294,7 +294,7 @@ module TacoDependencyInstaller {
                 return !!value.licenseUrl;
             });
 
-            loggerHelper.logSeparator();
+            loggerHelper.logSeperatorLine();
             logger.log(resources.getString("InstallingDependenciesHeader"));
             this.missingDependencies.forEach(function (value: IDependency): void {
                 logger.log(resources.getString("DependencyLabel", value.displayName));
@@ -306,7 +306,7 @@ module TacoDependencyInstaller {
                 }
             });
 
-            loggerHelper.logSeparator();
+            loggerHelper.logSeperatorLine();
             logger.log(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
 
             if (needsLicenseAgreement) {
@@ -318,7 +318,7 @@ module TacoDependencyInstaller {
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
                     if (answer === resources.getString("YesString")) {
-                        loggerHelper.logSeparator();
+                        loggerHelper.logSeperatorLine();
 
                         return Q.resolve({});
                     } else {
@@ -452,7 +452,7 @@ module TacoDependencyInstaller {
         }
 
         private printSummaryLine(code: number): void {
-            loggerHelper.logSeparator();
+            loggerHelper.logSeperatorLine();
 
             switch (code) {
                 case installerExitCode.CompletedWithErrors:
