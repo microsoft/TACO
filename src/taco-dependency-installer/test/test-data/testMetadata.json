@@ -1,0 +1,97 @@
+{
+    "dependency1": {
+        "displayName": "Dependency 1",
+        "installerPath": "../../installers/installerBase",
+        "licenseUrl": "test_value",
+        "prerequisites": ["dependency5", "dependency7"],
+        "versions": {
+            "1.0": {
+                "win32": {
+                    "ia32": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    },
+                    "x64": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    }
+                }
+            }
+        }
+    },
+    "dependency2": {
+        "isImplicit": true
+    },
+    "dependency3": {
+        "isImplicit": true
+    },
+    "dependency4": {
+        "displayName": "Dependency 4",
+        "installerPath": "../../installers/installerBase",
+        "licenseUrl": "test_value",
+        "prerequisites": [ ],
+        "versions": { }
+    },
+    "dependency5": {
+        "displayName": "Dependency 5",
+        "installerPath": "../../installers/installerBase",
+        "licenseUrl": "test_value",
+        "prerequisites": [ ],
+        "versions": {
+            "1.0": {
+                "win32": {
+                    "ia32": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    },
+                    "x64": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    }
+                }
+            }
+        }
+    },
+    "dependency6": {
+        "displayName": "Dependency 6",
+        "installerPath": "../../installers/installerBase",
+        "licenseUrl": "test_value",
+        "prerequisites": [ ],
+        "versions": {
+            "1.0": {
+            }
+        }
+    },
+    "dependency7": {
+        "displayName": "Dependency 7",
+        "installerPath": "../../installers/installerBase",
+        "licenseUrl": "test_value",
+        "prerequisites": ["dependency5", "dependency6"],
+        "versions": {
+            "1.0": {
+                "win32": {
+                    "ia32": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    },
+                    "x64": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    }
+                }
+            }
+        }
+    },
+}

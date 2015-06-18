@@ -67,8 +67,8 @@ module TacoDependencyInstaller {
         private socketHandle: NodeJSNet.Socket;
         private serverHandle: NodeJSNet.Server;
 
-        constructor() {
-            this.dependenciesDataWrapper = new DependencyDataWrapper();
+        constructor(dependenciesMetadataFilePath?: string) {
+            this.dependenciesDataWrapper = !!dependenciesMetadataFilePath ? new DependencyDataWrapper(dependenciesMetadataFilePath) : new DependencyDataWrapper();
         }
 
         public run(requirementsResult: any): Q.Promise<any> {

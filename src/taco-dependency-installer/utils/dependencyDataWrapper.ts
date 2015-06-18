@@ -15,12 +15,14 @@ import os = require ("os");
 import path = require ("path");
 
 class DependencyDataWrapper {
-    private static DependenciesMetadataFilePath: string = path.resolve(__dirname, "..", "platformDependencies.json");
+    private static DefaultDependenciesMetadataFilePath: string = path.resolve(__dirname, "..", "platformDependencies.json");
 
     private dependenciesData: DependencyInstallerInterfaces.IDependencyDictionary;
 
-    constructor() {
-        this.dependenciesData = JSON.parse(fs.readFileSync(DependencyDataWrapper.DependenciesMetadataFilePath, "utf8"));
+    constructor(dependenciesMetadataFilePath?: string) {
+        var loadPath: string = dependenciesMetadataFilePath || DependencyDataWrapper.DefaultDependenciesMetadataFilePath;
+
+        this.dependenciesData = JSON.parse(fs.readFileSync(loadPath, "utf8"));
     }
 
     /*
