@@ -139,11 +139,11 @@ class CordovaWrapper {
     /**
      * Static method to get the plugin version specification from the config.xml file
      *
-     * @param {string} The name(if) of the cordova command to be invoked
-     * @param {string} The version of the cordova CLI to use
-     * @param {ICordovaCommandParameters} The cordova command parameters
+     * @param {string} The name(id) of the cordova plugin
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
      *
-     * @return {Q.Promise<any>} An empty promise
+     * @return {Q.Promise<string>} A promise with the version specification as a string
      */
     public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
@@ -156,19 +156,18 @@ class CordovaWrapper {
     }
 
     /**
-     * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
+     * Static method to add the plugin specification to config.xml file
      *
-     * @param {string} The name of the cordova command to be invoked
-     * @param {string} The version of the cordova CLI to use
-     * @param {ICordovaCommandParameters} The cordova command parameters
+     * @param {ICordovaPlatformPuginInfo} The plugin info
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
      *
-     * @return {Q.Promise<any>} An empty promise
+     * @return {Q.Promise<string>} An empty promise
      */
     public static addPluginVersionSpec(info: Cordova.ICordovaPlatformPuginInfo, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
-
             var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(info.name);
             if (pluginEntry) {
                 configParser.removePlugin(info.name);
@@ -179,6 +178,15 @@ class CordovaWrapper {
         });
     }
 
+    /**
+     * Static method to remove the plugin specification from the config.xml file
+     *
+     * @param {ICordovaPlatformPuginInfo} The plugin info
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} An empty promise
+     */
     public static removePluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
@@ -189,6 +197,15 @@ class CordovaWrapper {
         });
     }
 
+    /**
+     * Static method to get the engine specification from the config.xml file
+     *
+     * @param {string} The platform name
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} A promise with the version specification as a string
+     */
     public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
@@ -204,6 +221,16 @@ class CordovaWrapper {
         });
     }
 
+    /**
+     * Static method to add the platform specification to config.xml file
+     *
+     * @param {string} The platform name
+     * @param {string} The version specification for the platform
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} An empty promise
+     */
     public static addEngineVersionSpec(platform: string, spec: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
@@ -215,6 +242,15 @@ class CordovaWrapper {
         });
     }
 
+    /**
+     * Static method to remove the platform specification from config.xml file
+     *
+     * @param {string} The platform name
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} An empty promise
+     */
     public static removeEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {

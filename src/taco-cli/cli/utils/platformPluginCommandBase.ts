@@ -18,7 +18,6 @@ import Q = require ("q");
 import semver = require ("semver");
 import util = require ("util");
 
-import cordovaHelper = require ("./cordovaHelper");
 import cordovaWrapper = require ("./cordovaWrapper");
 import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
@@ -89,9 +88,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
 
     /**
      * Abstract method to be implemented by the derived class.
-     * Checks the component (platform/plugin) specification to determine if the user has attempted an override.
-     * Overrides can be packageSpec@<version> / packageSpec@<git-url> / packageSpec@<filepath>
-     * Do not check for overrides from kit metadata if user explicitly overrides the package on command-line
+     * Checks if the component has a version specification in config.xml of the cordova project
      */
     public configXmlHasVersionOverride(componentName: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<boolean> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
@@ -99,11 +96,17 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
 
     /**
      * Abstract method to be implemented by the derived class.
-     * Checks the component (platform/plugin) specification to determine if the user has attempted an override.
-     * Overrides can be packageSpec@<version> / packageSpec@<git-url> / packageSpec@<filepath>
-     * Do not check for overrides from kit metadata if user explicitly overrides the package on command-line
+     * Saves the version override info to config.xml of the cordova project
      */
-    public saveVersionOverrideInfo(specsToPersist: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<boolean> {
+    public saveVersionOverrideInfo(infoToPersist: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
+        throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
+    }
+
+    /**
+     * Abstract method to be implemented by the derived class.
+     * Removes the version override info of the plugin from config.xml of the cordova project
+     */
+    public removeVersionOverrideInfo(infoToRemove: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -115,8 +118,6 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
     public cliParamHasVersionOverride(spec: string): boolean {
         var packageVersion: string = spec.indexOf("@") !== 0 ? spec.split("@")[1] : null;
         return !!packageLoader.GitUriRegex.test(spec) || !!packageLoader.FileUriRegex.test(spec) || (packageVersion && !!semver.valid(packageVersion));
-
-        // Also, check config.xml for override values - If there are, then we should not override with kit values
     }
    
     /**
@@ -170,10 +171,14 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
      * Parse the arguments and construct the command parameters.
      */
     private parseArguments(args: commands.ICommandData): void {
-        console.log("args.original : " + args.original + "\n");
         var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KnownOptions, PlatformPluginCommandBase.ShortHands, args.original, 0);
         var subCommand: string = commandData.remain[0];
         var targets: string[] = commandData.remain.slice(1);
+
+        targets = targets.filter(function (name: string): boolean {
+            return !!name && name.length > 0;
+        });
+
         this.downloadOptions = {
             searchpath: commandData.options["searchpath"],
             noregistry: commandData.options["noregistry"],

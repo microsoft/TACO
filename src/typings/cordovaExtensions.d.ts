@@ -15,6 +15,19 @@
 
 declare module Cordova {
     
+    export module cordova_lib {
+        export class configparser {
+            constructor(configXmlPath: string);
+            getPlugin(id: string): any;
+            removePlugin(id: string): void;
+            addPlugin(attributes: Cordova.ICordovaPlatformPuginInfo, varaibles: Cordova.ICordovaVariable[]): any;
+            getEngines(): Cordova.ICordovaPlatformPuginInfo[];
+            removeEngine(name: string): void;
+            addEngine(name: string, spec: string): any;
+            write(): any;
+        }
+    }
+
     export interface ICordovaRawOptions {
         platforms: string[];
         options?: string[];
@@ -77,19 +90,6 @@ declare module Cordova {
     export interface ICordovaVariable {
         name: string;
         value: string;
-    }
-
-    export module cordova_lib {
-        export class configparser {
-            constructor(configXmlPath: string);
-            getPlugin(id: string): any;
-            removePlugin(id: string): void;
-            addPlugin(attributes: Cordova.ICordovaPlatformPuginInfo, varaibles: Cordova.ICordovaVariable[]): any;
-            getEngines(): Cordova.ICordovaPlatformPuginInfo[];
-            removeEngine(name: string): void;
-            addEngine(name: string, spec: string): any;
-            write(): any;
-        }
     }
 
     export interface ICordovaRaw {
