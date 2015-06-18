@@ -8,7 +8,6 @@
 
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
-/// <reference path="../../../typings/cordovaLib.d.ts" />
 /// <reference path="../../../typings/cordovaExtensions.d.ts" />
 
 "use strict";
@@ -28,6 +27,7 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import ConfigParser = Cordova.cordova_lib.configparser;
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
@@ -85,7 +85,7 @@ class CordovaWrapper {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
                         return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(platform, commandData));
                 });
             } else {
@@ -98,7 +98,7 @@ class CordovaWrapper {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
                     return cordova.raw.run(cordovaHelper.toCordovaRunArguments(platform, commandData));
                 });
             } else {
@@ -117,7 +117,7 @@ class CordovaWrapper {
      */
     public static create(cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
                 cordovaHelper.prepareCordovaConfig(cordovaParameters);
 
                 return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
@@ -137,6 +137,25 @@ class CordovaWrapper {
     }
 
     /**
+     * Static method to get the plugin version specification from the config.xml file
+     *
+     * @param {string} The name(if) of the cordova command to be invoked
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaCommandParameters} The cordova command parameters
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
+            var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(pluginId);
+            var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
+            return Q.resolve(versionSpec);
+        });
+    }
+
+    /**
      * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
      *
      * @param {string} The name of the cordova command to be invoked
@@ -145,50 +164,35 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
+    public static addPluginVersionSpec(info: Cordova.ICordovaPlatformPuginInfo, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
-                var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
-                var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(pluginId);
-                var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
-                return Q.resolve(versionSpec);
-        });
-    }
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
 
-    public static addPluginVersionSpec(pluginId: string, attribs: Cordova.ICordovaPlatformPuginInfo, variables: Cordova.ICordovaVariable[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
-        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
-                var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
-
-                var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(pluginId);
-                if (pluginEntry) {
-                    configParser.removePlugin(pluginId);
-                }
-                configParser.addPlugin(attribs, variables);
-                configParser.write();
-                return Q.resolve({});
+            var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(info.name);
+            if (pluginEntry) {
+                configParser.removePlugin(info.name);
+            }
+            configParser.addPlugin({ name: info.name, spec: info.spec }, info.pluginVariables);
+            configParser.write();
+            return Q.resolve({});
         });
     }
 
     public static removePluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-                var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
-                var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
-                configParser.removePlugin(pluginId);
-                configParser.write();
-                return Q.resolve({});
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
+            configParser.removePlugin(pluginId);
+            configParser.write();
+            return Q.resolve({});
         });
     }
 
     public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-            var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
-            var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
-           
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             var engineSpec: string = "";
             var engines: Cordova.ICordovaPlatformPuginInfo[] = configParser.getEngines();
             engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPuginInfo): void {
@@ -202,9 +206,8 @@ class CordovaWrapper {
 
     public static addEngineVersionSpec(platform: string, spec: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-            var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
-            var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             configParser.removeEngine(platform);
             configParser.addEngine(platform, spec);
             configParser.write();
@@ -214,9 +217,8 @@ class CordovaWrapper {
 
     public static removeEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
-            var cordovaLib: Cordova.ICordovaLib = cordova.cordova_lib;
-            var configParser: CordovaLib.CordovaConfigParser = new cordovaLib.ConfigParser(configXmlPath);
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             configParser.removeEngine(platform);
             configParser.write();
             return Q.resolve({});
@@ -234,11 +236,11 @@ class CordovaWrapper {
      */
     public static invokeCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
             if (command === "platform") {
-                return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets.join(" "), platformCmdParameters.downloadOptions);
+                return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
             } else if (command === "plugin") {
-                return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets.join(" "), platformCmdParameters.downloadOptions);
+                return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
             } else {
                 return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
             }

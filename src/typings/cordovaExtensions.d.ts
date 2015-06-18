@@ -8,7 +8,6 @@
 
 // <reference path="../typings/Q.d.ts" />
 // <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/cordovaLib.d.ts" />
 
 // Note: cordova.d.ts defines typings for cordova as a cordova app would see it.
 // This file defines typings as the npm cordova module is used
@@ -80,8 +79,17 @@ declare module Cordova {
         value: string;
     }
 
-    export interface ICordovaLib {
-        cordova: ICordovaRaw;
+    export module cordova_lib {
+        export class configparser {
+            constructor(configXmlPath: string);
+            getPlugin(id: string): any;
+            removePlugin(id: string): void;
+            addPlugin(attributes: Cordova.ICordovaPlatformPuginInfo, varaibles: Cordova.ICordovaVariable[]): any;
+            getEngines(): Cordova.ICordovaPlatformPuginInfo[];
+            removeEngine(name: string): void;
+            addEngine(name: string, spec: string): any;
+            write(): any;
+        }
     }
 
     export interface ICordovaRaw {
@@ -101,16 +109,6 @@ declare module Cordova {
         run(options: ICordovaRawOptions): Q.Promise<any>;
         save(target: any, opts?: any): Q.Promise<any>;
         serve(port: number): Q.Promise<NodeJSHttp.Server>;
-    }
-
-    export interface ICordova {
-        on(event: string, ...args: any[]): void;
-        off(event: string, ...args: any[]): void;
-        emit(event: string, ...args: any[]): void;
-        trigger(event: string, ...args: any[]): void;
-        cli(args: string[]): void;
-        raw: ICordovaRaw;
-        cordova_lib: Cordova.ICordovaLib;
     }
 
     export function on(event: string, ...args: any[]): void;

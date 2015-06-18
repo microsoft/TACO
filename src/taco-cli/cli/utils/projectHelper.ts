@@ -26,6 +26,7 @@ import kitHelper = tacoKits.KitHelper;
  */
 class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
+    private static ConfigXmlFileName: string = "config.xml";
 
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
@@ -106,6 +107,7 @@ class ProjectHelper {
         var projectInfo: ProjectHelper.IProjectInfo = {
             isTacoProject: false,
             cordovaCliVersion: "",
+            configXmlPath: "",
             tacoKitId: ""
         };
 
@@ -117,6 +119,8 @@ class ProjectHelper {
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata = require(path.join(projectPath, ProjectHelper.TacoJsonFileName));
+            projectInfo.configXmlPath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
+
             if (tacoJson.kit) {
                 kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
                     projectInfo.isTacoProject = true;
@@ -163,6 +167,7 @@ module ProjectHelper {
     export interface IProjectInfo {
         isTacoProject: boolean;
         cordovaCliVersion: string;
+        configXmlPath: string;
         tacoKitId?: string;
     }
 }
