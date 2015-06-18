@@ -1,12 +1,12 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
+
 /// <reference path="../../typings/mocha.d.ts"/>
-/// <reference path="../../typings/sanitize-filename.d.ts"/>
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
 /// <reference path="../../typings/tacoKits.d.ts"/>
@@ -15,7 +15,6 @@
 
 import mocha = require ("mocha");
 import path = require ("path");
-import sanitize = require ("sanitize-filename");
 // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 var should_module = require("should");
 
@@ -26,6 +25,7 @@ import tacoUtils = require ("taco-utils");
 
 import kitHelper = tacoKits.KitHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import utilHelper = tacoUtils.UtilHelper;
 
 describe("KitHelper", function (): void {
     // Important paths
@@ -60,9 +60,7 @@ describe("KitHelper", function (): void {
     var testTemplateOverrideInfo: tacoKits.ITemplateOverrideInfo = {
         kitId: "5.0.0-Kit",
         templateInfo: {
-            name: {
-                en: "Blank template"
-            },
+            name: "BlankTemplateName",
             url: templateSrcPath
         }
     };
@@ -238,9 +236,7 @@ describe("KitHelper", function (): void {
                         kitId: "5.0.0-Kit",
                         templateId: "blank",
                         templateInfo: {
-                            name: {
-                                en: "Blank template"
-                            },
+                            name: "BlankTemplateName",
                             url: "templates/5.0.0-Kit/blank.zip"
                         }
                     }
@@ -269,9 +265,7 @@ describe("KitHelper", function (): void {
                         kitId: "default",
                         templateId: "blank",
                         templateInfo: {
-                            name: {
-                                en: "Blank template"
-                            },
+                            name: "BlankTemplateName",
                             url: "templates/default/blank.zip"
                         }
                     },
@@ -279,9 +273,7 @@ describe("KitHelper", function (): void {
                         kitId: "default",
                         templateId: "typescript",
                         templateInfo: {
-                            name: {
-                                en: "Blank Typescript template"
-                            },
+                            name: "TypescriptTemplateName",
                             url: "templates/default/typescript.zip"
                         }
                     }
@@ -310,9 +302,7 @@ describe("KitHelper", function (): void {
                         kitId: "5.0.0-Kit",
                         templateId: "blank",
                         templateInfo: {
-                            name: {
-                                en: "Blank template"
-                            },
+                            name: "BlankTemplateName",
                             url: "templates/5.0.0-Kit/blank.zip"
                         }
                     }
@@ -348,22 +338,58 @@ describe("KitHelper", function (): void {
         });
     });
 
-    describe("TacoKitMetaData.json", function (): void {
-        function verifyIsValidFileName(name: string): void {
-            try {
-                name.should.be.exactly(sanitize(name));
-            } catch (err) {
-                throw new Error("'" + name + "' is not a valid directory name");
-            }
-        }
+    describe("getAllTemplates()", function (): void {
+        it("should return the correct list of all available templates", function (done: MochaDone): void {
+            var kitId: string = null;
+            var expectedResult: TacoKits.ITemplateOverrideInfo[] = [
+                {
+                    kitId: "default",
+                    templateId: "blank",
+                    templateInfo: {
+                        name: "BlankTemplateName",
+                        url: "templates/default/blank.zip"
+                    }
+                },
+                {
+                    kitId: "default",
+                    templateId: "typescript",
+                    templateInfo: {
+                        name: "TypescriptTemplateName",
+                        url: "templates/default/typescript.zip"
+                    }
+                }
+            ];
 
+            kitHelper.getAllTemplates()
+                .then(function (returnedResults: TacoKits.ITemplateOverrideInfo[]): void {
+                    // Verify the returned array is of the expected size
+                    returnedResults.length.should.be.exactly(expectedResult.length);
+
+                    // Verify the returned array has an entry for each template id
+                    expectedResult.forEach(function (expectedTemplateInfo: TacoKits.ITemplateOverrideInfo): void {
+                        var foundExpectedResult: boolean = returnedResults.some(function (returnedTemplateInfo: TacoKits.ITemplateOverrideInfo): boolean {
+                            return expectedTemplateInfo.templateId === returnedTemplateInfo.templateId;
+                        });
+
+                        foundExpectedResult.should.be.true;
+                    });
+
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+    });
+
+    describe("TacoKitMetaData.json", function (): void {
         it("should only have kit ids that are suitable for directory names", function (): void {
             var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
 
             for (var kitId in metadata.kits) {
                 // Make sure we don't perform our check on objects added in the prototype
                 if (metadata.kits.hasOwnProperty(kitId)) {
-                    verifyIsValidFileName(kitId);
+                    utilHelper.isPathValid(kitId).should.be.true;
                 }
             }
         });
@@ -374,7 +400,7 @@ describe("KitHelper", function (): void {
             for (var templateId in metadata.templates) {
                 // Make sure we don't perform our check on objects added in the prototype
                 if (metadata.kits.hasOwnProperty(templateId)) {
-                    verifyIsValidFileName(templateId);
+                    utilHelper.isPathValid(templateId).should.be.true;
                 }
             }
         });

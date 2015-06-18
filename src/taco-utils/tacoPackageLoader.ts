@@ -289,6 +289,7 @@ module TacoUtility {
 
         private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
             if (request.logLevel >= InstallLogLevel.taco) {
+                logger.logLine();
                 logger.log(resources.getString("PackageLoaderDownloadingMessage", request.packageId));
             }
 

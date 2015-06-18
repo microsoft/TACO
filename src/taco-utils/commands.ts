@@ -16,10 +16,8 @@ import logger = require ("./logger");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
-import utilHelper = require ("./utilHelper");
 
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
-import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
     export module Commands {

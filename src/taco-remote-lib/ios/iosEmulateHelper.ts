@@ -44,12 +44,16 @@ class IOSEmulateHelper {
 
     public static emulate(emulateRequest: { appDir: string; appName: string; target: string }): Q.Promise<{ status: string; messageId: string; messageArgs?: any }> {
         return Q.fcall(IOSEmulateHelper.cdToAppDir, emulateRequest.appDir)
-            .then(IOSEmulateHelper.cordovaEmulate.bind(IOSEmulateHelper, emulateRequest))
-            .then(function success(): { status: string; messageId: string; messageArgs?: any } {
+        .then(function (): Q.Promise<{}> { return IOSEmulateHelper.cordovaEmulate(emulateRequest); })
+        .then(function success(): { status: string; messageId: string; messageArgs?: any } {
             return { status: BuildInfo.EMULATED, messageId: "EmulateSuccess" };
-        }, function fail(e: Error): { status: string; messageId: string; messageArgs?: any } {
+        }, function fail(e: any): { status: string; messageId: string; messageArgs?: any } {
+            if (e.status) {
+                return e;
+            } else {
                 return { status: "error", messageId: "EmulateFailedWithError", messageArgs: e.message };
-            });
+            }
+        });
     }
 
     private static cdToAppDir(appDir: string): void {
@@ -59,14 +63,22 @@ class IOSEmulateHelper {
     private static cordovaEmulate(emulateRequest: { appDir: string; appName: string; target: string }): Q.Promise<{}> {
         var deferred = Q.defer();
         var emulatorAppPath = utils.quotesAroundIfNecessary(path.join(emulateRequest.appDir, "platforms", "ios", "build", "emulator", emulateRequest.appName + ".app"));
-        utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        var emulatorProcess = utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
                 deferred.reject(error);
             } else {
                 deferred.resolve({});
             }
         });
-        return deferred.promise;
+        // When run via SSH / without a GUI, ios-sim can hang indefinitely. A cold launch can take on the order of 5 seconds.
+        var emulatorTimeout = setTimeout(function (): void {
+            emulatorProcess.kill();
+            deferred.reject({ status: "error", messageId: "EmulateFailedTimeout" });
+        }, 10000);
+
+        return deferred.promise.finally(function (): void {
+            clearTimeout(emulatorTimeout);
+        });
     }
 
     private static iosSimTarget(emulateRequestTarget: string): string {

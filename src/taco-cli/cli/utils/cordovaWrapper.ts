@@ -6,9 +6,10 @@
 ﻿ *******************************************************
 ﻿ */
 
+/// <reference path="../../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
-/// <reference path="../../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../../typings/semver.d.ts" />
 
 "use strict";
 
@@ -16,6 +17,7 @@ import child_process = require ("child_process");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import semver = require ("semver");
 import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
@@ -32,6 +34,7 @@ import ConfigParser = Cordova.cordova_lib.configparser;
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CordovaNpmPackageName: string = "cordova";
+    private static CordovaRequirementsMinVersion: string = "5.1.0";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
         var deferred = Q.defer<string>();
@@ -105,6 +108,50 @@ class CordovaWrapper {
                 return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
             }
         });
+    }
+
+    public static requirements(platforms: string[]): Q.Promise<any> {
+        // Try to see if we are in a taco project
+        var projectInfo: projectHelper.IProjectInfo;
+
+        return projectHelper.getProjectInfo()
+            .then(function (pi: projectHelper.IProjectInfo): Q.Promise<any> {
+                projectInfo = pi;
+
+                // Check cordova version
+                if (projectInfo.cordovaCliVersion) {
+                    return Q.resolve(projectInfo.cordovaCliVersion);
+                }
+
+                return CordovaWrapper.cli(["-v"], true);
+            })
+            .then(function (version: string): Q.Promise<any> {
+                // If the cordova version is older than 5.1.0, the 'requirements' command does not exist
+                if (!semver.gte(version, CordovaWrapper.CordovaRequirementsMinVersion)) {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld));
+                }
+
+                return Q.resolve({});
+            })
+            .then(function (): Q.Promise<any> {
+                // Execute the requirements command
+                if (projectInfo.cordovaCliVersion) {
+                    // If we are in a taco project, use the raw api
+                    return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.silent)
+                        .then(function (cordova: Cordova.ICordova510): Q.Promise<any> {
+                            return cordova.raw.requirements(platforms);
+                        });
+                }
+
+                // Fallback to the global Cordova via the command line
+                var args: string[] = ["requirements"];
+
+                if (platforms) {
+                    args = args.concat(platforms);
+                }
+
+                return CordovaWrapper.cli(args, true); 
+            });
     }
 
     /**

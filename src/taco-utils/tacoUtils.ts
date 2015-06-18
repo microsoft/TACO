@@ -17,10 +17,12 @@ import installLogLevel = require ("./installLogLevel");
 import jsDocHelpPrinter = require ("./jsDocHelpPrinter");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
+import newlineNormalizerStream = require ("./newlineNormalizerStream");
 import processLogger = require ("./processLogger");
 import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import tacoPackageLoader = require ("./tacoPackageLoader");
+import telemetry = require ("./telemetry");
 import utilHelper = require ("./utilHelper");
 
 module TacoUtility {
@@ -34,12 +36,14 @@ module TacoUtility {
     export var JSDocHelpPrinter = jsDocHelpPrinter.JSDocHelpPrinter;
     export var Logger = logger.Logger;
     export var LoggerHelper = loggerHelper.LoggerHelper;
+    export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
     export var InstallLogLevel = installLogLevel.InstallLogLevel;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;
     export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
+    export var Telemetry = telemetry.Telemetry;
     export var UtilHelper = utilHelper.UtilHelper;
     /// <enable code="SA1301" />
 }

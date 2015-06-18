@@ -157,7 +157,8 @@ declare module 'request' {
 			bucket?: string;
 		}
 
-		export interface CookieJar {
+        export interface CookieJar {
+            setCookie(cookie: Cookie, cookirUrl: string): void;
 			add(cookie: Cookie): void;
 			get(req: Request): Cookie;
 			cookieString(req: Request): string;

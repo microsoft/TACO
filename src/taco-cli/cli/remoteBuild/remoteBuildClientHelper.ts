@@ -36,6 +36,7 @@ import tacoUtils = require ("taco-utils");
 
 import BuildInfo = tacoUtils.BuildInfo;
 import CountStream = tacoUtils.CountStream;
+import NewlineNormalizerStream = tacoUtils.NewlineNormalizerStream;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class RemoteBuildClientHelper {
@@ -483,15 +484,22 @@ class RemoteBuildClientHelper {
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
             var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
-            var logStream = fs.createWriteStream(logPath, { start: offset, flags: logFlags });
+            var endOfFile = 0;
+            if (offset > 0 && fs.existsSync(logPath)) {
+                var logFileStat = fs.statSync(logPath);
+                endOfFile = logFileStat.size;
+            }
+
+            var logStream = fs.createWriteStream(logPath, { start: endOfFile, flags: logFlags });
             var countStream = new CountStream();
+            var newlineNormalizerStream = new NewlineNormalizerStream();
             logStream.on("finish", function (): void {
                 console.info(resources.getString("BuildLogWrittenTo", logPath));
             });
             req.on("end", function (): void {
                 buildInfo["logOffset"] = offset + countStream.count;
                 deferred.resolve(buildInfo);
-            }).pipe(countStream).pipe(logStream);
+            }).pipe(countStream).pipe(newlineNormalizerStream).pipe(logStream);
             return deferred.promise;
         });
     }
@@ -500,12 +508,12 @@ class RemoteBuildClientHelper {
      * Download the <platform>.json file that tracks the installed plugins on the remote machine.
      * This file is used by vs-mda/vs-tac, but it is also good for checking what plugins are actually installed remotely.
      */
-    private static downloadRemotePluginFile(buildInfo: BuildInfo, settings: BuildSettings, toDir: String): Q.Promise<BuildInfo> {
+    private static downloadRemotePluginFile(buildInfo: BuildInfo, settings: BuildSettings, toDir: string): Q.Promise<BuildInfo> {
         var serverUrl = settings.buildServerUrl;
         var deferred = Q.defer<BuildInfo>();
         var buildNumber = buildInfo.buildNumber;
         var downloadUrl = util.format("%s/files/%d/cordovaApp/plugins/%s.json", serverUrl, buildNumber, settings.platform);
-
+        UtilHelper.createDirectoryIfNecessary(toDir);
         var remotePluginStream = fs.createWriteStream(path.join(toDir, util.format("remote_%s.json", settings.platform)));
         remotePluginStream.on("finish", function (): void {
             deferred.resolve(buildInfo);

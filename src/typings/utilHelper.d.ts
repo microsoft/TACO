@@ -72,15 +72,23 @@ declare module TacoUtility {
         /**
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
-        public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): void;
+        public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): NodeJSChildProcess.ChildProcess;
         /**
-         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
+         * Returns a string where the %...% notations in the provided string have been replaced with their actual values. For example, calling this with "%programfiles%\foo"
+         * would return "C:\Program Files\foo" (on most systems). Values that don't exist are not replaced.
          *
-         * @param {[option: string]: any} Options dictionary to be cleansed
-         * @returns {string[]} Options to exclude from the specified options dictionary
+         * @param {string} str The string for which to expand environment variables
          *
-         * @return {[option: string]: any } A new options dictionary containing the cleansed options
+         * @return {string} A new string where the environment variables were replaced with their actual value
          */
-        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any };
+        public static expandEnvironmentVariables(str: string): string;
+        /**
+         * Validates the given path, ensuring all segments are valid directory / file names
+         *
+         * @param {string} pathToTest The path to validate
+         *
+         * @return {boolean} A boolean set to true if the path is valid, false if not
+         */
+        public static isPathValid(pathToTest: string): boolean;
     }
 }

@@ -1,10 +1,10 @@
 ﻿/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
 
 // Typings for taco-kits package
 declare module TacoKits {
@@ -12,6 +12,7 @@ declare module TacoKits {
     interface IKitHelper {
         getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+        getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;
     }
 
     interface IPluginOverrideInfo {
@@ -47,14 +48,14 @@ declare module TacoKits {
     }
 
     interface ITemplateInfo {
-        name: {
-            [language: string]: string;
-        };
+        name: string;
         url: string;
     }
 
     interface ITemplateMetadata {
-        [kitId: string]: string;
+        [kitId: string]: {
+            [templateId: string]: ITemplateInfo;
+        }
     }
 
     interface IKitInfo {
@@ -75,7 +76,6 @@ declare module TacoKits {
     }
 
     interface IPluginInfo {
-        pluginId: string;
         name: string;
         description?: string;
         platforms?: string[];
@@ -91,7 +91,10 @@ declare module TacoKits {
         templates: ITemplateMetadata;
     }
 
-    class KitHelper {
+    /**
+     *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
+     */
+    export class KitHelper {
         public static KitMetadataFilePath: string;
         /**
          *   Initializes resource manager with the locale for resource strings
@@ -144,6 +147,11 @@ declare module TacoKits {
          *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
          */
         public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo>;
+
+        /**
+         *   Returns a promise resolved with an ITemplateOverrideInfo[] that contains all the available templates regardless of kits
+         */
+        public static getAllTemplates(): Q.Promise<ITemplateOverrideInfo[]>;
     }
 
     enum TacoErrorCode {

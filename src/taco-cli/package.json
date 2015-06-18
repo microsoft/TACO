@@ -45,12 +45,12 @@
         "querystring": "0.2.0",
         "replace": "^0.3.0",
         "rimraf": "2.2.6",
-        "semver": "2.3.1",
+        "semver": "^4.3.6",
+        "taco-dependency-installer": "file:../taco-dependency-installer",
         "taco-utils": "file:../taco-utils",
         "taco-kits": "file:../taco-kits",
         "wrench": "^1.5.8"
     },
-    "bundledDependencies": ["taco-utils"],
     "devDependencies": {
         "typescript": "latest",
         "del": "^1.0.0",

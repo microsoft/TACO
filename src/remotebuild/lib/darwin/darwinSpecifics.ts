@@ -32,7 +32,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var osxdefaults: { [key: string]: any } = {
             writePidToFile: false,
-            lang: process.env.LANG && process.env.LANG.replace(/_.*/, "") || "en", // Convert "en_US.UTF8" to "en", similarly for other locales
+            lang: process.env.LANG && process.env.LANG.replace(/_/, "-").replace(/\..*/, "") || "en", // Convert "en_US.UTF8" to "en-US", similarly for other locales
             suppressSetupMessage: false,
         };
         Object.keys(osxdefaults).forEach(function (key: string): void {

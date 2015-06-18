@@ -81,51 +81,37 @@
     "templates": {
         "default": {
             "blank": {
-                "name": {
-                    "en": "Blank template"
-                },
+                "name": "BlankTemplateName",
                 "url": "templates/default/blank.zip"
             },
             "typescript": {
-                "name": { 
-                    "en": "Blank TypeScript template"
-                },
+                "name": "TypescriptTemplateName",
                 "url": "templates/default/typescript.zip"
             }
         },
         "2.2.0-Kit": {
             "blank": {
-                "name": {
-                    "en": "Blank template"
-                },
+                "name": "BlankTemplateName",
                 "url": "templates/2.2.0-kit/blank.zip"
             }
         },
         "4.0.0-Kit": {
             "blank": {
-                "name": {
-                    "en": "Blank template"
-                },
+                "name": "BlankTemplateName",
                 "url": "templates/4.0.0-kit/blank.zip"
             },
             "typescript": {
-                "name": { 
-                    "en": "Blank TypeScript template"
-                },
+                "name": "TypescriptTemplateName",
                 "url": "templates/4.0.0-kit/typescript.zip"
             }
         },
         "5.0.0-Kit": {
             "blank": {
-                "name": {
-                    "en": "Blank template"
-                },
+                "name": "BlankTemplateName",
                 "url": "templates/5.0.0-kit/blank.zip"
             },
             "typescript": {
-                "name": { 
-                    "en": "Blank TypeScript template"
-                },
+                "name": "TypescriptTemplateName",
                 "url": "templates/5.0.0-kit/typescript.zip"
             }
         }

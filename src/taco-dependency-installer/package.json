@@ -1,0 +1,29 @@
+﻿{
+    "name": "taco-dependency-installer",
+    "author": {
+        "name": "Microsoft Corp."
+    },
+    "description": "Install platform-specific third-party dependencies for Cordova development",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://xxxxxgithub.com/Microsoft/taco-cli.git"
+    },
+    "main": "dependencyInstaller.js",
+    "scripts": {
+        "test": "mocha"
+    },
+    "dependencies": {
+        "adm-zip": "0.4.4",
+        "hash-files": "^1.0.0",
+        "q": "^1.1.2",
+        "request": "2.36.0",
+        "taco-utils": "file:../taco-utils",
+        "toposort": "^0.2.10",
+        "wrench": "^1.5.8"
+    },
+    "bundledDependencies": ["taco-utils"],
+    "devDependencies": {
+        "typescript": ">=1.4.1"
+    }
+}

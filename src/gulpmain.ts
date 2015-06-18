@@ -22,7 +22,7 @@ import stylecopUtil = require ("../tools/stylecopUtil");
 import gulpUtils = require ("../tools/GulpUtils");
  
 var buildConfig = require("../../src/build_config.json");
-var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
+var tacoModules = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 var allModules = tacoModules.concat(["taco-remote-multiplexer"]);
 
 // honour --moduleFilter flag.
@@ -114,6 +114,7 @@ gulp.task("copy", function (): Q.Promise<any> {
         "/**/templates/**",
         "/**/examples/**",
         "/**/*.ps1",
+        "/**/platformDependencies.json"
     ];
     return Q.all([
         gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),

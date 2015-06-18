@@ -6,20 +6,23 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/Q.d.ts" />
-/// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
+/// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/nopt.d.ts" />
+/// <reference path="../typings/Q.d.ts" />
+/// <reference path="../typings/rimraf.d.ts"/>
 
 "use strict";
 import child_process = require ("child_process");
+import crypto = require ("crypto");
 import fs = require ("fs");
 import mkdirp = require ("mkdirp");
 import ncp = require ("ncp");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import rimraf = require ("rimraf");
 
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -181,8 +184,8 @@ module TacoUtility {
         /**
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
-        public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): void {
-            child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): child_process.ChildProcess {
+            return child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {
                     console.error(command);
                     console.error(stdout);
@@ -194,23 +197,76 @@ module TacoUtility {
         }
 
         /**
-         * Returns a new options dictionary that contains options from the specified dictionary minus the options whose names are in the specified exclusion list
+         * Returns a string where the %...% notations in the provided string have been replaced with their actual values. For example, calling this with "%programfiles%\foo"
+         * would return "C:\Program Files\foo" (on most systems). Values that don't exist are not replaced.
          *
-         * @param {[option: string]: any} Options dictionary to be cleansed
-         * @returns {string[]} Options to exclude from the specified options dictionary
+         * @param {string} str The string for which to expand environment variables
          *
-         * @return {[option: string]: any } A new options dictionary containing the cleansed options
+         * @return {string} A new string where the environment variables were replaced with their actual value
          */
-        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any } {
-            var cleansed: { [option: string]: any } = {};
-            
-            for (var opt in options) {
-                if (!exclude || exclude.indexOf(opt) < 0) {
-                    cleansed[opt] = options[opt];
+        public static expandEnvironmentVariables(str: string): string {
+            return str.replace(/%(.+?)%/g, function (substring: string, ...args: any[]): string {
+                if (process.env[args[0]]) {
+                    return process.env[args[0]];
+                } else {
+                    // This is not an environment variable, can't replace it so leave it as is
+                    return "%" + args[0] + "%";
                 }
+            });
+        }
+
+        /**
+         * Validates the given path, ensuring all segments are valid directory / file names
+         *
+         * @param {string} pathToTest The path to validate
+         *
+         * @return {boolean} A boolean set to true if the path is valid, false if not
+         */
+        public static isPathValid(pathToTest: string): boolean {
+            // If path is a network location ("\\...") or starts with "\\?\" notation, it is not a valid path for the purposes of this CLI
+            if (pathToTest.indexOf("\\\\") === 0) {
+                return false;
             }
 
-            return cleansed;
+            // Set up test folder
+            var tmpDir: string = os.tmpdir();
+            var testDir: string = crypto.pseudoRandomBytes(20).toString("hex");
+
+            while (fs.existsSync(path.join(tmpDir, testDir))) {
+                testDir = crypto.pseudoRandomBytes(20).toString("hex");
+            }
+
+            // Test each segment of the path
+            var currentPath: string = path.join(tmpDir, testDir);
+            var hasInvalidSegments: boolean;
+
+            fs.mkdirSync(currentPath);
+            hasInvalidSegments = pathToTest.split(path.sep).some(function (segment: string, index: number): boolean {
+                // Exceptions for Windows platform for the very first segment: skip drive letter
+                if (index === 0 && os.platform() === "win32" && /^[a-zA-Z]:$/.test(segment)) {
+                    return false;
+                }
+
+                try {
+                    var nextPath: string = path.join(currentPath, segment);
+
+                    fs.mkdirSync(nextPath);
+                    currentPath = nextPath;
+                } catch (err) {
+                    // If we catch an ENOENT, it means the segment is an invalid filename. For any other exception, we can't be sure, so we try to be permissive.
+                    if (err.code === "ENOENT") {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            // Attempt to delete our test folders, but don't throw if it doesn't work
+            rimraf(currentPath, function (error: Error): void { });
+
+            // Return the result
+            return !hasInvalidSegments;
         }
     }
 }

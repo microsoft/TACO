@@ -10,13 +10,17 @@
             { "name": "CONFIG", "description": "[CommandCreateArgsConfig]" }
         ],
         "options": [
-            { "name": "--kit <NAME>", "description": "[CommandCreateOptionsKit]" },
-            { "name": "--template <NAME>", "description": "[CommandCreateOptionsTemplate]" },
+            { "name": "--kit [NAME]", "description": "[CommandCreateOptionsKit]" },
+            { "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]" },
             { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
             { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
-            { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" },
-            { "name": "--list", "description": "[CommandCreateOptionsList]" }
+            { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" }
         ]
+    },
+    "templates": {
+        "synopsis": "<synopsis></synopsis>",
+        "modulePath": "./templates",
+        "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
     },
     "help": {
         "synopsis": "<synopsis>[COMMAND]</synopsis>",
@@ -123,7 +127,7 @@
         ]
     },
     "build": {
-        "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./build",
         "description": "<helptitle>[CommandBuildDescription]</helptitle>",
         "args": [
@@ -139,7 +143,7 @@
         ]
     },
     "run": {
-        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | -- release] [--device | --emulator | --target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./run",
         "description": "<helptitle>[CommandRunDescription]</helptitle>",
         "args": [
@@ -156,8 +160,16 @@
         ]
     },
     "version": {
-        "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
+        "synopsis": "<synopsis></synopsis>",
         "modulePath": "./version",
         "description": "<helptitle>[CommandVersionDescription]</helptitle>"
+    },
+    "install-reqs": {
+        "synopsis": "<synopsis>[PLATFORM_1] [PLATFORM_2] ...</synopsis>",
+        "modulePath": "./installReqs",
+        "description": "<helptitle>[CommandInstallReqsDescription]</helptitle>",
+        "options": [
+            { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
+        ]
     }
-  }
+}
