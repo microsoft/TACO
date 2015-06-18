@@ -147,7 +147,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         })
             .then(function (): Q.Promise<any> {
             var kitId: string = projectInfo.tacoKitId;
-            if (kitId) {
+            if (kitId && self.cordovaCommandParams.subCommand == "add") {
                 return self.checkForKitOverrides(projectInfo).then(function (specs: Cordova.ICordovaPlatformPuginInfo[]): void {
                     specsToPersist = specs;
                 });
@@ -158,7 +158,17 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         })
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {
-                return self.saveVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
+                switch (self.cordovaCommandParams.subCommand) {
+                    case "add":
+                        {
+                            return self.saveVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
+                        }
+                    case "remove":
+                    case "rm":
+                        {
+                            return self.removeVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
+                        }
+                }
             }
         })
             .then(function (): Q.Promise<any> {
