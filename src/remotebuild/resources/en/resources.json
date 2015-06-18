@@ -64,7 +64,7 @@
         "Reset server certificates to expire in 1 year",
         "remotebuild resetServerCert --certExpirationDays 365",
         "",
-        "Generate a new client certificate for use in Visual Studio, that will expire in 1 year",
+        "Generate a new certificate for use in the client that will expire in 1 year",
         "remotebuild generateClientCert --certExpirationDays 365"
     ],
     "_UsageInformation.comment": "Usage information to be printed when the -h argument is specified, or unknown arguments are given. The entries are combined with newlines before printing. {0} is a list of modules that the user can ask about",
