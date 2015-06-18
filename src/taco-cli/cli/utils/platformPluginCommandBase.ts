@@ -38,11 +38,6 @@ export enum CommandOperationStatus {
     Success = 1
 };
 
-export interface ComponentVersionInfo{
-    name: string;
-    version: string;
-};
-
 /*
 * PlatfromPluginCommandBase
 *
@@ -136,18 +131,18 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
 
         var self = this;
         var projectInfo: projectHelper.IProjectInfo;
-        var specsToPersist:Cordova.ICordovaPlatformPuginInfo[] = [];
+        var specsToPersist: Cordova.ICordovaPlatformPuginInfo[] = [];
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
             projectInfo = info;
         })
             .then(function (): Q.Promise<any> {
             if (!projectInfo.isTacoProject) {
-                return Q.reject(errorHelper.get(TacoErrorCodes.NotACordovaProject));
+                return Q.reject(errorHelper.get(TacoErrorCodes.NotInCordovaProject));
             }
         })
             .then(function (): Q.Promise<any> {
             var kitId: string = projectInfo.tacoKitId;
-            if (kitId && self.cordovaCommandParams.subCommand == "add") {
+            if (kitId && self.cordovaCommandParams.subCommand === "add") {
                 return self.checkForKitOverrides(projectInfo).then(function (specs: Cordova.ICordovaPlatformPuginInfo[]): void {
                     specsToPersist = specs;
                 });
@@ -159,13 +154,12 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {
                 switch (self.cordovaCommandParams.subCommand) {
-                    case "add":
-                        {
+                    case "add": {
                             return self.saveVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
                         }
+
                     case "remove":
-                    case "rm":
-                        {
+                    case "rm": {
                             return self.removeVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
                         }
                 }

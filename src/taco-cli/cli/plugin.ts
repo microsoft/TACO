@@ -12,16 +12,16 @@
 
 "use strict";
 
-import Q = require("q");
+import Q = require ("q");
 
-import commandBase = require("./utils/platformPluginCommandBase");
-import cordovaWrapper = require("./utils/cordovaWrapper");
-import errorHelper = require("./tacoErrorHelper");
-import projectHelper = require("./utils/projectHelper");
-import resources = require("../resources/resourceManager");
-import TacoErrorCodes = require("./tacoErrorCodes");
-import tacoKits = require("taco-kits");
-import tacoUtility = require("taco-utils");
+import commandBase = require ("./utils/platformPluginCommandBase");
+import cordovaWrapper = require ("./utils/cordovaWrapper");
+import errorHelper = require ("./tacoErrorHelper");
+import projectHelper = require ("./utils/projectHelper");
+import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import tacoKits = require ("taco-kits");
+import tacoUtility = require ("taco-utils");
 
 import CommandOperationStatus = commandBase.CommandOperationStatus;
 import kitHelper = tacoKits.KitHelper;
@@ -29,17 +29,17 @@ import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 /**
-  * Plugin
-  *
-  * Handles "taco plugin"
-  */
+ * Plugin
+ * 
+ * Handles "taco plugin"
+ */
 class Plugin extends commandBase.PlatformPluginCommandBase {
     public name: string = "plugin";
 
      /**
-     * Checks for kit overrides for the targets and massages the command targets 
-     * parameter to be consumed by the "plugin" command
-     */
+      * Checks for kit overrides for the targets and massages the command targets 
+      * parameter to be consumed by the "plugin" command
+      */
     public checkForKitOverrides(projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
         var targets: string[] = [];
         var self = this;
@@ -65,14 +65,17 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                                 } else if (pluginOverrides[pluginName].src) {
                                     target = pluginInfo.spec = pluginOverrides[pluginName].src;
                                 }
+
                                 // Push the target to list of values to be persisted in config.xml
                                 pluginInfoToPersist.push(pluginInfo);
                             }
+
                             targets.push(target);
                         });
                     } else {
                         targets.push(pluginName);
                     }
+
                     return Q.resolve(targets);
                 });
             }, Q({}));
@@ -93,7 +96,6 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
             deferred.resolve(versionSpec !== "");
         });
         return deferred.promise;
-
     }
 
     /**
@@ -119,6 +121,30 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
     }
 
     /**
+     * Prints the plugin addition/removal status message
+     */
+    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
+        // Parse the target string for plugin names and print success message
+        var plugins: string = "";
+
+        if (!(targets.length === 1 && targets[0].indexOf("@") !== 0 && packageLoader.GitUriRegex.test(targets[0]) && packageLoader.FileUriRegex.test(targets[0]))) {
+            plugins = targets.join(", ");
+        }
+
+        switch (status) {
+            case CommandOperationStatus.InProgress: {
+                this.printInProgressMessage(plugins, operation);
+                break;
+            }
+
+            case CommandOperationStatus.Success: {
+                this.printSuccessMessage(plugins, operation);
+                break;
+            }
+        }
+    }
+
+    /**
      * Prints the plugin addition/removal operation progress message
      */
     private printInProgressMessage(plugins: string, operation: string): void {
@@ -127,11 +153,13 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                 logger.log(resources.getString("CommandPluginStatusAdding", plugins));
                 break;
             }
+
             case "remove":
             case "rm": {
                 logger.log(resources.getString("CommandPluginStatusRemoving", plugins));
                 break;
             }
+
             case "update": {
                 logger.log(resources.getString("CommandPluginStatusUpdating", plugins));
                 break;
@@ -148,36 +176,15 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                 logger.log(resources.getString("CommandPluginStatusAdded", plugins));
                 break;
             }
+
             case "remove":
             case "rm": {
                 logger.log(resources.getString("CommandPluginStatusRemoved", plugins));
                 break;
             }
+
             case "update": {
                 logger.log(resources.getString("CommandPluginStatusUpdated", plugins));
-                break;
-            }
-        }
-    }
-
-    /**
-     * Prints the plugin addition/removal status message
-     */
-    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
-        // Parse the target string for plugin names and print success message
-        var plugins: string = "";
-
-        if (!(targets.length == 1 && targets[0].indexOf("@") !== 0 && packageLoader.GitUriRegex.test(targets[0]) && packageLoader.FileUriRegex.test(targets[0]))) {
-            plugins = targets.join(", ");
-        }
-
-        switch (status) {
-            case CommandOperationStatus.InProgress: {
-                this.printInProgressMessage(plugins, operation);
-                break;
-            }
-            case CommandOperationStatus.Success: {
-                this.printSuccessMessage(plugins, operation);
                 break;
             }
         }

@@ -17,13 +17,6 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 
-module CordovaHelper {
-    /* 
-     * Interfaces for the cordova create command
-     */
-    
-}
-
 class CordovaHelper {
     // Cordova's known parameters
     private static BooleanParameters =

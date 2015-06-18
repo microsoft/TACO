@@ -14,14 +14,14 @@
 
 import Q = require ("q");
 
-import commandBase = require("./utils/platformPluginCommandBase");
-import cordovaWrapper = require("./utils/cordovaWrapper");
-import errorHelper = require("./tacoErrorHelper");
-import projectHelper = require("./utils/projectHelper");
-import resources = require("../resources/resourceManager");
-import TacoErrorCodes = require("./tacoErrorCodes");
-import tacoKits = require("taco-kits");
-import tacoUtility = require("taco-utils");
+import commandBase = require ("./utils/platformPluginCommandBase");
+import cordovaWrapper = require ("./utils/cordovaWrapper");
+import errorHelper = require ("./tacoErrorHelper");
+import projectHelper = require ("./utils/projectHelper");
+import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import tacoKits = require ("taco-kits");
+import tacoUtility = require ("taco-utils");
 
 import CommandOperationStatus = commandBase.CommandOperationStatus;
 import kitHelper = tacoKits.KitHelper;
@@ -29,10 +29,10 @@ import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 /**
-  * Platform
-  *
-  * Handles "taco platform"
-  */
+ * Platform
+ * 
+ * Handles "taco platform"
+ */
 class Platform extends commandBase.PlatformPluginCommandBase {
     public name: string = "platform";
 
@@ -61,12 +61,14 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                                 platformInfo.spec = platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
                                 platformInfoToPersist.push(platformInfo);
                             }
+
                             var target = platformInfo.spec.length > 0 ? platformName + "@" + platformInfo.spec : platformName;
                             targets.push(target);
                         });
                     } else {
                         targets.push(platformName);
                     }
+
                     return Q.resolve(targets);
                 });
             }, Q({}));
@@ -87,7 +89,6 @@ class Platform extends commandBase.PlatformPluginCommandBase {
             deferred.resolve(versionSpec !== "");
         });
         return deferred.promise;
-
     }
 
     /**
@@ -113,6 +114,30 @@ class Platform extends commandBase.PlatformPluginCommandBase {
     }
 
     /**
+     * Prints the platform addition/removal status message
+     */
+    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
+        // Parse the target string for platform names and print success message
+        var platforms: string = "";
+
+        if (!(targets.length === 1 && targets[0].indexOf("@") !== 0 && packageLoader.GitUriRegex.test(targets[0]) && packageLoader.FileUriRegex.test(targets[0]))) {
+            platforms = targets.join(", ");
+        }
+
+        switch (status) {
+            case CommandOperationStatus.InProgress: {
+                this.printInProgressMessage(platforms, operation);
+                break;
+            }
+
+            case CommandOperationStatus.Success: {
+                this.printSuccessMessage(platforms, operation);
+                break;
+            }
+        }
+    }
+
+    /**
      * Prints the platform addition/removal operation progress message
      */
     private printInProgressMessage(platforms: string, operation: string): void {
@@ -121,11 +146,13 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                logger.log(resources.getString("CommandPlatformStatusAdding", platforms));
                break;
             }
+
             case "remove":
             case "rm": {
                 logger.log(resources.getString("CommandPlatformStatusRemoving", platforms));
                 break;
             }
+
             case "update": {
                 logger.log(resources.getString("CommandPlatformStatusUpdating", platforms));
                 break;
@@ -142,36 +169,15 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                 logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
                 break;
             }
+
             case "remove":
             case "rm": {
                 logger.log(resources.getString("CommandPlatformStatusRemoved", platforms));
                 break;
             }
+
             case "update": {
                 logger.log(resources.getString("CommandPlatformStatusUpdated", platforms));
-                break;
-            }
-        }
-    }
-
-    /**
-     * Prints the platform addition/removal status message
-     */
-    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
-        // Parse the target string for platform names and print success message
-        var platforms: string = "";
-
-        if (!(targets.length == 1 && targets[0].indexOf("@") !== 0 && packageLoader.GitUriRegex.test(targets[0]) && packageLoader.FileUriRegex.test(targets[0]))) {
-            platforms = targets.join(", ");
-        }
-
-        switch (status) {
-            case CommandOperationStatus.InProgress: {
-                this.printInProgressMessage(platforms, operation);
-                break;
-            }
-            case CommandOperationStatus.Success: {
-                this.printSuccessMessage(platforms, operation);
                 break;
             }
         }

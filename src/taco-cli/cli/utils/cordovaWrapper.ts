@@ -219,6 +219,7 @@ class CordovaWrapper {
             if (pluginEntry) {
                 configParser.removePlugin(info.name);
             }
+
             configParser.addPlugin({ name: info.name, spec: info.spec }, info.pluginVariables);
             configParser.write();
             return Q.resolve({});

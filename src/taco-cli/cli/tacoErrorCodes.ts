@@ -6,7 +6,7 @@ enum TacoErrorCode {
     CordovaCmdNotFound = 1001,
     CordovaCommandFailed,
     CordovaCommandFailedWithError,
-    NotACordovaProject,
+    NotInCordovaProject,
     CommandBuildInvalidPlatformLocation,
     CommandBuildTacoSettingsNotFound,
     CommandNotBothDeviceEmulate,
