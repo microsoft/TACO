@@ -64,15 +64,11 @@ declare module Cordova {
         linkTo?: string;
     }
 
-    export interface ICordovaRawCliVars {
-        [name: string]: string;
-    }
-
     export interface ICordovaDownloadOptions {
         searchpath: string;
         noregistry: boolean;
         usegit: boolean;
-        cli_variables: ICordovaRawCliVars;
+        cli_variables: IKeyValueStore<string>;
         browserify: string;
         link: string;
         save: boolean;

@@ -100,19 +100,19 @@ class Help implements commands.IDocumentedCommand {
         }
 
         // Prepare a flattened list of name/description values of args and options for each of the args.
-        // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>,<arg2>, <arg2.options>
+        // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>, <arg3>, <arg3.options>
         var argList: INameDescription[] = [];
-        var args: any = <INameDescription[]>this.commandsFactory.listings[command].args;
-        for (var i in args) {
+        var args: any[] = this.commandsFactory.listings[command].args;
+        args.forEach(arg => {
             // Push the arg first
             argList.push({
-                name: args[i].name,
-                description: args[i].description
+                name: arg.name,
+                description: arg.description
             });
-            if (args[i].options) {
-                var options: INameDescription[] = <INameDescription[]>args[i].options;
+            if (arg.options) {
+                var options: INameDescription[] = <INameDescription[]>arg.options;
+                var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
                 options.forEach(nvp => {
-                    var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
                     nvp.name = optionsLeftIndent + nvp.name;
                     argList.push({
                         name: nvp.name,
@@ -120,7 +120,7 @@ class Help implements commands.IDocumentedCommand {
                     });
                 });
             }
-        }
+        });
 
         var list: tacoUtility.Commands.ICommandInfo = this.commandsFactory.listings[command];
         Help.printCommandHeader(util.format("%s %s %s", Help.TacoString, command, list.synopsis), list.description);
@@ -146,7 +146,7 @@ class Help implements commands.IDocumentedCommand {
 
         if (list.aliases) {
             logger.log(resources.getString("CommandHelpUsageAliases"));
-            Help.printAliasTable(list.aliases, 2 * LoggerHelper.DefaultIndent, indent2);
+            Help.printAliasTable(list.aliases);
         }
     }
 
@@ -165,8 +165,8 @@ class Help implements commands.IDocumentedCommand {
         }
     }
 
-    private static printAliasTable(commandAliases: ICommandAlias[], indent1: number, indent2: number): void {
-        var leftIndent: string = Array(indent1 + 1).join(" ");
+    private static printAliasTable(commandAliases: ICommandAlias[]): void {
+        var leftIndent: string = Array(LoggerHelper.DefaultIndent + 1).join(" ");
         commandAliases.forEach(cmdAliasPair => {
             logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdAliasPair.alias, "->", cmdAliasPair.command));
         });

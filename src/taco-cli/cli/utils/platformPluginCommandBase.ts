@@ -18,7 +18,8 @@ import Q = require ("q");
 import semver = require ("semver");
 import util = require ("util");
 
-import cordovaWrapper = require ("./cordovaWrapper");
+import cordovaWrapper = require("./cordovaWrapper");
+import cordovaHelper = require("./cordovaHelper");
 import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -65,6 +66,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
     public cordovaCommandParams: Cordova.ICordovaCommandParameters;
     public downloadOptions: Cordova.ICordovaDownloadOptions;
     public info: commands.ICommandInfo;
+    
     /**
      * Abstract method to be implemented by the derived class.
      * Derived classes should override this method for kit override check functionality
@@ -85,23 +87,15 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
      * Abstract method to be implemented by the derived class.
      * Checks if the component has a version specification in config.xml of the cordova project
      */
-    public configXmlHasVersionOverride(componentName: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<boolean> {
+    public configXmlHasVersionOverride(componentName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
     /**
      * Abstract method to be implemented by the derived class.
-     * Saves the version override info to config.xml of the cordova project
+     * Edits the version override info to config.xml of the cordova project
      */
-    public saveVersionOverrideInfo(infoToPersist: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
-        throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
-    }
-
-    /**
-     * Abstract method to be implemented by the derived class.
-     * Removes the version override info of the plugin from config.xml of the cordova project
-     */
-    public removeVersionOverrideInfo(infoToRemove: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
+    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPuginInfo[], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -136,33 +130,23 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
             projectInfo = info;
         })
             .then(function (): Q.Promise<any> {
-            if (!projectInfo.isTacoProject) {
-                return Q.reject(errorHelper.get(TacoErrorCodes.NotInCordovaProject));
-            }
-        })
-            .then(function (): Q.Promise<any> {
             var kitId: string = projectInfo.tacoKitId;
-            if (kitId && self.cordovaCommandParams.subCommand === "add") {
+            if (kitId) {
                 return self.checkForKitOverrides(projectInfo).then(function (specs: Cordova.ICordovaPlatformPuginInfo[]): void {
                     specsToPersist = specs;
                 });
+            } else {
+                return Q({});
             }
         })
             .then(function (): Q.Promise<any> {
-            return cordovaWrapper.invokeCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams);
+            return cordovaWrapper.invokePlatformPluginCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams, data);
         })
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {
-                switch (self.cordovaCommandParams.subCommand) {
-                    case "add": {
-                            return self.saveVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
-                        }
-
-                    case "remove":
-                    case "rm": {
-                            return self.removeVersionOverrideInfo(specsToPersist, projectInfo.configXmlPath, projectInfo.cordovaCliVersion);
-                        }
-                }
+                return self.editVersionOverrideInfo(specsToPersist, projectInfo, self.cordovaCommandParams.subCommand.toLowerCase() === "add");
+            } else {
+                return Q({});
             }
         })
             .then(function (): Q.Promise<any> {
@@ -194,14 +178,14 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
             shrinkwrap: commandData.options["shrinkwrap"]
         };
 
-        var variables: Array<string> = commandData.options["variable"];
+        var variables: string[] = commandData.options["variable"];
         
         // Sanitize the --variable option flags
         if (variables) {
             var self = this;
             variables.forEach(function (variable: string): void {
-                var keyval = variable.split("=");
-                var key = keyval[0].toUpperCase();
+                var keyval: any[] = variable.split("=");
+                var key: string = keyval[0].toUpperCase();
                 self.downloadOptions.cli_variables[key] = keyval[1];
             });
         }

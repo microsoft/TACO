@@ -15,7 +15,8 @@
 import Q = require ("q");
 
 import commandBase = require ("./utils/platformPluginCommandBase");
-import cordovaWrapper = require ("./utils/cordovaWrapper");
+import cordovaHelper = require("./utils/cordovaHelper");
+import cordovaWrapper = require("./utils/cordovaWrapper");
 import errorHelper = require ("./tacoErrorHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
@@ -45,6 +46,11 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         var platformInfoToPersist: Cordova.ICordovaPlatformPuginInfo[] = [];
         var self = this;
 
+        var subCommand = this.cordovaCommandParams.subCommand.toLowerCase();
+        if (subCommand !== "add" && subCommand === "remove" && subCommand === "rm") {
+            return Q({});
+        }
+
         return kitHelper.getPlatformOverridesForKit(projectInfo.tacoKitId)
             .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): Q.Promise<any> {
             // For each of the platforms specified at command-line, check for overrides in the current kit
@@ -54,7 +60,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                     // Proceed only if the version has not already been overridden on the command line 
                     // i.e, proceed only if user did not do "taco platform <subcommand> platform@<verion|src>"
                     if (!self.cliParamHasVersionOverride(platformName)) {
-                        return self.configXmlHasVersionOverride(platformName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion)
+                        return self.configXmlHasVersionOverride(platformName, projectInfo)
                             .then(function (versionOverridden: boolean): void {                           
                             // Use kit overrides only if platform has not already been overridden in config.xml
                             if (!versionOverridden && platformOverrides[platformName]) {
@@ -83,34 +89,21 @@ class Platform extends commandBase.PlatformPluginCommandBase {
     /**
      * Checks if the platform has a version specification in config.xml of the cordova project
      */
-    public configXmlHasVersionOverride(platformName: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<boolean> {
+    public configXmlHasVersionOverride(platformName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
         var deferred = Q.defer<boolean>();
-        cordovaWrapper.getEngineVersionSpec(platformName, configXmlPath, cordovaCliVersion).then(function (versionSpec: string): void {
+        cordovaHelper.getEngineVersionSpec(platformName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion).then(function (versionSpec: string): void {
             deferred.resolve(versionSpec !== "");
         });
         return deferred.promise;
     }
 
     /**
-     * Saves the version override info to config.xml of the cordova project
+     * Edits the version override info to config.xml of the cordova project
      */
-    public saveVersionOverrideInfo(infoToPersist: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
-        return infoToPersist.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, info: Cordova.ICordovaPlatformPuginInfo): Q.Promise<any> {
-            return earlierPromise.then(function (): Q.Promise<any> {
-                return cordovaWrapper.addEngineVersionSpec(info.name, info.spec, configXmlPath, cordovaCliVersion);
-            });
-        }, Q({}));
-    }
-
-    /**
-     * Removes the version override info of the plugin from config.xml of the cordova project
-     */
-    public removeVersionOverrideInfo(infoToRemove: Cordova.ICordovaPlatformPuginInfo[], configXmlPath: string, cordovaCliVersion: string): Q.Promise<any> {
-        return infoToRemove.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, info: Cordova.ICordovaPlatformPuginInfo): Q.Promise<any> {
-            return earlierPromise.then(function (): Q.Promise<any> {
-                return cordovaWrapper.removeEngineVersionSpec(info.name, configXmlPath, cordovaCliVersion);
-            });
-        }, Q({}));
+    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPuginInfo[], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
+        return cordovaHelper.editConfigXml(specs, projectInfo, add, function (specs: Cordova.ICordovaPlatformPuginInfo[], parser: Cordova.cordova_lib.configparser, add: boolean): void {
+            cordovaHelper.editEngineVersionSpecs(specs, parser, add);
+        });
     }
 
     /**

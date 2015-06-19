@@ -12,7 +12,7 @@ declare module TacoUtility {
     class LoggerHelper {
         public static DefaultIndent: number;
 
-       /**
+        /**
          * Helper method to log an array of name/value pairs with proper indentation
          * @param {INameDescription[]} array of name/description pairs
          * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used

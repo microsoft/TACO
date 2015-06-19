@@ -119,7 +119,11 @@ class ProjectHelper {
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata = require(path.join(projectPath, ProjectHelper.TacoJsonFileName));
-            projectInfo.configXmlPath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
+            var configFilePath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
+
+            if (fs.existsSync(configFilePath)) {
+                projectInfo.configXmlPath = configFilePath;
+            }
 
             if (tacoJson.kit) {
                 kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
