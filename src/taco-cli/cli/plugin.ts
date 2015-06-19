@@ -46,6 +46,11 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         var self = this;
         var pluginInfoToPersist: Cordova.ICordovaPlatformPuginInfo[] = [];
 
+        var subCommand = this.cordovaCommandParams.subCommand.toLowerCase();
+        if (subCommand !== "add" && subCommand !== "remove" && subCommand !== "rm") {
+            return Q({});
+        }
+
         return kitHelper.getPluginOverridesForKit(projectInfo.tacoKitId)
             .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): Q.Promise<any> {
             // For each of the plugins specified at command-line, check for overrides in the current kit

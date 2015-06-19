@@ -47,7 +47,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         var self = this;
 
         var subCommand = this.cordovaCommandParams.subCommand.toLowerCase();
-        if (subCommand !== "add" && subCommand === "remove" && subCommand === "rm") {
+        if (subCommand !== "add" && subCommand !== "remove" && subCommand !== "rm") {
             return Q({});
         }
 
@@ -56,6 +56,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
             // For each of the platforms specified at command-line, check for overrides in the current kit
             return self.cordovaCommandParams.targets.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, platformName: string): Q.Promise<any> {
                 return earlierPromise.then(function (): Q.Promise<any> {
+                    
                     var platformInfo: Cordova.ICordovaPlatformPuginInfo = { name: platformName, spec: "" };
                     // Proceed only if the version has not already been overridden on the command line 
                     // i.e, proceed only if user did not do "taco platform <subcommand> platform@<verion|src>"
@@ -86,6 +87,16 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         });
     }
 
+    /**
+     * Checks if the platform has a version specification in config.xml of the cordova project
+     */
+    public (platformName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
+        var deferred = Q.defer<boolean>();
+        cordovaHelper.getEngineVersionSpec(platformName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion).then(function (versionSpec: string): void {
+            deferred.resolve(versionSpec !== "");
+        });
+        return deferred.promise;
+    }
     /**
      * Checks if the platform has a version specification in config.xml of the cordova project
      */
