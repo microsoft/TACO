@@ -11,6 +11,7 @@
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/nameDescription.d.ts" />
+/// <reference path="../../typings/commandAlias.d.ts" />
 
 "use strict";
 import path = require ("path");

@@ -152,15 +152,15 @@
     "_CommandPlatformOptBranchDescription.comment": "Description of the <BRANCH> argument in the syntax description",
     "CommandPlatformStatusAdding": "Adding platform <highlight>{0}</highlight> to Cordova project...",
     "_CommandPlatformStatusAdding.comment": "Status message shown while adding a platform {0} of version {1} from NPM",
-    "CommandPlatformStatusAdded": "<success>Success!</success> Platform(s) {0} added.",
+    "CommandPlatformStatusAdded": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> added to the project.",
     "_CommandPlatformStatusAdded.comment": "Status message after successfully adding platform(s) {0} to {1}",
     "CommandPlatformStatusRemoving": "Removing platform <highlight>{0}</highlight> from Cordova project...",
     "_CommandPlatformStatusRemoving.comment": "Status message shown while removing a platform {0} from the project",
-    "CommandPlatformStatusRemoved": "<success>Success!</success> Platform(s) {0} removed from {1}",
+    "CommandPlatformStatusRemoved": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> removed from the project.",
     "_CommandPlatformStatusRemoved.comment": "Status message after successfully removing platform {0}",
     "CommandPlatformStatusUpdating": "Updating platform <highlight>{0}</highlight> added to Cordova project...",
     "_CommandPlatformStatusUpdating.comment": "Status message shown while updating a platform {0} added to the project",
-    "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) {0} has been updated",
+    "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> are updated.",
     "_CommandPlatformStatusUpdated.comment": "Status message after successfully updating platform {0}",
     
 
@@ -194,7 +194,7 @@
     "_CommandPluginStatusAdded.comment": "Status message after successfully adding a plugin",
     "CommandPluginWithIdStatusAdded": "<success>Success!</success> Plugin {0} added.",
     "_CommandPluginWithIdStatusAdded.comment": "Status message after successfully adding plugin {0}",
-    "CommandPluginStatusRemoved": "<success>Success!</success> Plugin {0} removed",
+    "CommandPluginStatusRemoved": "<success>Success!</success> Plugin <highlight>{0}</highlight> removed",
     "_CommandPluginStatusRemoved.comment": "Status message after successfully removing plugin {0}",
     "CommandPluginStatusAdding": "Adding plugin <highlight>{0}</highlight> to Cordova project...",
     "_CommandPluginStatusAdding.comment": "Status message shown while adding a platform {0} of version {1} from NPM",
@@ -275,7 +275,7 @@
     "CommandNotBothDebugRelease": "Error: must specify at most one of --debug and --release",
     "_CommandNotBothDebugRelease.comment": "Error reported when both --debug and --release are specified for 'taco build' or 'taco run'",
 
-    "CommandVersionDescription": "Display the current Taco Version",
+    "CommandVersionDescription": "Display the current Taco pluginVersion",
     "_CommandVersionDescription.comment":  "Description of the -v/--v/--version arguments to taco",
 
     "CommandInstallReqsDescription": "Install platform-specific third-party dependencies",

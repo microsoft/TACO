@@ -12,9 +12,9 @@
             "deprecated": "true",
             "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
             "plugins": {
-                "org.apache.cordova.camera": {
-                    "version": "0.2.27",
-                    "platforms": "ios, android, wp8"
+                "cordova-plugin-camera": {
+                    "version": "1.1.0",
+                    "supported-platforms": "ios"
                 }
             }
         },
@@ -28,14 +28,17 @@
                 }
             },
             "plugins": {
-                "org.apache.cordova.battery-status": {
-                    "src": "https://github.com/apache/cordova-plugin-battery-status.git"
+                "cordova-plugin-battery-status": {
+                    "src": "https://github.com/apache/cordova-plugin-battery-status.git",
+                    "supported-platforms": "android, windows"
                 },
-                "org.apache.cordova.contacts": {
-                    "version": "1.0.0"
+                "cordova-plugin-contacts": {
+                    "version": "1.0.0",
+                    "supported-platforms": "ios"
                 },
-                "org.apache.cordova.device": {
-                    "version": "https://github.com/apache/cordova-plugin-device.git"
+                "cordova-plugin-device": {
+                    "version": "https://github.com/apache/cordova-plugin-device.git",
+                    "supported-platforms": "android, ios, windows"
                 }
             }
         },
@@ -60,20 +63,25 @@
                 }
             },
             "plugins": {
-                "org.apache.cordova.camera": {
-                    "version": "0.3.10"
+                "cordova-plugin-camera": {
+                    "version": "1.1.0",
+                    "supported-platforms": "android, ios, windows"
                 },
-                "org.apache.cordova.battery-status": {
-                    "src": "https://github.com/apache/cordova-plugin-battery-status.git"
+                "cordova-plugin-battery-status": {
+                    "src": "https://github.com/apache/cordova-plugin-battery-status.git",
+                    "supported-platforms": "android"
                 },
-                "org.apache.cordova.device-orientation": {
-                    "version": "1.0.0"
+                "cordova-plugin-device-orientation": {
+                    "version": "1.0.0",
+                    "supported-platforms": "android, ios, windows"
                 },
-                "org.apache.cordova.contacts": {
-                    "version": "1.0.0"
+                "cordova-plugin-contacts": {
+                    "version": "1.0.0",
+                    "supported-platforms": "android, ios, windows, blackberry"
                 },
-                "org.apache.cordova.device": {
-                    "version": "https://github.com/apache/cordova-plugin-device.git"
+                "cordova-plugin-device": {
+                    "version": "https://github.com/apache/cordova-plugin-device.git",
+                    "supported-platforms": "android, windows"
                 }
             }
         }
