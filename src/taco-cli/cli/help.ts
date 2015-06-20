@@ -104,6 +104,7 @@ class Help implements commands.IDocumentedCommand {
         // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>, <arg3>, <arg3.options>
         var argList: INameDescription[] = [];
         var args: any[] = this.commandsFactory.listings[command].args;
+        var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
         args.forEach(arg => {
             // Push the arg first
             argList.push({
@@ -112,7 +113,6 @@ class Help implements commands.IDocumentedCommand {
             });
             if (arg.options) {
                 var options: INameDescription[] = <INameDescription[]>arg.options;
-                var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
                 options.forEach(nvp => {
                     nvp.name = optionsLeftIndent + nvp.name;
                     argList.push({

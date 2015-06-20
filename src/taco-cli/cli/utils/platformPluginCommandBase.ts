@@ -18,8 +18,8 @@ import Q = require ("q");
 import semver = require ("semver");
 import util = require ("util");
 
-import cordovaWrapper = require("./cordovaWrapper");
-import cordovaHelper = require("./cordovaHelper");
+import cordovaWrapper = require ("./cordovaWrapper");
+import cordovaHelper = require ("./cordovaHelper");
 import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");

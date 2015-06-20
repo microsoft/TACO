@@ -8,12 +8,12 @@
 
 "use strict";
 
-import path = require("path");
-import Q = require("q");
+import path = require ("path");
+import Q = require ("q");
 
-import CordovaWrapper = require("./cordovaWrapper");
-import errorHelper = require("../tacoErrorHelper");
-import projectHelper = require("./projectHelper");
+import CordovaWrapper = require ("./cordovaWrapper");
+import errorHelper = require ("../tacoErrorHelper");
+import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import tacoUtility = require ("taco-utils");
@@ -156,11 +156,10 @@ class CordovaHelper {
     }
 
     public static editConfigXml(infoList: Cordova.ICordovaPlatformPuginInfo[], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPuginInfo[], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
-
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
-            editFunc(infoList, configParser, addSpec)
+            editFunc(infoList, configParser, addSpec);
             configParser.write();
             return Q.resolve({});
         });
@@ -203,16 +202,15 @@ class CordovaHelper {
         });
     }
 
-    
-    /**
-     * Static method to get the engine specification from the config.xml file
-     *
-     * @param {string} The platform name
-     * @param {string} The path to config.xml of the project
-     * @param {string} The cordova CLI version
-     *
-     * @return {Q.Promise<string>} A promise with the version specification as a string
-     */
+        /**
+         * Static method to get the engine specification from the config.xml file
+         *
+         * @param {string} The platform name
+         * @param {string} The path to config.xml of the project
+         * @param {string} The cordova CLI version
+         *
+         * @return {Q.Promise<string>} A promise with the version specification as a string
+         */
     public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {

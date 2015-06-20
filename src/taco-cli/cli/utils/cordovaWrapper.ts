@@ -207,7 +207,6 @@ class CordovaWrapper {
         } else {
             return CordovaWrapper.cli(cordovaHelper.toCordovaCliArguments(data));
         }
-        
     }
 }
 
