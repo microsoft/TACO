@@ -82,7 +82,7 @@
     "_RemoteBuildConfSecure.comment": "Help message printed for the --secure argument",
     "RemoteBuildConfPinTimeout": "Number of minutes for which client SSL certs can be acquired (defaults to 10 minutes)",
     "_RemoteBuildConfPinTimeout.comment": "Help message printed for the --pinTimeout argument",
-    "RemoteBuildConfHostname": "Hostname for which to generate certificates when in secure mode (defaults to os.hostname())",
+    "RemoteBuildConfHostname": "Hostname for which to generate SSL certificates when in secure mode (defaults to os.hostname())",
     "_RemoteBuildConfHostname.comment": "Help message printed for the --hostname argument",
     "RemoteBuildConfCertExpirationDays": "Number of days after which the generated SSL certificates will expire (defaults to 5 years if not specified)",
     "_RemoteBuildConfCertExpirationDays.comment": "Help message printed for the --certExpirationDays argument",
