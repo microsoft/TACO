@@ -29,6 +29,7 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
+import loggerHelper = tacoUtility.LoggerHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface ICliSession {
@@ -117,14 +118,14 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
             // No settings or the settings were corrupted: start from scratch
             return {};
         }).then(function (settings: Settings.ISettings): void {
-                var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): string {
+            var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): INameDescription {
                     var remote = settings.remotePlatforms[platform];
                     var url = util.format("%s://%s:%d/%s", remote.secure ? "https" : "http", remote.host, remote.port, remote.mountPoint);
-                    return resources.getString("CommandSetupRemoteListPlatform", platform, url);
+                    return { name: platform, description: url };
             });
             
             if (platforms && platforms.length > 0) {
-                platforms.forEach(logger.log.bind(logger));
+                loggerHelper.logNameDescriptionTable(platforms);
             } else {
                 logger.log(resources.getString("CommandSetupRemoteListNoPlatforms"));
             }

@@ -37,11 +37,13 @@
         ]
     },
     "setup": {
-        "synopsis": "<synopsis>remote [PLATFORM] [--remove]</synopsis>",
+        "synopsis": "<synopsis>remote [PLATFORM] [--remove | --list]</synopsis>",
         "modulePath": "./setup",
         "description": "<helptitle>[CommandSetupDescription]</helptitle>",
         "args": [
-            { "name": "PLATFORM", "description": "[CommandSetupOptionsPlatform]" }
+            { "name": "PLATFORM", "description": "[CommandSetupOptionsPlatform]" },
+            { "name": "--remove", "description": "[CommandSetupOptionsRemove]" },
+            { "name": "--list", "description": "[CommandSetupOptionsList]" }
         ]
     },
 
