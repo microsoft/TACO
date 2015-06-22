@@ -34,6 +34,7 @@ class DarwinDependenciesHelper {
             var readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
             var deferred2 = Q.defer<boolean>();
             readlineInterface.question(resources.getString("HomebrewInstallationQuery"), function (response: string): void {
+                readlineInterface.close();
                 var shouldInstall = response === "" || response.trim().toLowerCase().indexOf(resources.getString("HomebrewInstallationQueryResponse")) === 0;
 
                 if (shouldInstall) {
