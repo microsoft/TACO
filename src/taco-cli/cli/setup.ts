@@ -58,6 +58,13 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
             }
         },
         {
+            // taco setup remote --list
+            run: Setup.remoteList,
+            canHandleArgs: function (setupData: commands.ICommandData): boolean {
+                return setupData.remain[0] && setupData.remain[0].toLowerCase() === "remote" && setupData.options["list"];
+            }
+        },
+        {
             // taco setup remote
             run: Setup.remote,
             canHandleArgs: function (setupData: commands.ICommandData): boolean {
@@ -102,6 +109,25 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
             }
         }).then(function (): void {
             logger.log(resources.getString("CommandSetupRemoteRemoveSuccessful", platform));
+        });
+    }
+
+    private static remoteList(setupData: commands.ICommandData): Q.Promise<any> {
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+            // No settings or the settings were corrupted: start from scratch
+            return {};
+        }).then(function (settings: Settings.ISettings): void {
+                var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): string {
+                    var remote = settings.remotePlatforms[platform];
+                    var url = util.format("%s://%s:%d/%s", remote.secure ? "https" : "http", remote.host, remote.port, remote.mountPoint);
+                    return resources.getString("CommandSetupRemoteListPlatform", platform, url);
+            });
+            
+            if (platforms && platforms.length > 0) {
+                platforms.forEach(logger.log.bind(logger));
+            } else {
+                logger.log(resources.getString("CommandSetupRemoteListNoPlatforms"));
+            }
         });
     }
 

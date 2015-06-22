@@ -119,6 +119,10 @@
     "_CommandSetupRemoteDeletePlatformNotAdded.comment": "Error message pritned when someone runs 'taco setup remote --remove <platform>' and the platform has not been added",
     "CommandSetupRemoteRemoveSuccessful": "<success>Success!</success> Removed remote {0}",
     "_CommandSetupRemoteRemoveSuccessful.comment": "Message printed after 'taco setup remote --remove <platform>' succeeds. {0} is the specified platform",
+    "CommandSetupRemoteListPlatform": "{0}:\t{1}",
+    "_CommandSetupRemoteListPlatform.comment": "Listing for each configured remote when running 'taco setup remote --list'. {0} is the name of the platform, and {1} is the url that was configured",
+    "CommandSetupRemoteListNoPlatforms": "No remote platforms configured.",
+    "_CommandSetupRemoteListNoPlatforms.comment": "Message printed when running 'taco setup remote --list' and there is nothing to list.",
 
     "CommandBuildDescription": "Build a cordova project",
     "_CommandBuildDescription.comment": "Description for 'taco build'",
