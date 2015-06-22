@@ -63,7 +63,7 @@
 
     "CommandKitDescription": "Perform kit related operations",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
-    "CommandKitNotBothJsonAndCli": "Error: --json option cannot be used in conjunction with --cli option",
+    "CommandKitNotBothJsonAndCli": "Error: --json option cannot be used in conjunction with --cli option.",
     "_CommandKitNotBothJsonAndCli.comment": "Error reported when both --json and --cli are specified",
     "CommandKitJsonOptionDescription": "Used with the 'list' subcommand for 'taco kit'. Saves the list of known kits to a json file.",
     "_CommandKitJsonOptionDescription.comment": "Description for --json argument to taco kit list",
