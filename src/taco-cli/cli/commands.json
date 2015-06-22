@@ -37,7 +37,7 @@
         ]
     },
     "setup": {
-        "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
+        "synopsis": "<synopsis>remote [PLATFORM] [--remove]</synopsis>",
         "modulePath": "./setup",
         "description": "<helptitle>[CommandSetupDescription]</helptitle>",
         "args": [

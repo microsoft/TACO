@@ -113,6 +113,12 @@
     "_CommandSetupNotfound.comment": "Message printed when we fail to look up the user provided hostname. {0} is that hostname",
     "CommandSetupTimedout": "Unable to contact '{0}:{1}', please check that the server is reachable.",
     "_CommandSetupTimedout.comment": "Message printed when a connection times out. {0} is the host name and {1} is the port number",
+    "CommandSetupRemoteDeleteNeedsPlatform": "No platform specified for 'taco setup remote --remove'",
+    "_CommandSetupRemoteDeleteNeedsPlatform.comment": "Error message printed when someone runs 'taco setup remote --remove <platform>' without specifying the platform",
+    "CommandSetupRemoteDeletePlatformNotAdded": "Unable to remove platform '{0}': platform not added",
+    "_CommandSetupRemoteDeletePlatformNotAdded.comment": "Error message pritned when someone runs 'taco setup remote --remove <platform>' and the platform has not been added",
+    "CommandSetupRemoteRemoveSuccessful": "<success>Success!</success> Removed remote {0}",
+    "_CommandSetupRemoteRemoveSuccessful.comment": "Message printed after 'taco setup remote --remove <platform>' succeeds. {0} is the specified platform",
 
     "CommandBuildDescription": "Build a cordova project",
     "_CommandBuildDescription.comment": "Description for 'taco build'",

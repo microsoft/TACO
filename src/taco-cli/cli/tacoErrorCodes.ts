@@ -27,6 +27,8 @@ enum TacoErrorCode {
     CommandSetupCantFindRemoteMount,
     CommandSetupConnectionRefused,
     CommandSetupNotfound,
+    CommandSetupRemoteDeleteNeedsPlatform,
+    CommandSetupRemoteDeletePlatformNotAdded,
     CommandSetupRemoteInvalidPin,
     CommandSetupRemoteInvalidPort,
     CommandSetupRemoteRejectedPin,

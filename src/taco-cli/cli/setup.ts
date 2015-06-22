@@ -51,6 +51,13 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     public static CliSession: ICliSession = null;
     public subcommands: commands.ICommand[] = [
         {
+            // taco setup remote <platform> --remove
+            run: Setup.remoteRemove,
+            canHandleArgs: function (setupData: commands.ICommandData): boolean {
+                return setupData.remain[0] && setupData.remain[0].toLowerCase() === "remote" && setupData.options["remove"];
+            }
+        },
+        {
             // taco setup remote
             run: Setup.remote,
             canHandleArgs: function (setupData: commands.ICommandData): boolean {
@@ -74,6 +81,28 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Setup.KnownOptions, Setup.ShortHands, args, 0);
 
         return parsedOptions;
+    }
+
+    private static remoteRemove(setupData: commands.ICommandData): Q.Promise<any> {
+        if (setupData.remain.length < 2) {
+            throw errorHelper.get(TacoErrorCodes.CommandSetupRemoteDeleteNeedsPlatform);
+        }
+
+        var platform: string = (setupData.remain[1]).toLowerCase();
+
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+            // No settings or the settings were corrupted: start from scratch
+            return {};
+        }).then(function (settings: Settings.ISettings): Q.Promise<any> {
+            if (!(settings.remotePlatforms && platform in settings.remotePlatforms)) {
+                throw errorHelper.get(TacoErrorCodes.CommandSetupRemoteDeletePlatformNotAdded, platform);
+            } else {
+                delete settings.remotePlatforms[platform];
+                return Settings.saveSettings(settings);
+            }
+        }).then(function (): void {
+            logger.log(resources.getString("CommandSetupRemoteRemoveSuccessful", platform));
+        });
     }
 
     private static remote(setupData: commands.ICommandData): Q.Promise<any> {
