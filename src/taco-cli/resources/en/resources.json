@@ -224,6 +224,9 @@
     "ErrorCertificateSaveWithErrorCode": "Failed to save certificate in certficate store. Exit Code: {0}",
     "_ErrorCertificateSaveWithErrorCode.comment": "Error message printed when we fail to save a certificate via powershell and we have a process exit code. {0} is the process exit code.",
 
+    "ErrorNoPlatformsFound": "Unable to find any platforms. Please 'taco platform add <platform>' or 'taco setup remote <platform>' and retry.",
+    "_ErrorNoPlatformsFound.comment": "Error message printed when we try to run a command on a set of platforms, and the set is empty.",
+
     "ErrorUploadingRemoteBuild": "An error occurred uploading to the build server {0}",
     "_ErrorUploadingRemoteBuild.comment": "Message reported when we attempt to upload a build and the upload fails. {0} is the URL of the server",
     "ErrorDuringRemoteBuildSubmission": "Error during build submission: {0}",

@@ -42,6 +42,7 @@ enum TacoErrorCode {
     ErrorCertificateSaveWithErrorCode,
     ErrorTacoJsonMissingOrMalformed,
     ErrorPatchCreation,
+    ErrorNoPlatformsFound,
     GetCertificateFailed,
     HttpGetFailed,
     InvalidBuildSubmission400,
