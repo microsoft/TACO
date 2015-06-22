@@ -12,7 +12,7 @@ enum TacoErrorCode {
     CommandNotBothDebugRelease,
     CommandNotBothLocalRemote,
     CommandRemotePlatformNotKnown,
-    CommandKitInvalidCommandCombination,
+    CommandKitNotBothJsonAndCli,
     CommandCreateInvalidPath,
     CommandCreateNoPath,
     CommandCreateNotBothCliAndKit,

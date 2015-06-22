@@ -19,7 +19,7 @@
     "_TacoKitsExceptionKitMetadataFileNotFound.comment": "Error thrown when the TacoKitMetadata.json file is not found",
     "TacoKitsExceptionKitMetadataFileMalformed": "Error: The kit metadata file is corrupt. Please fix this by re-installing taco-kits from npm.",
     "_TacoKitsExceptionKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
-    "TacoKitsExceptionInvalidKit": "Error: {0} is not a known Kit.",
+    "TacoKitsExceptionInvalidKit": "Error: {0} is not a known Kit. Please run 'taco kit list' for the list of known kits",
     "_TacoKitsExceptionInvalidKit.comment": "Error shown when the user specifies an unknown kit identifier. {0} is the kit identifier that the user specified as parameter in the command line.",
     "TacoKitsExceptionDeprecatedKitWarning": "Warning: Kit {0} has been deprecated",
     "_TacoKitsExceptionDeprecatedKitWarning.comment": "Error shown when the user specifies a kit that is deprecated.",
