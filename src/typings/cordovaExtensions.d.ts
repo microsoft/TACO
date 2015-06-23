@@ -20,7 +20,7 @@ declare module Cordova {
             constructor(configXmlPath: string);
             getPlugin(id: string): any;
             removePlugin(id: string): void;
-            addPlugin(attributes: Cordova.ICordovaPlatformPluginInfo , varaibles: Cordova.ICordovaVariable[]): any;
+            addPlugin(attributes: Cordova.ICordovaPlatformPluginInfo , variables: Cordova.ICordovaVariable[]): any;
             getEngines(): Cordova.ICordovaPlatformPluginInfo [];
             removeEngine(name: string): void;
             addEngine(name: string, spec: string): any;
