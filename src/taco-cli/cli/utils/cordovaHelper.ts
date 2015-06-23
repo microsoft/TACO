@@ -155,7 +155,7 @@ class CordovaHelper {
         return CordovaHelper.toCordovaArgumentsInternal(platform, commandData);
     }
 
-    public static editConfigXml(infoList: Cordova.ICordovaPlatformPuginInfo[], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPuginInfo[], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
+    public static editConfigXml(infoList: Cordova.ICordovaPlatformPluginInfo [], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPluginInfo [], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
@@ -178,7 +178,7 @@ class CordovaHelper {
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
-            var pluginEntry: Cordova.ICordovaPlatformPuginInfo = configParser.getPlugin(pluginId);
+            var pluginEntry: Cordova.ICordovaPlatformPluginInfo  = configParser.getPlugin(pluginId);
             var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
             return Q.resolve(versionSpec);
         });
@@ -187,14 +187,14 @@ class CordovaHelper {
     /**
      * Static method to add the plugin specification to config.xml file
      *
-     * @param {ICordovaPlatformPuginInfo} The plugin info
+     * @param {ICordovaPlatformPluginInfo } The plugin info
      * @param {string} The path to config.xml of the project
      * @param {string} The cordova CLI version
      *
      * @return {Q.Promise<string>} An empty promise
      */
-    public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPuginInfo[], configParser: ConfigParser, addSpec: boolean): void {
-        infoList.forEach(function (info: Cordova.ICordovaPlatformPuginInfo): void {
+    public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo [], configParser: ConfigParser, addSpec: boolean): void {
+        infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
             configParser.removePlugin(info.name);
             if (addSpec) {
                 configParser.addPlugin({ name: info.name, spec: info.spec }, info.pluginVariables);
@@ -216,8 +216,8 @@ class CordovaHelper {
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             var engineSpec: string = "";
-            var engines: Cordova.ICordovaPlatformPuginInfo[] = configParser.getEngines();
-            engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPuginInfo): void {
+            var engines: Cordova.ICordovaPlatformPluginInfo [] = configParser.getEngines();
+            engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPluginInfo ): void {
                 if (engineInfo.name.toLowerCase() === platform.toLowerCase()) {
                     engineSpec = engineInfo.spec;
                 }
@@ -236,8 +236,8 @@ class CordovaHelper {
      *
      * @return {Q.Promise<string>} An empty promise
      */
-    public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPuginInfo[], configParser: ConfigParser, addSpec: boolean): void {
-        infoList.forEach(function (info: Cordova.ICordovaPlatformPuginInfo): void {
+    public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo [], configParser: ConfigParser, addSpec: boolean): void {
+        infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
             configParser.removeEngine(info.name);
             if (addSpec) {
                 configParser.addEngine(info.name, info.spec);

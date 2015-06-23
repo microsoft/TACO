@@ -20,8 +20,8 @@ declare module Cordova {
             constructor(configXmlPath: string);
             getPlugin(id: string): any;
             removePlugin(id: string): void;
-            addPlugin(attributes: Cordova.ICordovaPlatformPuginInfo, varaibles: Cordova.ICordovaVariable[]): any;
-            getEngines(): Cordova.ICordovaPlatformPuginInfo[];
+            addPlugin(attributes: Cordova.ICordovaPlatformPluginInfo , varaibles: Cordova.ICordovaVariable[]): any;
+            getEngines(): Cordova.ICordovaPlatformPluginInfo [];
             removeEngine(name: string): void;
             addEngine(name: string, spec: string): any;
             write(): any;
@@ -81,7 +81,7 @@ declare module Cordova {
         downloadOptions: ICordovaDownloadOptions;
     }
 
-    export interface ICordovaPlatformPuginInfo {
+    export interface ICordovaPlatformPluginInfo  {
         name: string;
         spec: string;
         pluginVariables?: ICordovaVariable[];

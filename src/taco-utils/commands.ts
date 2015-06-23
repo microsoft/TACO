@@ -21,16 +21,6 @@ import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 module TacoUtility {
     export module Commands {
-        export interface INameDescription {
-            name: string;
-            description: string;
-        }
-
-        export interface ICommandAlias {
-            alias: string;
-            command: string;
-        }
-
         export interface ICommandInfo {
             synopsis: string;
             modulePath: string;

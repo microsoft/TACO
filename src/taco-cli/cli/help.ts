@@ -104,33 +104,33 @@ class Help implements commands.IDocumentedCommand {
         // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>, <arg3>, <arg3.options>
         var argList: INameDescription[] = [];
         var args: any[] = this.commandsFactory.listings[command].args;
-        var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
-        args.forEach(arg => {
-            // Push the arg first
-            argList.push({
-                name: arg.name,
-                description: arg.description
-            });
-            if (arg.options) {
-                var options: INameDescription[] = <INameDescription[]>arg.options;
-                options.forEach(nvp => {
-                    nvp.name = optionsLeftIndent + nvp.name;
-                    argList.push({
-                        name: nvp.name,
-                        description: nvp.description
-                    });
-                });
-            }
-        });
-
         var list: tacoUtility.Commands.ICommandInfo = this.commandsFactory.listings[command];
         Help.printCommandHeader(util.format("%s %s %s", Help.TacoString, command, list.synopsis), list.description);
+        var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
+        if (args) {
+            args.forEach(arg => {
+                // Push the arg first
+                argList.push({
+                    name: arg.name,
+                    description: arg.description
+                });
+                if (arg.options) {
+                    var options: INameDescription[] = <INameDescription[]>arg.options;
+                    options.forEach(nvp => {
+                        nvp.name = optionsLeftIndent + nvp.name;
+                        argList.push({
+                            name: nvp.name,
+                            description: nvp.description
+                        });
+                    });
+                }
+            });
+            list.args = argList;
+        }
 
         // if both needs to be printed we need to calculate an indent ourselves
         // to make sure args.values have same indenation as options.values
         // we need to also account for extra indenation given to options
-        list.args = argList;
-
         var longestArgsLength: number = LoggerHelper.getLongestNameLength(list.args);
         var longestOptionsLength: number = LoggerHelper.getLongestNameLength(list.options);
         var longestKeyLength: number = Math.max(longestArgsLength, longestOptionsLength + LoggerHelper.DefaultIndent);
