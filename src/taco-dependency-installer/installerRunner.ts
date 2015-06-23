@@ -41,9 +41,9 @@ class InstallerRunner {
     private configFile: string;
     private logger: ILogger;
 
-    constructor(configFilePath: string, logger: ILogger) {
+    constructor(configFilePath: string, logger: ILogger, metadataFilePath?: string) {
         this.installerErrorFlag = false;
-        this.dependenciesDataWrapper = new DependencyDataWrapper();
+        this.dependenciesDataWrapper = metadataFilePath ? new DependencyDataWrapper(metadataFilePath) : new DependencyDataWrapper();
         this.configFile = configFilePath;
         this.logger = logger;
     }

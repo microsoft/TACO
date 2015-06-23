@@ -39,27 +39,27 @@ import loggerHelper = tacoUtils.LoggerHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utilHelper = tacoUtils.UtilHelper;
 
-// This represents the objects in the arrays that cordova.raw.requirements() returns. If Cordova ever changes their data format for missing requirements, this will need to be updated.
-interface ICordovaRequirement {
-    id?: string;
-    name?: string;
-    installed?: boolean;
-    metadata?: {
-        version?: string;
-    }
-}
-
-// This dictionary represents the collection of results returned by cordova.raw.requirements(). Each tested platform either contains a rejected reason, or an array of ICordovaRequirement objects.
-interface ICordovaRequirementsResult {
-    [platform: string]: ICordovaRequirement[];
-}
-
 module TacoDependencyInstaller {
+    // This represents the objects in the arrays that cordova.raw.requirements() returns. If Cordova ever changes their data format for missing requirements, this will need to be updated.
+    export interface ICordovaRequirement {
+        id?: string;
+        name?: string;
+        installed?: boolean;
+        metadata?: {
+            version?: string;
+        }
+    }
+
+    // This dictionary represents the collection of results returned by cordova.raw.requirements(). Each tested platform either contains a rejected reason, or an array of ICordovaRequirement objects.
+    export interface ICordovaRequirementsResult {
+        [platform: string]: ICordovaRequirement[];
+    }
+
     export class DependencyInstaller {
-        private static InstallConfigFolder: string = path.resolve(utilHelper.tacoHome);
-        private static InstallConfigFile: string = path.join(DependencyInstaller.InstallConfigFolder, "installConfig.json");
+        private static InstallConfigFileName: string = "installConfig.json";
         private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
 
+        private installConfigFilePath: string;
         private dependenciesDataWrapper: DependencyDataWrapper;
         private unsupportedMissingDependencies: ICordovaRequirement[];
         private missingDependencies: IDependency[];
@@ -69,6 +69,7 @@ module TacoDependencyInstaller {
 
         constructor(dependenciesMetadataFilePath?: string) {
             this.dependenciesDataWrapper = !!dependenciesMetadataFilePath ? new DependencyDataWrapper(dependenciesMetadataFilePath) : new DependencyDataWrapper();
+            this.installConfigFilePath = path.join(utilHelper.tacoHome, DependencyInstaller.InstallConfigFileName);
         }
 
         public run(requirementsResult: any): Q.Promise<any> {
@@ -187,7 +188,7 @@ module TacoDependencyInstaller {
                 var dependencyName: string = result[1];
 
                 var req: ICordovaRequirement = {
-                    id: namesToIds[dependencyName],
+                    id: namesToIds[dependencyName] || dependencyName,
                     installed: false,
                     name: dependencyName
                 };
@@ -324,7 +325,7 @@ module TacoDependencyInstaller {
             logger.logLine();
             loggerHelper.logSeparatorLine();
             logger.logLine();
-            logger.log(resources.getString("ModifyInstallPaths", DependencyInstaller.InstallConfigFile));
+            logger.log(resources.getString("ModifyInstallPaths", this.installConfigFilePath));
 
             if (needsLicenseAgreement) {
                 logger.log(resources.getString("LicenseAgreement"));
@@ -348,11 +349,11 @@ module TacoDependencyInstaller {
 
         private buildInstallConfigFile(): void {
             try {
-                if (fs.existsSync(DependencyInstaller.InstallConfigFile)) {
-                    fs.unlinkSync(DependencyInstaller.InstallConfigFile);
+                if (fs.existsSync(this.installConfigFilePath)) {
+                    fs.unlinkSync(this.installConfigFilePath);
                 }
             } catch (err) {
-                throw errorHelper.get(TacoErrorCodes.ErrorDeletingInstallConfig, DependencyInstaller.InstallConfigFile);
+                throw errorHelper.get(TacoErrorCodes.ErrorDeletingInstallConfig, this.installConfigFilePath);
             }
 
             try {
@@ -362,10 +363,10 @@ module TacoDependencyInstaller {
                 };
 
                 // Write the json object to the config file
-                wrench.mkdirSyncRecursive(DependencyInstaller.InstallConfigFolder, 511); // 511 decimal is 0777 octal
-                fs.writeFileSync(DependencyInstaller.InstallConfigFile, JSON.stringify(jsonWrapper, null, 4));
+                wrench.mkdirSyncRecursive(path.dirname(this.installConfigFilePath), 511); // 511 decimal is 0777 octal
+                fs.writeFileSync(this.installConfigFilePath, JSON.stringify(jsonWrapper, null, 4));
             } catch (err) {
-                throw errorHelper.get(TacoErrorCodes.ErrorCreatingInstallConfig, DependencyInstaller.InstallConfigFile);
+                throw errorHelper.get(TacoErrorCodes.ErrorCreatingInstallConfig, this.installConfigFilePath);
             }
         }
 
@@ -448,7 +449,7 @@ module TacoDependencyInstaller {
                 launcherPath,
                 utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
                 utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath),
-                utilHelper.quotesAroundIfNecessary(DependencyInstaller.InstallConfigFile)
+                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
             ];
             var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
 

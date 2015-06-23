@@ -23,8 +23,9 @@
         "wrench": "^1.5.8"
     },
     "devDependencies": {
-        "typescript": "1.4.1",
         "mocha": "2.0.1",
-        "should": "4.3.0"
+        "rimraf": "2.2.6",
+        "should": "4.3.0",
+        "typescript": "1.4.1"
     }
 }

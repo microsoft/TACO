@@ -128,10 +128,10 @@ class DependencyDataWrapper {
      * system platform if no platform is specified), or the "default" platform. Returns false otherwise.
      */
     public isSystemSupported(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): boolean {
-        return this.dependenciesData[id] &&
-            this.dependenciesData[id].versions[version] &&
-            this.dependenciesData[id].versions[version][platform] &&
-            !!this.dependenciesData[id].versions[version][platform][architecture]; // TS compiler doesn't like implicit cast of the last condition to boolean, so !! operator is used for explicit cast
+        return !!this.dependenciesData[id] &&
+            !!this.dependenciesData[id].versions[version] &&
+            !!this.dependenciesData[id].versions[version][platform] &&
+            !!this.dependenciesData[id].versions[version][platform][architecture];
     }
 
     /*
@@ -140,7 +140,7 @@ class DependencyDataWrapper {
      * to handle these packages specifically. Thus, they are marked as implicit dependencies.
      */
     public isImplicit(id: string): boolean {
-        return this.dependenciesData[id] && this.dependenciesData[id].isImplicit;
+        return !!this.dependenciesData[id] && this.dependenciesData[id].isImplicit;
     }
 }
 

@@ -19,6 +19,20 @@
                         "bytes": 0,
                         "installDestination": "test_value"
                     }
+                },
+                "darwin": {
+                    "ia32": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    },
+                    "x64": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    }
                 }
             }
         }
@@ -44,6 +58,20 @@
         "versions": {
             "1.0": {
                 "win32": {
+                    "ia32": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    },
+                    "x64": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    }
+                },
+                "darwin": {
                     "ia32": {
                         "installSource": "test_value",
                         "sha1": "test_value",
@@ -90,8 +118,22 @@
                         "bytes": 0,
                         "installDestination": "test_value"
                     }
+                },
+                "darwin": {
+                    "ia32": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    },
+                    "x64": {
+                        "installSource": "test_value",
+                        "sha1": "test_value",
+                        "bytes": 0,
+                        "installDestination": "test_value"
+                    }
                 }
             }
         }
-    },
+    }
 }
