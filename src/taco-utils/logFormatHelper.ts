@@ -124,11 +124,7 @@ module TacoUtility {
 
         public static isFormattedString(msg: string): boolean {
             var regex = new RegExp(LogFormatHelper.TagRegex, "gm");
-            if (regex.exec(msg)) {
-                return true;
-            } else {
-                return false;
-            }
+            return !!regex.exec(msg);
         }
 
         /**

@@ -96,6 +96,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                 logger.log(resources.getString("CommandKitListCurrentKit", projectInfo.tacoKitId));
                 deferred.resolve(projectInfo.tacoKitId);
             }
+
             return deferred.promise;
         });
     }
@@ -107,10 +108,11 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         var name: string = util.format("<kitid>%s</kitid>", kitId);
         if (!!kitInfo.default) {
             return util.format("%s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
-        }
-        else if (!!kitInfo.deprecated) {
+        } else if (!!kitInfo.deprecated) {
             return util.format("%s <deprecatedkit>(%s) </deprecatedkit>", name, resources.getString("CommandKitListDeprecatedKit"));
         }
+
+        return name;
     }
 
     /**
@@ -122,6 +124,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         if (kitInfo["cordova-cli"]) {
             kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
         }
+
         return kitInfo.description ? kitInfo.description : kitDefaultDescription;
     }
 
@@ -142,6 +145,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         var defaultKitDesc: INameDescription, currentKitDesc: INameDescription;
         var kitsToPrint: INameDescription[] = [];
         var deprecatedKits: INameDescription[] = [];
+        var availableKits: INameDescription[] = [];
         var currentKitId: string = "";
 
         logger.log(resources.getString("CommandKitList"));
@@ -165,11 +169,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                         } else {
                             if (!!kitInfo.default) {
                                 defaultKitDesc = kitNameDescription;
-                            }
-                            else if (!!kitInfo.deprecated) {
+                            } else if (!!kitInfo.deprecated) {
                                 deprecatedKits.push(kitNameDescription);
+                            } else {
+                                availableKits.push(kitNameDescription);
                             }
                         }
+
                         return Q.resolve({});
                     });
                 }));
@@ -184,6 +190,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                 kitsToPrint.push(defaultKitDesc);
             }
 
+            kitsToPrint.push.apply(kitsToPrint, availableKits);
             kitsToPrint.push.apply(kitsToPrint, deprecatedKits);
             LoggerHelper.logNameDescriptionTable(kitsToPrint);
             return Q.resolve({});
