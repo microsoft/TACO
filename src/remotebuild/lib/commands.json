@@ -1,0 +1,72 @@
+﻿{
+  "start": {
+    "synopsis": "<synopsis>[options]</synopsis>",
+    "description": "<helptitle>[CommandStartDescription]</helptitle>",
+    "options": [
+      { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
+      { "name": "--port [NUM]", "description": "[RemoteBuildConfPort]" },
+      { "name": "--lang [LANGUAGE]", "description": "[RemoteBuildConfLang]" },
+      { "name": "--secure [true|false]", "description": "[RemoteBuildConfSecure]" },
+      { "name": "--pinTimeout [NUM]", "description": "[RemoteBuildConfPinTimeout]" },
+      { "name": "--hostname", "description": "[RemoteBuildConfHostname]" },
+      { "name": "--certExpirationDays", "description": "[RemoteBuildConfCertExpirationDays]" },
+      { "name": "--config [PATH]", "description": "[RemoteBuildConfCertExpirationDays]" }
+    ],
+    "examples": [
+      { "example": "remotebuild", "description": "[RemoteBuildStartExample1]" },
+      { "example": "remotebuild --serverDir ~/other-builds --port 4000 --secure false", "description": "[RemoteBuildStartExample2]" }
+    ],
+    "notes": [
+      "[RemoteBuildStartNotes1]",
+      "[RemoteBuildStartNotes2]"
+    ]
+  },
+
+  "generateClientCert": {
+    "synopsis": "<synopsis>remote [PLATFORM]</synopsis>",
+    "description": "<helptitle>[CommandGenerateDescription]</helptitle>",
+    "options": [
+      { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
+      { "name": "--hostname", "description": "[RemoteBuildConfHostname]" },
+      { "name": "--pinTimeout [NUM]", "description": "[RemoteBuildConfPinTimeout]" },
+      { "name": "--certExpirationDays", "description": "[RemoteBuildConfCertExpirationDays]" },
+      { "name": "--config [PATH]", "description": "[RemoteBuildConfCertExpirationDays]" }
+    ],
+    "examples": [
+      { "example": "remotebuild generateClientCert --certExpirationDays 365", "description": "[GenerateClientCertExample1]" }
+    ],
+    "notes": [
+      "[GenerateClientCertNotes1]",
+      "[GenerateClientCertNotes2]"
+    ]
+  },
+
+  "resetServerCert": {
+    "synopsis": "<synopsis></synopsis>",
+    "description": "<helptitle>[CommandResetDescription]</helptitle>",
+    "options": [
+      { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
+      { "name": "--certExpirationDays", "description": "[RemoteBuildConfCertExpirationDays]" },
+      { "name": "--config [PATH]", "description": "[RemoteBuildConfCertExpirationDays]" }
+    ],
+    "examples": [
+      { "example": "remotebuild resetServerCert --certExpirationDays 365", "description": "[ResetServerCertExample1]" }
+    ],
+    "notes": [
+      "[ResetServerCertNotes1]",
+      "[ResetServerCertNotes2]"
+    ]
+  },
+
+  "help": {
+    "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
+    "modulePath": "./help",
+    "description": "<helptitle>[CommandHelpDescription]</helptitle>"
+  },
+
+  "version": {
+    "synopsis": "<synopsis></synopsis>",
+    "modulePath": "./version",
+    "description": "<helptitle>[CommandVersionDescription]</helptitle>"
+  }
+}

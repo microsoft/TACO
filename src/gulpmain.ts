@@ -41,12 +41,7 @@ gulp.task("compile", function (callback: Function): Q.Promise<any> {
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
         .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(buildConfig.buildPackages)))
-        .then(function (): Q.Promise<any> {
-            return Q.all([
-                gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "taco-remote", "lib", "tacoRemoteConfig.js")),
-                gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "remotebuild", "lib", "remoteBuildConf.js"))
-            ]);
+        .pipe(gulp.dest(buildConfig.buildPackages));
     });
 });
 

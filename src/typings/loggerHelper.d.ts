@@ -45,6 +45,20 @@ declare module TacoUtility {
          * @param {number} length of the longest key to be used in the Name/Value Table <br/>
          * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
          */
-        public static getDescriptionColumnIndent(maxKeyLength: number, indent1?: number): number;
+        public static getDescriptionColumnIndent(maxKeyLength: number, indent1?: number): number
+
+        /**
+         * Helper method to return a repeated string  
+         * @param {string} string to repeat
+         * @param {string} repeat count
+         */
+        public static repeat(c: string, n: number): string;
+
+        /**
+         * Helper method to pretty print a given json object with proper indentation
+         * @param {object} object to print
+         * @param {indent} constant indentation to use on the left
+         */
+        public static printJson(obj: any, indent?: number): void;
     }
 }

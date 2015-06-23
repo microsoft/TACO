@@ -11,6 +11,7 @@
 /// <reference path="../typings/nopt.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
+/// <reference path="../typings/tacoHelpArgs.d.ts"/>
 
 "use strict";
 import child_process = require ("child_process");
@@ -211,6 +212,30 @@ module TacoUtility {
             }
 
             return cleansed;
+        }
+
+        /**
+         * Returns true if version was requested in args, false otherswise
+         */
+        public static tryParseVersionArgs(args: string[]): boolean {
+            return args.some(function (value: string): boolean { return /^(-*)(v|version)$/.test(value); });
+        }
+
+        /**
+         * Returns ITacoHelpArgs with a requested helpTopic if help was requested in given args
+         * Returns null otherwise
+         */
+        public static tryParseHelpArgs(args: string[]): ITacoHelpArgs {
+            // if help flag is specified, use that
+            // for "taco --help cmd" scenarios, update commandArgs to reflect the next argument or make it [] if it is not present
+            // for "taco cmd --help" scenarios, update commandArgs to reflect the first argument instead
+            for (var i = 0; i < args.length; i++) {
+                if (/^(-*)(h|help)$/.test(args[i])) {
+                    return <ITacoHelpArgs>{ helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
+                }
+            }
+
+            return null;
         }
     }
 }

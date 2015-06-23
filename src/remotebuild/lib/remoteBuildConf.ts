@@ -34,6 +34,8 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         [key: string]: any;
     };
 
+    public usingDefaultModulesConfig: boolean = false;
+
     constructor(conf: typeof nconf, isUnitTest?: boolean) {
         var defaults: any = {
             serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
@@ -65,7 +67,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
         var serverMods = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
-            console.warn(resources.getString("NoServerModulesSelected"));
+            this.usingDefaultModulesConfig = true;
             if (isUnitTest) {
                 this.remoteBuildConf.modules = { };
             } else {
@@ -141,7 +143,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         return this.remoteBuildConf.certExpirationDays;
     }
 
-// This is not something that should be specified on the command line directly, although it can be if you try hard enough
+    // This is not something that should be specified on the command line directly, although it can be if you try hard enough
     public get modules(): string[] {
         return Object.keys(this.remoteBuildConf.modules);
     }

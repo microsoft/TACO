@@ -14,9 +14,11 @@ import assert = require ("assert");
 import os = require ("os");
 import util = require ("util");
 
+import jsonPrinter = require ("./jsonPrinter");
 import logFormathelper = require ("./logFormatHelper");
 import logger = require ("./logger");
 
+import JsonPrinter = jsonPrinter.JsonPrinter;
 import Logger = logger.Logger;
 import LogFormatHelper = logFormathelper.LogFormatHelper;
 
@@ -25,6 +27,7 @@ module TacoUtility {
         private static MaxRight: number = Math.floor(0.9 * (<any>process.stdout)["columns"]) || 80;  // maximum characters we're allowing in each line
         private static MinimumDots: number = 4;
         private static MinRightIndent: number = 25;
+        private static DefaultIndentString: string = "   ";
 
         public static DefaultIndent: number = 3;
 
@@ -102,6 +105,25 @@ module TacoUtility {
 
             // +2 for spaces around dots
             return Math.max(LoggerHelper.DefaultIndent + maxKeyLength + 1 + LoggerHelper.MinimumDots + 1, LoggerHelper.MinRightIndent);
+        }
+
+        /**
+         * Helper method to return a repeated string  
+         * @param {string} string to repeat
+         * @param {string} repeat count
+         */
+        public static repeat(c: string, n: number): string {
+            return LogFormatHelper.repeat(c, n);
+        }
+
+        /**
+         * Helper method to pretty print a given json object with proper indentation
+         * @param {object} object to print
+         * @param {indent} constant indentation to use on the left
+         */
+        public static printJson(obj: any, indent?: number): void {
+            var jsonPrinter: JsonPrinter = new JsonPrinter(LoggerHelper.DefaultIndent, LoggerHelper.MaxRight, indent);
+            Logger.log(jsonPrinter.stringify(obj));
         }
 
         private static wordWrapString(str: string, indent: number, maxWidth: number): string {

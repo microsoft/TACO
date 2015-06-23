@@ -45,14 +45,6 @@
     "_CommandCreateListBase.comment": "Header at the top of the table showing available templates when the user does 'taco create --list'. {0} is the id of the kit for which to list the templates.",
 
     "CommandHelpDescription": "Get help for a command",
-    "CommandHelpUsageSynopsis": "<helptitle>Synopsis</helptitle><br/>",
-    "_CommandHelpUsageSynopsis.comment": "synopsis header when user types 'taco help'",
-    "CommandHelpUsageOptions": "<br/><helptitle>Options:</helptitle><br/>",
-    "_CommandHelpUsageOptions.comment": "options header when user types 'taco help'",
-    "CommandHelpBadcomand": "{0} is not a valid command<br/>",
-    "_CommandHelpBadcomand.comment": "message shown when user enters invalid taco cli command",
-    "CommandHelpTacoUsage": "taco command [options]",
-    "_CommandHelpTacoUsage.comment": "CLI pattern shown in taco help",
 
     "CommandKitDescription": "Perform kit related operations",
     "_CommandKitDescription.comment": "Description for 'taco kit'",

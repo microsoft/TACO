@@ -31,6 +31,7 @@ import RemoteBuildConf = require ("./remoteBuildConf");
 import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 
+import Logger = utils.Logger;
 import UtilHelper = utils.UtilHelper;
 
 interface IDictionaryT<T> {
@@ -143,6 +144,10 @@ class Server {
     }
 
     private static loadServerModules(conf: RemoteBuildConf, app: Express.Application, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
+        if (conf.usingDefaultModulesConfig) {
+            Logger.logWarning(resources.getString("NoServerModulesSelected"));
+        }
+
         var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
             if (!(<any>req).client.authorized) {
                 res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));

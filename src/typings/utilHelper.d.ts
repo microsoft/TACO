@@ -10,6 +10,7 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts" />
 /// <reference path="../typings/ncp.d.ts" />
+/// <reference path="../typings/tacoHelpArgs.d.ts"/>
 
 declare module TacoUtility {
     class UtilHelper {
@@ -82,5 +83,17 @@ declare module TacoUtility {
          * @return {[option: string]: any } A new options dictionary containing the cleansed options
          */
         public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any };
+
+        /**
+         * Returns true if version was requested in args, false otherswise
+         */
+        public static tryParseVersionArgs(args: string[]): boolean;
+
+        /**
+         * Returns ITacoHelpArgs with a requested helpTopic if help was requested in given args
+         * Returns null otherwise
+         */
+        public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
+
     }
 }
