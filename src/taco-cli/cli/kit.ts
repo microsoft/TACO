@@ -151,11 +151,11 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         logger.log(resources.getString("CommandKitList"));
         logger.logLine();
         
-        return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<string> {
-            return Q.resolve(kitId);
-        })
-            .then(function (kitId: string): Q.Promise<any> {
+        return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<any> {
             currentKitId = kitId;
+            return Q.resolve({});
+        })
+            .then(function (): Q.Promise<any> {
             return kitHelper.getKitMetadata().then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
                 return Q.all(Object.keys(meta.kits).map(function (kitId: string): Q.Promise<any> {
                     return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): Q.Promise<any> {                     
@@ -266,21 +266,6 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         });
     }
 
-    /**
-     * Pretty prints a single Kit or all the kits based on the CLI flags passed
-     */
-    private static printKitsInfo(commandData: commands.ICommandData): Q.Promise<any> {
-        logger.logLine();
-        var kitId: string = commandData.options["kit"];
-          
-        // If the user requested for info regarding a particular kit, print all the information regarding the kit  
-        if (kitId) {
-            return Kit.printKit(kitId);
-        } else {
-            return Kit.printAllKits();
-        }
-    }
-
     private static getLongestPlatformPluginLength(kitInfo: tacoKits.IKitInfo): number {
         var longest: number = 0;
         if (kitInfo.platforms) {
@@ -299,7 +284,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
-        return Kit.printKitsInfo(commandData);
+        logger.logLine();
+        var kitId: string = commandData.options["kit"];
+          
+        // If the user requested for info regarding a particular kit, print all the information regarding the kit  
+        // Else print minimal information about all the kits
+
+        return kitId? Kit.printKit(kitId): Kit.printAllKits();
     }
 }
 

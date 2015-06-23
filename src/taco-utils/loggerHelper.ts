@@ -69,12 +69,8 @@ module TacoUtility {
             var dots: string = LogFormatHelper.repeat(".", indent2 - indent1 - keyLength - 2); // -2, for spaces around "..."
             value = LoggerHelper.wordWrapString(value, indent2, LoggerHelper.MaxRight);
 
-            var keyString: string = "";
-            if (LogFormatHelper.isFormattedString(key)) {
-                Logger.log(util.format("%s%s %s %s", leftIndent, key, dots, value));
-            } else {
-                Logger.log(util.format("%s<key>%s</key> %s %s", leftIndent, key, dots, value));
-            }
+            var keyString: string = LogFormatHelper.isFormattedString(key) ? key : util.format("<key>%s</key>", key);
+            Logger.log(util.format("%s%s %s %s", leftIndent, keyString, dots, value));
         }
 
         /**
