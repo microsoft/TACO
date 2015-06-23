@@ -6,10 +6,10 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/tacoKits.d.ts" />
 
 "use strict";
 
@@ -53,7 +53,6 @@ class Create implements commands.IDocumentedCommand {
         kit: String,
         template: String,
         cli: String,
-        list: Boolean,
         "copy-from": String,
         "link-to": String
     };
@@ -75,27 +74,23 @@ class Create implements commands.IDocumentedCommand {
             return Q.reject(err);
         }
 
-        if (this.commandParameters.data.options["list"]) {
-            return this.listTemplates();
-        } else {
-            var self = this;
-            var templateDisplayName: string;
+        var self = this;
+        var templateDisplayName: string;
 
-            return this.createProject()
-                .then(function (templateUsed: string): Q.Promise<any> {
-                    templateDisplayName = templateUsed;
+        return this.createProject()
+            .then(function (templateUsed: string): Q.Promise<any> {
+                templateDisplayName = templateUsed;
 
-                    var kitProject = self.isKitProject();
-                    var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
+                var kitProject = self.isKitProject();
+                var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
 
-                    return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
-                })
-                .then(function (): Q.Promise<any> {
-                    self.finalize(templateDisplayName);
+                return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+            })
+            .then(function (): Q.Promise<any> {
+                self.finalize(templateDisplayName);
 
-                    return Q.resolve({});
-                });
-        }
+                return Q.resolve({});
+            });
     }
 
     /**
@@ -130,7 +125,7 @@ class Create implements commands.IDocumentedCommand {
      * Verify that the right combination of options is passed
      */
     private verifyArguments(): void {
-        // Parameter exclusivity validation and other verifications
+        // Parameter exclusivity validation
         if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
@@ -142,25 +137,23 @@ class Create implements commands.IDocumentedCommand {
         if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
-    }
 
-    /**
-     * List available templates for the specified kit, or for the default kit if no kit is specified
-     */
-    private listTemplates(): Q.Promise<any> {
-        var kit = this.commandParameters.data.options["kit"];
-        var templates: templateManager = new templateManager(kitHelper);
+        // Make sure a path was specified
+        var createPath: string = this.commandParameters.cordovaParameters.projectPath;
 
-        return templates.getTemplatesForKit(kit)
-            .then(function (list: templateManager.ITemplateList): void {
-                var kitToPrint: string = kit || list.kitId;
-                logger.logLine();
-                logger.log(resources.getString("CommandCreateListBase", kitToPrint));
-                logger.logLine();
-                LoggerHelper.logNameDescriptionTable(list.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
-                    return <INameDescription>{ name: value.id, description: value.name };
-                }));
-            });
+        if (!createPath) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNoPath);
+        }
+
+        // Make sure the specified path is valid
+        if (!utils.isPathValid(createPath) || !fs.existsSync(path.dirname(createPath))) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreateInvalidPath, createPath);
+        }
+
+        // Make sure the specified path is empty if it exists
+        if (fs.existsSync(createPath) && fs.readdirSync(createPath).length > 0) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreatePathNotEmpty, createPath);
+        }
     }
 
     /**
@@ -196,7 +189,7 @@ class Create implements commands.IDocumentedCommand {
                     return Q.resolve(null);
                 }      
             })
-                .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
+            .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
                 if (kitInfo && !!kitInfo.deprecated) {
                     // Warn the user
                     logger.logWarning(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
@@ -238,7 +231,7 @@ class Create implements commands.IDocumentedCommand {
                 })
                 .then(function (kitIdUsed: string): void {
                     logger.log(resources.getString("CommandCreateStatusKitIdUsed", cordovaParameters.appName, cordovaParameters.appId, projectPath, kitIdUsed));
-            });
+                });
         }
     }
 

@@ -1,0 +1,58 @@
+﻿{
+    "androidSdk": {
+        "displayName": "Android SDK",
+        "installerPath": "./installers/androidSdkInstaller",
+        "licenseUrl": "https://developer.android.com/sdk/terms.html",
+        "prerequisites": [
+            "java"
+        ],
+        "versions": {
+            "r24.2": {
+                "win32": {
+                    "ia32": {
+                        "installSource": "http://dl.google.com/android/android-sdk_r24.2-windows.zip",
+                        "sha1": "2611ed9a6080f4838f1d4e55172801714a8a169b",
+                        "bytes": 155944165,
+                        "installDestination": "%programfiles%/Android"
+                    },
+                    "x64": {
+                        "installSource": "http://dl.google.com/android/android-sdk_r24.2-windows.zip",
+                        "sha1": "2611ed9a6080f4838f1d4e55172801714a8a169b",
+                        "bytes": 155944165,
+                        "installDestination": "%programfiles(x86)%/Android"
+                    }
+                }
+            }
+        }
+    },
+    "androidTarget": {
+        "isImplicit": true
+    },
+    "gradle": {
+        "isImplicit": true
+    },
+    "java": {
+        "displayName": "Java SE Development Kit",
+        "installerPath": "./installers/javaJdkInstaller",
+        "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
+        "prerequisites": [ ],
+        "versions": {
+            "7u55": {
+                "win32": {
+                    "ia32": {
+                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
+                        "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
+                        "bytes": 129674656,
+                        "installDestination": "%programfiles%/Java/jdk1.7.0_55"
+                    },
+                    "x64": {
+                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
+                        "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
+                        "bytes": 129674656,
+                        "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55"
+                    }
+                }
+            }
+        }
+    }
+}

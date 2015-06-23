@@ -27,6 +27,7 @@ module TacoKits {
     export interface IKitHelper {
         getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
         getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+        getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;
     }
 
     export interface IPluginOverrideInfo {
@@ -233,6 +234,36 @@ module TacoKits {
                     };
 
                     return Q.resolve(kitTemplatesOverrideInfo);
+                });
+        }
+
+        /**
+         *   Returns a promise resolved with an ITemplateOverrideInfo[] that contains all the available templates regardless of kits
+         */
+        public static getAllTemplates(): Q.Promise<ITemplateOverrideInfo[]> {
+            return KitHelper.getTemplateMetadata()
+                .then(function (templateMetadata: ITemplateMetadata): Q.Promise<ITemplateOverrideInfo[]> {
+                    var templateList: ITemplateOverrideInfo[] = [];
+
+                    // As we are printing the union of the templates defined in all of the kit overrides, we need a dictionary of template IDs we already added to our list to avoid duplication
+                    var knownTemplates: { [id: string]: boolean } = {};
+
+                    Object.keys(templateMetadata).forEach(function (kitId: string): void {
+                        Object.keys(templateMetadata[kitId]).forEach(function (templateId: string): void {
+                            if (!knownTemplates[templateId]) {
+                                var templateInfo: ITemplateOverrideInfo = {
+                                    kitId: kitId,
+                                    templateId: templateId,
+                                    templateInfo: templateMetadata[kitId][templateId]
+                                };
+
+                                templateList.push(templateInfo);
+                                knownTemplates[templateId] = true;
+                            }
+                        });
+                    });
+
+                    return Q.resolve(templateList);
                 });
         }
 

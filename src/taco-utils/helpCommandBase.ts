@@ -79,7 +79,7 @@ module TacoUtility {
          */
         private printHeader(): void {
             Logger.logLine();
-            LoggerHelper.logSeperatorLine();
+            LoggerHelper.logSeparatorLine();
         }
 
         /**

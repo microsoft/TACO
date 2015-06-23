@@ -22,7 +22,6 @@
 
     "UnknownCommand": "Unknown command: {0}",
     "_UnknownCommand.comment": "Message printed when an unknown option is specified. {0} is the command",
-
     "CommandStartDescription": "Starts the server",
     "_CommandStartDescription.comment": "Description printed for remotebuild start command",
     "CommandResetDescription": "Resets server SSL certificates",
@@ -43,7 +42,7 @@
     "RemoteBuildStartNotes2": "Command line options override configuration file values",
     "_RemoteBuildStartNotes2.comment": "Text shown in notes section providing additional notes when user invokes 'remotebuild help start'",
 
-    "GenerateClientCertExample1": "Generate a new client certificate for use in Visual Studio, that will expire in 1 year",
+    "GenerateClientCertExample1": "Generate a new certificate for use in the client that will expire in 1 year",
     "_GenerateClientCertExample1.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help generateClientCert'",
     "GenerateClientCertNotes1": "Options (All options other than --config can be specified via a configuration file)",
     "_GenerateClientCertNotes1.comment": "Text shown in notes section providing additional notes when user invokes 'remotebuild help generateClientCert'",
@@ -58,7 +57,6 @@
     "_ResetServerCertNotes2.comment": "Text shown in notes section providing additional notes when user invokes 'remotebuild help resetServerCert'",
     "RemoteBuildModuleHelpText": "Other options are described in the individual modules. Try asking for help about the following modules: {0}",
     "_RemoteBuildModuleHelpText.comment": "Text shown as footnote for all remotebuild help commands describing how to use help for a specific module. {0} comma seperated represents list of supported modules ",
-
     "UnableToFindModule": "Unable to load module '{0}'.",
     "_UnableToFindModule.comment": "Message printed when the user asks for help about a specific module, and we are unable to find it. {0} is the module they asked about",
     "RemoteBuildConfConfig": "Path to server configuration json file with any of these settings (defaults to $TACO_HOME/RemoteBuild.config if not specified)",
@@ -73,7 +71,7 @@
     "_RemoteBuildConfSecure.comment": "Help message printed for the --secure argument",
     "RemoteBuildConfPinTimeout": "Number of minutes for which client SSL certs can be acquired (defaults to 10 minutes)",
     "_RemoteBuildConfPinTimeout.comment": "Help message printed for the --pinTimeout argument",
-    "RemoteBuildConfHostname": "Hostname to generate certificates for in secure mode (defaults to os.hostname())",
+    "RemoteBuildConfHostname": "Hostname for which to generate SSL certificates when in secure mode (defaults to os.hostname())",
     "_RemoteBuildConfHostname.comment": "Help message printed for the --hostname argument",
     "RemoteBuildConfCertExpirationDays": "Number of days after which the generated SSL certificates will expire (defaults to 5 years if not specified)",
     "_RemoteBuildConfCertExpirationDays.comment": "Help message printed for the --certExpirationDays argument",

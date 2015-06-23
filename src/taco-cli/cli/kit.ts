@@ -71,7 +71,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameter combinations
         if (parsedOptions.options["json"] && parsedOptions.options["cli"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandKitInvalidCommandCombination);
+            throw errorHelper.get(TacoErrorCodes.CommandKitNotBothJsonAndCli);
         }
 
         return parsedOptions;

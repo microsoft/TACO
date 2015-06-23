@@ -13,12 +13,20 @@
 // This file defines typings as the npm cordova module is used
 
 declare module Cordova {
+    export interface IKeyValueStore<T> {
+        [key: string]: T
+    }
+
     export interface ICordovaRawOptions {
         platforms: string[];
         options?: string[];
         verbose?: boolean;
         silent?: boolean;
         browserify?: boolean;
+    }
+
+    export interface ICordovaPluginOptions {
+        cli_variables?: IKeyValueStore<string>
     }
 
     export interface ICordovaRaw {
@@ -31,13 +39,17 @@ declare module Cordova {
         info(): Q.Promise<any[]>;
         platform(command: any, targets?: any, opts?: any): Q.Promise<any>;
         platforms(command: any, targets?: any, opts?: any): Q.Promise<any>;
-        plugin(command: any, targets?: any, opts?: any): Q.Promise<any>;
+        plugin(command: any, targets?: any, opts?: ICordovaPluginOptions): Q.Promise<any>;
         plugins(command: any, targets?: any, opts?: any): Q.Promise<any>;
         prepare(options: ICordovaRawOptions): Q.Promise<any>;
         restore(target: any, args: any): Q.Promise<any>;
         run(options: ICordovaRawOptions): Q.Promise<any>;
         save(target: any, opts?: any): Q.Promise<any>;
         serve(port: number): Q.Promise<NodeJSHttp.Server>;
+    }
+
+    export interface ICordovaRaw510 extends ICordovaRaw {
+        requirements(platforms: string[]): Q.Promise<any>;
     }
 
     export interface ICordova {
@@ -48,6 +60,17 @@ declare module Cordova {
         cli(args: string[]): void;
         raw: ICordovaRaw;
     }
+
+    export interface IFetchJson {
+        [key: string]: {
+            variables?: IKeyValueStore<string>
+        }
+    }
+
+    export interface ICordova510 extends ICordova {
+        raw: ICordovaRaw510;
+    }
+
     export function on(event: string, ...args: any[]): void;
     export function off(event: string, ...args: any[]): void;
     export function emit(event: string, ...args: any[]): void;

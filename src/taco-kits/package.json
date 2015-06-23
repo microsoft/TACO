@@ -5,6 +5,10 @@
     },
     "description": "Validated Kits metadata for Taco CLI",
     "version": "0.0.2",
+    "repository": {
+        "type": "git",
+        "url": "https://xxxxxgithub.com/Microsoft/taco-cli.git"
+    },
     "main": "tacoKits.js",
     "scripts": {
         "test": "mocha"
@@ -16,7 +20,6 @@
     "devDependencies": {
         "typescript": "1.4.1",
         "mocha": "2.0.1",
-        "sanitize-filename": "^1.3.0",
         "should": "4.3.0"
     }
 }
