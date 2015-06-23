@@ -50,7 +50,14 @@ class Settings {
             Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
             return Q(Settings.Settings);
         } catch (e) {
-            return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
+            if (e.code === "ENOENT") {
+                // File doesn't exist, no need for a stack trace.
+                // The error message will instruct the user to run "taco setup" to resolve the issue.
+                return Q.reject<Settings.ISettings>(errorHelper.get(TacoErrorCodes.CommandBuildTacoSettingsNotFound));
+            } else {
+                // Couldn't open the file, not sure why, so we'll keep the error around for the user
+                return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
+            }
         }
     }
 
@@ -112,6 +119,12 @@ class Settings {
                 }).concat(localPlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
                     return { location: Settings.BuildLocationType.Local, platform: platform };
                 }));
+            }
+        }).then(function (platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
+            if (platforms.length > 0) {
+                return platforms;
+            } else {
+                throw errorHelper.get(TacoErrorCodes.ErrorNoPlatformsFound);
             }
         });
     }
