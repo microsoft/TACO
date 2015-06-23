@@ -106,10 +106,10 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static getKitTitle(kitId: string, kitInfo: tacoKits.IKitInfo): string {
         var name: string = util.format("<kitid>%s</kitid>", kitId);
         if (!!kitInfo.default) {
-            return util.format(" %s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
+            return util.format("%s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
         }
         else if (!!kitInfo.deprecated) {
-            return util.format(" %s <deprecatedkit>(%s) </deprecatedkit>", name, resources.getString("CommandKitListDeprecatedKit"));
+            return util.format("%s <deprecatedkit>(%s) </deprecatedkit>", name, resources.getString("CommandKitListDeprecatedKit"));
         }
     }
 
@@ -125,13 +125,28 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         return kitInfo.description ? kitInfo.description : kitDefaultDescription;
     }
 
+    /**
+     * Pretty prints title and description of all the known kits
+     * Order is :
+     * <current_kit> if within a Taco kit project
+     * <default_kit>
+     * <available_kit_1>
+     * <available_kit_2>
+     * <available_kit_3>
+     * ...
+     * <deprecated_kit_1>
+     * <deprecated_kit_2>
+     * ...
+     */
     private static printAllKits(): Q.Promise<any> {
-        var defaultKitDesc: INameDescription;
-        var currentKitDesc: INameDescription;
+        var defaultKitDesc: INameDescription, currentKitDesc: INameDescription;
         var kitsToPrint: INameDescription[] = [];
         var deprecatedKits: INameDescription[] = [];
         var currentKitId: string = "";
 
+        logger.log(resources.getString("CommandKitList"));
+        logger.logLine();
+        
         return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<string> {
             return Q.resolve(kitId);
         })
@@ -179,26 +194,10 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * Pretty prints the Kit name and description info
      */
     private static printKitNameAndDescription(kitId: string, kitInfo: tacoKits.IKitInfo): void {
-        var title: string = kitId;
-        var titleLength: number = title.length;
-        var suffix: string = "";
-        var kitDescription: string = "";
-        var kitDefaultDescription: string = "";
-
-        if (!!kitInfo.default) {
-            suffix = util.format("<defaultkit>(%s)</defaultkit>", resources.getString("CommandKitListDefaultKit"));
-        } else if (!!kitInfo.deprecated) {
-            suffix = util.format("<deprecatedkit>(%s)</deprecatedkit>", resources.getString("CommandKitListDeprecatedKit"));
-        }
-
-        if (kitInfo["cordova-cli"]) {
-            kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
-        }
-
-        
-        kitDescription = kitInfo.description ? kitInfo.description : kitDefaultDescription;
-
-        logger.log(util.format("<kitid>%s</kitid> %s: %s", title, suffix, kitDescription));
+        var title: string = Kit.getKitTitle(kitId, kitInfo);
+        var kitDescription: string = Kit.getKitDescription(kitInfo);
+        logger.log(util.format("%s<underline/>", title));
+        logger.log(kitDescription);
     }
 
     /**
@@ -246,21 +245,30 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         }
     }
 
+    /**
+     * Pretty prints information (title, description, Cordova CLI version,
+     * plugin/platform override info regardng a single kit
+     */
+    private static printKit(kitId: string): Q.Promise<any> {
+        return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
+            var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(kitInfo));
+            Kit.printKitNameAndDescription(kitId, kitInfo);
+            Kit.printCordovaCliVersion(kitInfo);
+            Kit.printPlatformOverrideInfo(kitInfo, indent2);
+            Kit.printPluginOverrideInfo(kitInfo, indent2);
+        });
+    }
+
+    /**
+     * Pretty prints a single Kit or all the kits based on the CLI flags passed
+     */
     private static printKitsInfo(commandData: commands.ICommandData): Q.Promise<any> {
         logger.logLine();
-        logger.log(resources.getString("CommandKitList"));
         var kitId: string = commandData.options["kit"];
           
         // If the user requested for info regarding a particular kit, print all the information regarding the kit  
         if (kitId) {
-            kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-                var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(kitInfo));
-                Kit.printKitNameAndDescription(kitId, kitInfo);
-                Kit.printCordovaCliVersion(kitInfo);
-                Kit.printPlatformOverrideInfo(kitInfo, indent2);
-                Kit.printPluginOverrideInfo(kitInfo, indent2);
-            });
-            return Q.resolve({});
+            return Kit.printKit(kitId);
         } else {
             return Kit.printAllKits();
         }
