@@ -30,7 +30,7 @@ import CordovaConfig = utils.CordovaConfig;
 import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
 
-var cordova: Cordova.ICordova = null;
+var cordova: typeof Cordova = null;
 
 function beforePrepare(data: any): void {
     // Instead of a build, we call prepare and then compile
@@ -62,7 +62,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     var cordovaVersion: string = currentBuild["vcordova"];
     buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
     process.send(buildInfo);
-    TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
+    TacoPackageLoader.lazyRequire<typeof Cordova>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: typeof Cordova): void {
         cordova = pkg;
 
         cordova.on("results", console.info);

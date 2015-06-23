@@ -82,8 +82,8 @@ module TacoUtility {
     };
 
     export class TacoPackageLoader {
-        private static GitUriRegex: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
-        private static FileUriRegex: RegExp = /^file:\/\/.*/;
+        public static GitUriRegex: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
+        public static FileUriRegex: RegExp = /^file:\/\/.*/;
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,

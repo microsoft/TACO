@@ -12,7 +12,22 @@
 // Note: cordova.d.ts defines typings for cordova as a cordova app would see it.
 // This file defines typings as the npm cordova module is used
 
+
 declare module Cordova {
+
+    export module cordova_lib {
+        export class configparser {
+            constructor(configXmlPath: string);
+            getPlugin(id: string): any;
+            removePlugin(id: string): void;
+            addPlugin(attributes: Cordova.ICordovaPlatformPluginInfo , variables: Cordova.ICordovaVariable[]): any;
+            getEngines(): Cordova.ICordovaPlatformPluginInfo [];
+            removeEngine(name: string): void;
+            addEngine(name: string, spec: string): any;
+            write(): any;
+        }
+    }
+
     export interface IKeyValueStore<T> {
         [key: string]: T
     }
@@ -24,9 +39,61 @@ declare module Cordova {
         silent?: boolean;
         browserify?: boolean;
     }
+    
+    export interface ICordovaLibMetadata {
+        url?: string;
+        version?: string;
+        id?: string;
+        link?: boolean;
+    }
+
+    export interface ICordovaConfigMetadata {
+        id?: string;
+        name?: string;
+        lib?: {
+            www?: ICordovaLibMetadata;
+        };
+    }
+
+    export interface ICordovaCreateParameters {
+        projectPath: string;
+        appId: string;
+        appName: string;
+        cordovaConfig: any;
+        copyFrom?: string;
+        linkTo?: string;
+    }
+
+    export interface ICordovaDownloadOptions {
+        searchpath: string;
+        noregistry: boolean;
+        usegit: boolean;
+        cli_variables: IKeyValueStore<string>;
+        browserify: string;
+        link: string;
+        save: boolean;
+        shrinkwrap: boolean;
+    }
+
+    export interface ICordovaCommandParameters {
+        subCommand: string;
+        targets: string[];
+        downloadOptions: ICordovaDownloadOptions;
+    }
+
+    export interface ICordovaPlatformPluginInfo  {
+        name: string;
+        spec: string;
+        pluginVariables?: ICordovaVariable[];
+    }
+
+    export interface ICordovaVariable {
+        name: string;
+        value: string;
+    }
 
     export interface ICordovaPluginOptions {
-        cli_variables?: IKeyValueStore<string>
+        cli_variables?: IKeyValueStore<string>;
     }
 
     export interface ICordovaRaw {

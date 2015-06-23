@@ -11,6 +11,7 @@
 /// <reference path="../../typings/colors.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/nameDescription.d.ts" />
+/// <reference path="../../typings/commandAlias.d.ts" />
 
 "use strict";
 import path = require ("path");
@@ -32,6 +33,7 @@ import LoggerHelper = tacoUtility.LoggerHelper;
  */
 class Help implements commands.IDocumentedCommand {
     private static TacoString: string = "taco";
+    private static OptionIndent: number = 5;
     private commandsFactory: CommandsFactory = null;
 
     public info: commands.ICommandInfo;
@@ -98,8 +100,33 @@ class Help implements commands.IDocumentedCommand {
             return;
         }
 
+        // Prepare a flattened list of name/description values of args and options for each of the args.
+        // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>, <arg3>, <arg3.options>
+        var argList: INameDescription[] = [];
+        var args: any[] = this.commandsFactory.listings[command].args;
         var list: tacoUtility.Commands.ICommandInfo = this.commandsFactory.listings[command];
         Help.printCommandHeader(util.format("%s %s %s", Help.TacoString, command, list.synopsis), list.description);
+        var optionsLeftIndent: string = Array(Help.OptionIndent + 1).join(" ");
+        if (args) {
+            args.forEach(arg => {
+                // Push the arg first
+                argList.push({
+                    name: arg.name,
+                    description: arg.description
+                });
+                if (arg.options) {
+                    var options: INameDescription[] = <INameDescription[]>arg.options;
+                    options.forEach(nvp => {
+                        nvp.name = optionsLeftIndent + nvp.name;
+                        argList.push({
+                            name: nvp.name,
+                            description: nvp.description
+                        });
+                    });
+                }
+            });
+            list.args = argList;
+        }
 
         // if both needs to be printed we need to calculate an indent ourselves
         // to make sure args.values have same indenation as options.values
@@ -117,6 +144,11 @@ class Help implements commands.IDocumentedCommand {
             logger.log(resources.getString("CommandHelpUsageOptions"));
             Help.printCommandTable(list.options, 2 * LoggerHelper.DefaultIndent, indent2);
         }
+
+        if (list.aliases) {
+            logger.log(resources.getString("CommandHelpUsageAliases"));
+            Help.printAliasTable(list.aliases);
+        }
     }
 
     private static printCommandTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number): void {
@@ -132,6 +164,13 @@ class Help implements commands.IDocumentedCommand {
         if (description) {
             logger.log(Help.getDescriptionString(description) + "<br/>");
         }
+    }
+
+    private static printAliasTable(commandAliases: ICommandAlias[]): void {
+        var leftIndent: string = Array(LoggerHelper.DefaultIndent + 1).join(" ");
+        commandAliases.forEach(cmdAliasPair => {
+            logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdAliasPair.alias, "->", cmdAliasPair.command));
+        });
     }
 
     /**
