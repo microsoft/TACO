@@ -95,7 +95,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
      * Abstract method to be implemented by the derived class.
      * Edits the version override info to config.xml of the cordova project
      */
-    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo [], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
+    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -125,18 +125,19 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
 
         var self = this;
         var projectInfo: projectHelper.IProjectInfo;
-        var specsToPersist: Cordova.ICordovaPlatformPluginInfo [] = [];
+        var specsToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): Q.Promise<any> {
             if (info.configXmlPath.length === 0) {
                 return Q.reject(errorHelper.get(TacoErrorCodes.NotInCordovaProject));
             }
+
             projectInfo = info;
             return Q({});
         })
             .then(function (): Q.Promise<any> {
             var kitId: string = projectInfo.tacoKitId;
             if (kitId) {
-                return self.checkForKitOverrides(projectInfo).then(function (specs: Cordova.ICordovaPlatformPluginInfo []): void {
+                return self.checkForKitOverrides(projectInfo).then(function (specs: Cordova.ICordovaPlatformPluginInfo[]): void {
                     specsToPersist = specs;
                 });
             } else {

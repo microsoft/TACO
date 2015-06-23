@@ -43,7 +43,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
      */
     public checkForKitOverrides(projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
         var targets: string[] = [];
-        var platformInfoToPersist: Cordova.ICordovaPlatformPluginInfo [] = [];
+        var platformInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
         var self = this;
 
         var subCommand = this.cordovaCommandParams.subCommand.toLowerCase();
@@ -56,7 +56,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
             // For each of the platforms specified at command-line, check for overrides in the current kit
             return self.cordovaCommandParams.targets.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, platformName: string): Q.Promise<any> {
                 return earlierPromise.then(function (): Q.Promise<any> {
-                    var platformInfo: Cordova.ICordovaPlatformPluginInfo  = { name: platformName, spec: "" };
+                    var platformInfo: Cordova.ICordovaPlatformPluginInfo = { name: platformName, spec: "" };
                     // Proceed only if the version has not already been overridden on the command line 
                     // i.e, proceed only if user did not do "taco platform <subcommand> platform@<verion|src>"
                     if (!self.cliParamHasVersionOverride(platformName)) {
@@ -100,8 +100,8 @@ class Platform extends commandBase.PlatformPluginCommandBase {
     /**
      * Edits the version override info to config.xml of the cordova project
      */
-    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo [], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
-        return cordovaHelper.editConfigXml(specs, projectInfo, add, function (specs: Cordova.ICordovaPlatformPluginInfo [], parser: Cordova.cordova_lib.configparser, add: boolean): void {
+    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
+        return cordovaHelper.editConfigXml(specs, projectInfo, add, function (specs: Cordova.ICordovaPlatformPluginInfo[], parser: Cordova.cordova_lib.configparser, add: boolean): void {
             cordovaHelper.editEngineVersionSpecs(specs, parser, add);
         });
     }

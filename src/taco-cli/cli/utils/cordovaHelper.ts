@@ -155,7 +155,7 @@ class CordovaHelper {
         return CordovaHelper.toCordovaArgumentsInternal(platform, commandData);
     }
 
-    public static editConfigXml(infoList: Cordova.ICordovaPlatformPluginInfo [], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPluginInfo [], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
+    public static editConfigXml(infoList: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
@@ -178,7 +178,7 @@ class CordovaHelper {
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
-            var pluginEntry: Cordova.ICordovaPlatformPluginInfo  = configParser.getPlugin(pluginId);
+            var pluginEntry: Cordova.ICordovaPlatformPluginInfo = configParser.getPlugin(pluginId);
             var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
             return Q.resolve(versionSpec);
         });
@@ -193,7 +193,7 @@ class CordovaHelper {
      *
      * @return {Q.Promise<string>} An empty promise
      */
-    public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo [], configParser: ConfigParser, addSpec: boolean): void {
+    public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean): void {
         infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
             configParser.removePlugin(info.name);
             if (addSpec) {
@@ -216,7 +216,7 @@ class CordovaHelper {
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             var engineSpec: string = "";
-            var engines: Cordova.ICordovaPlatformPluginInfo [] = configParser.getEngines();
+            var engines: Cordova.ICordovaPlatformPluginInfo[] = configParser.getEngines();
             engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPluginInfo ): void {
                 if (engineInfo.name.toLowerCase() === platform.toLowerCase()) {
                     engineSpec = engineInfo.spec;
@@ -236,7 +236,7 @@ class CordovaHelper {
      *
      * @return {Q.Promise<string>} An empty promise
      */
-    public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo [], configParser: ConfigParser, addSpec: boolean): void {
+    public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean): void {
         infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
             configParser.removeEngine(info.name);
             if (addSpec) {
