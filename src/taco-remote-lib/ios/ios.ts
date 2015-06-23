@@ -49,7 +49,7 @@ class IOSAgent implements ITargetPlatform {
         this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9322;
 
         if (utils.ArgsHelper.argToBool(config.get("allowsEmulate"))) {
-            process.env["PATH"] = path.resolve(__dirname, path.join("node_modules", "ios-sim", "build", "release")) + ":" + process.env["PATH"];
+            process.env["PATH"] = path.resolve(__dirname, path.join("..", "node_modules", "ios-sim", "build", "release")) + ":" + process.env["PATH"];
             child_process.exec("which ios-sim", function (err: Error, stdout: Buffer, stderr: Buffer): void {
                 if (err) {
                     console.error(resources.getString("IOSSimNotFound"));
