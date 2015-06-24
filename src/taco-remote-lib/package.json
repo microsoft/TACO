@@ -34,5 +34,6 @@
 		"lib": ".",
 		"doc": ".",
 		"test": "test"
-	}
+	},
+	"readmeFilename": "README.md"
 }
