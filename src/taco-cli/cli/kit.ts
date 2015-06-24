@@ -286,11 +286,10 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
         logger.logLine();
         var kitId: string = commandData.options["kit"];
-          
+                
         // If the user requested for info regarding a particular kit, print all the information regarding the kit  
         // Else print minimal information about all the kits
-
-        return kitId? Kit.printKit(kitId): Kit.printAllKits();
+        return kitId ? Kit.printKit(kitId) : Kit.printAllKits();
     }
 }
 
