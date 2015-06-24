@@ -75,6 +75,28 @@
                     "version": "0.3.10"
                 }
             }
+        },
+		"5.1.1-Kit": {
+            "cordova-cli": "5.1.1",
+            "platforms": {
+                "android": {
+                    "version": "4.2.3"
+                },
+                "ios": {
+                    "version": "4.2.2"
+                },
+                "windows": {
+                    "version": "4.0.0"
+                },
+                "wp8": {
+                    "version": "4.0.2"
+                }
+            },
+            "plugins": {
+                "org.apache.cordova.camera": {
+                    "version": "0.3.10"
+                }
+            }
         }
     },
     "templates": {

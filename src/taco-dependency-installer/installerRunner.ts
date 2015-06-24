@@ -88,6 +88,10 @@ class InstallerRunner {
             throw new Error(resources.getString("InstallConfigMalformed"));
         }
 
+        if (!parsedData.dependencies) {
+            throw new Error(resources.getString("InstallConfigMalformed"));
+        }
+
         var installPaths: { path: string; displayName: string; }[] = [];
 
         this.missingDependencies = [];

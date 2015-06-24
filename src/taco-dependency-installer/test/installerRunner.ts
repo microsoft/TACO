@@ -88,6 +88,12 @@ describe("DependencyInstaller", function (): void {
     });
 
     describe("parseInstallConfig()", function (): void {
+        beforeEach(function (): void {
+            if (fs.existsSync(installConfigFile)) {
+                fs.unlinkSync(installConfigFile);
+            }
+        });
+
         it("should parse without errors a valid installConfig file", function (): void {
             var missingDependencies: IDependency[] = [
                 {
@@ -116,13 +122,122 @@ describe("DependencyInstaller", function (): void {
         });
 
         it("should report the correct error when installConfig does not exist", function (): void {
-            if (fs.existsSync(installConfigFile)) {
-                fs.unlinkSync(installConfigFile);
-            }
             try {
                 (<any>installerRunner).parseInstallConfig();
             } catch (err) {
                 err.message.should.be.exactly("InstallConfigNotFound");
+            }
+        });
+
+        it("should report the correct error when installConfig is malformed", function (): void {
+            wrench.mkdirSyncRecursive(path.dirname(installConfigFile), 511); // 511 decimal is 0777 octal
+
+            // Case where the file does not contain a valid JSON object
+            fs.writeFileSync(installConfigFile, "{\"dependencies\":");
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("InstallConfigMalformed");
+            }
+
+            // Case where the file does not have a dependencies node
+            fs.writeFileSync(installConfigFile, "{\"unknownObject\":\"unknownValue\"}");
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("InstallConfigMalformed");
+            }
+        });
+
+        it("should report the correct error when installConfig contains an unknown ID", function (): void {
+            var missingDependencies: IDependency[] = [
+                {
+                    id: "dependency1",
+                    version: "1.0",
+                    displayName: "test_value1",
+                    installDestination: "test_value1"
+                },
+                {
+                    id: "unknownDependency",
+                    version: "1.0",
+                    displayName: "test_value5",
+                    installDestination: "test_value5"
+                },
+                {
+                    id: "dependency7",
+                    version: "1.0",
+                    displayName: "test_value7",
+                    installDestination: "test_value7",
+                    licenseUrl: "test_value7"
+                }
+            ];
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("UnknownDependency");
+            }
+        });
+
+        it("should report the correct error when installConfig contains an unknown version ID", function (): void {
+            var missingDependencies: IDependency[] = [
+                {
+                    id: "dependency1",
+                    version: "1.0",
+                    displayName: "test_value1",
+                    installDestination: "test_value1"
+                },
+                {
+                    id: "dependency5",
+                    version: "unknown",
+                    displayName: "test_value5",
+                    installDestination: "test_value5"
+                },
+                {
+                    id: "dependency7",
+                    version: "1.0",
+                    displayName: "test_value7",
+                    installDestination: "test_value7",
+                    licenseUrl: "test_value7"
+                }
+            ];
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("UnknownVersion");
+            }
+        });
+
+        it("should report the correct error when installConfig contains an invalid install path", function (): void {
+            var missingDependencies: IDependency[] = [
+                {
+                    id: "dependency1",
+                    version: "1.0",
+                    displayName: "test_value1",
+                    installDestination: "test_value1"
+                },
+                {
+                    id: "dependency5",
+                    version: "1.0",
+                    displayName: "test_value5",
+                    installDestination: "\\\\//::::****>>><<<<\"\""
+                },
+                {
+                    id: "dependency7",
+                    version: "1.0",
+                    displayName: "test_value7",
+                    installDestination: "test_value7",
+                    licenseUrl: "test_value7"
+                }
+            ];
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("UnknownVersion");
             }
         });
     });
