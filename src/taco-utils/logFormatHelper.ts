@@ -122,8 +122,13 @@ module TacoUtility {
             return msg.replace(new RegExp(LogFormatHelper.TagRegex, "gm"), "").length;
         }
 
+        public static isFormattedString(msg: string): boolean {
+            var regex = new RegExp(LogFormatHelper.TagRegex, "gm");
+            return regex.test(msg);
+        }
+
         /**
-         * Helper method to replase <br/> tags to end of line char 
+         * Helper method to replace <br/> tags to end of line char 
          * @param {string} input string
          */
         private static convertBrTags(msg: string): string {
