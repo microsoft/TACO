@@ -50,9 +50,10 @@ describe("taco create", function (): void {
     // The following numbers are for: "plugins", "hooks", "platforms" and ".cordova" folders, and "hooks\readme.md" and ".cordova\cordova.config" files. If our templates ever start to include
     // these files, then to avoid double counting them, we must reduce the counts in this dictionary.
     var cordovaFileCounts: { [kitId: string]: number } = {
-        "4.0.0-Kit": 6, // 2 file and 4 folders
-        "4.2.0-Kit": 6, // 2 files and 4 folders
-        "5.0.0-Kit": 4 // 1 file and 3 folders (no ".cordova\" and ".cordova\cordova.config")
+        "4.2.0-Kit": 6, // 2 file and 4 folders
+        "4.3.0-Kit": 6, // 2 file and 4 folders
+        "4.3.1-Kit": 4, // 1 file and 3 folders (no ".cordova\" and ".cordova\cordova.config") 
+        "5.0.0-Kit": 4 // 1 file and 3 folders 
     };
 
     // Persistent TemplateManager to count template entries
@@ -76,12 +77,12 @@ describe("taco create", function (): void {
     var successPrefix: string = "success";
     var failurePrefix: string = "failure";
     var successScenarios: IScenarioList = {
-        1: util.format("%s --kit 4.0.0-Kit --template typescript %s %s {}", getProjectPath(successPrefix, 1), testAppId, testAppName),
+        1: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(successPrefix, 1), testAppId, testAppName),
         2: util.format("%s --kit 5.0.0-Kit --template blank %s %s", getProjectPath(successPrefix, 2), testAppId, testAppName),
         3: util.format("%s --kit 4.2.0-Kit --template typescript %s", getProjectPath(successPrefix, 3), testAppId),
         4: util.format("%s --kit 4.2.0-Kit --template blank", getProjectPath(successPrefix, 4)),
         5: util.format("%s --kit 5.0.0-Kit --template", getProjectPath(successPrefix, 5)),
-        6: util.format("%s --kit 4.0.0-Kit", getProjectPath(successPrefix, 6)),
+        6: util.format("%s --kit 4.3.1-Kit", getProjectPath(successPrefix, 6)),
         7: util.format("%s --template blank", getProjectPath(successPrefix, 7)),
         8: util.format("%s --template", getProjectPath(successPrefix, 8)),
         9: util.format("%s --copy-from %s", getProjectPath(successPrefix, 9), copyFromPath),
@@ -93,11 +94,11 @@ describe("taco create", function (): void {
     var failureScenarios: IScenarioList = {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
         2: util.format("%s --template unknown", getProjectPath(failurePrefix, 2)),
-        3: util.format("%s --kit 2.2.0-Kit --template typescript", getProjectPath(failurePrefix, 3)),
+        3: util.format("%s --kit 4.3.0-Kit --template typescript", getProjectPath(failurePrefix, 3)),
         4: util.format("%s --kit 5.0.0-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 4), copyFromPath),
         5: util.format("%s --kit 5.0.0-Kit --cli 4.2.0", getProjectPath(failurePrefix, 5)),
         6: util.format("%s --cli 4.2.0 --template typescript", getProjectPath(failurePrefix, 6)),
-        7: util.format("%s --kit 4.0.0-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 7), testAppId, testAppName),
+        7: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 7), testAppId, testAppName),
         8: util.format("%s --kit 5.0.0-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 8)),
         9: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 9)),
         10: util.format("%s 42", getProjectPath(failurePrefix, 10)),
@@ -219,8 +220,8 @@ describe("taco create", function (): void {
         it("Success scenario 1 [path, id, name, cordovaConfig, kit, template]", function (done: MochaDone): void {
             var scenario: number = 1;
 
-            // Should use kit 4.0.0-Kit and template typescript
-            runScenario(scenario, "4.0.0-Kit", "typescript", "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
+            // Should use kit 4.3.1-Kit and template typescript
+            runScenario(scenario, "4.3.1-Kit", "typescript", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
@@ -254,8 +255,8 @@ describe("taco create", function (): void {
         it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
             var scenario: number = 6;
 
-            // Should use kit 4.0.0-Kit and template blank
-            runScenario(scenario, "4.0.0-Kit", "blank", "{\"kit\":\"4.0.0-Kit\"}").then(done, done);
+            // Should use kit 4.3.1-Kit and template blank
+            runScenario(scenario, "4.3.1-Kit", "blank", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 7 [path, template]", function (done: MochaDone): void {

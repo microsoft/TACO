@@ -6,6 +6,7 @@ enum TacoErrorCode {
     CordovaCmdNotFound = 1001,
     CordovaCommandFailed,
     CordovaCommandFailedWithError,
+    NotInCordovaProject,
     CommandBuildInvalidPlatformLocation,
     CommandBuildTacoSettingsNotFound,
     CommandNotBothDeviceEmulate,
@@ -41,6 +42,7 @@ enum TacoErrorCode {
     ErrorCertificateSave,
     ErrorCertificateSaveToPath,
     ErrorCertificateSaveWithErrorCode,
+    ErrorKitMetadataFileMalformed,
     ErrorTacoJsonMissingOrMalformed,
     ErrorPatchCreation,
     ErrorNoPlatformsFound,
@@ -60,6 +62,7 @@ enum TacoErrorCode {
     RemoteBuildStatusPollFailed,
     RemoteBuildUnsuccessful,
     UnsupportedPlatform,
+    UnimplementedAbstractMethod
 }
 
 export = TacoErrorCode;

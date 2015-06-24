@@ -44,7 +44,88 @@
             { "name": "PLATFORM", "description": "[CommandSetupOptionsPlatform]" }
         ]
     },
-
+    "platform": {
+        "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
+        "modulePath": "./platform",
+        "description": "<helptitle>[CommandPlatformDescription]</helptitle>",
+        "args": [
+            { "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]" },
+            {
+                "name": "add <PLAT-SPEC>",
+                "description": "[CommandPlatformAddSubcommandDescription]",
+                "options": [
+                    { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+                    { "name": "--save", "description": "[CommandPlatformSaveAddDescription]" },
+                    { "name": "--link", "description": "[CommandPlatformLinkDescription]" }
+                ]
+            },
+            {
+                "name": "remove <PLATFORM>",
+                "description": "[CommandPlatformRemoveSubcommandDescription]",
+                "options": [
+                    { "name": "--save", "description": "[CommandPlatformSaveRemoveDescription]" }
+                ]
+            },
+            { "name": "list", "description": "[CommandPlatformListSubcommandDescription]" },
+            {
+                "name": "update <PLAT-SPEC>",
+                "description": "[CommandPlatformUpdateSubcommandDescription]",
+                "options": [
+                    { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+                    { "name": "--save", "description": "[CommandPlatformSaveUpdateDescription]" }
+                ]
+            },
+            { "name": "check", "description": "[CommandPlatformCheckSubcommandDescription]" }
+        ],
+        "syntax": [
+            { "name": "plat-spec", "description": "[CommandPlatformOptPlatSpecDescription]" },
+            { "name": "platform-ver", "description": "[CommandPlatformOptPlatVersionDescription]" },
+            { "name": "platform", "description": "[CommandPlatformOptPlatformDescription]" },
+            { "name": "path", "description": "[CommandPlatformOptPathDescription]" },
+            { "name": "git-url", "description": "[CommandPlatformOptGitUrlDescription]" },
+            { "name": "url", "description": "[CommandPlatformOptUrlDescription]" },
+            { "name": "version", "description": "[CommandPlatformOptVersionDescription]" },
+            { "name": "branch", "description": "[CommandPlatformOptBranchDescription]" }
+        ],
+        "aliases": [
+            { "alias": "platforms", "command": "platform" },
+            { "alias": "rm", "command": "remove" },
+            { "alias": "ls", "command": "list" }
+        ]
+    },
+    "plugin": {
+        "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
+        "modulePath": "./plugin",
+        "description": "<helptitle>[CommandPluginDescription]</helptitle>",
+        "args": [
+            { "name": "COMMAND", "description": "[CommandPluginSubcommandDescription]" },
+            {
+                "name": "add <PLAT-SPEC>",
+                "description": "[CommandPluginAddSubcommandDescription]",
+                "options": [
+                    { "name": "[--searchpath <DIRECTORY>]", "description": "[CommandPluginSearchPathDescription]" },
+                    { "name": "[--noregistry]", "description": "[CommandPluginNoRegistryDescription]" },
+                    { "name": "[--link]", "description": "[CommandPluginLinkDescription]" },
+                    { "name": "[--save]", "description": "[CommandPluginSaveAddDescription]" },
+                    { "name": "[--shrinkwrap]", "description": "[CommandPluginShrinkwrapDescription]" }
+                ]
+            },
+            {
+                "name": "remove <PLUGINID> [...]",
+                "description": "[CommandPluginRemoveSubcommandDescription]",
+                "options": [
+                    { "name": "[--save]", "description": "[CommandPluginSaveRemoveDescription]" }
+                ]
+            },
+            { "name": "list", "description": "[CommandPluginListSubcommandDescription]" },
+            { "name": "search", "description": "[CommandPluginSearchSubcommandDescription]" }
+        ],
+        "aliases": [
+            { "alias": "plugins", "command": "plugin" },
+            { "alias": "rm", "command": "remove" },
+            { "alias": "ls", "command": "list" }
+        ]
+    },
     "build": {
         "synopsis": "<synopsis>[PLATFORM] [--remote | --local] [--clean] [--debug | --release] [--device | --emulator | --target=TARGET]</synopsis>",
         "modulePath": "./build",
