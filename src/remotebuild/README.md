@@ -21,14 +21,14 @@ You must also have the following:
 ## Download and install the remote build agent
 From the Terminal app on your Mac, type:
 ```
-sudo npm install -g remotebuild --user=$USER
+sudo npm install -g remotebuild
 ```
 where $USER will be replaced by your user name on the Mac. When you run the command, you will be prompted to enter your password as well.
 The global installation (-g) switch is recommended but not required.
 
 ## Start remotebuild in secure mode (default)
 ```
-remotebuild [--start]
+remotebuild [start]
 ```
 
 ## Start remotebuild in non-secure mode (using simple HTTP based connections)
@@ -59,7 +59,7 @@ remotebuild --help
 
 1. From the second Terminal app window on your Mac, type:
 ```
-remotebuild test
+remotebuild test [options as passed to first instance of remotebuild]
 ```
 This command initiates a test build. The output from the command should show the build number and other information about the build, such as its progress.
 
