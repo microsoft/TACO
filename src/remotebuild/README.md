@@ -1,9 +1,9 @@
 ﻿
 # remotebuild
 
-Secure build server to remotely build, run and debug apps. It sets up a webserver, and handles secure communication/authentication from the client. It loads other modules such as *taco-remote* agent to provide actual functionality.
+Secure build server to remotely build, run and debug apps. It sets up a webserver, and handles secure communication/authentication from the client. It loads other modules such as *taco-remote* to provide actual functionality.
 
-***remotebuild*** is an extensible server implementation which can support different project types (HTML/JS, C++ etc) to build mobile apps. By default, it supports *taco-remote* agent which allows to remotely build, run, and debug iOS apps created using Visual Studio Tools for Apache Cordova.
+***remotebuild*** is an extensible server implementation which can support different project types to build mobile apps. By default, it supports *taco-remote* agent which allows to remotely build, run, and debug iOS apps created using Visual Studio Tools for Apache Cordova.
 
 ## Requirements for iOS
 To build and run iOS apps on the iOS Simulator or on an iOS device using Visual Studio, you must install and configure the remote build, on a Mac computer that meets the following requirements -
