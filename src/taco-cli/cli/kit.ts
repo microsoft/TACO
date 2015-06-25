@@ -274,45 +274,38 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     /**
-     * Save the metadata Json file
-     * plugin/platform override info regardng a single kit
+     * Validates the file path passed. Throw appropriate errors if path passed is invalid.
      */
-    private static validateJsonFilePath(jsonFilePath: string): string {
+    private static validateJsonFilePath(jsonFilePath: string): void {
         // Make sure the specified path is valid
-        if (!utils.isPathValid(jsonFilePath)) {
+        if (!jsonFilePath || !utils.isPathValid(jsonFilePath)) {
             throw errorHelper.get(TacoErrorCodes.ErrorInvalidPath, jsonFilePath);
         }
 
-        if (fs.existsSync(jsonFilePath)) {
-            var stat = fs.statSync(jsonFilePath);
-            if (stat.isDirectory()) {
-             jsonFilePath = path.join(jsonFilePath, Kit.DefaultMetadataFileName);
-            } else {
-                // Make sure the file specified is not already present
-                throw errorHelper.get(TacoErrorCodes.ErrorFileAlreadyExists, jsonFilePath);
-            }
-        } else {
-            utils.createDirectoryIfNecessary(jsonFilePath);
-            jsonFilePath = path.join(jsonFilePath, Kit.DefaultMetadataFileName);
+        if (path.extname(jsonFilePath).toLowerCase() !== ".json") {
+            throw errorHelper.get(TacoErrorCodes.ErrorInvalidJsonFilePath, jsonFilePath);
         }
 
-        return jsonFilePath;
+        if (fs.existsSync(jsonFilePath)) {
+            throw errorHelper.get(TacoErrorCodes.ErrorFileAlreadyExists, jsonFilePath);
+        }
+
+        utils.createDirectoryIfNecessary(path.dirname(jsonFilePath));
     }
 
     /**
-     * Save the metadata Json jsonFilePath
-     * plugin/platform override info regardng a single kit
+     * Save the metadata Json to path provided as argument to "--json" option
      */
     private static writeMetadataJsonFile(commandData: commands.ICommandData): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var jsonFilePath: string = commandData.options["json"];
 
-        if (jsonFilePath) {
-            jsonFilePath = Kit.validateJsonFilePath(jsonFilePath);
-        } else {
+        if (!jsonFilePath) {
             jsonFilePath = path.join(utils.tacoHome, Kit.DefaultMetadataFileName);
         }
 
+        Kit.validateJsonFilePath(jsonFilePath);
+        
         return kitHelper.getKitMetadata()
             .then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
             return projectHelper.createJsonFileWithContents(jsonFilePath, meta.kits); 

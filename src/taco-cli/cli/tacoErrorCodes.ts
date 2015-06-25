@@ -42,6 +42,7 @@ enum TacoErrorCode {
     ErrorCertificateSaveWithErrorCode,
     ErrorFileAlreadyExists,
     ErrorIncompatibleOptions,
+    ErrorInvalidJsonFilePath,
     ErrorInvalidPath,
     ErrorKitMetadataFileMalformed,
     ErrorTacoJsonMissingOrMalformed,
