@@ -131,7 +131,7 @@ module TacoUtility {
                 if (subcommand) {
                     return subcommand.run(commandData);
                 } else {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadArguments, this.name, commandData.original.toString()));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, commandData.original.toString()));
                 }
             }
 

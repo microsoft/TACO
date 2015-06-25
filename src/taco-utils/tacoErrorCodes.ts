@@ -20,7 +20,7 @@ module TacoUtility {
 
         // Misc Errors: 700+
         AbstractMethod = 701,
-        CommandBadArguments = 702,
+        CommandBadSubcommand = 702,
         TacoUtilsExceptionListingfile = 703,
         TacoUtilsExceptionMissingcommand = 704,
     }

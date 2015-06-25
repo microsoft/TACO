@@ -33,7 +33,7 @@
         "description": "<helptitle>[CommandKitDescription]</helptitle>",
         "args": [
             { "name": "COMMAND", "description": "[CommandKitSubcommandDescription]" },
-            { "name": "--json", "description": "[CommandKitJsonOptionDescription]" }
+            { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" }
         ]
     },
     "setup": {

@@ -27,6 +27,7 @@ import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
 import telemetry = tacoUtility.Telemetry;
+import utilErrorCodes = tacoUtility.TacoErrorCode;
 
 interface IParsedArgs {
     args: string[];
@@ -48,6 +49,11 @@ class Taco {
             // Pretty print taco Errors
             if (reason && reason.isTacoError) {
                 tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
+                
+                // If failure was due to unknown subcommand, print help for the command
+                if (reason.errorCode === utilErrorCodes.CommandBadSubcommand) {
+                    Taco.printHelpForCommand(process.argv[2]);
+                }
             } else {
                 throw reason;
             }
@@ -104,6 +110,18 @@ class Taco {
             args: command ? commandArgs : args
         };
         return parsedArgs;
+    }
+
+    /*
+     * Prints help for the command passed
+     */
+    private static printHelpForCommand(commandName: string): Q.Promise<any> {
+        var args: string[] = [commandName];
+
+        var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
+        var command: commands.ICommand = commandsFactory.getTask("help", args, __dirname);
+
+        return command.run({ options: {}, original: args, remain: args });
     }
 }
 
