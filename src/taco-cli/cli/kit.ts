@@ -88,7 +88,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static getCurrentKitInfo(): Q.Promise<string> {
         var deferred = Q.defer<string>();
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
-            deferred.resolve(projectInfo.tacoKitId ? projectInfo.tacoKitId : "");
+            deferred.resolve(projectInfo.tacoKitId || "");
             return deferred.promise;
         });
     }
@@ -117,7 +117,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
         }
 
-        return kitInfo.description ? kitInfo.description : kitDefaultDescription;
+        return kitInfo.description || kitDefaultDescription;
     }
 
     /**
