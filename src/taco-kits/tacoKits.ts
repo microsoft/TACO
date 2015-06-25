@@ -34,7 +34,7 @@ module TacoKits {
         name?: string;
         version?: string;
         src?: string;
-        platforms?: string;
+        "supported-platforms"?: string;
     }
 
     export interface IPlatformOverrideInfo {

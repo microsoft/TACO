@@ -63,7 +63,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                         return self.configXmlHasVersionOverride(platformName, projectInfo)
                             .then(function (versionOverridden: boolean): void {                           
                             // Use kit overrides only if platform has not already been overridden in config.xml
-                            if (!versionOverridden && platformOverrides[platformName]) {
+                            if (!versionOverridden && platformOverrides && platformOverrides[platformName]) {
                                 platformInfo.spec = platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
                                 platformInfoToPersist.push(platformInfo);
                             }
