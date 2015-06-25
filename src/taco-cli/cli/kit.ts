@@ -14,6 +14,7 @@
 /// <reference path="../../typings/tacoKits.d.ts" />
 "use strict";
 
+import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
@@ -30,6 +31,7 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
+import utils = tacoUtility.UtilHelper;
 
 /**
  * kit
@@ -39,10 +41,11 @@ import LoggerHelper = tacoUtility.LoggerHelper;
 class Kit extends commands.TacoCommandBase implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.CommandData = {
         kit: String,
-        json: Boolean,
+        json: String,
         cli: String
     };
     private static ShortHands: Nopt.ShortFlags = {};
+    private static DefaultMetadataFileName: string = "KitMetadata.json";
 
     private static IndentWidth: number = 3; // indent string
     private static MaxTextWidth: number = 40;
@@ -72,11 +75,15 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameter combinations
         if (parsedOptions.options["json"] && parsedOptions.options["cli"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandKitNotBothJsonAndCli);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--json", "--cli");
         }
         
         if (parsedOptions.options["cli"] && parsedOptions.options["kit"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandKitNotBothKitAndCli);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--cli", "--kit");
+        }
+
+        if (parsedOptions.options["kit"] && parsedOptions.options["json"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--kit", "--json");
         }
 
         return parsedOptions;
@@ -266,6 +273,56 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         });
     }
 
+    /**
+     * Save the metadata Json file
+     * plugin/platform override info regardng a single kit
+     */
+    private static validateJsonFilePath(jsonFilePath: string): string {
+        // Make sure the specified path is valid
+        if (!utils.isPathValid(jsonFilePath)) {
+            throw errorHelper.get(TacoErrorCodes.ErrorInvalidPath, jsonFilePath);
+        }
+
+        if (fs.existsSync(jsonFilePath)) {
+            var stat = fs.statSync(jsonFilePath);
+            if (stat.isDirectory()) {
+             jsonFilePath = path.join(jsonFilePath, Kit.DefaultMetadataFileName);
+            } else {
+                // Make sure the file specified is not already present
+                throw errorHelper.get(TacoErrorCodes.ErrorFileAlreadyExists, jsonFilePath);
+            }
+        } else {
+            utils.createDirectoryIfNecessary(jsonFilePath);
+            jsonFilePath = path.join(jsonFilePath, Kit.DefaultMetadataFileName);
+        }
+
+        return jsonFilePath;
+    }
+
+    /**
+     * Save the metadata Json jsonFilePath
+     * plugin/platform override info regardng a single kit
+     */
+    private static writeMetadataJsonFile(commandData: commands.ICommandData): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var jsonFilePath: string = commandData.options["json"];
+
+        if (jsonFilePath) {
+            jsonFilePath = Kit.validateJsonFilePath(jsonFilePath);
+        } else {
+            jsonFilePath = path.join(utils.tacoHome, Kit.DefaultMetadataFileName);
+        }
+
+        return kitHelper.getKitMetadata()
+            .then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
+            return projectHelper.createJsonFileWithContents(jsonFilePath, meta.kits); 
+        })
+            .then(function (): Q.Promise<any> {
+            logger.log(resources.getString("CommandKitListJsonFileStatus", path.basename(jsonFilePath), path.dirname(jsonFilePath)));
+            return Q.resolve({});
+        });
+    }
+
     private static getLongestPlatformPluginLength(kitInfo: tacoKits.IKitInfo): number {
         var longest: number = 0;
         if (kitInfo.platforms) {
@@ -286,10 +343,15 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
         logger.logLine();
         var kitId: string = commandData.options["kit"];
-                
-        // If the user requested for info regarding a particular kit, print all the information regarding the kit  
-        // Else print minimal information about all the kits
-        return kitId ? Kit.printKit(kitId) : Kit.printAllKits();
+        var jsonPath: any = commandData.options["json"];
+
+        if (typeof jsonPath !== "undefined") {
+            return Kit.writeMetadataJsonFile(commandData);
+        } else {
+            // If the user requested for info regarding a particular kit, print all the information regarding the kit  
+            // Else print minimal information about all the kits
+            return kitId ? Kit.printKit(kitId) : Kit.printAllKits();
+        }       
     }
 }
 

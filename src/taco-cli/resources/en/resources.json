@@ -65,10 +65,6 @@
 
     "CommandKitDescription": "Perform kit related operations",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
-    "CommandKitNotBothJsonAndCli": "Error: --json option cannot be used in conjunction with --cli option.",
-    "_CommandKitNotBothJsonAndCli.comment": "Error reported when both --json and --cli are specified",
-    "CommandKitNotBothKitAndCli": "Error: --kit option cannot be used in conjunction with --cli option.",
-    "_CommandKitNotBothKitAndCli.comment": "Error reported when both --kit and --cli are specified",
     "CommandKitJsonOptionDescription": "Used with the 'list' subcommand for 'taco kit'. Saves the list of known kits to a json file.",
     "_CommandKitJsonOptionDescription.comment": "Description for --json argument to taco kit list",
      "CommandKitSubcommandDescription": "Perform kit related operations (like list)",
@@ -91,6 +87,8 @@
     "_CommandKitListPlatformOverridesForKit.comment": "Header for the list of platform overrides for a kit displayed on executing the 'taco kit list' command",
      "CommandKitListPluginOverridesForKit": "<bold>Plugins: </bold>",
     "_CommandKitListPluginOverridesForKit.comment": "Header for the list of plugin overrides for a kit displayed on executing the 'taco kit list' command",
+     "CommandKitListJsonFileStatus": "<success>Success!</success> Kit metadata file <highlight>{0}</highlight> is saved at <highlight>{1}</highlight>",
+    "_CommandKitListJsonFileStatus.comment": "Status indicating that the json file {0} has been successfully written to {1}",
 
     "CommandSetupDescription": "Configure remote builds",
     "_CommandSetupDescription.comment": "Description for 'taco setup remote'",
@@ -355,7 +353,12 @@
     "_FailedToDeleteRemoteZip.comment": "Message printed if deleting the packed build artifacts fails after already unpacking them. {0} is the location of the packed archive.",
     "ErrorKitMetadataFileMalformed": "Error: The kit metadata file used by TACO is corrupt. Please fix this by re-installing taco-cli from npm.",
     "_ErrorKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
-
+     "ErrorInvalidPath": "Error: The specified path is invalid: {0}",
+    "_ErrorInvalidPath.comment": "Error reported when the specified path passed to 'taco kit list --json' is invalid .",
+     "ErrorFileAlreadyExists": "Error: The file specified already exists: {0}",
+    "ErrorFileAlreadyExists.comment": "Error reported when the specified path passed to 'taco kit list --json' already exists.",
+    "ErrorIncompatibleOptions": "Error: {0} option cannot be used in conjunction with {1} option.",
+    "_ErrorIncompatibleOptions.comment": "Error reported when two incompatibible options {0} and {1} are specified on command line.",
 
     "IncrementalBuild": "------ Incremental Build: {0}",
     "_IncrementalBuild.comment": "Message printed when we start a remote build. {0} is either true or false, depending on whether the build is incremental",

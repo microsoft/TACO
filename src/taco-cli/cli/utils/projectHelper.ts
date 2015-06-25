@@ -38,10 +38,10 @@ class ProjectHelper {
         if (isKitProject) {
             if (!versionValue) {
                 return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
-                    return ProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { kit: kitId });
+                    return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
                 });
             } else {
-                return ProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { kit: versionValue });
+                return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: versionValue });
             }
         } else {
             if (!versionValue) {
@@ -49,7 +49,7 @@ class ProjectHelper {
                 return deferred.promise;
             }
 
-            return ProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { cli: versionValue });
+            return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { cli: versionValue });
         }
     }
 
@@ -147,9 +147,9 @@ class ProjectHelper {
     }
 
     /**
-     *  Private helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
+     *  public helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
      */
-    private static createTacoJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
+    public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
             if (err) {
