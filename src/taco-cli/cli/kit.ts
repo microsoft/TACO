@@ -88,15 +88,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static getCurrentKitInfo(): Q.Promise<string> {
         var deferred = Q.defer<string>();
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
-            if (!projectInfo.isTacoProject) {
-               deferred.resolve("");
-            }
-
-            if (projectInfo.tacoKitId) {
-                logger.log(resources.getString("CommandKitListCurrentKit", projectInfo.tacoKitId));
-                deferred.resolve(projectInfo.tacoKitId);
-            }
-
+            deferred.resolve(projectInfo.tacoKitId ? projectInfo.tacoKitId : "");
             return deferred.promise;
         });
     }

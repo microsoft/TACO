@@ -202,6 +202,8 @@
     "_CommandPluginStatusRemoved.comment": "Status message after successfully removing plugin {0}",
     "CommandPluginStatusAdding": "Adding plugin <highlight>{0}</highlight> to Cordova project...<br/>",
     "_CommandPluginStatusAdding.comment": "Status message shown while adding a platform {0} of version {1} from NPM",
+    "CommandPluginTestedPlatforms": "The plugin <highlight>{0}</highlight> has been validated on platform(s) - {1}.<br/>",
+    "_CommandPluginTestedPlatforms.comment": "Status message regarding the tested platforms while adding a plugin {0}",
     "CommandPluginStatusRemoving": "Removing plugin <highlight>{0}</highlight> from Cordova project...<br/>",
     "_CommandPluginStatusRemoving.comment": "Status message shown while removing a plugin {0} from the project",
     

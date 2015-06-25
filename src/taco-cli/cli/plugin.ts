@@ -46,7 +46,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         var self = this;
         var pluginInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
 
-        var subCommand = this.cordovaCommandParams.subCommand.toLowerCase();
+        var subCommand = this.cordovaCommandParams.subCommand;
         if (subCommand !== "add" && subCommand !== "remove" && subCommand !== "rm") {
             return Q({});
         }
@@ -64,16 +64,20 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                             .then(function (versionOverridden: boolean): void {
                             var target: string = pluginName;
                             // Use kit overrides only if plugin has not already been overridden in config.xml
-                            if (!versionOverridden && pluginOverrides[pluginName]) {
-                                if (pluginOverrides[pluginName].version) {
-                                    pluginInfo.spec = pluginOverrides[pluginName].version;
+                            if (!versionOverridden && pluginOverrides && pluginOverrides[pluginName]) {
+                                var pluginOverrideData: TacoKits.IPluginOverrideInfo = pluginOverrides[pluginName];
+                                if (pluginOverrideData.version) {
+                                    pluginInfo.spec = pluginOverrideData.version;
                                     target = pluginName + "@" + pluginInfo.spec;
-                                } else if (pluginOverrides[pluginName].src) {
-                                    target = pluginInfo.spec = pluginOverrides[pluginName].src;
+                                } else if (pluginOverrideData.src) {
+                                    target = pluginInfo.spec = pluginOverrideData.src;
                                 }
 
                                 // Push the target to list of values to be persisted in config.xml
                                 pluginInfoToPersist.push(pluginInfo);
+                                if (pluginOverrideData["supported-platforms"]) {
+                                    self.printSupportedPlatformsMessage(target, pluginOverrideData["supported-platforms"], self.cordovaCommandParams.subCommand);
+                                }
                             }
 
                             targets.push(target);
@@ -111,6 +115,15 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         return cordovaHelper.editConfigXml(specs, projectInfo, add, function (specs: Cordova.ICordovaPlatformPluginInfo[], parser: Cordova.cordova_lib.configparser, add: boolean): void {
             cordovaHelper.editPluginVersionSpecs(specs, parser, add);
         });
+    }
+
+    /**
+     * Prints the supported platforms information regarding a plugin
+     */
+    public printSupportedPlatformsMessage(pluginId: string, supportedPlatforms: string, operation: string): void {
+        if (operation === "add") {
+            logger.log(resources.getString("CommandPluginTestedPlatforms", pluginId, supportedPlatforms));
+        }
     }
 
     /**
