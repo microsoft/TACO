@@ -14,11 +14,11 @@ import assert = require ("assert");
 import os = require ("os");
 import util = require ("util");
 
-import jsonPrinter = require ("./jsonPrinter");
+import jsonSerializer = require ("./jsonSerializer");
 import logFormathelper = require ("./logFormatHelper");
 import logger = require ("./logger");
 
-import JsonPrinter = jsonPrinter.JsonPrinter;
+import JsonSerializer = jsonSerializer.JsonSerializer;
 import Logger = logger.Logger;
 import LogFormatHelper = logFormathelper.LogFormatHelper;
 
@@ -122,8 +122,8 @@ module TacoUtility {
          * @param {indent} constant indentation to use on the left
          */
         public static printJson(obj: any, indent?: number): void {
-            var jsonPrinter: JsonPrinter = new JsonPrinter(LoggerHelper.DefaultIndent, LoggerHelper.MaxRight, indent);
-            Logger.log(jsonPrinter.stringify(obj));
+            var jsonSerializer: JsonSerializer = new JsonSerializer(LoggerHelper.DefaultIndent, LoggerHelper.MaxRight, indent);
+            Logger.log(jsonSerializer.serlialize(obj));
         }
 
         private static wordWrapString(str: string, indent: number, maxWidth: number): string {

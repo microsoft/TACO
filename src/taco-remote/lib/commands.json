@@ -14,10 +14,14 @@
     "examples": [
       {
         "example": {
-          "taco-remote": {
-            "maxBuildsToKeep": 0,
-            "webDebugProxyDevicePort": 4321,
-            "deleteBuildsOnShutdown": true
+          "port": 3002,
+          "modules": {
+            "taco-remote": {
+              "mountPath": "cordova",
+              "maxBuildsToKeep": 0,
+              "webDebugProxyDevicePort": 4321,
+              "deleteBuildsOnShutdown": true
+            }
           }
         },
         "description": "[TacoRemoteHelpExample]"
@@ -27,4 +31,4 @@
       "[TacoRemoteHelpNotes]"
     ]
   }
-  }
+}

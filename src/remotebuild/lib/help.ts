@@ -15,7 +15,6 @@
 import path = require ("path");
 import Q = require ("q");
 
-import Commands = require ("./commands");
 import RemoteBuildConf = require ("./remoteBuildConf");
 import resources = require ("../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
@@ -44,9 +43,10 @@ class Help extends HelpCommandBase {
 
         // for remotebuild help, we always want to show extra comments in the end suggesting users to use 'remotebuild help taco-remote'
         return Q({})
-            .then(function (): void {
+            .then(function (): Q.Promise<void> {
+                var commands: any = require("./commands.json");
                 var topic: string = data.remain[0];
-                if (!topic || Commands.Tasks[topic]) {
+                if (!topic || commands[topic]) {
                     return baseRun(data);
                 }
 
@@ -57,12 +57,14 @@ class Help extends HelpCommandBase {
                         mod.printHelp(self.remotebuildConf, moduleConfig);
                     } catch (e) {
                         Logger.logError(resources.getString("UnableToFindModule", topic));
-                        baseRun(Help.DefaultCommandData);
+                        return baseRun(Help.DefaultCommandData);
                     }
                 } else {
                     Logger.logWarning(resources.getString("UnknownCommand", topic));
-                    baseRun(Help.DefaultCommandData);
+                    return baseRun(Help.DefaultCommandData);
                 }
+
+                return Q.resolve<void>(null);
             })
             .then(function (): void {
                 if (self.remotebuildConf) {

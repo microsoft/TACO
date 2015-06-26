@@ -75,11 +75,10 @@ module TacoUtility {
         }
 
         /**
-         * prints out Microsoft header
+         * prints out header while displaying help for a command
          */
         private printHeader(): void {
             Logger.logLine();
-            LoggerHelper.logSeparatorLine();
         }
 
         /**

@@ -16,18 +16,18 @@ import LogFormatHelper = logFormathelper.LogFormatHelper;
 
 module TacoUtility {
     /**
-     * This class converts a given json into a printable indented string how many bytes pass through it in a pipe stream.
+     * This class converts a given json into a printable well-indented string.
      * Example usage:
-     *    var jsonPrinter: JsonPrinter = new JsonPrinter(3,80, 10);
-     *    var json_str:string = jsonPrinter.stringify(obj));
+     *    var jsonSerializer: JsonSerializer = new JsonSerializer(3, 80, 10);
+     *    var json_str:string = jsonSerializer.serialize(obj));
      */
-    export class JsonPrinter {
+    export class JsonSerializer {
         private levelIndent: string = null;
         private indentOffset: string = null;
         private maxRight: number = 0;
 
         /**
-         * Constructs a JsonPrinter  
+         * Constructs a JsonSerializer  
          * @param {number} number of spaces (indentation) for every nested level
          * @param {number} max number of columns allowed in a row
          * @param {number} Optional, initial indentation offset
@@ -43,7 +43,7 @@ module TacoUtility {
          * Given a json object returns an indented string
          * @param {object} object to stringify
          */
-        public stringify(obj: any): string {
+        public serlialize(obj: any): string {
             return this.indentOffset + this.getIndentedJson(obj, this.indentOffset);
         }
 
@@ -65,7 +65,7 @@ module TacoUtility {
                 }
 
                 keyValuesJson = this.getIndentedJsonForObjectKeys(obj, indent + this.levelIndent);
-                return util.format("{<br/>%s%s}", keyValuesJson, indent);
+                return util.format("{<br/>%s<br/>%s}", keyValuesJson, indent);
             } else if (typeof obj === "string") {
                 return util.format("\"%s\"", obj);
             } else {
@@ -77,28 +77,26 @@ module TacoUtility {
          * Returns indented json for items in an array
          */
         private getIndentedJsonForArrayValues(arr: Array<any>, indent: string): string {
-            var formattedString: string = "";
+            var items: string[] = [];
             for (var i = 0; i < arr.length; i++) {
-                var itemJson: string = this.getIndentedJson(arr[i], indent);
-                formattedString += util.format("%s%s,<br/>", indent, itemJson);
+                items.push(this.getIndentedJson(arr[i], indent));
             }
 
-            return formattedString;
+            return items.join(",<br/>" + indent);
         }
 
         /**
          * Returns indented json for key/values for an object
          */
         private getIndentedJsonForObjectKeys(obj: any, indent: string): string {
+            var keyValuePairs: string[] = [];
+
             var keys: string[] = Object.keys(obj);
-            var formattedString: string = "";
             for (var i = 0; i < keys.length; i++) {
-                var valueJson: string = this.getIndentedJson(obj[keys[i]], indent);
-                formattedString += util.format("%s\"%s\" : %s", indent, keys[i], valueJson);
-                formattedString += (i === keys.length - 1) ? "<br/>" : ",<br/>";
+                keyValuePairs.push(util.format("\"%s\" : %s", keys[i], this.getIndentedJson(obj[keys[i]], indent)));
             }
 
-            return formattedString;
+            return indent + keyValuePairs.join(",<br/>" + indent);
         }
 
         /**
@@ -108,26 +106,35 @@ module TacoUtility {
          */
         private getMinifiedJsonForObjectKeys(obj: any, indent: string): string {
             var keys: string[] = Object.keys(obj);
+            // we don't want to use minified version, if the object is 
+            // 1. deep, has nested objects
+            // 2. has long values
+            // 3. has more than two keys
             if (keys.length > 2) {
                 return null;
             }
 
-            var formattedString: string = "";
-            for (var i = 0; i < keys.length; i++) {
+            var keyValuePairs: string[] = [];
+            var currentLength: number = indent.length + 4; // +4 for curly braces and spaces around "{ %s }"
+           for (var i = 0; i < keys.length; i++) {                
                 var valueType: string = typeof obj[keys[i]];
+                // Nested object, not minifiable
                 if (valueType === "object") {
                     return null;
                 }
 
-                var valueJson: string = this.getIndentedJson(obj[keys[i]], "");
-                formattedString += util.format("\"%s\" : %s", keys[i], valueJson);
-                formattedString += (i === keys.length - 1) ? "" : ",";
-                if (indent.length + formattedString.length + 4 > this.maxRight) {
+                var itemJson: string = util.format("\"%s\" : %s", keys[i], this.getIndentedJson(obj[keys[i]], ""));
+                keyValuePairs.push(itemJson);
+                currentLength += itemJson.length; 
+
+                // +2, for ", " seperator
+                // minified version is too long to fit on the screen
+                if ((currentLength + 2 * (keyValuePairs.length - 1)) > this.maxRight) {
                     return null;
                 }
             }
 
-            return formattedString;
+            return keyValuePairs.join(", ");
         }
     }
 }
