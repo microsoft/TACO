@@ -1,15 +1,16 @@
 {
-    "name": "taco-remote-multiplexer",
-    "description": "A package to determine how to interact with a Cordova project, given some request parameters.",
-    "version": "1.0.0",
-    "author": {
-        "name": "Microsoft Corporation",
-        "email": "vscordovatools-admin@microsoft.com"
-    },
-    "dependencies": {
-        "semver":  "4.3.4"
-    },
-    "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
-    "main": "./tacoRemoteMultiplexer.js",
-    "readmeFilename": "README.md"
+  "name": "taco-remote-multiplexer",
+  "description": "A package to determine how to interact with a Cordova project, given some request parameters.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Microsoft Corporation",
+    "email": "vscordovatools-admin@microsoft.com"
+  },
+  "dependencies": {
+    "semver": "4.3.4"
+  },
+  "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
+  "main": "./tacoRemoteMultiplexer.js",
+  "readmeFilename": "README.md",
+  "license": "LicenseRef-LICENSE"
 }
