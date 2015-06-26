@@ -1,7 +1,7 @@
 {
     "name": "taco-utils",
     "author": {
-        "name": "Microsoft Corporation"
+        "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
     },
     "description": "Common utilities used by the Tools for Apache Cordova node modules",

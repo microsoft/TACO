@@ -1,6 +1,6 @@
 {
     "name": "remotebuild",
-    "description": "Server frontend to host modules that implement remote build functionality, such as taco-remote.",
+    "description": "Front-end server that serves modules that implement remote build functionality, such as taco-remote.",
     "version": "1.0.0",
     "author": {
         "name": "Microsoft Corporation",
