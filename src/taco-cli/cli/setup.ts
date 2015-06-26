@@ -120,12 +120,20 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         }).then(function (settings: Settings.ISettings): void {
             var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): INameDescription {
                     var remote = settings.remotePlatforms[platform];
-                    var url = util.format("%s://%s:%d/%s", remote.secure ? "https" : "http", remote.host, remote.port, remote.mountPoint);
+                    var url = util.format("[%s] %s://%s:%d/%s",
+                        remote.secure ? resources.getString("CommandSetupRemoteListSecured") : resources.getString("CommandSetupRemoteListNotSecured"),
+                        remote.secure ? "https" : "http",
+                        remote.host,
+                        remote.port,
+                        remote.mountPoint);
                     return { name: platform, description: url };
             });
             
             if (platforms && platforms.length > 0) {
-                loggerHelper.logNameDescriptionTable(platforms);
+                logger.log(resources.getString("CommandSetupRemoteListPrelude"));
+                logger.logLine();
+                var header = { name: resources.getString("CommandSetupRemoteListPlatformHeader"), description: resources.getString("CommandSetupRemoteListDescriptionHeader") };
+                loggerHelper.logNameDescriptionTableWithHeader(header, platforms, null, null, " ");
             } else {
                 logger.log(resources.getString("CommandSetupRemoteListNoPlatforms"));
             }
