@@ -1,12 +1,7 @@
 ﻿{
-  "tacoRemoteLib@0.0.1": {
+  "tacoRemoteLib@1.0.0": {
     "packageName": "taco-remote-lib",
-    "packageId": "taco-remote-lib@0.0.1",
+    "packageId": "taco-remote-lib@1.0.0",
     "dev":  true
-  },
-
-  "samplePackageInNpm": {
-    "packageName": "taco-remote-lib",
-    "packageId": "taco-remote-lib@0.1.0"
   }
 }

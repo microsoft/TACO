@@ -1,10 +1,11 @@
 {
     "name": "taco-utils",
     "author": {
-        "name": "Microsoft Corp."
+        "name": "Microsoft Corporation"
+        "email": "vscordovatools-admin@microsoft.com"
     },
-    "description": "strictly internal use to enable require in utility folder",
-    "version": "0.0.1",
+    "description": "Common utilities used by the Tools for Apache Cordova node modules",
+    "version": "1.0.0",
     "main": "tacoUtils.js",
     "scripts": {
         "test": "mocha"
@@ -20,7 +21,6 @@
         "rimraf": "2.2.6",
         "semver": "2.3.1"
     },
-    "private": true,
     "devDependencies": {
         "typescript": ">=1.4.1",
         "mocha": "2.0.1",

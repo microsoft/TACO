@@ -1,7 +1,7 @@
 {
     "name": "remotebuild",
-    "description": "Agent to remotely build, run, and debug iOS apps created using Visual Studio Tools for Apache Cordova.",
-    "version": "0.2.6",
+    "description": "Server frontend to host modules that implement remote build functionality, such as taco-remote.",
+    "version": "1.0.0",
     "author": {
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
