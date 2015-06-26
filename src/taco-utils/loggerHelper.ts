@@ -47,7 +47,9 @@ module TacoUtility {
                 indent2 = LoggerHelper.getDescriptionColumnIndent(maxNameLength, indent1);
             }
 
-            LoggerHelper.logNameDescription(header.name, header.description, indent1, indent2, dotsCharacter);
+            var leftIndent: string = LogFormatHelper.repeat(" ", indent1);
+            var dots: string = LogFormatHelper.repeat(dotsCharacter, indent2 - indent1 - header.name.length - 2); // -2, for spaces around "..."
+            Logger.log(util.format("%s<title>%s</title> %s <title>%s</title>", leftIndent, header.name, dots, header.description));
             LoggerHelper.logSeparatorLine();
             LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1, indent2, dotsCharacter);
         }
