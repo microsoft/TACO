@@ -87,8 +87,8 @@
     "_CommandKitListPlatformOverridesForKit.comment": "Header for the list of platform overrides for a kit displayed on executing the 'taco kit list' command",
      "CommandKitListPluginOverridesForKit": "<bold>Plugins: </bold>",
     "_CommandKitListPluginOverridesForKit.comment": "Header for the list of plugin overrides for a kit displayed on executing the 'taco kit list' command",
-     "CommandKitListJsonFileStatus": "<success>Success!</success> Kit metadata file <highlight>{0}</highlight> is saved at <highlight>{1}</highlight>",
-    "_CommandKitListJsonFileStatus.comment": "Status indicating that the json file {0} has been successfully written to {1}",
+     "CommandKitListJsonFileStatus": "<success>Success!</success> Kit metadata file is saved at <highlight>{0}</highlight>",
+    "_CommandKitListJsonFileStatus.comment": "Status indicating that the json file has been successfully written to {0}",
 
     "CommandSetupDescription": "Configure remote builds",
     "_CommandSetupDescription.comment": "Description for 'taco setup remote'",
@@ -160,9 +160,9 @@
     "_CommandPlatformStatusRemoving.comment": "Status message shown while removing a platform {0} from the project",
     "CommandPlatformStatusRemoved": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> removed from the project.<br/>",
     "_CommandPlatformStatusRemoved.comment": "Status message after successfully removing platform {0}",
-    "CommandPlatformStatusUpdating": "Updating platform <highlight>{0}</highlight> added to Cordova project...<br/>",
+    "CommandPlatformStatusUpdating": "Updating platform <highlight>{0}</highlight>...<br/>",
     "_CommandPlatformStatusUpdating.comment": "Status message shown while updating a platform {0} added to the project",
-    "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> are updated.<br/>",
+    "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> updated.<br/>",
     "_CommandPlatformStatusUpdated.comment": "Status message after successfully updating platform {0}",
     
 
@@ -357,8 +357,6 @@
     "_ErrorKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
     "ErrorInvalidPath": "Error: The specified path is invalid: {0}",
     "_ErrorInvalidPath.comment": "Error reported when the specified path passed to 'taco kit list --json' is invalid.",
-    "ErrorFileAlreadyExists": "Error: The file specified already exists: {0}",
-    "ErrorFileAlreadyExists.comment": "Error reported when the specified path passed to 'taco kit list --json' already exists.",
     "ErrorInvalidJsonFilePath": "Error: The specified path is not a valid JSON file path: {0}",
     "_ErrorInvalidJsonFilePath.comment": "Error reported when the specified path passed to 'taco kit list --json' is an invalid JSON file path.",
     "ErrorIncompatibleOptions": "Error: {0} option cannot be used in conjunction with {1} option.",

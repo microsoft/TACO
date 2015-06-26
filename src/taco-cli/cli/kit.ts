@@ -14,6 +14,7 @@
 /// <reference path="../../typings/tacoKits.d.ts" />
 "use strict";
 
+import assert = require ("assert");
 import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
@@ -269,17 +270,14 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * Validates the file path passed. Throw appropriate errors if path passed is invalid.
      */
     private static validateJsonFilePath(jsonFilePath: string): void {
+        assert(jsonFilePath);
         // Make sure the specified path is valid
-        if (!jsonFilePath || !utils.isPathValid(jsonFilePath)) {
+        if (!utils.isPathValid(jsonFilePath)) {
             throw errorHelper.get(TacoErrorCodes.ErrorInvalidPath, jsonFilePath);
         }
 
         if (path.extname(jsonFilePath).toLowerCase() !== ".json") {
             throw errorHelper.get(TacoErrorCodes.ErrorInvalidJsonFilePath, jsonFilePath);
-        }
-
-        if (fs.existsSync(jsonFilePath)) {
-            throw errorHelper.get(TacoErrorCodes.ErrorFileAlreadyExists, jsonFilePath);
         }
 
         utils.createDirectoryIfNecessary(path.dirname(jsonFilePath));
@@ -303,7 +301,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             return projectHelper.createJsonFileWithContents(jsonFilePath, meta.kits); 
         })
             .then(function (): Q.Promise<any> {
-            logger.log(resources.getString("CommandKitListJsonFileStatus", path.basename(jsonFilePath), path.dirname(jsonFilePath)));
+            logger.log(resources.getString("CommandKitListJsonFileStatus", jsonFilePath));
             return Q.resolve({});
         });
     }
