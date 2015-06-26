@@ -50,7 +50,7 @@ class SelfTest {
         utils.createDirectoryIfNecessary(tempFolder);
         var cordovaApp = path.join(tempFolder, "helloCordova");
 
-        return TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", "cordova@" + vcordova).then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+        return TacoPackageLoader.lazyRequire<typeof Cordova>("cordova", "cordova@" + vcordova).then(function (cordova: typeof Cordova): Q.Promise<any> {
             return cordova.raw.create(cordovaApp);
         }, function (err: Error): any {
                 console.error(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));

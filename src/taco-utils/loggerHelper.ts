@@ -48,7 +48,8 @@ module TacoUtility {
             }
 
             var leftIndent: string = LogFormatHelper.repeat(" ", indent1);
-            var dots: string = LogFormatHelper.repeat(dotsCharacter, indent2 - indent1 - header.name.length - 2); // -2, for spaces around "..."
+            var keyLength = LogFormatHelper.getFormattedStringLength(header.name);
+            var dots: string = LogFormatHelper.repeat(dotsCharacter, indent2 - indent1 - keyLength - 2); // -2, for spaces around "..."
             Logger.log(util.format("%s<title>%s</title> %s <title>%s</title>", leftIndent, header.name, dots, header.description));
             LoggerHelper.logSeparatorLine();
             LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1, indent2, dotsCharacter);
@@ -92,9 +93,12 @@ module TacoUtility {
             indent2 = indent2 || LoggerHelper.MinRightIndent;
 
             var leftIndent: string = LogFormatHelper.repeat(" ", indent1);
-            var dots: string = LogFormatHelper.repeat(dotsCharacter, indent2 - indent1 - key.length - 2); // -2, for spaces around "..."
+            var keyLength = LogFormatHelper.getFormattedStringLength(key);
+            var dots: string = LogFormatHelper.repeat(dotsCharacter, indent2 - indent1 - keyLength - 2); // -2, for spaces around "..."
             value = LoggerHelper.wordWrapString(value, indent2, LoggerHelper.MaxRight);
-            Logger.log(util.format("%s<key>%s</key> %s %s", leftIndent, key, dots, value));
+
+            var keyString: string = LogFormatHelper.isFormattedString(key) ? key : util.format("<key>%s</key>", key);
+            Logger.log(util.format("%s%s %s %s", leftIndent, keyString, dots, value));
         }
 
         /**
@@ -111,7 +115,7 @@ module TacoUtility {
         public static getLongestNameLength(nameDescriptionPairs: INameDescription[]): number {
             if (nameDescriptionPairs) {
                 return nameDescriptionPairs.reduce(function (longest: number, nvp: INameDescription): number {
-                    return nvp.name ? Math.max(longest, nvp.name.length) : longest;
+                    return nvp.name ? Math.max(longest, LogFormatHelper.getFormattedStringLength(nvp.name)) : longest;
                 }, 0 /* initialValue */);
             }
 
