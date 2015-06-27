@@ -43,7 +43,7 @@ module TacoUtility {
          * Given a json object returns an indented string
          * @param {object} object to stringify
          */
-        public serlialize(obj: any): string {
+        public serialize(obj: any): string {
             return this.indentOffset + this.getIndentedJson(obj, this.indentOffset);
         }
 
@@ -51,13 +51,9 @@ module TacoUtility {
          * Returns indented json string for a given object
          */
         private getIndentedJson(obj: any, indent: string): string {
-            if (!obj) {
-                return obj;
-            }
-
             if (util.isArray(obj)) {
                 var valuesJson: string = this.getIndentedJsonForArrayValues(<Array<any>>obj, indent + this.levelIndent);
-                return util.format("[<br/>%s%s]", valuesJson, indent);
+                return util.format("[<br/>%s<br/>%s]", valuesJson, indent);
             } else if (typeof obj === "object") {
                 var keyValuesJson: string = this.getMinifiedJsonForObjectKeys(obj, indent);
                 if (keyValuesJson) {
@@ -66,10 +62,8 @@ module TacoUtility {
 
                 keyValuesJson = this.getIndentedJsonForObjectKeys(obj, indent + this.levelIndent);
                 return util.format("{<br/>%s<br/>%s}", keyValuesJson, indent);
-            } else if (typeof obj === "string") {
-                return util.format("\"%s\"", obj);
             } else {
-                return obj;
+                return JSON.stringify(obj);
             }
         }
 
@@ -93,7 +87,7 @@ module TacoUtility {
 
             var keys: string[] = Object.keys(obj);
             for (var i = 0; i < keys.length; i++) {
-                keyValuePairs.push(util.format("\"%s\" : %s", keys[i], this.getIndentedJson(obj[keys[i]], indent)));
+                keyValuePairs.push(JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], indent)));
             }
 
             return indent + keyValuePairs.join(",<br/>" + indent);
@@ -123,7 +117,7 @@ module TacoUtility {
                     return null;
                 }
 
-                var itemJson: string = util.format("\"%s\" : %s", keys[i], this.getIndentedJson(obj[keys[i]], ""));
+                var itemJson: string = JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], ""))
                 keyValuePairs.push(itemJson);
                 currentLength += itemJson.length; 
 
@@ -136,7 +130,11 @@ module TacoUtility {
 
             return keyValuePairs.join(", ");
         }
-    }
+
+        private static stringifyKvp(key: string, value: string): string {
+            return util.format("%s : %s", JSON.stringify(key), value);
+        }
+   }
 }
 
 export = TacoUtility;

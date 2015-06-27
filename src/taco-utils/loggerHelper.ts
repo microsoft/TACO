@@ -127,7 +127,7 @@ module TacoUtility {
          */
         public static printJson(obj: any, indent?: number): void {
             var jsonSerializer: JsonSerializer = new JsonSerializer(LoggerHelper.DefaultIndent, LoggerHelper.MaxRight, indent);
-            Logger.log(jsonSerializer.serlialize(obj));
+            Logger.log(jsonSerializer.serialize(obj));
         }
 
         private static wordWrapString(str: string, indent: number, maxWidth: number): string {

@@ -26,7 +26,7 @@
     "_CommandStartDescription.comment": "Description printed for remotebuild start command",
     "CommandCertificatesDescription": "Updates client/server SSL certificates for a secure connection",
     "_CommandCertificatesDescription.comment": "Description printed for remotebuild certificates command",
-    "CommandGenerateDescription": "Generate a new client certificate for configuring a new secure connection",
+    "CommandGenerateDescription": "Generates a new client SSL certificate for configuring a new secure connection",
     "_CommandGenerateDescription.comment": "Description printed for remotebuild certificates generate command",
     "CommandResetDescription": "Resets server SSL certificates",
     "_CommandResetDescription.comment": "Description printed for remotebuild certificates reset command",
