@@ -36,7 +36,7 @@ if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
 gulp.task("default", ["install-build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
-gulp.task("compile", function(callback: Function): Q.Promise<any> {
+gulp.task("compile", function (callback: Function): Q.Promise<any> {
     return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))

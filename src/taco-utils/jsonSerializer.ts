@@ -47,6 +47,10 @@ module TacoUtility {
             return this.indentOffset + this.getIndentedJson(obj, this.indentOffset);
         }
 
+        private static stringifyKvp(key: string, value: string): string {
+            return util.format("%s : %s", JSON.stringify(key), value);
+        }
+
         /**
          * Returns indented json string for a given object
          */
@@ -117,7 +121,7 @@ module TacoUtility {
                     return null;
                 }
 
-                var itemJson: string = JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], ""))
+                var itemJson: string = JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], ""));
                 keyValuePairs.push(itemJson);
                 currentLength += itemJson.length; 
 
@@ -129,10 +133,6 @@ module TacoUtility {
             }
 
             return keyValuePairs.join(", ");
-        }
-
-        private static stringifyKvp(key: string, value: string): string {
-            return util.format("%s : %s", JSON.stringify(key), value);
         }
    }
 }
