@@ -7,10 +7,11 @@
  */
 
 /// <reference path="../typings/colors.d.ts" />
+/// <reference path="../typings/commandAlias.d.ts" />
 /// <reference path="../typings/commandExample.d.ts" />
+/// <reference path="../typings/nameDescription.d.ts" />
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/nopt.d.ts" />
-/// <reference path="../typings/nameDescription.d.ts" />
 /// <reference path="../typings/tacoUtils.d.ts" />
 
 "use strict";
@@ -40,6 +41,7 @@ module TacoUtility {
      */
     export class HelpCommandBase implements IDocumentedCommand {
         private static DefaultBullet: string = "*";
+        private static OptionIndent: number = 5;
 
         private commandsFactory: CommandsFactory = null;
         private cliResources: ResourceManager = null;
@@ -106,8 +108,33 @@ module TacoUtility {
                 return;
             }
 
+            // Prepare a flattened list of name/description values of args and options for each of the args.
+            // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>, <arg3>, <arg3.options>
+            var argList: INameDescription[] = [];
+            var args: any[] = this.commandsFactory.listings[command].args;
             var list: ICommandInfo = this.commandsFactory.listings[command];
             this.printCommandHeader(this.cliName, command, list.synopsis, list.description);
+            var optionsLeftIndent: string = Array(HelpCommandBase.OptionIndent + 1).join(" ");
+            if (args) {
+                args.forEach(arg => {
+                    // Push the arg first
+                    argList.push({
+                        name: arg.name,
+                        description: arg.description
+                    });
+                    if (arg.options) {
+                        var options: INameDescription[] = <INameDescription[]>arg.options;
+                        options.forEach(nvp => {
+                            nvp.name = optionsLeftIndent + nvp.name;
+                            argList.push({
+                                name: nvp.name,
+                                description: nvp.description
+                            });
+                        });
+                    }
+                });
+                list.args = argList;
+            }
 
             // if both needs to be printed we need to calculate an indent ourselves
             // to make sure args.values have same indenation as options.values
@@ -124,6 +151,11 @@ module TacoUtility {
             if (list.options) {
                 Logger.log(resources.getString("CommandHelpUsageOptions"));
                 this.printCommandTable(list.options, 2 * LoggerHelper.DefaultIndent, indent2);
+            }
+
+            if (list.aliases) {
+                Logger.log(resources.getString("CommandHelpUsageAliases"));
+                this.printAliasTable(list.aliases);
             }
 
             this.printExamples(list.examples);
@@ -178,6 +210,13 @@ module TacoUtility {
             if (description) {
                 Logger.log(this.getDescriptionString(description) + "<br/>");
             }
+        }
+
+        private printAliasTable(commandAliases: ICommandAlias[]): void {
+            var leftIndent: string = Array(LoggerHelper.DefaultIndent + 1).join(" ");
+            commandAliases.forEach(cmdAliasPair => {
+                Logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdAliasPair.alias, "->", cmdAliasPair.command));
+            });
         }
 
         /**

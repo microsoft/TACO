@@ -50,5 +50,7 @@
     "CommandHelpUsageNotes": "<br/><helptitle>Notes:</helptitle><br/>",
     "_CommandHelpUsageNotes.comment": "examples header when user requests help for a command",
     "CommandHelpBadcomand": "{0} is not a valid command<br/>",
-    "_CommandHelpBadcomand.comment": "message shown when user enters invalid command"
+    "_CommandHelpBadcomand.comment": "message shown when user enters invalid command",
+    "CommandHelpUsageAliases": "<br/><helptitle>Aliases:</helptitle><br/>",
+    "_CommandHelpUsageAliases.comment": "options header when user types 'taco help'"
 }

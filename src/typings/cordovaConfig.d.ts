@@ -6,7 +6,6 @@
  *******************************************************
  */
 
-
 declare module TacoUtility {
     class CordovaConfig {
         /** CordovaConfig is a class for parsing the config.xml file for Cordova projects */
