@@ -29,6 +29,7 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
+import loggerHelper = tacoUtility.LoggerHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface ICliSession {
@@ -50,6 +51,20 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
      */
     public static CliSession: ICliSession = null;
     public subcommands: commands.ICommand[] = [
+        {
+            // taco setup remote <platform> --remove
+            run: Setup.remoteRemove,
+            canHandleArgs: function (setupData: commands.ICommandData): boolean {
+                return setupData.remain[0] && setupData.remain[0].toLowerCase() === "remote" && setupData.options["remove"];
+            }
+        },
+        {
+            // taco setup remote --list
+            run: Setup.remoteList,
+            canHandleArgs: function (setupData: commands.ICommandData): boolean {
+                return setupData.remain[0] && setupData.remain[0].toLowerCase() === "remote" && setupData.options["list"];
+            }
+        },
         {
             // taco setup remote
             run: Setup.remote,
@@ -74,6 +89,55 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Setup.KnownOptions, Setup.ShortHands, args, 0);
 
         return parsedOptions;
+    }
+
+    private static remoteRemove(setupData: commands.ICommandData): Q.Promise<any> {
+        if (setupData.remain.length < 2) {
+            throw errorHelper.get(TacoErrorCodes.CommandSetupRemoteDeleteNeedsPlatform);
+        }
+
+        var platform: string = (setupData.remain[1]).toLowerCase();
+
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+            // No settings or the settings were corrupted: start from scratch
+            return {};
+        }).then(function (settings: Settings.ISettings): Q.Promise<any> {
+            if (!(settings.remotePlatforms && platform in settings.remotePlatforms)) {
+                throw errorHelper.get(TacoErrorCodes.CommandSetupRemoteDeletePlatformNotAdded, platform);
+            } else {
+                delete settings.remotePlatforms[platform];
+                return Settings.saveSettings(settings);
+            }
+        }).then(function (): void {
+            logger.log(resources.getString("CommandSetupRemoteRemoveSuccessful", platform));
+        });
+    }
+
+    private static remoteList(setupData: commands.ICommandData): Q.Promise<any> {
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+            // No settings or the settings were corrupted: start from scratch
+            return {};
+        }).then(function (settings: Settings.ISettings): void {
+            var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): INameDescription {
+                    var remote = settings.remotePlatforms[platform];
+                    var url = util.format("[%s] %s://%s:%d/%s",
+                        remote.secure ? resources.getString("CommandSetupRemoteListSecured") : resources.getString("CommandSetupRemoteListNotSecured"),
+                        remote.secure ? "https" : "http",
+                        remote.host,
+                        remote.port,
+                        remote.mountPoint);
+                    return { name: platform, description: url };
+            });
+            
+            if (platforms && platforms.length > 0) {
+                logger.log(resources.getString("CommandSetupRemoteListPrelude"));
+                logger.logLine();
+                var header = { name: resources.getString("CommandSetupRemoteListPlatformHeader"), description: resources.getString("CommandSetupRemoteListDescriptionHeader") };
+                loggerHelper.logNameDescriptionTableWithHeader(header, platforms, null, null, " ");
+            } else {
+                logger.log(resources.getString("CommandSetupRemoteListNoPlatforms"));
+            }
+        });
     }
 
     private static remote(setupData: commands.ICommandData): Q.Promise<any> {
