@@ -1,0 +1,34 @@
+﻿{
+  "taco-remote": {
+    "description": "<helptitle>[TacoRemoteHelpDescription]</helptitle>",
+    "options": [
+      { "name": "allowsEmulate", "description": "[TacoRemoteConfigAllowsEmulate]" },
+      { "name": "deleteBuildsOnShutdown", "description": "[TacoRemoteConfigDeleteBuildsOnShutdown]" },
+      { "name": "maxBuildsInQueue", "description": "[TacoRemoteConfigMaxBuildsInQueue]" },
+      { "name": "maxBuildsToKeep", "description": "[TacoRemoteConfigMaxBuildsToKeep]" },
+      { "name": "nativeDebugProxyPort", "description": "[TacoRemoteConfigNativeDebugProxyPort]" },
+      { "name": "webDebugProxyDevicePort", "description": "[TacoRemoteConfigWebDebugProxyDevicePort]" },
+      { "name": "webDebugProxyPortMin", "description": "[TacoRemoteConfigWebDebugProxyPortMin]" },
+      { "name": "webDebugProxyPortMax", "description": "[TacoRemoteConfigWebDebugProxyPortMax]" }
+    ],
+    "examples": [
+      {
+        "example": {
+          "port": 3002,
+          "modules": {
+            "taco-remote": {
+              "mountPath": "cordova",
+              "maxBuildsToKeep": 0,
+              "webDebugProxyDevicePort": 4321,
+              "deleteBuildsOnShutdown": true
+            }
+          }
+        },
+        "description": "[TacoRemoteHelpExample]"
+      }
+    ],
+    "notes": [
+      "[TacoRemoteHelpNotes]"
+    ]
+  }
+}

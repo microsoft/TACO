@@ -42,5 +42,17 @@
     "InnerErrorToString": "Inner Error:\n{0}",
     "_InnerErrorToString.comment": "token prefix to an inner error",
     "PackageLoaderDownloadCompletedMessage": "{0} downloaded and installed.",
-    "_PackageLoaderDownloadCompletedMessage.comment": "Message reporting the success of package download and install."
+    "_PackageLoaderDownloadCompletedMessage.comment": "Message reporting the success of package download and install.",
+    "CommandHelpUsageSynopsis": "<helptitle>Synopsis</helptitle><br/>",
+    "_CommandHelpUsageSynopsis.comment": "synopsis header when user requests help for a command",
+    "CommandHelpUsageOptions": "<br/><helptitle>Options:</helptitle><br/>",
+    "_CommandHelpUsageOptions.comment": "options header when user requests help for a command",
+    "CommandHelpUsageExamples": "<br/><helptitle>Examples:</helptitle><br/>",
+    "_CommandHelpUsageExamples.comment": "examples header when user requests help for a command",
+    "CommandHelpUsageNotes": "<br/><helptitle>Notes:</helptitle><br/>",
+    "_CommandHelpUsageNotes.comment": "examples header when user requests help for a command",
+    "CommandHelpBadcomand": "{0} is not a valid command<br/>",
+    "_CommandHelpBadcomand.comment": "message shown when user enters invalid command",
+    "CommandHelpUsageAliases": "<br/><helptitle>Aliases:</helptitle><br/>",
+    "_CommandHelpUsageAliases.comment": "options header when user types 'taco help'"
 }

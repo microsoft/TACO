@@ -6,8 +6,10 @@
 ﻿ *******************************************************
 ﻿ */
 
+/// <reference path="../typings/commandExample.d.ts" />
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
+
 import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
@@ -27,6 +29,8 @@ module TacoUtility {
             description: string;
             args: INameDescription[];
             options: INameDescription[];
+            examples: ICommandExample[];
+            notes: string[];
             aliases: ICommandAlias[];
         }
 
