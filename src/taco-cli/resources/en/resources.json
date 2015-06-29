@@ -292,7 +292,7 @@
     "CommandNotBothDebugRelease": "Error: must specify at most one of --debug and --release",
     "_CommandNotBothDebugRelease.comment": "Error reported when both --debug and --release are specified for 'taco build' or 'taco run'",
 
-    "CommandVersionDescription": "Display the current Taco pluginVersion",
+    "CommandVersionDescription": "Display the current Taco version",
     "_CommandVersionDescription.comment":  "Description of the -v/--v/--version arguments to taco",
 
     "CommandInstallReqsDescription": "Install platform-specific third-party dependencies",
