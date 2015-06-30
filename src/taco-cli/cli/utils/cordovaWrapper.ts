@@ -196,6 +196,10 @@ class CordovaWrapper {
         if (cordovaCliVersion) {
             return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
                 .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                cordova.on("results", console.info);
+                cordova.on("log", console.info);
+                cordova.on("warn", console.warn);
+                cordova.on("error", console.error);
                 if (command === "platform") {
                     return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
                 } else if (command === "plugin") {
