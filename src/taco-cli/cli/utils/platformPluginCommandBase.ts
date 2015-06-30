@@ -127,10 +127,6 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         var projectInfo: projectHelper.IProjectInfo;
         var specsToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): Q.Promise<any> {
-            if (info.configXmlPath.length === 0) {
-                return Q.reject(errorHelper.get(TacoErrorCodes.NotInCordovaProject));
-            }
-
             projectInfo = info;
             return Q({});
         })
