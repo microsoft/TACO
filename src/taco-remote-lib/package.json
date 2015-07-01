@@ -33,5 +33,5 @@
     "test": "test"
   },
   "readmeFilename": "README.md",
-  "license": "LicenseRef-LICENSE"
+  "license": "MIT"
 }
