@@ -194,10 +194,11 @@ class CordovaWrapper {
      */
     public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData): Q.Promise<any> {
         if (cordovaCliVersion) {
+            var cordova: typeof Cordova;
             return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-                .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                .then(function (cdv: typeof Cordova): Q.Promise<any> {
+                cordova = cdv;
                 cordova.on("results", console.info);
-                cordova.on("log", console.info);
                 cordova.on("warn", console.warn);
                 cordova.on("error", console.error);
                 if (command === "platform") {
@@ -207,6 +208,11 @@ class CordovaWrapper {
                 } else {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
                 }
+            }).then(function(): Q.Promise<any>{
+                    cordova.off("results", console.info);
+                    cordova.off("warn", console.warn);
+                    cordova.off("error", console.error);
+                    return Q({});
             });
         } else {
             var cliArgs: string[] = [command, platformCmdParameters.subCommand].concat(platformCmdParameters.targets);

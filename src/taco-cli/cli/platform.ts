@@ -47,7 +47,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         var self = this;
 
         var subCommand = this.cordovaCommandParams.subCommand;
-        if (subCommand !== "add" && subCommand !== "remove" && subCommand !== "rm") {
+        if (subCommand !== "add") {
             return Q({});
         }
 
