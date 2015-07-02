@@ -84,9 +84,9 @@ var CliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios",
         { command: "remove android ios", expectedVersions: {} }
     ]
 
-var KitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera cordova-plugin-contacts", expectedVersions: kitPluginVersions },
+var KitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
         { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} },
-        { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
+        { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: kitPluginVersions},
         { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} }
     ]
 
@@ -199,6 +199,12 @@ describe("taco platform for kit", function (): void {
         });
     }
 
+    function sleep(milliseconds: number): Q.Promise<any> {
+        var deferred = Q.defer();
+        setTimeout(deferred.resolve, milliseconds);
+        return deferred.promise;
+    };
+
     before(function (mocha: MochaDone): void {
         originalCwd = process.cwd();
         // Set up mocked out resources
@@ -238,7 +244,10 @@ describe("taco platform for kit", function (): void {
                 console.log(args);
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
-                .then(function (): void {
+                .then(function (): Q.Promise<any> {
+                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    return sleep(5);
+                }).then(function (): void {
                     if(args[0] === "add") {
                         checkPlatformVersions(scenario.expectedVersions);
                     }
@@ -255,7 +264,10 @@ describe("taco platform for kit", function (): void {
                 console.log(args);
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
-                .then(function (): void {
+                .then(function (): Q.Promise<any> {
+                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    return sleep(5);
+                }).then(function (): void {
                     if(args[0] === "add") {
                         checkPluginVersions(scenario.expectedVersions);
                     }
@@ -289,7 +301,10 @@ describe("taco platform for kit", function (): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
-                .then(function (): void {
+                .then(function (): Q.Promise<any> {
+                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    return sleep(5);
+                }).then(function (): void {
                     if(args[0] === "add") {
                         checkPlatformVersions(scenario.expectedVersions);
                     }
@@ -306,7 +321,10 @@ describe("taco platform for kit", function (): void {
                 console.log(args);
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
-                .then(function (): void {
+                .then(function (): Q.Promise<any> {
+                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    return sleep(5);
+                }).then(function (): void {
                     if(args[0] === "add") {
                         checkPluginVersions(scenario.expectedVersions);
                     }
