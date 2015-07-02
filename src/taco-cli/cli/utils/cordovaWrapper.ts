@@ -208,7 +208,7 @@ class CordovaWrapper {
                 } else {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
                 }
-            }).then(function(): Q.Promise<any>{
+            }).then(function (): Q.Promise<any> {
                     cordova.off("results", console.info);
                     cordova.off("warn", console.warn);
                     cordova.off("error", console.error);

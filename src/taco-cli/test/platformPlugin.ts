@@ -47,19 +47,20 @@ interface ICommandAndResult {
     expectedVersions: IComponentVersionMap;
 }
 
+// Expected valued for various scenarios
 var userOverridePlatformVersions: IComponentVersionMap = {
-    "android": "4.0.1",
-    "ios": "3.8.0"
+    android: "4.0.1",
+    ios: "3.8.0"
 };
 
 var kitPlatformVersions: IComponentVersionMap = {
-    "android": "4.0.2",
-    "ios": "3.8.0"
+    android: "4.0.2",
+    ios: "3.8.0"
 };
 
 var cliPlatformVersions: IComponentVersionMap = {
-    "android": "4.0.0",
-    "ios": "3.8.0"
+    android: "4.0.0",
+    ios: "3.8.0"
 };
 
 var userOverridePluginVersions: IComponentVersionMap = {
@@ -72,27 +73,27 @@ var kitPluginVersions: IComponentVersionMap = {
     "cordova-plugin-contacts": "1.0.0"
 };
 
-var KitPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: kitPlatformVersions },
+var kitPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: kitPlatformVersions },
         { command: "remove android ios", expectedVersions: {} },
         { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions },
         { command: "remove android ios", expectedVersions: {} }
-    ]
+    ];
         
-var CliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: cliPlatformVersions },
+var cliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: cliPlatformVersions },
         { command: "remove android ios", expectedVersions: {} },
         { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions },
         { command: "remove android ios", expectedVersions: {} }
-    ]
+    ];
 
-var KitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
+var kitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
         { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} },
-        { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: kitPluginVersions},
+        { command: "add cordova-plugin-camera cordova-plugin-contacts", expectedVersions: kitPluginVersions },
         { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} }
-    ]
+    ];
 
-var CliPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
+var cliPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
         { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} }
-    ]
+    ];
 
 describe("taco platform for kit", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "platformPlugin");
@@ -117,12 +118,12 @@ describe("taco platform for kit", function (): void {
     }
 
     function createCliProject(cli: string): Q.Promise<any> {
-         return createProject(["example", "--cli", cli])
+         return createProject(["example", "--cli", cli]);
     }
 
     function createKitProject(kit: string): Q.Promise<any> {
         // Create a dummy test project with no platforms added
-        return createProject(["example", "--kit", kit])
+        return createProject(["example", "--kit", kit]);
     }
 
     function platformRun(args: string[]): Q.Promise<any> {
@@ -142,26 +143,27 @@ describe("taco platform for kit", function (): void {
     }
 
     function getInstalledPlatforms(platformsExpected: IComponentVersionMap): string[] {
-        var platformsDir = path.join(projectDir, 'platforms');
-        if ( !fs.existsSync(projectDir)) {
+        var platformsDir = path.join(projectDir, "platforms");
+        if (!fs.existsSync(projectDir)) {
             return [];
         }
-        return fs.readdirSync(platformsDir).filter(function(platform: string) {
+
+        return fs.readdirSync(platformsDir).filter(function (platform: string): boolean {
             return Object.keys(platformsExpected).indexOf(platform) > -1;
         });
     }
 
     function checkPlatformVersions(platformsExpected: IComponentVersionMap): Q.Promise<any> {
         var platformsInstalled: string[] = getInstalledPlatforms(platformsExpected);
-        var onWindows = process.platform == 'win32';
+        var onWindows = process.platform === "win32";
         var deferred = Q.defer<any>();
-        return Q.all(platformsInstalled.map(function(platform: string) {
+        return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
             var cmdName: string = "version";
-            if(onWindows) { 
+            if (onWindows) { 
                 cmdName = cmdName + ".bat";
             }
 
-            var cmdPath: string = path.join(projectDir, 'platforms', platform, 'cordova', cmdName);
+            var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
             var versionProc = child_process.spawn(cmdPath);
             versionProc.stdout.on("data", function (data: any): void {
                 var version: string = data.toString();
@@ -188,12 +190,13 @@ describe("taco platform for kit", function (): void {
         if (pluginInfo) {
             return pluginInfo["version"];
         }
+
         return "";
     }
 
     function checkPluginVersions(pluginsExpected: IComponentVersionMap): void {
         var deferred = Q.defer<any>();
-        Object.keys(pluginsExpected).forEach(function(plugin: string) {
+        Object.keys(pluginsExpected).forEach(function (plugin: string): void {
             var versionInstalled: string = getInstalledPluginVersion(plugin);
             versionInstalled.trim().should.be.equal(pluginsExpected[plugin]);
         });
@@ -207,11 +210,9 @@ describe("taco platform for kit", function (): void {
 
     before(function (mocha: MochaDone): void {
         originalCwd = process.cwd();
-        // Set up mocked out resources
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
-        // Create a mocked out remote server so we can specify how it reacts
         // Delete existing run folder if necessary
         del("example", mocha);
     });
@@ -238,17 +239,16 @@ describe("taco platform for kit", function (): void {
             del("example", mocha);
         });
         this.timeout(50000);
-        KitPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
-            //console.log(scenario);
+        kitPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
-                console.log(args);
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
                 .then(function (): Q.Promise<any> {
                     // Wait for 5 seconds after the installation to avaoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
-                    if(args[0] === "add") {
+                    if (args[0] === "add") {
+                        // Check the version of platform after addition
                         checkPlatformVersions(scenario.expectedVersions);
                     }
                 }).then(function (): void {
@@ -258,17 +258,16 @@ describe("taco platform for kit", function (): void {
                 });
             });
         });
-        KitPluginOperations.forEach(function (scenario: ICommandAndResult ): void {
-            //console.log(scenario);
+        kitPluginOperations.forEach(function (scenario: ICommandAndResult ): void {
             it("taco plugin " + scenario.command + " executes with no error", function (done: MochaDone): void {
-                console.log(args);
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
                 .then(function (): Q.Promise<any> {
                     // Wait for 5 seconds after the installation to avaoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
-                    if(args[0] === "add") {
+                    if (args[0] === "add") {
+                        // Check the version of plugin after addition
                         checkPluginVersions(scenario.expectedVersions);
                     }
                 }).then(function (): void {
@@ -297,7 +296,7 @@ describe("taco platform for kit", function (): void {
             del("example", mocha);
         });
         this.timeout(70000);
-        CliPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
+        cliPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
@@ -305,7 +304,8 @@ describe("taco platform for kit", function (): void {
                     // Wait for 5 seconds after the installation to avaoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
-                    if(args[0] === "add") {
+                    if (args[0] === "add") {
+                        // Check the version of platform after addition
                         checkPlatformVersions(scenario.expectedVersions);
                     }
                 }).then(function (): void {
@@ -315,17 +315,16 @@ describe("taco platform for kit", function (): void {
                 });
             });
         });
-        CliPluginOperations.forEach(function (scenario: ICommandAndResult ): void {
-            //console.log(scenario);
+        cliPluginOperations.forEach(function (scenario: ICommandAndResult ): void {
             it("taco plugin " + scenario.command + " executes with no error", function (done: MochaDone): void {
-                console.log(args);
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
                 .then(function (): Q.Promise<any> {
                     // Wait for 5 seconds after the installation to avaoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
-                    if(args[0] === "add") {
+                    if (args[0] === "add") {
+                        // Check the version of plugin after addition
                         checkPluginVersions(scenario.expectedVersions);
                     }
                 }).then(function (): void {
