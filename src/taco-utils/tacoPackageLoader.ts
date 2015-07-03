@@ -199,9 +199,7 @@ module TacoUtility {
                 packageType = PackageSpecType.Uri;
             } else if (TacoPackageLoader.FileUriRegex.test(packageId)) {
                 packageId = packageId.substring("file://".length);
-                if (fs.existsSync(packageId)) {
-                    packageType = PackageSpecType.FilePath;
-                }
+                packageType = PackageSpecType.FilePath;
             } else {
                 // moving this down after Uri/FilePath because both can have '@'. Parse the packageId to retrieve packageVersion
                 var packageVersion: string = packageId.split("@")[1];
