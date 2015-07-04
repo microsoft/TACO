@@ -8,7 +8,11 @@
   },
   "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
   "main": "./tacoRemoteLib.js",
-
+  "keywords": [
+    "cordova",
+    "osx ",
+    "remote build"
+  ],
   "dependencies": {
     "zip-stream": "0.2.3",
     "q": "1.0.1",

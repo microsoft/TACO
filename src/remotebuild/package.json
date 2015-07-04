@@ -11,7 +11,11 @@
   "bin": {
     "remotebuild": "./bin/remotebuild"
   },
-
+  "keywords": [
+    "cordova",
+    "osx ",
+    "remote build"
+  ],
   "preferGlobal": true,
   "dependencies": {
     "express": "4.12.2",

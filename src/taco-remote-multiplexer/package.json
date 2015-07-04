@@ -6,6 +6,11 @@
     "name": "Microsoft Corporation",
     "email": "vscordovatools-admin@microsoft.com"
   },
+  "keywords": [
+    "cordova",
+    "osx ",
+    "remote build"
+  ],
   "dependencies": {
     "semver": "4.3.4"
   },

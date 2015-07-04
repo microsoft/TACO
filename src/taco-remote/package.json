@@ -8,7 +8,11 @@
   },
   "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
   "main": "./lib/server.js",
-
+  "keywords": [
+    "cordova",
+    "osx ",
+    "remote build"
+  ],
   "dependencies": {
     "express": "4.12.2",
     "serve-index": "1.6.2",

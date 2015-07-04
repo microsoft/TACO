@@ -114,6 +114,7 @@ gulp.task("copy", function (): Q.Promise<any> {
         "/**/templates/**",
         "/**/examples/**",
         "/**/*.ps1",
+        "/**/LICENSE",
     ];
     return Q.all([
         gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),
