@@ -24,6 +24,7 @@ import gulpUtils = require ("../tools/GulpUtils");
 var buildConfig = require("../../src/build_config.json");
 var tacoModules = ["taco-utils", "taco-kits", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 var allModules = tacoModules.concat(["taco-remote-multiplexer"]);
+var useSourceMaps: boolean = true;
 
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
@@ -37,17 +38,30 @@ gulp.task("default", ["install-build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
 gulp.task("compile", function (callback: Function): Q.Promise<any> {
-    return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
-        .pipe(sourcemaps.init())
-        .pipe(ts(buildConfig.tsCompileOptions))
-        .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(buildConfig.buildPackages)))
-        .then(function (): Q.Promise<any> {
-            return Q.all([
-                gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "taco-remote", "lib", "tacoRemoteConfig.js")),
-                gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "remotebuild", "lib", "remoteBuildConf.js"))
-            ]);
-    });
+    if (useSourceMaps){
+        return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
+            .pipe(sourcemaps.init())
+            .pipe(ts(buildConfig.tsCompileOptions))
+            .pipe(sourcemaps.write("."))
+            .pipe(gulp.dest(buildConfig.buildPackages)))
+            .then(function (): Q.Promise<any> {
+                return Q.all([
+                    gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "taco-remote", "lib", "tacoRemoteConfig.js")),
+                    gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "remotebuild", "lib", "remoteBuildConf.js"))
+                ]);
+        });
+    } else{
+        return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
+            .pipe(ts(buildConfig.tsPackageCompileOptions))
+            .pipe(gulp.dest(buildConfig.buildPackages)))
+            .then(function (): Q.Promise<any> {
+                return Q.all([
+                    gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "taco-remote", "lib", "tacoRemoteConfig.js")),
+                    gulpUtils.prepareJsdocJson(path.join(buildConfig.buildPackages, "remotebuild", "lib", "remoteBuildConf.js"))
+                ]);
+        });
+
+    }
 });
 
 /* compile + copy */
@@ -56,7 +70,11 @@ gulp.task("build", ["prepare-templates"], function (callback: Function): void {
 });
 
 gulp.task("package", [], function (callback: Function): void {
-    runSequence("build", "just-package", callback);
+    useSourceMaps = false;
+    runSequence("build", "just-package", function(){
+        useSourceMaps = true;
+        callback();
+    });
 });
 
 gulp.task("just-package", [], function (): Q.Promise<any> {
@@ -115,6 +133,7 @@ gulp.task("copy", function (): Q.Promise<any> {
         "/**/examples/**",
         "/**/*.ps1",
         "/**/LICENSE",
+        "/**/*.md",
     ];
     return Q.all([
         gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),
