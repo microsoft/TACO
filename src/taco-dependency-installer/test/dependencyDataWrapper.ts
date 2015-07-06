@@ -227,8 +227,8 @@ describe("DependencyDataWrapper", function (): void {
             var version1: string = dependencyDataWrapper.getFirstValidVersion("dependency1", "win32", "ia32");
             var version2: string = dependencyDataWrapper.getFirstValidVersion("dependency7", "darwin", "x64");
 
-            expectedResult1.should.be.exactly(version1);
-            expectedResult2.should.be.exactly(version2);
+            version1.should.be.exactly(expectedResult1);
+            version2.should.be.exactly(expectedResult2);
         });
 
         it("should not give errors when no version is supported for the current system", function (): void {
@@ -279,18 +279,18 @@ describe("DependencyDataWrapper", function (): void {
             var exists6: boolean = dependencyDataWrapper.versionExists("dependency6", "1.0");
             var exists7: boolean = dependencyDataWrapper.versionExists("unknown", "1.0");
 
-            expectedResult1.should.be.exactly(exists1);
-            expectedResult2.should.be.exactly(exists2);
-            expectedResult3.should.be.exactly(exists3);
-            expectedResult4.should.be.exactly(exists4);
-            expectedResult5.should.be.exactly(exists5);
-            expectedResult6.should.be.exactly(exists6);
-            expectedResult7.should.be.exactly(exists7);
+            exists1.should.be.exactly(expectedResult1);
+            exists2.should.be.exactly(expectedResult2);
+            exists3.should.be.exactly(expectedResult3);
+            exists4.should.be.exactly(expectedResult4);
+            exists5.should.be.exactly(expectedResult5);
+            exists6.should.be.exactly(expectedResult6);
+            exists7.should.be.exactly(expectedResult7);
         });
     });
 
     describe("isSystemSupported()", function (): void {
-        it("should correctly detect whether a version exists or not in our metadata", function (): void {
+        it("should correctly detect whether a system is supported or not for the specified dependency", function (): void {
             var expectedResult1: boolean = true;
             var expectedResult2: boolean = true;
             var expectedResult3: boolean = false;
@@ -298,24 +298,47 @@ describe("DependencyDataWrapper", function (): void {
             var expectedResult5: boolean = false;
             var expectedResult6: boolean = true;
             var expectedResult7: boolean = false;
+            var expectedResult8: boolean = false;
+            var expectedResult9: boolean = false;
+            var expectedResult10: boolean = false;
 
-            var exists1: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "win32", "ia32");
-            var exists2: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "2.0", "win32", "ia32");
-            var exists3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "unknown", "win32", "ia32");
-            var exists3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "unknown", "ia32");
-            var exists3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "win32", "unknown");
-            var exists4: boolean = dependencyDataWrapper.isSystemSupported("dependency2", "1.0", "darwin", "x64");
-            var exists5: boolean = dependencyDataWrapper.isSystemSupported("dependency4", "1.0", "win32", "ia32");
-            var exists6: boolean = dependencyDataWrapper.isSystemSupported("dependency6", "1.0", "win32", "ia32");
-            var exists7: boolean = dependencyDataWrapper.isSystemSupported("unknown", "1.0", "win32", "ia32");
+            var isSupported1: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "win32", "ia32");
+            var isSupported2: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "2.0", "win32", "ia32");
+            var isSupported3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "unknown", "win32", "ia32");
+            var isSupported4: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "unknown", "ia32");
+            var isSupported5: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "win32", "unknown");
+            var isSupported6: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "darwin", "x64");
+            var isSupported7: boolean = dependencyDataWrapper.isSystemSupported("dependency2", "1.0", "win32", "ia32");
+            var isSupported8: boolean = dependencyDataWrapper.isSystemSupported("dependency4", "1.0", "darwin", "ia32");
+            var isSupported9: boolean = dependencyDataWrapper.isSystemSupported("dependency6", "1.0", "win32", "x64");
+            var isSupported10: boolean = dependencyDataWrapper.isSystemSupported("unknown", "1.0", "win32", "ia32");
 
-            expectedResult1.should.be.exactly(exists1);
-            expectedResult2.should.be.exactly(exists2);
-            expectedResult3.should.be.exactly(exists3);
-            expectedResult4.should.be.exactly(exists4);
-            expectedResult5.should.be.exactly(exists5);
-            expectedResult6.should.be.exactly(exists6);
-            expectedResult7.should.be.exactly(exists7);
+            isSupported1.should.be.exactly(expectedResult1);
+            isSupported2.should.be.exactly(expectedResult2);
+            isSupported3.should.be.exactly(expectedResult3);
+            isSupported4.should.be.exactly(expectedResult4);
+            isSupported5.should.be.exactly(expectedResult5);
+            isSupported6.should.be.exactly(expectedResult6);
+            isSupported7.should.be.exactly(expectedResult7);
+            isSupported8.should.be.exactly(expectedResult8);
+            isSupported9.should.be.exactly(expectedResult9);
+            isSupported10.should.be.exactly(expectedResult10);
+        });
+    });
+
+    describe("isImplicit()", function (): void {
+        it("should correctly detect whether a version exists or not in our metadata", function (): void {
+            var expectedResult1: boolean = false;
+            var expectedResult2: boolean = true;
+            var expectedResult3: boolean = false;
+
+            var isImplicit1: boolean = dependencyDataWrapper.isImplicit("dependency1");
+            var isImplicit2: boolean = dependencyDataWrapper.isImplicit("dependency2");
+            var isImplicit3: boolean = dependencyDataWrapper.isImplicit("unknown");
+
+            isImplicit1.should.be.exactly(expectedResult1);
+            isImplicit2.should.be.exactly(expectedResult2);
+            isImplicit3.should.be.exactly(expectedResult3);
         });
     });
 });

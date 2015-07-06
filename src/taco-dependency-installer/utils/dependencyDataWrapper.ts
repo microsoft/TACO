@@ -101,8 +101,8 @@ class DependencyDataWrapper {
         var self = this;
         var validVersion: string;
 
-        if (this.dependenciesData[id]) {
-            Object.keys(this.dependenciesData[id]).some(function (version: string): boolean {
+        if (this.dependenciesData[id] && this.dependenciesData[id].versions) {
+            Object.keys(this.dependenciesData[id].versions).some(function (version: string): boolean {
                 if (self.isSystemSupported(id, version, platform, architecture)) {
                     validVersion = version;
 
@@ -127,7 +127,7 @@ class DependencyDataWrapper {
      * Returns true if the specified dependency has a node for the specified version, false otherwise.
      */
     public versionExists(id: string, version: string): boolean {
-        return !!this.dependenciesData[id] && !!this.dependenciesData[id].versions[version];
+        return !!this.dependenciesData[id] && !!this.dependenciesData[id].versions && !!this.dependenciesData[id].versions[version];
     }
 
     /*
@@ -148,7 +148,7 @@ class DependencyDataWrapper {
      * to handle these packages specifically. Thus, they are marked as implicit dependencies.
      */
     public isImplicit(id: string): boolean {
-        return !!this.dependenciesData[id] && this.dependenciesData[id].isImplicit;
+        return !!this.dependenciesData[id] && !!this.dependenciesData[id].isImplicit;
     }
 }
 
