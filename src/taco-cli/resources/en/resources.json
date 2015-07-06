@@ -298,7 +298,7 @@
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option(s) of 'taco install-reqs'",
 
-    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova {0}. 'taco-install-reqs' only supports projects using Cordova 5.1.0 or later.",
+    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova {0}. 'taco-install-reqs' only supports projects using Cordova 5.1.0 or later.<br/><br/>If your project was created using a taco kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating your installation of Cordova.",
     "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than 5.1.0. {0} is the Cordova version used by the current project.",
 
     "NoRemoteBuildIdFound": "Error: No remote build found. Please run '{0}' first",
