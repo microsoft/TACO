@@ -8,6 +8,7 @@
 
 /// <reference path="../../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../../typings/mocha.d.ts"/>
+/// <reference path="../../typings/rimraf.d.ts"/>
 /// <reference path="../../typings/should.d.ts"/>
 
 "use strict";
@@ -24,7 +25,7 @@ import InstallerRunner = require ("../installerRunner");
 
 import IDependency = DependencyInstallerInterfaces.IDependency;
 
-describe("DependencyInstaller", function (): void {
+describe("InstallerRunner", function (): void {
     // Important paths
     var runFolder: string = path.resolve(os.tmpdir(), "taco_dependency_installer_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
@@ -35,7 +36,7 @@ describe("DependencyInstaller", function (): void {
     var installerRunner: InstallerRunner;
 
     // Utility functions
-    function createBuildConfig(dependencies: IDependency[]) {
+    function createBuildConfig(dependencies: IDependency[]): void {
         if (fs.existsSync(installConfigFile)) {
             fs.unlinkSync(installConfigFile);
         }
@@ -46,18 +47,6 @@ describe("DependencyInstaller", function (): void {
 
         wrench.mkdirSyncRecursive(path.dirname(installConfigFile), 511); // 511 decimal is 0777 octal
         fs.writeFileSync(installConfigFile, JSON.stringify(jsonWrapper, null, 4));
-    }
-
-    function verifyDependencyArray(expectedIds: string[], actualDependencies: IDependency[]): void {
-        expectedIds.length.should.be.exactly(actualDependencies.length);
-
-        expectedIds.forEach(function (id: string): void {
-            var expectedDepFound: boolean = actualDependencies.some(function (missingDep: IDependency): boolean {
-                return missingDep.id === id;
-            });
-
-            expectedDepFound.should.be.true;
-        });
     }
 
     before(function (done: MochaDone): void {
@@ -174,6 +163,8 @@ describe("DependencyInstaller", function (): void {
                 }
             ];
 
+            createBuildConfig(missingDependencies);
+
             try {
                 (<any>installerRunner).parseInstallConfig();
             } catch (err) {
@@ -204,6 +195,8 @@ describe("DependencyInstaller", function (): void {
                 }
             ];
 
+            createBuildConfig(missingDependencies);
+
             try {
                 (<any>installerRunner).parseInstallConfig();
             } catch (err) {
@@ -211,7 +204,7 @@ describe("DependencyInstaller", function (): void {
             }
         });
 
-        it("should report the correct error when installConfig contains an invalid install path", function (): void {
+        (os.platform() === "win32" ? it : it.skip)("should report the correct error when installConfig contains an invalid install path", function (): void {
             var missingDependencies: IDependency[] = [
                 {
                     id: "dependency1",
@@ -223,7 +216,7 @@ describe("DependencyInstaller", function (): void {
                     id: "dependency5",
                     version: "1.0",
                     displayName: "test_value5",
-                    installDestination: "\\\\//::::****>>><<<<\"\""
+                    installDestination: "\\\\//::::****>>><<<<\"\"my\\folder"
                 },
                 {
                     id: "dependency7",
@@ -234,14 +227,90 @@ describe("DependencyInstaller", function (): void {
                 }
             ];
 
+            createBuildConfig(missingDependencies);
+
             try {
                 (<any>installerRunner).parseInstallConfig();
             } catch (err) {
-                err.message.should.be.exactly("UnknownVersion");
+                err.message.should.be.exactly("InvalidInstallPath");
+            }
+        });
+
+        it("should report the correct error when installConfig contains a non-empty install path", function (): void {
+            var missingDependencies: IDependency[] = [
+                {
+                    id: "dependency1",
+                    version: "1.0",
+                    displayName: "test_value1",
+                    installDestination: "test_value1"
+                },
+                {
+                    id: "dependency5",
+                    version: "1.0",
+                    displayName: "test_value5",
+                    installDestination: runFolder
+                },
+                {
+                    id: "dependency7",
+                    version: "1.0",
+                    displayName: "test_value7",
+                    installDestination: "test_value7",
+                    licenseUrl: "test_value7"
+                }
+            ];
+
+            createBuildConfig(missingDependencies);
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("PathNotEmpty");
+            }
+        });
+
+        it("should report the correct error when installConfig contains duplicate install paths", function (): void {
+            var missingDependencies: IDependency[] = [
+                {
+                    id: "dependency1",
+                    version: "1.0",
+                    displayName: "test_value1",
+                    installDestination: "test_value1"
+                },
+                {
+                    id: "dependency5",
+                    version: "1.0",
+                    displayName: "test_value5",
+                    installDestination: "test_value7"
+                },
+                {
+                    id: "dependency7",
+                    version: "1.0",
+                    displayName: "test_value7",
+                    installDestination: "test_value7",
+                    licenseUrl: "test_value7"
+                }
+            ];
+
+            createBuildConfig(missingDependencies);
+
+            try {
+                (<any>installerRunner).parseInstallConfig();
+            } catch (err) {
+                err.message.should.be.exactly("PathNotUnique");
             }
         });
     });
 
     describe("instantiateInstaller()", function (): void {
+        it("should instantiate a sub-installer without error", function (): void {
+            var dependency: IDependency = {
+                id: "dependency1",
+                version: "1.0",
+                displayName: "test_value1",
+                installDestination: "test_value1"
+            };
+
+            (<any>installerRunner).instantiateInstaller(dependency);
+        });
     });
 });

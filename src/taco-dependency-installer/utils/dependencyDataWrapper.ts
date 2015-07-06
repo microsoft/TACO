@@ -30,7 +30,7 @@ class DependencyDataWrapper {
      * Will return null if the info is missing from our metadata or if either the dependency ID, the version ID or the platform ID does not exist.
      */
     public getInstallDirectory(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): string {
-        if (this.dependenciesData[id] && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
+        if (this.dependenciesData[id] && this.dependenciesData[id].versions && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform] && this.dependenciesData[id].versions[version][platform][architecture]) {
             return this.dependenciesData[id].versions[version][platform][architecture].installDestination;
         }
 
@@ -86,7 +86,7 @@ class DependencyDataWrapper {
      * platform if no platform is specified) ID does not exist.
      */
     public getInstallerInfo(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IInstallerData {
-        if (this.dependenciesData[id] && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
+        if (this.dependenciesData[id] && this.dependenciesData[id].versions && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
             return this.dependenciesData[id].versions[version][platform][architecture];
         }
 
@@ -97,16 +97,23 @@ class DependencyDataWrapper {
      * Looks into the specified dependency node and returns the first version ID that contains a node for either the specified platform (or the current system
      * platform if no platform is specified) or the "default" platform. Returns null if no such version ID exists.
      */
-    public getFirstValidVersion(id: string, platform: string = process.platform): string {
-        for (var version in this.dependenciesData[id].versions) {
-            if (this.dependenciesData[id].versions.hasOwnProperty(version)) {
-                if (this.isSystemSupported(id, version, platform)) {
-                    return version;
+    public getFirstValidVersion(id: string, platform: string = process.platform, architecture: string = os.arch()): string {
+        var self = this;
+        var validVersion: string;
+
+        if (this.dependenciesData[id]) {
+            Object.keys(this.dependenciesData[id]).some(function (version: string): boolean {
+                if (self.isSystemSupported(id, version, platform, architecture)) {
+                    validVersion = version;
+
+                    return true;
                 }
-            }
+
+                return false;
+            });
         }
 
-        return null;
+        return validVersion;
     }
 
     /*
@@ -129,6 +136,7 @@ class DependencyDataWrapper {
      */
     public isSystemSupported(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): boolean {
         return !!this.dependenciesData[id] &&
+            !!this.dependenciesData[id].versions &&
             !!this.dependenciesData[id].versions[version] &&
             !!this.dependenciesData[id].versions[version][platform] &&
             !!this.dependenciesData[id].versions[version][platform][architecture];
