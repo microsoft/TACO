@@ -218,4 +218,104 @@ describe("DependencyDataWrapper", function (): void {
             assertDoesNotExist(installerData5);
         });
     });
+
+    describe("getFirstValidVersion()", function (): void {
+        it("should return the correct version info for a dependency", function (): void {
+            var expectedResult1: string = "1.0";
+            var expectedResult2: string = "1.0";
+
+            var version1: string = dependencyDataWrapper.getFirstValidVersion("dependency1", "win32", "ia32");
+            var version2: string = dependencyDataWrapper.getFirstValidVersion("dependency7", "darwin", "x64");
+
+            expectedResult1.should.be.exactly(version1);
+            expectedResult2.should.be.exactly(version2);
+        });
+
+        it("should not give errors when no version is supported for the current system", function (): void {
+            var version1: string = dependencyDataWrapper.getFirstValidVersion("dependency1", "win32", "unknown");
+            var version2: string = dependencyDataWrapper.getFirstValidVersion("dependency7", "unknown", "x64");
+            var version3: string = dependencyDataWrapper.getFirstValidVersion("unknown", "win32", "x64");
+            var version4: string = dependencyDataWrapper.getFirstValidVersion("dependency2", "win32", "x64");
+            var version5: string = dependencyDataWrapper.getFirstValidVersion("dependency4", "win32", "x64");
+            var version6: string = dependencyDataWrapper.getFirstValidVersion("dependency6", "win32", "x64");
+
+            assertDoesNotExist(version1);
+            assertDoesNotExist(version2);
+            assertDoesNotExist(version3);
+            assertDoesNotExist(version4);
+            assertDoesNotExist(version5);
+            assertDoesNotExist(version6);
+        });
+    });
+
+    describe("dependencyExists()", function (): void {
+        it("should correctly detect whether a dependency exists or not in our metadata", function (): void {
+            var expectedResult1: boolean = true;
+            var expectedResult2: boolean = false;
+
+            var exists1: boolean = dependencyDataWrapper.dependencyExists("dependency1");
+            var exists2: boolean = dependencyDataWrapper.dependencyExists("unknown");
+
+            exists1.should.be.exactly(expectedResult1);
+            exists2.should.be.exactly(expectedResult2);
+        });
+    });
+
+    describe("versionExists()", function (): void {
+        it("should correctly detect whether a version exists or not in our metadata", function (): void {
+            var expectedResult1: boolean = true;
+            var expectedResult2: boolean = true;
+            var expectedResult3: boolean = false;
+            var expectedResult4: boolean = false;
+            var expectedResult5: boolean = false;
+            var expectedResult6: boolean = true;
+            var expectedResult7: boolean = false;
+
+            var exists1: boolean = dependencyDataWrapper.versionExists("dependency1", "1.0");
+            var exists2: boolean = dependencyDataWrapper.versionExists("dependency1", "2.0");
+            var exists3: boolean = dependencyDataWrapper.versionExists("dependency1", "unknown");
+            var exists4: boolean = dependencyDataWrapper.versionExists("dependency2", "1.0");
+            var exists5: boolean = dependencyDataWrapper.versionExists("dependency4", "1.0");
+            var exists6: boolean = dependencyDataWrapper.versionExists("dependency6", "1.0");
+            var exists7: boolean = dependencyDataWrapper.versionExists("unknown", "1.0");
+
+            expectedResult1.should.be.exactly(exists1);
+            expectedResult2.should.be.exactly(exists2);
+            expectedResult3.should.be.exactly(exists3);
+            expectedResult4.should.be.exactly(exists4);
+            expectedResult5.should.be.exactly(exists5);
+            expectedResult6.should.be.exactly(exists6);
+            expectedResult7.should.be.exactly(exists7);
+        });
+    });
+
+    describe("isSystemSupported()", function (): void {
+        it("should correctly detect whether a version exists or not in our metadata", function (): void {
+            var expectedResult1: boolean = true;
+            var expectedResult2: boolean = true;
+            var expectedResult3: boolean = false;
+            var expectedResult4: boolean = false;
+            var expectedResult5: boolean = false;
+            var expectedResult6: boolean = true;
+            var expectedResult7: boolean = false;
+
+            var exists1: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "win32", "ia32");
+            var exists2: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "2.0", "win32", "ia32");
+            var exists3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "unknown", "win32", "ia32");
+            var exists3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "unknown", "ia32");
+            var exists3: boolean = dependencyDataWrapper.isSystemSupported("dependency1", "1.0", "win32", "unknown");
+            var exists4: boolean = dependencyDataWrapper.isSystemSupported("dependency2", "1.0", "darwin", "x64");
+            var exists5: boolean = dependencyDataWrapper.isSystemSupported("dependency4", "1.0", "win32", "ia32");
+            var exists6: boolean = dependencyDataWrapper.isSystemSupported("dependency6", "1.0", "win32", "ia32");
+            var exists7: boolean = dependencyDataWrapper.isSystemSupported("unknown", "1.0", "win32", "ia32");
+
+            expectedResult1.should.be.exactly(exists1);
+            expectedResult2.should.be.exactly(exists2);
+            expectedResult3.should.be.exactly(exists3);
+            expectedResult4.should.be.exactly(exists4);
+            expectedResult5.should.be.exactly(exists5);
+            expectedResult6.should.be.exactly(exists6);
+            expectedResult7.should.be.exactly(exists7);
+        });
+    });
 });
