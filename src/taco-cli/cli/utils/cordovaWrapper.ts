@@ -126,9 +126,12 @@ class CordovaWrapper {
                 return CordovaWrapper.cli(["-v"], true);
             })
             .then(function (version: string): Q.Promise<any> {
+                // trim() the version to remove trailing newlines in case the raw output from 'cordova -v' was used
+                version = version.trim();
+
                 // If the cordova version is older than 5.1.0, the 'requirements' command does not exist
                 if (!semver.gte(version, CordovaWrapper.CordovaRequirementsMinVersion)) {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld, version));
                 }
 
                 return Q.resolve({});

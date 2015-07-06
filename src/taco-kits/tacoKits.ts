@@ -257,6 +257,7 @@ module TacoKits {
                                     templateInfo: templateMetadata[kitId][templateId]
                                 };
 
+                                templateInfo.templateInfo.name = resources.getString(templateInfo.templateInfo.name);
                                 templateList.push(templateInfo);
                                 knownTemplates[templateId] = true;
                             }
