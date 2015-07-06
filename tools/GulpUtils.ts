@@ -66,10 +66,8 @@ class GulpUtils {
         }, Q({}))
     }
 
-    public static copyFiles(pathsToCopy: string[], srcPath: string, destPath: string): Q.Promise<any> {
-        return Q.all(pathsToCopy.map(function (val: string): Q.Promise<any> {
-            return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, val)).pipe(gulp.dest(destPath)));
-        }));
+    public static copyFiles(pathsToCopy: string[], destPath: string): Q.Promise<any> {
+        return GulpUtils.streamToPromise(gulp.src(pathsToCopy).pipe(gulp.dest(destPath)));
     }
 
     public static copyDynamicDependenciesJson(fileGlob: string, srcPath: string, destPath: string, dropLocation: string, packed: boolean = false): Q.Promise<any> {
