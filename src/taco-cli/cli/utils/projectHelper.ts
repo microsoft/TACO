@@ -26,6 +26,7 @@ import kitHelper = tacoKits.KitHelper;
  */
 class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
+    private static ConfigXmlFileName: string = "config.xml";
 
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
@@ -37,10 +38,10 @@ class ProjectHelper {
         if (isKitProject) {
             if (!versionValue) {
                 return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
-                    return ProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { kit: kitId });
+                    return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
                 });
             } else {
-                return ProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { kit: versionValue });
+                return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: versionValue });
             }
         } else {
             if (!versionValue) {
@@ -48,7 +49,7 @@ class ProjectHelper {
                 return deferred.promise;
             }
 
-            return ProjectHelper.createTacoJsonFileWithContents(tacoJsonPath, { cli: versionValue });
+            return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { cli: versionValue });
         }
     }
 
@@ -106,6 +107,7 @@ class ProjectHelper {
         var projectInfo: ProjectHelper.IProjectInfo = {
             isTacoProject: false,
             cordovaCliVersion: "",
+            configXmlPath: "",
             tacoKitId: ""
         };
 
@@ -117,6 +119,12 @@ class ProjectHelper {
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata = require(path.join(projectPath, ProjectHelper.TacoJsonFileName));
+            var configFilePath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
+
+            if (fs.existsSync(configFilePath)) {
+                projectInfo.configXmlPath = configFilePath;
+            }
+
             if (tacoJson.kit) {
                 kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
                     projectInfo.isTacoProject = true;
@@ -139,9 +147,9 @@ class ProjectHelper {
     }
 
     /**
-     *  Private helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
+     *  public helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
      */
-    private static createTacoJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
+    public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
             if (err) {
@@ -163,6 +171,7 @@ module ProjectHelper {
     export interface IProjectInfo {
         isTacoProject: boolean;
         cordovaCliVersion: string;
+        configXmlPath: string;
         tacoKitId?: string;
     }
 }

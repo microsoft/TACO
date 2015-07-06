@@ -6,10 +6,11 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/tacoKits.d.ts" />
-/// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/tacoHelpArgs.d.ts"/>
+/// <reference path="../../typings/tacoKits.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 
 "use strict";
 
@@ -27,6 +28,7 @@ import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
 import telemetry = tacoUtility.Telemetry;
+import UtilHelper = tacoUtility.UtilHelper;
 
 interface IParsedArgs {
     args: string[];
@@ -78,32 +80,24 @@ class Taco {
         var commandArgs: string[] = null;
 
         // if version flag found, mark input as version and continue
-        if (args.some(function (value: string): boolean { return /^(-+)(v|version)$/.test(value); })) {
+        if (UtilHelper.tryParseVersionArgs(args)) {
             commandName = "version";
             commandArgs = [];
         } else {
-            // if help flag is specified, use that
-            // for "taco --help cmd" scenarios, update commandArgs to reflect the next argument or make it [] if it is not present
-            // for "taco cmd --help" scenarios, update commandArgs to reflect the first argument instead
-            for (var i = 0; i < args.length; i++) {
-                if (/^(-+)(h|help)$/.test(args[i])) {
-                    commandName = "help";
-                    commandArgs = (i === 0) ? (args[1] ? [args[1]] : []) : [args[0]];
-                    break;
-                }
+            var helpArgs: ITacoHelpArgs = UtilHelper.tryParseHelpArgs(args);
+            if (helpArgs) {
+                commandName = "help";
+                commandArgs = helpArgs.helpTopic ? [helpArgs.helpTopic] : [];
+            } else {
+                commandName = args[0] || "help";
+                commandArgs = args.slice(1);
             }
         }
 
-        commandName = commandName || args[0] || "help";
-        commandArgs = commandArgs || args.slice(1);
-
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.ICommand = commandsFactory.getTask(commandName, commandArgs, __dirname);
-        var parsedArgs: IParsedArgs = {
-            command: command,
-            args: command ? commandArgs : args
-        };
-        return parsedArgs;
+
+        return <IParsedArgs>{ command: command, args: command ? commandArgs : args };
     }
 }
 

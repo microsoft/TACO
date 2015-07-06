@@ -1,7 +1,7 @@
 declare module TacoUtility {
     enum TacoErrorCode {
         AbstractMethod,
-        CommandBadArguments,
+        CommandBadSubcommand,
         FailedFileRead,
         FailedFileWrite,
         FailedGitClone,

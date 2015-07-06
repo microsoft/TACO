@@ -19,7 +19,7 @@ declare module TacoKits {
         name?: string;
         version?: string;
         src?: string;
-        platforms?: string;
+        "supported-platforms"?: string;
     }
 
     interface IPlatformOverrideInfo {

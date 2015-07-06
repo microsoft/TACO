@@ -120,6 +120,12 @@ class Settings {
                     return { location: Settings.BuildLocationType.Local, platform: platform };
                 }));
             }
+        }).then(function (platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
+            if (platforms.length > 0) {
+                return platforms;
+            } else {
+                throw errorHelper.get(TacoErrorCodes.ErrorNoPlatformsFound);
+            }
         });
     }
 

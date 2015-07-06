@@ -8,7 +8,6 @@
 
 /// <reference path="../typings/node.d.ts" />
 
-interface INameDescription {
-    name: string;
-    description: string;
+interface ITacoHelpArgs {
+    helpTopic: string;
 }

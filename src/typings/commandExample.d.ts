@@ -8,7 +8,8 @@
 
 /// <reference path="../typings/node.d.ts" />
 
-interface INameDescription {
-    name: string;
+interface ICommandExample {
+    example: any;
     description: string;
 }
+

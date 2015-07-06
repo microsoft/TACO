@@ -215,6 +215,10 @@ class RemoteBuildClientHelper {
                 headers: { "Accept-Language": settings.language },
                 agent: agent
             };
+        }).finally(function (): Q.Promise<any> {
+            // Add a slight delay to work around node race condition to do with certificates.
+            // See https://github.com/nodejs/io.js/issues/712 for more discussion
+            return Q.delay(1);
         });
     }
 

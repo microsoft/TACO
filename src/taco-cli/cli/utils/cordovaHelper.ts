@@ -9,44 +9,21 @@
 "use strict";
 
 import path = require ("path");
+import Q = require ("q");
 
+import CordovaWrapper = require ("./cordovaWrapper");
+import errorHelper = require ("../tacoErrorHelper");
+import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
-import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
-
-module CordovaHelper {
-    /* 
-     * Interfaces for the cordova create command
-     */
-    export interface ICordovaLibMetadata {
-        url?: string;
-        version?: string;
-        id?: string;
-        link?: boolean;
-    }
-
-    export interface ICordovaConfigMetadata {
-        id?: string;
-        name?: string;
-        lib?: {
-            www?: ICordovaLibMetadata;
-        };
-    }
-
-    export interface ICordovaCreateParameters {
-        projectPath: string;
-        appId: string;
-        appName: string;
-        cordovaConfig: any;
-        copyFrom?: string;
-        linkTo?: string;
-    }
-}
+import ConfigParser = Cordova.cordova_lib.configparser;
+import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaHelper {
+    private static CordovaPackageName: string = "cordova";
     // Cordova's known parameters
     private static BooleanParameters =
     {
@@ -80,7 +57,7 @@ class CordovaHelper {
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
      */
-    public static prepareCordovaConfig(parameters: CordovaHelper.ICordovaCreateParameters): void {
+    public static prepareCordovaConfig(parameters: Cordova.ICordovaCreateParameters): void {
         /*
         Re-implementation of Cordova's code:
 
@@ -109,7 +86,7 @@ class CordovaHelper {
         }
         */
 
-        var config: CordovaHelper.ICordovaConfigMetadata = {};
+        var config: Cordova.ICordovaConfigMetadata = {};
 
         // Verify if user specified a cordovaConfig parameter on the command line
         if (parameters.cordovaConfig) {
@@ -131,7 +108,7 @@ class CordovaHelper {
 
             customWww = path.resolve(customWww);
 
-            var wwwCfg: CordovaHelper.ICordovaLibMetadata = { url: customWww };
+            var wwwCfg: Cordova.ICordovaLibMetadata = { url: customWww };
 
             if (parameters.linkTo) {
                 wwwCfg.link = true;
@@ -178,6 +155,96 @@ class CordovaHelper {
         return CordovaHelper.toCordovaArgumentsInternal(platform, commandData);
     }
 
+    public static editConfigXml(infoList: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
+        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
+            editFunc(infoList, configParser, addSpec);
+            configParser.write();
+            return Q.resolve({});
+        });
+    }
+
+    /**
+     * Static method to get the plugin version specification from the config.xml file
+     *
+     * @param {string} The name(id) of the cordova plugin
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} A promise with the version specification as a string
+     */
+    public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
+        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
+            var pluginEntry: Cordova.ICordovaPlatformPluginInfo = configParser.getPlugin(pluginId);
+            var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
+            return Q.resolve(versionSpec);
+        });
+    }
+
+    /**
+     * Static method to add the plugin specification to config.xml file
+     *
+     * @param {ICordovaPlatformPluginInfo } The plugin info
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} An empty promise
+     */
+    public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean): void {
+        infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
+            configParser.removePlugin(info.name);
+            if (addSpec) {
+                configParser.addPlugin({ name: info.name, spec: info.spec }, info.pluginVariables);
+            }
+        });
+    }
+
+        /**
+         * Static method to get the engine specification from the config.xml file
+         *
+         * @param {string} The platform name
+         * @param {string} The path to config.xml of the project
+         * @param {string} The cordova CLI version
+         *
+         * @return {Q.Promise<string>} A promise with the version specification as a string
+         */
+    public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
+        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+            var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
+            var engineSpec: string = "";
+            var engines: Cordova.ICordovaPlatformPluginInfo[] = configParser.getEngines();
+            engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPluginInfo ): void {
+                if (engineInfo.name.toLowerCase() === platform.toLowerCase()) {
+                    engineSpec = engineInfo.spec;
+                }
+            });
+            return Q.resolve(engineSpec);
+        });
+    }
+
+    /**
+     * Static method to add the platform specification to config.xml file
+     *
+     * @param {string} The platform name
+     * @param {string} The version specification for the platform
+     * @param {string} The path to config.xml of the project
+     * @param {string} The cordova CLI version
+     *
+     * @return {Q.Promise<string>} An empty promise
+     */
+    public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean): void {
+        infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
+            configParser.removeEngine(info.name);
+            if (addSpec) {
+                configParser.addEngine(info.name, info.spec);
+            }
+        });
+    }
+   
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
      */

@@ -21,7 +21,7 @@ import HelpCommandBase = tacoUtility.HelpCommandBase;
  * Help handles "Taco Help"
  */
 class Help extends HelpCommandBase {
-    private static TacoString: string = "taco";
+    private static TacoString: string = "taco-remote";
     constructor() {
         super(Help.TacoString, path.join(__dirname, "./commands.json"), require("../resources/resourceManager"));
     }

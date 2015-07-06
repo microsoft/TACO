@@ -7,7 +7,6 @@
 /// <reference path="../src/typings/archiver.d.ts" />
 /// <reference path="../src/typings/gulp.d.ts" />
 /// <reference path="../src/typings/gulp-json-editor.d.ts" />
-/// <reference path="../src/typings/jsdoc-parse.d.ts" />
 
 import archiver = require ("archiver");
 import child_process = require ("child_process");
@@ -16,7 +15,6 @@ import fs = require ("fs");
 import fstream = require ("fstream");
 import gulp = require ("gulp");
 import jsonEditor = require ("gulp-json-editor");
-import parse = require ("jsdoc-parse");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
@@ -196,11 +194,6 @@ class GulpUtils {
         });
 
         return Q.all(promises);
-    }
-
-    public static prepareJsdocJson(filename: string): Q.Promise<any> {
-        var outName = path.join(path.dirname(filename), util.format("%s.jsdoc.json", path.basename(filename, ".js")));
-        return GulpUtils.streamToPromise(parse({ src: filename }).pipe(fs.createWriteStream(outName)));
     }
 
     public static streamToPromise(stream: NodeJS.ReadWriteStream|NodeJS.WritableStream): Q.Promise<any> {

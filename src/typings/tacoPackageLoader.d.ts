@@ -17,6 +17,9 @@ declare module TacoUtility {
     }
 
     class TacoPackageLoader {
+        public static GitUriRegex: RegExp;
+        public static FileUriRegex: RegExp;
+
         /**
          * Load a node package with specified version. If the package is not already downloaded,
          * then first download the package and cache it locally for future loads. The loaded package is cast to type T

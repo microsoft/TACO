@@ -10,6 +10,7 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts" />
 /// <reference path="../typings/ncp.d.ts" />
+/// <reference path="../typings/tacoHelpArgs.d.ts"/>
 
 declare module TacoUtility {
     class UtilHelper {
@@ -81,7 +82,10 @@ declare module TacoUtility {
          *
          * @return {string} A new string where the environment variables were replaced with their actual value
          */
+        public static cleanseOptions(options: { [option: string]: any }, exclude: string[]): { [option: string]: any };
+
         public static expandEnvironmentVariables(str: string): string;
+
         /**
          * Validates the given path, ensuring all segments are valid directory / file names
          *
@@ -90,5 +94,16 @@ declare module TacoUtility {
          * @return {boolean} A boolean set to true if the path is valid, false if not
          */
         public static isPathValid(pathToTest: string): boolean;
+
+        /**
+         * Returns true if version was requested in args, false otherswise
+         */
+        public static tryParseVersionArgs(args: string[]): boolean;
+
+        /**
+         * Returns ITacoHelpArgs with a requested helpTopic if help was requested in given args
+         * Returns null otherwise
+         */
+        public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
     }
 }

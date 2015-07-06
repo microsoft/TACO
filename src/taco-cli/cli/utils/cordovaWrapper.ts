@@ -28,6 +28,7 @@ import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
+import ConfigParser = Cordova.cordova_lib.configparser;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
@@ -87,7 +88,7 @@ class CordovaWrapper {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
                         return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(platform, commandData));
                 });
             } else {
@@ -100,7 +101,7 @@ class CordovaWrapper {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
                     return cordova.raw.run(cordovaHelper.toCordovaRunArguments(platform, commandData));
                 });
             } else {
@@ -161,9 +162,9 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static create(cordovaCliVersion: string, cordovaParameters: cordovaHelper.ICordovaCreateParameters): Q.Promise<any> {
+    public static create(cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<any> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-            .then(function (cordova: Cordova.ICordova): Q.Promise<any> {
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
                 cordovaHelper.prepareCordovaConfig(cordovaParameters);
 
                 return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
@@ -180,6 +181,37 @@ class CordovaWrapper {
                 });
             }
         });
+    }
+
+    /**
+     * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
+     *
+     * @param {string} The name of the cordova command to be invoked
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaCommandParameters} The cordova command parameters
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData): Q.Promise<any> {
+        if (cordovaCliVersion) {
+            return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+                .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                cordova.on("results", console.info);
+                cordova.on("log", console.info);
+                cordova.on("warn", console.warn);
+                cordova.on("error", console.error);
+                if (command === "platform") {
+                    return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+                } else if (command === "plugin") {
+                    return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+                } else {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
+                }
+            });
+        } else {
+            var cliArgs: string[] = [command, platformCmdParameters.subCommand].concat(platformCmdParameters.targets);
+            return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
+        }
     }
 }
 

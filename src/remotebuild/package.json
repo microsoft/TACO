@@ -1,6 +1,6 @@
 {
     "name": "remotebuild",
-    "description": "Agent to remotely build, run, and debug iOS apps created using Visual Studio Tools for Apache Cordova.",
+    "description": "Agent to remotely build, run, and debug iOS apps created using Apache Cordova.",
     "version": "0.2.6",
     "author": {
         "name": "Microsoft Corporation",

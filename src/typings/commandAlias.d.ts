@@ -1,21 +1,14 @@
-﻿/**
+/**
  *******************************************************
  *                                                     *
  *   Copyright (C) Microsoft. All rights reserved.     *
  *                                                     *
  *******************************************************
  */
-// Barebones typings for jsdoc-parse
 
-declare module JSDocParse {
-    export interface IArgs {
-        src: string
-    }
+/// <reference path="../typings/node.d.ts" />
 
-    export function parse(arg: IArgs): NodeJSStream.Readable;
-}
-
-declare module "jsdoc-parse" {
-    import parse = JSDocParse.parse;
-    export = parse;
+interface ICommandAlias {
+    alias: string;
+    command: string;
 }

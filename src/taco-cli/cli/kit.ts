@@ -14,6 +14,8 @@
 /// <reference path="../../typings/tacoKits.d.ts" />
 "use strict";
 
+import assert = require ("assert");
+import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
@@ -30,6 +32,7 @@ import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
+import utils = tacoUtility.UtilHelper;
 
 /**
  * kit
@@ -38,10 +41,12 @@ import LoggerHelper = tacoUtility.LoggerHelper;
  */
 class Kit extends commands.TacoCommandBase implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.CommandData = {
-        json: Boolean,
+        kit: String,
+        json: String,
         cli: String
     };
     private static ShortHands: Nopt.ShortFlags = {};
+    private static DefaultMetadataFileName: string = "KitMetadata.json";
 
     private static IndentWidth: number = 3; // indent string
     private static MaxTextWidth: number = 40;
@@ -71,7 +76,15 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameter combinations
         if (parsedOptions.options["json"] && parsedOptions.options["cli"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandKitInvalidCommandCombination);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--json", "--cli");
+        }
+        
+        if (parsedOptions.options["cli"] && parsedOptions.options["kit"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--cli", "--kit");
+        }
+
+        if (parsedOptions.options["kit"] && parsedOptions.options["json"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--kit", "--json");
         }
 
         return parsedOptions;
@@ -80,18 +93,107 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      /**
       * Pretty prints the current Kit/Cordova CLI info
       */
-    private static printCurrentKitInfo(): Q.Promise<void> {
+    private static getCurrentKitInfo(): Q.Promise<string> {
+        var deferred = Q.defer<string>();
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
+            deferred.resolve(projectInfo.tacoKitId || "");
+            return deferred.promise;
+        });
+    }
+
+    /**
+     * Get kit title
+     */
+    private static getKitTitle(kitId: string, kitInfo: tacoKits.IKitInfo): string {
+        var name: string = util.format("<kitid>%s</kitid>", kitId);
+        if (!!kitInfo.default) {
+            return util.format("%s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
+        } else if (!!kitInfo.deprecated) {
+            return util.format("%s <deprecatedkit>(%s) </deprecatedkit>", name, resources.getString("CommandKitListDeprecatedKit"));
+        }
+
+        return name;
+    }
+
+    /**
+     * Get kit description
+     */
+    private static getKitDescription(kitInfo: tacoKits.IKitInfo): string {
+        var kitDefaultDescription: string = "";
+
+        if (kitInfo["cordova-cli"]) {
+            kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
+        }
+
+        return kitInfo.description || kitDefaultDescription;
+    }
+
+    /**
+     * Pretty prints title and description of all the known kits
+     * Order is :
+     * <current_kit> if within a Taco kit project
+     * <default_kit>
+     * <available_kit_1>
+     * <available_kit_2>
+     * <available_kit_3>
+     * ...
+     * <deprecated_kit_1>
+     * <deprecated_kit_2>
+     * ...
+     */
+    private static printAllKits(): Q.Promise<any> {
+        var defaultKitDesc: INameDescription, currentKitDesc: INameDescription;
+        var kitsToPrint: INameDescription[] = [];
+        var deprecatedKits: INameDescription[] = [];
+        var availableKits: INameDescription[] = [];
+        var currentKitId: string = "";
+
+        logger.log(resources.getString("CommandKitList"));
         logger.logLine();
-        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): void {
-            if (!projectInfo.isTacoProject) {
-                return;
+        
+        return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<any> {
+            currentKitId = kitId;
+            return Q.resolve({});
+        })
+            .then(function (): Q.Promise<any> {
+            return kitHelper.getKitMetadata().then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
+                return Q.all(Object.keys(meta.kits).map(function (kitId: string): Q.Promise<any> {
+                    return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): Q.Promise<any> {                     
+                        var kitNameDescription = {
+                            name: Kit.getKitTitle(kitId, kitInfo),
+                            description: Kit.getKitDescription(kitInfo)
+                        };
+
+                        if (kitId === currentKitId) {
+                            currentKitDesc = kitNameDescription;
+                        } else {
+                            if (!!kitInfo.default) {
+                                defaultKitDesc = kitNameDescription;
+                            } else if (!!kitInfo.deprecated) {
+                                deprecatedKits.push(kitNameDescription);
+                            } else {
+                                availableKits.push(kitNameDescription);
+                            }
+                        }
+
+                        return Q.resolve({});
+                    });
+                }));
+            });
+        })
+            .then(function (): Q.Promise<any> {
+            if (currentKitDesc) {
+                kitsToPrint.push(currentKitDesc);
             }
 
-            if (projectInfo.tacoKitId) {
-                logger.log(resources.getString("CommandKitListCurrentKit", projectInfo.tacoKitId));
+            if (defaultKitDesc) {
+                kitsToPrint.push(defaultKitDesc);
             }
 
-            logger.log(resources.getString("CommandKitListCurrentCordovaCli", projectInfo.cordovaCliVersion));
+            kitsToPrint.push.apply(kitsToPrint, availableKits);
+            kitsToPrint.push.apply(kitsToPrint, deprecatedKits);
+            LoggerHelper.logNameDescriptionTable(kitsToPrint);
+            return Q.resolve({});
         });
     }
 
@@ -99,22 +201,10 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * Pretty prints the Kit name and description info
      */
     private static printKitNameAndDescription(kitId: string, kitInfo: tacoKits.IKitInfo): void {
-        var title: string = kitId;
-        var titleLength: number = title.length;
-        var suffix: string = "";
-
-        if (!!kitInfo.default) {
-            suffix = util.format("<defaultkit>(%s)</defaultkit>", resources.getString("CommandKitListDefaultKit"));
-        } else if (!!kitInfo.deprecated) {
-            suffix = util.format("<deprecatedkit>(%s)</deprecatedkit>", resources.getString("CommandKitListDeprecatedKit"));
-        }
-
-        logger.logLine();//
-        logger.log(util.format("<kitid>%s</kitid> %s<underline/>", title, suffix));
-        logger.log(kitInfo.name);
-        logger.logLine();
-        logger.log(kitInfo.description);
-        logger.logLine();
+        var title: string = Kit.getKitTitle(kitId, kitInfo);
+        var kitDescription: string = Kit.getKitDescription(kitInfo);
+        logger.log(util.format("%s<underline/>", title));
+        logger.log(kitDescription);
     }
 
     /**
@@ -162,53 +252,89 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         }
     }
 
-    private static printKitsInfo(): Q.Promise<any> {
-        logger.logLine();
-        logger.log(resources.getString("CommandKitList"));
-        return kitHelper.getKitMetadata().then(function (metadata: tacoKits.ITacoKitMetadata): Q.Promise<tacoKits.IKitMetadata> {
-            return Q.resolve(metadata.kits);
-        }).then(function (kits: tacoKits.IKitMetadata): Q.Promise<any> {
-                return Kit.getLongestPlatformPluginLength(kits)
-                    .then(function (maxLength: number): void {
-                        var indent2 = LoggerHelper.getDescriptionColumnIndent(maxLength);
-                        Object.keys(kits).forEach(function (kitId: string): void {
-                            if (kitId) {
-                                kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-                                    Kit.printKitNameAndDescription(kitId, kitInfo);
-                                    Kit.printCordovaCliVersion(kitInfo);
-                                    Kit.printPlatformOverrideInfo(kitInfo, indent2);
-                                    Kit.printPluginOverrideInfo(kitInfo, indent2);
-                                });
-                            }
-                        });
-                });
+    /**
+     * Pretty prints information (title, description, Cordova CLI version,
+     * plugin/platform override info regardng a single kit
+     */
+    private static printKit(kitId: string): Q.Promise<any> {
+        return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
+            var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(kitInfo));
+            Kit.printKitNameAndDescription(kitId, kitInfo);
+            Kit.printCordovaCliVersion(kitInfo);
+            Kit.printPlatformOverrideInfo(kitInfo, indent2);
+            Kit.printPluginOverrideInfo(kitInfo, indent2);
         });
     }
 
-    private static getLongestPlatformPluginLength(kits: tacoKits.IKitMetadata): Q.Promise<number> {
-        return Object.keys(kits).reduce<Q.Promise<number>>(function (longest: Q.Promise<number>, kitId: string): Q.Promise<number> {
-            return Q.all([longest, kitHelper.getKitInfo(kitId)]).spread<number>(function (longest: number, kitInfo: tacoKits.IKitInfo): number {
-                if (kitInfo.platforms) {
-                    longest = Object.keys(kitInfo.platforms).reduce(function (longest: number, platformName: string): number {
-                        return Math.max(longest, platformName.length);
-                    }, longest);
-                }
+    /**
+     * Validates the file path passed. Throw appropriate errors if path passed is invalid.
+     */
+    private static validateJsonFilePath(jsonFilePath: string): void {
+        assert(jsonFilePath);
+        // Make sure the specified path is valid
+        if (!utils.isPathValid(jsonFilePath)) {
+            throw errorHelper.get(TacoErrorCodes.ErrorInvalidPath, jsonFilePath);
+        }
 
-                if (kitInfo.plugins) {
-                    longest = Object.keys(kitInfo.plugins).reduce(function (longest: number, pluginId: string): number {
+        if (path.extname(jsonFilePath).toLowerCase() !== ".json") {
+            throw errorHelper.get(TacoErrorCodes.ErrorInvalidJsonFilePath, jsonFilePath);
+        }
+
+        utils.createDirectoryIfNecessary(path.dirname(jsonFilePath));
+    }
+
+    /**
+     * Save the metadata Json to path provided as argument to "--json" option
+     */
+    private static writeMetadataJsonFile(commandData: commands.ICommandData): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var jsonFilePath: string = commandData.options["json"];
+
+        if (!jsonFilePath) {
+            jsonFilePath = path.join(utils.tacoHome, Kit.DefaultMetadataFileName);
+        }
+
+        Kit.validateJsonFilePath(jsonFilePath);
+        
+        return kitHelper.getKitMetadata()
+            .then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
+            return projectHelper.createJsonFileWithContents(jsonFilePath, meta.kits); 
+        })
+            .then(function (): Q.Promise<any> {
+            logger.log(resources.getString("CommandKitListJsonFileStatus", jsonFilePath));
+            return Q.resolve({});
+        });
+    }
+
+    private static getLongestPlatformPluginLength(kitInfo: tacoKits.IKitInfo): number {
+        var longest: number = 0;
+        if (kitInfo.platforms) {
+                longest = Object.keys(kitInfo.platforms).reduce(function (longest: number, platformName: string): number {
+                return Math.max(longest, platformName.length);
+            }, longest);
+        }
+
+        if (kitInfo.plugins) {
+            longest = Object.keys(kitInfo.plugins).reduce(function (longest: number, pluginId: string): number {
                         return Math.max(longest, pluginId.length);
-                    }, longest);
-                }
+            }, longest);
+        }
 
-                return longest;
-            });
-        }, Q(0));
+        return longest;
     }
 
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
-        return Kit.printCurrentKitInfo().then(function (): Q.Promise<any> {
-            return Kit.printKitsInfo();
-        });
+        logger.logLine();
+        var kitId: string = commandData.options["kit"];
+        var jsonPath: any = commandData.options["json"];
+
+        if (typeof jsonPath !== "undefined") {
+            return Kit.writeMetadataJsonFile(commandData);
+        } else {
+            // If the user requested for info regarding a particular kit, print all the information regarding the kit  
+            // Else print minimal information about all the kits
+            return kitId ? Kit.printKit(kitId) : Kit.printAllKits();
+        }       
     }
 }
 

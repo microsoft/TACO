@@ -43,17 +43,15 @@ describe("KitHelper", function (): void {
         deprecated: true,
         deprecatedReasonUri: "http://cordova.apache.org/blog/2014102310023",
         plugins: {
-            "org.apache.cordova.camera": {
-                version: "0.2.27",
-                platforms: "ios, android, wp8"
+            "cordova-plugin-camera": {
+                version: "1.0.1",
+                "supported-platforms": "ios, android, wp8"
             },
-            "org.apache.cordova.media-capture": {
-                version: "0.3.4",
-                platforms: "ios, android, windows, windows8"
+            "cordova-plugin-media-capture": {
+                version: "1.0.1",
+                "supported-platforms": "ios, android, windows, windows8"
             }
-        },
-        name: "4.0.0-Kit",
-        description: "4.0.0-Kit-desc"
+        }
     };
 
     var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-Kit", "blank.zip");
@@ -85,8 +83,8 @@ describe("KitHelper", function (): void {
     };
 
     var testPluginOverridesForDefaultKit: tacoKits.IPluginOverrideMetadata = {
-        "org.apache.cordova.camera": {
-            version: "0.3.10"
+        "cordova-plugin-camera": {
+            version: "1.0.1"
         }
     };
 
