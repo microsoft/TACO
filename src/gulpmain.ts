@@ -105,7 +105,8 @@ gulp.task("copy", function (): Q.Promise<any> {
         "!/**/*.ts",
         "/*/.npmignore",
         "/**/templates/**",
-        "/**/examples/**"
+        "/**/examples/**",
+        "!/**/dynamicDependencies.json"
     ].map(val => val[0] === "!" ? "!" + path.join(buildConfig.src, val.substring(1)) : path.join(buildConfig.src, val));
 
     return Q.all([
