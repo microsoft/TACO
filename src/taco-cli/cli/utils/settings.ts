@@ -94,8 +94,8 @@ class Settings {
                         buildLocation = Settings.BuildLocationType.Local;
                     } else {                     
                         // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
-                        buildLocation = (platform in settings.remotePlatforms) || !utils.canBuildLocally(platform)
-                            ? Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
+                        buildLocation = (platform in settings.remotePlatforms) || !utils.canBuildLocally(platform) ?
+                            Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
                     }
 
                     return { location: buildLocation, platform: platform };
