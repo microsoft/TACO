@@ -18,6 +18,13 @@ declare module TacoUtility {
 
         static tacoHome: string;
         /**
+         * Determine whether the given target platform can be built on the local machine
+         *
+         * @targetPlatform {string} target platform to build, e.g. ios, windows
+         * @return {boolean} true if target platform can be built on local machine
+         */
+        static canBuildLocally(targetPlatform: string): boolean;
+        /**
          * Read the contents of a file, stripping out any byte order markers
          *
          * @param {string} filename The file to read
