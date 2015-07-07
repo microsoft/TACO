@@ -30,7 +30,7 @@ class DependencyDataWrapper {
      * Will return null if the info is missing from our metadata or if either the dependency ID, the version ID or the platform ID does not exist.
      */
     public getInstallDirectory(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): string {
-        if (this.dependenciesData[id] && this.dependenciesData[id].versions && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform] && this.dependenciesData[id].versions[version][platform][architecture]) {
+        if (this.isSystemSupported(id, version, platform, architecture)) {
             return this.dependenciesData[id].versions[version][platform][architecture].installDestination;
         }
 
@@ -41,7 +41,7 @@ class DependencyDataWrapper {
      * Returns the display name for the specified dependency. Will return null if the info is missing in our metadata or if the dependency does not exist.
      */
     public getDisplayName(id: string): string {
-        if (this.dependenciesData[id]) {
+        if (this.dependencyExists(id)) {
             return this.dependenciesData[id].displayName;
         }
 
@@ -52,7 +52,7 @@ class DependencyDataWrapper {
      * Returns the path to the specialized installer class of the specified dependency, or null if the dependency doesn't exist.
      */
     public getInstallerPath(id: string): string {
-        if (this.dependenciesData[id]) {
+        if (this.dependencyExists(id)) {
             return this.dependenciesData[id].installerPath;
         }
 
@@ -63,7 +63,7 @@ class DependencyDataWrapper {
      * Returns the license url for the specified dependency. Will return null if the info is missing in our metadata or if the dependency does not exist.
      */
     public getLicenseUrl(id: string): string {
-        if (this.dependenciesData[id]) {
+        if (this.dependencyExists(id)) {
             return this.dependenciesData[id].licenseUrl;
         }
 
@@ -74,7 +74,7 @@ class DependencyDataWrapper {
      * Returns the list of prerequisites for the specified dependency. Will return null if the info is missing in our metadata or if the dependency does not exist.
      */
     public getPrerequisites(id: string): string[] {
-        if (this.dependenciesData[id]) {
+        if (this.dependencyExists(id)) {
             return this.dependenciesData[id].prerequisites;
         }
 
@@ -86,7 +86,7 @@ class DependencyDataWrapper {
      * platform if no platform is specified) ID does not exist.
      */
     public getInstallerInfo(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IInstallerData {
-        if (this.dependenciesData[id] && this.dependenciesData[id].versions && this.dependenciesData[id].versions[version] && this.dependenciesData[id].versions[version][platform]) {
+        if (this.isSystemSupported(id, version, platform, architecture)) {
             return this.dependenciesData[id].versions[version][platform][architecture];
         }
 
@@ -101,7 +101,7 @@ class DependencyDataWrapper {
         var self = this;
         var validVersion: string;
 
-        if (this.dependenciesData[id] && this.dependenciesData[id].versions) {
+        if (this.dependencyExists(id) && !!this.dependenciesData[id].versions) {
             Object.keys(this.dependenciesData[id].versions).some(function (version: string): boolean {
                 if (self.isSystemSupported(id, version, platform, architecture)) {
                     validVersion = version;
@@ -127,7 +127,9 @@ class DependencyDataWrapper {
      * Returns true if the specified dependency has a node for the specified version, false otherwise.
      */
     public versionExists(id: string, version: string): boolean {
-        return !!this.dependenciesData[id] && !!this.dependenciesData[id].versions && !!this.dependenciesData[id].versions[version];
+        return this.dependencyExists(id) &&
+            !!this.dependenciesData[id].versions &&
+            !!this.dependenciesData[id].versions[version];
     }
 
     /*
@@ -135,9 +137,7 @@ class DependencyDataWrapper {
      * system platform if no platform is specified), or the "default" platform. Returns false otherwise.
      */
     public isSystemSupported(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): boolean {
-        return !!this.dependenciesData[id] &&
-            !!this.dependenciesData[id].versions &&
-            !!this.dependenciesData[id].versions[version] &&
+        return this.versionExists(id, version) &&
             !!this.dependenciesData[id].versions[version][platform] &&
             !!this.dependenciesData[id].versions[version][platform][architecture];
     }
