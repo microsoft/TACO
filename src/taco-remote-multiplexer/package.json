@@ -11,5 +11,6 @@
     },
     "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
     "main": "./tacoRemoteMultiplexer.js",
-    "readmeFilename": "README.md"
+    "readmeFilename": "README.md",
+    "license": "MIT"
 }
