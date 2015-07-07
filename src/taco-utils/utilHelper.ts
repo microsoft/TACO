@@ -64,15 +64,11 @@ module TacoUtility {
          * @return {boolean} true if target platform can be built on local machine
          */
         public static canBuildLocally(targetPlatform: string): boolean {
-            if (targetPlatform === "android") {  // android can be built on iether mac or windows
-                return true;
-            }
-
             switch (os.platform()) {
                 case "darwin":
-                    return targetPlatform === "ios";
+                    return targetPlatform !== "windows";  // can be android, ios
                 case "win32":
-                    return targetPlatform !== "ios";  // can be wp* or windows
+                    return targetPlatform !== "ios";  // can be android, wp*, or windows
             }
 
             return false;
