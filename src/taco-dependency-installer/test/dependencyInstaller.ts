@@ -38,7 +38,7 @@ describe("DependencyInstaller", function (): void {
     var dependencyInstaller: DependencyInstaller;
 
     // Test data
-    var cordovaRequirementsResultsRaw: ICordovaRequirementsResult = {
+    var mockCordovaReqsRaw: ICordovaRequirementsResult = {
         android: [
             {
                 id: "dependency1",
@@ -89,7 +89,7 @@ describe("DependencyInstaller", function (): void {
             }
         ]
     };
-    var cordovaRequirementsResultsOutput: string = [
+    var mockCordovaReqsOutput: string = [
         "Requirements check results for android:",
         "dependency1: not installed",
         "dependency2: not installed",
@@ -172,7 +172,7 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            (<any>dependencyInstaller).parseMissingDependencies(cordovaRequirementsResultsRaw);
+            (<any>dependencyInstaller).parseMissingDependencies(mockCordovaReqsRaw);
 
             var missingDependencies: IDependency[] = (<any>dependencyInstaller).missingDependencies;
             var unsupportedDependencies: ICordovaRequirement[] = (<any>dependencyInstaller).unsupportedMissingDependencies;
@@ -192,7 +192,7 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            (<any>dependencyInstaller).parseMissingDependencies(cordovaRequirementsResultsOutput);
+            (<any>dependencyInstaller).parseMissingDependencies(mockCordovaReqsOutput);
 
             var missingDependencies: IDependency[] = (<any>dependencyInstaller).missingDependencies;
             var unsupportedDependencies: ICordovaRequirement[] = (<any>dependencyInstaller).unsupportedMissingDependencies;
@@ -214,7 +214,7 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            var parsedRequirements: ICordovaRequirement[] = (<any>dependencyInstaller).parseFromString(cordovaRequirementsResultsOutput);
+            var parsedRequirements: ICordovaRequirement[] = (<any>dependencyInstaller).parseFromString(mockCordovaReqsOutput);
 
             verifyRequirementArray(expectedDependencies, parsedRequirements);
         });
@@ -232,7 +232,7 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            var parsedRequirements: ICordovaRequirement[] = (<any>dependencyInstaller).parseFromRawResult(cordovaRequirementsResultsRaw);
+            var parsedRequirements: ICordovaRequirement[] = (<any>dependencyInstaller).parseFromRawResult(mockCordovaReqsRaw);
 
             verifyRequirementArray(expectedDependencies, parsedRequirements);
         });
@@ -261,6 +261,26 @@ describe("DependencyInstaller", function (): void {
                 },
                 {
                     id: "dependency7",
+                    version: "1.0",
+                    displayName: "test_value",
+                    installDestination: "test_value"
+                }
+            ];
+
+            (<any>dependencyInstaller).sortDependencies();
+            (<IDependency[]>(<any>dependencyInstaller).missingDependencies).forEach(function (value: IDependency, index: number): void {
+                value.id.should.be.exactly(expectedOrder[index]);
+            });
+        });
+
+        it("should sort the missing dependencies without error when there's only one dependency", function (): void {
+            var expectedOrder: string[] = [
+                "dependency1"
+            ];
+
+            (<any>dependencyInstaller).missingDependencies = [
+                {
+                    id: "dependency1",
                     version: "1.0",
                     displayName: "test_value",
                     installDestination: "test_value"
@@ -391,36 +411,40 @@ describe("DependencyInstaller", function (): void {
     });
 
     describe("buildInstallConfigFile()", function (): void {
-        it("should correctly generate the install config file", function (): void {
-            var missingDependencies: IDependency[] = [
-                {
-                    id: "dependency1",
-                    version: "1.0",
-                    displayName: "test_value1",
-                    installDestination: "test_value1"
-                },
-                {
-                    id: "dependency5",
-                    version: "1.0",
-                    displayName: "test_value5",
-                    installDestination: "test_value5"
-                },
-                {
-                    id: "dependency7",
-                    version: "1.0",
-                    displayName: "test_value7",
-                    installDestination: "test_value7"
-                }
-            ];
-            var jsonWrapper: any = {
-                dependencies: missingDependencies
-            };
+        var missingDependencies: IDependency[] = [
+            {
+                id: "dependency1",
+                version: "1.0",
+                displayName: "test_value1",
+                installDestination: "test_value1"
+            },
+            {
+                id: "dependency5",
+                version: "1.0",
+                displayName: "test_value5",
+                installDestination: "test_value5"
+            },
+            {
+                id: "dependency7",
+                version: "1.0",
+                displayName: "test_value7",
+                installDestination: "test_value7"
+            }
+        ];
 
+        var jsonWrapper: any = {
+            dependencies: missingDependencies
+        };
+
+        beforeEach(function (): void {
             if (fs.existsSync(installConfigFile)) {
                 fs.unlinkSync(installConfigFile);
             }
 
             (<any>dependencyInstaller).missingDependencies = missingDependencies;
+        });
+         
+        it("should correctly generate the install config file", function (): void {
             (<any>dependencyInstaller).buildInstallConfigFile();
             
             var content: any = require(installConfigFile);
@@ -432,39 +456,12 @@ describe("DependencyInstaller", function (): void {
             var dummyContent: any = {
                 test: "test"
             };
-            var missingDependencies: IDependency[] = [
-                {
-                    id: "dependency1",
-                    version: "1.0",
-                    displayName: "test_value1",
-                    installDestination: "test_value1"
-                },
-                {
-                    id: "dependency5",
-                    version: "1.0",
-                    displayName: "test_value5",
-                    installDestination: "test_value5"
-                },
-                {
-                    id: "dependency7",
-                    version: "1.0",
-                    displayName: "test_value7",
-                    installDestination: "test_value7"
-                }
-            ];
-            var jsonWrapper: any = {
-                dependencies: missingDependencies
-            };
-
-            if (fs.existsSync(installConfigFile)) {
-                fs.unlinkSync(installConfigFile);
-            }
 
             // Write a dummy installConfig file
             wrench.mkdirSyncRecursive(path.dirname(installConfigFile), 511); // 511 decimal is 0777 octal
             fs.writeFileSync(installConfigFile, JSON.stringify(dummyContent, null, 4));
 
-            (<any>dependencyInstaller).missingDependencies = missingDependencies;
+            // Write the real installConfig file
             (<any>dependencyInstaller).buildInstallConfigFile();
 
             var content: any = require(installConfigFile);

@@ -54,19 +54,24 @@ describe("InstallerUtils", function (): void {
     });
 
     describe("pathContains()", function (): void {
-        var root: string = os.platform() === "win32" ? "C:" : "/";
-        var testPath: string = [
-            path.join(root, "some path with space"),
-            root + path.sep + path.sep + path.sep + path.sep + "temp" + path.sep + "some path" + path.sep + "with spaces",
-            path.join(root, "some_folder", "some_nested_folder")
-        ].join(path.delimiter);
+        var testPathWin32: string = "C:\\some path with spaces;C:\\\\\\\\temp\\some path\\with spaces;C:\\some_folder\\some_nested_folder";
+        var testPathDarwin: string = "/some path with spaces://///temp/some path/with spaces:/some_folder/some_nested_folder";
+        var testPath: string = os.platform() === "win32" ? testPathWin32 : testPathDarwin;
 
         it("should correctly detect that a value is already in the path", function (): void {
-            var pathToVerify1: string = path.join(root, "some path with space");
-            var pathToVerify2: string = path.join(root, "temp", "some path", "with spaces");
-            var pathToVerify3: string = root + path.sep + path.sep + path.sep + path.sep + path.sep + path.sep + path.sep + "some_folder" + path.sep + path.sep + "some_nested_folder";
+            var pathToVerify1: string;
+            var pathToVerify2: string;
+            var pathToVerify3: string;
 
-            process.env["Path"] = testPath;
+            if (os.platform() === "win32") {
+                pathToVerify1 = "C:\\some path with spaces";
+                pathToVerify2 = "C:\\temp\\some path\\with spaces";
+                pathToVerify3 = "C:\\\\\\\\\\\\\\some_folder\\\\some_nested_folder";
+            } else {
+                pathToVerify1 = "/some path with spaces";
+                pathToVerify2 = "/temp/some path/with spaces";
+                pathToVerify3 = "////////some_folder//some_nested_folder";
+            }
 
             installerUtils.pathContains(pathToVerify1, testPath).should.be.true;
             installerUtils.pathContains(pathToVerify2, testPath).should.be.true;
@@ -74,7 +79,13 @@ describe("InstallerUtils", function (): void {
         });
 
         it("should correctly detect that a value is not in the path", function (): void {
-            var pathToVerify: string = root + path.sep + path.sep + path.sep + path.sep + path.sep + path.sep + path.sep + "some_folder" + path.sep + path.sep + "unknown";
+            var pathToVerify: string;
+
+            if (os.platform() === "win32") {
+                pathToVerify = "C:\\\\\\\\\\\\\\some_folder\\\\unknown";
+            } else {
+                pathToVerify = "////////some_folder//unknown";
+            }
 
             installerUtils.pathContains(pathToVerify, testPath).should.be.false;
         });
