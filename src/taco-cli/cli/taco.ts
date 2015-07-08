@@ -101,7 +101,7 @@ class Taco {
 
         // If the diagnostic option is found, set the process' diagnostic flag
         if (UtilHelper.tryParseDiagnosticArg(args)) {
-            (<any>process).TACO_DIAGNOSTIC = true;
+            process.env.TACO_DIAGNOSTIC = true;
         }
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));

@@ -281,7 +281,7 @@ module TacoUtility {
          * Returns true if diagnostic was requested in args, false otherwise
          */
         public static tryParseDiagnosticArg(args: string[]): boolean {
-            return args.some(function (value: string): boolean { return /^--diagnostic$/.test(value); });
+            return args.some(function (value: string): boolean { return value === "--diagnostic"; });
         }
 
         /**

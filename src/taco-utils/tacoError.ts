@@ -66,7 +66,7 @@ module TacoUtility {
             var innerErrorString: string = "";
             if (this.innerError) {
                 var stack: string = (<any>this.innerError).stack;
-                if (stack && (<any>process).TACO_DIAGNOSTIC) {
+                if (stack && process.env.TACO_DIAGNOSTIC) {
                     innerErrorString = utilResources.getString("InnerErrorToString", stack);
                 } else if (this.innerError.message) {
                     innerErrorString = utilResources.getString("InnerErrorToString", this.innerError.message);
