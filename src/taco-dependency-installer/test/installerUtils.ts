@@ -21,7 +21,7 @@ import installerUtils = require ("../utils/installerUtils");
 describe("InstallerUtils", function (): void {
     // Important paths
     var testFile: string = path.join(__dirname, "test-data", "testFile.txt");
-    var testFileSha1: string = "8B88752A4C77711EFC9A742A2A4086E8480042A0";
+    var testFileSha1: string = "8b88752a4c77711efc9a742a2a4086e8480042a0";
     var testFileBytes: number = 3148;
 
     describe("isFileClean()", function (): void {
