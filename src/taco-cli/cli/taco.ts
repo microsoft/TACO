@@ -20,13 +20,15 @@ import Q = require ("q");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
-import tacoUtility = require ("taco-utils");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoKits = require ("taco-kits");
-import logger = tacoUtility.Logger;
+import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
+import logger = tacoUtility.Logger;
 import telemetry = tacoUtility.Telemetry;
 import UtilHelper = tacoUtility.UtilHelper;
 
@@ -51,7 +53,10 @@ class Taco {
             if (reason && reason.isTacoError) {
                 tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
             } else {
-                throw reason;
+                // An unhandled error occured, wrap it in a generic error message to print it nicely
+                var error: TacoUtility.TacoError = errorHelper.wrap(TacoErrorCodes.CommandError, reason);
+
+                tacoUtility.Logger.logError(error.toString());
             }
         });
     }
@@ -92,6 +97,11 @@ class Taco {
                 commandName = args[0] || "help";
                 commandArgs = args.slice(1);
             }
+        }
+
+        // If the diagnostic option is found, set the process' diagnostic flag
+        if (UtilHelper.tryParseDiagnosticArg(args)) {
+            (<any>process).TACO_DIAGNOSTIC = true;
         }
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));

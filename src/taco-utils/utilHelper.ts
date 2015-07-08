@@ -271,10 +271,17 @@ module TacoUtility {
         }
 
         /**
-         * Returns true if version was requested in args, false otherswise
+         * Returns true if version was requested in args, false otherwise
          */
         public static tryParseVersionArgs(args: string[]): boolean {
             return args.some(function (value: string): boolean { return /^(-*)(v|version)$/.test(value); });
+        }
+
+        /**
+         * Returns true if diagnostic was requested in args, false otherwise
+         */
+        public static tryParseDiagnosticArg(args: string[]): boolean {
+            return args.some(function (value: string): boolean { return /^--diagnostic$/.test(value); });
         }
 
         /**
