@@ -67,7 +67,7 @@ class Settings {
         utils.createDirectoryIfNecessary(utils.tacoHome);
         fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
         return Q({});
-    }
+    }    
 
     /*
      * Given the command line options, determine which platforms we should operate on.
@@ -94,7 +94,7 @@ class Settings {
                         buildLocation = Settings.BuildLocationType.Local;
                     } else {                     
                         // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
-                        buildLocation = (platform in settings.remotePlatforms) || !utils.canBuildLocally(platform) ?
+                        buildLocation = (platform in settings.remotePlatforms) || !Settings.canBuildLocally(platform) ?
                             Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
                     }
 
@@ -136,6 +136,23 @@ class Settings {
      */
     public static getRemoteServerUrl(server: Settings.IRemoteConnectionInfo): string {
         return util.format("http%s://%s:%d/%s", server.secure ? "s" : "", server.host, server.port, server.mountPoint);
+    }
+
+    /**
+     * Determine whether the given target platform can be built on the local machine
+     *
+     * @targetPlatform {string} target platform to build, e.g. ios, windows
+     * @return {boolean} true if target platform can be built on local machine
+     */
+    private static canBuildLocally(targetPlatform: string): boolean {
+        switch (os.platform()) {
+            case "darwin":
+                return targetPlatform !== "windows";  // can be android, ios
+            case "win32":
+                return targetPlatform !== "ios";  // can be android, wp*, or windows
+        }
+
+        return false;
     }
 }
 

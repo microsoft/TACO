@@ -39,7 +39,7 @@ module TacoUtility {
             39: "/",
             60: "<",
             92: "\\"
-        };        
+        };
 
         public static get tacoHome(): string {
             if (process.env["TACO_HOME"]) {
@@ -55,23 +55,6 @@ module TacoUtility {
                 default:
                     throw new Error("UnexpectedPlatform");
             };
-        }
-
-        /**
-         * Determine whether the given target platform can be built on the local machine
-         *
-         * @targetPlatform {string} target platform to build, e.g. ios, windows
-         * @return {boolean} true if target platform can be built on local machine
-         */
-        public static canBuildLocally(targetPlatform: string): boolean {
-            switch (os.platform()) {
-                case "darwin":
-                    return targetPlatform !== "windows";  // can be android, ios
-                case "win32":
-                    return targetPlatform !== "ios";  // can be android, wp*, or windows
-            }
-
-            return false;
         }
 
         /**
