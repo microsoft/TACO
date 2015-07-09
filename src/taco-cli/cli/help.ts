@@ -16,8 +16,7 @@ import path = require ("path");
 
 import tacoUtility = require ("taco-utils");
 import HelpCommandBase = tacoUtility.HelpCommandBase;
-
-import telemetry = tacoUtility.Telemetry;
+import telemetryHelper = require ("utils/telemetryHelper");
 
 /*
  * Help handles "Taco Help"
@@ -29,9 +28,7 @@ class Help extends HelpCommandBase {
     }
 
     public run(data: tacoUtility.Commands.ICommandData): Q.Promise<any> {
-        var helpEvent = new telemetry.TelemetryEvent("taco/help");
-        helpEvent.properties["args"] = data.original.join(", ");
-        telemetry.send(helpEvent);
+        telemetryHelper.sendBasicCommandTelemetry("help", data.original.join(", "));
 
         return super.run(data);
     }

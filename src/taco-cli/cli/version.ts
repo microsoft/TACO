@@ -12,6 +12,7 @@
 import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import resources = require ("../resources/resourceManager");
+import telemetryHelper = require ("utils/telemetryHelper");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
@@ -33,6 +34,8 @@ class Version implements commands.IDocumentedCommand {
      */
     public run(data: commands.ICommandData): Q.Promise<any> {
         this.printTacoVersion();
+
+        telemetryHelper.sendBasicCommandTelemetry("version");
 
         return Q({});
     }

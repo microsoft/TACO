@@ -19,6 +19,7 @@ import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
+import telemetryHelper = require ("utils/telemetryHelper");
 
 import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
@@ -35,6 +36,8 @@ class Templates implements commands.IDocumentedCommand {
 
     public run(data: commands.ICommandData): Q.Promise<any> {
         var self = this;
+
+        telemetryHelper.sendBasicCommandTelemetry("templates");
 
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {
