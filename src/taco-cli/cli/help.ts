@@ -16,7 +16,7 @@ import path = require ("path");
 
 import tacoUtility = require ("taco-utils");
 import HelpCommandBase = tacoUtility.HelpCommandBase;
-import telemetryHelper = require ("utils/telemetryHelper");
+import telemetryHelper = require ("./utils/telemetryHelper");
 
 /*
  * Help handles "Taco Help"

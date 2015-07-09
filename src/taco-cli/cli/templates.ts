@@ -19,7 +19,7 @@ import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
-import telemetryHelper = require ("utils/telemetryHelper");
+import telemetryHelper = require ("./utils/telemetryHelper");
 
 import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;

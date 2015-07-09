@@ -19,7 +19,7 @@ class TelemetryHelper {
         var commandEvent = new telemetry.TelemetryEvent("taco/command");
         commandEvent.properties["command"] = commandName;
 
-        if (arguments) {
+        if (args) {
             commandEvent.properties["arguments"] = args;
         }
 
