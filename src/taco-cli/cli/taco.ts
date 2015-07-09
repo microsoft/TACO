@@ -70,7 +70,19 @@ class Taco {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
                     return parsedArgs.command.run(commandData);
                 } else {
-                    return cordovaWrapper.cli(parsedArgs.args);
+                    var routeToCordovaEvent = new telemetry.TelemetryEvent("taco/routedcommand");
+                    routeToCordovaEvent.properties["args"] = parsedArgs.args;
+                    return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
+                        routeToCordovaEvent.properties["success"] = "true";
+                        telemetry.send(routeToCordovaEvent);
+
+                        return Q(output);
+                    }, function (reason: any): any {
+                        routeToCordovaEvent.properties["success"] = "false";
+                        telemetry.send(routeToCordovaEvent);
+
+                        return Q.reject(reason);
+                    });
                 }
         });
     }
