@@ -98,20 +98,19 @@ gulp.task("clean-templates", function (callback: (err: Error) => void): void {
 
 /* copy package.json and resources.json files from source to bin */
 gulp.task("copy", function (): Q.Promise<any> {
+    // Note: order matters, and later inclusions/exclusions take precedence over earlier ones.
     var filesToCopy: string[] = [
-        "/**/package.json",
-        "/**/resources.json",
-        "/**/test/**",
-        "/**/commands.json",
-        "/**/TacoKitMetaData.json",
-        "/**/bin/**",
+        "/**",
+        "!/typings/**",
+        "!/**/*.ts",
+        "/*/.npmignore",
         "/**/templates/**",
         "/**/examples/**",
-        "/**/*.ps1",
-        "/**/platformDependencies.json"
-    ];
+        "!/**/dynamicDependencies.json"
+    ].map(val => val[0] === "!" ? "!" + path.join(buildConfig.src, val.substring(1)) : path.join(buildConfig.src, val));
+
     return Q.all([
-        gulpUtils.copyFiles(filesToCopy, buildConfig.src, buildConfig.buildPackages),
+        gulpUtils.copyFiles(filesToCopy, buildConfig.buildPackages),
         gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop && path.join(options.drop, "node_modules"))
     ]);
 });
