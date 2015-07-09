@@ -21,6 +21,7 @@ import newlineNormalizerStream = require ("./newlineNormalizerStream");
 import processLogger = require ("./processLogger");
 import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
+import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import tacoPackageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
 import utilHelper = require ("./utilHelper");
@@ -42,6 +43,7 @@ module TacoUtility {
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;
     export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
+    export var TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var Telemetry = telemetry.Telemetry;
     export var UtilHelper = utilHelper.UtilHelper;

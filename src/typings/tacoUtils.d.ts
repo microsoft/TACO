@@ -17,6 +17,7 @@
 /// <reference path="../typings/processLogger.d.ts" />
 /// <reference path="../typings/resourceManager.d.ts" />
 /// <reference path="../typings/tacoError.d.ts" />
+/// <reference path="../typings/tacoGLobalConfig.d.ts" />
 /// <reference path="../typings/tacoPackageLoader.d.ts" />
 /// <reference path="../typings/tacoUtilsErrorCodes.d.ts" />
 /// <reference path="../typings/telemetry.d.ts" />

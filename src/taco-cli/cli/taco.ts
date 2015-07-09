@@ -29,6 +29,7 @@ import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
+import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
 import UtilHelper = tacoUtility.UtilHelper;
 
@@ -99,9 +100,9 @@ class Taco {
             }
         }
 
-        // If the diagnostic option is found, set the process' diagnostic flag
+        // If the diagnostic option is found, set the global setting for enabling stack trace
         if (UtilHelper.tryParseDiagnosticArg(args)) {
-            process.env.TACO_DIAGNOSTIC = true;
+            TacoGlobalConfig.enableStackTrace = true;
         }
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));

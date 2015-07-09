@@ -27,6 +27,7 @@ import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
 import CordovaConfig = utils.CordovaConfig;
+import TacoGlobalConfig = utils.TacoGlobalConfig;
 import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
 
@@ -58,7 +59,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     }
 
     currentBuild = buildInfo;
-    process.env.TACO_LANG = buildRequest.language;
+    TacoGlobalConfig.lang = buildRequest.language;
     var cordovaVersion: string = currentBuild["vcordova"];
     buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
     process.send(buildInfo);

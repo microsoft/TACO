@@ -17,6 +17,7 @@ import HostSpecifics = require ("./hostSpecifics");
 import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
@@ -58,7 +59,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         }
 
         this.remoteBuildConf = conf.get();
-        process.env.TACO_LANG = this.lang;
+        TacoGlobalConfig.lang = this.lang;
 
         if (!(this.port > 0 && this.port < 65536)) {
             // Negated positve checks is important to catch NaN
