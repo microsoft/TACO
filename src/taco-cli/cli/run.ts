@@ -97,11 +97,11 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
+            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
         if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {

@@ -87,7 +87,7 @@
 
     "TacoRemoteHelpDescription": "taco-remote enables building Apache Cordova projects remotely.",
     "_TacoRemoteHelpDescription.comment": "Help message for this module",
-    "TacoRemoteHelpNotes": "More documentation for configuring taco remote build can be found at <link>http://go.microsoft.com/fwlink/?LinkId=613345</link>",
+    "TacoRemoteHelpNotes": "More documentation for configuring taco remote build can be found at <link>http://go.microsoft.com/fwlink/?LinkId=618174</link>",
     "_TacoRemoteHelpNotes.comment": "",
     "TacoRemoteHelpExample": "Use following config file to configure remotebuild port, web debug proxy port, no builds retention and build cleanup on shutdown",
     "_TacoRemoteHelpExample.comment": "Comments describing remote build configuration file options for an example which customizes web debug proxy port and build retention policy",
