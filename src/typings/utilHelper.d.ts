@@ -105,5 +105,14 @@ declare module TacoUtility {
          * Returns null otherwise
          */
         public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
+
+        /**
+         * Returns a LogLevel enum value based on the string value that was passed, or null if we can't convert to a LogLevel enum value
+         *
+         * @param {string} logLevelString The string name of the LogLevel enum value
+         *
+         * @return {LogLevel} A LogLevel enum value, or null if the string couldn't be converted to an appropriate LogLevel value
+         */
+        public static extractLogLevelFromString(logLevelString: string): LogLevel;
     }
 }

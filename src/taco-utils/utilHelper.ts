@@ -25,9 +25,11 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 
+import logLevel = require ("./logLevel");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 
+import LogLevel = logLevel.LogLevel;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 module TacoUtility {
@@ -289,6 +291,30 @@ module TacoUtility {
                 if (/^(-*)(h|help)$/.test(args[i])) {
                     return <ITacoHelpArgs>{ helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
                 }
+            }
+
+            return null;
+        }
+
+        /**
+         * Returns a LogLevel enum value based on the string value that was passed, or null if we can't convert to a LogLevel enum value
+         *
+         * @param {string} logLevelString The string name of the LogLevel enum value
+         *
+         * @return {LogLevel} A LogLevel enum value, or null if the string couldn't be converted to an appropriate LogLevel value
+         */
+        public static extractLogLevelFromString(logLevelString: string): LogLevel {
+            if (!logLevelString) {
+                return null;
+            }
+
+            // Convert the provided string value to Pascalcase (which is the format of our LogLevel enum)
+            logLevelString = logLevelString.toLowerCase();
+            logLevelString = logLevelString.charAt(0).toUpperCase() + logLevelString.slice(1);
+
+            // If we understand the provided log level, convert the string value to the actual enum value
+            if (LogLevel.hasOwnProperty(logLevelString)) {
+                return (<any>LogLevel)[logLevelString];
             }
 
             return null;

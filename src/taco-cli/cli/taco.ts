@@ -30,7 +30,6 @@ import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
-import LogLevel = tacoUtility.LogLevel;
 import TacoError = tacoUtility.TacoError;
 import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
@@ -97,21 +96,10 @@ class Taco {
             }
         }
 
-        // Set the loglevel global setting if needed
+        // Set the loglevel global setting
         var knownOptionsLogLevel: Nopt.FlagTypeMap = { loglevel: String };
         var initialArgsParse: commands.ICommandData = argsHelper.parseArguments(knownOptionsLogLevel, {}, args);
-        var logLevelStringValue: string = initialArgsParse.options["loglevel"];
-
-        if (logLevelStringValue) {
-            // Convert the provided string value to Pascalcase (which is the format of our LogLevel enum)
-            logLevelStringValue = logLevelStringValue.toLowerCase();
-            logLevelStringValue = logLevelStringValue.charAt(0).toUpperCase() + logLevelStringValue.slice(1);
-
-            // If we understand the provided log level, convert the string value to the actual enum value and save it in the global config
-            if (LogLevel.hasOwnProperty(logLevelStringValue)) {
-                TacoGlobalConfig.logLevel = (<any>LogLevel)[logLevelStringValue];
-            }
-        }
+        TacoGlobalConfig.logLevel = UtilHelper.extractLogLevelFromString(initialArgsParse.options["loglevel"]);
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.ICommand = commandsFactory.getTask(commandName, commandArgs, __dirname);

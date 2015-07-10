@@ -35,6 +35,10 @@ module TacoUtility {
         }
 
         public static set logLevel(level: LogLevel) {
+            if (!level) {
+                return;
+            }
+
             // Save the string name of the enum value to process.env
             process.env[TacoGlobalConfig.LogLevelName] = LogLevel[level];
         }

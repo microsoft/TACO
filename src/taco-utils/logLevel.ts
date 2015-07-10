@@ -10,7 +10,7 @@
 "use strict";
 module TacoUtility {
     export enum LogLevel {
-        Diagnostic
+        Diagnostic = 1
     }
 }
 

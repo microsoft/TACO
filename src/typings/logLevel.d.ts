@@ -8,6 +8,6 @@
 
 declare module TacoUtility {
     enum LogLevel {
-        Diagnostic
+        Diagnostic = 1
     }
 }
