@@ -107,12 +107,11 @@ declare module TacoUtility {
         public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
 
         /**
-         * Returns a LogLevel enum value based on the string value that was passed, or null if we can't convert to a LogLevel enum value
+         * Sets the global LogLevel setting for Taco by parsing the given command line args. If the specified log level is
+         * not recognized, then it is ignored (this method won't set the global setting in that case).
          *
-         * @param {string} logLevelString The string name of the LogLevel enum value
-         *
-         * @return {LogLevel} A LogLevel enum value, or null if the string couldn't be converted to an appropriate LogLevel value
+         * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
          */
-        public static extractLogLevelFromString(logLevelString: string): LogLevel;
+        public static initializeLogLevel(args: string[]): void;
     }
 }

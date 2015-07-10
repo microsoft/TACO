@@ -25,12 +25,19 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 
+import argsHelper = require ("./argsHelper");
+import commands = require ("./commands");
 import logLevel = require ("./logLevel");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
+import tacoGlobalConfig = require ("./tacoGlobalConfig");
 
+import ArgsHelper = argsHelper.ArgsHelper;
+import Commands = commands.Commands;
+import ICommandData = Commands.ICommandData;
 import LogLevel = logLevel.LogLevel;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 
 module TacoUtility {
     export class UtilHelper {
@@ -297,27 +304,32 @@ module TacoUtility {
         }
 
         /**
-         * Returns a LogLevel enum value based on the string value that was passed, or null if we can't convert to a LogLevel enum value
+         * Sets the global LogLevel setting for Taco by parsing the given command line args. If the specified log level is
+         * not recognized, then it is ignored (this method won't set the global setting in that case).
          *
-         * @param {string} logLevelString The string name of the LogLevel enum value
-         *
-         * @return {LogLevel} A LogLevel enum value, or null if the string couldn't be converted to an appropriate LogLevel value
+         * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
          */
-        public static extractLogLevelFromString(logLevelString: string): LogLevel {
+        public static initializeLogLevel(args: string[]): void {
+            if (!args) {
+                return;
+            }
+
+            var knownOptionsLogLevel: Nopt.FlagTypeMap = { loglevel: String };
+            var initialArgsParse: ICommandData = ArgsHelper.parseArguments(knownOptionsLogLevel, {}, args);
+            var logLevelString: string = initialArgsParse.options["loglevel"];
+
             if (!logLevelString) {
-                return null;
+                return;
             }
 
             // Convert the provided string value to Pascalcase (which is the format of our LogLevel enum)
             logLevelString = logLevelString.toLowerCase();
             logLevelString = logLevelString.charAt(0).toUpperCase() + logLevelString.slice(1);
 
-            // If we understand the provided log level, convert the string value to the actual enum value
+            // If we understand the provided log level, convert the string value to the actual enum value and save it in the global settings
             if (LogLevel.hasOwnProperty(logLevelString)) {
-                return (<any>LogLevel)[logLevelString];
+                TacoGlobalConfig.logLevel = (<any>LogLevel)[logLevelString];
             }
-
-            return null;
         }
     }
 }

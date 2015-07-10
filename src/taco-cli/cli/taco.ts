@@ -9,7 +9,6 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoHelpArgs.d.ts"/>
-/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 
 "use strict";
@@ -22,16 +21,12 @@ import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
-import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
-import argsHelper = tacoUtility.ArgsHelper;
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import TacoError = tacoUtility.TacoError;
-import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
 import UtilHelper = tacoUtility.UtilHelper;
 
@@ -97,9 +92,7 @@ class Taco {
         }
 
         // Set the loglevel global setting
-        var knownOptionsLogLevel: Nopt.FlagTypeMap = { loglevel: String };
-        var initialArgsParse: commands.ICommandData = argsHelper.parseArguments(knownOptionsLogLevel, {}, args);
-        TacoGlobalConfig.logLevel = UtilHelper.extractLogLevelFromString(initialArgsParse.options["loglevel"]);
+        UtilHelper.initializeLogLevel(args);
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.ICommand = commandsFactory.getTask(commandName, commandArgs, __dirname);
