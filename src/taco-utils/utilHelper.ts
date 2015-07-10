@@ -278,13 +278,6 @@ module TacoUtility {
         }
 
         /**
-         * Returns true if diagnostic was requested in args, false otherwise
-         */
-        public static tryParseDiagnosticArg(args: string[]): boolean {
-            return args.some(function (value: string): boolean { return value === "--diagnostic"; });
-        }
-
-        /**
          * Returns ITacoHelpArgs with a requested helpTopic if help was requested in given args
          * Returns null otherwise
          */

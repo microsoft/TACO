@@ -8,24 +8,35 @@
 
 /// <reference path="../typings/node.d.ts" />
 
+import logLevel = require ("./logLevel");
+
+import LogLevel = logLevel.LogLevel;
+
 "use strict";
 
 module TacoUtility {
     export class TacoGlobalConfig {
+        private static LangName: string = "TACO_LANG";
+        private static LogLevelName: string = "TACO_LOG_LEVEL";
+
         public static get lang(): string {
-            return process.env.TACO_LANG;
+            return process.env[TacoGlobalConfig.LangName];
         }
 
         public static set lang(setLang: string) {
-            process.env.TACO_LANG = setLang;
+            process.env[TacoGlobalConfig.LangName] = setLang;
         }
 
-        public static get enableStackTrace(): boolean {
-            return process.env.TACO_ENABLE_STACK_TRACE;
+        public static get logLevel(): LogLevel {
+            // Restore the string name of the enum value to the actual enum value
+            var enumValueName: string = process.env[TacoGlobalConfig.LogLevelName];
+
+            return (<any>LogLevel)[enumValueName];
         }
 
-        public static set enableStackTrace(enable: boolean) {
-            process.env.TACO_ENABLE_STACK_TRACE = true;
+        public static set logLevel(level: LogLevel) {
+            // Save the string name of the enum value to process.env
+            process.env[TacoGlobalConfig.LogLevelName] = LogLevel[level];
         }
     }
 }

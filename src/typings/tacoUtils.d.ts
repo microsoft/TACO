@@ -13,6 +13,7 @@
 /// <reference path="../typings/countStream.d.ts" />
 /// <reference path="../typings/logger.d.ts" />
 /// <reference path="../typings/loggerHelper.d.ts" />
+/// <reference path="../typings/logLevel.d.ts" />
 /// <reference path="../typings/newlineNormalizerStream.d.ts" />
 /// <reference path="../typings/processLogger.d.ts" />
 /// <reference path="../typings/resourceManager.d.ts" />

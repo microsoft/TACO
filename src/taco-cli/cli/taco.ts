@@ -25,10 +25,13 @@ import errorHelper = require ("./tacoErrorHelper");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
+import argsHelper = tacoUtility.ArgsHelper;
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
+import LogLevel = tacoUtility.LogLevel;
+import TacoError = tacoUtility.TacoError;
 import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
 import UtilHelper = tacoUtility.UtilHelper;
@@ -45,20 +48,14 @@ interface IParsedArgs {
  */
 class Taco { 
     /*
-     * Runs taco with command line args, catches "known" taco errors
+     * Runs taco with command line args
      */
     public static run(): void {
         telemetry.init(require("../package.json").version);
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
-            // Pretty print taco Errors
-            if (reason && reason.isTacoError) {
-                tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
-            } else {
-                // An unhandled error occured, wrap it in a generic error message to print it nicely
-                var error: TacoUtility.TacoError = errorHelper.wrap(TacoErrorCodes.CommandError, reason);
-
-                tacoUtility.Logger.logError(error.toString());
-            }
+            // Print the error nicely whether it's a Taco Error or not
+            var error: TacoError = reason.isTacoError ? reason : errorHelper.wrap(TacoErrorCodes.CommandError, reason);
+            tacoUtility.Logger.logError(error.toString());
         });
     }
 
@@ -100,9 +97,20 @@ class Taco {
             }
         }
 
-        // If the diagnostic option is found, set the global setting for enabling stack trace
-        if (UtilHelper.tryParseDiagnosticArg(args)) {
-            TacoGlobalConfig.enableStackTrace = true;
+        // Set the loglevel global setting if needed
+        var knownOptionsLogLevel: Nopt.FlagTypeMap = { loglevel: String };
+        var initialArgsParse: commands.ICommandData = argsHelper.parseArguments(knownOptionsLogLevel, {}, args);
+        var logLevelStringValue: string = initialArgsParse.options["loglevel"];
+
+        if (logLevelStringValue) {
+            // Convert the provided string value to Pascalcase (which is the format of our LogLevel enum)
+            logLevelStringValue = logLevelStringValue.toLowerCase();
+            logLevelStringValue = logLevelStringValue.charAt(0).toUpperCase() + logLevelStringValue.slice(1);
+
+            // If we understand the provided log level, convert the string value to the actual enum value and save it in the global config
+            if (LogLevel.hasOwnProperty(logLevelStringValue)) {
+                TacoGlobalConfig.logLevel = (<any>LogLevel)[logLevelStringValue];
+            }
         }
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));

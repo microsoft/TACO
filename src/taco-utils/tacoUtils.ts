@@ -17,6 +17,7 @@ import helpCommandBase = require ("./helpCommandBase");
 import installLogLevel = require ("./installLogLevel");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
+import logLevel = require ("./logLevel");
 import newlineNormalizerStream = require ("./newlineNormalizerStream");
 import processLogger = require ("./processLogger");
 import tacoError = require ("./tacoError");
@@ -36,6 +37,7 @@ module TacoUtility {
     export var CountStream = countStream.CountStream;
     export var Logger = logger.Logger;
     export var LoggerHelper = loggerHelper.LoggerHelper;
+    export var LogLevel = logLevel.LogLevel;
     export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
     export var HelpCommandBase = helpCommandBase.HelpCommandBase;
     export var InstallLogLevel = installLogLevel.InstallLogLevel;

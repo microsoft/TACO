@@ -7,9 +7,11 @@ import util = require ("util");
 import argsHelper = require ("./argsHelper");
 import resourceManager = require ("./resourceManager");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
+import logLevel = require ("./logLevel");
 import utilResources = require ("./resources/resourceManager");
 
 import ArgsHelper = argsHelper.ArgsHelper;
+import LogLevel = logLevel.LogLevel;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 import ResourceManager = resourceManager.ResourceManager;
 
@@ -68,7 +70,7 @@ module TacoUtility {
             var innerErrorString: string = "";
             if (this.innerError) {
                 var stack: string = (<any>this.innerError).stack;
-                if (stack && TacoGlobalConfig.enableStackTrace) {
+                if (stack && TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
                     innerErrorString = utilResources.getString("InnerErrorToString", stack);
                 } else if (this.innerError.message) {
                     innerErrorString = utilResources.getString("InnerErrorToString", this.innerError.message);
