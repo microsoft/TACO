@@ -54,8 +54,8 @@ class Taco {
         telemetry.init(require("../package.json").version);
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
             // Print the error nicely whether it's a Taco Error or not
-            var error: TacoError = reason.isTacoError ? reason : errorHelper.wrap(TacoErrorCodes.CommandError, reason);
-            tacoUtility.Logger.logError(error.toString());
+            var error: TacoError = reason && reason.isTacoError ? reason : errorHelper.wrap(TacoErrorCodes.CommandError, reason);
+            logger.logError(error.toString());
         });
     }
 
