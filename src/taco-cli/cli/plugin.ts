@@ -47,7 +47,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         var pluginInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
 
         var subCommand = this.cordovaCommandParams.subCommand;
-        if (subCommand !== "add" && subCommand !== "remove" && subCommand !== "rm") {
+        if (subCommand !== "add") {
             return Q({});
         }
 
