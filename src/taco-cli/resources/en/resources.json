@@ -62,7 +62,7 @@
     "_CommandKitListCurrentKit.comment": "Title for the Currently used kit Id displayed on executing the 'taco kit list' command",
     "CommandKitListDefaultKit": "Default",
     "_CommandKitListDefaultKit.comment": "On executing the 'taco kit list' command, the string is printed alongside the kit name for the default kit ",
-    "CommandKitListDefaultDescription": "A toolkit of plugins and platforms that work with Cordova CLI v{0}",
+    "CommandKitListDefaultDescription": "A toolkit of plugins and platforms that works with Cordova CLI v{0}",
     "_CommandKitListDefaultDescription.comment": "Default description of a kit",
     "CommandKitListDeprecatedKit": "Deprecated",
     "_CommandKitListDeprecatedKit.comment": "On executing the 'taco kit list' command, the string is printed alongside the kit name for a deprecated kit ",

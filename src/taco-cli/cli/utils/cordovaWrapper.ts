@@ -209,7 +209,8 @@ class CordovaWrapper {
                 }
             });
         } else {
-            return CordovaWrapper.cli(cordovaHelper.toCordovaCliArguments(data));
+            var cliArgs: string[] = [command, platformCmdParameters.subCommand].concat(platformCmdParameters.targets);
+            return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
         }
     }
 }

@@ -51,9 +51,7 @@ describe("KitHelper", function (): void {
                 version: "1.0.1",
                 "supported-platforms": "ios, android, windows, windows8"
             }
-        },
-        name: "4.0.0-Kit",
-        description: "4.0.0-Kit-desc"
+        }
     };
 
     var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-Kit", "blank.zip");
