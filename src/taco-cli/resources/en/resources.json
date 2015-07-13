@@ -33,7 +33,7 @@
     "CommandCreateStatusCordovaCliUsed": "Creating a new Cordova project with name {0} and id {1} at location {2} with Cordova version {3} and no Kit...",
     "_CommandCreateStatusCordovaCliUsed.comment": "Status message shown while creating a cli based project.  {0} is project name, {1} is project id, 2 is the full path where project is created and {3} is the cordova version used ",
 
-    "CommandCreateWarningDeprecatedKit": "<br/>Warning: Kit {0} has been deprecated.<br/>Consider changing your project to use a more recent Kit. For deprecation information, see {fwdLink_toDo}",
+    "CommandCreateWarningDeprecatedKit": "<br/><warn>Warning: Kit {0} has been deprecated.</warn><br/>Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation. {0} is the name of deprecated kit",
 
     "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <highlight>{1}</highlight>",
@@ -54,10 +54,14 @@
     "CommandHelpDescription": "Get help for a command",
     "CommandKitDescription": "Perform kit related operations",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
-    "CommandKitJsonOptionDescription": "Used with the 'list' subcommand for 'taco kit'.Saves the list of known kits to a json file with path <PATH>.",
+    "CommandKitJsonOptionDescription": "Saves the list of known kits to a json file with path <PATH>.",
     "_CommandKitJsonOptionDescription.comment": "Description for --json argument to taco kit list",
-     "CommandKitSubcommandDescription": "Perform kit related operations (like list)",
+    "CommandKitOptionKitDescription": "Lists the details (pinned version of Cordova CLI, platforms and plugins) for a specific kit with ID <KIT-ID>.",
+    "_CommandKitOptionKitDescription.comment": "Description for --kit argument to taco kit list",
+    "CommandKitSubcommandDescription": "Perform kit related operations (like list)",
     "_CommandKitSubcommandDescription.comment": "Description for the 'COMMAND' argument to 'taco kit'",
+    "CommandKitListSubcommandDescription": "List available taco kits",
+    "_CommandKitListSubcommandDescription.comment": "Description for the 'COMMAND' argument to 'taco kit'",
     "CommandKitListCurrentKit": "<bold>Current Kit</bold>: {0}",
     "_CommandKitListCurrentKit.comment": "Title for the Currently used kit Id displayed on executing the 'taco kit list' command",
     "CommandKitListDefaultKit": "Default",
@@ -141,7 +145,7 @@
     "_CommandPlatformListSubcommandDescription.comment": "Description for 'taco platform list'",
     "CommandPlatformUpdateSubcommandDescription": "Update the version of cordova used for a specific platform; Update to the latest <VERSION>, if no <VERSION>, path or <URL> is specified.",
     "_CommandPlatformUpdateSubcommandDescription.comment": "Description for 'taco platform update'",
-    "CommandPlatformCheckSubcommandDescription": "List platforms which can be updated by 'cordova platform update'",
+    "CommandPlatformCheckSubcommandDescription": "List platforms which can be updated by 'taco platform update'",
     "_CommandPlatformCheckSubcommandDescription.comment": "Description for 'taco platform check'",
     "CommandPlatformUsegitDescription": "Retrieve from git instead of npm registry",
     "_CommandPlatformUsegitDescription.comment": "Description of  --usegit argument to 'taco platform update' or 'taco platform update'",
@@ -405,7 +409,7 @@
     "CordovaCommandFailedWithError": "'cordova {0}' failed.",
     "_CordovaCommandFailedWithError.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
 
-    "CordovaCmdNotFound": "Cordova not found, please run 'npm install –g Cordova' to install Cordova globally",
+    "CordovaCmdNotFound": "Cordova not found, please run 'npm install –g cordova' to install Cordova globally",
     "_CordovaCmdNotFound.comment": "Error message shown when no Cordova is found on the machine",
     "UnimplementedAbstractMethod": "This is an abstract method and should be implemented by a derived overload",
     "_UnimplementedAbstractMethod.comment": "Error thrown for an unimplemented method"
