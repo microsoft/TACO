@@ -198,6 +198,7 @@ class CordovaWrapper {
             return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
                 .then(function (cdv: typeof Cordova): Q.Promise<any> {
                 cordova = cdv;
+                // Hook the event listeners. This will help us get the logs that cordova emits during platform/plugin operations
                 cordova.on("results", console.info);
                 cordova.on("warn", console.warn);
                 cordova.on("error", console.error);
@@ -209,10 +210,12 @@ class CordovaWrapper {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
                 }
             }).then(function (): Q.Promise<any> {
-                    cordova.off("results", console.info);
-                    cordova.off("warn", console.warn);
-                    cordova.off("error", console.error);
-                    return Q({});
+                // Unhook the event listeners after we are done
+                // (Cordova has an upper limit for the number of active event listeners - we do not want to exceed the max) 
+                cordova.off("results", console.info);
+                cordova.off("warn", console.warn);
+                cordova.off("error", console.error);
+                return Q({});
             });
         } else {
             var cliArgs: string[] = [command, platformCmdParameters.subCommand].concat(platformCmdParameters.targets);

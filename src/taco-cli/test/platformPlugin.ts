@@ -86,8 +86,6 @@ var cliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios",
     ];
 
 var kitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
-        { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} },
-        { command: "add cordova-plugin-camera cordova-plugin-contacts", expectedVersions: kitPluginVersions },
         { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} }
     ];
 
@@ -244,7 +242,7 @@ describe("taco platform for kit", function (): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
                 .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
@@ -263,7 +261,7 @@ describe("taco platform for kit", function (): void {
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
                 .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
@@ -301,7 +299,7 @@ describe("taco platform for kit", function (): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
                 .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
@@ -320,7 +318,7 @@ describe("taco platform for kit", function (): void {
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
                 .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avaoid false negatives in version checking
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
