@@ -21,7 +21,7 @@
     "_TacoKitsExceptionInvalidKit.comment": "Error shown when the user specifies an unknown kit identifier. {0} is the kit identifier that the user specified as parameter in the command line.",
     "TacoKitsExceptionDeprecatedKitWarning": "Warning: Kit {0} has been deprecated",
     "_TacoKitsExceptionDeprecatedKitWarning.comment": "Error shown when the user specifies a kit that is deprecated.",
-    "TacoKitsExceptionDeprecatedKitMessage": "Consider changing your project to use a more recent Kit. For deprecation information, see {todo_fwdLink}",
+    "TacoKitsExceptionDeprecatedKitMessage": "Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
     "_TacoKitsExceptionDeprecatedKitMessage.comment": "Helpful message shown when the user specifies deprecated kit identifier.",
 
     "TacoKitsExceptionNoDefaultKit": "Error: No default kit found. Please fix this by re-installing taco-kits from npm or run \"taco kit list\" to see the list of available kits",
