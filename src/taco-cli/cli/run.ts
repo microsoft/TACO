@@ -106,11 +106,16 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
         return parsedOptions;
     }
 
-    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
+    private static runProject(commandData: commands.ICommandData, remote: boolean = false): Q.Promise<any> {
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
-            return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                assert(platform.location === Settings.BuildLocationType.Remote);
-                return Run.runRemotePlatform(platform.platform, commandData);
+            return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {    
+                if (remote) {
+                    assert(platform.location === Settings.BuildLocationType.Remote);
+                    return Run.runRemotePlatform(platform.platform, commandData);
+                } else {
+                    assert(platform.location === Settings.BuildLocationType.Local);
+                    return CordovaWrapper.run(platform.platform, commandData);
+                }
             }));
         });
     }
@@ -193,12 +198,11 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
-            return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                assert(platform.location === Settings.BuildLocationType.Local);
-                return CordovaWrapper.run(platform.platform, commandData);
-            }));
-        });
+        return Run.runProject(commandData, false);
+    }
+
+    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
+        return Run.runProject(commandData, true);
     }
 
     private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
