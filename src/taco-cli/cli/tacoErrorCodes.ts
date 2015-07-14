@@ -47,6 +47,7 @@ enum TacoErrorCode {
     ErrorInvalidJsonFilePath,
     ErrorInvalidPath,
     ErrorKitMetadataFileMalformed,
+    ErrorNoPluginOrPlatformSpecified,
     ErrorTacoJsonMissingOrMalformed,
     ErrorPatchCreation,
     ErrorNoPlatformsFound,
