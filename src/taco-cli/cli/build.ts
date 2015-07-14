@@ -176,26 +176,13 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         return promise;
     }
 
-    private static build(commandData: commands.ICommandData, remote: boolean = false): Q.Promise<any> {
+    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                if(remote) {
                 assert(platform.location !== Settings.BuildLocationType.Local);
                 return Build.buildRemotePlatform(platform.platform, commandData);
-                }  else {
-                    assert(platform.location === Settings.BuildLocationType.Local);
-                    return CordovaWrapper.build(platform.platform, commandData);
-                }
             }));
         });
-    }
-
-    private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return Build.build(commandData, false);
-    }
-
-    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
-        return Build.build(commandData, true);
     }
 
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
