@@ -21,23 +21,28 @@ import utils = require ("taco-utils");
 
 import Logger = utils.Logger;
 interface IRemoteBuildTask {
-    execute(config: RemoteBuildConf, subCommand?: string): Q.Promise<any>;
+    execute(config: RemoteBuildConf, cliArguments?: string[]): Q.Promise<any>;
 }
 
 class Commands {
     public static Tasks: { [key: string]: IRemoteBuildTask } = {
         start: {
-            execute: function (config: RemoteBuildConf, subCommand: string): Q.Promise<void> {
+            execute: function (config: RemoteBuildConf, cliArguments?: string[]): Q.Promise<any> {
                 return server.start(config);
             },
         },
         test: {
-            execute: function (config: RemoteBuildConf, subCommand: string): Q.Promise<void> {
-                return server.test(config);
+            execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
+                return server.start(config).then(function (): Q.Promise<any> {
+                    return server.test(config, cliArguments);
+                }).finally(function (): void {
+                    server.stop();
+                });
             }
         },
         certificates: {
-            execute: function (config: RemoteBuildConf, subCommand: string): Q.Promise<void> {
+            execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
+                var subCommand = cliArguments[1];
                 switch (subCommand) {
                     case "generate":
                         return server.generateClientCert(config);
@@ -53,12 +58,12 @@ class Commands {
             }
         },
         help: {
-            execute: function (config: RemoteBuildConf, subCommand: string): Q.Promise<void> {
+            execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
                 return Q.resolve<void>(null);
             }
         },
         version: {
-            execute: function (config: RemoteBuildConf, subCommand: string): Q.Promise<void> {
+            execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
                 return Q.resolve<void>(null);
             }
         }
