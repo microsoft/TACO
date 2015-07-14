@@ -24,15 +24,15 @@ import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurit
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
-import SetupMod = require ("../cli/setup");
-import SetupMock = require ("./utils/setupMock");
+import RemoteMod = require ("../cli/remote");
+import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
 
-var setup = new SetupMod();
+var remote = new RemoteMod();
 
-describe("taco setup", function (): void {
+describe("taco remote", function (): void {
     var testHome = path.join(os.tmpdir(), "taco-cli", "setup");
     var tacoSettingsFile = path.join(testHome, "TacoSettings.json");
     before(function (): void {
@@ -61,14 +61,14 @@ describe("taco setup", function (): void {
     }
 
     it("should handle arguments", function (): void {
-        setup.canHandleArgs(makeICommandData(["remote", "ios"])).should.be.true;
+        remote.canHandleArgs(makeICommandData(["remote", "ios"])).should.be.true;
         // Even bad arguments should return true because we don't want to pass through to cordova
-        setup.canHandleArgs(makeICommandData(["foo"])).should.be.true;
-        setup.canHandleArgs(makeICommandData([])).should.be.true;
+        remote.canHandleArgs(makeICommandData(["foo"])).should.be.true;
+        remote.canHandleArgs(makeICommandData([])).should.be.true;
     });
 
-    var setupRun = function (args: string[]): Q.Promise<any> {
-        return setup.run(makeICommandData(args));
+    var remoteRun = function (args: string[]): Q.Promise<any> {
+        return remote.run(makeICommandData(args));
     };
 
     it("should save in the expected format", function (mocha: MochaDone): void {
@@ -95,8 +95,8 @@ describe("taco setup", function (): void {
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
-        SetupMod.CliSession = SetupMock.makeCliMock(mocha, () => { sessionClosed = true; }, desiredState, () => { questionsAsked++; });
-        Q(["remote", "ios"]).then(setupRun).then(function (): void {
+        RemoteMod.CliSession = RemoteMock.makeCliMock(mocha, () => { sessionClosed = true; }, desiredState, () => { questionsAsked++; });
+        Q(["add", "ios"]).then(remoteRun).then(function (): void {
             if (questionsAsked !== 3) {
                 throw new Error("Wrong number of questions asked: " + questionsAsked);
             } else if (!sessionClosed) {
@@ -120,7 +120,7 @@ describe("taco setup", function (): void {
     });
 
     it("should reject unknown parameters", function (mocha: MochaDone): void {
-        SetupMod.CliSession = {
+        RemoteMod.CliSession = {
             question: function (question: string, callback: (answer: string) => void): void {
                 mocha(new Error("Should not get as far as querying the user with invalid paramters"));
             },
@@ -129,7 +129,7 @@ describe("taco setup", function (): void {
             }
         };
 
-        Q([]).then(setupRun).then(function (): void {
+        Q([]).then(remoteRun).then(function (): void {
             mocha(new Error("Should have errored out due to bad input"));
         }, function (e: Error): void {
             if (e.message === "CommandBadSubcommand") {
@@ -179,8 +179,8 @@ describe("taco setup", function (): void {
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
-        SetupMod.CliSession = SetupMock.makeCliMock(mocha, () => { }, desiredState);
-        Q(["remote", "ios"]).then(setupRun).then(function (): Q.Promise<Settings.ISettings> {
+        RemoteMod.CliSession = RemoteMock.makeCliMock(mocha, () => { }, desiredState);
+        Q(["add", "ios"]).then(remoteRun).then(function (): Q.Promise<Settings.ISettings> {
             return Settings.loadSettings();
         }).then(function (data: Settings.ISettings): Q.Promise<void> {
             data.remotePlatforms["ios"].should.eql({

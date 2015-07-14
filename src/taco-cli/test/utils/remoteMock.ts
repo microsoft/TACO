@@ -2,7 +2,7 @@
 
 import Settings = require ("../../cli/utils/settings");
 
-class SetupMock {
+class RemoteMock {
     public static makeCliMock(onError: (err: Error) => void, onClose: () => void, desiredState: { host: string; port: number; pin: string }, onQuestion?: () => void): {
             question: (question: string, callback: (answer: string) => void) => void;
             close: () => void
@@ -10,13 +10,13 @@ class SetupMock {
         return {
             question: function (question: string, callback: (answer: string) => void): void {
                 switch (question) {
-                    case "CommandSetupRemoteQueryHost":
+                    case "CommandRemoteQueryHost":
                         callback(desiredState.host);
                         break;
-                    case "CommandSetupRemoteQueryPort":
+                    case "CommandRemoteQueryPort":
                         callback(desiredState.port.toString());
                         break;
-                    case "CommandSetupRemoteQueryPin":
+                    case "CommandRemoteQueryPin":
                         callback(desiredState.pin);
                         break;
                     default:
@@ -32,6 +32,7 @@ class SetupMock {
     }
 
     public static saveConfig(platform: string, config: Settings.IRemoteConnectionInfo): Q.Promise<any> {
+        Settings.forgetSettings();
         return Settings.loadSettings().catch(function (): Settings.ISettings {
             return { remotePlatforms: {} };
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {
@@ -41,4 +42,4 @@ class SetupMock {
     }
 }
 
-export = SetupMock;
+export = RemoteMock;

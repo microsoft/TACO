@@ -22,7 +22,7 @@ import rimraf = require ("rimraf");
 import createMod = require ("../cli/create");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("../cli/utils/settings");
-import SetupMock = require ("./utils/setupMock");
+import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
@@ -40,7 +40,7 @@ describe("taco settings", function (): void {
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Configure a dummy platform "test" to use the mocked out remote server
-        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
         }, function (err: any): void {
             mocha(err);
