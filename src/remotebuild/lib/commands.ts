@@ -34,9 +34,9 @@ class Commands {
         test: {
             execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
                 return server.start(config).then(function (): Q.Promise<any> {
-                    return server.test(config, cliArguments);
-                }).finally(function (): void {
-                    server.stop();
+                    return server.test(config, cliArguments).finally(function (): void {
+                        server.stop();
+                    });
                 });
             }
         },
