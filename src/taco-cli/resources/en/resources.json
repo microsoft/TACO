@@ -61,7 +61,7 @@
     "CommandKitSubcommandDescription": "Perform kit related operations (like list)",
     "_CommandKitSubcommandDescription.comment": "Description for the 'COMMAND' argument to 'taco kit'",
     "CommandKitListSubcommandDescription": "List available taco kits",
-    "_CommandKitListSubcommandDescription.comment": "Description for the 'COMMAND' argument to 'taco kit'",
+    "_CommandKitListSubcommandDescription.comment": "Description for the 'list' subcommand for 'taco kit'",
     "CommandKitListCurrentKit": "<bold>Current Kit</bold>: {0}",
     "_CommandKitListCurrentKit.comment": "Title for the Currently used kit Id displayed on executing the 'taco kit list' command",
     "CommandKitListDefaultKit": "Default",
