@@ -91,7 +91,7 @@
     "_CommandSetupOptionsRemove.comment": "Description of the --remove argument to 'taco setup remote --remove'",
     "CommandSetupOptionsList": "List currently configured platforms",
     "_CommandSetupOptionsList.comment": "Description of the --list argument to 'taco setup remote --list'",
-    "CommandSetupRemoteHeader": "Please ensure that remotebuild is running on the remote server.<br/> You can generate new client information at any time by typing remotebuild generateClientCert. For more details, see <fwlink goes here>",
+    "CommandSetupRemoteHeader": "Please ensure that remotebuild is running on the remote server.<br/> You can generate new client information at any time by typing remotebuild generateClientCert. For more details, see <link>http://go.microsoft.com/fwlink/?LinkId=618171</link>",
     "_CommandSetupRemoteHeader.comment": "Message printed to console when running taco setup remote",
     "CommandSetupRemoteQueryHost": "Remote host name / IP address: ",
     "_CommandSetupRemoteQueryHost.comment": "Query asking the user to enter the host name or IP address of the remote server",
