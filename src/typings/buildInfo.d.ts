@@ -6,7 +6,7 @@
  *******************************************************
  */
 
-/// <reference path="../typings/resourceManager" />
+/// <reference path="../typings/resourceManager.d.ts" />
 declare module TacoUtility {
     class BuildInfo {
         static UPLOADING: string;
