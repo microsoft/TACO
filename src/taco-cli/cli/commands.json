@@ -33,7 +33,14 @@
         "description": "<helptitle>[CommandKitDescription]</helptitle>",
         "args": [
             { "name": "COMMAND", "description": "[CommandKitSubcommandDescription]" },
-            { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" }
+            {
+                "name": "list",
+                "description": "[CommandKitListSubcommandDescription]",
+                "options": [
+                    { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" },
+                    { "name": "--kit <KIT-ID>", "description": "[CommandKitOptionKitDescription]" }
+                ]
+            }
         ]
     },
     "remote": {
