@@ -254,7 +254,12 @@ class CordovaHelper {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
                     .then(function (cordova: typeof Cordova): (platform: string) => boolean {
-                        return (platform: string) => platform in cordova.cordova_lib.cordova_platforms;
+                        if (!cordova.cordova_lib) {
+                            // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
+                            return () => true;
+                        } else {
+                            return (platform: string) => platform in cordova.cordova_lib.cordova_platforms;
+                        }
                 });
             } else {
                 return Q(() => true);

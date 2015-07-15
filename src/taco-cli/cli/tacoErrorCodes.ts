@@ -65,6 +65,7 @@ enum TacoErrorCode {
     RemoteBuildSslConnectionReset,
     RemoteBuildStatusPollFailed,
     RemoteBuildUnsuccessful,
+    RemoteBuildUnsupportedPlatform,
     UnsupportedPlatform,
     UnimplementedAbstractMethod
 }

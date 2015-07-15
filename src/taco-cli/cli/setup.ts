@@ -20,6 +20,7 @@ import readline = require ("readline");
 import request = require ("request");
 import util = require ("util");
 
+import CordovaHelper = require ("./utils/cordovaHelper");
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -143,14 +144,20 @@ class Setup extends commands.TacoCommandBase implements commands.IDocumentedComm
     private static remote(setupData: commands.ICommandData): Q.Promise<any> {
         var platform: string = (setupData.remain[1] || "ios").toLowerCase();
 
-        logger.log(resources.getString("CommandSetupRemoteHeader"));
+        return CordovaHelper.getSupportedPlatforms().then(function (filter: (platform: string) => boolean): Q.Promise<any> {
+            if (!filter(platform)) {
+                throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
+            }
 
-        return Setup.queryUserForRemoteConfig()
-        .then(Setup.acquireCertificateIfRequired)
-        .then(Setup.constructRemotePlatformSettings)
-        .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
-        .then(function (): void {
-            logger.log(resources.getString("CommandSetupSettingsStored", Settings.settingsFile));
+            logger.log(resources.getString("CommandSetupRemoteHeader"));
+
+            return Setup.queryUserForRemoteConfig()
+                .then(Setup.acquireCertificateIfRequired)
+                .then(Setup.constructRemotePlatformSettings)
+                .then(Setup.saveRemotePlatformSettings.bind(Setup, platform))
+                .then(function (): void {
+                logger.log(resources.getString("CommandSetupSettingsStored", Settings.settingsFile));
+            });
         });
     }
 
