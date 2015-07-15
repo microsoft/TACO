@@ -54,7 +54,7 @@
     "CommandHelpDescription": "Get help for a command",
     "CommandKitDescription": "Perform kit related operations",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
-    "CommandKitJsonOptionDescription": "Saves the list of known kits to a json file with path <PATH>.",
+    "CommandKitJsonOptionDescription": "Saves the list of known kits to a json file at path <PATH>.",
     "_CommandKitJsonOptionDescription.comment": "Description for --json argument to taco kit list",
     "CommandKitOptionKitDescription": "Lists the details (pinned version of Cordova CLI, platforms and plugins) for a specific kit with ID <KIT-ID>.",
     "_CommandKitOptionKitDescription.comment": "Description for --kit argument to taco kit list",

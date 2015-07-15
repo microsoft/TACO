@@ -49,12 +49,14 @@ class Taco {
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason) {
-                if(reason.isTacoError) {
+                if (reason.isTacoError) {
                     tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
-                } else if(reason.message) {
+                } else if (reason.message) {
                     tacoUtility.Logger.logError(reason.message);
                 } 
             }
+            
+            process.exit(1);
         });
     }
 

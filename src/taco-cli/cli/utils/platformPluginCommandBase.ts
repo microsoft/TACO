@@ -156,8 +156,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         });
     }
 
-    private operationRequiresTargets(subCommand: string): boolean
-    {
+    private operationRequiresTargets(subCommand: string): boolean {
         return (subCommand === "add" || subCommand === "remove" || subCommand === "update");
     }
 
@@ -173,7 +172,7 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
             return !!name && name.length > 0;
         });
 
-        if(this.operationRequiresTargets(subCommand) && targets.length == 0) {
+        if (this.operationRequiresTargets(subCommand) && targets.length === 0) {
             throw errorHelper.get(TacoErrorCodes.ErrorNoPluginOrPlatformSpecified, this.name, subCommand);
         }
 
