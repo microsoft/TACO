@@ -170,16 +170,11 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         return promise;
     }
 
-    private static buildProject(commandData: commands.ICommandData, remote: boolean = false): Q.Promise<any> {
+    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                if (remote) {
-                    assert(platform.location === Settings.BuildLocationType.Remote);
+                assert(platform.location !== Settings.BuildLocationType.Local);
                 return Build.buildRemotePlatform(platform.platform, commandData);
-                } else {
-                    assert(platform.location === Settings.BuildLocationType.Local);
-                    return CordovaWrapper.build(platform.platform, commandData);
-                }
             }));
         });
     }
@@ -209,11 +204,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return Build.buildProject(commandData, false);
-    }
-
-    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
-        return Build.buildProject(commandData, true);
+        return CordovaWrapper.build(commandData);
     }
 
     private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
@@ -223,7 +214,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just build local, and failures are failures
-                            return CordovaWrapper.build(platform.platform, commandData);
+                            return CordovaWrapper.build(commandData, platform.platform);
                         case Settings.BuildLocationType.Remote:
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);
