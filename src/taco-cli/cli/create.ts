@@ -223,7 +223,7 @@ class Create implements commands.IDocumentedCommand {
             return Q({})
                 .then(function (): Q.Promise<string> {
                     if (!kitId) {
-                        return kitHelper.getDefaultKit();
+                        return kitHelper.getDefaultKit().then(kitId => kitId + resources.getString("CommandCreateStatusDefaultKitUsedAnnotation"));
                     }
 
                     return Q(kitId);
@@ -238,23 +238,40 @@ class Create implements commands.IDocumentedCommand {
      * Finalizes the creation of project by printing the Success messages with information about the Kit and template used
      */
     private finalize(templateDisplayName: string): void {
+        var loggerR = logger.forResources(resources);
+
         // Report success over multiple loggings for different styles
         var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
         if (this.isKitProject()) {
             if (templateDisplayName) {
-                logger.log(resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath));
+                loggerR.logResourceString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath);
 
                 if (this.commandParameters.data.options["template"] === "typescript") {
-                    logger.log(resources.getString("CommandCreateInstallGulp"));
+                    loggerR.logResourceString("CommandCreateInstallGulp");
                 }
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"];
-                logger.log(resources.getString("CommandCreateSuccessProjectCustomWww", customWwwPath, projectFullPath));
+                loggerR.logResourceString("CommandCreateSuccessProjectCustomWww", customWwwPath, projectFullPath);
             }
         } else {
-            logger.log(resources.getString("CommandCreateSuccessProjectCLI", projectFullPath));
+            loggerR.logResourceString("CommandCreateSuccessProjectCLI", projectFullPath);
         }
+
+        // Print the onboarding experience
+        loggerR.logResourceStrings(["OnboardingExperienceSectionSeparator",
+            "HowToUseChangeToProjectFolder",
+            "HowToUseCommandPlatformAddPlatform",
+            "HowToUseCommandInstallReqsPlugin",
+            "HowToUseCommandAddPlugin",
+            "HowToUseCommandSetupRemote",
+            "HowToUseCommandBuildPlatform",
+            "HowToUseCommandRunBrowser",
+            "HowToUseCommandEmulatePlatform",
+            "HowToUseCommandRunPlatform",
+            "OnboardingExperienceInnerSectionSeparator",
+            "HowToUseCommandHelp",
+            "HowToUseCommandDocs"], projectFullPath);
     }
 }
 

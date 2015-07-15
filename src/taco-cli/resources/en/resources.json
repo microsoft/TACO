@@ -31,9 +31,10 @@
     "CommandCreateInvalidPath": "Error: The specified path is invalid: {0}",
     "_CommandCreateInvalidPath.comment": "Error reported when the specified path at which to create the cordova project has segments that are invalid directory names for the current OS. {0} is the path that was given by the user.",
 
-    "CommandCreateStatusKitIdUsed": "Creating a new Cordova project with name <highlight>{0}</highlight> and id <highlight>{1}</highlight> at location <highlight>{2}</highlight> using Kit <highlight>{3}</highlight>...",
+    "CommandCreateStatusDefaultKitUsedAnnotation": " (Default)",
+    "CommandCreateStatusKitIdUsed": "Creating a new Cordova project -\n\t------------------------------------\n\tName............<highlight>{0}</highlight>\n\tID............<highlight>{1}</highlight>\n\tLocation........<highlight>{2}</highlight>\n\tKit.............<highlight>{3}</highlight>\n\tRelease notes...http://fwdlink\n\t-----------------------------------",
     "_CommandCreateStatusKitIdUsed.comment": "Status message shown while creating a kit based project. {0} is project name, {1} is project id, 2 is the full path where project is created and {3} is the name of the kit used",
-    "CommandCreateStatusCordovaCliUsed": "Creating a new Cordova project with name {0} and id {1} at location {2} with Cordova version {3} and no Kit...",
+    "CommandCreateStatusCordovaCliUsed": "Creating a new Cordova project -\n\t------------------------------------\n\tName............<highlight>{0}</highlight>\n\tID................<highlight>{1}</highlight>\n\tLocation........<highlight>{2}</highlight>\n\tCordova.........<highlight>{3}</highlight>\n\tRelease notes...http://fwdlink\n\t-----------------------------------",
     "_CommandCreateStatusCordovaCliUsed.comment": "Status message shown while creating a cli based project.  {0} is project name, {1} is project id, 2 is the full path where project is created and {3} is the cordova version used ",
 
     "CommandCreateWarningDeprecatedKit": "<br/><warn>Warning: Kit {0} has been deprecated.</warn><br/>Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
@@ -452,5 +453,18 @@
     "CordovaCmdNotFound": "Cordova not found, please run 'npm install –g cordova' to install Cordova globally",
     "_CordovaCmdNotFound.comment": "Error message shown when no Cordova is found on the machine",
     "UnimplementedAbstractMethod": "This is an abstract method and should be implemented by a derived overload",
-    "_UnimplementedAbstractMethod.comment": "Error thrown for an unimplemented method"
+    "_UnimplementedAbstractMethod.comment": "Error thrown for an unimplemented method",
+
+    "OnboardingExperienceSectionSeparator":"-------------------------------------",
+    "OnboardingExperienceInnerSectionSeparator":"",
+    "HowToUseChangeToProjectFolder": " * Change the directory to your project: cd {0}",
+    "HowToUseCommandPlatformAddPlatform": " * Add a platform:  taco platform add <PLATFORM>",
+    "HowToUseCommandInstallReqsPlugin": " * Install the build tools for each platform:  taco install-reqs <PLATFORM>",
+    "HowToUseCommandAddPlugin": " * Add a Cordova plugin: taco add <PLUGIN-ID>",
+    "HowToUseCommandSetupRemote": " * Connect to a remote build agent: taco remote add <PLATFORM>",
+    "HowToUseCommandBuildPlatform": " * Build your app: taco build <PLATFORM>",
+    "HowToUseCommandEmulatePlatform": " * Run your app in the emulator: taco emulate <PLATFORM>",
+    "HowToUseCommandRunPlatform": " * Run your app on a device: taco run <PLATFORM>",
+    "HowToUseCommandHelp": "For command help, use 'taco --help' ",
+    "HowToUseCommandDocs": "For full documentation online, use 'taco docs'"
 }

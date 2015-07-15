@@ -54,5 +54,6 @@
     "CommandHelpBadcomand": "{0} is not a valid command<br/>",
     "_CommandHelpBadcomand.comment": "message shown when user enters invalid command",
     "CommandHelpUsageAliases": "<br/><helptitle>Aliases:</helptitle><br/>",
-    "_CommandHelpUsageAliases.comment": "options header when user types 'taco help'"
+  "_CommandHelpUsageAliases.comment": "options header when user types 'taco help'"
+
 }

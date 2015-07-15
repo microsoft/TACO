@@ -421,4 +421,7 @@ describe("taco create", function (): void {
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreatePathNotEmpty).then(done, done);
         });
     });
+
+    it("prints the onboarding experience", function (done: MochaDone): void {
+    });
 });
