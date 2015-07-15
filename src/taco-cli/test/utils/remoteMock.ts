@@ -32,7 +32,7 @@ class RemoteMock {
     }
 
     public static saveConfig(platform: string, config: Settings.IRemoteConnectionInfo): Q.Promise<any> {
-        Settings.forgetSettings();
+        (<any>Settings).forgetSettings();
         return Settings.loadSettings().catch(function (): Settings.ISettings {
             return { remotePlatforms: {} };
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {

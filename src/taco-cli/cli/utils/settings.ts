@@ -39,13 +39,6 @@ class Settings {
     }
 
     /*
-     * Remove cached settings object, for use in tests
-     */
-    public static forgetSettings(): void {
-        Settings.Settings = null;
-    }
-
-    /*
      * Load data from TACO_HOME/TacoSettings.json
      */
     public static loadSettings(): Q.Promise<Settings.ISettings> {
@@ -160,6 +153,13 @@ class Settings {
         }
 
         return false;
+    }
+
+    /**
+     * Remove cached settings object, for use in tests
+     */
+    private static forgetSettings(): void {
+        Settings.Settings = null;
     }
 }
 
