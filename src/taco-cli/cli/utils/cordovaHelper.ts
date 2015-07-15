@@ -244,6 +244,23 @@ class CordovaHelper {
             }
         });
     }
+
+    /**
+     * Return a function that determines whether a given platform is supported by this project or not.
+     * For kit projects, we can get an accurate answer via cordova.cordova_lib.cordova_platforms, while 
+     */
+    public static getSupportedPlatforms(): Q.Promise<(platform: string) => boolean> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<(platform: string) => boolean> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
+                    .then(function (cordova: typeof Cordova): (platform: string) => boolean {
+                        return (platform: string) => platform in cordova.cordova_lib.cordova_platforms;
+                });
+            } else {
+                return Q(() => true);
+            }
+        });
+    }
    
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X

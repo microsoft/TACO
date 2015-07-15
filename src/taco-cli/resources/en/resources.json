@@ -287,6 +287,9 @@
     "CommandRunRemoteEmulatorSuccess": "<success>Success!</success> Build running on remote emulator",
     "_CommandRunRemoteEmulatorSuccess.comment": "Message printed after successfully running a build on a remote device",
 
+    "CommandUnsupportedPlatformIgnored": "Warning: Platform '{0}' is not supported and will be ignored.",
+    "_CommandUnsupportedPlatformIgnored.comment": "Message printed when we 'taco build' or 'taco run' with a platform that is unsupported. {0} is the particular platform",
+
     "CommandNotBothLocalRemote": "Error: must specify at most one of --local and --remote",
     "_CommandNotBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
     "CommandNotBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",

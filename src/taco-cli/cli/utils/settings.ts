@@ -18,6 +18,7 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
+import CordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
@@ -81,8 +82,51 @@ class Settings {
      *                 - If a platform exists in /platforms and does not have a remote configuration, then perform a local build
      */
     public static determinePlatform(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Settings.loadSettings()
-        .fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
+        return Q.all([
+            CordovaHelper.getSupportedPlatforms(),
+            Settings.determinePlatformsFromOptions(options)
+        ]).spread<Settings.IPlatformWithLocation[]>(function (filter: (platform: string) => boolean, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
+            var filteredPlatforms = platforms.filter(function (platform: Settings.IPlatformWithLocation): boolean {
+                var supported = filter(platform.platform);
+                if (!supported) {
+                    logger.logWarning(resources.getString("CommandUnsupportedPlatformIgnored", platform.platform));
+                };
+                return supported;
+            });
+            if (filteredPlatforms.length > 0) {
+                return filteredPlatforms;
+            } else {
+                throw errorHelper.get(TacoErrorCodes.ErrorNoPlatformsFound);
+            }
+        });
+    }
+
+    /*
+     * Construct the base URL for the given build server
+     */
+    public static getRemoteServerUrl(server: Settings.IRemoteConnectionInfo): string {
+        return util.format("http%s://%s:%d/%s", server.secure ? "s" : "", server.host, server.port, server.mountPoint);
+    }
+
+    /**
+     * Determine whether the given target platform can be built on the local machine
+     *
+     * @targetPlatform {string} target platform to build, e.g. ios, windows
+     * @return {boolean} true if target platform can be built on local machine
+     */
+    private static canBuildLocally(targetPlatform: string): boolean {
+        switch (os.platform()) {
+            case "darwin":
+                return targetPlatform !== "windows";  // can be android, ios
+            case "win32":
+                return targetPlatform !== "ios";  // can be android, wp*, or windows
+        }
+
+        return false;
+    }
+
+    private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
+        return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
         .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
             if (options.remain.length > 0) {
                 // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
@@ -122,37 +166,7 @@ class Settings {
                     return { location: Settings.BuildLocationType.Local, platform: platform };
                 }));
             }
-        }).then(function (platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
-            if (platforms.length > 0) {
-                return platforms;
-            } else {
-                throw errorHelper.get(TacoErrorCodes.ErrorNoPlatformsFound);
-            }
         });
-    }
-
-    /*
-     * Construct the base URL for the given build server
-     */
-    public static getRemoteServerUrl(server: Settings.IRemoteConnectionInfo): string {
-        return util.format("http%s://%s:%d/%s", server.secure ? "s" : "", server.host, server.port, server.mountPoint);
-    }
-
-    /**
-     * Determine whether the given target platform can be built on the local machine
-     *
-     * @targetPlatform {string} target platform to build, e.g. ios, windows
-     * @return {boolean} true if target platform can be built on local machine
-     */
-    private static canBuildLocally(targetPlatform: string): boolean {
-        switch (os.platform()) {
-            case "darwin":
-                return targetPlatform !== "windows";  // can be android, ios
-            case "win32":
-                return targetPlatform !== "ios";  // can be android, wp*, or windows
-        }
-
-        return false;
     }
 }
 
