@@ -77,7 +77,7 @@ class Server {
         });
     }
 
-    public static stop(callback: Function): void {
+    public static stop(callback?: Function): void {
         process.removeListener("uncaughtException", Server.ErrorShutdown);
         process.removeListener("SIGTERM", Server.Shutdown);
         process.removeListener("SIGINT", Server.Shutdown);
@@ -85,16 +85,18 @@ class Server {
             var tempInstance = Server.ServerInstance;
             Server.ServerInstance = null;
             tempInstance.close(callback);
+        } else if (callback) {
+            callback(null);
         }
     }
 
     /**
      * Attempt to test each of the server modules against a separate instance of remotebuild which is assumed to be running with the same configuration
      */
-    public static test(conf: RemoteBuildConf): Q.Promise<any> {
+    public static test(conf: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
         return Server.initializeServerTestCapabilities(conf).then(function (serverTestCaps: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
             return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
-                return modGen.test(conf, moduleConfig, serverTestCaps).then(function (): void {
+                return modGen.test(conf, moduleConfig, serverTestCaps, cliArguments).then(function (): void {
                     console.log(resources.getString("TestPassed", mod));
                 }, function (err: Error): void {
                     console.error(resources.getString("TestFailed", mod));
