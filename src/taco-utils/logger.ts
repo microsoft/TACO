@@ -7,13 +7,39 @@
 ﻿ */
 
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/logger.d.ts" />
 
 import os = require ("os");
 
 import logFormathelper = require ("./logFormatHelper");
+import resourceManager = require ("./resourceManager");
+
 import LogFormatHelper = logFormathelper.LogFormatHelper;
+import ResourceManager = resourceManager.ResourceManager;
 
 module TacoUtility {
+    class LoggerForStringResources {
+        private resources: ResourceManager;
+
+        constructor(resources: ResourceManager) {
+            this.resources = resources;
+        }
+
+        /**
+         * Logs a message generated from a resource string
+         */
+        public logResourceString(id: string, ...optionalArgs: any[]): void {
+            Logger.log(this.resources.getString(id, optionalArgs));
+        }
+        
+        /**
+         * Logs several messages generated from a resource strings
+         */
+        public logResourceStrings(ids: string[], ...optionalArgs: any[]): void {
+            ids.forEach(id => this.logResourceString(id, optionalArgs));
+        }
+    }
+
     export class Logger {
         /**
          * message can be any string with xml type tags in it.
@@ -39,6 +65,10 @@ module TacoUtility {
          */
         public static logWarning(message: string): void {
             Logger.stderr(LogFormatHelper.toWarning(message));
+        }
+
+        public static forResources(resources: ResourceManager): LoggerForStringResources {
+            return new LoggerForStringResources(resources);
         }
 
         /**
