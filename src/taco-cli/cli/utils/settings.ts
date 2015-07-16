@@ -168,6 +168,13 @@ class Settings {
             }
         });
     }
+
+    /**
+     * Remove cached settings object, for use in tests
+     */
+    private static forgetSettings(): void {
+        Settings.Settings = null;
+    }
 }
 
 module Settings {

@@ -43,14 +43,28 @@
             }
         ]
     },
-    "setup": {
-        "synopsis": "<synopsis>remote [PLATFORM] [--remove | --list]</synopsis>",
-        "modulePath": "./setup",
-        "description": "<helptitle>[CommandSetupDescription]</helptitle>",
+    "remote": {
+        "synopsis": "<synopsis>COMMAND</synopsis>",
+        "modulePath": "./remote",
+        "description": "<helptitle>[CommandRemoteDescription]</helptitle>",
         "args": [
-            { "name": "PLATFORM", "description": "[CommandSetupOptionsPlatform]" },
-            { "name": "--remove", "description": "[CommandSetupOptionsRemove]" },
-            { "name": "--list", "description": "[CommandSetupOptionsList]" }
+            { "name": "COMMAND", "description": "[CommandRemoteSubcommandDescription]" },
+            {
+                "name": "add <PLATFORM>",
+                "description": "[CommandRemoteAddSubcommandDescription]"
+            },
+            {
+                "name": "remove <PLATFORM>",
+                "description": "[CommandRemoteRemoveSubcommandDescription]"
+            },
+            {
+                "name": "list",
+                "description": "[CommandRemoteListSubcommandDescription]"
+            }
+        ],
+        "aliases": [
+            { "alias": "rm", "command": "remove" },
+            { "alias": "ls", "command": "list" }
         ]
     },
     "platform": {

@@ -25,10 +25,9 @@ import util = require ("util");
 
 import buildMod = require ("../cli/build");
 import createMod = require ("../cli/create");
-import setupMod = require ("../cli/setup");
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
-import SetupMock = require ("./utils/setupMock");
+import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
@@ -36,7 +35,6 @@ import utils = TacoUtility.UtilHelper;
 
 var build = new buildMod();
 var create = new createMod();
-var setup = new setupMod();
 
 describe("taco build", function (): void {
     var testHttpServer: http.Server;
@@ -71,7 +69,7 @@ describe("taco build", function (): void {
         var port = 3000;
         testHttpServer.listen(port);
         // Configure a dummy platform "test" to use the mocked out remote server
-        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
         }, function (err: any): void {
                 mocha(err);
