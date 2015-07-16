@@ -39,6 +39,8 @@
     "_PackageLoaderNpmUpdateFailedWithCode.comment": "Message reported when npm update fails with an exit code.",
     "PackageLoaderNpmUpdateFailedEaccess": "Error updating {0} via npm. Exit Code: {1}. Check permissions of npm cache. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=613751.",
     "_PackageLoaderNpmUpdateFailedEaccess.comment": "Message reported when npm update fails due to permissions",
+    "PackageLoaderUpdateUnableToRecover": "Error attempting to recover from failed installation at {0}.",
+    "_PackageLoaderUpdateUnableToRecover.comment": "Message reported when we try to update a package to a newer version, an error occurs, and we are unable to roll back to the previou version. {0} is the file path to where the package is",
     "InnerErrorToString": "Inner Error:\n{0}",
     "_InnerErrorToString.comment": "token prefix to an inner error",
     "PackageLoaderDownloadCompletedMessage": "{0} downloaded and installed.",

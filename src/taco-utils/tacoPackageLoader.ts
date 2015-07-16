@@ -171,16 +171,24 @@ module TacoUtility {
         private static lazyRequireInternal<T>(request: IPackageInstallRequest, needsUpdate: boolean = false): Q.Promise<T> {
             assert.notEqual(request, null);
 
+            var targetPath = request.targetPath;
+            var backupPath = request.targetPath + "_backup";
+
             return Q({})
                 .then(function (): Q.Promise<void> {
                     if (needsUpdate) {
-                        fs.renameSync(request.targetPath, request.targetPath + "_backup");
+                        fs.renameSync(targetPath, backupPath);
                         return TacoPackageLoader.installPackageViaNPM(request).then(function success(): void {
-                            rimraf.sync(request.targetPath + "_backup");
+                            rimraf.sync(backupPath);
                         }, function fail(error: any): void {
-                            console.warn(error);
-                            rimraf.sync(request.targetPath);
-                            fs.renameSync(request.targetPath + "_backup", request.targetPath);
+                            try {
+                                logger.logWarning(error.toString());
+                                rimraf.sync(targetPath);
+                                fs.renameSync(backupPath, targetPath);
+                            } catch (e) {
+                                // An error happened, either when deleting the attempted new install, or when moving the backup in to place
+                                throw errorHelper.wrap(TacoErrorCodes.PackageLoaderUpdateUnableToRecover, e, targetPath);
+                            }
                         });
                     }
 
@@ -396,7 +404,7 @@ module TacoUtility {
             try {
                 fs.writeFileSync(TacoPackageLoader.getTimestampFilePath(targetPath), Date.now().toString());
             } catch (e) {
-                console.error(e);
+                logger.logError(e);
                 // report but otherwise ignore the error.
             }
         }
