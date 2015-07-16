@@ -42,13 +42,11 @@ class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
         });
     }
 
-    public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
+    public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities, cliArguments: string[]): Q.Promise<any> {
         var host = util.format("http%s://%s:%d", utils.ArgsHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
         var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
-        return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ false, serverTestCapabilities.agent).then(function (): Q.Promise<any> {
-            return selftest.test(host, modConfig.mountPath, downloadDir, /* deviceBuild */ true, serverTestCapabilities.agent);
-        });
+        return selftest.test(host, modConfig.mountPath, downloadDir, cliArguments.indexOf("--device") !== -1, serverTestCapabilities.agent);
     }
 
     public printHelp(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): void {

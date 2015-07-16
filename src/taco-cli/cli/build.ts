@@ -94,12 +94,6 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
-        // TODO: Revisit once we decide how to do the cordova passthrough
-        if (data.original.indexOf("--local") !== -1 && data.original.indexOf("--clean") === -1) {
-            // non-clean local builds are equivalent to cordova builds
-            return false;
-        }
-
         return true;
     }
 
@@ -210,7 +204,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     }
 
     private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return CordovaWrapper.cli(commandData.original);
+        return CordovaWrapper.build(commandData);
     }
 
     private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
@@ -220,7 +214,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just build local, and failures are failures
-                            return CordovaWrapper.build(platform.platform, commandData);
+                            return CordovaWrapper.build(commandData, platform.platform);
                         case Settings.BuildLocationType.Remote:
                             // Just build remote, and failures are failures
                             return Build.buildRemotePlatform(platform.platform, commandData);

@@ -84,12 +84,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
-        if (data.original.indexOf("--local") !== -1) {
-            // local runs are equivalent to cordova runs
-            return false;
-        }
-
-        return true;
+       return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
@@ -198,8 +193,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        CordovaWrapper.cli(commandData.original);
-        return Q({});
+        return CordovaWrapper.run(commandData);
     }
 
     private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
@@ -211,7 +205,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                         return Run.runRemotePlatform(platform.platform, commandData);
                     };
                     var localRunFunc = function (): Q.Promise<any> {
-                        return CordovaWrapper.run(platform.platform, commandData);
+                        return CordovaWrapper.run(commandData, platform.platform);
                     };
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
