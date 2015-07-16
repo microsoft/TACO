@@ -41,5 +41,6 @@
         "test": "test",
         "example": "examples"
     },
-    "readmeFilename": "README.md"
+    "readmeFilename": "README.md",
+    "license": "MIT"
 }

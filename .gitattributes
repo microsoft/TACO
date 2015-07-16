@@ -66,3 +66,6 @@
 # Make sure to keep "executable" files with lf line endings
 src/taco-cli/bin/taco text eol=lf
 src/remotebuild/bin/remotebuild text eol=lf
+
+# Keep line endings consistent across platforms for the dummy file used in unit tests to calculate SHA1 signature and byte size
+/src/taco-dependency-installer/test/test-data/testFile.txt text eol=lf

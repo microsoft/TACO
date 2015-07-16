@@ -45,7 +45,7 @@ class CliHelper {
                 return CliHelper.handleHelpFlag(args, remotebuildConf);
             })
             .then(function (): Q.Promise<void> {
-                var command: string = args[0] || "start";
+                var command: string = nconf.get("_")[0] || "start";
                 var task = Commands.Tasks[command];
 
                 if (!task) {
@@ -58,7 +58,7 @@ class CliHelper {
 
                 return HostSpecifics.initialize(remotebuildConf)
                        .then(function (): Q.Promise<any> {
-                              return task.execute(remotebuildConf, args[1]);
+                              return task.execute(remotebuildConf, args);
                        });
             })
             .done();

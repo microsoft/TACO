@@ -192,7 +192,7 @@ class Create implements commands.IDocumentedCommand {
             .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
                 if (kitInfo && !!kitInfo.deprecated) {
                     // Warn the user
-                    logger.logWarning(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
+                    logger.log(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
                 }
 
                 if (mustUseTemplate) {
