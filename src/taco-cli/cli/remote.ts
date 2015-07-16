@@ -144,8 +144,8 @@ class Remote extends commands.TacoCommandBase implements commands.IDocumentedCom
     private static add(remoteData: commands.ICommandData): Q.Promise<any> {
         var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
 
-        return CordovaHelper.getSupportedPlatforms().then(function (filter: (platform: string) => boolean): Q.Promise<any> {
-            if (!filter(platform)) {
+        return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): Q.Promise<any> {
+            if (!supportedPlatforms || platform in supportedPlatforms) {
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
             }
 
