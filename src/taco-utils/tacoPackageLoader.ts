@@ -157,11 +157,7 @@ module TacoUtility {
                         // A previous version exists. If we can't acquire a new one,
                         // we may continue using the previous version
                         var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
-                        if (updateRequested) {
-                            return TacoPackageLoader.lazyRequireInternal<T>(request, updateRequested);
-                        } else {
-                            return TacoPackageLoader.lazyRequireInternal<T>(request);
-                        }
+                        return TacoPackageLoader.lazyRequireInternal<T>(request, updateRequested);
                     }
                 })
                 .then(function (obj: T): T {
@@ -185,7 +181,7 @@ module TacoUtility {
                         }, function fail(error: any): void {
                             console.warn(error);
                             rimraf.sync(request.targetPath);
-                            fs.renameSync(request.targetPath, request.targetPath + "_backup");
+                            fs.renameSync(request.targetPath + "_backup", request.targetPath);
                         });
                     }
 
