@@ -149,24 +149,27 @@ module TacoUtility {
             // Check if update is needed
             return TacoPackageLoader.getLastCheckTimestamp(request.targetPath)
                 .then(function (lastCheckTimestamp: number): Q.Promise<T> {
-                    // Note that needsUpdate is false if package is not present
-                    var updateNeeded: boolean = (lastCheckTimestamp > 0) && (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
-                    updateTimestamp = updateNeeded || lastCheckTimestamp <= 0;
-                    return TacoPackageLoader.lazyRequireInternal<T>(request, updateNeeded);
+                    if (lastCheckTimestamp < 0) {
+                        // No previous version, we must download something
+                        updateTimestamp = true;
+                        return TacoPackageLoader.lazyRequireInternal<T>(request);
+                    } else {
+                        // A previous version exists. If we can't acquire a new one,
+                        // we may continue using the previous version
+                        var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
+                        if (updateRequested) {
+                            return TacoPackageLoader.lazyRequireInternal<T>(request, updateRequested);
+                        } else {
+                            return TacoPackageLoader.lazyRequireInternal<T>(request);
+                        }
+                    }
                 })
-                .then(function (obj: T): void {
-                    packageObj = obj;
-                })
-                // update last check timestamp 
-                .then(function (): Q.Promise<void> {
+                .then(function (obj: T): T {
                     if (updateTimestamp) {
-                        return TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
+                        TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
                     }
 
-                    return Q.resolve<void>(null);
-                })
-                .then(function (): Q.Promise<T> {
-                    return Q(packageObj);
+                    return obj;
                 });
         }
 
@@ -176,12 +179,14 @@ module TacoUtility {
             return Q({})
                 .then(function (): Q.Promise<void> {
                     if (needsUpdate) {
-                        // for test scenarios, where test checks expirationIntervalInHours functionality and provide a local package
-                        if (request.type === PackageSpecType.FilePath) {
-                            return TacoPackageLoader.installPackageViaNPM(request);
-                        }
-
-                        return TacoPackageLoader.updatePackageViaNPM(request.packageName, request.targetPath, request.logLevel);
+                        fs.renameSync(request.targetPath, request.targetPath + "_backup");
+                        return TacoPackageLoader.installPackageViaNPM(request).then(function success(): void {
+                            rimraf.sync(request.targetPath + "_backup");
+                        }, function fail(error: any): void {
+                            console.warn(error);
+                            rimraf.sync(request.targetPath);
+                            fs.renameSync(request.targetPath, request.targetPath + "_backup");
+                        });
                     }
 
                     return TacoPackageLoader.installPackageIfNeeded(request);
@@ -392,11 +397,13 @@ module TacoUtility {
                 });
         }
 
-        private static updateLastCheckTimestamp(targetPath: string): Q.Promise<void> {
-            return Q.denodeify(fs.writeFile)(TacoPackageLoader.getTimestampFilePath(targetPath), Date.now().toString())
-                .catch(function (): any {
-                    return Q.resolve<void>(null);
-            });
+        private static updateLastCheckTimestamp(targetPath: string): void {
+            try {
+                fs.writeFileSync(TacoPackageLoader.getTimestampFilePath(targetPath), Date.now().toString());
+            } catch (e) {
+                console.error(e);
+                // report but otherwise ignore the error.
+            }
         }
     }
 }
