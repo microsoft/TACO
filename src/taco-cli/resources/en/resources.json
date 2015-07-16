@@ -54,7 +54,7 @@
     "CommandHelpDescription": "Get help for a command",
     "CommandKitDescription": "Perform kit related operations",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
-    "CommandKitJsonOptionDescription": "Saves the list of known kits to a json file with path <PATH>.",
+    "CommandKitJsonOptionDescription": "Saves the list of known kits to a json file at path <PATH>.",
     "_CommandKitJsonOptionDescription.comment": "Description for --json argument to taco kit list",
     "CommandKitOptionKitDescription": "Lists the details (pinned version of Cordova CLI, platforms and plugins) for a specific kit with ID <KIT-ID>.",
     "_CommandKitOptionKitDescription.comment": "Description for --kit argument to taco kit list",
@@ -179,7 +179,6 @@
     "_CommandPlatformStatusUpdating.comment": "Status message shown while updating a platform {0} added to the project",
     "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> updated.<br/>",
     "_CommandPlatformStatusUpdated.comment": "Status message after successfully updating platform {0}",
-    
 
     "CommandPluginDescription": "Manage project plugins",
     "_CommandPluginDescription.comment": "Description for 'taco plugin'",
@@ -329,6 +328,9 @@
     "ErrorCertificateSaveWithErrorCode": "Failed to save certificate in certficate store. Exit Code: {0}",
     "_ErrorCertificateSaveWithErrorCode.comment": "Error message printed when we fail to save a certificate via powershell and we have a process exit code. {0} is the process exit code.",
 
+    "ErrorNoPluginOrPlatformSpecified": "No {0}(s) specified. Please specify {0}(s) to {1}. See `taco {0} list`.",
+    "_ErrorNoPluginOrPlatformSpecified.comment": "Error message printed when no platforms or plugins ({0}) are specified for operation {1}",
+    
     "ErrorNoPlatformsFound": "Unable to find any platforms. Please 'taco platform add <platform>' or 'taco setup remote <platform>' and retry.",
     "_ErrorNoPlatformsFound.comment": "Error message printed when we try to run a command on a set of platforms, and the set is empty.",
 
