@@ -144,7 +144,6 @@ module TacoUtility {
             assert.notEqual(request.type, PackageSpecType.Uri, "update is not supported for git URIs");
 
             var updateTimestamp: boolean = false;
-            var packageObj: T = null;
 
             // Check if update is needed
             return TacoPackageLoader.getLastCheckTimestamp(request.targetPath)
