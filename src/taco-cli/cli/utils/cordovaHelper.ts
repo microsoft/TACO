@@ -248,7 +248,7 @@ class CordovaHelper {
     /**
      * Return a dictionary where the keys are supported platforms, or "null" if the answer is unknown.
      * For sufficiently recent kit projects, we can get an accurate answer via cordova.cordova_lib.cordova_platforms, while 
-     * for older versions of cordova or for non-kit projects, we default back
+     * for older versions of cordova or for non-kit projects, we default back to being permissive
      */
     public static getSupportedPlatforms(): Q.Promise<CordovaHelper.IDictionary<any>> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<CordovaHelper.IDictionary<any>> {
