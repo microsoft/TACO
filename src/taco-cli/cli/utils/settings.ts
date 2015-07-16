@@ -85,12 +85,13 @@ class Settings {
         return Q.all([
             CordovaHelper.getSupportedPlatforms(),
             Settings.determinePlatformsFromOptions(options)
-        ]).spread<Settings.IPlatformWithLocation[]>(function (filter: (platform: string) => boolean, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
+        ]).spread<Settings.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
             var filteredPlatforms = platforms.filter(function (platform: Settings.IPlatformWithLocation): boolean {
-                var supported = filter(platform.platform);
+                var supported = !supportedPlatforms || platform.platform in supportedPlatforms;
                 if (!supported) {
                     logger.logWarning(resources.getString("CommandUnsupportedPlatformIgnored", platform.platform));
-                };
+                }
+
                 return supported;
             });
             if (filteredPlatforms.length > 0) {
