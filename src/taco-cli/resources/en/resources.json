@@ -257,7 +257,7 @@
     "_CommandBuildNoLocalPlatformsFound.comment": "Error reported when we are asked to build locally with no platform specified, and there are no platforms in the project",
     "CommandBuildRemotePlatformsNotConfigured": "Error: No remote platforms configured. Please run 'taco remote add' to configure one",
     "_CommandBuildRemotePlatformsNotConfigured.comment": "Error reported when we are asked to build remotely with no platform specified, and there are no remote build servers configured",
-    "CommandBuildPlatformsNotFound": "Error: Unable to find any local or remote platforms. Please run 'taco platform add' or 'taco remot adde'",
+    "CommandBuildPlatformsNotFound": "Error: Unable to find any local or remote platforms. Please run 'taco platform add' or 'taco remote add'",
     "_CommandBuildPlatformsNotFound.comment": "Error reported when we are asked to build with no platform specified and we are unable to find any platforms either locally or remotely",
     "CommandRemotePlatformNotKnown": "Error: No remote settings found for {0}. Please run 'taco remote add {0}'",
     "_CommandRemotePlatformNotKnown.comment": "Error message printed when a remote build or run is requested for a platform that does not have remote settings configured. {0} is the platform",
