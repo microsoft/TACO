@@ -143,55 +143,53 @@ module TacoUtility {
         private static lazyRequireLatest<T>(request: IPackageInstallRequest): Q.Promise<T> {
             assert.notEqual(request.type, PackageSpecType.Uri, "update is not supported for git URIs");
 
-            var updateTimestamp: boolean = false;
-
             // Check if update is needed
             return TacoPackageLoader.getLastCheckTimestamp(request.targetPath)
-                .then(function (lastCheckTimestamp: number): Q.Promise<T> {
-                    if (lastCheckTimestamp < 0) {
-                        // No previous version, we must download something
-                        updateTimestamp = true;
-                        return TacoPackageLoader.lazyRequireInternal<T>(request);
-                    } else {
-                        // A previous version exists. If we can't acquire a new one,
-                        // we may continue using the previous version
-                        var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
-                        return TacoPackageLoader.lazyRequireInternal<T>(request, updateRequested);
-                    }
-                })
-                .then(function (obj: T): T {
-                    if (updateTimestamp) {
+            .then(function (lastCheckTimestamp: number): Q.Promise<T> {
+                if (lastCheckTimestamp < 0) {
+                    // No previous version, we must download something
+                    return TacoPackageLoader.lazyRequireInternal<T>(request).then(function (obj: T): Q.Promise<T> {
                         TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
-                    }
+                        return Q<T>(obj);
+                    });
+                } else {
+                    // A previous version exists. If we can't acquire a new one,
+                    // we may continue using the previous version
+                    var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
 
-                    return obj;
-                });
+                    if (updateRequested) {
+                        var targetPath = request.targetPath;
+                        var backupPath = request.targetPath + "_backup";
+                        fs.renameSync(targetPath, backupPath);
+
+                        return TacoPackageLoader.lazyRequireInternal<T>(request).then(function (obj: T): Q.Promise<T> {
+                            rimraf.sync(backupPath);
+                            TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
+                            return Q<T>(obj);
+                        }, function (error: any): Q.Promise<T> {
+                                try {
+                                    logger.logWarning(error.toString());
+                                    rimraf.sync(targetPath);
+                                    fs.renameSync(backupPath, targetPath);
+                                    return TacoPackageLoader.lazyRequireInternal<T>(request);
+                                } catch (e) {
+                                    // An error happened, either when deleting the attempted new install, or when moving the backup in to place
+                                    throw errorHelper.wrap(TacoErrorCodes.PackageLoaderUpdateUnableToRecover, e, targetPath);
+                                }
+                            });
+                    } else {
+                        // Just use the cached version, no need to download a new version and update timestamps
+                        return TacoPackageLoader.lazyRequireInternal<T>(request);
+                    }
+                }
+            });
         }
 
-        private static lazyRequireInternal<T>(request: IPackageInstallRequest, needsUpdate: boolean = false): Q.Promise<T> {
+        private static lazyRequireInternal<T>(request: IPackageInstallRequest): Q.Promise<T> {
             assert.notEqual(request, null);
-
-            var targetPath = request.targetPath;
-            var backupPath = request.targetPath + "_backup";
 
             return Q({})
                 .then(function (): Q.Promise<void> {
-                    if (needsUpdate) {
-                        fs.renameSync(targetPath, backupPath);
-                        return TacoPackageLoader.installPackageViaNPM(request).then(function success(): void {
-                            rimraf.sync(backupPath);
-                        }, function fail(error: any): void {
-                            try {
-                                logger.logWarning(error.toString());
-                                rimraf.sync(targetPath);
-                                fs.renameSync(backupPath, targetPath);
-                            } catch (e) {
-                                // An error happened, either when deleting the attempted new install, or when moving the backup in to place
-                                throw errorHelper.wrap(TacoErrorCodes.PackageLoaderUpdateUnableToRecover, e, targetPath);
-                            }
-                        });
-                    }
-
                     return TacoPackageLoader.installPackageIfNeeded(request);
                 })
                 .then(function (): T {
