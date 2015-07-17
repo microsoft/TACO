@@ -143,47 +143,53 @@ module TacoUtility {
         private static lazyRequireLatest<T>(request: IPackageInstallRequest): Q.Promise<T> {
             assert.notEqual(request.type, PackageSpecType.Uri, "update is not supported for git URIs");
 
-            var updateTimestamp: boolean = false;
-            var packageObj: T = null;
-
             // Check if update is needed
             return TacoPackageLoader.getLastCheckTimestamp(request.targetPath)
-                .then(function (lastCheckTimestamp: number): Q.Promise<T> {
-                    // Note that needsUpdate is false if package is not present
-                    var updateNeeded: boolean = (lastCheckTimestamp > 0) && (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
-                    updateTimestamp = updateNeeded || lastCheckTimestamp <= 0;
-                    return TacoPackageLoader.lazyRequireInternal<T>(request, updateNeeded);
-                })
-                .then(function (obj: T): void {
-                    packageObj = obj;
-                })
-                // update last check timestamp 
-                .then(function (): Q.Promise<void> {
-                    if (updateTimestamp) {
-                        return TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
-                    }
+            .then(function (lastCheckTimestamp: number): Q.Promise<T> {
+                if (lastCheckTimestamp < 0) {
+                    // No previous version, we must download something
+                    return TacoPackageLoader.lazyRequireInternal<T>(request).then(function (obj: T): Q.Promise<T> {
+                        TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
+                        return Q<T>(obj);
+                    });
+                } else {
+                    // A previous version exists. If we can't acquire a new one,
+                    // we may continue using the previous version
+                    var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
 
-                    return Q.resolve<void>(null);
-                })
-                .then(function (): Q.Promise<T> {
-                    return Q(packageObj);
-                });
+                    if (updateRequested) {
+                        var targetPath = request.targetPath;
+                        var backupPath = request.targetPath + "_backup";
+                        fs.renameSync(targetPath, backupPath);
+
+                        return TacoPackageLoader.lazyRequireInternal<T>(request).then(function (obj: T): Q.Promise<T> {
+                            rimraf.sync(backupPath);
+                            TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
+                            return Q<T>(obj);
+                        }, function (error: any): Q.Promise<T> {
+                                try {
+                                    logger.logWarning(error.toString());
+                                    rimraf.sync(targetPath);
+                                    fs.renameSync(backupPath, targetPath);
+                                    return TacoPackageLoader.lazyRequireInternal<T>(request);
+                                } catch (e) {
+                                    // An error happened, either when deleting the attempted new install, or when moving the backup in to place
+                                    throw errorHelper.wrap(TacoErrorCodes.PackageLoaderUpdateUnableToRecover, e, targetPath);
+                                }
+                            });
+                    } else {
+                        // Just use the cached version, no need to download a new version and update timestamps
+                        return TacoPackageLoader.lazyRequireInternal<T>(request);
+                    }
+                }
+            });
         }
 
-        private static lazyRequireInternal<T>(request: IPackageInstallRequest, needsUpdate: boolean = false): Q.Promise<T> {
+        private static lazyRequireInternal<T>(request: IPackageInstallRequest): Q.Promise<T> {
             assert.notEqual(request, null);
 
             return Q({})
                 .then(function (): Q.Promise<void> {
-                    if (needsUpdate) {
-                        // for test scenarios, where test checks expirationIntervalInHours functionality and provide a local package
-                        if (request.type === PackageSpecType.FilePath) {
-                            return TacoPackageLoader.installPackageViaNPM(request);
-                        }
-
-                        return TacoPackageLoader.updatePackageViaNPM(request.packageName, request.targetPath, request.logLevel);
-                    }
-
                     return TacoPackageLoader.installPackageIfNeeded(request);
                 })
                 .then(function (): T {
@@ -199,9 +205,7 @@ module TacoUtility {
                 packageType = PackageSpecType.Uri;
             } else if (TacoPackageLoader.FileUriRegex.test(packageId)) {
                 packageId = packageId.substring("file://".length);
-                if (fs.existsSync(packageId)) {
-                    packageType = PackageSpecType.FilePath;
-                }
+                packageType = PackageSpecType.FilePath;
             } else {
                 // moving this down after Uri/FilePath because both can have '@'. Parse the packageId to retrieve packageVersion
                 var packageVersion: string = packageId.split("@")[1];
@@ -394,11 +398,13 @@ module TacoUtility {
                 });
         }
 
-        private static updateLastCheckTimestamp(targetPath: string): Q.Promise<void> {
-            return Q.denodeify(fs.writeFile)(TacoPackageLoader.getTimestampFilePath(targetPath), Date.now().toString())
-                .catch(function (): any {
-                    return Q.resolve<void>(null);
-            });
+        private static updateLastCheckTimestamp(targetPath: string): void {
+            try {
+                fs.writeFileSync(TacoPackageLoader.getTimestampFilePath(targetPath), Date.now().toString());
+            } catch (e) {
+                logger.logError(e);
+                // report but otherwise ignore the error.
+            }
         }
     }
 }
