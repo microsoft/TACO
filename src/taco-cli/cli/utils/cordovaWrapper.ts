@@ -218,7 +218,7 @@ class CordovaWrapper {
                 return Q({});
             });
         } else {
-            var cliArgs: string[] = [command, platformCmdParameters.subCommand].concat(platformCmdParameters.targets);
+            var cliArgs: string[] = [command];
             return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
         }
     }
