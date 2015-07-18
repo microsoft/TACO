@@ -22,7 +22,6 @@ class BuildRetention {
 
     constructor(baseBuildDir: string, config: TacoRemoteConfig) {
         this.maxBuildsToKeep = config.maxBuildsToKeep;
-        console.info(resources.getString("BuildRetentionInit"), baseBuildDir, this.maxBuildsToKeep);
     }
 
     public purge(builds: { [idx: string]: utils.BuildInfo }): void {

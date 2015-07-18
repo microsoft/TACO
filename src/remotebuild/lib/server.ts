@@ -66,7 +66,9 @@ class Server {
             return Server.loadServerModules(conf, app, serverCapabilities);
         }).then(function (): Q.Promise<any> {
             return Server.startupServer(conf, app);
-        }).then(Server.registerShutdownHooks)
+        }).then(Server.registerShutdownHooks).then(function (): void {
+            console.info(resources.getString("CheckSettingsForInfo", conf.configFileLocation));
+        })
           .fail(function (err: any): void {
             console.error(resources.getString("ServerStartFailed"), err);
             if (err.stack) {
@@ -115,7 +117,16 @@ class Server {
         return HostSpecifics.hostSpecifics.generateClientCert(conf);
     }
 
-    public static initializeServerCapabilities(conf: RemoteBuildConf): Q.Promise<RemoteBuild.IServerCapabilities> {
+    public static saveConfig(conf: RemoteBuildConf): Q.Promise<any> {
+        return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
+            conf.setModuleConfig(mod, modGen.getConfig(conf, moduleConfig));
+            return Q({});
+        }).then(function (): void {
+            conf.save();
+        }); 
+    }
+
+    private static initializeServerCapabilities(conf: RemoteBuildConf): Q.Promise<RemoteBuild.IServerCapabilities> {
         var serverCapPromises: Q.Promise<any>[] = [
             conf.secure ? HostSpecifics.hostSpecifics.initializeServerCerts(conf) : Q(null),
             // More capabilities can be exposed here

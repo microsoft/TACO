@@ -47,6 +47,19 @@
     ]
   },
 
+  "saveconfig":  {
+    "synopsis": "<synopsis>[Options]</synopsis>",
+    "description": "<helptitle>[CommandSaveConfigDescription]</helptitle>",
+    "options": [
+      { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
+      { "name": "--port [PORT_NUM]", "description": "[RemoteBuildConfPort]" },
+      { "name": "--lang [LANGUAGE]", "description": "[RemoteBuildConfLang]" },
+      { "name": "--certExpirationDays [NUM_DAYS]", "description": "[RemoteBuildConfCertExpirationDays]" },
+      { "name": "--hostname [HOSTNAME]", "description": "[RemoteBuildConfHostname]" },
+      { "name": "--config [PATH]", "description": "[RemoteBuildConfConfigFile]" }
+    ]
+  },
+
   "help": {
     "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
     "modulePath": "./help",
