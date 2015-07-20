@@ -159,6 +159,20 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         switch (operation) {
             case "add": {
                 logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
+
+                // Print the onboarding experience
+                ["OnboardingExperienceSectionSeparator",
+                    "HowToUseCommandInstallReqsPlugin",
+                    "HowToUseCommandAddPlugin",
+                    "HowToUseCommandSetupRemote",
+                    "HowToUseCommandBuildPlatform",
+                    "HowToUseCommandEmulatePlatform",
+                    "HowToUseCommandRunPlatform"].forEach(msg => resources.log(msg));
+
+                logger.logLine();
+
+                ["HowToUseCommandHelp",
+                    "HowToUseCommandDocs"].forEach(msg => resources.log(msg));
                 break;
             }
 
