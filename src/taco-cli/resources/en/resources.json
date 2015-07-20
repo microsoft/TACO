@@ -289,6 +289,9 @@
     "CommandRunRemoteEmulatorSuccess": "<success>Success!</success> Build running on remote emulator",
     "_CommandRunRemoteEmulatorSuccess.comment": "Message printed after successfully running a build on a remote device",
 
+    "CommandUnsupportedPlatformIgnored": "Warning: Platform '{0}' is not supported and will be ignored.",
+    "_CommandUnsupportedPlatformIgnored.comment": "Message printed when we 'taco build' or 'taco run' with a platform that is unsupported. {0} is the particular platform",
+
     "CommandNotBothLocalRemote": "Error: must specify at most one of --local and --remote",
     "_CommandNotBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
     "CommandNotBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
@@ -311,6 +314,9 @@
     "_NoRemoteBuildIdFound.comment": "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",
     "NotInCordovaProject": "Error: Current working directory is not a Cordova-based project",
     "_NotInCordovaProject.comment": "Message printed when attempting to run a taco command in a directory which is not a Cordova-based project ",
+
+    "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of cordova.",
+    "_RemoteBuildUnsupportedPlatformcomment": "Error message printed when trying to 'taco remote add <platform>' and the platform is not supported. {0} is the platform",
 
     "UnsupportedPlatform": "Error: Unsupported platform {0}",
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",

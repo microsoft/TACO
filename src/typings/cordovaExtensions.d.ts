@@ -26,6 +26,8 @@ declare module Cordova {
             addEngine(name: string, spec: string): any;
             write(): any;
         }
+
+        export var cordova_platforms: { [platform: string]: any };
     }
 
     export interface IKeyValueStore<T> {

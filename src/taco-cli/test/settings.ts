@@ -40,7 +40,7 @@ describe("taco settings", function (): void {
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Configure a dummy platform "test" to use the mocked out remote server
-        RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("ios", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
         }, function (err: any): void {
             mocha(err);
@@ -58,8 +58,8 @@ describe("taco settings", function (): void {
             options: {
                 local: true
             },
-            original: ["foo", "test", "--local"],
-            remain: ["foo", "test"]
+            original: ["windows", "ios", "--local"],
+            remain: ["windows", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
@@ -75,8 +75,8 @@ describe("taco settings", function (): void {
             options: {
                 remote: true
             },
-            original: ["foo", "test", "--remote"],
-            remain: ["foo", "test"]
+            original: ["windows", "ios", "--remote"],
+            remain: ["windows", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
@@ -91,8 +91,8 @@ describe("taco settings", function (): void {
         var data: TacoUtility.Commands.ICommandData = {
             options: {
             },
-            original: ["foo", "test"],
-            remain: ["foo", "test"]
+            original: ["windows", "ios"],
+            remain: ["windows", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms[0].location.should.equal(Settings.BuildLocationType.Local);
@@ -120,13 +120,13 @@ describe("taco settings", function (): void {
             });
         }).then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
-            fs.mkdirSync(path.join("platforms", "foo"));
+            fs.mkdirSync(path.join("platforms", "windows"));
         }).then(function (): Q.Promise<any> {
             return Settings.determinePlatform(data);
         }).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.length.should.equal(2);
-            platforms[0].should.eql({ location: Settings.BuildLocationType.Remote, platform: "test" });
-            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "foo" });
+            platforms[0].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
+            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "windows" });
         }).done(function (): void {
             mocha();
         }, mocha);
