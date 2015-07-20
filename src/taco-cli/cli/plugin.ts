@@ -179,7 +179,20 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
     private printSuccessMessage(plugins: string, operation: string): void {
         switch (operation) {
             case "add": {
-                logger.log(resources.getString("CommandPluginStatusAdded", plugins));
+                logger.log(resources.getString("CommandPluginWithIdStatusAdded", plugins));
+
+                // Print the onboarding experience
+                ["OnboardingExperienceSectionSeparator",
+                    "HowToUseCommandInstallReqsPlugin",
+                    "HowToUseCommandSetupRemote",
+                    "HowToUseCommandBuildPlatform",
+                    "HowToUseCommandEmulatePlatform",
+                    "HowToUseCommandRunPlatform"].forEach(msg => resources.log(msg));
+
+                logger.logLine();
+
+                ["HowToUseCommandHelp",
+                    "HowToUseCommandDocs"].forEach(msg => resources.log(msg));
                 break;
             }
 
