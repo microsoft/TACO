@@ -26,13 +26,13 @@ import util = require ("util");
 import wrench = require ("wrench");
 
 import Create = require ("../cli/create");
+import kitHelper = require ("../cli/utils/KitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 import TemplateManager = require ("../cli/utils/templateManager");
 
-import kitHelper = tacoKits.KitHelper;
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;

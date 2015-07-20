@@ -18,15 +18,14 @@ import path = require ("path");
 import Q = require ("q");
 
 import cordovaWrapper = require ("./utils/cordovaWrapper");
+import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import tacoUtility = require ("taco-utils");
-import tacoKits = require ("taco-kits");
 import logger = tacoUtility.Logger;
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
-import kitHelper = tacoKits.KitHelper;
 import telemetry = tacoUtility.Telemetry;
 import UtilHelper = tacoUtility.UtilHelper;
 

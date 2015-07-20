@@ -10,9 +10,62 @@
 declare module TacoKits {
     // Basic interface for a KitHelper, for mocking purposes
     interface IKitHelper {
-        getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
-        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+        /**
+         *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
+         *   or resolved with the parsed metadata
+         */
+        getKitMetadata?: () => Q.Promise<ITacoKitMetadata>;
+
+        /**
+         *   Returns a promise which is either rejected with a failure to find the specified kit
+         *   or resolved with the information regarding the kit
+         */
+        getKitInfo?: (kitId: string) => Q.Promise<IKitInfo>;
+
+        /**
+         *  Returns a promise resolved with the Id of the default kit or rejected with error
+         *  Note that the default kit is one with default attribute set to 'true'
+         */
+        getDefaultKit?: () => Q.Promise<string>;
+
+        /**
+         *   Returns a promise resolved by a valid cordova Cli for the kitId
+         *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
+         *   Otherwise, returns the cordovaCli used by the default kit
+         */
+        getValidCordovaCli?: (kitId: string) => Q.Promise<string>;
+
+        /**
+         *  Returns a promise resolved with the platform override info for the kit
+         */
+        getPlatformOverridesForKit?: (kitId: string) => Q.Promise<IPlatformOverrideMetadata>;
+
+        /**
+         *  Returns a promise resolved with the plugin override info for the kit
+         */
+        getPluginOverridesForKit?: (kitId: string) => Q.Promise<IPluginOverrideMetadata>;
+
+        /**
+         *   Returns a promise resolved by the template override information for the specified kit
+         *   If there is an override for {kitId} -> returns the template override info for the {templateId}
+         *   Else -> returns the default template information with id {templateId}
+         */
+        getTemplateOverrideInfo?: (kitId: string, templateId: string) => Q.Promise<ITemplateOverrideInfo>;
+
+        /**
+         *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
+         */
+        getTemplatesForKit?:(kitId: string) => Q.Promise<IKitTemplatesOverrideInfo>;
+
+        /**
+         *   Returns a promise resolved with an ITemplateOverrideInfo[] that contains all the available templates regardless of kits
+         */
         getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;
+        /*getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
+        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
+        getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;*/
+
+        kitMetadataFilePath?: string;
     }
 
     interface IPluginOverrideInfo {
@@ -91,67 +144,8 @@ declare module TacoKits {
         templates: ITemplateMetadata;
     }
 
-    /**
-     *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
-     */
-    export class KitHelper {
-        public static KitMetadataFilePath: string;
-        /**
-         *   Initializes resource manager with the locale for resource strings
-         */
-        public static init(locale: string): void;
-
-        /**
-         *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
-         *   or resolved with the parsed metadata
-         */
-        public static getKitMetadata(): Q.Promise<ITacoKitMetadata>;
-
-        /**
-         *   Returns a promise which is either rejected with a failure to find the specified kit
-         *   or resolved with the information regarding the kit
-         */
-        public static getKitInfo(kitId: string): Q.Promise<IKitInfo>;
-
-        /**
-         *  Returns a promise resolved with the Id of the default kit or rejected with error
-         *  Note that the default kit is one with default attribute set to 'true'
-         */
-        public static getDefaultKit(): Q.Promise<string>;
-
-        /**
-         *   Returns a promise resolved by a valid cordova Cli for the kitId
-         *   If kitId param is a valid {kitId}, returns the cordova Cli used by the kit with id {kitId}
-         *   Otherwise, returns the cordovaCli used by the default kit
-         */
-        public static getValidCordovaCli(kitId: string): Q.Promise<string>;
-
-        /**
-         *  Returns a promise resolved with the platform override info for the kit
-         */
-        public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata>;
-
-        /**
-         *  Returns a promise resolved with the plugin override info for the kit
-         */
-        public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata>;
-
-        /**
-         *   Returns a promise resolved by the template override information for the specified kit
-         *   If there is an override for {kitId} -> returns the template override info for the {templateId}
-         *   Else -> returns the default template information with id {templateId}
-         */
-        public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo>;
-
-        /**
-         *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
-         */
-        public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo>;
-
-        /**
-         *   Returns a promise resolved with an ITemplateOverrideInfo[] that contains all the available templates regardless of kits
-         */
-        public static getAllTemplates(): Q.Promise<ITemplateOverrideInfo[]>;
+    interface ITacoKits {
+        kitHelper: IKitHelper;        
     }
 
     enum TacoErrorCode {

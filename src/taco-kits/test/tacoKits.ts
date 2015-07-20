@@ -23,7 +23,7 @@ import tacoErrorCodes = require ("../tacoErrorCodes");
 import tacoKits = require ("../tacoKits");
 import tacoUtils = require ("taco-utils");
 
-import kitHelper = tacoKits.KitHelper;
+import kitHelper = tacoKits.kitHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utilHelper = tacoUtils.UtilHelper;
 
@@ -104,7 +104,7 @@ describe("KitHelper", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         
         // Set the kit metadata file location
-        kitHelper.KitMetadataFilePath = testMetadataPath;
+        kitHelper.kitMetadataFilePath = testMetadataPath;
     });
 
     after(function (): void {
@@ -112,7 +112,7 @@ describe("KitHelper", function (): void {
         process.env["TACO_UNIT_TEST"] = false;
 
         // Reset kit metadata path
-        kitHelper.KitMetadataFilePath = null;
+        kitHelper.kitMetadataFilePath = null;
     });
 
     describe("getKitMetadata()", function (): void {
@@ -121,7 +121,7 @@ describe("KitHelper", function (): void {
             kitHelper.getKitMetadata()
                 .then(function (kitMetadata: tacoKits.ITacoKitMetadata): void {
                     // Verify the returned kit metadata is expected
-                    kitMetadata.should.equal(require(kitHelper.KitMetadataFilePath));
+                    kitMetadata.should.equal(require(kitHelper.kitMetadataFilePath));
                     done();
                 })
                 .catch(function (err: string): void {

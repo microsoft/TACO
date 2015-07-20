@@ -22,14 +22,13 @@ import Q = require ("q");
 import util = require ("util");
 
 import errorHelper = require ("./tacoErrorHelper");
+import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
-import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
@@ -104,7 +103,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Get kit title
      */
-    private static getKitTitle(kitId: string, kitInfo: tacoKits.IKitInfo): string {
+    private static getKitTitle(kitId: string, kitInfo: TacoKits.IKitInfo): string {
         var name: string = util.format("<kitid>%s</kitid>", kitId);
         if (!!kitInfo.default) {
             return util.format("%s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
@@ -118,7 +117,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Get kit description
      */
-    private static getKitDescription(kitInfo: tacoKits.IKitInfo): string {
+    private static getKitDescription(kitInfo: TacoKits.IKitInfo): string {
         var kitDefaultDescription: string = "";
 
         if (kitInfo["cordova-cli"]) {
@@ -156,9 +155,9 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             return Q.resolve({});
         })
             .then(function (): Q.Promise<any> {
-            return kitHelper.getKitMetadata().then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
+            return kitHelper.getKitMetadata().then(function (meta: TacoKits.ITacoKitMetadata): Q.Promise<any> {
                 return Q.all(Object.keys(meta.kits).map(function (kitId: string): Q.Promise<any> {
-                    return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): Q.Promise<any> {                     
+                    return kitHelper.getKitInfo(kitId).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {                     
                         var kitNameDescription = {
                             name: Kit.getKitTitle(kitId, kitInfo),
                             description: Kit.getKitDescription(kitInfo)
@@ -200,7 +199,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Pretty prints the Kit name and description info
      */
-    private static printKitNameAndDescription(kitId: string, kitInfo: tacoKits.IKitInfo): void {
+    private static printKitNameAndDescription(kitId: string, kitInfo: TacoKits.IKitInfo): void {
         var title: string = Kit.getKitTitle(kitId, kitInfo);
         var kitDescription: string = Kit.getKitDescription(kitInfo);
         logger.log(util.format("%s<underline/>", title));
@@ -210,7 +209,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Pretty prints the Cordova CLI version info
      */
-    private static printCordovaCliVersion(kitInfo: tacoKits.IKitInfo): void {
+    private static printCordovaCliVersion(kitInfo: TacoKits.IKitInfo): void {
         if (kitInfo["cordova-cli"]) {
             logger.logLine();
             logger.log(resources.getString("CommandKitListCordovaCliForKit", kitInfo["cordova-cli"]));
@@ -221,7 +220,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Pretty prints the platform version override info
      */
-    private static printPlatformOverrideInfo(kitInfo: tacoKits.IKitInfo, valuesIndent: number): void {
+    private static printPlatformOverrideInfo(kitInfo: TacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.platforms) {
             logger.log(resources.getString("CommandKitListPlatformOverridesForKit"));
             LoggerHelper.logNameDescriptionTable(
@@ -238,7 +237,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     /**
      * Pretty prints the plugin version override info
      */
-    private static printPluginOverrideInfo(kitInfo: tacoKits.IKitInfo, valuesIndent: number): void {
+    private static printPluginOverrideInfo(kitInfo: TacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.plugins) {
             logger.log(resources.getString("CommandKitListPluginOverridesForKit"));
             LoggerHelper.logNameDescriptionTable(
@@ -257,7 +256,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * plugin/platform override info regardng a single kit
      */
     private static printKit(kitId: string): Q.Promise<any> {
-        return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
+        return kitHelper.getKitInfo(kitId).then(function (kitInfo: TacoKits.IKitInfo): void {
             var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(kitInfo));
             Kit.printKitNameAndDescription(kitId, kitInfo);
             Kit.printCordovaCliVersion(kitInfo);
@@ -297,7 +296,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         Kit.validateJsonFilePath(jsonFilePath);
         
         return kitHelper.getKitMetadata()
-            .then(function (meta: tacoKits.ITacoKitMetadata): Q.Promise<any> {
+            .then(function (meta: TacoKits.ITacoKitMetadata): Q.Promise<any> {
             return projectHelper.createJsonFileWithContents(jsonFilePath, meta.kits); 
         })
             .then(function (): Q.Promise<any> {
@@ -306,7 +305,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         });
     }
 
-    private static getLongestPlatformPluginLength(kitInfo: tacoKits.IKitInfo): number {
+    private static getLongestPlatformPluginLength(kitInfo: TacoKits.IKitInfo): number {
         var longest: number = 0;
         if (kitInfo.platforms) {
                 longest = Object.keys(kitInfo.platforms).reduce(function (longest: number, platformName: string): number {

@@ -27,13 +27,12 @@ var should_module = require("should");
 import wrench = require ("wrench");
 import zlib = require ("zlib");
 
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 import templateManager = require ("../cli/utils/templateManager");
-
-import kitHelper = tacoKits.KitHelper;
 import utils = tacoUtils.UtilHelper;
 
 describe("TemplateManager", function (): void {
