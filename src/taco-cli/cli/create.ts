@@ -212,66 +212,92 @@ class Create implements commands.IDocumentedCommand {
      * Prints the project creation status message
      */
     private printStatusMessage(): Q.Promise<any> {
+        var self = this;
         var cordovaParameters = this.commandParameters.cordovaParameters;
         var projectPath: string = cordovaParameters.projectPath ? path.resolve(cordovaParameters.projectPath) : "''";
 
         if (!this.isKitProject()) {
-            logger.log(resources.getString("CommandCreateStatusCordovaCliUsed", cordovaParameters.appName, cordovaParameters.appId, projectPath, this.commandParameters.data.options["cli"]));
+            self.printNewProjectTable("CommandCreateStatusTableCordovaCLIVersionDescription", this.commandParameters.data.options["cli"]);
             return Q({});
         } else {
             var kitId: string = this.commandParameters.data.options["kit"];
             return Q({})
                 .then(function (): Q.Promise<string> {
                     if (!kitId) {
-                        return kitHelper.getDefaultKit().then(kitId => kitId + resources.getString("CommandCreateStatusDefaultKitUsedAnnotation"));
+                        return kitHelper.getDefaultKit().then(kitId => resources.getString("CommandCreateStatusDefaultKitUsedAnnotation", kitId));
                     }
 
                     return Q(kitId);
                 })
                 .then(function (kitIdUsed: string): void {
-                    logger.log(resources.getString("CommandCreateStatusKitIdUsed", cordovaParameters.appName, cordovaParameters.appId, projectPath, kitIdUsed));
+                    self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription", kitIdUsed);
                 });
         }
+    }
+
+    private repeat(text: string, times: number): string {
+        // From: http://stackoverflow.com/questions/1877475/repeat-character-n-times
+        return new Array(times + 1).join(text);
+    }
+
+    private printNewProjectTable(kitOrCordovaStringResource: string, kitOrCordovaVersion: string): void {
+        var cordovaParameters = this.commandParameters.cordovaParameters;
+        var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
+
+        var indentation = 6; // We leave some empty space on the left before the text/table starts
+        resources.log("CommandCreateStatusCreatingNewProject");
+
+        var indentationString = this.repeat(" ", indentation);
+        var sectionsSeparator = indentationString + resources.getString("CommandCreateStatusTableSectionSeparator");
+        logger.log(sectionsSeparator);
+        var rows = [
+            { name: resources.getString("CommandCreateStatusTableNameDescription"), description: cordovaParameters.appName },
+            { name: resources.getString("CommandCreateStatusTableIDDescription"), description: cordovaParameters.appId },
+            { name: resources.getString("CommandCreateStatusTableLocationDescription"), description: projectFullPath },
+            { name: resources.getString(kitOrCordovaStringResource), description: kitOrCordovaVersion },
+            { name: resources.getString("CommandCreateStatusTableReleaseNotesDescription"), description: resources.getString("CommandCreateStatusTableReleaseNotesLink") },
+        ];
+        LoggerHelper.logNameDescriptionTable(rows, indentation);
+        logger.log(sectionsSeparator);
     }
 
     /**
      * Finalizes the creation of project by printing the Success messages with information about the Kit and template used
      */
     private finalize(templateDisplayName: string): void {
-        var loggerR = logger.forResources(resources);
-
         // Report success over multiple loggings for different styles
         var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
         if (this.isKitProject()) {
             if (templateDisplayName) {
-                loggerR.logResourceString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath);
+                resources.log("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath);
 
                 if (this.commandParameters.data.options["template"] === "typescript") {
-                    loggerR.logResourceString("CommandCreateInstallGulp");
+                    resources.log("CommandCreateInstallGulp");
                 }
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"];
-                loggerR.logResourceString("CommandCreateSuccessProjectCustomWww", customWwwPath, projectFullPath);
+                resources.log("CommandCreateSuccessProjectCustomWww", customWwwPath, projectFullPath);
             }
         } else {
-            loggerR.logResourceString("CommandCreateSuccessProjectCLI", projectFullPath);
+            resources.log("CommandCreateSuccessProjectCLI", projectFullPath);
         }
 
         // Print the onboarding experience
-        loggerR.logResourceStrings(["OnboardingExperienceSectionSeparator",
+        ["OnboardingExperienceSectionSeparator",
             "HowToUseChangeToProjectFolder",
             "HowToUseCommandPlatformAddPlatform",
             "HowToUseCommandInstallReqsPlugin",
             "HowToUseCommandAddPlugin",
             "HowToUseCommandSetupRemote",
             "HowToUseCommandBuildPlatform",
-            "HowToUseCommandRunBrowser",
             "HowToUseCommandEmulatePlatform",
-            "HowToUseCommandRunPlatform",
-            "OnboardingExperienceInnerSectionSeparator",
-            "HowToUseCommandHelp",
-            "HowToUseCommandDocs"], projectFullPath);
+            "HowToUseCommandRunPlatform"].forEach(msg => resources.log(msg, projectFullPath));
+
+        logger.logLine();
+
+        ["HowToUseCommandHelp",
+        "HowToUseCommandDocs"].forEach(msg => resources.log(msg, projectFullPath));
     }
 }
 
