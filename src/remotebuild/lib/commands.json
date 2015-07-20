@@ -47,9 +47,9 @@
     ]
   },
 
-  "saveconfig":  {
+  "savesettings":  {
     "synopsis": "<synopsis>[Options]</synopsis>",
-    "description": "<helptitle>[CommandSaveConfigDescription]</helptitle>",
+    "description": "<helptitle>[CommandSaveSettingsDescription]</helptitle>",
     "options": [
       { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
       { "name": "--port [PORT_NUM]", "description": "[RemoteBuildConfPort]" },

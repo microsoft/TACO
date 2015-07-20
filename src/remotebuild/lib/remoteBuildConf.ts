@@ -173,10 +173,13 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
     }
 
     public save(): void {
+        // nconf.argv() adds some members to nconf that we do not want to save:
+        // nconf.get("_") is the remaining command line arguments
         if (this.remoteBuildConf["_"]) {
             delete this.remoteBuildConf["_"];
         }
 
+        // nconf.get("$0") is the command that started this process, e.g. "node remotebuild.js"
         if (this.remoteBuildConf["$0"]) {
             delete this.remoteBuildConf["$0"];
         }
