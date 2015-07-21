@@ -84,28 +84,28 @@ class CordovaWrapper {
         return deferred.promise;
     }
 
-    public static build(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+    public static build(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
                     .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                        return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(platform, commandData));
+                        return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(commandData, platform));
                 });
             } else {
-                return CordovaWrapper.cli(["build", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
+                return CordovaWrapper.cli(["build"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
             }
         });
     }
 
-    public static run(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
+    public static run(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
                     .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(platform, commandData));
+                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(commandData, platform));
                 });
             } else {
-                return CordovaWrapper.cli(["run", platform].concat(cordovaHelper.toCordovaCliArguments(commandData)));
+                return CordovaWrapper.cli(["run"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
             }
         });
     }
@@ -218,7 +218,7 @@ class CordovaWrapper {
                 return Q({});
             });
         } else {
-            var cliArgs: string[] = [command, platformCmdParameters.subCommand].concat(platformCmdParameters.targets);
+            var cliArgs: string[] = [command];
             return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
         }
     }

@@ -26,8 +26,7 @@ import createMod = require ("../cli/create");
 import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
 import ServerMock = require ("./utils/serverMock");
-import setupMod = require ("../cli/setup");
-import SetupMock = require ("./utils/setupMock");
+import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
@@ -35,7 +34,6 @@ import utils = TacoUtility.UtilHelper;
 
 var create = new createMod();
 var run = new runMod();
-var setup = new setupMod();
 
 describe("taco run", function (): void {
     var testHttpServer: http.Server;
@@ -71,7 +69,7 @@ describe("taco run", function (): void {
         var port = 3000;
         testHttpServer.listen(port);
         // Configure a dummy platform "test" to use the mocked out remote server in insecure mode
-        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
         }, function (err: any): void {
             mocha(err);

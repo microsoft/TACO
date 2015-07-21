@@ -109,7 +109,7 @@ class Settings {
                 }
 
                 var localPlatforms: string[] = [];
-                if (!options.options["remote"]) {
+                if (!options.options["remote"] && fs.existsSync("platforms")) {
                     // Check for local platforms to try building
                     localPlatforms = fs.readdirSync("platforms").filter(function (entry: string): boolean {
                         return fs.statSync(path.join("platforms", entry)).isDirectory() && remotePlatforms.indexOf(entry) === -1;
@@ -153,6 +153,13 @@ class Settings {
         }
 
         return false;
+    }
+
+    /**
+     * Remove cached settings object, for use in tests
+     */
+    private static forgetSettings(): void {
+        Settings.Settings = null;
     }
 }
 
