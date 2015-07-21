@@ -27,6 +27,11 @@
         "modulePath": "./help",
         "description": "<helptitle>[CommandHelpDescription]</helptitle>"
     },
+    "docs": {
+        "synopsis": "<synopsis></synopsis>",
+        "modulePath": "./docs",
+        "description": "<helptitle>[CommandDocumentationDescription]</helptitle>"
+    },
     "kit": {
         "synopsis": "<synopsis>[COMMAND] [--json]</synopsis>",
         "modulePath": "./kit",
