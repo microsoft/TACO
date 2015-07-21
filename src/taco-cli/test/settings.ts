@@ -58,8 +58,8 @@ describe("taco settings", function (): void {
             options: {
                 local: true
             },
-            original: ["windows", "ios", "--local"],
-            remain: ["windows", "ios"]
+            original: ["android", "ios", "--local"],
+            remain: ["android", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
@@ -75,8 +75,8 @@ describe("taco settings", function (): void {
             options: {
                 remote: true
             },
-            original: ["windows", "ios", "--remote"],
-            remain: ["windows", "ios"]
+            original: ["android", "ios", "--remote"],
+            remain: ["android", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
@@ -91,12 +91,12 @@ describe("taco settings", function (): void {
         var data: TacoUtility.Commands.ICommandData = {
             options: {
             },
-            original: ["windows", "ios"],
-            remain: ["windows", "ios"]
+            original: ["android", "ios"],
+            remain: ["android", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.length.should.equal(2);
-            platforms[0].should.eql({ location: Settings.BuildLocationType.Local, platform: "windows" });
+            platforms[0].should.eql({ location: Settings.BuildLocationType.Local, platform: "android" });
             platforms[1].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
         }).done(function (): void {
             mocha();
@@ -121,13 +121,13 @@ describe("taco settings", function (): void {
             });
         }).then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
-            fs.mkdirSync(path.join("platforms", "windows"));
+            fs.mkdirSync(path.join("platforms", "android"));
         }).then(function (): Q.Promise<any> {
             return Settings.determinePlatform(data);
         }).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.length.should.equal(2);
             platforms[0].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
-            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "windows" });
+            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "android" });
         }).done(function (): void {
             mocha();
         }, mocha);
