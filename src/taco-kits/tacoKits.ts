@@ -30,6 +30,7 @@ module TacoKits {
         getKitInfo?: (kitId: string) => Q.Promise<IKitInfo>;
         getDefaultKit?: () => Q.Promise<string>;
         getValidCordovaCli?: (kitId: string) => Q.Promise<string>;
+        getCordovaCliForKit?: (kitId: string) => Q.Promise<string>;
         getPlatformOverridesForKit?: (kitId: string) => Q.Promise<IPlatformOverrideMetadata>;
         getPluginOverridesForKit?: (kitId: string)=> Q.Promise<IPluginOverrideMetadata>;
         getTemplateOverrideInfo?: (kitId: string, templateId: string) => Q.Promise<ITemplateOverrideInfo>;
@@ -194,18 +195,19 @@ module TacoKits {
         public getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
             var kit: string = null;
             var templates: ITemplateMetadata = null;
+            var self = this;
 
             return this.getTemplateMetadata()
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
                     templates = templateMetadata;
 
-                    return kitId ? Q.resolve(kitId) : this.getDefaultKit();
+                    return kitId ? Q.resolve(kitId) : self.getDefaultKit();
                 })
                 .then(function (kitId: string): Q.Promise<IKitInfo> {
                     kit = kitId;
 
                     // Try to get the kit info of the specified kit; we won't do anything with it, but it will throw an error if the kit is invalid
-                    return this.getKitInfo(kit);
+                    return self.getKitInfo(kit);
                 })
                 .then(function (): Q.Promise<IKitTemplatesOverrideInfo> {
                     var templatesForKit: { [templateId: string]: ITemplateInfo } = null;
@@ -279,19 +281,20 @@ module TacoKits {
             var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
             var templates: ITemplateMetadata = null;
             var templateOverrideInfo: ITemplateOverrideInfo = null;
+            var self = this;
 
             return this.getTemplateMetadata()
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
                     templates = templateMetadata;
 
-                    return kitId ? Q.resolve(kitId) : this.getDefaultKit();
+                    return kitId ? Q.resolve(kitId) : self.getDefaultKit();
                 })
                 .then(function (kitId: string): Q.Promise<ITemplateOverrideInfo> {
                     if (templates[kitId]) {
                         // Found an override for the specified kit
                         if (templates[kitId][templateId]) {
                             // Found the specified template
-                            templateOverrideInfo = this.createTemplateOverrideInfo(kitId, templates[kitId][templateId]);
+                            templateOverrideInfo = self.createTemplateOverrideInfo(kitId, templates[kitId][templateId]);
 
                             // Properly assign the localized template name
                             templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
@@ -310,7 +313,7 @@ module TacoKits {
                         }
                     } else if (templates[KitHelper.DefaultTemplateKitOverride][templateId]) {
                         // Found a default template matching the specified template id
-                        templateOverrideInfo = this.createTemplateOverrideInfo(KitHelper.DefaultTemplateKitOverride, templates[KitHelper.DefaultTemplateKitOverride][templateId]);
+                        templateOverrideInfo = self.createTemplateOverrideInfo(KitHelper.DefaultTemplateKitOverride, templates[KitHelper.DefaultTemplateKitOverride][templateId]);
 
                         // Properly assign the localized template name
                         templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
@@ -408,8 +411,9 @@ module TacoKits {
          */
         public getCordovaCliForDefaultKit(): Q.Promise<string> {
             var deferred: Q.Deferred<string> = Q.defer<string>();
+            var self = this;
             return this.getDefaultKit().then(function (defaultKit: string): Q.Promise<string> {
-                return this.getCordovaCliForKit(defaultKit);
+                return self.getCordovaCliForKit(defaultKit);
             });
             return deferred.promise;
         }

@@ -34,6 +34,7 @@ declare module TacoKits {
          *   Otherwise, returns the cordovaCli used by the default kit
          */
         getValidCordovaCli?: (kitId: string) => Q.Promise<string>;
+        getCordovaCliForKit?: (kitId: string) => Q.Promise<string>;
 
         /**
          *  Returns a promise resolved with the platform override info for the kit
