@@ -95,8 +95,9 @@ describe("taco settings", function (): void {
             remain: ["windows", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
-            platforms[0].location.should.equal(Settings.BuildLocationType.Local);
-            platforms[1].location.should.equal(Settings.BuildLocationType.Remote);
+            platforms.length.should.equal(2);
+            platforms[0].should.eql({ location: Settings.BuildLocationType.Local, platform: "windows" });
+            platforms[1].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
         }).done(function (): void {
             mocha();
         }, mocha);
