@@ -11,7 +11,6 @@
 
 import Q = require ("q");
 import path = require ("path");
-import fs = require ("fs");
 
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -32,11 +31,21 @@ import IKitTemplatesOverrideInfo = TacoKits.IKitTemplatesOverrideInfo;
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
  */
 class KitHelper {
-    private static dynamicDependenciesLocation:string = path.join(__dirname, "../../dynamicDependencies.json");
-    private static tacoKits:string = "taco-kits";
+    private static DynamicDependenciesLocation: string = path.join(__dirname, "../../dynamicDependencies.json");
+    private static TacoKits: string = "taco-kits";
+
+    public static getTemplatesForKit(kitId: string): Q.Promise<any> {
+        return KitHelper.acquireKitPackage()
+            .then(function (tacoKits: ITacoKits): Q.Promise<IKitTemplatesOverrideInfo> {
+                return tacoKits.kitHelper.getTemplatesForKit(kitId);
+            })
+            .catch(function (err: any): void {
+                throw err;
+            });
+    }
 
     public static getKitMetadata(): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
+        return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<ITacoKitMetadata> {
                 return tacoKits.kitHelper.getKitMetadata();
             })
@@ -46,7 +55,7 @@ class KitHelper {
     }
 
     public static getKitInfo(kitId: string): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
+        return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IKitInfo> {
                 return tacoKits.kitHelper.getKitInfo(kitId);
             })
@@ -56,7 +65,7 @@ class KitHelper {
     }
     
     public static getDefaultKit(): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
+        return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<string> {
                 return tacoKits.kitHelper.getDefaultKit();
             })
@@ -64,11 +73,11 @@ class KitHelper {
                 throw err;
             });
     }
-
-    public static getValidCordovaCli(kitId: string): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
-            .then(function (tacoKits: ITacoKits): Q.Promise<string> {
-                return tacoKits.kitHelper.getValidCordovaCli(kitId);
+    
+    public static getAllTemplates(): Q.Promise<any> {
+        return KitHelper.acquireKitPackage()
+            .then(function (tacoKits: ITacoKits): Q.Promise<ITemplateOverrideInfo[]> {
+                return tacoKits.kitHelper.getAllTemplates();
             })
             .catch(function (err: any): void {
                 throw err;
@@ -76,7 +85,7 @@ class KitHelper {
     }
 
     public static getPlatformOverridesForKit(kitId: string): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
+        return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IPlatformOverrideMetadata> {
                 return tacoKits.kitHelper.getPlatformOverridesForKit(kitId);
             })
@@ -86,7 +95,7 @@ class KitHelper {
     }
 
     public static getPluginOverridesForKit(kitId: string): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
+        return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IPluginOverrideMetadata> {
                 return tacoKits.kitHelper.getPluginOverridesForKit(kitId);
             })
@@ -96,7 +105,7 @@ class KitHelper {
     }
 
     public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
+        return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<ITemplateOverrideInfo> {
                 return tacoKits.kitHelper.getTemplateOverrideInfo(kitId, templateId);
             })
@@ -105,24 +114,18 @@ class KitHelper {
             });
     }
 
-    public static getTemplatesForKit(kitId: string): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
-            .then(function (tacoKits: ITacoKits): Q.Promise<IKitTemplatesOverrideInfo> {
-                return tacoKits.kitHelper.getTemplatesForKit(kitId);
+    public static getValidCordovaCli(kitId: string): Q.Promise<any> {
+        return KitHelper.acquireKitPackage()
+            .then(function (tacoKits: ITacoKits): Q.Promise<string> {
+                return tacoKits.kitHelper.getValidCordovaCli(kitId);
             })
             .catch(function (err: any): void {
                 throw err;
             });
     }
-    
-    public static getAllTemplates(): Q.Promise<any> {
-        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.tacoKits, KitHelper.dynamicDependenciesLocation)
-            .then(function (tacoKits: ITacoKits): Q.Promise<ITemplateOverrideInfo[]> {
-                return tacoKits.kitHelper.getAllTemplates();
-            })
-            .catch(function (err: any): void {
-                throw err;
-            });
+
+    private static acquireKitPackage(): Q.Promise<ITacoKits> {
+        return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TacoKits, KitHelper.DynamicDependenciesLocation);
     }
 }
 

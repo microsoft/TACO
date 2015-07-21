@@ -180,7 +180,9 @@ describe("KitHelper", function (): void {
         it("must return the platform overrides of the specified kit", function (done: MochaDone): void {
             // Call getDefaultKit() to get the default kitId and pass it as param to getPlatformOverridesForKit
             kitHelper.getDefaultKit()
-                .then(kitHelper.getPlatformOverridesForKit)
+                .then(function (kitId: string): Q.Promise<TacoKits.IPlatformOverrideMetadata> {
+                    return kitHelper.getPlatformOverridesForKit(kitId);
+                })
                 .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): void {
                     // Verify the returned override info is correct
                     JSON.stringify(platformOverrides).should.equal(JSON.stringify(testPlatformOverridesForDefaultKit));
@@ -196,7 +198,9 @@ describe("KitHelper", function (): void {
         it("must return the plugin overrides of the specified kit", function (done: MochaDone): void {
             // Call getDefaultKit() to get the default kitId and pass it as param to getPluginOverridesForKit
             kitHelper.getDefaultKit()
-                .then(kitHelper.getPluginOverridesForKit)
+                .then(function (kitId: string): Q.Promise<TacoKits.IPluginOverrideMetadata> {
+                    return kitHelper.getPluginOverridesForKit(kitId);
+                })
                 .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): void {
                     // Verify the returned override info is correct
                     JSON.stringify(pluginOverrides).should.equal(JSON.stringify(testPluginOverridesForDefaultKit));

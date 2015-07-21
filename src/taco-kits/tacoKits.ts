@@ -32,9 +32,9 @@ module TacoKits {
         getValidCordovaCli?: (kitId: string) => Q.Promise<string>;
         getCordovaCliForKit?: (kitId: string) => Q.Promise<string>;
         getPlatformOverridesForKit?: (kitId: string) => Q.Promise<IPlatformOverrideMetadata>;
-        getPluginOverridesForKit?: (kitId: string)=> Q.Promise<IPluginOverrideMetadata>;
+        getPluginOverridesForKit?: (kitId: string) => Q.Promise<IPluginOverrideMetadata>;
         getTemplateOverrideInfo?: (kitId: string, templateId: string) => Q.Promise<ITemplateOverrideInfo>;
-        getTemplatesForKit?:(kitId: string) => Q.Promise<IKitTemplatesOverrideInfo>;
+        getTemplatesForKit?: (kitId: string) => Q.Promise<IKitTemplatesOverrideInfo>;
         getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;
     }
     export interface IPluginOverrideInfo {
@@ -118,11 +118,11 @@ module TacoKits {
      */
     export class KitHelper implements TacoKits.IKitHelper {
         private static KitMetadata: ITacoKitMetadata;
-        private static TsTemplateId: string = "typescript";
         private static DefaultKitId: string;
         private static KitFileName: string = "TacoKitMetadata.json";
         private static KitDesciptionSuffix: string = "-desc";
         private static DefaultTemplateKitOverride: string = "default";
+        private static TsTemplateId: string = "typescript";
 
         public kitMetadataFilePath: string;
         /**
@@ -386,23 +386,21 @@ module TacoKits {
         }
 
         /**
-         * Builds an ITemplateOverrideInfo from a kit id and a ITemplateInfo. The ITemplateInfo is deep copied to make sure modifications
-         * to the ITemplateOverrideInfo do not affect the provided ITemplateInfo.
+         *   Returns the template metadata for all the kits from the TacoKitMetadata.json file
          */
-        private createTemplateOverrideInfo(kit: string, template: ITemplateInfo): ITemplateOverrideInfo {
-            var templateOverrideInfo: ITemplateOverrideInfo = {
-                kitId: kit,
-                templateInfo: {
-                    name: "",
-                    url: ""
+        public getTemplateMetadata(): Q.Promise<ITemplateMetadata> {
+            var deferred: Q.Deferred<ITemplateMetadata> = Q.defer<ITemplateMetadata>();
+            return this.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<ITemplateMetadata> {
+                var templates = metadata.templates;
+                if (templates) {
+                    deferred.resolve(templates);
+                } else {
+                    // There definitely should be a templates node in the kit metadata
+                    return Q.reject<ITemplateMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileMalformed));
                 }
-            };
 
-            // Deep copy the provided ITemplateInfo to the returned override object. Since we know ITemplateInfo only contains strings,
-            // and are relatively small, it is safe to deep copy via JSON serialization
-            templateOverrideInfo.templateInfo = JSON.parse(JSON.stringify(template));
-
-            return templateOverrideInfo;
+                return deferred.promise;
+            });
         }
 
         /**
@@ -436,21 +434,23 @@ module TacoKits {
         }
 
         /**
-         *   Returns the template metadata for all the kits from the TacoKitMetadata.json file
+         * Builds an ITemplateOverrideInfo from a kit id and a ITemplateInfo. The ITemplateInfo is deep copied to make sure modifications
+         * to the ITemplateOverrideInfo do not affect the provided ITemplateInfo.
          */
-        public getTemplateMetadata(): Q.Promise<ITemplateMetadata> {
-            var deferred: Q.Deferred<ITemplateMetadata> = Q.defer<ITemplateMetadata>();
-            return this.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<ITemplateMetadata> {
-                var templates = metadata.templates;
-                if (templates) {
-                    deferred.resolve(templates);
-                } else {
-                    // There definitely should be a templates node in the kit metadata
-                    return Q.reject<ITemplateMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileMalformed));
+        private createTemplateOverrideInfo(kit: string, template: ITemplateInfo): ITemplateOverrideInfo {
+            var templateOverrideInfo: ITemplateOverrideInfo = {
+                kitId: kit,
+                templateInfo: {
+                    name: "",
+                    url: ""
                 }
+            };
 
-                return deferred.promise;
-            });
+            // Deep copy the provided ITemplateInfo to the returned override object. Since we know ITemplateInfo only contains strings,
+            // and are relatively small, it is safe to deep copy via JSON serialization
+            templateOverrideInfo.templateInfo = JSON.parse(JSON.stringify(template));
+
+            return templateOverrideInfo;
         }
 
         private getLocalizedTemplateName(templateInfo: ITemplateInfo): string {
