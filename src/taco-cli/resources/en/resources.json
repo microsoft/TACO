@@ -476,5 +476,6 @@
     "HowToUseCommandEmulatePlatform": " * Run your app in the emulator: taco emulate <PLATFORM>",
     "HowToUseCommandRunPlatform": " * Run your app on a device: taco run <PLATFORM>",
     "HowToUseCommandHelp": "For command help, use 'taco --help' ",
-    "HowToUseCommandDocs": "For full documentation online, use 'taco docs'"
+    "HowToUseCommandDocs": "For full documentation online, use 'taco docs'",
+    "HowToUseCreateProjectWithTemplate": "e.g: To create a new TypeScript project, use taco create <PATH> [ID] --template typescript"
 }

@@ -27,6 +27,7 @@ import tacoPackageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
 import telemetryHelper = require ("./telemetryHelper");
 import utilHelper = require ("./utilHelper");
+import logFormatHelper = require ("./logFormatHelper");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
@@ -51,6 +52,7 @@ module TacoUtility {
     export var Telemetry = telemetry.Telemetry;
     export var TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper = utilHelper.UtilHelper;
+    export var LogFormatHelper = logFormatHelper.LogFormatHelper;
     /// <enable code="SA1301" />
 }
 
