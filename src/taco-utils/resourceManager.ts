@@ -15,10 +15,12 @@ import path = require ("path");
 import argsHelper = require ("./argsHelper");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import resourceSet = require ("./resourceSet");
+import logger = require ("./logger");
 
 import ArgsHelper = argsHelper.ArgsHelper;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 import ResourceSet = resourceSet.ResourceSet;
+import Logger = logger.Logger;
 
 module TacoUtility {
     export class ResourceManager {
@@ -94,6 +96,13 @@ module TacoUtility {
 
             var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
             return resourceSet.getString(id, args);
+        }
+
+        /**
+         * Logs a message generated from a resource string
+         */
+        public log(id: string, ...optionalArgs: any[]): void {
+            Logger.log(this.getString(id, optionalArgs));
         }
 
         /**

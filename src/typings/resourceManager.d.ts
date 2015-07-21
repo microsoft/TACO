@@ -15,6 +15,9 @@ declare module TacoUtility {
         getString(id: string, ...optionalArgs: any[]): string;
         /** ** ...optionalArgs is only there for typings, function rest params** */
         getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string;
+        /** Logs a message generated from a resource string */
+        log(id: string, ...optionalArgs: any[]): void;
+
         static getBestAvailableLocale(availableLocales: string[], inputLocales?: string[]): string;
     }
 }

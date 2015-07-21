@@ -11,11 +11,6 @@
 /// <reference path="../typings/resourceManager.d.ts" />
 
 declare module TacoUtility {
-    interface ILoggerForStringResources {
-        logResourceString(id: string, ...optionalArgs: any[]): void;
-        logResourceStrings(ids: string[], ...optionalArgs: any[]): void;
-    }
-
     class Logger {
         /**
          * message can be any string with xml type tags in it.
@@ -42,6 +37,9 @@ declare module TacoUtility {
          */
         public static logLine(): void;
 
-        public static forResources(resources: ResourceManager): ILoggerForStringResources;
+        /**
+         * Logs a message generated from a resource string
+         */
+        public static logResourceString(resources: ResourceManager, id: string, ...optionalArgs: any[]): void;
    }
 }
