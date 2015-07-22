@@ -2,7 +2,7 @@
     "CommandError": "Error: An error occurred while running the command.",
     "_CommandError.comment": "A generic error message displayed when an error occurs. This will be followed by the inner error, which should contain more details.",
 
-    "CommandCreateDescription": "Create a Cordova project",
+    "CommandCreateDescription": "Create a new Cordova based taco project",
     "CommandCreateArgsPath": "Where to create the project",
     "CommandCreateArgsId": "Package ID for the project",
     "CommandCreateArgsName": "Human readable app name",
@@ -56,14 +56,12 @@
     "_CommandCreateTacoJsonFileCreationError.comment": "This message is displayed when the taco.json file creation fails.",
     "CommandCreateTacoJsonFileWriteError": "Failed to write to {0}",
 
-    "CommandTemplatesDescription": "List available taco templates",
+    "CommandTemplatesDescription": "List available taco templates for project creation",
     "_CommandTemplatesDescription.comment": "Description of the 'taco templates' command when the user types 'taco help templates'.",
     "CommandTemplatesHeader": "Available templates:",
     "_CommandTemplatesHeader.comment": "Header at the top of the table showing available templates 'taco templates'.",
 
     "CommandHelpDescription": "Get help for a taco command",
-    "CommandHelpTableTitle":  "Commands:",
-    "_CommandHelpTableTitle.comment":  "This is the title that we use for the commands list table that we show when executing taco help'",
     "CommandDocumentationDescription": "Open up the documentation page in your default browser",
     "TacoDocumentationLink": "http://fwdlink.todo/fill?this=link",
     "CommandKitDescription": "Perform kit related operations",
@@ -121,8 +119,7 @@
     "CommandKitSelectStatusSuccess": "<success>Success!</success>",
     "_CommandKitSelectStatusSuccess.comment": "Status message on successfully updating platforms and plugins",
 
-    
-    "CommandRemoteDescription": "Configure remote build servers",
+    "CommandRemoteDescription": "Configure remote builds (currently supports iOS build only)",
     "_CommandRemoteDescription.comment": "Description for 'taco remote'",
     "CommandRemoteSubcommandDescription": "The subcommand to run: add, remove, or list",
     "_CommandRemoteSubcommandDescription.comment": "description of the COMMAND argument to 'taco remote COMMAND'",
@@ -175,7 +172,7 @@
     "CommandRemoteListPrelude": "Current remote configuration(s):",
     "_CommandRemoteListPrelude.comment": "Text printed introducing the table of remote platforms when you 'taco remote list'",
 
-    "CommandPlatformDescription": "Manage project platforms",
+    "CommandPlatformDescription": "Manage project platforms (currently supports Windows, Android & iOS)",
     "_CommandPlatformDescription.comment": "Description for 'taco platform'",
     "CommandPlatformSubcommandDescription": "The subcommand to be run - add, remove, list, update or check",
     "_CommandPlatformSubcommandDescription.comment": "Description of the COMMAND argument to 'taco build'",
@@ -222,8 +219,7 @@
     "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> updated.<br/>",
     "_CommandPlatformStatusUpdated.comment": "Status message after successfully updating platform {0}",
 
-
-    "CommandPluginDescription": "Manage project plugins",
+    "CommandPluginDescription": "Manage Cordova plugins for the project",
     "_CommandPluginDescription.comment": "Description for 'taco plugin'",
     "CommandPluginSubcommandDescription": "The subcommand to be run - add, remove, list, or search",
     "_CommandPluginSubcommandDescription.comment": "Description of the COMMAND argument to 'taco build'",
@@ -262,7 +258,7 @@
     "CommandPluginStatusRemoving": "Removing plugin <highlight>{0}</highlight> from Cordova project...<br/>",
     "_CommandPluginStatusRemoving.comment": "Status message shown while removing a plugin {0} from the project",
 
-    "CommandBuildDescription": "Build a cordova project",
+    "CommandBuildDescription": "Locally build the Cordova based taco project for a given platform",
     "_CommandBuildDescription.comment": "Description for 'taco build'",
     "CommandBuildPlatformDescription": "The platform that you wish to build",
     "_CommandBuildPlatformDescription.comment": "Description of the PLATFORM argument to 'taco build'",
@@ -302,7 +298,7 @@
     "CommandRemotePlatformNotKnown": "Error: No remote settings found for {0}. Please run 'taco remote add {0}'",
     "_CommandRemotePlatformNotKnown.comment": "Error message printed when a remote build or run is requested for a platform that does not have remote settings configured. {0} is the platform",
 
-    "CommandRunDescription": "Run a cordova project",
+    "CommandRunDescription": "Run the Cordova based taco project on a connected device",
     "_CommandRunDescription.comment": "Description for 'taco run'",
     "CommandRunPlatformDescription": "The platform that you wish to run",
     "_CommandRunPlatformDescription.comment": "Description of the PLATFORM argument to 'taco run'",
@@ -339,10 +335,10 @@
     "CommandNotBothDebugRelease": "Error: must specify at most one of --debug and --release",
     "_CommandNotBothDebugRelease.comment": "Error reported when both --debug and --release are specified for 'taco build' or 'taco run'",
 
-    "CommandVersionDescription": "Display the current Taco version",
+    "CommandVersionDescription": "Display the current taco version",
     "_CommandVersionDescription.comment": "Description of the -v/--v/--version arguments to taco",
 
-    "CommandInstallReqsDescription": "Install platform-specific third-party dependencies",
+    "CommandInstallReqsDescription": "Install platform-specific third-party dependencies required to build",
     "_CommandInstallReqsDescription.comment": "Description for 'taco install-reqs'",
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option(s) of 'taco install-reqs'",

@@ -90,7 +90,11 @@ module TacoUtility {
          * prints out general usage of all support TACO commands, iterates through commands and their descriptions
          */
         private printGeneralUsage(): void {
-            this.printCommandHeader(this.cliName, "command", "[options]");
+            resources.log("TacoProgramDescription");
+
+            Logger.log(util.format("<br/>   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
+
+            resources.log("CommandHelpTableTitle");
 
             var nameDescriptionPairs: INameDescription[] = new Array();
             for (var i in this.commandsFactory.listings) {
