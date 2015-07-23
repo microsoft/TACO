@@ -9,6 +9,8 @@
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 
+
+import child_process = require ("child_process");
 import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
@@ -62,7 +64,7 @@ class ProjectHelper {
         var projectPath: string = process.cwd();
         var parentPath: string;
         var atFsRoot: boolean = false;
-        while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, ProjectHelper.TacoJsonFileName))) {
+        while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, ProjectHelper.TacoJsonFileName)) && !fs.existsSync(path.join(projectPath, ProjectHelper.ConfigXmlFileName))) {
             // Navigate up one level until either taco.json is found or the parent path is invalid
             parentPath = path.resolve(projectPath, "..");
             if (parentPath !== projectPath) {
@@ -147,6 +149,84 @@ class ProjectHelper {
     }
 
     /**
+     *  public helper that returns all the installed platforms
+     */
+    public static getInstalledPlatforms(projectDir: string): string[] {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var platformsDir = path.join(projectDir, "platforms");
+        if (!fs.existsSync(platformsDir)) {
+            return [];
+        }
+
+        return fs.readdirSync(platformsDir).filter(function (platform: string): boolean {
+            return fs.statSync(path.join(platformsDir, platform)).isDirectory();
+        });
+    }
+
+    /**
+     *  public helper that returns all the installed platforms
+     */
+    public static getInstalledPlugins(projectDir: string): string[] {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var pluginsDir = path.join(projectDir, "plugins");
+        if (!fs.existsSync(pluginsDir)) {
+            return [];
+        }
+
+        return fs.readdirSync(pluginsDir).filter(function (plugin: string): boolean {
+            return fs.statSync(path.join(pluginsDir, plugin)).isDirectory();
+        });
+    }
+
+    /**
+     *  public helper that gets the version of the installed platforms
+     */
+    public static getInstalledPlatformVersions(projectDir: string): Q.Promise<any> {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var platformsInstalled: string[] = ProjectHelper.getInstalledPlatforms(projectDir);
+        var onWindows = process.platform === "win32";
+        var deferred = Q.defer<ProjectHelper.IPlatformVersionInfo>();
+        var platformVersions: ProjectHelper.IPlatformVersionInfo = {};
+        return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
+            var cmdName: string = "version";
+            if (onWindows) { 
+                cmdName = cmdName + ".bat";
+            }
+
+            var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
+            var versionProc = child_process.spawn(cmdPath);
+            versionProc.stdout.on("data", function (data: any): void {
+                var version: string = data.toString();
+                if (path) {
+                    platformVersions[platform] = version;
+                }
+            });
+            return Q({});
+        })).spread<any>(function (): Q.Promise<any> {
+            console.log(platformVersions);
+            deferred.resolve(platformVersions);           
+            return deferred.promise;
+        });
+    }
+
+    /**
+     *  public helper that gets the version of the installed plugins
+     */
+    public static getInstalledPluginVersions(projectDir: string): Q.Promise<ProjectHelper.IPluginVersionInfo> {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var pluginsInstalled: string[] = ProjectHelper.getInstalledPlugins(projectDir);
+        var pluginVersions: ProjectHelper.IPluginVersionInfo = {};
+        pluginsInstalled.forEach(function (plugin: string): void {
+            var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
+            var pluginInfo = require(pluginPackgeJson);
+            if (pluginInfo) {
+                pluginVersions[plugin] = pluginInfo["version"];
+            }
+        });
+        return Q.resolve(pluginVersions);
+    }
+
+    /**
      *  public helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
      */
     public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
@@ -173,6 +253,14 @@ module ProjectHelper {
         cordovaCliVersion: string;
         configXmlPath: string;
         tacoKitId?: string;
+    }
+
+    export interface IPlatformVersionInfo {
+        [platformName: string]: string;
+    }
+
+    export interface IPluginVersionInfo {
+        [pluginName: string]: string;
     }
 }
 

@@ -59,6 +59,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
                 return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "list";
             }
         },
+        {
+            // Local Run
+            run: Kit.select,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "select";
+            }
+        },
     ];
 
     public name: string = "kit";
@@ -323,6 +330,36 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         return longest;
     }
 
+    private static printPlatformUpdateInfo(projectPath: string): Q.Promise<any> {
+        return projectHelper.getInstalledPlatformVersions(projectPath).then(function (platformVersions: projectHelper.IPlatformVersionInfo) {
+            console.log(platformVersions);
+        });
+    }
+
+    private static printPluginUpdateInfo(projectPath: string): Q.Promise<any> {
+        return projectHelper.getInstalledPluginVersions(projectPath).then(function (pluginVersions: projectHelper.IPluginVersionInfo) {
+            console.log(pluginVersions);
+        });
+    }
+
+    private static selectKit(kitId: string, projectPath: string): Q.Promise<any> {
+       return projectHelper.createTacoJsonFile(projectPath, true, kitId)
+       .then(function (): Q.Promise<any> {
+            return Kit.printPlatformUpdateInfo(projectPath);
+        }).then(function (): Q.Promise<any> {
+            return Kit.printPluginUpdateInfo(projectPath);
+        });
+    }
+    
+    private static selectCli(cli: string, projectPath: string): Q.Promise<any> {
+        return projectHelper.createTacoJsonFile(projectPath, false, cli)
+        .then(function (): Q.Promise<any> {
+            return Kit.printPlatformUpdateInfo(projectPath);
+        }).then(function (): Q.Promise<any> {
+            return Kit.printPluginUpdateInfo(projectPath);
+        });
+    }
+
     private static list(commandData: commands.ICommandData): Q.Promise<any> {
         logger.logLine();
         var kitId: string = commandData.options["kit"];
@@ -335,6 +372,37 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             // Else print minimal information about all the kits
             return kitId ? Kit.printKit(kitId) : Kit.printAllKits();
         }       
+    }
+
+    private static select(commandData: commands.ICommandData): Q.Promise<any> {
+        logger.logLine();
+        var kitId: string = commandData.options["kit"];
+        var cli: string = commandData.options["cli"];
+        var projectInfo: projectHelper.IProjectInfo;
+        var projectPath: string = projectHelper.getProjectRoot();
+        return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
+            projectInfo = info;
+            if(info.configXmlPath === "") {
+                throw errorHelper.get(TacoErrorCodes.NotInCordovaProject);
+            }
+        })
+            .then(function (): Q.Promise<any> {
+            var usedkitId: string = projectInfo.tacoKitId;
+            if (kitId) {
+                if(usedkitId && usedkitId === kitId ) {
+                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameKit);
+                } else {
+                    return Kit.selectKit(kitId, projectPath);
+                }
+            } else if (cli) {
+                var usedCli: string = projectInfo.cordovaCliVersion;
+                if(usedCli && usedCli === cli ) {
+                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameCli);
+                } else {
+                    return Kit.selectCli(cli, projectPath);
+                }
+            }
+        });
     }
 }
 

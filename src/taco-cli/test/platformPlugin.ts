@@ -80,9 +80,7 @@ var kitPlatformOperations: ICommandAndResult[] = [ { command: "add android ios",
     ];
         
 var cliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: cliPlatformVersions },
-        { command: "remove android ios", expectedVersions: {} },
-        { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions },
-        { command: "remove android ios", expectedVersions: {} }
+        { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions }
     ];
 
 var kitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
