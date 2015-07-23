@@ -90,9 +90,15 @@ module TacoUtility {
          * prints out general usage of all support TACO commands, iterates through commands and their descriptions
          */
         private printGeneralUsage(): void {
-            resources.log("TacoProgramDescription");
+            var programDescription: string = this.cliResources.getString("ProgramDescription");
+            if (programDescription) {
+                Logger.log(programDescription); // If we have a ProgramDescription we use the new format
+                Logger.logLine();
+            } else {
+                resources.log("CommandHelpUsageSynopsis"); // If not we fall-back to the old synopsis format
+            }
 
-            Logger.log(util.format("<br/>   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
+            Logger.log(util.format("   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
 
             resources.log("CommandHelpTableTitle");
 

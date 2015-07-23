@@ -496,5 +496,7 @@
     "HowToUseCommandDocs": "For full documentation online, use 'taco docs'",
     "_HowToUseCommandDocs.comment": "This message is printed as part of the onboarding experience of several commands, to suggest the user how he can view the taco documentation",
     "HowToUseCreateProjectWithTemplate": "e.g: To create a new TypeScript project, use taco create <PATH> [ID] --template typescript",
-    "_HowToUseCreateProjectWithTemplate.comment": "This message is printed as part of the onboarding experience of the 'taco templates' command, to suggest the user how to create a taco project using a particular template"
+    "_HowToUseCreateProjectWithTemplate.comment": "This message is printed as part of the onboarding experience of the 'taco templates' command, to suggest the user how to create a taco project using a particular template",
+    "ProgramDescription": "Taco is a command line tool utility that makes it easy to create, build, run and emulate Cordova applications.",
+    "_ProgramDescription.comment": "This is a description of the purpose of the whole taco program"
 }
