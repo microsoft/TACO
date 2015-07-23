@@ -75,8 +75,7 @@ var kitPluginVersions: IComponentVersionMap = {
 
 var kitPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: kitPlatformVersions },
         { command: "remove android ios", expectedVersions: {} },
-        { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions },
-        { command: "remove android ios", expectedVersions: {} }
+        { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions }
     ];
         
 var cliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: cliPlatformVersions },
