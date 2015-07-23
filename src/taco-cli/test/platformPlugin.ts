@@ -232,13 +232,6 @@ describe("taco platform for kit", function (): void {
         rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
-    var isFirstTest = true; // Only the first test download some required dependencies, so we use this variable to identify the first test run
-
-    afterEach(function (done: MochaDone): void {
-        isFirstTest = false;
-        done();
-    });
-
     describe("taco platform/plugin operation for a kit project with platform/plugin overrides execute with no errors", function (): void {
         var kitProjectpath: string;
         this.timeout(50000);
