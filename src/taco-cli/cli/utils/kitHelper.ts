@@ -34,93 +34,66 @@ class KitHelper {
     private static DynamicDependenciesLocation: string = path.join(__dirname, "../../dynamicDependencies.json");
     private static TacoKits: string = "taco-kits";
 
-    public static getTemplatesForKit(kitId: string): Q.Promise<any> {
+    public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IKitTemplatesOverrideInfo> {
                 return tacoKits.kitHelper.getTemplatesForKit(kitId);
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
-    public static getKitMetadata(): Q.Promise<any> {
+    public static getKitMetadata(): Q.Promise<ITacoKitMetadata> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<ITacoKitMetadata> {
                 return tacoKits.kitHelper.getKitMetadata();
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
-    public static getKitInfo(kitId: string): Q.Promise<any> {
+    public static getKitInfo(kitId: string): Q.Promise<IKitInfo> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IKitInfo> {
                 return tacoKits.kitHelper.getKitInfo(kitId);
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
     
-    public static getDefaultKit(): Q.Promise<any> {
+    public static getDefaultKit(): Q.Promise<string> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<string> {
                 return tacoKits.kitHelper.getDefaultKit();
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
     
-    public static getAllTemplates(): Q.Promise<any> {
+    public static getAllTemplates(): Q.Promise<ITemplateOverrideInfo[]> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<ITemplateOverrideInfo[]> {
                 return tacoKits.kitHelper.getAllTemplates();
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
-    public static getPlatformOverridesForKit(kitId: string): Q.Promise<any> {
+    public static getPlatformOverridesForKit(kitId: string): Q.Promise<IPlatformOverrideMetadata> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IPlatformOverrideMetadata> {
                 return tacoKits.kitHelper.getPlatformOverridesForKit(kitId);
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
-    public static getPluginOverridesForKit(kitId: string): Q.Promise<any> {
+    public static getPluginOverridesForKit(kitId: string): Q.Promise<IPluginOverrideMetadata> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<IPluginOverrideMetadata> {
                 return tacoKits.kitHelper.getPluginOverridesForKit(kitId);
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
-    public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<any> {
+    public static getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<ITemplateOverrideInfo> {
                 return tacoKits.kitHelper.getTemplateOverrideInfo(kitId, templateId);
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
-    public static getValidCordovaCli(kitId: string): Q.Promise<any> {
+    public static getValidCordovaCli(kitId: string): Q.Promise<string> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<string> {
                 return tacoKits.kitHelper.getValidCordovaCli(kitId);
-            })
-            .catch(function (err: any): void {
-                throw err;
             });
     }
 
