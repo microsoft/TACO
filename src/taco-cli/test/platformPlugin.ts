@@ -371,8 +371,8 @@ describe("taco platform for kit", function (): void {
         function testCommandForArguments(commandRun: { (args: string[]): Q.Promise<any> },
             platformCommandLineArguments: string[], scenarioArguments: string[],
             alternativeScenarioArguments: string[], done: MochaDone): void {
-            // Some messages are only printted the first time something is executed. When we run all the tests
-            // all those messages don't get printted, but if we only run the onboarding tests, they are the first
+            // Some messages are only printed the first time something is executed. When we run all the tests
+            // all those messages don't get printed, but if we only run the onboarding tests, they are the first
             // tests to run, so they do get printed. We accept both options and we validate we got one of them
             commandRun(platformCommandLineArguments).done(() => {
                 var expected = scenarioArguments.join("\n");

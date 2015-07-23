@@ -442,13 +442,13 @@ describe("taco create", function (): void {
             done();
         });
 
-        var teenSpaces = "          ";
+        var tenSpaces = "          ";
         function testCreateForArguments(createCommandLineArguments: string[],
             expectedMessages: string[],
             alternativeExpectedMessages: string[],
             done: MochaDone): void {
-            // Some messages are only printted the first time something is executed. When we run all the tests
-            // all those messages don't get printted, but if we only run the onboarding tests, they are the first
+            // Some messages are only printed the first time something is executed. When we run all the tests
+            // all those messages don't get printed, but if we only run the onboarding tests, they are the first
             // tests to run, so they do get printed. We accept both options and we validate we got one of them
             var commandData: tacoUtils.Commands.ICommandData = {
                 options: {},
@@ -460,7 +460,7 @@ describe("taco create", function (): void {
                 var expected = expectedMessages.join("\n");
 
                 var actual = LogFormatHelper.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
-                actual = actual.replace(/ {10,}/g, teenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
+                actual = actual.replace(/ {10,}/g, tenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
                 actual = actual.replace(/ +$/gm, ""); // We also don't want trailing spaces
                 if (expected !== actual) {
                     var expected = alternativeExpectedMessages.join("\n");
@@ -513,7 +513,7 @@ describe("taco create", function (): void {
                 done);
         });
 
-        var continueInNextLine = "\n" + teenSpaces;
+        var continueInNextLine = "\n" + tenSpaces;
 
         it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
             var projectPath = getProjectPath("onboarding-experience", 2);
