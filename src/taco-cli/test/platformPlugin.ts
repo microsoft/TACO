@@ -342,11 +342,9 @@ describe("taco platform for kit", function (): void {
         });
     });
 
-    describe("Onboarding experience", function (): void {
+    describe("Onboarding experience", () => {
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
-
-        this.timeout(10000); // Instaling the android platform can take several seconds
 
         beforeEach(function (done: MochaDone): void {
             this.timeout(60000); // Instaling the node packages during create can take a long time
@@ -362,10 +360,9 @@ describe("taco platform for kit", function (): void {
             });
         });
 
-        after(function (done: MochaDone): void {
+        after(() => {
             // We just need to reset the stdout just once, after all the tests have finished
             process.stdout.write = stdoutWrite;
-            done();
         });
 
         function testCommandForArguments(commandRun: { (args: string[]): Q.Promise<any> },
@@ -389,6 +386,8 @@ describe("taco platform for kit", function (): void {
         }
 
         it("prints the onboarding experience when adding a platform", function (done: MochaDone): void {
+            this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
+
             var firstPart = ["CommandPlatformStatusAdding"];
             var lastPart = [
                 "CommandPlatformStatusAdded",
@@ -410,6 +409,8 @@ describe("taco platform for kit", function (): void {
         });
 
         it("prints the onboarding experience when adding a plugin", function (done: MochaDone): void {
+            this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
+
             var firstPart = [
                 "CommandPluginTestedPlatforms",
                 "CommandPluginStatusAdding"];

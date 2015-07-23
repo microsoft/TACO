@@ -424,22 +424,20 @@ describe("taco create", function (): void {
         });
     });
 
-    describe("Onboarding experience", function (): void {
+    describe("Onboarding experience", () => {
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
         this.timeout(60000); // Instaling the node packages during create can take a long time
 
-        beforeEach(function (done: MochaDone): void {
+        beforeEach(() => {
             memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
             process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
-            done();
         });
 
-        after(function (done: MochaDone): void {
+        after(() => {
             // We just need to reset the stdout just once, after all the tests have finished
             process.stdout.write = stdoutWrite;
-            done();
         });
 
         var tenSpaces = "          ";

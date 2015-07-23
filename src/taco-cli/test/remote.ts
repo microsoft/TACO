@@ -220,16 +220,14 @@ describe("taco remote", function (): void {
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
-        beforeEach(function (done: MochaDone): void {
+        beforeEach(() => {
             memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
             process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
-            done();
         });
 
-        after(function (done: MochaDone): void {
+        after(() => {
             // We just need to reset the stdout just once, after all the tests have finished
             process.stdout.write = stdoutWrite;
-            done();
         });
 
         // Here you can write to the console with logger.log(...) and then you'll be able to 
