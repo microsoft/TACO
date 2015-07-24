@@ -244,6 +244,29 @@ class CordovaHelper {
             }
         });
     }
+
+    /**
+     * Return a dictionary where the keys are supported platforms, or "null" if the answer is unknown.
+     * For sufficiently recent kit projects, we can get an accurate answer via cordova.cordova_lib.cordova_platforms, while 
+     * for older versions of cordova or for non-kit projects, we default back to being permissive
+     */
+    public static getSupportedPlatforms(): Q.Promise<CordovaHelper.IDictionary<any>> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<CordovaHelper.IDictionary<any>> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
+                    .then(function (cordova: typeof Cordova): CordovaHelper.IDictionary<any> {
+                        if (!cordova.cordova_lib) {
+                            // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
+                            return null;
+                        } else {
+                            return cordova.cordova_lib.cordova_platforms;
+                        }
+                });
+            } else {
+                return Q<CordovaHelper.IDictionary<any>>(null);
+            }
+        });
+    }
    
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
@@ -282,6 +305,12 @@ class CordovaHelper {
         opts.options = downstreamArgs.concat(additionalArguments);
 
         return opts;
+    }
+}
+
+module CordovaHelper {
+    export interface IDictionary<T> {
+        [key: string]: T
     }
 }
 
