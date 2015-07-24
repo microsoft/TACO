@@ -23,10 +23,12 @@ import Q = require ("q");
 import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 import util = require ("util");
+import wrench = require ("wrench");
 
 import platformMod = require ("../cli/platform");
 import pluginMod = require ("../cli/plugin");
 import createMod = require ("../cli/create");
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
 
@@ -94,33 +96,34 @@ var cliPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-
 
 describe("taco platform for kit", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "platformPlugin");
-    var projectDir = path.join(tacoHome, "example");
+    var cliProjectDir: string = "cliProject";
+    var kitProjectDir: string = "kitProject";
     var originalCwd: string;
     var cordovaVersion: string = "5.0.0";
 
-    function createProject(args: string[]): Q.Promise<any> {
+    function createProject(args: string[], projectDir: string): Q.Promise<any> {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
-        return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
+        return Q.denodeify(del)(projectDir).then(function (): Q.Promise<any> {
             return create.run({
                 options: {},
                 original: args,
                 remain: args
             });
         }).then(function (): void {
-            var projectPath: string = path.join(tacoHome, "example");
+            var projectPath: string = path.join(tacoHome, projectDir);
             process.chdir(projectPath);
         });
     }
 
     function createCliProject(cli: string): Q.Promise<any> {
-         return createProject(["example", "--cli", cli]);
+         return createProject(["cliProject", "--cli", cli], cliProjectDir);
     }
 
     function createKitProject(kit: string): Q.Promise<any> {
         // Create a dummy test project with no platforms added
-        return createProject(["example", "--kit", kit]);
+        return createProject(["kitProject", "--kit", kit], kitProjectDir);
     }
 
     function platformRun(args: string[]): Q.Promise<any> {
@@ -139,9 +142,9 @@ describe("taco platform for kit", function (): void {
         });
     }
 
-    function getInstalledPlatforms(platformsExpected: IComponentVersionMap): string[] {
-        var platformsDir = path.join(projectDir, "platforms");
-        if (!fs.existsSync(projectDir)) {
+    function getInstalledPlatforms(platformsExpected: IComponentVersionMap, projectPath: string): string[] {
+        var platformsDir = path.join(projectPath, "platforms");
+        if (!fs.existsSync(platformsDir)) {
             return [];
         }
 
@@ -150,8 +153,8 @@ describe("taco platform for kit", function (): void {
         });
     }
 
-    function checkPlatformVersions(platformsExpected: IComponentVersionMap): Q.Promise<any> {
-        var platformsInstalled: string[] = getInstalledPlatforms(platformsExpected);
+    function checkPlatformVersions(platformsExpected: IComponentVersionMap, projectPath: string): Q.Promise<any> {
+        var platformsInstalled: string[] = getInstalledPlatforms(platformsExpected, projectPath);
         var onWindows = process.platform === "win32";
         var deferred = Q.defer<any>();
         return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
@@ -160,7 +163,7 @@ describe("taco platform for kit", function (): void {
                 cmdName = cmdName + ".bat";
             }
 
-            var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
+            var cmdPath: string = path.join(projectPath, "platforms", platform, "cordova", cmdName);
             var versionProc = child_process.spawn(cmdPath);
             versionProc.stdout.on("data", function (data: any): void {
                 var version: string = data.toString();
@@ -181,8 +184,8 @@ describe("taco platform for kit", function (): void {
         }));
     }
 
-    function getInstalledPluginVersion(plugin: string): string {
-        var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
+    function getInstalledPluginVersion(plugin: string, projectPath: string): string {
+        var pluginPackgeJson = path.join(projectPath, "plugins", plugin, "package.json");
         var pluginInfo = require(pluginPackgeJson);
         if (pluginInfo) {
             return pluginInfo["version"];
@@ -191,10 +194,10 @@ describe("taco platform for kit", function (): void {
         return "";
     }
 
-    function checkPluginVersions(pluginsExpected: IComponentVersionMap): void {
+    function checkPluginVersions(pluginsExpected: IComponentVersionMap, projectPath: string): void {
         var deferred = Q.defer<any>();
         Object.keys(pluginsExpected).forEach(function (plugin: string): void {
-            var versionInstalled: string = getInstalledPluginVersion(plugin);
+            var versionInstalled: string = getInstalledPluginVersion(plugin, projectPath);
             versionInstalled.trim().should.be.equal(pluginsExpected[plugin]);
         });
     }
@@ -210,8 +213,16 @@ describe("taco platform for kit", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
-        // Delete existing run folder if necessary
-        del("example", mocha);
+
+        // Force KitHelper to fetch the package fresh
+        kitHelper.KitPackagePromise = null;
+
+        this.timeout(100000);
+        rimraf.sync(tacoHome);
+        createKitProject("5.0.0-Kit")
+        .done(function (): void {
+            mocha();
+        });          
     });
 
     after(function (): void {
@@ -220,22 +231,19 @@ describe("taco platform for kit", function (): void {
     });
 
     describe("taco platform/plugin operation for a kit project with platform/plugin overrides execute with no errors", function (): void {
-        before(function (mocha: MochaDone): void {
-            // Start each test with a pristine cordova project
-            this.timeout(50000);
-            Q.fcall(createKitProject, "5.0.0-Kit").done(function (): void {
-                mocha();
-            }, function (err: any): void {
-                mocha(err);
-            });
-        });
-        
-        after(function (mocha: MochaDone): void {
-            // Remove the project that we operated on
-            process.chdir(tacoHome);
-            del("example", mocha);
-        });
+        var kitProjectpath: string;
         this.timeout(50000);
+
+        before(function (): void {
+            kitProjectpath = path.join(tacoHome, kitProjectDir);
+            process.chdir(kitProjectpath);
+        });
+
+        after(function (): void {
+            process.chdir(tacoHome);
+            rimraf(kitProjectpath, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+        });
+
         kitPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
@@ -246,7 +254,7 @@ describe("taco platform for kit", function (): void {
                 }).then(function (): void {
                     if (args[0] === "add") {
                         // Check the version of platform after addition
-                        checkPlatformVersions(scenario.expectedVersions);
+                        checkPlatformVersions(scenario.expectedVersions, kitProjectpath);
                     }
                 }).then(function (): void {
                     done();
@@ -265,7 +273,7 @@ describe("taco platform for kit", function (): void {
                 }).then(function (): void {
                     if (args[0] === "add") {
                         // Check the version of plugin after addition
-                        checkPluginVersions(scenario.expectedVersions);
+                        checkPluginVersions(scenario.expectedVersions, kitProjectpath);
                     }
                 }).then(function (): void {
                     done();
@@ -277,22 +285,21 @@ describe("taco platform for kit", function (): void {
     });
 
     describe("taco platform/plugin operation for a CLI project with no platform/plugin overrides execute with no errors", function (): void {
+        var cliProjectPath: string;
+        this.timeout(70000);
         before(function (mocha: MochaDone): void {
-            // Start each test with a pristine cordova project
-            this.timeout(50000);
-            Q.fcall(createCliProject, "5.0.0").done(function (): void {
+            createCliProject("5.0.0")
+            .then(function (): void {
+                cliProjectPath = path.join(tacoHome, cliProjectDir);
+                process.chdir(cliProjectPath);
                 mocha();
-            }, function (err: any): void {
-                mocha(err);
             });
         });
-        
-        after(function (mocha: MochaDone): void {
-            // Remove the project that we operated on
-            process.chdir(tacoHome);
-            del("example", mocha);
+
+        after(function (): void {
+            rimraf(cliProjectPath, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
         });
-        this.timeout(70000);
+
         cliPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
@@ -301,9 +308,10 @@ describe("taco platform for kit", function (): void {
                     // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
+                    console.log(args);
                     if (args[0] === "add") {
                         // Check the version of platform after addition
-                        checkPlatformVersions(scenario.expectedVersions);
+                        checkPlatformVersions(scenario.expectedVersions, cliProjectPath);
                     }
                 }).then(function (): void {
                     done();
@@ -320,9 +328,10 @@ describe("taco platform for kit", function (): void {
                     // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
+                    console.log(args);
                     if (args[0] === "add") {
                         // Check the version of plugin after addition
-                        checkPluginVersions(scenario.expectedVersions);
+                        checkPluginVersions(scenario.expectedVersions, cliProjectPath);
                     }
                 }).then(function (): void {
                     done();

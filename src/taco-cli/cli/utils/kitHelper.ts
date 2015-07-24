@@ -32,8 +32,10 @@ import IKitTemplatesOverrideInfo = TacoKits.IKitTemplatesOverrideInfo;
  */
 class KitHelper {
     private static DynamicDependenciesLocation: string = path.join(__dirname, "../../dynamicDependencies.json");
-    private static KitPackagePromise: Q.Promise<ITacoKits> = null;
     private static TacoKits: string = "taco-kits";
+
+    // Keeping the cached promise acessible to tests
+    public static KitPackagePromise: Q.Promise<ITacoKits> = null;
 
     public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
         return KitHelper.acquireKitPackage()
@@ -101,10 +103,11 @@ class KitHelper {
     private static acquireKitPackage(): Q.Promise<ITacoKits> {
         if (KitHelper.KitPackagePromise) {
             return KitHelper.KitPackagePromise;
-        } 
-        else {
-            return TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TacoKits, KitHelper.DynamicDependenciesLocation);
+        } else {
+            KitHelper.KitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TacoKits, KitHelper.DynamicDependenciesLocation);
         }
+        
+        return KitHelper.KitPackagePromise;
     }
 }
 
