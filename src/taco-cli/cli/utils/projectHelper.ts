@@ -151,16 +151,19 @@ class ProjectHelper {
     /**
      *  public helper that returns all the installed platforms
      */
-    public static getInstalledPlatforms(projectDir: string): string[] {
+    public static getInstalledPlatforms(projectDir: string): Q.Promise<string[]> {
+        var platforms: string[] = [];
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
         var platformsDir = path.join(projectDir, "platforms");
         if (!fs.existsSync(platformsDir)) {
-            return [];
+            return Q.resolve(platforms);
         }
 
-        return fs.readdirSync(platformsDir).filter(function (platform: string): boolean {
+        platforms = fs.readdirSync(platformsDir).filter(function (platform: string): boolean {
             return fs.statSync(path.join(platformsDir, platform)).isDirectory();
         });
+
+        return Q.resolve(platforms);
     }
 
     /**
@@ -183,27 +186,28 @@ class ProjectHelper {
      */
     public static getInstalledPlatformVersions(projectDir: string): Q.Promise<any> {
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var platformsInstalled: string[] = ProjectHelper.getInstalledPlatforms(projectDir);
         var onWindows = process.platform === "win32";
-        var deferred = Q.defer<ProjectHelper.IPlatformVersionInfo>();
+        var deferred = Q.defer<any>();
         var platformVersions: ProjectHelper.IPlatformVersionInfo = {};
-        return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
-            var cmdName: string = "version";
-            if (onWindows) { 
-                cmdName = cmdName + ".bat";
-            }
-
-            var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
-            var versionProc = child_process.spawn(cmdPath);
-            versionProc.stdout.on("data", function (data: any): void {
-                var version: string = data.toString();
-                if (path) {
-                    platformVersions[platform] = version;
+        return ProjectHelper.getInstalledPlatforms(projectDir)
+        .then(function (platformsInstalled: string[]): Q.Promise<any> {
+            return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
+                var deferredProcPromise = Q.defer<any>();
+                var cmdName: string = "version";
+                if (onWindows) { 
+                    cmdName = cmdName + ".bat";
                 }
-            });
-            return Q({});
-        })).spread<any>(function (): Q.Promise<any> {
-            console.log(platformVersions);
+
+                var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
+                var versionProc = child_process.spawn(cmdPath);
+                versionProc.stdout.on("data", function (data: any): void {
+                    var version: string = data.toString();
+                    platformVersions[platform] = version.trim();
+                    deferredProcPromise.resolve(version);
+                });
+                return deferredProcPromise.promise;
+            }));
+        }).then(function (): Q.Promise<any> {
             deferred.resolve(platformVersions);           
             return deferred.promise;
         });
