@@ -57,7 +57,7 @@ class Commands {
                 return help.run({ options: {}, original: [topic], remain: [topic] });
             }
         },
-        savesettings: {
+        saveconfig: {
             execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {
                 return server.saveConfig(config);
             }

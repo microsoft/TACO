@@ -34,12 +34,12 @@
     "_CommandVersionDescription.comment":  "Description printed for remotebuild version command",
     "CommandHelpDescription": "Gets help for a command or a module",
     "_CommandHelpDescription.comment": "Description printed for remotebuild help command",
-    "CommandSaveSettingsDescription": "Saves the specified configuration to a file.",
-    "_CommandSaveSettingsDescription.comment": "Description printed for 'remotebuild savesettings' command",
+    "CommandSaveConfigDescription": "Saves the specified configuration to a file.",
+    "_CommandSaveConfigDescription.comment": "Description printed for 'remotebuild savesettings' command",
 
-    "SavedConfig": "Successfully saved configuration to {0}",
-    "_SavedConfig.comment": "Message printed when 'remotebuild savesettings' completes successfully.",
-    "CheckSettingsForInfo": "Please refer to {0} to view/edit server settings. You may need to run 'remotebuild savesettings' to generate it. You will have to restart the server if you update the server settings.",
+    "SavedConfig": "Configuration saved successfully to {0}.",
+    "_SavedConfig.comment": "Message printed when 'remotebuild saveconfig' completes successfully.",
+    "CheckSettingsForInfo": "Please view/edit server configuration at {0}. You many need to run 'remotebuild saveconfig' to generate it. You will have to restart the server if you update the server configurations.",
     "_CheckSettingsForInfo.comment": "Message printed after starting the server to tell the user where configuration options are stored. {0} is the path to where we look for the config file",
 
     "RemoteBuildStartExample1": "Start the server with all defaults (secure server with serverDir $TACO_HOME/remote-builds, port 3000)",
