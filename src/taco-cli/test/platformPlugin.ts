@@ -308,7 +308,6 @@ describe("taco platform for kit", function (): void {
                     // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
-                    console.log(args);
                     if (args[0] === "add") {
                         // Check the version of platform after addition
                         checkPlatformVersions(scenario.expectedVersions, cliProjectPath);
@@ -328,7 +327,6 @@ describe("taco platform for kit", function (): void {
                     // Wait for 5 seconds after the installation to avoid false negatives in version checking
                     return sleep(5);
                 }).then(function (): void {
-                    console.log(args);
                     if (args[0] === "add") {
                         // Check the version of plugin after addition
                         checkPluginVersions(scenario.expectedVersions, cliProjectPath);
