@@ -21,6 +21,7 @@ import Templates = require ("../cli/templates");
 import commands = tacoUtils.Commands.ICommandData;
 
 describe("templates", function (): void {
+    this.timeout(20000);
     it("'taco templates' should not throw any error", function (done: MochaDone): void {
         var templates = new Templates();
         var data: commands = {

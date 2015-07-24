@@ -20,6 +20,7 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 
 import createMod = require ("../cli/create");
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("../cli/utils/settings");
 import RemoteMock = require ("./utils/remoteMock");
@@ -39,6 +40,8 @@ describe("taco settings", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
+        // Force KitHelper to fetch the package fresh
+        kitHelper.KitPackagePromise = null;
         // Configure a dummy platform "test" to use the mocked out remote server
         RemoteMock.saveConfig("ios", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
@@ -50,6 +53,7 @@ describe("taco settings", function (): void {
     after(function (done: MochaDone): void {
         this.timeout(50000);
         process.chdir(originalCwd);
+        kitHelper.KitPackagePromise = null;
         rimraf(tacoHome, done);
     });
 

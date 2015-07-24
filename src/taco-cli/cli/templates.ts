@@ -15,13 +15,12 @@
 
 import Q = require ("q");
 
+import kitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
 
 import commands = tacoUtility.Commands;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 
