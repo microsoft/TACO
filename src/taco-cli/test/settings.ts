@@ -53,6 +53,7 @@ describe("taco settings", function (): void {
     after(function (done: MochaDone): void {
         this.timeout(50000);
         process.chdir(originalCwd);
+        kitHelper.KitPackagePromise = null;
         rimraf(tacoHome, done);
     });
 

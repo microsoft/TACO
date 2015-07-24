@@ -227,6 +227,7 @@ describe("taco platform for kit", function (): void {
 
     after(function (): void {
         process.chdir(originalCwd);
+        kitHelper.KitPackagePromise = null;
         rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 

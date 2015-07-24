@@ -194,6 +194,9 @@ describe("taco create", function (): void {
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
+        // Force KitHelper to fetch the package fresh
+        kitHelper.KitPackagePromise = null;
+        
         // Instantiate the persistent templateManager
         templateManager = new TemplateManager(kitHelper);
 
@@ -211,6 +214,7 @@ describe("taco create", function (): void {
 
     after(function (done: MochaDone): void {
         this.timeout(createTimeout);
+        kitHelper.KitPackagePromise = null;
         rimraf(runFolder, done);
     });
 
