@@ -40,7 +40,6 @@ class Templates implements commands.IDocumentedCommand {
 
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {
-                logger.logLine();
                 resources.log("CommandTemplatesHeader");
                 logger.logLine();
                 LoggerHelper.logNameDescriptionTable(templateList.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {

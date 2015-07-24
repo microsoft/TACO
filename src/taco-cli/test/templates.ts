@@ -37,6 +37,16 @@ describe("templates", function (): void {
         return templates.run(data);
     }
 
+    var previous: boolean;
+    before(() => {
+        previous = process.env["TACO_UNIT_TEST"];
+        process.env["TACO_UNIT_TEST"] = true;
+    });
+
+    after(() => {
+        process.env["TACO_UNIT_TEST"] = previous;
+    });
+
     it("'taco templates' should not throw any error", function (done: MochaDone): void {
         templatesRun().then(done, done);
     });
@@ -57,7 +67,7 @@ describe("templates", function (): void {
 
         it("templates prints the onboarding experience", function (done: MochaDone): void {
             templatesRun().done(() => {
-                var expected = ["",
+                var expected = [
                     "CommandTemplatesHeader",
                     "",
                     "   blank ............... A blank starter Cordova JavaScript project.",

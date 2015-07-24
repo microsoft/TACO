@@ -68,7 +68,6 @@ module TacoUtility {
          * entry point for printing helper
          */
         public run(data: ICommandData): Q.Promise<any> {
-            this.printHeader();
             if (data.original && data.original.length > 0 && this.commandExists(data.original[0])) {
                 this.printCommandUsage(data.original[0]);
             } else {
@@ -77,13 +76,6 @@ module TacoUtility {
             
             TelemetryHelper.sendBasicCommandTelemetry("help", data.original);
             return Q({});
-        }
-
-        /**
-         * prints out header while displaying help for a command
-         */
-        private printHeader(): void {
-            Logger.logLine();
         }
 
         /**

@@ -428,8 +428,6 @@ describe("taco create", function (): void {
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
-        this.timeout(60000); // Instaling the node packages during create can take a long time
-
         beforeEach(() => {
             memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
             process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
@@ -477,9 +475,11 @@ describe("taco create", function (): void {
             "PackageLoaderDownloadCompletedMessage"];
 
         it("prints the onboarding experience when using a kit", function (done: MochaDone): void {
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+
             var projectPath = getProjectPath("onboarding-experience", 1);
 
-            var firstPart = ["",
+            var firstPart = [
                 "CommandCreateStatusCreatingNewProject",
                 "      CommandCreateStatusTableSectionSeparator",
                 "      CommandCreateStatusTableNameDescription ......... HelloTaco",
@@ -514,9 +514,11 @@ describe("taco create", function (): void {
         var continueInNextLine = "\n" + tenSpaces;
 
         it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+
             var projectPath = getProjectPath("onboarding-experience", 2);
 
-            var firstPart = ["",
+            var firstPart = [
                 "CommandCreateStatusCreatingNewProject",
                 "      CommandCreateStatusTableSectionSeparator",
                 "      CommandCreateStatusTableNameDescription .............. HelloTaco",

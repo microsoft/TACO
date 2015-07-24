@@ -165,8 +165,6 @@ class Create implements commands.IDocumentedCommand {
         var kitId: string = this.commandParameters.data.options["kit"];
         var templateId: string = this.commandParameters.data.options["template"];
 
-        logger.logLine();
-
         // Create the project 
         if (!this.isKitProject()) {
             return this.printStatusMessage()
