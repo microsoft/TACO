@@ -36,10 +36,5 @@ declare module TacoUtility {
          * Logs an empty line on console
          */
         public static logLine(): void;
-
-        /**
-         * Logs a message generated from a resource string
-         */
-        public static logResourceString(resources: ResourceManager, id: string, ...optionalArgs: any[]): void;
    }
 }

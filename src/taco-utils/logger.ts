@@ -12,7 +12,6 @@
 import os = require ("os");
 
 import logFormathelper = require ("./logFormatHelper");
-import resourceManager = require ("./resourceManager");
 
 import LogFormatHelper = logFormathelper.LogFormatHelper;
 

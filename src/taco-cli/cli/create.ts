@@ -295,7 +295,7 @@ class Create implements commands.IDocumentedCommand {
         logger.logLine();
 
         ["HowToUseCommandHelp",
-        "HowToUseCommandDocs"].forEach(msg => resources.log(msg, projectFullPath));
+        "HowToUseCommandDocs"].forEach(msg => resources.log(msg));
     }
 }
 
