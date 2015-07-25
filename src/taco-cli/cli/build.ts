@@ -58,31 +58,9 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
     public static RemoteBuild = RemoteBuildClientHelper;
     public subcommands: commands.ICommand[] = [
         {
-            // Remote Build
-            run: Build.remote,
+            run: Build.build,
             canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.options["clean"] && !!commandData.options["remote"];
-            }
-        },
-        {
-            // Local Build
-            run: Build.local,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.options["clean"] && !!commandData.options["local"];
-            }
-        },
-        {
-            // Clean build
-            run: Build.clean,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !!commandData.options["clean"];
-            }
-        },
-        {
-            // Fallback: determine whether to build local or remote
-            run: Build.fallback,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.options["clean"];
+                return true;
             }
         }
     ];
@@ -114,16 +92,6 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         }
 
         return parsedOptions;
-    }
-
-    private static clean(commandData: commands.ICommandData): Q.Promise<any> {
-        return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
-            return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                return soFar.then(function (): Q.Promise<any> {
-                    return Build.cleanPlatform(platform, commandData);
-                });
-            }, Q({}));
-        });
     }
 
     private static cleanPlatform(platform: Settings.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
@@ -170,15 +138,6 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         return promise;
     }
 
-    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
-        return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
-            return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                assert(platform.location !== Settings.BuildLocationType.Local);
-                return Build.buildRemotePlatform(platform.platform, commandData);
-            }));
-        });
-    }
-
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         var configuration = commandData.options["release"] ? "release" : "debug";
         var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
@@ -203,14 +162,16 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         });
     }
 
-    private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return CordovaWrapper.build(commandData);
-    }
-
-    private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
+    private static build(commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
+                    if (commandData.options["clean"]) {
+                        return Build.cleanPlatform(platform, commandData);
+                    } else {
+                        return Q({});
+                    }
+                }).then(function (): Q.Promise<any> {
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just build local, and failures are failures
