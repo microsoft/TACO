@@ -122,11 +122,11 @@
     "templates": {
         "default": {
             "blank": {
-                "name": "A blank starter Cordova JavaScript project.",
+                "name": "BlankTemplateName",
                 "url": "templates/default/blank.zip"
             },
             "typescript": {
-                "name": "A blank starter Typescript project.",
+                "name": "TypescriptTemplateName",
                 "url": "templates/default/typescript.zip"
             }
         },

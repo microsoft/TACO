@@ -36,11 +36,26 @@ module TemplateManager {
     export interface ITemplateDescriptor {
         id: string;
         name: string;
+        getDescription(): string;
     }
 
     export interface ITemplateList {
         kitId: string;
         templates: ITemplateDescriptor[];
+    }
+}
+
+class TemplateDescriptor implements TemplateManager.ITemplateDescriptor {
+    public id: string;
+    public name: string;
+
+    constructor(templateOverrideInfo: TacoKits.ITemplateOverrideInfo) {
+        this.id = templateOverrideInfo.templateId;
+        this.name = templateOverrideInfo.templateInfo.name;
+    }
+
+    public getDescription(): string {
+        return resources.getString(this.name);
     }
 }
 
@@ -109,21 +124,10 @@ class TemplateManager {
     public getTemplatesForKit(kitId: string): Q.Promise<TemplateManager.ITemplateList> {
         return this.kitHelper.getTemplatesForKit(kitId)
             .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): Q.Promise<TemplateManager.ITemplateList> {
-                var list: TemplateManager.ITemplateList = {
-                kitId: kitOverride.kitId,
-                templates: []
-            };
-
-            for (var i: number = 0; i < kitOverride.templates.length; i++) {
-                var templateDescriptor: TemplateManager.ITemplateDescriptor = {
-                    id: kitOverride.templates[i].templateId,
-                    name: kitOverride.templates[i].templateInfo.name
-                };
-
-                list.templates.push(templateDescriptor);
-            }
-
-            return Q.resolve(list);
+                return Q.resolve({
+                    kitId: kitOverride.kitId,
+                    templates: kitOverride.templates.map(t => new TemplateDescriptor(t))
+            });
         });
     }
 
@@ -135,21 +139,10 @@ class TemplateManager {
     public getAllTemplates(): Q.Promise<TemplateManager.ITemplateList> {
         return this.kitHelper.getAllTemplates()
             .then(function (results: TacoKits.ITemplateOverrideInfo[]): Q.Promise<TemplateManager.ITemplateList> {
-                var templatesContainer: TemplateManager.ITemplateList = {
+                return Q.resolve({
                     kitId: "",
-                    templates: []
-                };
-
-                results.forEach(function (templateInfo: TacoKits.ITemplateOverrideInfo): void {
-                    var templateDescriptor: TemplateManager.ITemplateDescriptor = {
-                        id: templateInfo.templateId,
-                        name: templateInfo.templateInfo.name
-                    };
-
-                    templatesContainer.templates.push(templateDescriptor);
+                    templates: results.map(templateInfo => new TemplateDescriptor(templateInfo))
                 });
-
-                return Q.resolve(templatesContainer);
             });
     }
 

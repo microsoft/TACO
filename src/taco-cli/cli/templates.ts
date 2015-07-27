@@ -43,7 +43,7 @@ class Templates implements commands.IDocumentedCommand {
                 resources.log("CommandTemplatesHeader");
                 logger.logLine();
                 LoggerHelper.logNameDescriptionTable(templateList.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
-                    return <INameDescription>{ name: value.id, description: value.name };
+                    return <INameDescription>{ name: value.id, description: value.getDescription() };
                 }));
                 logger.logLine();
                 resources.log("HowToUseCreateProjectWithTemplate");

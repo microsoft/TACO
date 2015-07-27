@@ -70,8 +70,8 @@ describe("templates", function (): void {
                 var expected = [
                     "CommandTemplatesHeader",
                     "",
-                    "   blank ............... A blank starter Cordova JavaScript project.",
-                    "   typescript .......... A blank starter Typescript project.",
+                    "   blank ............... BlankTemplateName",
+                    "   typescript .......... TypescriptTemplateName",
                     "",
                     "HowToUseCreateProjectWithTemplate",
                     ""].join("\n");
