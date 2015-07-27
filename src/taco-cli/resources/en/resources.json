@@ -98,6 +98,15 @@
     "CommandKitSelectProjectUpdatePrompt.comment": "Prompt message printed on command 'taco kit select' before updates to the project are made",
     "CommandKitSelectKitCliVersion": "[DEFAULT]",
     "CommandKitSelectKitCliVersion.comment": "String used to represent the CLI pinned version of platforms and plugins that aproject will be updated to, on 'taco kit select'",
+    "ProjectUpdatePromptResponseYes": [ "y", "yes" ],
+    "_ProjectUpdatePromptResponseYes.comment": "List of responses that are considered affirmative. User input will be converted to lower case before consulting this list",
+    "CommandKitSelectStatusUpdatingPlatforms": "Updating platforms...",
+    "_CommandKitSelectStatusUpdatingPlatforms.comment": "Status message on updating platforms",
+    "CommandKitSelectStatusUpdatingPlugins": "Updating plugins...",
+    "_CommandKitSelectStatusUpdatingPlugins.comment": "Status message on updating plugins",
+    "CommandKitSelectStatusSuccess": "<success>Success!</success>",
+    "_CommandKitSelectStatusSuccess.comment": "Status message on successfully updating platforms and plugins",
+
     
     "CommandRemoteDescription": "Configure remote build servers",
     "_CommandRemoteDescription.comment": "Description for 'taco remote'",
