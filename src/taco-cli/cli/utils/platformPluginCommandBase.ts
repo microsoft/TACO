@@ -20,6 +20,7 @@ import util = require ("util");
 
 import cordovaWrapper = require ("./cordovaWrapper");
 import cordovaHelper = require ("./cordovaHelper");
+import kitHelper = require ("./kitHelper");
 import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -28,7 +29,6 @@ import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 import utils = tacoUtility.UtilHelper;

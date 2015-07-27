@@ -15,13 +15,11 @@ import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
 
+import kitHelper = require ("./kitHelper");
 import resources = require ("../../resources/resourceManager");
-import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
-
-import kitHelper = tacoKits.KitHelper;
 
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.

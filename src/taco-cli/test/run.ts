@@ -23,6 +23,7 @@ import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 
 import createMod = require ("../cli/create");
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
 import ServerMock = require ("./utils/serverMock");
@@ -64,6 +65,8 @@ describe("taco run", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
+        // Force KitHelper to fetch the package fresh
+        kitHelper.KitPackagePromise = null;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
         var port = 3000;
@@ -78,6 +81,7 @@ describe("taco run", function (): void {
 
     after(function (): void {
         process.chdir(originalCwd);
+        kitHelper.KitPackagePromise = null;
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
