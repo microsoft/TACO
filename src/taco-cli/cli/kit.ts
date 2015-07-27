@@ -67,7 +67,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             }
         },
         {
-            // Local Run
+            // Change kit or CLI
             run: Kit.select,
             canHandleArgs(commandData: commands.ICommandData): boolean {
                 return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "select";
@@ -272,11 +272,11 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      */
     private static printKit(kitId: string): Q.Promise<any> {
         return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-            var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(kitInfo.platforms), Object.keys(kitInfo.plugins)));
+            var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(kitInfo.platforms), Object.keys(kitInfo.plugins)));
             Kit.printKitNameAndDescription(kitId, kitInfo);
             Kit.printCordovaCliVersion(kitInfo);
-            Kit.printPlatformOverrideInfo(kitInfo, indent2);
-            Kit.printPluginOverrideInfo(kitInfo, indent2);
+            Kit.printPlatformOverrideInfo(kitInfo, indent);
+            Kit.printPluginOverrideInfo(kitInfo, indent);
         });
     }
 
