@@ -24,6 +24,7 @@ enum TacoErrorCode {
     CommandCreateTacoJsonFileWriteError,
     CommandCreateTemplatesUnavailable,
     CommandInstallCordovaTooOld,
+    CommandKitCliOrKitShouldBeSpecified,
     CommandKitProjectUsesSameKit,
     CommandKitProjectUsesSameCli,
     CommandRemoteCantFindRemoteMount,

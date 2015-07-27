@@ -21,8 +21,10 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
+import cordovaWrapper = require ("./utils/cordovaWrapper");
 import errorHelper = require ("./tacoErrorHelper");
 import projectHelper = require ("./utils/projectHelper");
+import readline = require ("readline");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoKits = require ("taco-kits");
@@ -265,7 +267,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      */
     private static printKit(kitId: string): Q.Promise<any> {
         return kitHelper.getKitInfo(kitId).then(function (kitInfo: tacoKits.IKitInfo): void {
-            var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(kitInfo));
+            var indent2 = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(kitInfo.platforms), Object.keys(kitInfo.plugins)));
             Kit.printKitNameAndDescription(kitId, kitInfo);
             Kit.printCordovaCliVersion(kitInfo);
             Kit.printPlatformOverrideInfo(kitInfo, indent2);
@@ -313,16 +315,16 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         });
     }
 
-    private static getLongestPlatformPluginLength(kitInfo: tacoKits.IKitInfo): number {
+    private static getLongestPlatformPluginLength(platforms: string[], plugins: string[]): number {
         var longest: number = 0;
-        if (kitInfo.platforms) {
-                longest = Object.keys(kitInfo.platforms).reduce(function (longest: number, platformName: string): number {
+        if (platforms) {
+                longest = platforms.reduce(function (longest: number, platformName: string): number {
                 return Math.max(longest, platformName.length);
             }, longest);
         }
 
-        if (kitInfo.plugins) {
-            longest = Object.keys(kitInfo.plugins).reduce(function (longest: number, pluginId: string): number {
+        if (plugins) {
+            longest = plugins.reduce(function (longest: number, pluginId: string): number {
                         return Math.max(longest, pluginId.length);
             }, longest);
         }
@@ -330,33 +332,185 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         return longest;
     }
 
-    private static printPlatformUpdateInfo(projectPath: string): Q.Promise<any> {
-        return projectHelper.getInstalledPlatformVersions(projectPath).then(function (platformVersions: projectHelper.IPlatformVersionInfo) {
-            console.log(platformVersions);
+    private static getPlatformUpdateInfo(projectPath: string, kitId: string, installedPlatformInfo: projectHelper.IPlatformVersionInfo): Q.Promise<any> {
+        var platformVersionUpdates: projectHelper.IPlatformVersionInfo = {};
+        return kitHelper.getPlatformOverridesForKit(kitId)
+        .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): Q.Promise<any> {
+            Object.keys(installedPlatformInfo).forEach(function (key: string): void {
+                if (platformOverrides[key] && platformOverrides[key].version && platformOverrides[key].version !== installedPlatformInfo[key]) {
+                    platformVersionUpdates[key] = platformOverrides[key].version;
+                }
+            });
+            return Q.resolve(platformVersionUpdates);
         });
     }
 
-    private static printPluginUpdateInfo(projectPath: string): Q.Promise<any> {
-        return projectHelper.getInstalledPluginVersions(projectPath).then(function (pluginVersions: projectHelper.IPluginVersionInfo) {
-            console.log(pluginVersions);
+    private static getPluginUpdateInfo(projectPath: string, kitId: string, installedPluginInfo: projectHelper.IPluginVersionInfo): Q.Promise<any> {
+        var pluginVersionUpdates: projectHelper.IPluginVersionInfo = {};
+        return kitHelper.getPluginOverridesForKit(kitId)
+        .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): Q.Promise<any> {
+            Object.keys(installedPluginInfo).forEach(function (key: string): void {
+                if (pluginOverrides[key] && pluginOverrides[key].version && pluginOverrides[key].version !== installedPluginInfo[key]) {
+                    pluginVersionUpdates[key] = pluginOverrides[key].version;
+                }
+            });
+            return Q.resolve(pluginVersionUpdates);
         });
     }
 
-    private static selectKit(kitId: string, projectPath: string): Q.Promise<any> {
-       return projectHelper.createTacoJsonFile(projectPath, true, kitId)
-       .then(function (): Q.Promise<any> {
-            return Kit.printPlatformUpdateInfo(projectPath);
-        }).then(function (): Q.Promise<any> {
-            return Kit.printPluginUpdateInfo(projectPath);
+    /**
+     * Pretty prints the Cordova CLI version info
+     */
+    private static printCordovaCliVersionUpdate(currentCli: string, newCli: string): void {
+        assert(currentCli);
+        assert(newCli);
+
+        logger.logLine();
+        logger.log(resources.getString("CommandKitListCordovaCliForKit", currentCli + " => " + newCli));
+        logger.logLine();
+    }
+
+    private static printPlatformUpdateInfo(indent: number, installedPlatformInfo: projectHelper.IPlatformVersionInfo, platformUpdateInfo: projectHelper.IPlatformVersionInfo = null): void {
+        assert(installedPlatformInfo);
+        logger.log(resources.getString("CommandKitListPlatformOverridesForKit"));
+        if(platformUpdateInfo) {
+            LoggerHelper.logNameDescriptionTable(
+                Object.keys(installedPlatformInfo).map(function (platformName: string): INameDescription {
+                    return <INameDescription>{
+                        name: platformName,
+                        description: installedPlatformInfo[platformName] + " => " + platformUpdateInfo[platformName]
+                    };
+            }), LoggerHelper.DefaultIndent, indent);
+        } else {
+            LoggerHelper.logNameDescriptionTable(
+                Object.keys(installedPlatformInfo).map(function (platformName: string): INameDescription {
+                    return <INameDescription>{
+                        name: platformName,
+                        description: installedPlatformInfo[platformName] + " => [DEFAULT]"
+                    };
+            }), LoggerHelper.DefaultIndent, indent);
+        }
+        logger.logLine();
+    }
+
+    private static printPluginUpdateInfo(indent: number, installedPluginInfo: projectHelper.IPluginVersionInfo, pluginUpdateInfo: projectHelper.IPluginVersionInfo = null): void {
+        assert(installedPluginInfo);
+        logger.log(resources.getString("CommandKitListPluginOverridesForKit"));
+        if(pluginUpdateInfo) {
+            LoggerHelper.logNameDescriptionTable(
+                Object.keys(installedPluginInfo).map(function (pluginName: string): INameDescription {
+                    return <INameDescription>{
+                        name: pluginName,
+                        description: installedPluginInfo[pluginName] + " => " + pluginUpdateInfo[pluginName]
+                    };
+            }), LoggerHelper.DefaultIndent, indent);
+        } else {
+            LoggerHelper.logNameDescriptionTable(
+                Object.keys(installedPluginInfo).map(function (pluginName: string): INameDescription {
+                    return <INameDescription>{
+                        name: pluginName,
+                        description: installedPluginInfo[pluginName] + " => [DEFAULT]"
+                    };
+            }), LoggerHelper.DefaultIndent, indent);
+        }
+        logger.logLine();
+    }
+
+    public static promptForUpdate(prompt: string): Q.Promise<string> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var yesOrNoHandler = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+        yesOrNoHandler.question(prompt, function (answer: string): void {
+            yesOrNoHandler.close();
+            deferred.resolve(answer);
+        });
+
+        return deferred.promise;
+    }
+
+    private static selectKit(projectPath: string, kitId: string): Q.Promise<any> {
+        var platformVersionUpdates: projectHelper.IPlatformVersionInfo = {};
+        var installedPlatformVersions: projectHelper.IPlatformVersionInfo = {};
+        var pluginVersionUpdates: projectHelper.IPluginVersionInfo = {};
+        var installedPluginVersions: projectHelper.IPluginVersionInfo = {};
+        var kitInfo: tacoKits.IKitInfo;
+        var projectRequiresUpdate: boolean;
+        
+        return projectHelper.createTacoJsonFile(projectPath, true, kitId)
+        .then(function (): Q.Promise<any> {
+            return projectHelper.getInstalledPlatformVersions(projectPath)
+        }).then(function (platformVersions: projectHelper.IPlatformVersionInfo): Q.Promise<any> {
+            installedPlatformVersions = platformVersions;
+            return projectHelper.getInstalledPluginVersions(projectPath);
+        }).then(function (pluginVersions: projectHelper.IPluginVersionInfo): Q.Promise<any> {
+            installedPluginVersions = pluginVersions;
+           return Kit.getPlatformUpdateInfo(projectPath, kitId, installedPlatformVersions);
+        }).then(function (platformVersions: projectHelper.IPluginVersionInfo): Q.Promise<any> {
+            platformVersionUpdates = platformVersions;
+           return Kit.getPluginUpdateInfo(projectPath, kitId, installedPlatformVersions);
+        }).then(function (pluginVersions: projectHelper.IPluginVersionInfo): Q.Promise<any> {
+            pluginVersionUpdates = pluginVersions;
+            return kitHelper.getKitInfo(kitId).then(function (info: tacoKits.IKitInfo): Q.Promise<any> {
+                kitInfo = info;
+                return cordovaWrapper.getCordovaVersion().then(function (cordovaVersion: string): Q.Promise<any> {
+                    Kit.printCordovaCliVersionUpdate(cordovaVersion, kitInfo["cordova-cli"]);
+                    var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(platformVersionUpdates), Object.keys(pluginVersionUpdates)));
+                    var platformsRequireUpdate: boolean = Object.keys(platformVersionUpdates).length > 0 ? true : false;
+                    var pluginsRequireUpdate: boolean = Object.keys(pluginVersionUpdates).length > 0 ? true : false;
+
+                    if(platformsRequireUpdate || pluginsRequireUpdate) {
+                        logger.log(resources.getString("CommandKitSelectKitPreview", kitId));
+                        logger.logLine();
+                        if(platformsRequireUpdate) {
+                            Kit.printPlatformUpdateInfo(indent, installedPlatformVersions, platformVersionUpdates);
+                        }
+                        if(pluginsRequireUpdate) {
+                            Kit.printPlatformUpdateInfo(indent, installedPlatformVersions, platformVersionUpdates);
+                        }
+                        logger.logWarning(resources.getString("CommandKitSelectProjectUpdateWarning"));
+                        logger.logLine();
+                    }
+                    
+                    return Q({});
+
+                });
+            });
         });
     }
     
-    private static selectCli(cli: string, projectPath: string): Q.Promise<any> {
+    private static selectCli(projectPath: string, cli: string): Q.Promise<any> {
+        var platformVersionUpdates: projectHelper.IPlatformVersionInfo = {};
+        var installedPlatformVersions: projectHelper.IPlatformVersionInfo = {};
+        var pluginVersionUpdates: projectHelper.IPluginVersionInfo = {};
+        var installedPluginVersions: projectHelper.IPluginVersionInfo = {};
+
         return projectHelper.createTacoJsonFile(projectPath, false, cli)
         .then(function (): Q.Promise<any> {
-            return Kit.printPlatformUpdateInfo(projectPath);
-        }).then(function (): Q.Promise<any> {
-            return Kit.printPluginUpdateInfo(projectPath);
+            return projectHelper.getInstalledPlatformVersions(projectPath)
+        }).then(function (platformVersions: projectHelper.IPlatformVersionInfo): Q.Promise<any> {
+            installedPlatformVersions = platformVersions;
+            return projectHelper.getInstalledPluginVersions(projectPath);
+        }).then(function (pluginVersions: projectHelper.IPluginVersionInfo): Q.Promise<any> {
+            installedPluginVersions = pluginVersions;
+            return cordovaWrapper.getCordovaVersion().then(function (cordovaVersion: string): void {
+                Kit.printCordovaCliVersionUpdate(cordovaVersion, cli)
+                var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(installedPluginVersions), Object.keys(installedPluginVersions)));
+
+                var platformsRequireUpdate: boolean = Object.keys(installedPlatformVersions).length > 0 ? true : false;
+                var pluginsRequireUpdate: boolean = Object.keys(installedPlatformVersions).length > 0 ? true : false;
+
+                if(platformsRequireUpdate || pluginsRequireUpdate) {
+                    logger.log(resources.getString("CommandKitSelectCliPreview", cli));
+                    if(platformsRequireUpdate) {
+                        Kit.printPlatformUpdateInfo(indent, installedPlatformVersions);
+                    }
+                    if(pluginsRequireUpdate) {
+                        Kit.printPlatformUpdateInfo(indent, installedPlatformVersions);
+                    }
+                    logger.logWarning(resources.getString("CommandKitSelectProjectUpdateWarning"));
+
+                }
+            });
         });
     }
 
@@ -375,11 +529,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     private static select(commandData: commands.ICommandData): Q.Promise<any> {
-        logger.logLine();
         var kitId: string = commandData.options["kit"];
         var cli: string = commandData.options["cli"];
         var projectInfo: projectHelper.IProjectInfo;
         var projectPath: string = projectHelper.getProjectRoot();
+
+        logger.logLine();
+
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
             projectInfo = info;
             if(info.configXmlPath === "") {
@@ -390,17 +546,19 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             var usedkitId: string = projectInfo.tacoKitId;
             if (kitId) {
                 if(usedkitId && usedkitId === kitId ) {
-                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameKit);
+                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameKit, kitId);
                 } else {
-                    return Kit.selectKit(kitId, projectPath);
+                    return Kit.selectKit(projectPath, kitId);
                 }
             } else if (cli) {
                 var usedCli: string = projectInfo.cordovaCliVersion;
                 if(usedCli && usedCli === cli ) {
-                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameCli);
+                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameCli, cli);
                 } else {
-                    return Kit.selectCli(cli, projectPath);
+                    return Kit.selectCli(projectPath, cli);
                 }
+            } else {
+                throw errorHelper.get(TacoErrorCodes.CommandKitCliOrKitShouldBeSpecified);
             }
         });
     }
