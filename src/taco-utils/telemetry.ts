@@ -22,8 +22,13 @@ import utilHelper = require ("./utilHelper");
 
 import UtilHelper = utilHelper.UtilHelper;
 
+/**
+ * Telemetry module is agnostic to the application using it so functions included here should also conform to that.
+ */
 module TacoUtility {
     export module Telemetry {
+        export var appName: string;
+
         export interface ITelemetryProperties {
             [propertyName: string]: any;
         };
@@ -41,7 +46,7 @@ module TacoUtility {
                 this.name = name;
                 this.properties = properties || {};
 
-                this.eventId = TelemetryHelper.generateGuid();
+                this.eventId = TelemetryUtils.generateGuid();
             }
 
             public setPiiProperty(name: string, value: string): void {                
@@ -81,12 +86,13 @@ module TacoUtility {
             }
         };
 
-        export function init(appVersion?: string): void {
-            TelemetryHelper.init(appVersion);
+        export function init(appName: string, appVersion?: string): void {
+            Telemetry.appName = appName;
+            TelemetryUtils.init(appVersion);
         }
 
         export function send(event: TelemetryEvent): void {
-            TelemetryHelper.addCommonProperties(event);
+            TelemetryUtils.addCommonProperties(event);
 
             if (event instanceof TelemetryActivity) {
                 (<TelemetryActivity>event).end();
@@ -106,7 +112,7 @@ module TacoUtility {
             machineId?: string;
         }
 
-        class TelemetryHelper {
+        class TelemetryUtils {
             private static SessionId: string;
             private static UserId: string;
             private static MachineId: string;
@@ -121,13 +127,13 @@ module TacoUtility {
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
 
             private static get telemetrySettingsFile(): string {
-                return path.join(UtilHelper.tacoHome, TelemetryHelper.TelemetrySettingsFileName);
+                return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
             }
 
             public static init(appVersion: string): void {
-                TelemetryHelper.loadSettings();
+                TelemetryUtils.loadSettings();
                 
-                appInsights.setup(TelemetryHelper.APPINSIGHTS_INSTRUMENTATIONKEY)
+                appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
                     .setAutoCollectPerformance(false)
@@ -140,17 +146,17 @@ module TacoUtility {
                     context.tags[context.keys.applicationVersion] = appVersion;
                 }
 
-                TelemetryHelper.UserId = TelemetryHelper.getOrCreateId(IdType.User);
-                TelemetryHelper.MachineId = TelemetryHelper.getOrCreateId(IdType.Machine);
-                TelemetryHelper.SessionId = TelemetryHelper.generateGuid();
+                TelemetryUtils.UserId = TelemetryUtils.getOrCreateId(IdType.User);
+                TelemetryUtils.MachineId = TelemetryUtils.getOrCreateId(IdType.Machine);
+                TelemetryUtils.SessionId = TelemetryUtils.generateGuid();
 
-                TelemetryHelper.saveSettings();
+                TelemetryUtils.saveSettings();
             }
 
             public static addCommonProperties(event: any): void {
-                event.properties["userId"] = TelemetryHelper.UserId;
-                event.properties["machineId"] = TelemetryHelper.MachineId;
-                event.properties["sessionId"] = TelemetryHelper.SessionId;
+                event.properties["userId"] = TelemetryUtils.UserId;
+                event.properties["machineId"] = TelemetryUtils.MachineId;
+                event.properties["sessionId"] = TelemetryUtils.SessionId;
             }
 
             public static generateGuid(): string {
@@ -182,13 +188,13 @@ module TacoUtility {
              */
             private static loadSettings(): ITelemetrySettings {
                 try {
-                    TelemetryHelper.TelemetrySettings = JSON.parse(UtilHelper.readFileContentsSync(TelemetryHelper.telemetrySettingsFile));
+                    TelemetryUtils.TelemetrySettings = JSON.parse(UtilHelper.readFileContentsSync(TelemetryUtils.telemetrySettingsFile));
                 } catch (e) {
                     // if file does not exist or fails to parse then assume no settings are saved and start over
-                    TelemetryHelper.TelemetrySettings = {};
+                    TelemetryUtils.TelemetrySettings = {};
                 }
 
-                return TelemetryHelper.TelemetrySettings;
+                return TelemetryUtils.TelemetrySettings;
             }
             
             /*
@@ -196,23 +202,23 @@ module TacoUtility {
              */
             private static saveSettings(): void {
                 UtilHelper.createDirectoryIfNecessary(UtilHelper.tacoHome);
-                fs.writeFileSync(TelemetryHelper.telemetrySettingsFile, JSON.stringify(TelemetryHelper.TelemetrySettings));
+                fs.writeFileSync(TelemetryUtils.telemetrySettingsFile, JSON.stringify(TelemetryUtils.TelemetrySettings));
             }
 
             private static getOrCreateId(idType: IdType): string {
-                var settingsKey: string = idType === IdType.User ? TelemetryHelper.SETTINGS_USERID_KEY : TelemetryHelper.SETTINGS_MACHINEID_KEY;
-                var registryKey: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_KEY : TelemetryHelper.REGISTRY_MACHINEID_KEY;
-                var registryValue: string = idType === IdType.User ? TelemetryHelper.REGISTRY_USERID_VALUE : TelemetryHelper.REGISTRY_MACHINEID_VALUE;
+                var settingsKey: string = idType === IdType.User ? TelemetryUtils.SETTINGS_USERID_KEY : TelemetryUtils.SETTINGS_MACHINEID_KEY;
+                var registryKey: string = idType === IdType.User ? TelemetryUtils.REGISTRY_USERID_KEY : TelemetryUtils.REGISTRY_MACHINEID_KEY;
+                var registryValue: string = idType === IdType.User ? TelemetryUtils.REGISTRY_USERID_VALUE : TelemetryUtils.REGISTRY_MACHINEID_VALUE;
 
-                var id: string = TelemetryHelper.TelemetrySettings[settingsKey];
+                var id: string = TelemetryUtils.TelemetrySettings[settingsKey];
                 if (!id) {
                     if (os.platform() === "win32") {
-                        id = TelemetryHelper.getRegistryValue(registryKey, registryValue);
+                        id = TelemetryUtils.getRegistryValue(registryKey, registryValue);
                     }
 
-                    id = id ? id.replace(/[{}]/g, "") : TelemetryHelper.generateGuid();
+                    id = id ? id.replace(/[{}]/g, "") : TelemetryUtils.generateGuid();
 
-                    TelemetryHelper.TelemetrySettings[settingsKey] = id;
+                    TelemetryUtils.TelemetrySettings[settingsKey] = id;
                 }
 
                 return id;

@@ -19,12 +19,12 @@ import resources = require ("../resources/resourceManager");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
-import telemetryHelper = require ("./utils/telemetryHelper");
 
 import commands = tacoUtility.Commands;
 import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 
 /*
  * Templates

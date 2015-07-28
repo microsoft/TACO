@@ -10,6 +10,8 @@
 
 declare module TacoUtility {
     module Telemetry {
+        var appName: string;
+
         interface ITelemetryProperties {
             [propertyName: string]: any;
         }
@@ -36,7 +38,7 @@ declare module TacoUtility {
             start(): void;
             end(): void;
         }
-        function init(appVersion?: string): void;
+        function init(appName: string, appVersion?: string): void;
         function send(event: TelemetryEvent): void;
     }
 }

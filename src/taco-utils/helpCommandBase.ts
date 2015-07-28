@@ -24,6 +24,7 @@ import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
 import resourceManager = require ("./resourceManager");
 import resources = require ("./resources/resourceManager");
+import telemetryHelper = require ("./telemetryHelper");
 
 import CommandsFactory = commands.Commands.CommandFactory;
 import ICommandData = commands.Commands.ICommandData;
@@ -32,6 +33,7 @@ import IDocumentedCommand = commands.Commands.IDocumentedCommand;
 import Logger = logger.Logger;
 import LoggerHelper = loggerHelper.LoggerHelper;
 import ResourceManager = resourceManager.ResourceManager;
+import TelemetryHelper = telemetryHelper.TelemetryHelper;
 
 module TacoUtility {
     /*
@@ -72,7 +74,8 @@ module TacoUtility {
             } else {
                 this.printGeneralUsage();
             }
-
+            
+            TelemetryHelper.sendBasicCommandTelemetry("help", data.original);
             return Q({});
         }
 

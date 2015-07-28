@@ -12,10 +12,10 @@
 import Q = require ("q");
 import tacoUtility = require ("taco-utils");
 import resources = require ("../resources/resourceManager");
-import telemetryHelper = require ("./utils/telemetryHelper");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 
 /*
  * Version
