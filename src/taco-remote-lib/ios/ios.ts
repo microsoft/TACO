@@ -177,7 +177,7 @@ class IOSAgent implements ITargetPlatform {
         ideviceinstaller.stdout.on("data", function (data: Buffer): void {
             var dataStr: String = data.toString();
             if (dataStr.indexOf("ApplicationVerificationFailed") !== -1) {
-                res.status(404).send(resources.getStringForLanguage(req, "ProvisioningFailed"));
+                errorMessage = resources.getStringForLanguage(req, "ProvisioningFailed");
             }
 
             stdout += dataStr;
