@@ -109,6 +109,16 @@ class Settings {
         return util.format("http%s://%s:%d/%s", server.secure ? "s" : "", server.host, server.port, server.mountPoint);
     }
 
+    /*
+     * Update settings from TACO_HOME/TacoSettings.json (It loads the settings, give you a chance to update them, and then it saves them again)
+     */
+    public static updateSettings(updateFunction: (settings: Settings.ISettings) => void): Q.Promise<Settings.ISettings> {
+        return this.loadSettings().then(settings => {
+            updateFunction(settings);
+            return this.saveSettings(settings);
+        });
+    }
+
     /**
      * Determine whether the given target platform can be built on the local machine
      *
@@ -191,7 +201,8 @@ module Settings {
         remotePlatforms?: {
             [platform: string]: IRemoteConnectionInfo
         };
-        language?: string
+        language?: string;
+        lastCheckForNewerVersionTimestamp?: string;
     }
 
     export enum BuildLocationType {
