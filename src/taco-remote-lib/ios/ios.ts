@@ -174,6 +174,7 @@ class IOSAgent implements ITargetPlatform {
         var ideviceinstaller = child_process.spawn("ideviceinstaller", ["-i", pathToIpaFile]);
         var stdout: string = "";
         var stderr: string = "";
+        var errorMessage: string;
         ideviceinstaller.stdout.on("data", function (data: Buffer): void {
             var dataStr: String = data.toString();
             if (dataStr.indexOf("ApplicationVerificationFailed") !== -1) {
@@ -182,7 +183,6 @@ class IOSAgent implements ITargetPlatform {
 
             stdout += dataStr;
         });
-        var errorMessage: string;
         ideviceinstaller.stderr.on("data", function (data: Buffer): void {
             var dataStr: string = data.toString();
             if (!errorMessage) {
