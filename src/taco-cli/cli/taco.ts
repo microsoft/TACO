@@ -52,9 +52,9 @@ class Taco {
             // Pretty print errors
             if (reason) {
                 if (reason.isTacoError) {
-                    tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
+                    logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else if (reason.message) {
-                    tacoUtility.Logger.logError(errorHelper.wrap(TacoErrorCodes.CommandError, reason).toString());
+                    logger.logError(errorHelper.wrap(TacoErrorCodes.CommandError, reason).toString());
                 } 
             }
             
