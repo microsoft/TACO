@@ -23,7 +23,7 @@ import tacoErrorCodes = require ("../tacoErrorCodes");
 import tacoKits = require ("../tacoKits");
 import tacoUtils = require ("taco-utils");
 
-import kitHelper = tacoKits.KitHelper;
+import kitHelper = tacoKits.kitHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utilHelper = tacoUtils.UtilHelper;
 
@@ -104,7 +104,7 @@ describe("KitHelper", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         
         // Set the kit metadata file location
-        kitHelper.KitMetadataFilePath = testMetadataPath;
+        kitHelper.kitMetadataFilePath = testMetadataPath;
     });
 
     after(function (): void {
@@ -112,7 +112,7 @@ describe("KitHelper", function (): void {
         process.env["TACO_UNIT_TEST"] = false;
 
         // Reset kit metadata path
-        kitHelper.KitMetadataFilePath = null;
+        kitHelper.kitMetadataFilePath = null;
     });
 
     describe("getKitMetadata()", function (): void {
@@ -121,7 +121,7 @@ describe("KitHelper", function (): void {
             kitHelper.getKitMetadata()
                 .then(function (kitMetadata: tacoKits.ITacoKitMetadata): void {
                     // Verify the returned kit metadata is expected
-                    kitMetadata.should.equal(require(kitHelper.KitMetadataFilePath));
+                    kitMetadata.should.equal(require(kitHelper.kitMetadataFilePath));
                     done();
                 })
                 .catch(function (err: string): void {
@@ -180,7 +180,9 @@ describe("KitHelper", function (): void {
         it("must return the platform overrides of the specified kit", function (done: MochaDone): void {
             // Call getDefaultKit() to get the default kitId and pass it as param to getPlatformOverridesForKit
             kitHelper.getDefaultKit()
-                .then(kitHelper.getPlatformOverridesForKit)
+                .then(function (kitId: string): Q.Promise<TacoKits.IPlatformOverrideMetadata> {
+                    return kitHelper.getPlatformOverridesForKit(kitId);
+                })
                 .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): void {
                     // Verify the returned override info is correct
                     JSON.stringify(platformOverrides).should.equal(JSON.stringify(testPlatformOverridesForDefaultKit));
@@ -196,7 +198,9 @@ describe("KitHelper", function (): void {
         it("must return the plugin overrides of the specified kit", function (done: MochaDone): void {
             // Call getDefaultKit() to get the default kitId and pass it as param to getPluginOverridesForKit
             kitHelper.getDefaultKit()
-                .then(kitHelper.getPluginOverridesForKit)
+                .then(function (kitId: string): Q.Promise<TacoKits.IPluginOverrideMetadata> {
+                    return kitHelper.getPluginOverridesForKit(kitId);
+                })
                 .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): void {
                     // Verify the returned override info is correct
                     JSON.stringify(pluginOverrides).should.equal(JSON.stringify(testPluginOverridesForDefaultKit));

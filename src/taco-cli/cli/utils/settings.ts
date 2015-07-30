@@ -18,6 +18,7 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
+import CordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
@@ -81,50 +82,20 @@ class Settings {
      *                 - If a platform exists in /platforms and does not have a remote configuration, then perform a local build
      */
     public static determinePlatform(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Settings.loadSettings()
-        .fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
-        .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
-            if (options.remain.length > 0) {
-                // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
-                return options.remain.map(function (platform: string): Settings.IPlatformWithLocation {
-                    var buildLocation: Settings.BuildLocationType;
-                    if (options.options["remote"]) {
-                        buildLocation = Settings.BuildLocationType.Remote;
-                    } else if (options.options["local"]) {
-                        buildLocation = Settings.BuildLocationType.Local;
-                    } else {                     
-                        // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
-                        buildLocation = (platform in settings.remotePlatforms) || !Settings.canBuildLocally(platform) ?
-                            Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
-                    }
-
-                    return { location: buildLocation, platform: platform };
-                });
-            } else {
-                // No platform specified: try to do 'all' of them
-                var remotePlatforms: string[] = [];
-                if (!options.options["local"]) {
-                    // If we are not only building locally, then we need to consider any remote-only builds we need to do
-                    var remotePlatforms = Object.keys(settings.remotePlatforms);
+        return Q.all([
+            CordovaHelper.getSupportedPlatforms(),
+            Settings.determinePlatformsFromOptions(options)
+        ]).spread<Settings.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
+            var filteredPlatforms = platforms.filter(function (platform: Settings.IPlatformWithLocation): boolean {
+                var supported = !supportedPlatforms || platform.platform in supportedPlatforms;
+                if (!supported) {
+                    logger.logWarning(resources.getString("CommandUnsupportedPlatformIgnored", platform.platform));
                 }
 
-                var localPlatforms: string[] = [];
-                if (!options.options["remote"]) {
-                    // Check for local platforms to try building
-                    localPlatforms = fs.readdirSync("platforms").filter(function (entry: string): boolean {
-                        return fs.statSync(path.join("platforms", entry)).isDirectory() && remotePlatforms.indexOf(entry) === -1;
-                    });
-                }
-
-                return remotePlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
-                    return { location: Settings.BuildLocationType.Remote, platform: platform };
-                }).concat(localPlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
-                    return { location: Settings.BuildLocationType.Local, platform: platform };
-                }));
-            }
-        }).then(function (platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
-            if (platforms.length > 0) {
-                return platforms;
+                return supported;
+            });
+            if (filteredPlatforms.length > 0) {
+                return filteredPlatforms;
             } else {
                 throw errorHelper.get(TacoErrorCodes.ErrorNoPlatformsFound);
             }
@@ -153,6 +124,57 @@ class Settings {
         }
 
         return false;
+    }
+
+    private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
+        return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
+        .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
+            if (options.remain.length > 0) {
+                // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
+                return options.remain.map(function (platform: string): Settings.IPlatformWithLocation {
+                    var buildLocation: Settings.BuildLocationType;
+                    if (options.options["remote"]) {
+                        buildLocation = Settings.BuildLocationType.Remote;
+                    } else if (options.options["local"]) {
+                        buildLocation = Settings.BuildLocationType.Local;
+                    } else {                     
+                        // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
+                        buildLocation = (platform in settings.remotePlatforms) || !Settings.canBuildLocally(platform) ?
+                            Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
+                    }
+
+                    return { location: buildLocation, platform: platform };
+                });
+            } else {
+                // No platform specified: try to do 'all' of them
+                var remotePlatforms: string[] = [];
+                if (!options.options["local"]) {
+                    // If we are not only building locally, then we need to consider any remote-only builds we need to do
+                    var remotePlatforms = Object.keys(settings.remotePlatforms);
+                }
+
+                var localPlatforms: string[] = [];
+                if (!options.options["remote"] && fs.existsSync("platforms")) {
+                    // Check for local platforms to try building
+                    localPlatforms = fs.readdirSync("platforms").filter(function (entry: string): boolean {
+                        return fs.statSync(path.join("platforms", entry)).isDirectory() && remotePlatforms.indexOf(entry) === -1;
+                    });
+                }
+
+                return remotePlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
+                    return { location: Settings.BuildLocationType.Remote, platform: platform };
+                }).concat(localPlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
+                    return { location: Settings.BuildLocationType.Local, platform: platform };
+                }));
+            }
+        });
+    }
+
+    /**
+     * Remove cached settings object, for use in tests
+     */
+    private static forgetSettings(): void {
+        Settings.Settings = null;
     }
 }
 

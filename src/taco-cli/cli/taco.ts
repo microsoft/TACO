@@ -9,6 +9,7 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoHelpArgs.d.ts"/>
+/// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 
 "use strict";
@@ -17,6 +18,7 @@ import path = require ("path");
 import Q = require ("q");
 
 import cordovaWrapper = require ("./utils/cordovaWrapper");
+import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
@@ -47,9 +49,19 @@ class Taco {
     public static run(): void {
         telemetry.init(require("../package.json").version);
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
+            // Pretty print taco Errors
+            if (reason) {
+                if (reason.isTacoError) {
+                    tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
+                } else if (reason.message) {
+                    tacoUtility.Logger.logError(reason.message);
+                } 
+            }
             // Print the error nicely whether it's a Taco Error or not
             var error: TacoError = reason && reason.isTacoError ? reason : errorHelper.wrap(TacoErrorCodes.CommandError, reason);
             logger.logError(error.toString());
+            
+            process.exit(1);
         });
     }
 

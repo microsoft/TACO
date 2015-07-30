@@ -20,9 +20,10 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 
 import createMod = require ("../cli/create");
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("../cli/utils/settings");
-import SetupMock = require ("./utils/setupMock");
+import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
@@ -39,8 +40,10 @@ describe("taco settings", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
+        // Force KitHelper to fetch the package fresh
+        kitHelper.KitPackagePromise = null;
         // Configure a dummy platform "test" to use the mocked out remote server
-        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("ios", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
         }, function (err: any): void {
             mocha(err);
@@ -50,6 +53,7 @@ describe("taco settings", function (): void {
     after(function (done: MochaDone): void {
         this.timeout(50000);
         process.chdir(originalCwd);
+        kitHelper.KitPackagePromise = null;
         rimraf(tacoHome, done);
     });
 
@@ -58,8 +62,8 @@ describe("taco settings", function (): void {
             options: {
                 local: true
             },
-            original: ["foo", "test", "--local"],
-            remain: ["foo", "test"]
+            original: ["android", "ios", "--local"],
+            remain: ["android", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
@@ -75,8 +79,8 @@ describe("taco settings", function (): void {
             options: {
                 remote: true
             },
-            original: ["foo", "test", "--remote"],
-            remain: ["foo", "test"]
+            original: ["android", "ios", "--remote"],
+            remain: ["android", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
@@ -91,19 +95,20 @@ describe("taco settings", function (): void {
         var data: TacoUtility.Commands.ICommandData = {
             options: {
             },
-            original: ["foo", "test"],
-            remain: ["foo", "test"]
+            original: ["android", "ios"],
+            remain: ["android", "ios"]
         };
         Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
-            platforms[0].location.should.equal(Settings.BuildLocationType.Local);
-            platforms[1].location.should.equal(Settings.BuildLocationType.Remote);
+            platforms.length.should.equal(2);
+            platforms[0].should.eql({ location: Settings.BuildLocationType.Local, platform: "android" });
+            platforms[1].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
         }).done(function (): void {
             mocha();
         }, mocha);
     });
 
     it("should correctly report build locations when no platforms are specified", function (mocha: MochaDone): void {
-        this.timeout(50000);
+        this.timeout(70000);
         var data: TacoUtility.Commands.ICommandData = {
             options: {
             },
@@ -120,13 +125,13 @@ describe("taco settings", function (): void {
             });
         }).then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
-            fs.mkdirSync(path.join("platforms", "foo"));
+            fs.mkdirSync(path.join("platforms", "android"));
         }).then(function (): Q.Promise<any> {
             return Settings.determinePlatform(data);
         }).then(function (platforms: Settings.IPlatformWithLocation[]): void {
             platforms.length.should.equal(2);
-            platforms[0].should.eql({ location: Settings.BuildLocationType.Remote, platform: "test" });
-            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "foo" });
+            platforms[0].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
+            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "android" });
         }).done(function (): void {
             mocha();
         }, mocha);

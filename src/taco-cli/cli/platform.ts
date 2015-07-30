@@ -18,14 +18,13 @@ import commandBase = require ("./utils/platformPluginCommandBase");
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import errorHelper = require ("./tacoErrorHelper");
+import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
-import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
 import CommandOperationStatus = commandBase.CommandOperationStatus;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
@@ -47,7 +46,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         var self = this;
 
         var subCommand = this.cordovaCommandParams.subCommand;
-        if (subCommand !== "add" && subCommand !== "remove" && subCommand !== "rm") {
+        if (subCommand !== "add") {
             return Q({});
         }
 

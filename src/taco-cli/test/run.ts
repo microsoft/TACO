@@ -23,11 +23,11 @@ import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 
 import createMod = require ("../cli/create");
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
 import ServerMock = require ("./utils/serverMock");
-import setupMod = require ("../cli/setup");
-import SetupMock = require ("./utils/setupMock");
+import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
@@ -35,7 +35,6 @@ import utils = TacoUtility.UtilHelper;
 
 var create = new createMod();
 var run = new runMod();
-var setup = new setupMod();
 
 describe("taco run", function (): void {
     var testHttpServer: http.Server;
@@ -66,12 +65,14 @@ describe("taco run", function (): void {
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
+        // Force KitHelper to fetch the package fresh
+        kitHelper.KitPackagePromise = null;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
         var port = 3000;
         testHttpServer.listen(port);
         // Configure a dummy platform "test" to use the mocked out remote server in insecure mode
-        SetupMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
         }, function (err: any): void {
             mocha(err);
@@ -80,6 +81,7 @@ describe("taco run", function (): void {
 
     after(function (): void {
         process.chdir(originalCwd);
+        kitHelper.KitPackagePromise = null;
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });

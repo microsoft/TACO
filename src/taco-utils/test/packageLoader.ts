@@ -93,13 +93,13 @@ describe("TacoPackageLoader", function (): void {
 
         // add a dynamicDependencies file
         var dynamicDependenciesPath: string = path.join(testHome, "dynamicDependenciesFoo.json");
-        fs.writeFileSync(dynamicDependenciesPath,
-            "{\"foo\": \
-                { \"packageName\": \"foo\", \
-                  \"localPath\": \"file://" + packagePath.replace(/\\/g, "\\\\") + "\", \
-                  \"expirationIntervalInHours\": " + 100 / (60 * 60 * 1000) +
-            "} \
-            }");
+        fs.writeFileSync(dynamicDependenciesPath, JSON.stringify({
+            foo: {
+                packageName: "foo",
+                localPath: "file://" + packagePath,
+                expirationIntervalInHours: 100 / (60 * 60 * 1000)
+            }
+        }));
 
         // 1. require package and verify package exports "foo"
         // 2. update package to export "bar"
@@ -128,10 +128,7 @@ describe("TacoPackageLoader", function (): void {
             return Q.denodeify(fs.writeFile)(indexJsPath, "module.exports = \"baz\"");
         })
         .then(function (): Q.Promise<any> {
-            // short delay
-            return delay(5);
-        })
-        .then(function (): Q.Promise<any> {
+            // Minimal delay, should be less than the expiration interval
             return TacoPackageLoader.lazyTacoRequire("foo", dynamicDependenciesPath);
         })
         .then(function (pkg: any): void {

@@ -20,6 +20,7 @@ import util = require ("util");
 
 import cordovaWrapper = require ("./cordovaWrapper");
 import cordovaHelper = require ("./cordovaHelper");
+import kitHelper = require ("./kitHelper");
 import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -28,7 +29,6 @@ import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 import utils = tacoUtility.UtilHelper;
@@ -156,6 +156,10 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         });
     }
 
+    private operationRequiresTargets(subCommand: string): boolean {
+        return (subCommand === "add" || subCommand === "remove" || subCommand === "update");
+    }
+
     /**
      * Parse the arguments and construct the command parameters.
      */
@@ -167,6 +171,10 @@ export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
         targets = targets.filter(function (name: string): boolean {
             return !!name && name.length > 0;
         });
+
+        if (this.operationRequiresTargets(subCommand) && targets.length === 0) {
+            throw errorHelper.get(TacoErrorCodes.ErrorNoPluginOrPlatformSpecified, this.name, subCommand);
+        }
 
         this.downloadOptions = {
             searchpath: commandData.options["searchpath"],

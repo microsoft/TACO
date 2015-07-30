@@ -21,16 +21,15 @@ import util = require ("util");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
+import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
-import tacoKits = require ("taco-kits");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
 
 import commands = tacoUtility.Commands;
-import kitHelper = tacoKits.KitHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
@@ -192,7 +191,7 @@ class Create implements commands.IDocumentedCommand {
             .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
                 if (kitInfo && !!kitInfo.deprecated) {
                     // Warn the user
-                    logger.logWarning(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
+                    logger.log(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
                 }
 
                 if (mustUseTemplate) {
