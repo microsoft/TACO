@@ -98,7 +98,9 @@ module TacoUtility {
                 (<TelemetryActivity>event).end();
             }
 
-            appInsights.client.trackEvent(event.name, event.properties);
+            if (appInsights.client) { // no-op if telemetry is not initialized
+                appInsights.client.trackEvent(event.name, event.properties);
+            }
         }
 
         enum IdType {
