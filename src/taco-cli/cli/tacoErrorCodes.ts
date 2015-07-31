@@ -9,6 +9,7 @@ enum TacoErrorCode {
     NotInCordovaProject,
     CommandBuildInvalidPlatformLocation,
     CommandBuildTacoSettingsNotFound,
+    CommandError,
     CommandNotBothDeviceEmulate,
     CommandNotBothDebugRelease,
     CommandNotBothLocalRemote,

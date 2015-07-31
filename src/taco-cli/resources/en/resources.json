@@ -1,4 +1,7 @@
 ﻿{
+    "CommandError": "Error: An error occurred while running the command.",
+    "_CommandError.comment": "A generic error message displayed when an error occurs. This will be followed by the inner error, which should contain more details.",
+
     "CommandCreateDescription": "Create a Cordova project",
     "CommandCreateArgsPath": "Where to create the project",
     "CommandCreateArgsId": "Package ID for the project",
@@ -72,15 +75,15 @@
     "_CommandKitListDeprecatedKit.comment": "On executing the 'taco kit list' command, the string is printed alongside the kit name for a deprecated kit ",
     "CommandKitListCurrentCordovaCli": "<bold>Cordova CLI Version: </bold>{0}",
     "_CommandKitListCurrentCordovaCli.comment": "Title for the Currently used Cordova CLI version displayed on executing the 'taco kit list' command",
-     "CommandKitList": "The following kits are available for use:",
+    "CommandKitList": "The following kits are available for use:",
     "_CommandKitList.comment": "Header for the list of kits displayed on executing the 'taco kit list' command",
-     "CommandKitListCordovaCliForKit":"<bold>Cordova CLI: </bold>{0}",
+    "CommandKitListCordovaCliForKit": "<bold>Cordova CLI: </bold>{0}",
     "_CommandKitListCordovaCliForKit.comment": "Title for the Cordova CLI version for a kit displayed on executing the 'taco kit list' command",
-     "CommandKitListPlatformOverridesForKit": "<bold>Platforms: </bold>",
+    "CommandKitListPlatformOverridesForKit": "<bold>Platforms: </bold>",
     "_CommandKitListPlatformOverridesForKit.comment": "Header for the list of platform overrides for a kit displayed on executing the 'taco kit list' command",
-     "CommandKitListPluginOverridesForKit": "<bold>Plugins: </bold>",
+    "CommandKitListPluginOverridesForKit": "<bold>Plugins: </bold>",
     "_CommandKitListPluginOverridesForKit.comment": "Header for the list of plugin overrides for a kit displayed on executing the 'taco kit list' command",
-     "CommandKitListJsonFileStatus": "<success>Success!</success> Kit metadata file is saved at <highlight>{0}</highlight>",
+    "CommandKitListJsonFileStatus": "<success>Success!</success> Kit metadata file is saved at <highlight>{0}</highlight>",
     "_CommandKitListJsonFileStatus.comment": "Status indicating that the json file has been successfully written to {0}",
 
     "CommandRemoteDescription": "Configure remote build servers",
@@ -183,6 +186,7 @@
     "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> updated.<br/>",
     "_CommandPlatformStatusUpdated.comment": "Status message after successfully updating platform {0}",
 
+
     "CommandPluginDescription": "Manage project plugins",
     "_CommandPluginDescription.comment": "Description for 'taco plugin'",
     "CommandPluginSubcommandDescription": "The subcommand to be run - add, remove, list, or search",
@@ -221,7 +225,7 @@
     "_CommandPluginTestedPlatforms.comment": "Status message regarding the tested platforms while adding a plugin {0}",
     "CommandPluginStatusRemoving": "Removing plugin <highlight>{0}</highlight> from Cordova project...<br/>",
     "_CommandPluginStatusRemoving.comment": "Status message shown while removing a plugin {0} from the project",
-    
+
     "CommandBuildDescription": "Build a cordova project",
     "_CommandBuildDescription.comment": "Description for 'taco build'",
     "CommandBuildPlatformDescription": "The platform that you wish to build",
@@ -300,15 +304,15 @@
     "_CommandNotBothDebugRelease.comment": "Error reported when both --debug and --release are specified for 'taco build' or 'taco run'",
 
     "CommandVersionDescription": "Display the current Taco version",
-    "_CommandVersionDescription.comment":  "Description of the -v/--v/--version arguments to taco",
+    "_CommandVersionDescription.comment": "Description of the -v/--v/--version arguments to taco",
 
     "CommandInstallReqsDescription": "Install platform-specific third-party dependencies",
     "_CommandInstallReqsDescription.comment": "Description for 'taco install-reqs'",
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option(s) of 'taco install-reqs'",
 
-    "CommandInstallCordovaTooOld": "Error: Cordova 5.1.0 or later required.",
-    "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than 5.1.0.",
+    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova version {0}. 'taco-install-reqs' supports projects using Cordova version 5.1.0 or higher.<br/><br/>If your project was created using a taco kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to <link>http://go.microsoft.com/fwlink/?LinkId=618544</link>.",
+    "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than 5.1.0. {0} is the Cordova version used by the current project.",
 
     "NoRemoteBuildIdFound": "Error: No remote build found. Please run '{0}' first",
     "_NoRemoteBuildIdFound.comment": "Message printed when trying to make use of a remote build which does not have an associated ID. {0} is the command the user should run to try to fix things",
@@ -360,7 +364,7 @@
     "RemoteBuildSslConnectionReset": "Secure connection to {0} could not be established. Verify that the build server is running in secure mode.",
     "_RemoteBuildSslConnectionReset.comment": "Error message reported when a secure client tries to connect to an insecure server. {0} is the URL of the server",
     "RemoteBuildNonSslConnectionReset": "Non-secure connection to {0} could not be established. Verify that the build server is not running in secure mode.",
-    "_RemoteBuildNonSslConnectionReset.comment":  "Error message reported when an insecure client tries to connect to a secure server. {0} is the url of the server",
+    "_RemoteBuildNonSslConnectionReset.comment": "Error message reported when an insecure client tries to connect to a secure server. {0} is the url of the server",
     "RemoteBuildHostNotFound": "Host unreachable for build server {0}.",
     "_RemoteBuildHostNotFound.comment": "Error message reported when we are unable to resolve the hostname {0}",
     "RemoteBuildNoConnection": "Remote build server {0} connection failed. Verify that the server is running.",
