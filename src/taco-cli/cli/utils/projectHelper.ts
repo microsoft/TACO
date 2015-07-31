@@ -15,6 +15,7 @@ import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
 
+import cordovaHelper = require ("./cordovaHelper");
 import kitHelper = require ("./kitHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -147,36 +148,21 @@ class ProjectHelper {
     }
 
     /**
-     *  public helper that returns all the installed platforms
+     *  public helper that returns all the installed components - platforms/plugins
      */
-    public static getInstalledPlatforms(projectDir: string): Q.Promise<string[]> {
-        var platforms: string[] = [];
+    public static getInstalledComponents(projectDir: string, componentDirName: string): Q.Promise<string[]> {
+        var components: string[] = [];
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var platformsDir = path.join(projectDir, "platforms");
-        if (!fs.existsSync(platformsDir)) {
-            return Q.resolve(platforms);
+        var componentDir = path.join(projectDir, componentDirName);
+        if (!fs.existsSync(componentDir)) {
+            return Q.resolve(components);
         }
 
-        platforms = fs.readdirSync(platformsDir).filter(function (platform: string): boolean {
-            return fs.statSync(path.join(platformsDir, platform)).isDirectory();
+        components = fs.readdirSync(componentDir).filter(function (component: string): boolean {
+            return fs.statSync(path.join(componentDir, component)).isDirectory();
         });
 
-        return Q.resolve(platforms);
-    }
-
-    /**
-     *  public helper that returns all the installed platforms
-     */
-    public static getInstalledPlugins(projectDir: string): string[] {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var pluginsDir = path.join(projectDir, "plugins");
-        if (!fs.existsSync(pluginsDir)) {
-            return [];
-        }
-
-        return fs.readdirSync(pluginsDir).filter(function (plugin: string): boolean {
-            return fs.statSync(path.join(pluginsDir, plugin)).isDirectory();
-        });
+        return Q.resolve(components);
     }
 
     /**
@@ -186,8 +172,8 @@ class ProjectHelper {
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
         var onWindows = process.platform === "win32";
         var deferred = Q.defer<any>();
-        var platformVersions: ProjectHelper.IPlatformVersionInfo = {};
-        return ProjectHelper.getInstalledPlatforms(projectDir)
+        var platformVersions: cordovaHelper.IDictionary<string> = {};
+        return ProjectHelper.getInstalledComponents(projectDir, "platforms")
         .then(function (platformsInstalled: string[]): Q.Promise<any> {
             return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
                 var deferredProcPromise = Q.defer<any>();
@@ -214,18 +200,20 @@ class ProjectHelper {
     /**
      *  public helper that gets the version of the installed plugins
      */
-    public static getInstalledPluginVersions(projectDir: string): Q.Promise<ProjectHelper.IPluginVersionInfo> {
+    public static getInstalledPluginVersions(projectDir: string): Q.Promise<any> {
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var pluginsInstalled: string[] = ProjectHelper.getInstalledPlugins(projectDir);
-        var pluginVersions: ProjectHelper.IPluginVersionInfo = {};
-        pluginsInstalled.forEach(function (plugin: string): void {
-            var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
-            var pluginInfo = require(pluginPackgeJson);
-            if (pluginInfo) {
-                pluginVersions[plugin] = pluginInfo["version"];
-            }
+        var pluginVersions: cordovaHelper.IDictionary<string> = {};
+        return ProjectHelper.getInstalledComponents(projectDir, "plugins")
+        .then(function (pluginsInstalled: string[]): Q.Promise<any> {
+            pluginsInstalled.forEach(function (plugin: string): void {
+                var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
+                var pluginInfo = require(pluginPackgeJson);
+                if (pluginInfo) {
+                    pluginVersions[plugin] = pluginInfo["version"];
+                }
+            });       
+            return Q.resolve(pluginVersions);
         });
-        return Q.resolve(pluginVersions);
     }
 
     /**
@@ -255,14 +243,6 @@ module ProjectHelper {
         cordovaCliVersion: string;
         configXmlPath: string;
         tacoKitId?: string;
-    }
-
-    export interface IPlatformVersionInfo {
-        [platformName: string]: string;
-    }
-
-    export interface IPluginVersionInfo {
-        [pluginName: string]: string;
     }
 }
 

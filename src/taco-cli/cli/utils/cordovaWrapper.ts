@@ -13,6 +13,7 @@
 
 "use strict";
 
+import assert = require ("assert");
 import child_process = require ("child_process");
 import os = require ("os");
 import path = require ("path");
@@ -183,6 +184,18 @@ class CordovaWrapper {
         });
     }
 
+    private static changeCordovaEventSubscription(cordova: typeof Cordova, subscribe: boolean): void {
+        if(subscribe) {
+            cordova.on("results", console.info);
+            cordova.on("warn", console.warn);
+            cordova.on("error", console.error);
+        } else {
+            cordova.off("results", console.info);
+            cordova.off("warn", console.warn);
+            cordova.off("error", console.error);
+        }
+    }
+
     /**
      * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
      *
@@ -192,16 +205,14 @@ class CordovaWrapper {
      *
      * @return {Q.Promise<any>} An empty promise
      */
-    public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData): Q.Promise<any> {
+    public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData = null, isSilent: boolean = false): Q.Promise<any> {
         if (cordovaCliVersion) {
             var cordova: typeof Cordova;
             return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
                 .then(function (cdv: typeof Cordova): Q.Promise<any> {
                 cordova = cdv;
                 // Hook the event listeners. This will help us get the logs that cordova emits during platform/plugin operations
-                cordova.on("results", console.info);
-                cordova.on("warn", console.warn);
-                cordova.on("error", console.error);
+                CordovaWrapper.changeCordovaEventSubscription(cordova, !isSilent /* Subscribe only if we are not in silent mode */);
                 if (command === "platform") {
                     return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
                 } else if (command === "plugin") {
@@ -212,12 +223,11 @@ class CordovaWrapper {
             }).then(function (): Q.Promise<any> {
                 // Unhook the event listeners after we are done
                 // (Cordova has an upper limit for the number of active event listeners - we do not want to exceed the max) 
-                cordova.off("results", console.info);
-                cordova.off("warn", console.warn);
-                cordova.off("error", console.error);
+                CordovaWrapper.changeCordovaEventSubscription(cordova, false /* Unscubscribe */);
                 return Q({});
             });
         } else {
+            assert(data);
             var cliArgs: string[] = [command];
             return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
         }
