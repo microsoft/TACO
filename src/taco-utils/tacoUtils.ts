@@ -23,6 +23,7 @@ import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import tacoPackageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
+import telemetryHelper = require ("./telemetryHelper");
 import utilHelper = require ("./utilHelper");
 
 module TacoUtility {
@@ -44,6 +45,7 @@ module TacoUtility {
     export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var Telemetry = telemetry.Telemetry;
+    export var TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper = utilHelper.UtilHelper;
     /// <enable code="SA1301" />
 }

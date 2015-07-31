@@ -27,6 +27,7 @@ import logger = tacoUtility.Logger;
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import telemetry = tacoUtility.Telemetry;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface IParsedArgs {
@@ -44,7 +45,7 @@ class Taco {
      * Runs taco with command line args, catches "known" taco errors
      */
     public static run(): void {
-        telemetry.init(require("../package.json").version);
+        telemetry.init(require("../package.json").name, require("../package.json").version);
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
             // Pretty print taco Errors
             if (reason) {
@@ -73,7 +74,17 @@ class Taco {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
                     return parsedArgs.command.run(commandData);
                 } else {
-                    return cordovaWrapper.cli(parsedArgs.args);
+                    var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
+                    telemetryHelper.addMultiplePropertiesToEvent(routeToCordovaEvent, "argument", args, true);
+                    return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
+                        routeToCordovaEvent.properties["success"] = "true";
+                        telemetry.send(routeToCordovaEvent);
+                        return Q(output);
+                    }, function (reason: any): any {
+                        routeToCordovaEvent.properties["success"] = "false";
+                        telemetry.send(routeToCordovaEvent);
+                        return Q.reject(reason);
+                    });
                 }
         });
     }

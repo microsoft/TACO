@@ -20,6 +20,7 @@
 /// <reference path="../typings/tacoPackageLoader.d.ts" />
 /// <reference path="../typings/tacoUtilsErrorCodes.d.ts" />
 /// <reference path="../typings/telemetry.d.ts" />
+/// <reference path="../typings/telemetryHelper.d.ts" />
 /// <reference path="../typings/utilHelper.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoUtility namespace,
