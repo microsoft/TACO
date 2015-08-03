@@ -7,19 +7,57 @@
             "java"
         ],
         "versions": {
-            "r24.2": {
+            "r24.3.3": {
                 "win32": {
                     "ia32": {
-                        "installSource": "http://dl.google.com/android/android-sdk_r24.2-windows.zip",
-                        "sha1": "2611ed9a6080f4838f1d4e55172801714a8a169b",
-                        "bytes": 155944165,
-                        "installDestination": "%programfiles%/Android"
+                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-windows.zip",
+                        "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
+                        "bytes": 187480692,
+                        "installDestination": "%programfiles%/Android",
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": true,
+                            "postInstall": true
+                        }
                     },
                     "x64": {
-                        "installSource": "http://dl.google.com/android/android-sdk_r24.2-windows.zip",
-                        "sha1": "2611ed9a6080f4838f1d4e55172801714a8a169b",
-                        "bytes": 155944165,
-                        "installDestination": "%programfiles(x86)%/Android"
+                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-windows.zip",
+                        "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
+                        "bytes": 187480692,
+                        "installDestination": "%programfiles(x86)%/Android",
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": true,
+                            "postInstall": true
+                        }
+                    }
+                },
+                "darwin": {
+                    "ia32": {
+                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
+                        "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
+                        "bytes": 98330824,
+                        "installDestination": "/Library/Android",
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": true,
+                            "postInstall": true
+                        }
+                    },
+                    "x64": {
+                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
+                        "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
+                        "bytes": 98330824,
+                        "installDestination": "/Library/Android",
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": true,
+                            "postInstall": true
+                        }
                     }
                 }
             }
@@ -43,13 +81,38 @@
                         "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
                         "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
                         "bytes": 129674656,
-                        "installDestination": "%programfiles%/Java/jdk1.7.0_55"
+                        "installDestination": "%programfiles%/Java/jdk1.7.0_55",
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": true,
+                            "postInstall": false
+                        }
                     },
                     "x64": {
                         "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
                         "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
                         "bytes": 129674656,
-                        "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55"
+                        "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55",
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": true,
+                            "postInstall": false
+                        }
+                    }
+                },
+                "darwin": { 
+                    "x64": {
+                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-macosx-x64.dmg",
+                        "sha1": "3ce4892fc99dc7d5e3af829d09bd87b163f9939d",
+                        "bytes": 98330824,
+                        "steps": {
+                            "download": true,
+                            "install": true,
+                            "updateVariables": false,
+                            "postInstall": false
+                        }
                     }
                 }
             }

@@ -75,7 +75,7 @@ module TacoDependencyInstaller {
         public run(requirementsResult: any): Q.Promise<any> {
             // Installing dependencies is currently only supported on Windows
             // TODO (DevDiv 1172346): Support Mac OS as well
-            if (process.platform !== "win32") {
+            if (process.platform !== "win32" || process.platform !== "darwin") {
                 return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
 
@@ -100,10 +100,7 @@ module TacoDependencyInstaller {
 
             return this.promptUserBeforeInstall()
                 .then(function (): void {
-                    self.createServer();
-                })
-                .then(function (): Q.Promise<any> {
-                    return self.connectServer();
+                    self.prepareCommunications();
                 })
                 .then(function (): Q.Promise<number> {
                     return self.spawnElevatedInstaller();
@@ -370,6 +367,21 @@ module TacoDependencyInstaller {
             }
         }
 
+        private prepareCommunications(): Q.Promise<any> {
+            if (os.platform() === "win32") {
+                // For Windows we need to prepare a local server to communicate with the elevated installer process
+                return Q({})
+                    .then(function (): void {
+                        this.createServer();
+                    })
+                    .then(function (): Q.Promise<any> {
+                        return this.connectServer();
+                    });
+            }
+
+            return Q({});
+        }
+
         private createServer(): void {
             var self = this;
 
@@ -431,6 +443,8 @@ module TacoDependencyInstaller {
             switch (process.platform) {
                 case "win32":
                     return this.spawnElevatedInstallerWin32();
+                case "darwin":
+                    return this.spawnElevatedInstallerDarwin();
                 default:
                     return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
@@ -448,8 +462,8 @@ module TacoDependencyInstaller {
                 "-file",
                 launcherPath,
                 utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
-                utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath),
-                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
+                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath),
+                utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
             ];
             var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
 
@@ -461,11 +475,31 @@ module TacoDependencyInstaller {
                     deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
                 }
             });
-
             cp.on("exit", function (code: number): void {
                 self.serverHandle.close(function (): void {
                     deferred.resolve(code);
                 });
+            });
+
+            return deferred.promise;
+        }
+
+        private spawnElevatedInstallerDarwin(): Q.Promise<number> {
+            var self = this;
+            var deferred: Q.Deferred<number> = Q.defer<number>();
+            var elevatedInstallerScript: string = path.resolve(__dirname, "elevatedInstaller.js");
+            var command: string = "sudo";
+            var args: string[] = [
+                "node",
+                elevatedInstallerScript
+            ];
+            var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+
+            cp.on("error", function (err: Error): void {
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
+            });
+            cp.on("exit", function (code: number): void {
+                deferred.resolve(code);
             });
 
             return deferred.promise;
@@ -495,7 +529,7 @@ module TacoDependencyInstaller {
                     throw errorHelper.get(TacoErrorCodes.UnknownExitCode);
             }
 
-            if (code === installerExitCode.Success || code === installerExitCode.CompletedWithErrors) {
+            if (os.platform() === "win32" && (code === installerExitCode.Success || code === installerExitCode.CompletedWithErrors)) {
                 logger.log(resources.getString("RestartCommandPrompt"));
             }
         }

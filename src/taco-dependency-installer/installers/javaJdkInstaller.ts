@@ -15,8 +15,10 @@
 
 "use strict";
 
+import admZip = require ("adm-zip");
 import childProcess = require ("child_process");
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
@@ -33,15 +35,13 @@ import ILogger = installerProtocol.ILogger;
 import utils = tacoUtils.UtilHelper;
 
 class JavaJdkInstaller extends InstallerBase {
-    private installerFile: string;
+    private installerDownloadPath: string;
 
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger) {
-        super(installerInfo, softwareVersion, installTo, logger);
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
+        super(installerInfo, softwareVersion, installTo, logger, steps);
     }
 
     protected downloadWin32(): Q.Promise<any> {
-        this.installerFile = path.join(InstallerBase.InstallerCache, "javaJdk", "win32", this.softwareVersion, path.basename(this.installerInfo.installSource));
-
         return this.downloadDefault();
     }
 
@@ -51,16 +51,16 @@ class JavaJdkInstaller extends InstallerBase {
         // Run installer
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
-        var commandLine: string = this.installerFile + " /quiet /norestart /lvx %temp%/javajdk7.0.550.13.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
+        var commandLine: string = this.installerDownloadPath + " /quiet /norestart /lvx %temp%/javajdk7.0.550.13.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
 
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
                 var code: number = (<any>err).code;
 
                 if (code) {
-                    deferred.reject(new Error(resources.getString("InstallerError", self.installerFile, code)));
+                    deferred.reject(new Error(resources.getString("InstallerError", self.installerDownloadPath, code)));
                 } else {
-                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerFile, err.name)));
+                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerDownloadPath, err.name)));
                 }
             } else {
                 deferred.resolve({});
@@ -82,7 +82,77 @@ class JavaJdkInstaller extends InstallerBase {
             });
     }
 
+    protected downloadDarwin(): Q.Promise<any> {
+        return this.downloadDefault();
+    }
+
+    protected installDarwin(): Q.Promise<any> {
+        var self = this;
+
+        return this.attachDmg()
+            .then(function (): Q.Promise<any> {
+                return self.installPkg();
+            })
+            .then(function (): Q.Promise<any> {
+                return self.detachDmg();
+            });
+    }
+
+    private attachDmg(): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var command: string = "hdiutil attach " + this.installDestination;
+
+        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            if (error) {
+                deferred.reject(error);
+            } else {
+                deferred.resolve({});
+            }
+        });
+
+        return deferred.promise;
+    }
+
+    private installPkg(): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var pkgPath: string = path.join("/", "Volumes", "JDK 7 Update 55", "JDK 7 Update 55.pkg");
+        var commandLine: string = "installer -pkg " + pkgPath + " -target \"/\"";
+
+        childProcess.exec(commandLine, function (err: Error): void {
+            if (err) {
+                var code: number = (<any>err).code;
+
+                if (code) {
+                    deferred.reject(new Error(resources.getString("InstallerError", this.installerDownloadPath, code)));
+                } else {
+                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", this.installerDownloadPath, err.name)));
+                }
+            } else {
+                deferred.resolve({});
+            }
+        });
+
+        return deferred.promise;
+    }
+
+    private detachDmg(): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var command: string = "hdiutil detach /Volumes/JDK\ 7\ Update\ 55/";
+
+        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            if (error) {
+                deferred.reject(error);
+            } else {
+                deferred.resolve({});
+            }
+        });
+
+        return deferred.promise;
+    }
+
     private downloadDefault(): Q.Promise<any> {
+        this.installerDownloadPath = path.join(InstallerBase.InstallerCache, "javaJdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
+
         // Prepare expected installer file properties
         var expectedProperties: installerUtils.IFileSignature = {
             bytes: this.installerInfo.bytes,
@@ -105,7 +175,7 @@ class JavaJdkInstaller extends InstallerBase {
         };
 
         // Download the installer
-        return installerUtils.downloadFile(options, this.installerFile, expectedProperties);
+        return installerUtils.downloadFile(options, this.installerDownloadPath, expectedProperties);
     }
 }
 

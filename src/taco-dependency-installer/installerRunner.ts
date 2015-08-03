@@ -154,10 +154,11 @@ class InstallerRunner {
 
     private instantiateInstaller(dependency: DependencyInstallerInterfaces.IDependency): InstallerBase {
         var installerInfoToUse: DependencyInstallerInterfaces.IInstallerData = this.dependenciesDataWrapper.getInstallerInfo(dependency.id, dependency.version);
+        var installerSteps: DependencyInstallerInterfaces.IStepsDeclaration = this.dependenciesDataWrapper.getInstallerSteps(dependency.id, dependency.version);
         var installerRequirePath: string = path.join(__dirname, this.dependenciesDataWrapper.getInstallerPath(dependency.id));
         var installerConstructor: any = require(installerRequirePath);
 
-        return new installerConstructor(installerInfoToUse, dependency.version, dependency.installDestination, this.logger);
+        return new installerConstructor(installerInfoToUse, dependency.version, dependency.installDestination, this.logger, installerSteps);
     }
 
     private runInstallers(): Q.Promise<any> {
@@ -166,15 +167,15 @@ class InstallerRunner {
         return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyWrapper, currentIndex: number): Q.Promise<any> {
             return previous
                 .then(function (): Q.Promise<any> {
-                var baseHeaderString: string = currentIndex === 0 ? "" : "<br/>";
+                    var baseHeaderString: string = currentIndex === 0 ? "" : "<br/>";
 
-                self.logger.log(baseHeaderString + "<highlight>" + value.dependency.displayName + "</highlight>");
+                    self.logger.log(baseHeaderString + "<highlight>" + value.dependency.displayName + "</highlight>");
 
-                return value.installer.run();
-            })
+                    return value.installer.run();
+                })
                 .catch(function (err: Error): void {
                     self.errorHandler(err);
-            });
+                });
         }, Q({}));
     }
 
