@@ -457,14 +457,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * Pretty prints the platform and plugin update information
      */
     private static printProjectUpdateInfo(id: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
-        platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): Q.Promise<boolean> {
+        platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): boolean {
         logger.logLine();
         var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(installedPluginVersions), Object.keys(installedPluginVersions)));
         
         var platformsRequireUpdate: boolean = Object.keys(platformVersionUpdates || installedPlatformVersions).length > 0 ? true : false;
         var pluginsRequireUpdate: boolean = Object.keys(platformVersionUpdates || installedPlatformVersions).length > 0 ? true : false;
 
-        var deferred: Q.Deferred<any> = Q.defer<any>();
         if (platformsRequireUpdate || pluginsRequireUpdate) {
             if (platformVersionUpdates || pluginVersionUpdates) {
                 logger.log(resources.getString("CommandKitSelectKitPreview", id));
@@ -485,14 +484,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             }
             
             logger.logWarning(resources.getString("CommandKitSelectProjectUpdateWarning"));
-            deferred.resolve(true);
+            return true;
         }
 
-        deferred.resolve(false);
-        return deferred.promise;
+        return false;
     }
 
-    private static printCliProjectUpdateInfo(projectInfo: projectHelper.IProjectInfo, cli: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>): Q.Promise<boolean> {
+    private static printCliProjectUpdateInfo(projectInfo: projectHelper.IProjectInfo, cli: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>): boolean {
         Kit.printCordovaCliUpdateInfo(projectInfo.cordovaCliVersion, cli);
         return Kit.printProjectUpdateInfo(cli, installedPlatformVersions, installedPluginVersions);
     }
@@ -501,7 +499,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         platformVersionUpdates: IDictionary<string>, pluginVersionUpdates: IDictionary<string>): Q.Promise<boolean> {
         return kitHelper.getKitInfo(kitId).then(function (info: TacoKits.IKitInfo): Q.Promise<any> {
             Kit.printCordovaCliUpdateInfo(projectInfo.cordovaCliVersion, info["cordova-cli"]);
-            return Kit.printProjectUpdateInfo(kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
+            return Q.resolve(Kit.printProjectUpdateInfo(kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates));
         });
     }
 
@@ -562,10 +560,9 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         var installedPlatformVersions: IDictionary<string>;
         var installedPluginVersions: IDictionary<string>;
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.createTacoJsonFile(projectPath, false, cli)])
-        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>): Q.Promise<boolean> {
+        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>): Q.Promise<any> {
                 installedPluginVersions = pluginVersions;
-            return Kit.printCliProjectUpdateInfo(projectInfo, cli, installedPlatformVersions, installedPluginVersions);
-        }).then(function (projectRequiresUpdate: boolean): Q.Promise<any> {
+            var projectRequiresUpdate: boolean = Kit.printCliProjectUpdateInfo(projectInfo, cli, installedPlatformVersions, installedPluginVersions);
             return Kit.promptAndUpdateProject(projectRequiresUpdate, projectInfo.cordovaCliVersion, installedPlatformVersions, installedPluginVersions);
         });
     }
