@@ -45,13 +45,21 @@ import ms = require ("./utils/memoryStream");
 import stream = require ("stream");
 
 export class MemoryStream extends stream.Writable {
+    private stdoutWrite: { (data: any, encoding: string, callback: Function): void };
+    private shouldAlsoPrintToRealStdout = true; // We turn this on for debugging purposes, on the tests, possible on the build server
+
     private fullBuffer: Buffer = new Buffer("");
     public _write(data: Buffer, encoding: string, callback: Function): void;
     public _write(data: string, encoding: string, callback: Function): void;
     public _write(data: any, encoding: string, callback: Function): void {
         var buffer = Buffer.isBuffer(data) ? data : new Buffer(data, encoding);
         this.fullBuffer = Buffer.concat([this.fullBuffer, buffer]);
-        callback();
+        if (this.shouldAlsoPrintToRealStdout) {
+            this.stdoutWrite.call(process.stdout, data, encoding, () => { });
+            callback();
+        } else {
+            callback();
+        }
     }
 
     public contentsAsText(): string {
@@ -60,6 +68,7 @@ export class MemoryStream extends stream.Writable {
     }
 
     public writeAsFunction(): { (data: any, second: any, callback?: any): boolean } {
+        this.stdoutWrite = process.stdout.write;
         return (data: any, second: any, callback?: any) => {
             if (typeof second === "string") {
                 return this.write(data, second, callback);
