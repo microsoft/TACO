@@ -81,6 +81,26 @@ module TacoUtility {
         }
 
         /**
+         * Helper method to log an array of name/value pairs with proper indentation and horizontal borders (a line at the top and bottom)
+         * @param {INameDescription[]} array of name/description pairs
+         * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
+         */
+        public static logNameDescriptionTableWithHorizontalBorders(nameDescriptionPairs: INameDescription[], indent1?: number): void {
+            if (indent1 !== 0) {
+                indent1 = indent1 || LoggerHelper.DefaultIndent;
+            }
+
+            var indentationString = this.repeat(" ", indent1);
+            var longestNameLength = this.longestValueLength(nameDescriptionPairs, e => e.name);
+            var longestDescriptionLength = this.longestValueLength(nameDescriptionPairs, e => e.description);
+            var totalSeparatorLength = LoggerHelper.getDescriptionColumnIndent(longestNameLength, indent1) + longestDescriptionLength - indent1; // ("\t\t" + Name + ....) + Description - "\t\t"
+            var sectionsSeparator = indentationString + LoggerHelper.repeat("-", totalSeparatorLength);
+            Logger.log(sectionsSeparator);
+            LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1);
+            Logger.log(sectionsSeparator);
+        }
+
+        /**
          * Helper method to log a given name/value with proper indentation
          * @param {string} name name which comes on left. can't have any styling tags
          * @param {string} value values comes after bunch of dots. can have styling tags includeing <br/>
@@ -153,6 +173,23 @@ module TacoUtility {
         public static printJson(obj: any, indent?: number): void {
             var jsonSerializer: JsonSerializer = new JsonSerializer(LoggerHelper.DefaultIndent, LoggerHelper.MaxRight, indent);
             Logger.log(jsonSerializer.serialize(obj));
+        }
+
+        /**
+         * Logs an array of strings with proper indentation and a fixed bullet (*) (This is a list, in the sense of an HTML <ul><li></li></ul> list)
+         */
+        public static logList(listElements: string[]): void {
+            listElements.forEach(element => Logger.log(" * " + element));
+        }
+
+        /**
+         * Returns the length of the longest value of the property specified with the getter
+         * @param {list[]} array of elements
+         * @param {propertyGetter} lambda function to extract the property we want to measure the length, from each element
+         */
+        private static longestValueLength<T>(list: T[], propertyGetter: { (element: T): string }): number {
+            var propertyValuesLength = list.map(propertyGetter).map(str => LogFormatHelper.getFormattedStringLength(str));
+            return Math.max.apply(null, propertyValuesLength);
         }
 
         private static wordWrapString(str: string, indent: number, maxWidth: number): string {

@@ -33,6 +33,7 @@ import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
+import LogFormatHelper = tacoUtility.LogFormatHelper;
 
 /* 
  * Wrapper interface for create command parameters
@@ -62,7 +63,7 @@ class Create implements commands.IDocumentedCommand {
     private static DefaultAppName: string = "HelloTaco";
 
     private commandParameters: ICreateParameters;
-    
+
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
@@ -184,7 +185,7 @@ class Create implements commands.IDocumentedCommand {
                     return kitHelper.getKitInfo(kitId);
                 } else {
                     return Q.resolve(null);
-                }      
+                }
             })
             .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
                 if (kitInfo && !!kitInfo.deprecated) {
@@ -242,21 +243,17 @@ class Create implements commands.IDocumentedCommand {
         var cordovaParameters = this.commandParameters.cordovaParameters;
         var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
 
-        var indentation = 6; // We leave some empty space on the left before the text/table starts
-        resources.log("CommandCreateStatusCreatingNewProject");
+        logger.log(resources.getString("CommandCreateStatusCreatingNewProject"));
 
-        var indentationString = this.repeat(" ", indentation);
-        var sectionsSeparator = indentationString + resources.getString("CommandCreateStatusTableSectionSeparator");
-        logger.log(sectionsSeparator);
-        var rows = [
+        var indentation = 6; // We leave some empty space on the left before the text/table starts
+        var nameDescriptionPairs = [
             { name: resources.getString("CommandCreateStatusTableNameDescription"), description: cordovaParameters.appName },
             { name: resources.getString("CommandCreateStatusTableIDDescription"), description: cordovaParameters.appId },
             { name: resources.getString("CommandCreateStatusTableLocationDescription"), description: projectFullPath },
             { name: resources.getString(kitOrCordovaStringResource), description: kitOrCordovaVersion },
             { name: resources.getString("CommandCreateStatusTableReleaseNotesDescription"), description: resources.getString("CommandCreateStatusTableReleaseNotesLink") },
         ];
-        LoggerHelper.logNameDescriptionTable(rows, indentation);
-        logger.log(sectionsSeparator);
+        LoggerHelper.logNameDescriptionTableWithHorizontalBorders(nameDescriptionPairs, indentation);
     }
 
     /**
@@ -267,35 +264,34 @@ class Create implements commands.IDocumentedCommand {
         var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
         if (this.isKitProject()) {
             if (templateDisplayName) {
-                resources.log("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath);
+                logger.log(resources.getString("CommandCreateSuccessProjectTemplate", templateDisplayName, projectFullPath));
 
                 if (this.commandParameters.data.options["template"] === "typescript") {
-                    resources.log("CommandCreateInstallGulp");
+                    logger.log(resources.getString("CommandCreateInstallGulp"));
                 }
             } else {
                 // If both --copy-from and --link-to are specified, Cordova uses --copy-from and ignores --link-to, so for our message we should use the path provided to --copy-from if the user specified both
                 var customWwwPath: string = this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"];
-                resources.log("CommandCreateSuccessProjectCustomWww", customWwwPath, projectFullPath);
+                logger.log(resources.getString("CommandCreateSuccessProjectCustomWww", customWwwPath, projectFullPath));
             }
         } else {
-            resources.log("CommandCreateSuccessProjectCLI", projectFullPath);
+            logger.log(resources.getString("CommandCreateSuccessProjectCLI", projectFullPath));
         }
 
         // Print the onboarding experience
-        ["OnboardingExperienceSectionSeparator",
-            "HowToUseChangeToProjectFolder",
+        logger.log("-------------------------------------");
+        LoggerHelper.logList(["HowToUseChangeToProjectFolder",
             "HowToUseCommandPlatformAddPlatform",
             "HowToUseCommandInstallReqsPlugin",
             "HowToUseCommandAddPlugin",
             "HowToUseCommandSetupRemote",
             "HowToUseCommandBuildPlatform",
             "HowToUseCommandEmulatePlatform",
-            "HowToUseCommandRunPlatform"].forEach(msg => resources.log(msg, projectFullPath));
+            "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg, projectFullPath)));
 
-        logger.logLine();
-
-        ["HowToUseCommandHelp",
-        "HowToUseCommandDocs"].forEach(msg => resources.log(msg));
+        ["",
+            "HowToUseCommandHelp",
+            "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
     }
 }
 

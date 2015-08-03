@@ -40,13 +40,13 @@ class Templates implements commands.IDocumentedCommand {
 
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {
-                resources.log("CommandTemplatesHeader");
+                logger.log(resources.getString("CommandTemplatesHeader"));
                 logger.logLine();
                 LoggerHelper.logNameDescriptionTable(templateList.templates.map(function (value: templateManager.ITemplateDescriptor): INameDescription {
                     return <INameDescription>{ name: value.id, description: value.getDescription() };
                 }));
                 logger.logLine();
-                resources.log("HowToUseCreateProjectWithTemplate");
+                logger.log(resources.getString("HowToUseCreateProjectWithTemplate"));
             });
     }
 

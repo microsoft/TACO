@@ -27,6 +27,7 @@ import tacoUtility = require ("taco-utils");
 import CommandOperationStatus = commandBase.CommandOperationStatus;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import LoggerHelper = tacoUtility.LoggerHelper;
 
 /**
  * Platform
@@ -161,18 +162,17 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                 logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
 
                 // Print the onboarding experience
-                ["OnboardingExperienceSectionSeparator",
-                    "HowToUseCommandInstallReqsPlugin",
+                logger.log("-------------------------------------");
+                LoggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
                     "HowToUseCommandAddPlugin",
                     "HowToUseCommandSetupRemote",
                     "HowToUseCommandBuildPlatform",
                     "HowToUseCommandEmulatePlatform",
-                    "HowToUseCommandRunPlatform"].forEach(msg => resources.log(msg));
+                    "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
 
-                logger.logLine();
-
-                ["HowToUseCommandHelp",
-                    "HowToUseCommandDocs"].forEach(msg => resources.log(msg));
+                ["",
+                    "HowToUseCommandHelp",
+                    "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
                 break;
             }
 

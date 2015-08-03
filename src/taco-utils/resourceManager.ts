@@ -99,13 +99,6 @@ module TacoUtility {
         }
 
         /**
-         * Logs a message generated from a resource string
-         */
-        public log(id: string, ...optionalArgs: any[]): void {
-            Logger.log(this.getString(id, optionalArgs));
-        }
-
-        /**
          * Given availableLocales and inputLocales, find the best match
          * preferring specific locales over parent locales ("fr-FR" over "fr")
          */

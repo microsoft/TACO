@@ -149,26 +149,25 @@ class Remote extends commands.TacoCommandBase implements commands.IDocumentedCom
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
             }
 
-            resources.log("CommandRemoteHeader");
+            logger.log(resources.getString("CommandRemoteHeader"));
 
             return Remote.queryUserForRemoteConfig()
                 .then(Remote.acquireCertificateIfRequired)
                 .then(Remote.constructRemotePlatformSettings)
                 .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
                 .then(function (): void {
-                    resources.log("CommandRemoteSettingsStored", Settings.settingsFile);
+                    logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
 
                     // Print the onboarding experience
-                    ["OnboardingExperienceSectionSeparator",
-                        "HowToUseCommandInstallReqsPlugin",
+                    logger.log("-------------------------------------");
+                    loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
                         "HowToUseCommandBuildPlatform",
                         "HowToUseCommandEmulatePlatform",
-                        "HowToUseCommandRunPlatform"].forEach(msg => resources.log(msg));
+                        "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
 
-                    logger.logLine();
-
-                    ["HowToUseCommandHelp",
-                        "HowToUseCommandDocs"].forEach(msg => resources.log(msg));
+                    ["",
+                        "HowToUseCommandHelp",
+                        "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
              });
         });
     }

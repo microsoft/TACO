@@ -87,12 +87,12 @@ module TacoUtility {
                 Logger.log(programDescription); // If we have a ProgramDescription we use the new format
                 Logger.logLine();
             } else {
-                resources.log("CommandHelpUsageSynopsis"); // If not we fall-back to the old synopsis format
+                Logger.log(resources.getString("CommandHelpUsageSynopsis")); // If not we fall-back to the old synopsis format
             }
 
             Logger.log(util.format("   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
 
-            resources.log("CommandHelpTableTitle");
+            Logger.log(resources.getString("CommandHelpTableTitle"));
 
             var nameDescriptionPairs: INameDescription[] = new Array();
             for (var i in this.commandsFactory.listings) {
