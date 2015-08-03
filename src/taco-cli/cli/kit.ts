@@ -25,8 +25,6 @@ import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
 import errorHelper = require ("./tacoErrorHelper");
 import kitHelper = require ("./utils/kitHelper");
-import platformModule = require ("./platform");
-import pluginModule = require ("./plugin");
 import projectHelper = require ("./utils/projectHelper");
 import readline = require ("readline");
 import resources = require ("../resources/resourceManager");
@@ -99,7 +97,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 
     /**
-     * Prompts the user with the prompt string and returns the response
+     * Prompts for update and updates the project on a affirmative response
      */
     public static promptAndUpdateProject(updateProject: boolean, cliVersion: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
         platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): Q.Promise<any> {
@@ -459,7 +457,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
      * Pretty prints the platform and plugin update information
      */
     private static printProjectUpdateInfo(id: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
-        platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): Q.Promise<any> {
+        platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): Q.Promise<boolean> {
         logger.logLine();
         var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(Object.keys(installedPluginVersions), Object.keys(installedPluginVersions)));
         
@@ -490,16 +488,17 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             deferred.resolve(true);
         }
 
+        deferred.resolve(false);
         return deferred.promise;
     }
 
-    private static printCliProjectUpdateInfo(projectInfo: projectHelper.IProjectInfo, cli: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>): Q.Promise<any> {
+    private static printCliProjectUpdateInfo(projectInfo: projectHelper.IProjectInfo, cli: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>): Q.Promise<boolean> {
         Kit.printCordovaCliUpdateInfo(projectInfo.cordovaCliVersion, cli);
         return Kit.printProjectUpdateInfo(cli, installedPlatformVersions, installedPluginVersions);
     }
 
     private static printKitProjectUpdateInfo(projectInfo: projectHelper.IProjectInfo, kitId: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>, 
-        platformVersionUpdates: IDictionary<string>, pluginVersionUpdates: IDictionary<string>): Q.Promise<any> {
+        platformVersionUpdates: IDictionary<string>, pluginVersionUpdates: IDictionary<string>): Q.Promise<boolean> {
         return kitHelper.getKitInfo(kitId).then(function (info: TacoKits.IKitInfo): Q.Promise<any> {
             Kit.printCordovaCliUpdateInfo(projectInfo.cordovaCliVersion, info["cordova-cli"]);
             return Kit.printProjectUpdateInfo(kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
@@ -547,7 +546,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             .then(function (platformVersions: IDictionary<string>): Q.Promise<any> {
                 platformVersionUpdates = platformVersions;
                 return Kit.getComponentUpdateInfo(projectPath, kitId, installedPlatformVersions, ProjectComponentType.Plugin);
-            }).then(function (pluginVersions: IDictionary<string>): Q.Promise<any> {
+            }).then(function (pluginVersions: IDictionary<string>): Q.Promise<boolean> {
                 pluginVersionUpdates = pluginVersions;
                 return Kit.printKitProjectUpdateInfo(projectInfo, kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
             }).then(function (projectRequiresUpdate: boolean): Q.Promise<any> {
@@ -563,7 +562,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         var installedPlatformVersions: IDictionary<string>;
         var installedPluginVersions: IDictionary<string>;
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.createTacoJsonFile(projectPath, false, cli)])
-        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>): Q.Promise<any> {
+        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>): Q.Promise<boolean> {
                 installedPluginVersions = pluginVersions;
             return Kit.printCliProjectUpdateInfo(projectInfo, cli, installedPlatformVersions, installedPluginVersions);
         }).then(function (projectRequiresUpdate: boolean): Q.Promise<any> {
