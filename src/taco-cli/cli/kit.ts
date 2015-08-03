@@ -545,7 +545,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
             return Kit.getComponentUpdateInfo(projectPath, kitId, installedPlatformVersions, ProjectComponentType.Platform)
             .then(function (platformVersions: IDictionary<string>): Q.Promise<any> {
                 platformVersionUpdates = platformVersions;
-                return Kit.getComponentUpdateInfo(projectPath, kitId, installedPlatformVersions, ProjectComponentType.Plugin);
+                return Kit.getComponentUpdateInfo(projectPath, kitId, installedPluginVersions, ProjectComponentType.Plugin);
             }).then(function (pluginVersions: IDictionary<string>): Q.Promise<boolean> {
                 pluginVersionUpdates = pluginVersions;
                 return Kit.printKitProjectUpdateInfo(projectInfo, kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
