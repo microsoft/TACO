@@ -9,7 +9,6 @@
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 
-
 import child_process = require ("child_process");
 import Q = require ("q");
 import path = require ("path");
