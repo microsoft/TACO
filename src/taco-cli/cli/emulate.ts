@@ -12,9 +12,6 @@
 
 "use strict";
 
-import assert = require ("assert");
-import child_process = require ("child_process");
-import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 
@@ -30,9 +27,8 @@ import tacoUtility = require ("taco-utils");
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
-import UtilHelper = tacoUtility.UtilHelper;
 
-/*
+/**
  * Emulate
  *
  * handles "taco emulate"
