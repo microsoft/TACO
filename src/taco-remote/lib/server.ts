@@ -58,7 +58,7 @@ class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
 
     public getConfig(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): RemoteBuild.IServerModuleConfiguration {
         var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
-        return tacoRemoteConf.getForSaving();
+        return tacoRemoteConf.serialize();
     }
 }
 
