@@ -49,6 +49,7 @@
         "taco-dependency-installer": "file:../taco-dependency-installer",
         "taco-utils": "file:../taco-utils",
         "wrench": "^1.5.8",
+        "colors": "^1.0.3",
         "opener": "~1.4.1"
     },
     "devDependencies": {

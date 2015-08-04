@@ -34,10 +34,11 @@ import tacoUtils = require ("taco-utils");
 import TemplateManager = require ("../cli/utils/templateManager");
 import ms = require ("./utils/memoryStream");
 
+var colors = require("colors/safe");
+
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
-import LogFormatHelper = tacoUtils.LogFormatHelper;
 
 interface IScenarioList {
     [scenario: number]: string;
@@ -456,10 +457,12 @@ describe("taco create", function (): void {
             create.run(commandData).done(() => {
                 var expected = expectedMessages.join("\n");
 
-                var actual = LogFormatHelper.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
+                var actual = colors.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
                 actual = actual.replace(/ {10,}/g, tenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
                 actual = actual.replace(/-{10,}/g, tenMinuses); // We don't want to count -----s when we have a lot of them, so we replace it with 10 (They also depend dynamically on the path length)
                 actual = actual.replace(/ +$/gm, ""); // We also don't want trailing spaces
+                actual = actual.replace(/ \.+ ?\n  +/gm, " ..... "); // We undo the word-wrapping, that we know happens in Mac
+                actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
                 if (expected !== actual) {
                     var expected = alternativeExpectedMessages.join("\n");
                 }
@@ -484,11 +487,11 @@ describe("taco create", function (): void {
             var firstPart = [
                 "CommandCreateStatusCreatingNewProject",
                 "      ----------",
-                "      CommandCreateStatusTableNameDescription ......... HelloTaco",
-                "      CommandCreateStatusTableIDDescription ........... io.cordova.hellocordova",
-                "      CommandCreateStatusTableLocationDescription ....." + continueInNextLine + projectPath,
-                "      CommandCreateStatusTableKitVersionDescription ... 4.3.1-Kit",
-                "      CommandCreateStatusTableReleaseNotesDescription . CommandCreateStatusTableReleaseNotesLink",
+                "      CommandCreateStatusTableNameDescription ..... HelloTaco",
+                "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
+                "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
+                "      CommandCreateStatusTableKitVersionDescription ..... 4.3.1-Kit",
+                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                 "      ----------",
                 "CommandCreateWarningDeprecatedKit"];
 
@@ -513,8 +516,6 @@ describe("taco create", function (): void {
                 done);
         });
 
-        var continueInNextLine = "\n" + tenSpaces;
-
         it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
             this.timeout(60000); // Instaling the node packages during create can take a long time
 
@@ -523,11 +524,11 @@ describe("taco create", function (): void {
             var firstPart = [
                 "CommandCreateStatusCreatingNewProject",
                 "      ----------",
-                "      CommandCreateStatusTableNameDescription .............. HelloTaco",
-                "      CommandCreateStatusTableIDDescription ................ io.cordova.hellocordova",
-                "      CommandCreateStatusTableLocationDescription .........." + continueInNextLine + projectPath,
-                "      CommandCreateStatusTableCordovaCLIVersionDescription . 5.0.0",
-                "      CommandCreateStatusTableReleaseNotesDescription ...... CommandCreateStatusTableReleaseNotesLink",
+                "      CommandCreateStatusTableNameDescription ..... HelloTaco",
+                "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
+                "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
+                "      CommandCreateStatusTableCordovaCLIVersionDescription ..... 5.0.0",
+                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                 "      ----------"];
 
             var lastPart = [

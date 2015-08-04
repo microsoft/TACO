@@ -18,10 +18,10 @@ var should_module = require("should"); // Note not import: We don't want to refe
 import tacoUtils = require ("taco-utils");
 import Templates = require ("../cli/templates");
 import ms = require ("./utils/memoryStream");
-import colors = require ("colors");
+
+var colors = require("colors/safe");
 
 import commands = tacoUtils.Commands.ICommandData;
-import LogFormatHelper = tacoUtils.LogFormatHelper;
 
 describe("templates", function (): void {
     this.timeout(20000);
@@ -75,7 +75,7 @@ describe("templates", function (): void {
                     "",
                     "HowToUseCreateProjectWithTemplate",
                     ""].join("\n");
-                var actual = LogFormatHelper.strip(memoryStdout.contentsAsText()); // The colors add extra characters
+                var actual = colors.strip(memoryStdout.contentsAsText()); // The colors add extra characters
                 actual.should.be.equal(expected);
                 done();
             }, done);

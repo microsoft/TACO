@@ -33,7 +33,6 @@ import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
-import LogFormatHelper = tacoUtility.LogFormatHelper;
 
 /* 
  * Wrapper interface for create command parameters

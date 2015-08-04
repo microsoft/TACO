@@ -94,13 +94,6 @@ module TacoUtility {
         }
 
         /**
-         * Strip the colors of a formatted message
-         */
-        public static strip(msg: string): string {
-            return colors.strip(msg);
-        }
-
-        /**
          * Helper method to convert a message to error format
          * @param {string} input string
          */

@@ -15,12 +15,10 @@ import path = require ("path");
 import argsHelper = require ("./argsHelper");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import resourceSet = require ("./resourceSet");
-import logger = require ("./logger");
 
 import ArgsHelper = argsHelper.ArgsHelper;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 import ResourceSet = resourceSet.ResourceSet;
-import Logger = logger.Logger;
 
 module TacoUtility {
     export class ResourceManager {
