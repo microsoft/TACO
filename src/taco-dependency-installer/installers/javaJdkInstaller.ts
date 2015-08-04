@@ -9,7 +9,6 @@
 /// <reference path="../../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
-/// <reference path="../../typings/wrench.d.ts" />
 
 /// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
 
@@ -17,12 +16,10 @@
 
 import admZip = require ("adm-zip");
 import childProcess = require ("child_process");
-import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
-import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");
 import installerProtocol = require ("../elevatedInstallerProtocol");
@@ -114,6 +111,7 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     private installPkg(): Q.Promise<any> {
+        var self = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var pkgPath: string = path.join("/", "Volumes", "JDK 7 Update 55", "JDK 7 Update 55.pkg");
         var commandLine: string = "installer -pkg " + pkgPath + " -target \"/\"";
@@ -123,9 +121,9 @@ class JavaJdkInstaller extends InstallerBase {
                 var code: number = (<any>err).code;
 
                 if (code) {
-                    deferred.reject(new Error(resources.getString("InstallerError", this.installerDownloadPath, code)));
+                    deferred.reject(new Error(resources.getString("InstallerError", self.installerDownloadPath, code)));
                 } else {
-                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", this.installerDownloadPath, err.name)));
+                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerDownloadPath, err.name)));
                 }
             } else {
                 deferred.resolve({});

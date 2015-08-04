@@ -312,7 +312,10 @@ module TacoDependencyInstaller {
             this.missingDependencies.forEach(function (value: IDependency): void {
                 logger.log(resources.getString("DependencyLabel", value.displayName));
                 logger.log(resources.getString("DependencyVersion", value.version));
-                logger.log(resources.getString("InstallDestination", value.installDestination));
+
+                if (value.installDestination) {
+                    logger.log(resources.getString("InstallDestination", value.installDestination));
+                }
 
                 if (value.licenseUrl) {
                     logger.log(resources.getString("DependencyLicense", value.licenseUrl));

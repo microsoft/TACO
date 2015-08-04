@@ -69,6 +69,63 @@
     "gradle": {
         "isImplicit": true
     },
+    "ios-deploy": {
+        "displayName": "ios-deploy",
+        "installerPath": "./installers/iosDeployInstaller",
+        "prerequisites": [ ],
+        "versions": {
+            "latest": {
+                "darwin": {
+                    "ia32": {
+                        "installSource": "ios-deploy",
+                        "steps": {
+                            "download": false,
+                            "install": true,
+                            "updateVariables": false,
+                            "postInstall": false
+                        }
+                    },
+                    "x64": {
+                        "installSource": "ios-deploy",
+                        "steps": {
+                            "download": false,
+                            "install": true,
+                            "updateVariables": false,
+                            "postInstall": false
+                        }
+                    }
+                }
+            }
+    },
+    "ios-sim": { 
+        "displayName": "ios-sim",
+        "installerPath": "./installers/iosSimInstaller",
+        "prerequisites": [ ],
+        "versions": {
+            "latest": {
+                "darwin": {
+                    "ia32": {
+                        "installSource": "ios-sim",
+                        "steps": {
+                            "download": false,
+                            "install": true,
+                            "updateVariables": false,
+                            "postInstall": false
+                        }
+                    },
+                    "x64": {
+                        "installSource": "ios-sim",
+                        "steps": {
+                            "download": false,
+                            "install": true,
+                            "updateVariables": false,
+                            "postInstall": false
+                        }
+                    }
+                }
+            }
+        }
+    },
     "java": {
         "displayName": "Java SE Development Kit",
         "installerPath": "./installers/javaJdkInstaller",
