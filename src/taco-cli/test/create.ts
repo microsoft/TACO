@@ -439,6 +439,7 @@ describe("taco create", function (): void {
         });
 
         var tenSpaces = "          ";
+        var tenMinuses = "----------";
         function testCreateForArguments(createCommandLineArguments: string[],
             expectedMessages: string[],
             alternativeExpectedMessages: string[],
@@ -457,6 +458,7 @@ describe("taco create", function (): void {
 
                 var actual = LogFormatHelper.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
                 actual = actual.replace(/ {10,}/g, tenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
+                actual = actual.replace(/-{10,}/g, tenMinuses); // We don't want to count -----s when we have a lot of them, so we replace it with 10 (They also depend dynamically on the path length)
                 actual = actual.replace(/ +$/gm, ""); // We also don't want trailing spaces
                 if (expected !== actual) {
                     var expected = alternativeExpectedMessages.join("\n");
@@ -481,18 +483,18 @@ describe("taco create", function (): void {
 
             var firstPart = [
                 "CommandCreateStatusCreatingNewProject",
-                "      ------------------------------------------------------------------------------------------------------------------------------------",
+                "      ----------",
                 "      CommandCreateStatusTableNameDescription ......... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ........... io.cordova.hellocordova",
                 "      CommandCreateStatusTableLocationDescription ....." + continueInNextLine + projectPath,
                 "      CommandCreateStatusTableKitVersionDescription ... 4.3.1-Kit",
                 "      CommandCreateStatusTableReleaseNotesDescription . CommandCreateStatusTableReleaseNotesLink",
-                "      ------------------------------------------------------------------------------------------------------------------------------------",
+                "      ----------",
                 "CommandCreateWarningDeprecatedKit"];
 
             var lastPart = [
                 "CommandCreateSuccessProjectTemplate",
-                "-------------------------------------",
+                "----------",
                 " * HowToUseChangeToProjectFolder",
                 " * HowToUseCommandPlatformAddPlatform",
                 " * HowToUseCommandInstallReqsPlugin",
@@ -520,17 +522,17 @@ describe("taco create", function (): void {
 
             var firstPart = [
                 "CommandCreateStatusCreatingNewProject",
-                "      -----------------------------------------------------------------------------------------------------------------------------------------",
+                "      ----------",
                 "      CommandCreateStatusTableNameDescription .............. HelloTaco",
                 "      CommandCreateStatusTableIDDescription ................ io.cordova.hellocordova",
                 "      CommandCreateStatusTableLocationDescription .........." + continueInNextLine + projectPath,
                 "      CommandCreateStatusTableCordovaCLIVersionDescription . 5.0.0",
                 "      CommandCreateStatusTableReleaseNotesDescription ...... CommandCreateStatusTableReleaseNotesLink",
-                "      -----------------------------------------------------------------------------------------------------------------------------------------"];
+                "      ----------"];
 
             var lastPart = [
                 "CommandCreateSuccessProjectCLI",
-                "-------------------------------------",
+                "----------",
                 " * HowToUseChangeToProjectFolder",
                 " * HowToUseCommandPlatformAddPlatform",
                 " * HowToUseCommandInstallReqsPlugin",
