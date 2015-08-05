@@ -23,9 +23,6 @@ var colors = require("colors/safe");
 import commands = tacoUtils.Commands.ICommandData;
 
 describe("help for a command", function (): void {
-    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
-
     function helpRun(command: string): Q.Promise<any> {
         var help = new Help();
         var data: commands = {
@@ -48,9 +45,13 @@ describe("help for a command", function (): void {
         }, done);
     }
 
-    beforeEach(() => {
-        memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
-        process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
+    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
+    var memoryStdout: ms.MemoryStream;
+    var previous: boolean;
+
+    before(() => {
+        previous = process.env["TACO_UNIT_TEST"];
+        process.env["TACO_UNIT_TEST"] = true;
     });
 
     after(() => {
@@ -59,10 +60,9 @@ describe("help for a command", function (): void {
         process.env["TACO_UNIT_TEST"] = previous;
     });
 
-    var previous: boolean;
-    before(() => {
-        previous = process.env["TACO_UNIT_TEST"];
-        process.env["TACO_UNIT_TEST"] = true;
+    beforeEach(() => {
+        memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+        process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
     });
 
     it("prints the help for create", function (done: MochaDone): void {
