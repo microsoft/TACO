@@ -86,7 +86,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
         var newPath: string = "\"" + addToPathTools + "\":\"" + addToPathPlatformTools + "\":\"$PATH\"";
         var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
-        var updateCommand: string = "echo -e '" + appendToBashProfile + "' >>~/.bash_profile";
+        var updateCommand: string = "echo '" + appendToBashProfile + "' >>~/.bash_profile";
 
         this.androidHomeValue = androidHomeValue;
 
@@ -141,7 +141,8 @@ class AndroidSdkInstaller extends InstallerBase {
     private postInstallDefault(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = path.join(this.androidHomeValue, "tools", "android.bat");
+        var androidCommand: string = os.platform() === "win32" ? "android.bat" : "android";
+        var command: string = path.join(this.androidHomeValue, "tools", androidCommand);
         var androidPackages: string[] = [
             "tools",
             "platform-tools",
@@ -152,11 +153,11 @@ class AndroidSdkInstaller extends InstallerBase {
             "build-tools-22.0.1",
             "android-19",
             "android-21",
-            "android-22",
-            "sys-img-armeabi-v7a-android-19",
-            "sys-img-x86-android-19",
-            "addon-google_apis_x86-google-19",
-            "addon-google_apis-google-19"
+            "android-22"//,
+            //"sys-img-armeabi-v7a-android-19",
+            //"sys-img-x86-android-19",
+            //"addon-google_apis_x86-google-19",
+            //"addon-google_apis-google-19"
         ];
         var args: string[] = [
             "update",

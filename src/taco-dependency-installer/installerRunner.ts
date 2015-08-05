@@ -106,36 +106,42 @@ class InstallerRunner {
                 throw new Error(resources.getString("UnknownVersion", value.id, value.version));
             }
 
-            // Verify the path is valid
-            var resolvedPath: string = path.resolve(value.installDestination);
+            // If an install destination is present, validate it
+            if (value.installDestination) {
+                // Verify the path is valid
+                var resolvedPath: string = path.resolve(value.installDestination);
 
-            if (!utilHelper.isPathValid(resolvedPath)) {
-                throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
-            }
-
-            // Verify the path is empty if it exists
-            if (fs.existsSync(value.installDestination)) {
-                if (fs.readdirSync(value.installDestination).length > 0) {
-                    throw new Error(resources.getString("PathNotEmpty", value.displayName, value.installDestination));
-                }
-            }
-
-            // Verify that this path is not already used by another dependency
-            var dependencyWithSamePath: string;
-            var isPathUnique: boolean = !installPaths.some(function (previousInstallPath: { path: string; displayName: string; }): boolean {
-                var path1: string = path.resolve(previousInstallPath.path);
-                var path2: string = path.resolve(value.installDestination);
-
-                if (path1 === path2) {
-                    dependencyWithSamePath = previousInstallPath.displayName;
-                    return true;
+                if (!utilHelper.isPathValid(resolvedPath)) {
+                    throw new Error(resources.getString("InvalidInstallPath", value.displayName, value.installDestination));
                 }
 
-                return false;
-            });
+                // Verify that the destination folder is empty if it already exists
+                if (fs.existsSync(value.installDestination)) {
+                    if (fs.readdirSync(value.installDestination).length > 0) {
+                        throw new Error(resources.getString("PathNotEmpty", value.displayName, value.installDestination));
+                    }
+                }
 
-            if (!isPathUnique) {
-                throw new Error(resources.getString("PathNotUnique", value.displayName, dependencyWithSamePath));
+                // Verify that this path is not already used by another dependency
+                var dependencyWithSamePath: string;
+                var isPathUnique: boolean = !installPaths.some(function (previousInstallPath: { path: string; displayName: string; }): boolean {
+                    var path1: string = path.resolve(previousInstallPath.path);
+                    var path2: string = path.resolve(value.installDestination);
+
+                    if (path1 === path2) {
+                        dependencyWithSamePath = previousInstallPath.displayName;
+                        return true;
+                    }
+
+                    return false;
+                });
+
+                if (!isPathUnique) {
+                    throw new Error(resources.getString("PathNotUnique", value.displayName, dependencyWithSamePath));
+                }
+
+                // Cache install path for the next dependency validations
+                installPaths.push({ displayName: value.displayName, path: value.installDestination });
             }
 
             // At this point, the values appear valid, so proceed with the instantiation of the installer for this dependency
@@ -146,9 +152,6 @@ class InstallerRunner {
 
             // Add the dependency to our list of dependencies to install
             self.missingDependencies.push(dependencyWrapper);
-
-            // Cache install path
-            installPaths.push({ displayName: value.displayName, path: value.installDestination });
         });
     }
 

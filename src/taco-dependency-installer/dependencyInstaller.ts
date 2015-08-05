@@ -131,7 +131,7 @@ module TacoDependencyInstaller {
                     if (!self.dependenciesDataWrapper.isImplicit(value.id)) {
                         var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.getFirstValidVersion(value.id);
                         var installPath: string = self.dependenciesDataWrapper.getInstallDirectory(value.id, versionToUse);
-                        var expandedInstallPath: string = path.resolve(utilHelper.expandEnvironmentVariables(installPath));
+                        var expandedInstallPath: string = installPath ? path.resolve(utilHelper.expandEnvironmentVariables(installPath)) : null;
 
                         var dependencyInfo: IDependency = {
                             id: value.id,
@@ -490,15 +490,15 @@ module TacoDependencyInstaller {
         }
 
         private spawnElevatedInstallerDarwin(): Q.Promise<number> {
-            var self = this;
             var deferred: Q.Deferred<number> = Q.defer<number>();
             var elevatedInstallerScript: string = path.resolve(__dirname, "elevatedInstaller.js");
             var command: string = "sudo";
             var args: string[] = [
                 "node",
-                elevatedInstallerScript
+                elevatedInstallerScript,
+                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
             ];
-            var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+            var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "inherit" });
 
             cp.on("error", function (err: Error): void {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));

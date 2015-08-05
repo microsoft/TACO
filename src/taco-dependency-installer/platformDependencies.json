@@ -164,7 +164,7 @@
                     "x64": {
                         "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-macosx-x64.dmg",
                         "sha1": "3ce4892fc99dc7d5e3af829d09bd87b163f9939d",
-                        "bytes": 98330824,
+                        "bytes": 188286095,
                         "steps": {
                             "download": true,
                             "install": true,
