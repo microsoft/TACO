@@ -75,7 +75,7 @@ module TacoDependencyInstaller {
         public run(requirementsResult: any): Q.Promise<any> {
             // Installing dependencies is currently only supported on Windows
             // TODO (DevDiv 1172346): Support Mac OS as well
-            if (process.platform !== "win32" || process.platform !== "darwin") {
+            if (process.platform !== "win32" && process.platform !== "darwin") {
                 return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
 
@@ -371,14 +371,16 @@ module TacoDependencyInstaller {
         }
 
         private prepareCommunications(): Q.Promise<any> {
+            var self = this;
+
             if (os.platform() === "win32") {
                 // For Windows we need to prepare a local server to communicate with the elevated installer process
                 return Q({})
                     .then(function (): void {
-                        this.createServer();
+                        self.createServer();
                     })
                     .then(function (): Q.Promise<any> {
-                        return this.connectServer();
+                        return self.connectServer();
                     });
             }
 

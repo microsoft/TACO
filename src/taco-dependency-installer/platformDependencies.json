@@ -96,8 +96,9 @@
                     }
                 }
             }
+        }
     },
-    "ios-sim": { 
+    "ios-sim": {
         "displayName": "ios-sim",
         "installerPath": "./installers/iosSimInstaller",
         "prerequisites": [ ],
@@ -159,7 +160,7 @@
                         }
                     }
                 },
-                "darwin": { 
+                "darwin": {
                     "x64": {
                         "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-macosx-x64.dmg",
                         "sha1": "3ce4892fc99dc7d5e3af829d09bd87b163f9939d",

@@ -123,19 +123,21 @@ class ElevatedInstaller {
     }
 
     private prepareCommunications(): Q.Promise<any> {
+        var self = this;
+
         switch (process.platform) {
             case "win32":
-                // Instantiate the logger
-                this.logger = new SocketLogger(this.socketHandle);
-
                 // Connect to the communication server
-                return this.connectToServer();
+                return this.connectToServer()
+                    .then(function (): void {
+                        // Instantiate the logger
+                        self.logger = new SocketLogger(self.socketHandle);
+                    });
             case "darwin":
                 // Instantiate the logger
                 this.logger = new DarwinLogger();
                 return Q({});
             default:
-                this.logger.logError(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform).toString());
                 this.exitProcess(protocolExitCode.FatalError);
         }
     }
