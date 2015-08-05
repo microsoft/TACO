@@ -178,10 +178,11 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<any> {
             currentKitId = kitId;
-            if(kitId) {
+            if (kitId) {
                 logger.log(resources.getString("CommandKitListCurrentKit", kitId));
                 logger.logLine();
             }
+            
             return Q.resolve({});
         })
             .then(function (): Q.Promise<any> {
