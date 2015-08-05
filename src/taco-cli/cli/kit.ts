@@ -176,11 +176,12 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         var availableKits: INameDescription[] = [];
         var currentKitId: string = "";
 
-        logger.log(resources.getString("CommandKitList"));
-        logger.logLine();
-        
         return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<any> {
             currentKitId = kitId;
+            if(kitId) {
+                logger.log(resources.getString("CommandKitListCurrentKit", kitId));
+                logger.logLine();
+            }
             return Q.resolve({});
         })
             .then(function (): Q.Promise<any> {
@@ -220,6 +221,8 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
             kitsToPrint.push.apply(kitsToPrint, availableKits);
             kitsToPrint.push.apply(kitsToPrint, deprecatedKits);
+            logger.log(resources.getString("CommandKitList"));
+            logger.logLine();
             LoggerHelper.logNameDescriptionTable(kitsToPrint);
             return Q.resolve({});
         });
@@ -357,7 +360,7 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static getCurrentKitInfo(): Q.Promise<string> {
         var deferred = Q.defer<string>();
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
-            deferred.resolve(projectInfo.tacoKitId || "");
+            deferred.resolve(projectInfo.tacoKitId);
             return deferred.promise;
         });
     }
@@ -396,13 +399,13 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         return Object.keys(components).reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, componentName: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
-                var targets: string[] = [componentName];
+                var componentOverride: string = componentName + "@" + components[componentName];
                 var downloadOptions: Cordova.ICordovaDownloadOptions = { searchpath: "", noregistry: false, usegit: false, cli_variables: {}, browserify: "", link: "", save: true, shrinkwrap: false };
                 var command = (componentType === ProjectComponentType.Platform) ? "platform" : "plugin";
-                return Kit.invokeComponentCommandSilent(cliVersion, command, "remove", targets, downloadOptions)
+                return Kit.invokeComponentCommandSilent(cliVersion, command, "remove", [componentName], downloadOptions)
                 .then(function (): Q.Promise<any> {    
                     downloadOptions.save = true;
-                    return Kit.invokeComponentCommandSilent(cliVersion, command, "add", targets, downloadOptions);
+                    return Kit.invokeComponentCommandSilent(cliVersion, command, "add", [componentOverride], downloadOptions);
                 });
             });
         }, Q({}));

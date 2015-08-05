@@ -57,7 +57,7 @@
             "default": true,
             "platforms": {
                 "android": {
-                    "version": "4.0.2"
+                    "version": "4.1.0"
                 },
                 "ios": {
                     "version": "3.8.0"
@@ -66,7 +66,7 @@
                     "src": "https://github.com/apache/cordova-windows.git"
                 },
                 "wp8": {
-                    "version": "4.0.2"
+                    "version": "3.8.0"
                 },
                 "browser": {
                     "version": "3.6.2"
@@ -99,16 +99,16 @@
             "cordova-cli": "5.1.1",
             "platforms": {
                 "android": {
-                    "version": "4.2.3"
+                    "version": "4.1.1"
                 },
                 "ios": {
-                    "version": "4.2.2"
+                    "version": "3.9.0"
                 },
                 "windows": {
-                    "version": "4.0.0"
+                    "version": "3.8.2"
                 },
                 "wp8": {
-                    "version": "4.0.2"
+                    "version": "3.8.1"
                 }
             },
             "plugins": {
