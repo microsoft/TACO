@@ -103,7 +103,12 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected postInstallDarwin(): Q.Promise<any> {
-        return this.postInstallDefault();
+        var self = this;
+
+        return this.addExecutePermission()
+            .then(function (): Q.Promise<any> {
+                return self.postInstallDefault();
+            });
     }
 
     private downloadDefault(): Q.Promise<any> {
@@ -138,6 +143,21 @@ class AndroidSdkInstaller extends InstallerBase {
         return Q.resolve({});
     }
 
+    private addExecutePermission(): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var command: string = "chmod a+x " + path.join(this.androidHomeValue, "tools", "android");
+
+        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            if (error) {
+                deferred.reject(error);
+            } else {
+                deferred.resolve({});
+            }
+        });
+
+        return deferred.promise;
+    }
+
     private postInstallDefault(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
@@ -153,11 +173,7 @@ class AndroidSdkInstaller extends InstallerBase {
             "build-tools-22.0.1",
             "android-19",
             "android-21",
-            "android-22"//,
-            //"sys-img-armeabi-v7a-android-19",
-            //"sys-img-x86-android-19",
-            //"addon-google_apis_x86-google-19",
-            //"addon-google_apis-google-19"
+            "android-22"
         ];
         var args: string[] = [
             "update",

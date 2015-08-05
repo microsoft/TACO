@@ -534,7 +534,7 @@ module TacoDependencyInstaller {
                     throw errorHelper.get(TacoErrorCodes.UnknownExitCode);
             }
 
-            if (os.platform() === "win32" && (code === installerExitCode.Success || code === installerExitCode.CompletedWithErrors)) {
+            if (code === installerExitCode.Success || code === installerExitCode.CompletedWithErrors) {
                 logger.log(resources.getString("RestartCommandPrompt"));
             }
         }

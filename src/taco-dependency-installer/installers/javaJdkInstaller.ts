@@ -33,6 +33,7 @@ import utils = tacoUtils.UtilHelper;
 
 class JavaJdkInstaller extends InstallerBase {
     private installerDownloadPath: string;
+    private darwinMountpointName: string;
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
         super(installerInfo, softwareVersion, installTo, logger, steps);
@@ -96,10 +97,17 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     private attachDmg(): Q.Promise<any> {
+        var self = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "hdiutil attach " + this.installDestination;
+        var command: string = "hdiutil attach " + this.installerDownloadPath;
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            // Save the mounted volume's name
+            var stringOutput: string = stdout.toString();
+            var capturedResult: string[] = /\/Volumes\/(.+)/.exec(stringOutput);
+
+            self.darwinMountpointName = capturedResult[1];
+
             if (error) {
                 deferred.reject(error);
             } else {
@@ -113,7 +121,7 @@ class JavaJdkInstaller extends InstallerBase {
     private installPkg(): Q.Promise<any> {
         var self = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var pkgPath: string = path.join("/", "Volumes", "JDK 7 Update 55", "JDK 7 Update 55.pkg");
+        var pkgPath: string = path.join("/", "Volumes", this.darwinMountpointName, this.darwinMountpointName + ".pkg");
         var commandLine: string = "installer -pkg " + pkgPath + " -target \"/\"";
 
         childProcess.exec(commandLine, function (err: Error): void {
@@ -135,7 +143,8 @@ class JavaJdkInstaller extends InstallerBase {
 
     private detachDmg(): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "hdiutil detach /Volumes/JDK\ 7\ Update\ 55/";
+        var mountPath: string = path.join("/", "Volumes", this.darwinMountpointName);
+        var command: string = "hdiutil detach " + mountPath;
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {

@@ -18,10 +18,10 @@ module ElevatedInstallerProtocol {
      */
     export enum ExitCode {
         Success = 0,
-        CompletedWithErrors = 2337,
-        NoAdminRights = 2674,
-        CouldNotConnect = 5674,
-        FatalError = 8674
+        CompletedWithErrors = 12,
+        NoAdminRights = 33,
+        CouldNotConnect = 37,
+        FatalError = 108
     }
 
     export enum DataType {
