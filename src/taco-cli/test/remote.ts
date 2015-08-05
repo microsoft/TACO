@@ -233,6 +233,7 @@ describe("taco remote", function (): void {
         // Here you can write to the console with logger.log(...) and then you'll be able to 
         //    retrieve the contents from the memory stream
         it("prints the onboarding experience when adding a new remote", function (done: MochaDone): void {
+            this.timeout(5000);
             var desiredState = {
                 host: "localhost",
                 port: 3000,
