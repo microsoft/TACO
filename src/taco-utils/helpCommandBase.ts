@@ -119,7 +119,7 @@ module TacoUtility {
             var args: any[] = this.commandsFactory.listings[command].args;
             var list: ICommandInfo = this.commandsFactory.listings[command];
             this.printCommandHeader(this.cliName, command, list.synopsis, list.description);
-            var optionsLeftIndent: string = Array(HelpCommandBase.OptionIndent + 1).join(" ");
+            var optionsLeftIndent: string = LoggerHelper.repeat(" ", HelpCommandBase.OptionIndent);
             if (args) {
                 args.forEach(arg => {
                     // Push the arg first
@@ -150,6 +150,7 @@ module TacoUtility {
             var indent2 = LoggerHelper.getDescriptionColumnIndent(longestKeyLength);
 
             if (list.args) {
+                Logger.log(resources.getString("CommandHelpUsageParameters"));
                 this.printCommandTable(list.args, LoggerHelper.DefaultIndent, indent2);
             }
 
@@ -207,18 +208,18 @@ module TacoUtility {
         }
 
         private printCommandHeader(cliName: string, commandName: string, synopsis: string, description?: string): void {
-            if (synopsis) {
-                Logger.log(resources.getString("CommandHelpUsageSynopsis"));
-                Logger.log(util.format("   <synopsis>%s %s %s</synopsis><br/>", cliName, commandName, synopsis));
+            if (description) {
+                Logger.log(this.getDescriptionString(description));
             }
 
-            if (description) {
-                Logger.log(this.getDescriptionString(description) + "<br/>");
+            if (synopsis) {
+                var leftIndent: string = LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent);
+                Logger.log(util.format("%s<synopsis>%s %s %s</synopsis><br/>", leftIndent, cliName, commandName, synopsis));
             }
         }
 
         private printAliasTable(commandAliases: ICommandAlias[]): void {
-            var leftIndent: string = Array(LoggerHelper.DefaultIndent + 1).join(" ");
+            var leftIndent: string = LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent);
             commandAliases.forEach(cmdAliasPair => {
                 Logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdAliasPair.alias, "->", cmdAliasPair.command));
             });
