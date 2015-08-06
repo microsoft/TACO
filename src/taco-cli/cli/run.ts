@@ -197,20 +197,13 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
-                    var promise: Q.Promise<any> = Q({});
-                    var remoteRunFunc = function (): Q.Promise<any> {
-                        return Run.runRemotePlatform(platform.platform, commandData);
-                    };
-                    var localRunFunc = function (): Q.Promise<any> {
-                        return CordovaWrapper.run(commandData, platform.platform);
-                    };
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just run local, and failures are failures
-                            return promise.then(localRunFunc);
+                            return CordovaWrapper.run(commandData, platform.platform);
                         case Settings.BuildLocationType.Remote:
                             // Just run remote, and failures are failures
-                            return promise.then(remoteRunFunc);
+                            return Run.runRemotePlatform(platform.platform, commandData);
                     }
                 });
             }, Q({}));
