@@ -135,6 +135,19 @@ class CordovaWrapper {
         }
     }
 
+    public static emulate(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                        return cordova.raw.emulate(cordovaHelper.toCordovaRunArguments(commandData, platform));
+                    });
+            } else {
+                return CordovaWrapper.cli(["emulate"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
+            }
+        });
+    }
+
     public static requirements(platforms: string[]): Q.Promise<any> {
         // Try to see if we are in a taco project
         var projectInfo: projectHelper.IProjectInfo;
