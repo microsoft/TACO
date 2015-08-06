@@ -91,7 +91,7 @@ class JavaJdkInstaller extends InstallerBase {
             .then(function (): Q.Promise<any> {
                 return self.installPkg();
             })
-            .then(function (): Q.Promise<any> {
+            .finally(function (): Q.Promise<any> {
                 return self.detachDmg();
             });
     }
@@ -144,7 +144,7 @@ class JavaJdkInstaller extends InstallerBase {
     private detachDmg(): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var mountPath: string = path.join("/", "Volumes", this.darwinMountpointName);
-        var command: string = "hdiutil detach " + mountPath;
+        var command: string = "hdiutil detach \"" + mountPath + "\"";
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
