@@ -9,10 +9,12 @@
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
 
+import child_process = require ("child_process");
 import Q = require ("q");
 import path = require ("path");
 import fs = require ("fs");
 
+import cordovaHelper = require ("./cordovaHelper");
 import kitHelper = require ("./kitHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -60,7 +62,7 @@ class ProjectHelper {
         var projectPath: string = process.cwd();
         var parentPath: string;
         var atFsRoot: boolean = false;
-        while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, ProjectHelper.TacoJsonFileName))) {
+        while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, ProjectHelper.TacoJsonFileName)) && !fs.existsSync(path.join(projectPath, ProjectHelper.ConfigXmlFileName))) {
             // Navigate up one level until either taco.json is found or the parent path is invalid
             parentPath = path.resolve(projectPath, "..");
             if (parentPath !== projectPath) {
@@ -142,6 +144,75 @@ class ProjectHelper {
         }
 
         return deferred.promise;
+    }
+
+    /**
+     *  public helper that returns all the installed components - platforms/plugins
+     */
+    public static getInstalledComponents(projectDir: string, componentDirName: string): Q.Promise<string[]> {
+        var components: string[] = [];
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var componentDir = path.join(projectDir, componentDirName);
+        if (!fs.existsSync(componentDir)) {
+            return Q.resolve(components);
+        }
+
+        components = fs.readdirSync(componentDir).filter(function (component: string): boolean {
+            return fs.statSync(path.join(componentDir, component)).isDirectory();
+        });
+
+        return Q.resolve(components);
+    }
+
+    /**
+     *  public helper that gets the version of the installed platforms
+     */
+    public static getInstalledPlatformVersions(projectDir: string): Q.Promise<any> {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var onWindows = process.platform === "win32";
+        var deferred = Q.defer<any>();
+        var platformVersions: cordovaHelper.IDictionary<string> = {};
+        return ProjectHelper.getInstalledComponents(projectDir, "platforms")
+        .then(function (platformsInstalled: string[]): Q.Promise<any> {
+            return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
+                var deferredProcPromise = Q.defer<any>();
+                var cmdName: string = "version";
+                if (onWindows) { 
+                    cmdName = cmdName + ".bat";
+                }
+
+                var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
+                var versionProc = child_process.spawn(cmdPath);
+                versionProc.stdout.on("data", function (data: any): void {
+                    var version: string = data.toString();
+                    platformVersions[platform] = version.trim();
+                    deferredProcPromise.resolve(version);
+                });
+                return deferredProcPromise.promise;
+            }));
+        }).then(function (): Q.Promise<any> {
+            deferred.resolve(platformVersions);           
+            return deferred.promise;
+        });
+    }
+
+    /**
+     *  public helper that gets the version of the installed plugins
+     */
+    public static getInstalledPluginVersions(projectDir: string): Q.Promise<any> {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var pluginVersions: cordovaHelper.IDictionary<string> = {};
+        return ProjectHelper.getInstalledComponents(projectDir, "plugins")
+        .then(function (pluginsInstalled: string[]): Q.Promise<any> {
+            pluginsInstalled.forEach(function (plugin: string): void {
+                var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
+                var pluginInfo = require(pluginPackgeJson);
+                if (pluginInfo) {
+                    pluginVersions[plugin] = pluginInfo["version"];
+                }
+            });       
+            return Q.resolve(pluginVersions);
+        });
     }
 
     /**

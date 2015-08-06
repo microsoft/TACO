@@ -105,5 +105,13 @@ declare module TacoUtility {
          * Returns null otherwise
          */
         public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
+
+        /**
+         * Sets the global LogLevel setting for Taco by parsing the given command line args. If the specified log level is
+         * not recognized, then it is ignored (this method won't set the global setting in that case).
+         *
+         * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
+         */
+        public static initializeLogLevel(args: string[]): void;
     }
 }

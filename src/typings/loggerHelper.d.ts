@@ -32,6 +32,13 @@ declare module TacoUtility {
         public static logNameDescriptionTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number, dotsCharacter?: string): void;
 
         /**
+         * Helper method to log an array of name/value pairs with proper indentation and horizontal borders (a line at the top and bottom)
+         * @param {INameDescription[]} array of name/description pairs
+         * @param {number} indent1 amount of spaces to be printed before the key, if not specified default value (3) is used
+         */
+        public static logNameDescriptionTableWithHorizontalBorders(nameDescriptionPairs: INameDescription[], indent1?: number): void;
+
+        /**
          * Helper method to log a given name/value with proper indentation
          * @param {string} name name which comes on left. can't have any styling tags
          * @param {string} value values comes after bunch of dots. can have styling tags includeing <br/>
@@ -72,5 +79,10 @@ declare module TacoUtility {
          * @param {indent} constant indentation to use on the left
          */
         public static printJson(obj: any, indent?: number): void;
+
+        /**
+         * Logs an array of strings with proper indentation and a fixed bullet (*) (This is a list, in the sense of an HTML <ul><li></li></ul> list)
+         */
+        public static logList(listElements: string[]): void;
     }
 }

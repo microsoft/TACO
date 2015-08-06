@@ -32,6 +32,9 @@ import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 import TemplateManager = require ("../cli/utils/templateManager");
+import ms = require ("./utils/memoryStream");
+
+var colors = require("colors/safe");
 
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
@@ -163,11 +166,11 @@ describe("taco create", function (): void {
 
     function runScenario(scenario: number, kitUsed: string, templateUsed: string, tacoJsonFileContents?: string): Q.Promise<any> {
         return templateManager.getTemplateEntriesCount(kitUsed, templateUsed)
-                .then(function (templateEntries: number): Q.Promise<any> {
-                    var totalEntries: number = templateEntries + tacoFileCount + cordovaFileCounts[kitUsed];
+            .then(function (templateEntries: number): Q.Promise<any> {
+                var totalEntries: number = templateEntries + tacoFileCount + cordovaFileCounts[kitUsed];
 
-                    return runScenarioWithExpectedFileCount(scenario, totalEntries, tacoJsonFileContents);
-                });
+                return runScenarioWithExpectedFileCount(scenario, totalEntries, tacoJsonFileContents);
+            });
     }
 
     function runFailureScenario<T>(scenario: number, expectedErrorCode?: T): Q.Promise<any> {
@@ -419,6 +422,135 @@ describe("taco create", function (): void {
 
             wrench.mkdirSyncRecursive(path.join(projectPath, "some", "nested", "folders"), 511); // 511 decimal is 0777 octal
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreatePathNotEmpty).then(done, done);
+        });
+    });
+
+    describe("Onboarding experience", () => {
+        var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
+        var memoryStdout: ms.MemoryStream;
+
+        beforeEach(() => {
+            memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+            process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
+        });
+
+        after(() => {
+            // We just need to reset the stdout just once, after all the tests have finished
+            process.stdout.write = stdoutWrite;
+        });
+
+        var tenSpaces = "          ";
+        var tenMinuses = "----------";
+        function testCreateForArguments(createCommandLineArguments: string[],
+            expectedMessages: string[],
+            alternativeExpectedMessages: string[],
+            done: MochaDone): void {
+            // Some messages are only printed the first time something is executed. When we run all the tests
+            // all those messages don't get printed, but if we only run the onboarding tests, they are the first
+            // tests to run, so they do get printed. We accept both options and we validate we got one of them
+            var commandData: tacoUtils.Commands.ICommandData = {
+                options: {},
+                original: createCommandLineArguments,
+                remain: createCommandLineArguments.slice()
+            };
+            var create = new Create();
+            create.run(commandData).done(() => {
+                var expected = expectedMessages.join("\n");
+
+                var actual = colors.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
+                actual = actual.replace(/ {10,}/g, tenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
+                actual = actual.replace(/-{10,}/g, tenMinuses); // We don't want to count -----s when we have a lot of them, so we replace it with 10 (They also depend dynamically on the path length)
+                actual = actual.replace(/ +$/gm, ""); // We also don't want trailing spaces
+                actual = actual.replace(/ \.+ ?\n  +/gm, " ..... "); // We undo the word-wrapping, that we know happens in Mac
+                actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
+                if (expected !== actual) {
+                    var expected = alternativeExpectedMessages.join("\n");
+                }
+
+                actual.should.be.equal(expected);
+                done();
+            }, (arg: any) => {
+                done(arg);
+            });
+        }
+
+        var downloadingDependenciesOutput = ["",
+            "PackageLoaderDownloadingMessage",
+            "",
+            "PackageLoaderDownloadCompletedMessage"];
+
+        it("prints the onboarding experience when using a kit", function (done: MochaDone): void {
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+
+            var projectPath = getProjectPath("onboarding-experience", 1);
+
+            var firstPart = [
+                "CommandCreateStatusCreatingNewProject",
+                "      ----------",
+                "      CommandCreateStatusTableNameDescription ..... HelloTaco",
+                "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
+                "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
+                "      CommandCreateStatusTableKitVersionDescription ..... 4.3.1-Kit",
+                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
+                "      ----------",
+                "CommandCreateWarningDeprecatedKit"];
+
+            var lastPart = [
+                "CommandCreateSuccessProjectTemplate",
+                "----------",
+                " * HowToUseChangeToProjectFolder",
+                " * HowToUseCommandPlatformAddPlatform",
+                " * HowToUseCommandInstallReqsPlugin",
+                " * HowToUseCommandAddPlugin",
+                " * HowToUseCommandSetupRemote",
+                " * HowToUseCommandBuildPlatform",
+                " * HowToUseCommandEmulatePlatform",
+                " * HowToUseCommandRunPlatform",
+                "",
+                "HowToUseCommandHelp",
+                "HowToUseCommandDocs",
+                ""];
+            testCreateForArguments([projectPath, "--kit", "4.3.1-Kit"],
+                firstPart.concat(lastPart),
+                firstPart.concat(downloadingDependenciesOutput, lastPart),
+                done);
+        });
+
+        it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+
+            var projectPath = getProjectPath("onboarding-experience", 2);
+
+            var firstPart = [
+                "CommandCreateStatusCreatingNewProject",
+                "      ----------",
+                "      CommandCreateStatusTableNameDescription ..... HelloTaco",
+                "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
+                "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
+                "      CommandCreateStatusTableCordovaCLIVersionDescription ..... 5.0.0",
+                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
+                "      ----------"];
+
+            var lastPart = [
+                "CommandCreateSuccessProjectCLI",
+                "----------",
+                " * HowToUseChangeToProjectFolder",
+                " * HowToUseCommandPlatformAddPlatform",
+                " * HowToUseCommandInstallReqsPlugin",
+                " * HowToUseCommandAddPlugin",
+                " * HowToUseCommandSetupRemote",
+                " * HowToUseCommandBuildPlatform",
+                " * HowToUseCommandEmulatePlatform",
+                " * HowToUseCommandRunPlatform",
+                "",
+                "HowToUseCommandHelp",
+                "HowToUseCommandDocs",
+                ""];
+
+            testCreateForArguments([projectPath, "--cli", "5.0.0"],
+                firstPart.concat(lastPart),
+                firstPart.concat(downloadingDependenciesOutput, lastPart),
+                done);
         });
     });
 });

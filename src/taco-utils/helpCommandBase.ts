@@ -24,6 +24,7 @@ import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
 import resourceManager = require ("./resourceManager");
 import resources = require ("./resources/resourceManager");
+import telemetryHelper = require ("./telemetryHelper");
 
 import CommandsFactory = commands.Commands.CommandFactory;
 import ICommandData = commands.Commands.ICommandData;
@@ -32,6 +33,7 @@ import IDocumentedCommand = commands.Commands.IDocumentedCommand;
 import Logger = logger.Logger;
 import LoggerHelper = loggerHelper.LoggerHelper;
 import ResourceManager = resourceManager.ResourceManager;
+import TelemetryHelper = telemetryHelper.TelemetryHelper;
 
 module TacoUtility {
     /*
@@ -66,28 +68,31 @@ module TacoUtility {
          * entry point for printing helper
          */
         public run(data: ICommandData): Q.Promise<any> {
-            this.printHeader();
             if (data.original && data.original.length > 0 && this.commandExists(data.original[0])) {
                 this.printCommandUsage(data.original[0]);
             } else {
                 this.printGeneralUsage();
             }
-
+            
+            TelemetryHelper.sendBasicCommandTelemetry("help", data.original);
             return Q({});
-        }
-
-        /**
-         * prints out header while displaying help for a command
-         */
-        private printHeader(): void {
-            Logger.logLine();
         }
 
         /**
          * prints out general usage of all support TACO commands, iterates through commands and their descriptions
          */
         private printGeneralUsage(): void {
-            this.printCommandHeader(this.cliName, "command", "[options]");
+            var programDescription: string = this.cliResources.getString("ProgramDescription");
+            if (programDescription) {
+                Logger.log(programDescription); // If we have a ProgramDescription we use the new format
+                Logger.logLine();
+            } else {
+                Logger.log(resources.getString("CommandHelpUsageSynopsis")); // If not we fall-back to the old synopsis format
+            }
+
+            Logger.log(util.format("   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
+
+            Logger.log(resources.getString("CommandHelpTableTitle"));
 
             var nameDescriptionPairs: INameDescription[] = new Array();
             for (var i in this.commandsFactory.listings) {

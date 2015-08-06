@@ -27,6 +27,7 @@ import Settings = require ("../cli/utils/settings");
 import RemoteMod = require ("../cli/remote");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
+import ms = require ("./utils/memoryStream");
 
 import utils = TacoUtility.UtilHelper;
 
@@ -213,5 +214,68 @@ describe("taco remote", function (): void {
         }).done(function (): void {
             mocha();
         }, mocha);
+    });
+
+    describe("Onboarding experience", function (): void {
+        var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
+        var memoryStdout: ms.MemoryStream;
+
+        beforeEach(() => {
+            memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+            process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
+        });
+
+        after(() => {
+            // We just need to reset the stdout just once, after all the tests have finished
+            process.stdout.write = stdoutWrite;
+        });
+
+        // Here you can write to the console with logger.log(...) and then you'll be able to 
+        //    retrieve the contents from the memory stream
+        it("prints the onboarding experience when adding a new remote", function (done: MochaDone): void {
+            this.timeout(5000);
+            var desiredState = {
+                host: "localhost",
+                port: 3000,
+                pin: "",
+                mountPoint: "testMountPoint"
+            };
+            var expectedSequence = [
+                {
+                    expectedUrl: "/modules/taco-remote",
+                    head: {
+                        "Content-Type": "text/plain"
+                    },
+                    statusCode: 200,
+                    response: desiredState.mountPoint
+                }
+            ];
+
+            var mockServer = http.createServer();
+            var serverFunction = ServerMock.generateServerFunction(done, expectedSequence);
+            mockServer.listen(desiredState.port);
+            mockServer.on("request", serverFunction);
+
+            RemoteMod.CliSession = RemoteMock.makeCliMock(done, () => { }, desiredState, () => { });
+            remoteRun(["add", "ios"]).finally(function (): void {
+                mockServer.close();
+            }).done(() => {
+                var messages = ["CommandRemoteHeader",
+                    "CommandRemoteSettingsStored",
+                    "-------------------------------------",
+                    " * HowToUseCommandInstallReqsPlugin",
+                    " * HowToUseCommandBuildPlatform",
+                    " * HowToUseCommandEmulatePlatform",
+                    " * HowToUseCommandRunPlatform",
+                    "",
+                    "HowToUseCommandHelp",
+                    "HowToUseCommandDocs",
+                    ""]; // Get the expected console output
+                var expected = messages.join("\n");
+                var actual = memoryStdout.contentsAsText();
+                actual.should.be.equal(expected);
+                done();
+            }, done);
+        });
     });
 });

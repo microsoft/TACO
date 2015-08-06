@@ -13,6 +13,7 @@
 
 "use strict";
 
+import assert = require ("assert");
 import child_process = require ("child_process");
 import os = require ("os");
 import path = require ("path");
@@ -33,8 +34,8 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
-    private static CordovaNpmPackageName: string = "cordova";
     private static CordovaRequirementsMinVersion: string = "5.1.0";
+    private static CordovaNpmPackageName: string = "cordova";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
         var deferred = Q.defer<string>();
@@ -97,15 +98,52 @@ class CordovaWrapper {
         });
     }
 
-    public static run(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    /**
+     * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
+     *
+     * @param {string} The name of the cordova command to be invoked
+     * @param {string} The version of the cordova CLI to use
+     * @param {ICordovaCommandParameters} The cordova command parameters
+     *
+     * @return {Q.Promise<any>} An empty promise
+     */
+    public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData = null, isSilent: boolean = false): Q.Promise<any> {
+        if (cordovaCliVersion) {
+            var cordova: typeof Cordova;
+            return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
+                .then(function (cdv: typeof Cordova): Q.Promise<any> {
+                cordova = cdv;
+                // Hook the event listeners. This will help us get the logs that cordova emits during platform/plugin operations
+                CordovaWrapper.changeCordovaEventSubscription(cordova, !isSilent /* Subscribe only if we are not in silent mode */);
+                if (command === "platform") {
+                    return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+                } else if (command === "plugin") {
+                    return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+                } else {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
+                }
+            }).then(function (): Q.Promise<any> {
+                // Unhook the event listeners after we are done
+                // (Cordova has an upper limit for the number of active event listeners - we do not want to exceed the max) 
+                CordovaWrapper.changeCordovaEventSubscription(cordova, false /* Unscubscribe */);
+                return Q({});
+            });
+        } else {
+            assert(data);
+            var cliArgs: string[] = [command];
+            return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
+        }
+    }
+
+    public static emulate(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
                 return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
                     .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(commandData, platform));
-                });
+                        return cordova.raw.emulate(cordovaHelper.toCordovaRunArguments(commandData, platform));
+                    });
             } else {
-                return CordovaWrapper.cli(["run"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
+                return CordovaWrapper.cli(["emulate"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
             }
         });
     }
@@ -126,9 +164,12 @@ class CordovaWrapper {
                 return CordovaWrapper.cli(["-v"], true);
             })
             .then(function (version: string): Q.Promise<any> {
+                // trim() the version to remove trailing newlines in case the raw output from 'cordova -v' was used
+                version = version.trim();
+
                 // If the cordova version is older than 5.1.0, the 'requirements' command does not exist
                 if (!semver.gte(version, CordovaWrapper.CordovaRequirementsMinVersion)) {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld, version));
                 }
 
                 return Q.resolve({});
@@ -183,43 +224,28 @@ class CordovaWrapper {
         });
     }
 
-    /**
-     * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
-     *
-     * @param {string} The name of the cordova command to be invoked
-     * @param {string} The version of the cordova CLI to use
-     * @param {ICordovaCommandParameters} The cordova command parameters
-     *
-     * @return {Q.Promise<any>} An empty promise
-     */
-    public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData): Q.Promise<any> {
-        if (cordovaCliVersion) {
-            var cordova: typeof Cordova;
-            return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-                .then(function (cdv: typeof Cordova): Q.Promise<any> {
-                cordova = cdv;
-                // Hook the event listeners. This will help us get the logs that cordova emits during platform/plugin operations
-                cordova.on("results", console.info);
-                cordova.on("warn", console.warn);
-                cordova.on("error", console.error);
-                if (command === "platform") {
-                    return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
-                } else if (command === "plugin") {
-                    return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
-                } else {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
-                }
-            }).then(function (): Q.Promise<any> {
-                // Unhook the event listeners after we are done
-                // (Cordova has an upper limit for the number of active event listeners - we do not want to exceed the max) 
-                cordova.off("results", console.info);
-                cordova.off("warn", console.warn);
-                cordova.off("error", console.error);
-                return Q({});
-            });
+    public static run(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
+                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(commandData, platform));
+                });
+            } else {
+                return CordovaWrapper.cli(["run"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
+            }
+        });
+    }
+
+    private static changeCordovaEventSubscription(cordova: typeof Cordova, subscribe: boolean): void {
+        if (subscribe) {
+            cordova.on("results", console.info);
+            cordova.on("warn", console.warn);
+            cordova.on("error", console.error);
         } else {
-            var cliArgs: string[] = [command];
-            return CordovaWrapper.cli(cliArgs.concat(cordovaHelper.toCordovaCliArguments(data)));
+            cordova.off("results", console.info);
+            cordova.off("warn", console.warn);
+            cordova.off("error", console.error);
         }
     }
 }

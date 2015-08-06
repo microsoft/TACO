@@ -31,6 +31,7 @@ import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
+import ms = require ("./utils/memoryStream");
 
 import utils = TacoUtility.UtilHelper;
 
@@ -338,6 +339,97 @@ describe("taco platform for kit", function (): void {
                     done(err);
                 });
             });
+        });
+    });
+
+    describe("Onboarding experience", () => {
+        var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
+        var memoryStdout: ms.MemoryStream;
+
+        beforeEach(function (done: MochaDone): void {
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+
+            // We create a taco project outside of the test
+            Q.fcall(createCliProject, "5.0.0").done(() => {
+                // After the taco project is created, we initialize the console, so we won't get the creation messages in the console
+                memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+                process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
+                done();
+            }, function (err: any): void {
+                done(err);
+            });
+        });
+
+        after(() => {
+            // We just need to reset the stdout just once, after all the tests have finished
+            process.stdout.write = stdoutWrite;
+        });
+
+        function testCommandForArguments(commandRun: { (args: string[]): Q.Promise<any> },
+            platformCommandLineArguments: string[], scenarioArguments: string[],
+            alternativeScenarioArguments: string[], done: MochaDone): void {
+            // Some messages are only printed the first time something is executed. When we run all the tests
+            // all those messages don't get printed, but if we only run the onboarding tests, they are the first
+            // tests to run, so they do get printed. We accept both options and we validate we got one of them
+            commandRun(platformCommandLineArguments).done(() => {
+                var expected = scenarioArguments.join("\n");
+                var actual = memoryStdout.contentsAsText();
+                if (expected !== actual) {
+                    expected = alternativeScenarioArguments.join("\n");
+                }
+
+                actual.should.be.equal(expected);
+                done();
+            }, (err: any) => {
+                done(err);
+            });
+        }
+
+        it("prints the onboarding experience when adding a platform", function (done: MochaDone): void {
+            this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
+
+            var firstPart = ["CommandPlatformStatusAdding"];
+            var lastPart = [
+                "CommandPlatformStatusAdded",
+                "-------------------------------------",
+                " * HowToUseCommandInstallReqsPlugin",
+                " * HowToUseCommandAddPlugin",
+                " * HowToUseCommandSetupRemote",
+                " * HowToUseCommandBuildPlatform",
+                " * HowToUseCommandEmulatePlatform",
+                " * HowToUseCommandRunPlatform",
+                "",
+                "HowToUseCommandHelp",
+                "HowToUseCommandDocs",
+                ""];
+            testCommandForArguments(platformRun, ["add", "android"],
+                firstPart.concat(lastPart),
+                lastPart,
+                done);
+        });
+
+        it("prints the onboarding experience when adding a plugin", function (done: MochaDone): void {
+            this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
+
+            var firstPart = [
+                "CommandPluginTestedPlatforms",
+                "CommandPluginStatusAdding"];
+            var lastPart = [
+                "CommandPluginWithIdStatusAdded",
+                "-------------------------------------",
+                " * HowToUseCommandInstallReqsPlugin",
+                " * HowToUseCommandSetupRemote",
+                " * HowToUseCommandBuildPlatform",
+                " * HowToUseCommandEmulatePlatform",
+                " * HowToUseCommandRunPlatform",
+                "",
+                "HowToUseCommandHelp",
+                "HowToUseCommandDocs",
+                ""];
+            testCommandForArguments(pluginRun, ["add", "cordova-plugin-camera"],
+                firstPart.concat(lastPart),
+                lastPart,
+                done);
         });
     });
 });

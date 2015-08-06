@@ -8,6 +8,8 @@
 
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/colors.d.ts" />
+/// <reference path="../typings/resourceManager.d.ts" />
+
 declare module TacoUtility {
     class Logger {
         /**
@@ -34,5 +36,5 @@ declare module TacoUtility {
          * Logs an empty line on console
          */
         public static logLine(): void;
-    }
+   }
 }

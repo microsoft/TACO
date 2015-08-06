@@ -292,7 +292,7 @@ describe("TemplateManager", function (): void {
             var templates: templateManager = new templateManager(mockKitHelper, templateCache);
 
             // Build the expected result
-            var expectedResult: templateManager.ITemplateList = {
+            var expectedResult = {
                 kitId: testKitId,
                 templates: [
                     {
@@ -328,7 +328,7 @@ describe("TemplateManager", function (): void {
             var templates: templateManager = new templateManager(mockKitHelper, templateCache);
 
             // Build the expected result
-            var expectedResult: templateManager.ITemplateList = {
+            var expectedResult = {
                 kitId: "",
                 templates: [
                     {

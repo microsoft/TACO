@@ -256,13 +256,14 @@ module TacoKits {
                     Object.keys(templateMetadata).forEach(function (kitId: string): void {
                         Object.keys(templateMetadata[kitId]).forEach(function (templateId: string): void {
                             if (!knownTemplates[templateId]) {
-                                var templateInfo: ITemplateOverrideInfo = {
+                                var templateOverrideInfo: ITemplateOverrideInfo = {
                                     kitId: kitId,
                                     templateId: templateId,
                                     templateInfo: templateMetadata[kitId][templateId]
                                 };
 
-                                templateList.push(templateInfo);
+                                templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
+                                templateList.push(templateOverrideInfo);
                                 knownTemplates[templateId] = true;
                             }
                         });

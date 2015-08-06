@@ -7,10 +7,12 @@
 ﻿ */
 
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/logger.d.ts" />
 
 import os = require ("os");
 
 import logFormathelper = require ("./logFormatHelper");
+
 import LogFormatHelper = logFormathelper.LogFormatHelper;
 
 module TacoUtility {
@@ -40,7 +42,7 @@ module TacoUtility {
         public static logWarning(message: string): void {
             Logger.stderr(LogFormatHelper.toWarning(message));
         }
-
+        
         /**
          * Logs an empty line on console
          */

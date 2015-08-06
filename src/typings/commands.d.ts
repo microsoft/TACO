@@ -9,6 +9,7 @@
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/nameDescription.d.ts" />
+/// <reference path="../typings/commandAlias.d.ts" />
 declare module TacoUtility {
     module Commands {
         interface ICommandInfo {

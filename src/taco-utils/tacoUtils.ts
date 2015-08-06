@@ -17,13 +17,17 @@ import helpCommandBase = require ("./helpCommandBase");
 import installLogLevel = require ("./installLogLevel");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
+import logLevel = require ("./logLevel");
 import newlineNormalizerStream = require ("./newlineNormalizerStream");
 import processLogger = require ("./processLogger");
 import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
+import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import tacoPackageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
+import telemetryHelper = require ("./telemetryHelper");
 import utilHelper = require ("./utilHelper");
+import logFormatHelper = require ("./logFormatHelper");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
@@ -35,6 +39,7 @@ module TacoUtility {
     export var CountStream = countStream.CountStream;
     export var Logger = logger.Logger;
     export var LoggerHelper = loggerHelper.LoggerHelper;
+    export var LogLevel = logLevel.LogLevel;
     export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
     export var HelpCommandBase = helpCommandBase.HelpCommandBase;
     export var InstallLogLevel = installLogLevel.InstallLogLevel;
@@ -42,9 +47,12 @@ module TacoUtility {
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;
     export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
+    export var TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var Telemetry = telemetry.Telemetry;
+    export var TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper = utilHelper.UtilHelper;
+    export var LogFormatHelper = logFormatHelper.LogFormatHelper;
     /// <enable code="SA1301" />
 }
 

@@ -21,12 +21,16 @@ import cordovaWrapper = require ("./utils/cordovaWrapper");
 import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
+import TacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
-import logger = tacoUtility.Logger;
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
+import logger = tacoUtility.Logger;
+import TacoError = tacoUtility.TacoError;
 import telemetry = tacoUtility.Telemetry;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface IParsedArgs {
@@ -41,17 +45,17 @@ interface IParsedArgs {
  */
 class Taco { 
     /*
-     * Runs taco with command line args, catches "known" taco errors
+     * Runs taco with command line args
      */
     public static run(): void {
-        telemetry.init(require("../package.json").version);
+        telemetry.init(require("../package.json").name, require("../package.json").version);
         Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
-            // Pretty print taco Errors
+            // Pretty print errors
             if (reason) {
                 if (reason.isTacoError) {
-                    tacoUtility.Logger.logError((<tacoUtility.TacoError>reason).toString());
+                    logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else if (reason.message) {
-                    tacoUtility.Logger.logError(reason.message);
+                    logger.logError(errorHelper.wrap(TacoErrorCodes.CommandError, reason).toString());
                 } 
             }
             
@@ -73,7 +77,17 @@ class Taco {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
                     return parsedArgs.command.run(commandData);
                 } else {
-                    return cordovaWrapper.cli(parsedArgs.args);
+                    var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
+                    telemetryHelper.addMultiplePropertiesToEvent(routeToCordovaEvent, "argument", args, true);
+                    return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
+                        routeToCordovaEvent.properties["success"] = "true";
+                        telemetry.send(routeToCordovaEvent);
+                        return Q(output);
+                    }, function (reason: any): any {
+                        routeToCordovaEvent.properties["success"] = "false";
+                        telemetry.send(routeToCordovaEvent);
+                        return Q.reject(reason);
+                    });
                 }
         });
     }
@@ -96,6 +110,9 @@ class Taco {
                 commandArgs = args.slice(1);
             }
         }
+
+        // Set the loglevel global setting
+        UtilHelper.initializeLogLevel(args);
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.ICommand = commandsFactory.getTask(commandName, commandArgs, __dirname);

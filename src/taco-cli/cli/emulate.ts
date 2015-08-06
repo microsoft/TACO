@@ -12,7 +12,6 @@
 
 "use strict";
 
-import assert = require ("assert");
 import path = require ("path");
 import Q = require ("q");
 
@@ -30,11 +29,11 @@ import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 
 /**
- * Run
+ * Emulate
  *
- * handles "taco run"
+ * handles "taco emulate"
  */
-class Run extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Emulate extends commands.TacoCommandBase implements commands.IDocumentedCommand {
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,
@@ -42,7 +41,6 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
         nobuild: Boolean,
 
         device: Boolean,
-        emulator: Boolean,
         target: String,
 
         // Are these only for when we build as part of running?
@@ -52,22 +50,7 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     private static ShortHands: Nopt.ShortFlags = {};
     public subcommands: commands.ICommand[] = [
         {
-            // Remote Run
-            run: Run.remote,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !!commandData.options["remote"];
-            }
-        },
-        {
-            // Local Run
-            run: Run.local,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !!commandData.options["local"];
-            }
-        },
-        {
-            // Fallback
-            run: Run.fallback,
+            run: Emulate.emulate,
             canHandleArgs(commandData: commands.ICommandData): boolean {
                 return true;
             }
@@ -81,18 +64,18 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
-       return true;
+        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Run.KnownOptions, Run.ShortHands, args, 0);
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Emulate.KnownOptions, Emulate.ShortHands, args, 0);
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
             throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
         }
 
-        if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
+        if (parsedOptions.options["device"]) {
             throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
         }
 
@@ -103,19 +86,10 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
         return parsedOptions;
     }
 
-    private static remote(commandData: commands.ICommandData): Q.Promise<any> {
-        return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
-            return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                assert(platform.location === Settings.BuildLocationType.Remote);
-                return Run.runRemotePlatform(platform.platform, commandData);
-            }));
-        });
-    }
-
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData): Q.Promise<any> {
         return Q.all([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
-            var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
+            var buildTarget = commandData.options["target"] || "";
             var language = settings.language || "en";
             var remoteConfig = settings.remotePlatforms[platform];
             if (!remoteConfig) {
@@ -151,26 +125,12 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
                 buildInfoPromise = RemoteBuildClientHelper.build(buildSettings);
             }
 
-            // Default to a simulator/emulator build unless explicitly asked otherwise
-            // This makes sure that our defaults match Cordova's, as well as being consistent between our own build and run.
-            var runPromise: Q.Promise<BuildInfo>;
-            if (commandData.options["device"]) {
-                runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                    return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
-                }).then(function (buildInfo: BuildInfo): BuildInfo {
-                    logger.log(resources.getString("CommandRunRemoteDeviceSuccess"));
-                    return buildInfo;
-                });
-            } else {
-                runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                    return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
-                }).then(function (buildInfo: BuildInfo): BuildInfo {
-                    logger.log(resources.getString("CommandRunRemoteEmulatorSuccess"));
-                    return buildInfo;
-                });
-            }
-
-            return runPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+            return buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+                return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
+            }).then(function (buildInfo: BuildInfo): BuildInfo {
+                logger.log(resources.getString("CommandRunRemoteEmulatorSuccess"));
+                return buildInfo;
+            }).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 if (commandData.options["debuginfo"]) {
                     // enable debugging and report connection information
                     return RemoteBuildClientHelper.debug(buildInfo, remoteConfig)
@@ -188,21 +148,17 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
         });
     }
 
-    private static local(commandData: commands.ICommandData): Q.Promise<any> {
-        return CordovaWrapper.run(commandData);
-    }
-
-    private static fallback(commandData: commands.ICommandData): Q.Promise<any> {
+    private static emulate(commandData: commands.ICommandData): Q.Promise<any> {
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
                     switch (platform.location) {
                         case Settings.BuildLocationType.Local:
                             // Just run local, and failures are failures
-                            return CordovaWrapper.run(commandData, platform.platform);
+                            return CordovaWrapper.emulate(commandData, platform.platform);
                         case Settings.BuildLocationType.Remote:
                             // Just run remote, and failures are failures
-                            return Run.runRemotePlatform(platform.platform, commandData);
+                            return Emulate.runRemotePlatform(platform.platform, commandData);
                     }
                 });
             }, Q({}));
@@ -210,4 +166,4 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
     }
 }
 
-export = Run;
+export = Emulate;

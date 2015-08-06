@@ -157,6 +157,17 @@ class Remote extends commands.TacoCommandBase implements commands.IDocumentedCom
                 .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
                 .then(function (): void {
                     logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
+
+                    // Print the onboarding experience
+                    logger.log("-------------------------------------");
+                    loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
+                        "HowToUseCommandBuildPlatform",
+                        "HowToUseCommandEmulatePlatform",
+                        "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
+
+                    ["",
+                        "HowToUseCommandHelp",
+                        "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
              });
         });
     }
