@@ -165,8 +165,8 @@
                 "darwin": {
                     "x64": {
                         "installSource": "http://download.oracle.com/otn/java/jdk/8u45-b14/jdk-8u45-macosx-x64.dmg",
-                        "sha1": "3ce4892fc99dc7d5e3af829d09bd87b163f9939d",
-                        "bytes": 188286095,
+                        "sha1": "3e466244f9d5efc5fb366fc63acaaa1574ea4b1a",
+                        "bytes": 232764982,
                         "steps": {
                             "download": true,
                             "install": true,
