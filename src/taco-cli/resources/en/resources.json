@@ -474,6 +474,8 @@
     "UnimplementedAbstractMethod": "This is an abstract method and should be implemented by a derived overload",
     "_UnimplementedAbstractMethod.comment": "Error thrown for an unimplemented method",
 
+    "OnboardingExperienceTitle": "<br/>Quick tips & commands:",
+    "_OnboardingExperienceTitle.comment": "Title shown before showing the onboarding experience commands related to the command we just executed",
     "HowToUseChangeToProjectFolder": "Change the directory to your project: <bold>cd {0}</bold>",
     "_HowToUseChangeToProjectFolder.comment": "{0} is the absolute path to the folder where the user created a project. This message is printed after the user created a new project, to suggest him that now he'll probably want to change into that folder to continue working in this project",
     "HowToUseCommandPlatformAddPlatform": "Add a platform:  <bold>taco platform add <PLATFORM></bold>",

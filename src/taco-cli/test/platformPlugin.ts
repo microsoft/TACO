@@ -391,7 +391,7 @@ describe("taco platform for kit", function (): void {
             var firstPart = ["CommandPlatformStatusAdding"];
             var lastPart = [
                 "CommandPlatformStatusAdded",
-                "-------------------------------------",
+                "OnboardingExperienceTitle",
                 " * HowToUseCommandInstallReqsPlugin",
                 " * HowToUseCommandAddPlugin",
                 " * HowToUseCommandSetupRemote",
@@ -416,7 +416,7 @@ describe("taco platform for kit", function (): void {
                 "CommandPluginStatusAdding"];
             var lastPart = [
                 "CommandPluginWithIdStatusAdded",
-                "-------------------------------------",
+                "OnboardingExperienceTitle",
                 " * HowToUseCommandInstallReqsPlugin",
                 " * HowToUseCommandSetupRemote",
                 " * HowToUseCommandBuildPlatform",

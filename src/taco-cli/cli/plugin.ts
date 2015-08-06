@@ -183,7 +183,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                 logger.log(resources.getString("CommandPluginWithIdStatusAdded", plugins));
 
                 // Print the onboarding experience
-                logger.log("-------------------------------------");
+                logger.log(resources.getString("OnboardingExperienceTitle"));
                 LoggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
                     "HowToUseCommandSetupRemote",
                     "HowToUseCommandBuildPlatform",
