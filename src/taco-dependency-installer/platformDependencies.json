@@ -159,10 +159,12 @@
                             "postInstall": false
                         }
                     }
-                },
+                }
+            },
+            "8u45": {
                 "darwin": {
                     "x64": {
-                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-macosx-x64.dmg",
+                        "installSource": "http://download.oracle.com/otn/java/jdk/8u45-b14/jdk-8u45-macosx-x64.dmg",
                         "sha1": "3ce4892fc99dc7d5e3af829d09bd87b163f9939d",
                         "bytes": 188286095,
                         "steps": {

@@ -122,7 +122,7 @@ class JavaJdkInstaller extends InstallerBase {
         var self = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var pkgPath: string = path.join("/", "Volumes", this.darwinMountpointName, this.darwinMountpointName + ".pkg");
-        var commandLine: string = "installer -pkg " + pkgPath + " -target \"/\"";
+        var commandLine: string = "installer -pkg \"" + pkgPath + "\" -target \"/\"";
 
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
