@@ -24,7 +24,7 @@ import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
-import checkForNewerVersion = require ("./utils/checkForNewerVersion");
+import CheckForNewerVersion = require ("./utils/checkForNewerVersion");
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
@@ -33,7 +33,6 @@ import TacoError = tacoUtility.TacoError;
 import telemetry = tacoUtility.Telemetry;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
-import CheckForNewerVersion = checkForNewerVersion.CheckForNewerVersion;
 
 interface IParsedArgs {
     args: string[];

@@ -20,12 +20,7 @@ import semver = require ("semver");
 
 import logger = tacoUtility.Logger;
 
-enum LastCheckTime {
-    Recently, // Less than 4 hours. We don't want to recheck
-    LongAgo // More than 4 hours. We do want to recheck
-}
-
-export class CheckForNewerVersion {
+class CheckForNewerVersion {
     private millisecondsInAnHour = 60 * 60 * 1000;
     private maximumCheckIntervalInHours = 4;
     private tacoCliNpmRepositoryUrl: string;
@@ -38,7 +33,7 @@ export class CheckForNewerVersion {
         this.packageFilePath = packageFilePath;
     }
 
-    public showOnExit(): Q.Promise<LastCheckTime> {
+    public showOnExit(): Q.Promise<boolean> {
         /* Pseudo-code:
             1. Get last time check was done from TacoSettings.json
             2. If last time check was done was long ago, then continue, if not stop.
@@ -47,12 +42,16 @@ export class CheckForNewerVersion {
             5. Update the last time check was done on TacoSettings.json to Date.now()
         */
 
-        return this.lastTimeCheckWasDone() // 1.
-            .then(lastTimeCheckWasDone => lastTimeCheckWasDone === LastCheckTime.LongAgo ? // 2.
-                this.latestVersion() : // 3.
-                Q.reject<string>("We've recently checked on" + lastTimeCheckWasDone))
-            .then(latestVersion => this.printVersionWarningIfNeccesary(latestVersion)) // 4.
-            .then(() => this.updateLastTimeCheckWasDone()); // 5.
+        return this.isCheckForUpdateNeeded() // 1.
+            .then(isCheckForUpdateNeeded => {
+                if (isCheckForUpdateNeeded) { // 2.
+                    return this.getLatestVersion() // 3.
+                        .then(latestVersion => this.printVersionWarningIfNeccesary(latestVersion)) // 4.
+                        .then(() => this.updateLastTimeCheckWasDone()); // 5.
+                } else {
+                    return Q.resolve<boolean>(isCheckForUpdateNeeded);
+                }
+            });
     }
 
     public showOnExitAndIgnoreFailures(): void {
@@ -63,24 +62,24 @@ export class CheckForNewerVersion {
         }
     }
 
-    private lastTimeCheckWasDone(): Q.Promise<LastCheckTime> {
+    private isCheckForUpdateNeeded(): Q.Promise<boolean> {
         var self = this;
         return settingsManager.loadSettings().then(settings => {
             var currentDate = new Date();
             if (settings.lastCheckForNewerVersionTimestamp) {
                 var millisecondSinceLastCheck = currentDate.getTime() - new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
-                var lastCheckTime = millisecondSinceLastCheck > self.maximumCheckIntervalInHours * self.millisecondsInAnHour ? LastCheckTime.LongAgo : LastCheckTime.Recently;
+                var isCheckForUpdateNeeded = millisecondSinceLastCheck > self.maximumCheckIntervalInHours * self.millisecondsInAnHour;
                 // FOR DEBUGGING: The next line is only used while debugging this feature
                 // logger.log("Last Check Time" + lastCheckTime + "Current date = " + currentDate + ", Last checked date = " + settings.lastCheckForNewerVersionTimestamp);
-                return lastCheckTime;
+                return isCheckForUpdateNeeded;
             } else {
                 // If the setting doesn't exist, we assume we've never checked it before
-                return LastCheckTime.LongAgo;
+                return true;
             }
-        });
+        }).fail(() => true);
     }
 
-    private latestVersion(): Q.Promise<string> {
+    private getLatestVersion(): Q.Promise<string> {
         var deferredLatestVersion = Q.defer<string>();
         var proxy = process.env.PROXY || process.env.http_proxy || null;
         request({ url: this.tacoCliNpmRepositoryUrl, json: true, proxy: proxy, timeout: this.millisecondsUntilTimeout }, (error: any, response: any, body: any) => {
@@ -116,3 +115,5 @@ export class CheckForNewerVersion {
         return settingsManager.updateSettings(settings => settings.lastCheckForNewerVersionTimestamp = Date.now());
     }
 }
+
+export = CheckForNewerVersion;

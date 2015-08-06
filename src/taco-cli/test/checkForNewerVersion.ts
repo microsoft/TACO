@@ -27,148 +27,143 @@ import resources = require ("../resources/resourceManager");
 import Settings = require ("../cli/utils/settings");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
-import checkForNewerVersion = require ("../cli/utils/checkForNewerVersion");
+import CheckForNewerVersion = require ("../cli/utils/checkForNewerVersion");
 import ms = require ("./utils/memoryStream");
 import http = require ("http");
+import ServerMock = require ("./utils/serverMock");
 
 import utils = TacoUtility.UtilHelper;
-import CheckForNewerVersion = checkForNewerVersion.CheckForNewerVersion;
-
-class FakeNPMSeverOptions {
-    public updateResponse: { (response: any): void } = response => { };
-    public responseDelay: number = 0;
-    public responseStatusCode: number = 200;
-    public generateResponseText: { (info: any): string } = info => JSON.stringify(info);
-}
 
 enum MessageExpectation {
     WillBeShown,
     WontBeShown
 }
 
-describe("Check for newer version", function (): void {
-    // These contents were copied from http://registry.npmjs.org/remotebuild/latest and then renamed to what should be a taco-cli response
-    var tacoCliLatestInformation: any = {
-        name: "taco-cli",
-        description: "Front-end server that serves modules that implement remote build functionality, such as taco-remote.",
-        version: "1.0.0",
-        author: {
-            name: "Microsoft Corporation",
-            email: "vscordovatools-admin@microsoft.com"
-        },
-        homepage: "http://msdn.microsoft.com/en-us/vstudio/dn722381",
-        main: "./lib/server.js",
-        bin: {
-            remotebuild: "./bin/remotebuild"
-        },
-        keywords: [
-            "cordova",
-            "osx ",
-            "remote build"
-        ],
-        preferGlobal: true,
-        dependencies: {
-            express: "4.12.2",
-            morgan: "1.5.1",
-            errorhandler: "1.3.4",
-            nconf: "0.6.9",
-            q: "1.0.1",
-            rimraf: "2.2.6",
-            "taco-utils": "1.0.0",
-            "taco-remote": "1.0.0"
-        },
-        optionalDependencies: {
-            "taco-remote": "1.0.0"
-        },
-        devDependencies: {
-            typescript: "1.3.0",
-            mocha: "2.0.1",
-            mkdirp: "0.3.5",
-            should: "4.3.0",
-            request: "2.36.0"
-        },
-        scripts: {
-            test: "mocha"
-        },
-        directories: {
-            lib: "lib",
-            doc: ".",
-            test: "test",
-            example: "examples"
-        },
-        license: "MIT",
-        _id: "remotebuild@1.0.0",
-        _shasum: "9b33d502b22f8ba8977e11c4a7db93bde5037e88",
-        _resolved: "file:remotebuild.tgz",
-        _from: "remotebuild.tgz",
-        _npmVersion: "2.7.4",
-        _nodeVersion: "0.12.2",
-        _npmUser: {
-            name: "multidevicehybridapp",
-            email: "vscordovatools-admin@microsoft.com"
-        },
-        dist: {
-            shasum: "9b33d502b22f8ba8977e11c4a7db93bde5037e88",
-            tarball: "http://registry.npmjs.org/remotebuild/-/remotebuild-1.0.0.tgz"
-        },
-        maintainers: [
-            {
-                name: "multidevicehybridapp",
-                email: "vscordovatools-admin@microsoft.com"
-            }
-        ]
-    };
+describe.only("Check for newer version", function (): void {
+    var tacoHome = path.join(os.tmpdir(), "taco-cli", "check-for-new-version");
 
-    var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");
-    var originalCwd: string;
+    // Use a dummy home location so we don't trash any real configurations
+    process.env["TACO_HOME"] = tacoHome;
 
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
     var memoryStdout: ms.MemoryStream;
 
-    var fakeNPMServerOptions: FakeNPMSeverOptions;
-    var fakeNPMServer: http.Server;
+    var expectedRequestAndResponse: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean, responseDelay?: number };
 
     // We should be able to remove the next line, after this fix gets released: https://github.com/mochajs/mocha/issues/779
     this.timeout(15000);
+    var tacoCliLatestInformation: any;
 
-    before((done: MochaDone) => {
+    before(() => {
         // Set up mocked out resources
         process.env["TACO_UNIT_TEST"] = true;
-        // Use a dummy home location so we don't trash any real configurations
-        process.env["TACO_HOME"] = tacoHome;
 
         process.listeners("beforeExit").should.be.empty; // We can't run the tests if we have unexpected beforeExit listeners
-
-        // Create the package.json
-        fs.writeFileSync(packageFilePath, JSON.stringify(tacoCliLatestInformation));
-
-        // Launch fake NPM Server
-        launchFakeNPMServer().done(server => {
-            fakeNPMServer = server;
-            done();
-        });
     });
 
     beforeEach(() => {
         memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
         process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
 
-        fakeNPMServerOptions = new FakeNPMSeverOptions();
+        // These contents were copied from http://registry.npmjs.org/remotebuild/latest and then renamed to what should be a taco-cli response
+        tacoCliLatestInformation = {
+            name: "taco-cli",
+            description: "Front-end server that serves modules that implement remote build functionality, such as taco-remote.",
+            version: "1.0.0",
+            author: {
+                name: "Microsoft Corporation",
+                email: "vscordovatools-admin@microsoft.com"
+            },
+            homepage: "http://msdn.microsoft.com/en-us/vstudio/dn722381",
+            main: "./lib/server.js",
+            bin: {
+                remotebuild: "./bin/remotebuild"
+            },
+            keywords: [
+                "cordova",
+                "osx ",
+                "remote build"
+            ],
+            preferGlobal: true,
+            dependencies: {
+                express: "4.12.2",
+                morgan: "1.5.1",
+                errorhandler: "1.3.4",
+                nconf: "0.6.9",
+                q: "1.0.1",
+                rimraf: "2.2.6",
+                "taco-utils": "1.0.0",
+                "taco-remote": "1.0.0"
+            },
+            optionalDependencies: {
+                "taco-remote": "1.0.0"
+            },
+            devDependencies: {
+                typescript: "1.3.0",
+                mocha: "2.0.1",
+                mkdirp: "0.3.5",
+                should: "4.3.0",
+                request: "2.36.0"
+            },
+            scripts: {
+                test: "mocha"
+            },
+            directories: {
+                lib: "lib",
+                doc: ".",
+                test: "test",
+                example: "examples"
+            },
+            license: "MIT",
+            _id: "remotebuild@1.0.0",
+            _shasum: "9b33d502b22f8ba8977e11c4a7db93bde5037e88",
+            _resolved: "file:remotebuild.tgz",
+            _from: "remotebuild.tgz",
+            _npmVersion: "2.7.4",
+            _nodeVersion: "0.12.2",
+            _npmUser: {
+                name: "multidevicehybridapp",
+                email: "vscordovatools-admin@microsoft.com"
+            },
+            dist: {
+                shasum: "9b33d502b22f8ba8977e11c4a7db93bde5037e88",
+                tarball: "http://registry.npmjs.org/remotebuild/-/remotebuild-1.0.0.tgz"
+            },
+            maintainers: [
+                {
+                    name: "multidevicehybridapp",
+                    email: "vscordovatools-admin@microsoft.com"
+                }
+            ]
+        };
 
-        // Create an empty settings file
-        Settings.saveSettings({});
+        // Create the package.json
+        utils.createDirectoryIfNecessary(tacoHome);
+        fs.writeFileSync(packageFilePath, JSON.stringify(tacoCliLatestInformation));
+
+        // Default request answered by the fake NPM server
+        expectedRequestAndResponse = {
+            expectedUrl: repositoryPath,
+            head: { "Content-Type": "application/json" },
+            statusCode: 200,
+            response: JSON.stringify(tacoCliLatestInformation)
+        };
+
+        /* By default there is an update available. We do this after writing the package.json file
+            Because we want 1.0.0 to be the current version, and after the expectedRequestAndResponse because
+            it's required */
+        setLatestReleasedVersion("1.0.1");
     });
 
     afterEach(() => {
         process.stdout.write = stdoutWrite;
         process.removeAllListeners("beforeExit");
-    });
-
-    after((done: MochaDone) => {
-        this.timeout(60000);
-        fakeNPMServer.close(() => {
-            fs.unlink(Settings.settingsFile, done);
-        });
+        Settings.forgetSettings();
+        try {
+            // Not all tests create the file, so we ignore the exception
+            fs.unlinkSync(Settings.settingsFile);
+        } catch (exception) {
+        }
     });
 
     function simulateBeforeExit(): void {
@@ -183,23 +178,15 @@ describe("Check for newer version", function (): void {
     var repositoryInFakeServerPath = fakeServer + repositoryPath;
     var packageFilePath = path.join(utils.tacoHome, "package.json");
 
-    function launchFakeNPMServer(): Q.Promise<http.Server> {
+    function launchFakeNPMServer(done: MochaDone): Q.Promise<http.Server> {
         var serverIsListening = Q.defer<http.Server>();
 
         // Port for the web server
         const PORT = 8080;
 
         // Create the server
-        var server = http.createServer((request: http.ServerRequest, response: http.ServerResponse) => {
-            if (request.url === repositoryPath) {
-                response.writeHead(fakeNPMServerOptions.responseStatusCode, { "Content-Type": "application/json" });
-                fakeNPMServerOptions.updateResponse(tacoCliLatestInformation);
-                var responseText: string = fakeNPMServerOptions.generateResponseText(tacoCliLatestInformation);
-                setTimeout(() => response.end(responseText), fakeNPMServerOptions.responseDelay);
-            } else {
-                throw "Unexpected request: " + request.url;
-            }
-        });
+        var server = http.createServer(ServerMock.generateServerFunction(done, [expectedRequestAndResponse]));
+        server.listen(PORT);
 
         // If there is any error, we reject the promise
         server.on("error", (error: any) => {
@@ -216,7 +203,10 @@ describe("Check for newer version", function (): void {
 
     function testCheckForNewerVersion(messageExpectation: MessageExpectation, done: MochaDone): void {
         var timeBeforeTest = Date.now();
-        new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(error => { })
+        var fakeNPMServer: http.Server;
+        launchFakeNPMServer(done)
+            .then(server => fakeNPMServer = server)
+            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(error => { }))
             .then(() => {
                 // CheckForNewerVersion doesn't print anything synchronically. It prints it on the beforeExit event
                 var actual = memoryStdout.contentsAsText();
@@ -238,27 +228,36 @@ describe("Check for newer version", function (): void {
                     done();
                 }
             })
+            .finally(() => {
+                fakeNPMServer.close();
+            })
             .done();
     }
 
-    function setCheckedTimestampToHoursAgo(howManyHoursAgo: number): Q.Promise<string> {
+    function setCheckedTimestampToHoursAgo(howManyHoursAgo: number): Q.Promise<number> {
         var someHoursAgo = new Date();
         someHoursAgo.setHours(someHoursAgo.getHours() - howManyHoursAgo);
-        var lastCheckForNewerVersionTimestamp = someHoursAgo.getTime().toString();
+        var lastCheckForNewerVersionTimestamp = someHoursAgo.getTime();
         return Settings.updateSettings(settings => settings.lastCheckForNewerVersionTimestamp = lastCheckForNewerVersionTimestamp).then(() => lastCheckForNewerVersionTimestamp);
+    }
+
+    function setLatestReleasedVersion(version: string): void {
+        tacoCliLatestInformation.version = version;
+        expectedRequestAndResponse.response = JSON.stringify(tacoCliLatestInformation);
     }
 
     it("shows message when there is an update available and it's the first time we've ever checked", done => {
         this.timeout(10000);
-        fakeNPMServerOptions.updateResponse = response => response.version = "1.0.1";
+
         testCheckForNewerVersion(MessageExpectation.WillBeShown, done);
     });
 
     it("doesn't run the check if we've checked 3 hours ago", done => {
         this.timeout(10000);
-        var lastCheckForNewerVersionTimestamp: string;
+
+        var lastCheckForNewerVersionTimestamp: number;
         setCheckedTimestampToHoursAgo(3)
-            .then(storedString => lastCheckForNewerVersionTimestamp = storedString)
+            .then(storedNumber => lastCheckForNewerVersionTimestamp = storedNumber)
             .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(failure => { }))
             .done(() => {
                 var listeners = process.listeners("beforeExit");
@@ -275,32 +274,46 @@ describe("Check for newer version", function (): void {
 
     it("does run the check if we've checked 5 hours ago", done => {
         this.timeout(10000);
+
         setCheckedTimestampToHoursAgo(5)
             .done(() => testCheckForNewerVersion(MessageExpectation.WillBeShown, done));
     });
 
     it("doesn't show a message when there is not an update available", done => {
         this.timeout(10000);
-        fakeNPMServerOptions.updateResponse = response => response.version = "1.0.0";
+        setLatestReleasedVersion("1.0.0");
+
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
     it("doesn't show any errors if the http request times out", done => {
         this.timeout(15000);
-        fakeNPMServerOptions.responseDelay = 10 * 1000; // 10 seconds
+
+        expectedRequestAndResponse.responseDelay = 10 * 1000; // 10 seconds
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
     it("doesn't show any errors if the http request fails with 4xx", done => {
         this.timeout(10000);
-        fakeNPMServerOptions.responseStatusCode = 401;
+
+        expectedRequestAndResponse.statusCode = 401;
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
     it("doesn't show any errors if the http request fails", done => {
         this.timeout(10000);
-        fakeNPMServerOptions.responseStatusCode = 500;
-        fakeNPMServerOptions.generateResponseText = info => "There was a fake internal error"; // The body.version property doesn't exist with this response. It's also not JSON
+
+        expectedRequestAndResponse.statusCode = 500;
+        expectedRequestAndResponse.response = "There was a fake internal error"; // The body.version property doesn't exist with this response. It's also not JSON
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
+    });
+
+    it("works if the settings file is empty", done => {
+        this.timeout(10000);
+
+        // Create an empty settings file
+        Settings.saveSettings({});
+
+        testCheckForNewerVersion(MessageExpectation.WillBeShown, done);
     });
 });
