@@ -497,7 +497,7 @@ describe("taco create", function (): void {
 
             var lastPart = [
                 "CommandCreateSuccessProjectTemplate",
-                "----------",
+                "OnboardingExperienceTitle",
                 " * HowToUseChangeToProjectFolder",
                 " * HowToUseCommandPlatformAddPlatform",
                 " * HowToUseCommandInstallReqsPlugin",
@@ -533,7 +533,7 @@ describe("taco create", function (): void {
 
             var lastPart = [
                 "CommandCreateSuccessProjectCLI",
-                "----------",
+                "OnboardingExperienceTitle",
                 " * HowToUseChangeToProjectFolder",
                 " * HowToUseCommandPlatformAddPlatform",
                 " * HowToUseCommandInstallReqsPlugin",

@@ -159,7 +159,7 @@ class Remote extends commands.TacoCommandBase implements commands.IDocumentedCom
                     logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
 
                     // Print the onboarding experience
-                    logger.log("-------------------------------------");
+                    logger.log(resources.getString("OnboardingExperienceTitle"));
                     loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
                         "HowToUseCommandBuildPlatform",
                         "HowToUseCommandEmulatePlatform",
