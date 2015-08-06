@@ -228,7 +228,7 @@ describe("Check for newer version", function (): void {
                     actual.should.be.equal("NewerTacoCLIVersionAvailable\n",
                         "The output of the console should match what we expected");
                     return Settings.loadSettings().then(settings => {
-                        var lastCheck = new Date(parseInt(settings.lastCheckForNewerVersionTimestamp)).getTime();
+                        var lastCheck = new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
                         lastCheck.should.be.greaterThan(timeBeforeTest,
                             "The last check for newer version timestamp: " + lastCheck + " should be updated after each attempt to check for a newer version and thus be greater than " + timeBeforeTest);
                         done();

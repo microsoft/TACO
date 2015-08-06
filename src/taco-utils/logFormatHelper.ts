@@ -27,6 +27,7 @@ colors.setTheme({
     kitid: ["green", "bold"],
     deprecatedkit: ["red", "bold"],
     defaultkit: ["yellow", "bold"],
+    command: ["green", "bold"],
 });
 
 module TacoUtility {

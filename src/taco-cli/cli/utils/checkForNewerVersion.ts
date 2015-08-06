@@ -68,7 +68,7 @@ export class CheckForNewerVersion {
         return settingsManager.loadSettings().then(settings => {
             var currentDate = new Date();
             if (settings.lastCheckForNewerVersionTimestamp) {
-                var millisecondSinceLastCheck = currentDate.getTime() - new Date(parseInt(settings.lastCheckForNewerVersionTimestamp)).getTime();
+                var millisecondSinceLastCheck = currentDate.getTime() - new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
                 var lastCheckTime = millisecondSinceLastCheck > self.maximumCheckIntervalInHours * self.millisecondsInAnHour ? LastCheckTime.LongAgo : LastCheckTime.Recently;
                 // FOR DEBUGGING: The next line is only used while debugging this feature
                 // logger.log("Last Check Time" + lastCheckTime + "Current date = " + currentDate + ", Last checked date = " + settings.lastCheckForNewerVersionTimestamp);
@@ -113,6 +113,6 @@ export class CheckForNewerVersion {
     }
 
     private updateLastTimeCheckWasDone(): Q.Promise<any> {
-        return settingsManager.updateSettings(settings => settings.lastCheckForNewerVersionTimestamp = Date.now().toString());
+        return settingsManager.updateSettings(settings => settings.lastCheckForNewerVersionTimestamp = Date.now());
     }
 }

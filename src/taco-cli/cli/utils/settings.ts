@@ -202,7 +202,7 @@ module Settings {
             [platform: string]: IRemoteConnectionInfo
         };
         language?: string;
-        lastCheckForNewerVersionTimestamp?: string;
+        lastCheckForNewerVersionTimestamp?: number;
     }
 
     export enum BuildLocationType {
