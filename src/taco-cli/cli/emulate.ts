@@ -96,7 +96,6 @@ class Emulate extends commands.TacoCommandBase implements commands.IDocumentedCo
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
-            var buildServerUrl = Settings.getRemoteServerUrl(remoteConfig);
             var buildInfoPath = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
             var buildSettings = new RemoteBuildSettings({
