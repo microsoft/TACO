@@ -68,7 +68,7 @@ describe("help for a command", function (): void {
     it("prints the help for create", function (done: MochaDone): void {
         testHelpForCommand("create", [
             "CommandCreateDescription",
-            "   taco create <PATH> [ID [NAME [CONFIG]]] [--options]",
+            "   taco create <PATH> [ID [NAME [CONFIG]]] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
             "   PATH ......................... CommandCreateArgsPath",
@@ -111,7 +111,7 @@ describe("help for a command", function (): void {
     it("prints the help for platform", function (done: MochaDone): void {
         testHelpForCommand("platform", [
             "CommandPlatformDescription",
-            "   taco platform [COMMAND] [--options]",
+            "   taco platform [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
             "   COMMAND ............... CommandPlatformSubcommandDescription",
@@ -135,7 +135,7 @@ describe("help for a command", function (): void {
 
     it("prints the help for plugin", function (done: MochaDone): void {
         testHelpForCommand("plugin", ["CommandPluginDescription",
-            "   taco plugin [COMMAND] [--options]",
+            "   taco plugin [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
             "   COMMAND ............................ CommandPluginSubcommandDescription",
@@ -158,7 +158,7 @@ describe("help for a command", function (): void {
 
     it("prints the help for kit", function (done: MochaDone): void {
         testHelpForCommand("kit", ["CommandKitDescription",
-            "   taco kit [COMMAND] [--options]",
+            "   taco kit [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
             "   COMMAND ................ CommandKitSubcommandDescription",
@@ -171,39 +171,39 @@ describe("help for a command", function (): void {
     it("prints the help for build", function (done: MochaDone): void {
         testHelpForCommand("build", [
             "CommandBuildDescription",
-            "   taco build [PLATFORM] [--options]",
+            "   taco build [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   PLATFORM ............ CommandBuildPlatformDescription",
+            "   PLATFORM .............. CommandBuildPlatformDescription",
             "CommandHelpUsageOptions",
-            "      --remote ......... CommandBuildRemoteDescription",
-            "      --local .......... CommandBuildLocalDescription",
-            "      --clean .......... CommandBuildCleanDescription",
-            "      --debug .......... CommandBuildDebugDescription",
-            "      --release ........ CommandBuildReleaseDescription",
-            "      --device ......... CommandBuildDeviceDescription",
-            "      --emulator ....... CommandBuildEmulatorDescription",
-            "      --target ......... CommandBuildTargetDescription",
+            "      --remote ........... CommandBuildRemoteDescription",
+            "      --local ............ CommandBuildLocalDescription",
+            "      --clean ............ CommandBuildCleanDescription",
+            "      --debug ............ CommandBuildDebugDescription",
+            "      --release .......... CommandBuildReleaseDescription",
+            "      --device ........... CommandBuildDeviceDescription",
+            "      --emulator ......... CommandBuildEmulatorDescription",
+            "      --target=TARGET .... CommandBuildTargetDescription",
             ""], done);
     });
 
     it("prints the help for run", function (done: MochaDone): void {
         testHelpForCommand("run", [
             "CommandRunDescription",
-            "   taco run [PLATFORM] [--options]",
+            "   taco run [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   PLATFORM ............ CommandRunPlatformDescription",
+            "   PLATFORM .............. CommandRunPlatformDescription",
             "CommandHelpUsageOptions",
-            "      --remote ......... CommandRunRemoteDescription",
-            "      --local .......... CommandRunLocalDescription",
-            "      --nobuild ........ CommandRunNobuildDescription",
-            "      --debuginfo ...... CommandRunDebuginfoDescription",
-            "      --debug .......... CommandRunDebugDescription",
-            "      --release ........ CommandRunReleaseDescription",
-            "      --device ......... CommandRunDeviceDescription",
-            "      --emulator ....... CommandRunEmulatorDescription",
-            "      --target ......... CommandRunTargetDescription",
+            "      --remote ........... CommandRunRemoteDescription",
+            "      --local ............ CommandRunLocalDescription",
+            "      --nobuild .......... CommandRunNobuildDescription",
+            "      --debuginfo ........ CommandRunDebuginfoDescription",
+            "      --debug ............ CommandRunDebugDescription",
+            "      --release .......... CommandRunReleaseDescription",
+            "      --device ........... CommandRunDeviceDescription",
+            "      --emulator ......... CommandRunEmulatorDescription",
+            "      --target=TARGET .... CommandRunTargetDescription",
             ""], done);
     });
 

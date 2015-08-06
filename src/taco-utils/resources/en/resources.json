@@ -58,7 +58,5 @@
     "CommandHelpUsageAliases": "<br/><helptitle>Aliases:</helptitle><br/>",
     "_CommandHelpUsageAliases.comment": "options header when user types 'taco help'",
     "CommandHelpTableTitle":  "Commands:",
-    "_CommandHelpTableTitle.comment": "This is the title that we use for the commands list table that we show when executing 'taco help'",
-    "TacoProgramDescription": "Taco is a command line tool utility that makes it easy to create, build, run and emulate Cordova applications.",
-    "_TacoProgramDescription.comment": "This is a description of the purpose of the whole taco program"
+    "_CommandHelpTableTitle.comment": "This is the title that we use for the commands list table that we show when executing 'taco help'"
 }

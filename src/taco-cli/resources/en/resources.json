@@ -501,7 +501,7 @@
     "_HowToUseCommandDocs.comment": "This message is printed as part of the onboarding experience of several commands, to suggest the user how he can view the taco documentation",
     "HowToUseCreateProjectWithTemplate": "e.g: To create a new TypeScript project, use <bold>taco create <PATH> [ID] --template typescript</bold>",
     "_HowToUseCreateProjectWithTemplate.comment": "This message is printed as part of the onboarding experience of the 'taco templates' command, to suggest the user how to create a taco project using a particular template",
-    "ProgramDescription": "taco is a command line tool utility that makes it easy to create, build, run and emulate Cordova applications.",
+    "ProgramDescription": "taco is a command line tool that makes it easy to create, build, run, and emulate Cordova applications.",
     "_ProgramDescription.comment": "This is a description of the purpose of the whole taco program",
     "BlankTemplateName": "A blank starter Cordova JavaScript project.",
     "_BlankTemplateName.comment": "The description of an empty/blank cordova project using JavaScript",
