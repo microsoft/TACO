@@ -39,7 +39,7 @@ var platform = new platformMod();
 var plugin = new pluginMod();
 var create = new createMod();
 
-var testKitId: string = "5.0.0-Kit";
+var testKitId: string = "5.1.1-Kit";
 
 interface IComponentVersionMap {
     [component: string]: string;
@@ -100,7 +100,7 @@ describe("taco platform for kit", function (): void {
     var cliProjectDir: string = "cliProject";
     var kitProjectDir: string = "kitProject";
     var originalCwd: string;
-    var cordovaVersion: string = "5.0.0";
+    var cordovaVersion: string = "5.1.1";
 
     function createProject(args: string[], projectDir: string): Q.Promise<any> {
         // Create a dummy test project with no platforms added
@@ -220,7 +220,7 @@ describe("taco platform for kit", function (): void {
 
         this.timeout(100000);
         rimraf.sync(tacoHome);
-        createKitProject("5.0.0-Kit")
+        createKitProject("5.1.1-Kit")
         .done(function (): void {
             mocha();
         });          

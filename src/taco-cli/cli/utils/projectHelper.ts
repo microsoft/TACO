@@ -118,11 +118,19 @@ class ProjectHelper {
                 return deferred.promise;
             }
 
-            var tacoJson: ProjectHelper.ITacoJsonMetadata = require(path.join(projectPath, ProjectHelper.TacoJsonFileName));
+            var tacoJson: ProjectHelper.ITacoJsonMetadata;
+            var tacoJsonFilePath = path.join(projectPath, ProjectHelper.TacoJsonFileName);
             var configFilePath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
 
             if (fs.existsSync(configFilePath)) {
                 projectInfo.configXmlPath = configFilePath;
+            }
+
+            if (fs.existsSync(tacoJsonFilePath)) {
+                tacoJson = require(tacoJsonFilePath);
+            } else {
+                deferred.resolve(projectInfo);
+                return deferred.promise;
             }
 
             if (tacoJson.kit) {
