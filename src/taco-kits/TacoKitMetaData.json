@@ -6,18 +6,6 @@
     },
 
     "kits": {
-        "4.2.0-Kit": {
-            "cordova-cli": "4.2.0",
-            "taco-min": "1.0.0",
-            "deprecated": "true",
-            "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
-            "plugins": {
-                "cordova-plugin-camera": {
-                    "version": "1.1.0",
-                    "supported-platforms": "ios"
-                }
-            }
-        },
         "4.3.0-Kit": {
             "cordova-cli": "4.3.0",
             "taco-min": "1.0.0",
@@ -52,49 +40,7 @@
                 }
             }
         },
-        "5.0.0-Kit": {
-            "cordova-cli": "5.0.0",
-            "platforms": {
-                "android": {
-                    "version": "4.1.0"
-                },
-                "ios": {
-                    "version": "3.8.0"
-                },
-                "windows": {
-                    "src": "https://github.com/apache/cordova-windows.git"
-                },
-                "wp8": {
-                    "version": "3.8.0"
-                },
-                "browser": {
-                    "version": "3.6.2"
-                }
-            },
-            "plugins": {
-                "cordova-plugin-camera": {
-                    "version": "1.1.0",
-                    "supported-platforms": "android, ios, windows"
-                },
-                "cordova-plugin-battery-status": {
-                    "src": "https://github.com/apache/cordova-plugin-battery-status.git",
-                    "supported-platforms": "android"
-                },
-                "cordova-plugin-device-orientation": {
-                    "version": "1.0.0",
-                    "supported-platforms": "android, ios, windows"
-                },
-                "cordova-plugin-contacts": {
-                    "version": "1.0.0",
-                    "supported-platforms": "android, ios, windows, blackberry"
-                },
-                "cordova-plugin-device": {
-                    "version": "https://github.com/apache/cordova-plugin-device.git",
-                    "supported-platforms": "android, windows"
-                }
-            }
-        },
-		"5.1.1-Kit": {
+        "5.1.1-Kit": {
             "cordova-cli": "5.1.1",
             "default": true,
             "platforms": {
