@@ -35,9 +35,9 @@ class Certs {
     private static CERT_DEFAULTS = {
         days: 1825, // 5 years
         country: "US",
-        ca_cn: "remotebuild." + os.hostname() + ".Certificate-Authority", // NOTE: Changing certificates away from referring to vs-mda-remote may require changes to VS, until the CLI can configure certs appropriately
-        pfx_name: "remotebuild." + os.hostname() + ".Client-Certificate",
-        client_cn: "remotebuild." + os.hostname(), // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
+        ca_cn: os.hostname().substring(0, 50) + ".RB.CA", // Note: these cn entries have a maximum length of 64 bytes. If a hostname contains unicode characters, then os.hostname will return an ascii mis-encoding which is still one byte per character.
+        pfx_name: os.hostname().substring(0, 50) + ".RB.CC",
+        client_cn: os.hostname().substring(0, 50) + ".RB", // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
     };
 
     private static CertStore: HostSpecifics.ICertStore = null;
@@ -236,7 +236,7 @@ class Certs {
         options = options || {};
         var csrPath = path.join(path.dirname(outCertPath), "CSR-" + path.basename(outCertPath));
         var days = options.days || Certs.CERT_DEFAULTS.days;
-        var cn = options.cn || os.hostname();
+        var cn = options.cn || Certs.CERT_DEFAULTS.client_cn;
 
         var cnfPath = path.join(conf.serverDir, "certs", "openssl.cnf");
         Certs.writeConfigFile(cnfPath, conf);
