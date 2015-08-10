@@ -154,7 +154,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
     }
 
     public get configFileLocation(): string {
-        return path.resolve(this.conf.stores.file.dir, this.conf.stores.file.file);
+        return this.conf.stores.file && this.conf.stores.file.file;
     }
 
     public get(prop: string): any {
