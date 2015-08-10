@@ -179,9 +179,13 @@ module TacoUtility {
             private static getRegistryValue(key: string, value: string): string {
                 // TODO: Task 1186340:TACO cli telemetry: Update to use winreg package instead of windows-no-runnable
                 var windows = require("windows-no-runnable");
-                var regKey = windows.registry(key);
-                if (regKey && regKey[value] && regKey[value].value) {
-                    return regKey[value].value;
+                try {
+                    var regKey = windows.registry(key);
+                    if (regKey && regKey[value] && regKey[value].value) {
+                        return regKey[value].value;
+                    }
+                } catch (e) {
+                    return null;
                 }
             }
 
