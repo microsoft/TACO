@@ -493,7 +493,7 @@ module TacoDependencyInstaller {
             var deferred: Q.Deferred<number> = Q.defer<number>();
 
             // While we are still in non-elevated mode, create a .bash_profile file in the user's home if it doesn't exist
-            var bashProfile: string = path.join("~", ".bash_profile");
+            var bashProfile: string = path.join(process.env["HOME"], ".bash_profile");
 
             if (!fs.existsSync(bashProfile)) {
                 fs.writeFileSync(bashProfile, "");
