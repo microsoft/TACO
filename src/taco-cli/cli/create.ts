@@ -28,6 +28,7 @@ import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
+import kit = require ("./kit");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
@@ -219,17 +220,10 @@ class Create implements commands.IDocumentedCommand {
             return Q({});
         } else {
             var kitId: string = this.commandParameters.data.options["kit"];
-            return Q({})
-                .then(function (): Q.Promise<string> {
-                    if (!kitId) {
-                        return kitHelper.getDefaultKit().then(kitId => resources.getString("CommandCreateStatusDefaultKitUsedAnnotation", kitId));
-                    }
-
-                    return Q(kitId);
-                })
-                .then(function (kitIdUsed: string): void {
-                    self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription", kitIdUsed);
-                });
+            return (kitId ? Q(kitId) : kitHelper.getDefaultKit())
+                .then((kitId: string) => kitHelper.getKitInfo(kitId)
+                    .then(kitInfo => self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription",
+                        kit.getKitTitle(kitId, kitInfo))));
         }
     }
 
