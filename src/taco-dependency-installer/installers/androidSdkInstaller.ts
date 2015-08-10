@@ -84,7 +84,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
         var addToPathTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/tools/";
         var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
-        var newPath: string = "\"" + addToPathTools + "\":\"" + addToPathPlatformTools + "\":\"$PATH\"";
+        var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
         var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
         var updateCommand: string = "echo '" + appendToBashProfile + "' >>~/.bash_profile";
 

@@ -73,8 +73,6 @@ module TacoDependencyInstaller {
         }
 
         public run(requirementsResult: any): Q.Promise<any> {
-            // Installing dependencies is currently only supported on Windows
-            // TODO (DevDiv 1172346): Support Mac OS as well
             if (process.platform !== "win32" && process.platform !== "darwin") {
                 return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
@@ -99,9 +97,6 @@ module TacoDependencyInstaller {
             var self = this;
 
             return this.promptUserBeforeInstall()
-                .then(function (): void {
-                    self.prepareCommunications();
-                })
                 .then(function (): Q.Promise<number> {
                     return self.spawnElevatedInstaller();
                 })
@@ -457,40 +452,54 @@ module TacoDependencyInstaller {
 
         private spawnElevatedInstallerWin32(): Q.Promise<number> {
             var self = this;
-            var deferred: Q.Deferred<number> = Q.defer<number>();
-            var launcherPath: string = path.resolve(__dirname, "utils", "win32", "elevatedInstallerLauncher.ps1");
-            var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
-            var command: string = "powershell";
-            var args: string[] = [
-                "-executionpolicy",
-                "unrestricted",
-                "-file",
-                launcherPath,
-                utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
-                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath),
-                utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
-            ];
-            var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
 
-            cp.on("error", function (err: Error): void {
-                // Handle ENOENT if Powershell is not found
-                if (err.name === "ENOENT") {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
-                } else {
-                    deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
-                }
-            });
-            cp.on("exit", function (code: number): void {
-                self.serverHandle.close(function (): void {
-                    deferred.resolve(code);
+            // Set up the communication channels to talk with the elevated installer process
+            return this.prepareCommunications()
+                .then(function (): Q.Promise<any> {
+                    var deferred: Q.Deferred<number> = Q.defer<number>();
+                    var launcherPath: string = path.resolve(__dirname, "utils", "win32", "elevatedInstallerLauncher.ps1");
+                    var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
+                    var command: string = "powershell";
+                    var args: string[] = [
+                        "-executionpolicy",
+                        "unrestricted",
+                        "-file",
+                        launcherPath,
+                        utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
+                        utilHelper.quotesAroundIfNecessary(this.installConfigFilePath),
+                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
+                    ];
+                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+
+                    cp.on("error", function (err: Error): void {
+                        // Handle ENOENT if Powershell is not found
+                        if (err.name === "ENOENT") {
+                            deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
+                        } else {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
+                        }
+                    });
+                    cp.on("exit", function (code: number): void {
+                        self.serverHandle.close(function (): void {
+                            deferred.resolve(code);
+                        });
+                    });
+
+                    return deferred.promise;
                 });
-            });
-
-            return deferred.promise;
         }
 
         private spawnElevatedInstallerDarwin(): Q.Promise<number> {
             var deferred: Q.Deferred<number> = Q.defer<number>();
+
+            // While we are still in non-elevated mode, create a .bash_profile file in the user's home if it doesn't exist
+            var bashProfile: string = path.join("~", ".bash_profile");
+
+            if (!fs.existsSync(bashProfile)) {
+                fs.writeFileSync(bashProfile, "");
+            }
+
+            // Spawn the elevated installer process
             var elevatedInstallerScript: string = path.resolve(__dirname, "elevatedInstaller.js");
             var command: string = "sudo";
             var args: string[] = [
