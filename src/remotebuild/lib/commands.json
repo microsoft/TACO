@@ -4,7 +4,7 @@
     "description": "<helptitle>[CommandStartDescription]</helptitle>",
     "options": [
       { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
-      { "name": "--port [PORT_NUM]", "description": "[RemoteBuildConfPort]" },
+      { "name": "--port [PORT-NUM]", "description": "[RemoteBuildConfPort]" },
       { "name": "--secure [true|false]", "description": "[RemoteBuildConfSecure]" },
       { "name": "--lang [LANGUAGE]", "description": "[RemoteBuildConfLang]" },
       { "name": "--pinTimeout [MINS]", "description": "[RemoteBuildConfPinTimeout]" },
@@ -31,7 +31,7 @@
     ],
     "options": [
       { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
-      { "name": "--port [PORT_NUM]", "description": "[RemoteBuildConfPort]" },
+      { "name": "--port [PORT-NUM]", "description": "[RemoteBuildConfPort]" },
       { "name": "--lang [LANGUAGE]", "description": "[RemoteBuildConfLang]" },
       { "name": "--certExpirationDays [NUM_DAYS]", "description": "[RemoteBuildConfCertExpirationDays]" },
       { "name": "--hostname [HOSTNAME]", "description": "[RemoteBuildConfHostname]" },
@@ -44,6 +44,19 @@
     "notes": [
       "[RemoteBuildNotes1]",
       "[RemoteBuildNotes2]"
+    ]
+  },
+
+  "saveconfig":  {
+    "synopsis": "<synopsis>[Options]</synopsis>",
+    "description": "<helptitle>[CommandSaveConfigDescription]</helptitle>",
+    "options": [
+      { "name": "--serverDir [DIRECTORY]", "description": "[RemoteBuildConfServerDir]" },
+      { "name": "--port [PORT-NUM]", "description": "[RemoteBuildConfPort]" },
+      { "name": "--lang [LANGUAGE]", "description": "[RemoteBuildConfLang]" },
+      { "name": "--certExpirationDays [NUM_DAYS]", "description": "[RemoteBuildConfCertExpirationDays]" },
+      { "name": "--hostname [HOSTNAME]", "description": "[RemoteBuildConfHostname]" },
+      { "name": "--config [PATH]", "description": "[RemoteBuildConfConfigFile]" }
     ]
   },
 

@@ -53,10 +53,9 @@ describe("taco create", function (): void {
     // The following numbers are for: "plugins", "hooks", "platforms" and ".cordova" folders, and "hooks\readme.md" and ".cordova\cordova.config" files. If our templates ever start to include
     // these files, then to avoid double counting them, we must reduce the counts in this dictionary.
     var cordovaFileCounts: { [kitId: string]: number } = {
-        "4.2.0-Kit": 6, // 2 file and 4 folders
         "4.3.0-Kit": 6, // 2 file and 4 folders
         "4.3.1-Kit": 4, // 1 file and 3 folders (no ".cordova\" and ".cordova\cordova.config") 
-        "5.0.0-Kit": 4 // 1 file and 3 folders 
+        "5.1.1-Kit": 4 // 1 file and 3 folders 
     };
 
     // Persistent TemplateManager to count template entries
@@ -81,15 +80,15 @@ describe("taco create", function (): void {
     var failurePrefix: string = "failure";
     var successScenarios: IScenarioList = {
         1: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(successPrefix, 1), testAppId, testAppName),
-        2: util.format("%s --kit 5.0.0-Kit --template blank %s %s", getProjectPath(successPrefix, 2), testAppId, testAppName),
-        3: util.format("%s --kit 4.2.0-Kit --template typescript %s", getProjectPath(successPrefix, 3), testAppId),
-        4: util.format("%s --kit 4.2.0-Kit --template blank", getProjectPath(successPrefix, 4)),
-        5: util.format("%s --kit 5.0.0-Kit --template", getProjectPath(successPrefix, 5)),
+        2: util.format("%s --kit 5.1.1-Kit --template blank %s %s", getProjectPath(successPrefix, 2), testAppId, testAppName),
+        3: util.format("%s --kit 4.3.1-Kit --template typescript %s", getProjectPath(successPrefix, 3), testAppId),
+        4: util.format("%s --kit 4.3.1-Kit --template blank", getProjectPath(successPrefix, 4)),
+        5: util.format("%s --kit 5.1.1-Kit --template", getProjectPath(successPrefix, 5)),
         6: util.format("%s --kit 4.3.1-Kit", getProjectPath(successPrefix, 6)),
         7: util.format("%s --template blank", getProjectPath(successPrefix, 7)),
         8: util.format("%s --template", getProjectPath(successPrefix, 8)),
         9: util.format("%s --copy-from %s", getProjectPath(successPrefix, 9), copyFromPath),
-        10: util.format("%s --cli 4.2.0", getProjectPath(successPrefix, 10)),
+        10: util.format("%s --cli 4.3.0", getProjectPath(successPrefix, 10)),
         11: util.format("%s --unknownParameter", getProjectPath(successPrefix, 11)),
         12: util.format("%s --kit", getProjectPath(successPrefix, 12)),
         13: util.format("%s --template typescript", getProjectPath(successPrefix, 13))
@@ -98,11 +97,11 @@ describe("taco create", function (): void {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
         2: util.format("%s --template unknown", getProjectPath(failurePrefix, 2)),
         3: util.format("%s --kit 4.3.0-Kit --template typescript", getProjectPath(failurePrefix, 3)),
-        4: util.format("%s --kit 5.0.0-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 4), copyFromPath),
-        5: util.format("%s --kit 5.0.0-Kit --cli 4.2.0", getProjectPath(failurePrefix, 5)),
-        6: util.format("%s --cli 4.2.0 --template typescript", getProjectPath(failurePrefix, 6)),
+        4: util.format("%s --kit 5.1.1-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 4), copyFromPath),
+        5: util.format("%s --kit 5.1.1-Kit --cli 4.2.0", getProjectPath(failurePrefix, 5)),
+        6: util.format("%s --cli 4.3.0 --template typescript", getProjectPath(failurePrefix, 6)),
         7: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 7), testAppId, testAppName),
-        8: util.format("%s --kit 5.0.0-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 8)),
+        8: util.format("%s --kit 5.1.1-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 8)),
         9: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 9)),
         10: util.format("%s 42", getProjectPath(failurePrefix, 10)),
         11: "",
@@ -234,29 +233,29 @@ describe("taco create", function (): void {
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
             var scenario: number = 2;
 
-            // Should use kit 5.0.0-Kit and template blank
-            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template blank
+            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
             var scenario: number = 3;
 
-            // Should use kit 4.2.0-Kit and template typescript
-            runScenario(scenario, "4.2.0-Kit", "typescript", "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
+            // Should use kit 4.3.1-Kit and template typescript
+            runScenario(scenario, "4.3.1-Kit", "typescript", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
             var scenario: number = 4;
 
-            // Should use kit 4.2.0-Kit and template blank
-            runScenario(scenario, "4.2.0-Kit", "blank", "{\"kit\":\"4.2.0-Kit\"}").then(done, done);
+            // Should use kit 4.3.1-Kit and template blank
+            runScenario(scenario, "4.3.1-Kit", "blank", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 5 [path, kit, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 5;
 
-            // Should use kit 5.0.0-Kit and template blank
-            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template blank
+            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
@@ -269,25 +268,25 @@ describe("taco create", function (): void {
         it("Success scenario 7 [path, template]", function (done: MochaDone): void {
             var scenario: number = 7;
 
-            // Should use kit 5.0.0-Kit and template blank
-            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template blank
+            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 8 [path, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 8;
 
-            // Should use kit 5.0.0-Kit and template blank
-            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template blank
+            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 9 [path, copy-from]", function (done: MochaDone): void {
             var scenario: number = 9;
 
             // copy-from custom assets: 2 files and 1 folder
-            // Kit 5.0.0-Kit: Cordova adds 2 files and 4 folders
+            // Kit 5.1.1-Kit: Cordova adds 2 files and 4 folders
             var totalEntries = 9 + tacoFileCount;
 
-            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 10 [path, cli]", function (done: MochaDone): void {
@@ -297,28 +296,28 @@ describe("taco create", function (): void {
             // taco-cli: adds 1 file
             var totalEntries = cordovaDefaultProjectFileCount + tacoFileCount;
 
-            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"cli\":\"4.2.0\"}").then(done, done);
+            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"cli\":\"4.3.0\"}").then(done, done);
         });
 
         it("Success scenario 11 [path, extra unknown parameter]", function (done: MochaDone): void {
             var scenario: number = 11;
 
-            // Should use kit 5.0.0-Kit and template blank
-            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template blank
+            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 12 [path, kit (empty)]", function (done: MochaDone): void {
             var scenario: number = 12;
 
-            // Should use kit 5.0.0-Kit and template blank
-            runScenario(scenario, "5.0.0-Kit", "blank", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template blank
+            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
 
         it("Success scenario 13 [path, template (typescript)]", function (done: MochaDone): void {
             var scenario: number = 13;
 
-            // Should use kit 5.0.0-Kit and template typescript
-            runScenario(scenario, "5.0.0-Kit", "typescript", "{\"kit\":\"5.0.0-Kit\"}").then(done, done);
+            // Should use kit 5.1.1-Kit and template typescript
+            runScenario(scenario, "5.1.1-Kit", "typescript", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
         });
     });
 
@@ -492,12 +491,11 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
                 "      CommandCreateStatusTableKitVersionDescription ..... 4.3.1-Kit",
                 "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
-                "      ----------",
-                "CommandCreateWarningDeprecatedKit"];
+                "      ----------"];
 
             var lastPart = [
                 "CommandCreateSuccessProjectTemplate",
-                "----------",
+                "OnboardingExperienceTitle",
                 " * HowToUseChangeToProjectFolder",
                 " * HowToUseCommandPlatformAddPlatform",
                 " * HowToUseCommandInstallReqsPlugin",
@@ -527,13 +525,13 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
                 "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
-                "      CommandCreateStatusTableCordovaCLIVersionDescription ..... 5.0.0",
+                "      CommandCreateStatusTableCordovaCLIVersionDescription ..... 5.1.1",
                 "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                 "      ----------"];
 
             var lastPart = [
                 "CommandCreateSuccessProjectCLI",
-                "----------",
+                "OnboardingExperienceTitle",
                 " * HowToUseChangeToProjectFolder",
                 " * HowToUseCommandPlatformAddPlatform",
                 " * HowToUseCommandInstallReqsPlugin",
@@ -547,7 +545,7 @@ describe("taco create", function (): void {
                 "HowToUseCommandDocs",
                 ""];
 
-            testCreateForArguments([projectPath, "--cli", "5.0.0"],
+            testCreateForArguments([projectPath, "--cli", "5.1.1"],
                 firstPart.concat(lastPart),
                 firstPart.concat(downloadingDependenciesOutput, lastPart),
                 done);

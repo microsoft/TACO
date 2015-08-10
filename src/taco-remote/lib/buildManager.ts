@@ -82,8 +82,6 @@ class BuildManager {
         };
         this.currentBuild = null;
         this.queuedBuilds = [];
-        console.info(resources.getString("BuildManagerInit"),
-            this.baseBuildDir, this.maxBuildsInQueue, this.deleteBuildsOnShutdown, allowsEmulate, this.nextBuildNumber);
     }
 
     public shutdown(): void {

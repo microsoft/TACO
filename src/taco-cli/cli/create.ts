@@ -278,7 +278,7 @@ class Create implements commands.IDocumentedCommand {
         }
 
         // Print the onboarding experience
-        logger.log("-------------------------------------");
+        logger.log(resources.getString("OnboardingExperienceTitle"));
         LoggerHelper.logList(["HowToUseChangeToProjectFolder",
             "HowToUseCommandPlatformAddPlatform",
             "HowToUseCommandInstallReqsPlugin",
