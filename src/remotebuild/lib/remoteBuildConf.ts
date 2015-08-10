@@ -7,6 +7,7 @@
 ﻿ */
 
 /// <reference path="../../typings/remotebuild.d.ts" />
+/// <reference path="../../typings/nconf_extensions.d.ts" />
 "use strict";
 
 import nconf = require ("nconf");
@@ -35,9 +36,12 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         [key: string]: any;
     };
 
+    private conf: typeof nconf;
+
     public usingDefaultModulesConfig: boolean = false;
 
     constructor(conf: typeof nconf, isUnitTest?: boolean) {
+        this.conf = conf;
         var defaults: any = {
             serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
             port: 3000,
@@ -149,6 +153,10 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         return Object.keys(this.remoteBuildConf.modules);
     }
 
+    public get configFileLocation(): string {
+        return path.resolve(this.conf.stores.file.dir, this.conf.stores.file.file);
+    }
+
     public get(prop: string): any {
         return this.remoteBuildConf[prop];
     }
@@ -157,19 +165,35 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
         this.remoteBuildConf[prop] = val;
     }
 
-    public moduleConfig(mod: string): RemoteBuildConf.IModuleConf {
+    public moduleConfig(mod: string): RemoteBuild.IServerModuleConfiguration {
         return this.remoteBuildConf.modules[mod];
+    }
+
+    public setModuleConfig(mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): void {
+        this.remoteBuildConf.modules[mod] = moduleConfig;
+    }
+
+    public save(): void {
+        // nconf.argv() adds some members to nconf that we do not want to save:
+        // nconf.get("_") is the remaining command line arguments
+        if (this.remoteBuildConf["_"]) {
+            delete this.remoteBuildConf["_"];
+        }
+
+        // nconf.get("$0") is the command that started this process, e.g. "node remotebuild.js"
+        if (this.remoteBuildConf["$0"]) {
+            delete this.remoteBuildConf["$0"];
+        }
+
+        this.conf.merge(this.remoteBuildConf);
+        this.conf.save(null);
+        console.info(resources.getString("SavedConfig", this.configFileLocation));
     }
 }
 
 module RemoteBuildConf {
-    export interface IModuleConf {
-        mountPath: string;
-        requirePath?: string;
-        [prop: string]: any;
-    };
     export interface IModulesConf {
-        [module: string]: RemoteBuildConf.IModuleConf;
+        [module: string]: RemoteBuild.IServerModuleConfiguration;
     };
 }
 

@@ -138,6 +138,16 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
     public get(prop: string): any {
         return this.tacoRemoteConf[prop];
     }
+
+    public serialize(): RemoteBuild.IServerModuleConfiguration {
+        var confCopy = JSON.parse(JSON.stringify(this.tacoRemoteConf));
+        // These three properties are taken from the root config, and are not individually configurable. Remove them when saving.
+        delete confCopy.lang;
+        delete confCopy.port;
+        delete confCopy.serverDir;
+
+        return confCopy;
+    }
 }
 
 export = TacoRemoteConfig;

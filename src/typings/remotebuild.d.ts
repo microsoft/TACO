@@ -44,6 +44,7 @@ declare module RemoteBuild {
         create(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration, serverCapabilities: IServerCapabilities): Q.Promise<RemoteBuild.IServerModule>;
         test(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration, serverTestCapabilities: IServerTestCapabilities, cliArguments: string[]): Q.Promise<any>; // When remotebuild is invoked in testing mode, it will call for the modules to test themselves against a separate instance of the server running in the normal mode
         printHelp(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration): void;
+        getConfig(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration): IServerModuleConfiguration;
     }
     interface IServerModule {
         getRouter(): Express.Router;
