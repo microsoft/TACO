@@ -37,6 +37,7 @@ import IDependency = DependencyInstallerInterfaces.IDependency;
 import logger = tacoUtils.Logger;
 import loggerHelper = tacoUtils.LoggerHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import utilHelper = tacoUtils.UtilHelper;
 
 module TacoDependencyInstaller {
@@ -492,28 +493,32 @@ module TacoDependencyInstaller {
         private spawnElevatedInstallerDarwin(): Q.Promise<number> {
             var deferred: Q.Deferred<number> = Q.defer<number>();
 
-            // While we are still in non-elevated mode, create a .bash_profile file in the user's home if it doesn't exist
-            var bashProfile: string = path.join(process.env["HOME"], ".bash_profile");
+            // While we are still in non-elevated mode, store the current user for later "chown" commands
+            var idCmd: string = "id -un";
+            childProcess.exec(idCmd, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+                if (error) {
+                    deferred.reject(error);
+                } else {
+                    // Store the result of the id command
+                    TacoGlobalConfig.userName = stdout.toString();
 
-            if (!fs.existsSync(bashProfile)) {
-                fs.writeFileSync(bashProfile, "");
-            }
+                    // Spawn the elevated installer process
+                    var elevatedInstallerScript: string = path.resolve(__dirname, "elevatedInstaller.js");
+                    var command: string = "sudo";
+                    var args: string[] = [
+                        "node",
+                        elevatedInstallerScript,
+                        utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
+                    ];
+                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "inherit" });
 
-            // Spawn the elevated installer process
-            var elevatedInstallerScript: string = path.resolve(__dirname, "elevatedInstaller.js");
-            var command: string = "sudo";
-            var args: string[] = [
-                "node",
-                elevatedInstallerScript,
-                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
-            ];
-            var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "inherit" });
-
-            cp.on("error", function (err: Error): void {
-                deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
-            });
-            cp.on("exit", function (code: number): void {
-                deferred.resolve(code);
+                    cp.on("error", function (err: Error): void {
+                        deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
+                    });
+                    cp.on("exit", function (code: number): void {
+                        deferred.resolve(code);
+                    });
+                }
             });
 
             return deferred.promise;

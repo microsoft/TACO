@@ -34,7 +34,7 @@ import tacoLogger = tacoUtils.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 // Internal class for an ILogger specifically designed for the communication between the elevatedInstaller and the dependencyInstaller on Windows, which requires socket communication over a local server
-class SocketLogger implements protocol.ILogger {
+class Win32Logger implements protocol.ILogger {
     private socketHandle: NodeJSNet.Socket;
 
     constructor(socket: NodeJSNet.Socket) {
@@ -131,7 +131,7 @@ class ElevatedInstaller {
                 return this.connectToServer()
                     .then(function (): void {
                         // Instantiate the logger
-                        self.logger = new SocketLogger(self.socketHandle);
+                        self.logger = new Win32Logger(self.socketHandle);
                     });
             case "darwin":
                 // Instantiate the logger

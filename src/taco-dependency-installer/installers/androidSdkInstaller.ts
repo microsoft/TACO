@@ -30,11 +30,27 @@ import installerProtocol = require ("../elevatedInstallerProtocol");
 import installerUtils = require ("../utils/installerUtils");
 import installerUtilsWin32 = require ("../utils/win32/installerUtilsWin32");
 import resources = require ("../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
 
 import ILogger = installerProtocol.ILogger;
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
+import utilHelper = tacoUtils.UtilHelper;
 
 class AndroidSdkInstaller extends InstallerBase {
     private static AndroidHomeName: string = "ANDROID_HOME";
+    private static AndroidCommand = os.platform() === "win32" ? "android.bat" : "android";
+    private static AndroidPackages: string[] = [
+        "tools",
+        "platform-tools",
+        "extra-android-support",
+        "extra-android-m2repository",
+        "build-tools-19.1.0",
+        "build-tools-21.1.2",
+        "build-tools-22.0.1",
+        "android-19",
+        "android-21",
+        "android-22"
+    ];
 
     private installerArchive: string;
     private androidHomeValue: string;
@@ -66,7 +82,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected postInstallWin32(): Q.Promise<any> {
-        return this.postInstallDefault();
+        return this.postInstallDefault(AndroidSdkInstaller.AndroidCommand);
     }
 
     protected downloadDarwin(): Q.Promise<any> {
@@ -74,7 +90,25 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected installDarwin(): Q.Promise<any> {
-        return this.installDefault();
+        var self = this;
+
+        return this.installDefault()
+            .then(function (): Q.Promise<any> {
+                var deferred: Q.Deferred<any> = Q.defer<any>();
+
+                // The SDK was extracted as root, so change the owner back to the current user
+                var chownCmd: string = "chown -R " + TacoGlobalConfig.userName + "\"" + self.installDestination + "\"";
+
+                childProcess.exec(chownCmd, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+                    if (error) {
+                        deferred.reject(error);
+                    } else {
+                        deferred.resolve({});
+                    }
+                });
+
+                return deferred.promise;
+            });
     }
 
     protected updateVariablesDarwin(): Q.Promise<any> {
@@ -86,11 +120,10 @@ class AndroidSdkInstaller extends InstallerBase {
         var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
         var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
         var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
-        var updateCommand: string = "echo '" + appendToBashProfile + "' >>~/.bash_profile";
+        var updateCommand: string = "sudo -u " + TacoGlobalConfig.userName + " echo '" + appendToBashProfile + "' >>~/.bash_profile";
 
         this.androidHomeValue = androidHomeValue;
 
-        // Add Android values in ~/.bash_profile
         childProcess.exec(updateCommand, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
                 deferred.reject(error);
@@ -107,7 +140,12 @@ class AndroidSdkInstaller extends InstallerBase {
 
         return this.addExecutePermission()
             .then(function (): Q.Promise<any> {
-                return self.postInstallDefault();
+                // For MacOS, we need to run the android command as non-root, otherwise there will be permission issues
+                return self.postInstallDefault("sudo", [
+                    "-u",
+                    TacoGlobalConfig.userName,
+                    AndroidSdkInstaller.AndroidCommand
+                    ]);
             });
     }
 
@@ -131,6 +169,11 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     private installDefault(): Q.Promise<any> {
+        // Make sure we have an install location
+        if (!this.installDestination) {
+            return Q.reject(new Error(resources.getString("NeedInstallDestination")));
+        }
+
         // Extract the archive
         var templateZip = new admZip(this.installerArchive);
 
@@ -158,31 +201,23 @@ class AndroidSdkInstaller extends InstallerBase {
         return deferred.promise;
     }
 
-    private postInstallDefault(): Q.Promise<any> {
+    private postInstallDefault(command: string, argsPrepend?: string[]): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var androidCommand: string = os.platform() === "win32" ? "android.bat" : "android";
-        var command: string = path.join(this.androidHomeValue, "tools", androidCommand);
-        var androidPackages: string[] = [
-            "tools",
-            "platform-tools",
-            "extra-android-support",
-            "extra-android-m2repository",
-            "build-tools-19.1.0",
-            "build-tools-21.1.2",
-            "build-tools-22.0.1",
-            "android-19",
-            "android-21",
-            "android-22"
-        ];
+
         var args: string[] = [
             "update",
             "sdk",
             "-u",
             "-a",
             "--filter",
-            androidPackages.join(",")
+            AndroidSdkInstaller.AndroidPackages.join(",")
         ];
+
+        if (argsPrepend) {
+            args = argsPrepend.concat(args);
+        }
+
         var errorOutput: string = "";
         var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
 

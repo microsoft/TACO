@@ -18,6 +18,7 @@ import Q = require ("q");
 
 import InstallerBase = require ("./installerBase");
 import installerProtocol = require ("../elevatedInstallerProtocol");
+import installerUtils = require ("../utils/installerUtils");
 
 import ILogger = installerProtocol.ILogger;
 
@@ -35,18 +36,7 @@ class IosDeployInstaller extends InstallerBase {
     }
 
     private installDefault(): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "npm install -g " + this.installerInfo.installSource;
-
-        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-            if (error) {
-                deferred.reject(error);
-            } else {
-                deferred.resolve({});
-            }
-        });
-
-        return deferred.promise;
+        return installerUtils.installNpmPackage(this.installerInfo.installSource);
     }
 }
 

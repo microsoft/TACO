@@ -39,7 +39,7 @@
                         "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
                         "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
                         "bytes": 98330824,
-                        "installDestination": "/Library/Android",
+                        "installDestination": "$HOME/Library/Android",
                         "steps": {
                             "download": true,
                             "install": true,
@@ -51,7 +51,7 @@
                         "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
                         "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
                         "bytes": 98330824,
-                        "installDestination": "/Library/Android",
+                        "installDestination": "$HOME/Library/Android",
                         "steps": {
                             "download": true,
                             "install": true,

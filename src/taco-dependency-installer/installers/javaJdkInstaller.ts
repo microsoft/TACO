@@ -45,11 +45,15 @@ class JavaJdkInstaller extends InstallerBase {
 
     protected installWin32(): Q.Promise<any> {
         var self = this;
-
-        // Run installer
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
-        var commandLine: string = this.installerDownloadPath + " /quiet /norestart /lvx %temp%/javajdk7.0.550.13.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
+        // Make sure we have an install location
+        if (!this.installDestination) {
+            deferred.reject(new Error(resources.getString("NeedInstallDestination")));
+        }
+
+        // Run installer
+        var commandLine: string = this.installerDownloadPath + " /quiet /norestart /lvx %temp%/javajdk.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
 
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
