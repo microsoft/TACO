@@ -467,7 +467,7 @@ module TacoDependencyInstaller {
                         "-file",
                         launcherPath,
                         utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
-                        utilHelper.quotesAroundIfNecessary(this.installConfigFilePath),
+                        utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
@@ -491,6 +491,7 @@ module TacoDependencyInstaller {
         }
 
         private spawnElevatedInstallerDarwin(): Q.Promise<number> {
+            var self = this;
             var deferred: Q.Deferred<number> = Q.defer<number>();
 
             // While we are still in non-elevated mode, store the current user for later "chown" commands
@@ -508,7 +509,7 @@ module TacoDependencyInstaller {
                     var args: string[] = [
                         "node",
                         elevatedInstallerScript,
-                        utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
+                        utilHelper.quotesAroundIfNecessary(self.installConfigFilePath)
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "inherit" });
 
