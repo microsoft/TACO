@@ -2,6 +2,9 @@
     "CommandError": "Error: An error occurred while running the command.",
     "_CommandError.comment": "A generic error message displayed when an error occurs. This will be followed by the inner error, which should contain more details.",
 
+    "TacoCommandPassthrough": "Unknown taco command, passing it to cordova",
+    "_TacoCommandPassthrough.comment": "Message printed when we taco is given a command we don't understand and we pass through to cordova",
+
     "CommandCreateDescription": "Create a new Cordova based taco project",
     "_CommandCreateDescription.comment": "Description of the 'taco create' command",
     "CommandCreateArgsPath": "Where to create the project",
