@@ -72,7 +72,6 @@ class Taco {
             .then(function (): Q.Promise<any> {
                 var parsedArgs: IParsedArgs = Taco.parseArgs(args);
                 projectHelper.cdToProjectRoot();
-
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
