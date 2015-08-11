@@ -120,7 +120,7 @@ describe("taco remote", function (): void {
         }, mocha);
     });
 
-    it("should reject unknown parameters", function (mocha: MochaDone): void {
+    it("should print help for unknown parameters", function (mocha: MochaDone): void {
         RemoteMod.CliSession = {
             question: function (question: string, callback: (answer: string) => void): void {
                 mocha(new Error("Should not get as far as querying the user with invalid paramters"));
@@ -131,13 +131,9 @@ describe("taco remote", function (): void {
         };
 
         Q([]).then(remoteRun).then(function (): void {
-            mocha(new Error("Should have errored out due to bad input"));
+            mocha();
         }, function (e: Error): void {
-            if (e.message === "CommandBadSubcommand") {
-                mocha();
-            } else {
-                mocha(new Error("Unknown error: " + e));
-            }
+            mocha(new Error("Should have printed help"));
         });
     });
 

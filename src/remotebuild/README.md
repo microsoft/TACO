@@ -25,7 +25,6 @@ From the Terminal app on your Mac, type:
 ```
 sudo npm install -g remotebuild
 ```
-where $USER will be replaced by your user name on the Mac. When you run the command, you will be prompted to enter your password as well.
 The global installation (-g) switch is recommended but not required.
 
 ## Start remotebuild in secure mode (default)
@@ -40,15 +39,15 @@ remotebuild --secure false
 
 ## Generate a new security PIN
 ```
-remotebuild generateClientCert
+remotebuild certificates generate
 ```
 
 ## Generate a new server certificate
 ```
-remotebuild resetServerCert
+remotebuild certificates reset
 When prompted, type "Y" and then type Enter
 
-remotebuild generateClientCert
+remotebuild certificates generate
 ```
 
 ## List of all available commands
