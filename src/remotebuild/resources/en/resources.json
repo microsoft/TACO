@@ -103,6 +103,15 @@
     "OSXResetServerCertPleaseYesNo": "Please answer [Y]es or [N]o.",
     "_OSXResetServerCertPleaseYesNo.comment": "Query after user enters an option which is not recognised",
 
+    "CommandTestDescription": "Run tests against another instance of remotebuild",
+    "_CommandTestDescription.comment": "Description for 'remotebuild test'",
+    "CommandTestDevice": "Test that the machine is configured for device builds",
+    "_CommandTestDevice.comment": "Description for the --device option to remotebuild test",
+    "RemoteBuildTestExample1": "Run tests against a server started using all defaults",
+    "_RemoteBuildTestExample1.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help test'",
+    "RemoteBuildTestExample2": "Run device tests against a server started with 'remotebuild --config config.json'",
+    "_RemoteBuildTestExample2.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help test'",
+
     "RunningAsRootError": "****** remotebuild should not be run as root. Shutting down.",
     "_RunningAsRootError.comment": "Message printed when remotebuild is run as root, instructing the user not to do so",
     "ServerStartFailed": "****** Failed to start server: %s",
