@@ -431,8 +431,6 @@
     "_DoneExtractingRemoteBuild.comment": "Message printed after successfully unpacking the downloaded build artifacts. {0} is the location they were unpacked to.",
     "FailedToDeleteRemoteZip": "------ Failed to delete downloaded zip file {0}. This did not prevent a successful build.",
     "_FailedToDeleteRemoteZip.comment": "Message printed if deleting the packed build artifacts fails after already unpacking them. {0} is the location of the packed archive.",
-    "ErrorKitMetadataFileMalformed": "Error: The kit metadata file used by TACO is corrupt. Please fix this by re-installing taco-cli from npm.",
-    "_ErrorKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
     "ErrorInvalidPath": "Error: The specified path is invalid: {0}",
     "_ErrorInvalidPath.comment": "Error reported when the specified path passed to 'taco kit list --json' is invalid.",
     "ErrorInvalidJsonFilePath": "Error: The specified path is not a valid JSON file path: {0}",
