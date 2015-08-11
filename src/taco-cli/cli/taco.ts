@@ -31,6 +31,7 @@ import logger = tacoUtility.Logger;
 import TacoError = tacoUtility.TacoError;
 import telemetry = tacoUtility.Telemetry;
 import telemetryHelper = tacoUtility.TelemetryHelper;
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface IParsedArgs {
@@ -78,7 +79,7 @@ class Taco {
                     return parsedArgs.command.run(commandData);
                 } else {
                     var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
-                    telemetryHelper.addMultiplePropertiesToEvent(routeToCordovaEvent, "argument", args, true);
+                    telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", args, true);
                     return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
                         routeToCordovaEvent.properties["success"] = "true";
                         telemetry.send(routeToCordovaEvent);

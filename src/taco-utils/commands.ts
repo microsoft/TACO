@@ -18,9 +18,11 @@ import Q = require ("q");
 import logger = require ("./logger");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
+import telemetryHelper = require ("./telemetryHelper");
 import errorHelper = require ("./tacoErrorHelper");
 
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import ICommandTelemetryProperties = telemetryHelper.ICommandTelemetryProperties;
 
 module TacoUtility {
     export module Commands {
@@ -138,6 +140,10 @@ module TacoUtility {
                 } else {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, commandData.original.toString()));
                 }
+            }
+
+            public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+                return Q(<ICommandTelemetryProperties>{});
             }
 
             private getSubCommand(options: ICommandData): ICommand {
