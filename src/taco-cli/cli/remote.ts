@@ -39,7 +39,7 @@ interface ICliSession {
     close: () => void
 };
 
-/*
+/**
  * Remote
  *
  * handles "taco remote"

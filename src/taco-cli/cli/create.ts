@@ -34,7 +34,7 @@ import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
 
-/* 
+/**
  * Wrapper interface for create command parameters
  */
 interface ICreateParameters {
@@ -42,7 +42,7 @@ interface ICreateParameters {
     data: commands.ICommandData;
 }
 
-/*
+/**
  * Create
  *
  * Handles "taco create"

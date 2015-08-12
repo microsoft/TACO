@@ -19,7 +19,7 @@ import opener = require ("opener");
 
 import commands = tacoUtility.Commands;
 
-/*
+/**
  * Documentation
  *
  * Handles "taco Documentation"

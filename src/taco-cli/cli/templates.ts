@@ -25,7 +25,7 @@ import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 
-/*
+/**
  * Templates
  *
  * Handles "taco templates"

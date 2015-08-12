@@ -25,7 +25,7 @@ import tacoUtils = require ("taco-utils");
 import commands = tacoUtils.Commands;
 import DependencyInstaller = dependencies.DependencyInstaller;
 
-/*
+/**
  * InstallDependencies
  *
  * Handles "taco install-dependencies"

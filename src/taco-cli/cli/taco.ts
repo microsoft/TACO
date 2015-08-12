@@ -1,10 +1,10 @@
 ﻿/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+ *******************************************************
+ *                                                     *
+ *   Copyright (C) Microsoft. All rights reserved.     *
+ *                                                     *
+ *******************************************************
+ */
 
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
@@ -40,13 +40,13 @@ interface IParsedArgs {
     commandName: string;
 }
 
-/*
+/**
  * Taco
  *
  * Main Taco class
  */
 class Taco { 
-    /*
+    /**
      * Runs taco with command line args
      */
     public static run(): void {
@@ -79,7 +79,7 @@ class Taco {
         });
     }
 
-    /*
+    /**
      * runs taco with parsed args ensuring proper initialization
      */
     public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<any> {
@@ -92,6 +92,8 @@ class Taco {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
                     return parsedArgs.command.run(commandData);
                 } else {
+                    logger.logWarning(resources.getString("TacoCommandPassthrough"));
+                    
                     var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
                     telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
                     return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
@@ -107,7 +109,7 @@ class Taco {
         });
     }
 
-    /*
+    /**
      * runs taco with raw args ensuring proper initialization
      */
     public static runWithArgs(args: string[]): Q.Promise<any> {

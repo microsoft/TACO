@@ -17,7 +17,7 @@ import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 
-/*
+/**
  * Version
  *
  * handles "Taco Version"
