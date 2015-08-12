@@ -44,7 +44,7 @@ export enum CommandOperationStatus {
 *
 * Base handler for platform and plugin commands
 */
-export class PlatformPluginCommandBase implements commands.IDocumentedCommand {
+export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         searchpath: String,
         noregistry: String,

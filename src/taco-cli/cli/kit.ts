@@ -49,7 +49,7 @@ enum ProjectComponentType {
  *
  * handles "taco kit"
  */
-class Kit extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Kit extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         kit: String,
         json: String,

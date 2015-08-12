@@ -22,7 +22,7 @@ import telemetryHelper = tacoUtility.TelemetryHelper;
  *
  * handles "Taco Version"
  */
-class Version implements commands.IDocumentedCommand {
+class Version extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
     public canHandleArgs(data: commands.ICommandData): boolean {

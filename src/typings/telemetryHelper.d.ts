@@ -20,6 +20,7 @@ declare module TacoUtility {
 
     class TelemetryHelper {
         static sendBasicCommandTelemetry(commandName: string, args?: string[]): void;
+        static sendErrorTelemetry(error: any, commandName: string, args?: string[]): void;
         static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void;
         static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void;
     }

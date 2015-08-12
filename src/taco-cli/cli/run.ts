@@ -34,7 +34,7 @@ import logger = tacoUtility.Logger;
  *
  * handles "taco run"
  */
-class Run extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Run extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,

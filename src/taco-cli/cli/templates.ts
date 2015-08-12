@@ -30,7 +30,7 @@ import telemetryHelper = tacoUtility.TelemetryHelper;
  *
  * Handles "taco templates"
  */
-class Templates implements commands.IDocumentedCommand {
+class Templates extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {

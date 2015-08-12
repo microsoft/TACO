@@ -33,7 +33,7 @@ import logger = tacoUtility.Logger;
  *
  * handles "taco emulate"
  */
-class Emulate extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Emulate extends commands.TacoCommandBase{
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,

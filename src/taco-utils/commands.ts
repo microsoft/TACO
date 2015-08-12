@@ -1,10 +1,10 @@
 ﻿/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+? *******************************************************
+? *                                                     *
+? *   Copyright (C) Microsoft. All rights reserved.     *
+? *                                                     *
+? *******************************************************
+? */
 
 /// <reference path="../typings/commandExample.d.ts" />
 /// <reference path="../typings/node.d.ts" />
@@ -52,63 +52,12 @@ module TacoUtility {
             run(data: ICommandData): Q.Promise<any>;
             canHandleArgs(data: ICommandData): boolean;
         }
-        export interface IDocumentedCommand extends ICommand {
-            info: ICommandInfo;
-        }
-
-        /**
-         * Factory to create new Commands classes
-         */
-        export class CommandFactory {
-            public listings: any;
-
-            /**
-             * Factory to create new Commands classes
-             * initialize with json file containing commands
-             */
-            constructor(commandsInfoPath: string) {
-                if (!fs.existsSync(commandsInfoPath)) {
-                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
-                }
-
-                this.listings = require(commandsInfoPath);
-            }
-
-            /**
-             * get specific task object, given task name
-             */
-            public getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
-                if (!name || !this.listings) {
-                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
-                }
-
-                var moduleInfo: ICommandInfo = this.listings[name];
-                if (!moduleInfo) {
-                    return null;
-                }
-
-                var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
-                if (!fs.existsSync(modulePath + ".js")) {
-                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionMissingcommand, name);
-                }
-
-                var commandMod: any = require(modulePath);
-                var moduleInstance: any = new commandMod();
-                moduleInstance.info = moduleInfo;
-
-                var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
-                if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
-                    return moduleInstance;
-                } else {
-                    return null;
-                }
-            }
-        }
 
         export class TacoCommandBase implements ICommand {
             public name: string;
             public subcommands: ICommand[];
             public info: ICommandInfo;
+            public data: ICommandData;
 
             /**
              * Abstract method to be implemented by derived class.
@@ -155,6 +104,55 @@ module TacoUtility {
                 }
 
                 return null;
+            }
+        }
+
+        /**
+         * Factory to create new Commands classes
+         */
+        export class CommandFactory {
+            public listings: any;
+
+            /**
+             * Factory to create new Commands classes
+             * initialize with json file containing commands
+             */
+            constructor(commandsInfoPath: string) {
+                if (!fs.existsSync(commandsInfoPath)) {
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
+                }
+
+                this.listings = require(commandsInfoPath);
+            }
+
+            /**
+             * get specific task object, given task name
+             */
+            public getTask(name: string, inputArgs: string[], commandsModulePath: string): TacoCommandBase {
+                if (!name || !this.listings) {
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
+                }
+
+                var moduleInfo: ICommandInfo = this.listings[name];
+                if (!moduleInfo) {
+                    return null;
+                }
+
+                var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
+                if (!fs.existsSync(modulePath + ".js")) {
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionMissingcommand, name);
+                }
+
+                var commandMod: any = require(modulePath);
+                var moduleInstance: any = new commandMod();
+                moduleInstance.info = moduleInfo;
+
+                var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
+                if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
+                    return moduleInstance;
+                } else {
+                    return null;
+                }
             }
         }
     }

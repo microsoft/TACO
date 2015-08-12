@@ -1,10 +1,10 @@
 ﻿/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+? *******************************************************
+? *                                                     *
+? *   Copyright (C) Microsoft. All rights reserved.     *
+? *                                                     *
+? *******************************************************
+? */
 
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
@@ -36,7 +36,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 
 interface IParsedArgs {
     args: string[];
-    command: commands.ICommand;
+    command: commands.TacoCommandBase;
 }
 
 /*
@@ -50,9 +50,21 @@ class Taco {
      */
     public static run(): void {
         telemetry.init(require("../package.json").name, require("../package.json").version);
-        Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
+        
+        var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
+        var commandProperties: ICommandTelemetryProperties = {};
+        
+        Taco.runWithParsedArgs(parsedArgs)
+        .then(function (): void {
+            if(parsedArgs.command) {
+                parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
+                    commandProperties = properties;
+                });
+            }
+        }).done(null, function (reason: any): any {
             // Pretty print errors
             if (reason) {
+                telemetryHelper.sendErrorTelemetry(reason, parsedArgs.command.name, parsedArgs.args);
                 if (reason.isTacoError) {
                     logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else if (reason.message) {
@@ -65,22 +77,20 @@ class Taco {
     }
 
     /*
-     * runs taco with passed array of args ensuring proper initialization
+     * runs taco with parsed args ensuring proper initialization
      */
-    public static runWithArgs(args: string[]): Q.Promise<any> {
+    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<any> {
         return Q({})
             .then(function (): Q.Promise<any> {
-                var parsedArgs: IParsedArgs = Taco.parseArgs(args);
                 projectHelper.cdToProjectRoot();
+
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
                     return parsedArgs.command.run(commandData);
                 } else {
-                    logger.logWarning(resources.getString("TacoCommandPassthrough"));
-
                     var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
-                    telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", args, true);
+                    telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
                     return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
                         routeToCordovaEvent.properties["success"] = "true";
                         telemetry.send(routeToCordovaEvent);
@@ -92,6 +102,13 @@ class Taco {
                     });
                 }
         });
+    }
+
+    /*
+     * runs taco with raw args ensuring proper initialization
+     */
+    public static runWithArgs(args: string[]): Q.Promise<any> {
+        return Taco.runWithParsedArgs(Taco.parseArgs(process.argv.slice(2)));
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
@@ -117,7 +134,7 @@ class Taco {
         UtilHelper.initializeLogLevel(args);
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
-        var command: commands.ICommand = commandsFactory.getTask(commandName, commandArgs, __dirname);
+        var command: commands.TacoCommandBase = commandsFactory.getTask(commandName, commandArgs, __dirname);
 
         return <IParsedArgs>{ command: command, args: command ? commandArgs : args };
     }

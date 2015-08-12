@@ -11,7 +11,7 @@
 /// <reference path="../typings/commands.d.ts" />
 
 declare module TacoUtility {
-    class HelpCommandBase implements TacoUtility.Commands.IDocumentedCommand {
+    class HelpCommandBase extends TacoUtility.Commands.TacoCommandBase {
         public info: TacoUtility.Commands.ICommandInfo;
 
         constructor(cliName: string, commandJsonPath: string, resources: ResourceManager);

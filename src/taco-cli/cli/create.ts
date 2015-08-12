@@ -47,7 +47,7 @@ interface ICreateParameters {
  *
  * Handles "taco create"
  */
-class Create implements commands.IDocumentedCommand {
+class Create extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.FlagTypeMap = {
         kit: String,
         template: String,

@@ -50,6 +50,21 @@ module TacoUtility {
             });
         }
 
+        public static sendErrorTelemetry(error: any, commandName: string, args?: string[]): void {
+            var erroEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/command");
+            erroEvent.properties["command"] = commandName;
+
+            if (args) {
+                TelemetryHelper.addTelemetryEventProperty(erroEvent, "argument", args, true);
+            }
+            
+            if (error.isTacoError) {
+                erroEvent.properties["tacoErrorCode"] = error.errorCode;
+            } else if (error.message) {
+                erroEvent.setPiiProperty("error", error.message);
+            } 
+        }
+
         private static setTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             if (isPii) {
                 event.setPiiProperty(propertyName, propertyValue);
