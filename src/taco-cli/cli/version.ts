@@ -34,9 +34,6 @@ class Version extends commands.TacoCommandBase {
      */
     public run(data: commands.ICommandData): Q.Promise<any> {
         this.printTacoVersion();
-
-        telemetryHelper.sendBasicCommandTelemetry("version");
-
         return Q({});
     }
 

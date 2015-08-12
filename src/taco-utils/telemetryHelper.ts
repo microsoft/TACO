@@ -25,17 +25,6 @@ module TacoUtility {
     };
 
     export class TelemetryHelper {
-       public static sendBasicCommandTelemetry(commandName: string, args?: string[]): void {
-            var commandEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/command");
-            commandEvent.properties["command"] = commandName;
-
-            if (args) {
-                TelemetryHelper.addTelemetryEventProperty(commandEvent, "argument", args, true);
-            }
-
-            Telemetry.send(commandEvent);
-        }
-
         public static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void {
             if (Array.isArray(propertyValue)) {
                 TelemetryHelper.addMultiValuedTelemetryEventProperty(event, propertyName, propertyValue, isPii);
@@ -50,21 +39,42 @@ module TacoUtility {
             });
         }
 
-        public static sendErrorTelemetry(error: any, commandName: string, args?: string[]): void {
-            var erroEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/command");
-            erroEvent.properties["command"] = commandName;
-
-            if (args) {
-                TelemetryHelper.addTelemetryEventProperty(erroEvent, "argument", args, true);
-            }
+        public static sendCommandFailureTelemetry(commandName: string, error: any, args: string[] = null): void { 
+            var errorEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
             
             if (error.isTacoError) {
-                erroEvent.properties["tacoErrorCode"] = error.errorCode;
+                errorEvent.properties["tacoErrorCode"] = error.errorCode;
             } else if (error.message) {
-                erroEvent.setPiiProperty("error", error.message);
+                errorEvent.setPiiProperty("errorMessage", error.message);
             } 
+
+            Telemetry.send(errorEvent);
         }
 
+        public static sendCommandSuccessTelemetry(commandName: string, commandProperties: ICommandTelemetryProperties, args: string[] = null): void {
+            var successEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
+            
+            TelemetryHelper.addTelemetryEventProperties(successEvent, commandProperties);
+
+            Telemetry.send(successEvent);
+        }
+
+        private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {
+            var commandEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/command");
+            
+            if (commandName) {
+                commandEvent.properties["command"] = commandName;
+            } else if (args && args.length > 0) {
+                commandEvent.setPiiProperty("command", args[0]);
+            }
+
+            if (args) {
+                TelemetryHelper.addTelemetryEventProperty(commandEvent, "argument", args, true);
+            }
+
+            return commandEvent;
+        }
+        
         private static setTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             if (isPii) {
                 event.setPiiProperty(propertyName, propertyValue);

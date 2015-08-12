@@ -1,10 +1,10 @@
 ﻿/**
-? *******************************************************
-? *                                                     *
-? *   Copyright (C) Microsoft. All rights reserved.     *
-? *                                                     *
-? *******************************************************
-? */
+﻿ * ******************************************************
+﻿ *                                                       *
+﻿ *   Copyright (C) Microsoft. All rights reserved.       *
+﻿ *                                                       *
+﻿ *******************************************************
+﻿ */
 
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
@@ -37,6 +37,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 interface IParsedArgs {
     args: string[];
     command: commands.TacoCommandBase;
+    commandName: string;
 }
 
 /*
@@ -56,15 +57,17 @@ class Taco {
         
         Taco.runWithParsedArgs(parsedArgs)
         .then(function (): void {
-            if(parsedArgs.command) {
+            if (parsedArgs.command) {
                 parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
                     commandProperties = properties;
                 });
             }
-        }).done(null, function (reason: any): any {
+        }).done(function (): void {
+            telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
+        }, function (reason: any): any {
             // Pretty print errors
             if (reason) {
-                telemetryHelper.sendErrorTelemetry(reason, parsedArgs.command.name, parsedArgs.args);
+                telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, parsedArgs.args);
                 if (reason.isTacoError) {
                     logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else if (reason.message) {
@@ -136,7 +139,7 @@ class Taco {
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.TacoCommandBase = commandsFactory.getTask(commandName, commandArgs, __dirname);
 
-        return <IParsedArgs>{ command: command, args: command ? commandArgs : args };
+        return <IParsedArgs>{ command: command, args: command ? commandArgs : args, commandName: commandName || command.name};
     }
 }
 

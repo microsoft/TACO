@@ -36,8 +36,6 @@ class Templates extends commands.TacoCommandBase {
     public run(data: commands.ICommandData): Q.Promise<any> {
         var self = this;
 
-        telemetryHelper.sendBasicCommandTelemetry("templates");
-
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {
                 logger.log(resources.getString("CommandTemplatesHeader"));

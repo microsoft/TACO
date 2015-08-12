@@ -63,6 +63,7 @@ class Create extends commands.TacoCommandBase {
 
     private commandParameters: ICreateParameters;
 
+    public name: string = "create";
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {

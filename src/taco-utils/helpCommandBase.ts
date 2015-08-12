@@ -75,7 +75,6 @@ module TacoUtility {
                 this.printGeneralUsage();
             }
             
-            TelemetryHelper.sendBasicCommandTelemetry("help", data.original);
             return Q({});
         }
 
