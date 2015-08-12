@@ -223,9 +223,8 @@ class AndroidSdkInstaller extends InstallerBase {
             "--filter",
             AndroidSdkInstaller.AndroidPackages.join(",")
         ];
-        var options: childProcess.IExecOptions = os.platform() === "darwin" ? { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) } : null;
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = childProcess.spawn(command, args, options);
+        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) }) : childProcess.spawn(command, args);
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData = data.toString();

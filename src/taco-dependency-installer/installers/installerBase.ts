@@ -18,6 +18,7 @@ import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
+import wrench = require ("wrench");
 
 import installerProtocol = require ("../elevatedInstallerProtocol");
 import installerUtils = require ("../utils/installerUtils");
@@ -75,7 +76,12 @@ class InstallerBase {
             case "win32":
                 return this.downloadWin32();
             case "darwin":
-                return this.downloadDarwin();
+                return this.downloadDarwin()
+                    .then(function (): void {
+                        // After we download something on Mac OS, we need to change the owner of the cached installer back to the current user, otherwise
+                        // they won't be able to delete their taco_home folder without admin privileges
+                        wrench.chownSyncRecursive(InstallerBase.InstallerCache, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                    });
             default:
                 return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
         }
