@@ -344,13 +344,6 @@
     "CommandUnsupportedPlatformIgnored": "Warning: Platform '{0}' is not supported and will be ignored.",
     "_CommandUnsupportedPlatformIgnored.comment": "Message printed when we 'taco build' or 'taco run' with a platform that is unsupported. {0} is the particular platform",
 
-    "CommandNotBothLocalRemote": "Error: must specify at most one of --local and --remote",
-    "_CommandNotBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
-    "CommandNotBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
-    "_CommandNotBothDeviceEmulate.comment": "Error reported when both --device and --emulator are specified for 'taco build' or 'taco run'",
-    "CommandNotBothDebugRelease": "Error: must specify at most one of --debug and --release",
-    "_CommandNotBothDebugRelease.comment": "Error reported when both --debug and --release are specified for 'taco build' or 'taco run'",
-
     "CommandVersionDescription": "Display the current taco version",
     "_CommandVersionDescription.comment": "Description of the -v/--v/--version arguments to taco",
 

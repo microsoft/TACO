@@ -80,15 +80,15 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--remote", "--local");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--device", "--emulator");
         }
 
         if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDebugRelease);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
         }
 
         return parsedOptions;
