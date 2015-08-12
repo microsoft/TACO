@@ -18,7 +18,6 @@ module TacoUtility {
     export class TacoGlobalConfig {
         private static LangName: string = "TACO_LANG";
         private static LogLevelName: string = "TACO_LOG_LEVEL";
-        private static UserName: string = "TACO_CURRENT_USER";
 
         public static get lang(): string {
             return process.env[TacoGlobalConfig.LangName];
@@ -42,18 +41,6 @@ module TacoUtility {
 
             // Save the string name of the enum value to process.env
             process.env[TacoGlobalConfig.LogLevelName] = LogLevel[level];
-        }
-
-        public static get userName(): string {
-            return process.env[TacoGlobalConfig.UserName];
-        }
-
-        public static set userName(userName: string) {
-            if (!userName) {
-                return;
-            }
-
-            process.env[TacoGlobalConfig.UserName] = userName;
         }
     }
 }

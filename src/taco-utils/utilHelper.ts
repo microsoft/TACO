@@ -219,10 +219,17 @@ module TacoUtility {
 
             return str.replace(regex, function (substring: string, ...args: any[]): string {
                 if (process.env[args[0]]) {
-                    return process.env[args[0]];
+                    var newValue: string = process.env[args[0]];
+
+                    // For darwin platform, if the matched string ends with "/", then add a "/"
+                    if (os.platform() === "darwin" && substring[substring.length - 1] === "/") {
+                        newValue += "/";
+                    }
+
+                    return newValue;
                 } else {
                     // This is not an environment variable, can't replace it so leave it as is
-                    return process.platform === "win32" ? "%" + args[0] + "%" : "$" + args[0];
+                    return substring;
                 }
             });
         }

@@ -33,7 +33,6 @@ import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
 import ILogger = installerProtocol.ILogger;
-import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import utilHelper = tacoUtils.UtilHelper;
 
 class AndroidSdkInstaller extends InstallerBase {
@@ -82,7 +81,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected postInstallWin32(): Q.Promise<any> {
-        return this.postInstallDefault(AndroidSdkInstaller.AndroidCommand);
+        return this.postInstallDefault();
     }
 
     protected downloadDarwin(): Q.Promise<any> {
@@ -92,22 +91,31 @@ class AndroidSdkInstaller extends InstallerBase {
     protected installDarwin(): Q.Promise<any> {
         var self = this;
 
+        // Before we extract Android SDK, we need to save the first directory under the specified install path that doesn't exist. This directory and all those under it will be created
+        // with root as the owner, so we will need to change the owner back to the current user after the extraction is complete.
+        var pathSegments: string[] = path.resolve(this.installDestination).split(os.EOL);
+        var firstNonExistentDir: string;
+        var pathSoFar: string = "";
+
+        pathSegments.some(function (dir: string): boolean {
+            pathSoFar = path.join(pathSoFar, dir);
+
+            if (!fs.existsSync(pathSoFar)) {
+                firstNonExistentDir = pathSoFar;
+
+                return true;
+            }
+
+            return false;
+        });
+
         return this.installDefault()
-            .then(function (): Q.Promise<any> {
-                var deferred: Q.Deferred<any> = Q.defer<any>();
-
-                // The SDK was extracted as root, so change the owner back to the current user
-                var chownCmd: string = "chown -R " + TacoGlobalConfig.userName + "\"" + self.installDestination + "\"";
-
-                childProcess.exec(chownCmd, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-                    if (error) {
-                        deferred.reject(error);
-                    } else {
-                        deferred.resolve({});
-                    }
-                });
-
-                return deferred.promise;
+            .then(function (): void {
+                // If some segments of the path the SDK was extracted to didn't exist before, it means they were created as part of the install. They will have root as the owner, so we 
+                // must change the owner back to the current user.
+                if (firstNonExistentDir) {
+                    fs.chownSync(firstNonExistentDir, process.env.SUDO_UID, process.env.SUDO_GID);
+                }
             });
     }
 
@@ -120,7 +128,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
         var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
         var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
-        var updateCommand: string = "sudo -u " + TacoGlobalConfig.userName + " echo '" + appendToBashProfile + "' >>~/.bash_profile";
+        var updateCommand: string = "sudo -u " + process.env.SUDO_USER + " echo '" + appendToBashProfile + "' >>~/.bash_profile";
 
         this.androidHomeValue = androidHomeValue;
 
@@ -140,12 +148,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
         return this.addExecutePermission()
             .then(function (): Q.Promise<any> {
-                // For MacOS, we need to run the android command as non-root, otherwise there will be permission issues
-                return self.postInstallDefault("sudo", [
-                    "-u",
-                    TacoGlobalConfig.userName,
-                    AndroidSdkInstaller.AndroidCommand
-                    ]);
+                return self.postInstallDefault();
             });
     }
 
@@ -201,10 +204,9 @@ class AndroidSdkInstaller extends InstallerBase {
         return deferred.promise;
     }
 
-    private postInstallDefault(command: string, argsPrepend?: string[]): Q.Promise<any> {
+    private postInstallDefault(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-
         var args: string[] = [
             "update",
             "sdk",
@@ -213,13 +215,9 @@ class AndroidSdkInstaller extends InstallerBase {
             "--filter",
             AndroidSdkInstaller.AndroidPackages.join(",")
         ];
-
-        if (argsPrepend) {
-            args = argsPrepend.concat(args);
-        }
-
+        var options: childProcess.IExecOptions = os.platform() === "darwin" ? { uid: process.env.SUDO_UID, gid: process.env.SUDO_GID } : null;
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+        var cp: childProcess.ChildProcess = childProcess.spawn(AndroidSdkInstaller.AndroidCommand, args, options);
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData = data.toString();
