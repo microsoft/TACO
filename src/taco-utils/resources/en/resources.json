@@ -47,6 +47,8 @@
     "_CommandHelpUsageSynopsis.comment": "synopsis header when user requests help for a command",
     "CommandHelpUsageOptions": "<br/><helptitle>Options:</helptitle><br/>",
     "_CommandHelpUsageOptions.comment": "options header when user requests help for a command",
+    "CommandHelpUsageParameters": "<helptitle>Parameters:</helptitle><br/>",
+    "_CommandHelpUsageParameters.comment": "parameters header when user requests help for a command",
     "CommandHelpUsageExamples": "<br/><helptitle>Examples:</helptitle><br/>",
     "_CommandHelpUsageExamples.comment": "examples header when user requests help for a command",
     "CommandHelpUsageNotes": "<br/><helptitle>Notes:</helptitle><br/>",
