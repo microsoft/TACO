@@ -39,8 +39,7 @@ import UtilHelper = tacoUtility.UtilHelper;
  *
  * handles "taco build"
  */
-class Build extends commands.TacoCommandBase{
-
+class Build extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,

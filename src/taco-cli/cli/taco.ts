@@ -1,8 +1,8 @@
 ﻿/**
-﻿ * ******************************************************
-﻿ *                                                       *
-﻿ *   Copyright (C) Microsoft. All rights reserved.       *
-﻿ *                                                       *
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
 
@@ -139,7 +139,7 @@ class Taco {
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.TacoCommandBase = commandsFactory.getTask(commandName, commandArgs, __dirname);
 
-        return <IParsedArgs>{ command: command, args: command ? commandArgs : args, commandName: commandName || command.name};
+        return <IParsedArgs>{ command: command, args: command ? commandArgs : args, commandName: commandName || command.name };
     }
 }
 

@@ -34,6 +34,7 @@ declare module TacoUtility {
          */
         interface ICommand {
             run(data: ICommandData): Q.Promise<any>;
+            canHandleArgs(data: ICommandData): boolean;
         }
         
         /**

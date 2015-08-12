@@ -14,7 +14,6 @@ import telemetry = require ("./telemetry");
 import Telemetry = telemetry.Telemetry;
 
 module TacoUtility {
-
     export interface ITelemetryPropertyInfo {
         value: any;
         isPii: boolean;
@@ -29,7 +28,7 @@ module TacoUtility {
             if (Array.isArray(propertyValue)) {
                 TelemetryHelper.addMultiValuedTelemetryEventProperty(event, propertyName, propertyValue, isPii);
             } else {
-                TelemetryHelper.setTelemetryEventProperty(event, propertyName, propertyValue, isPii)
+                TelemetryHelper.setTelemetryEventProperty(event, propertyName, propertyValue, isPii);
             }
         }
 
@@ -88,8 +87,6 @@ module TacoUtility {
                 TelemetryHelper.setTelemetryEventProperty(event, propertyName + i, propertyValue[i], isPii);
             }            
         }
-
-        
     };
 }
 
