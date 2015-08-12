@@ -216,4 +216,21 @@ describe("help for a command", function (): void {
             "   [PLATFORM] .......... CommandInstallReqsPlatformDescription",
             ""], done);
     });
+
+    it("prints the help for emulate", function (done: MochaDone): void {
+        testHelpForCommand("emulate", [
+            "CommandEmulateDescription",
+            "   taco emulate [PLATFORM] [--OPTIONS]",
+            "",
+            "CommandHelpUsageParameters",
+            "   PLATFORM ............ CommandRunPlatformDescription",
+            "   --remote ............ CommandRunRemoteDescription",
+            "   --local ............. CommandRunLocalDescription",
+            "   --nobuild ........... CommandRunNobuildDescription",
+            "   --debuginfo ......... CommandRunDebuginfoDescription",
+            "   --debug ............. CommandRunDebugDescription",
+            "   --release ........... CommandRunReleaseDescription",
+            "   --target=TARGET ..... CommandRunTargetDescription",
+            ""], done);
+    });
 });

@@ -200,7 +200,7 @@
         ]
     },
     "emulate": {
-        "synopsis": "<synopsis>[PLATFORM] [--debuginfo] [--remote | --local] [--nobuild] [--debug | --release] [--target=TARGET]</synopsis>",
+        "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
         "modulePath": "./emulate",
         "description": "<helptitle>[CommandEmulateDescription]</helptitle>",
         "args": [
@@ -211,7 +211,7 @@
             { "name": "--debuginfo", "description": "[CommandRunDebuginfoDescription]" },
             { "name": "--debug", "description": "[CommandRunDebugDescription]" },
             { "name": "--release", "description": "[CommandRunReleaseDescription]" },
-            { "name": "--target", "description": "[CommandRunTargetDescription]" }
+            { "name": "--target=TARGET", "description": "[CommandRunTargetDescription]" }
         ]
     },
     "version": {
