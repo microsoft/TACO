@@ -3,7 +3,7 @@
 
 // Error Codes: 5000- 5999
 enum TacoErrorCode {
-    // General errors 5000-5499
+    // General errors 5000-5449
     CordovaCmdNotFound = 5001,
     CordovaCommandFailed = 5002,
     CordovaCommandFailedWithError = 5003,
@@ -13,13 +13,15 @@ enum TacoErrorCode {
     ErrorTacoJsonMissingOrMalformed = 5007,
     ErrorNoPlatformsFound = 5008,
     CommandBuildTacoSettingsNotFound = 5009,
-    CommandCreateInvalidPath = 5010,
-    CommandCreateTacoJsonFileCreationError = 5011,
-    CommandCreateTacoJsonFileWriteError = 5012,
-    CommandCreateTemplatesUnavailable = 5013,
-    CommandInstallCordovaTooOld = 5014,
-    CommandBuildInvalidPlatformLocation = 5015,
+    CommandBuildInvalidPlatformLocation = 5010,
+    CommandInstallCordovaTooOld = 5011,
 
+    // Errors to do with Create 5450-5499
+    CommandCreateInvalidPath = 5451,
+    CommandCreateTacoJsonFileCreationError = 5452,
+    CommandCreateTacoJsonFileWriteError = 5453,
+    CommandCreateTemplatesUnavailable = 5454,
+    
     // Invalid Arguments 5500 - 5599
     // General invalid arguments 5500 - 5509
     ErrorIncompatibleOptions = 5501,
