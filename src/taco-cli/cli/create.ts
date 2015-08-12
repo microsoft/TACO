@@ -58,7 +58,7 @@ class Create implements commands.IDocumentedCommand {
     private static ShortHands: Nopt.ShortFlags = {
         src: "--copy-from"
     };
-    private static DefaultAppId: string = "io.cordova.hellocordova";
+    private static DefaultAppId: string = "io.taco.hellotaco";
     private static DefaultAppName: string = "HelloTaco";
 
     private commandParameters: ICreateParameters;

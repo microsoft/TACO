@@ -14,6 +14,7 @@
 
 "use strict";
 
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 
@@ -29,7 +30,9 @@ import CheckForNewerVersion = require ("./utils/checkForNewerVersion");
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import logger = tacoUtility.Logger;
+import LogLevel = tacoUtility.LogLevel;
 import TacoError = tacoUtility.TacoError;
+import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
@@ -59,8 +62,15 @@ class Taco {
             if (reason) {
                 if (reason.isTacoError) {
                     logger.logError((<tacoUtility.TacoError>reason).toString());
-                } else if (reason.message) {
-                    logger.logError(errorHelper.wrap(TacoErrorCodes.CommandError, reason).toString());
+                } else {
+                    var toPrint: string = reason.toString();
+
+                    // If we have a loglevel of diagnostic, and there is a stack, replace the error message with the stack (the stack contains the error message already)
+                    if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && reason.stack) {
+                        toPrint = reason.stack
+                    }
+
+                    logger.logError(toPrint);
                 } 
             }
             
