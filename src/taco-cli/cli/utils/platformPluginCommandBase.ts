@@ -39,11 +39,11 @@ export enum CommandOperationStatus {
     Success = 1
 };
 
-/*
-* PlatfromPluginCommandBase
-*
-* Base handler for platform and plugin commands
-*/
+/**
+ * PlatfromPluginCommandBase
+ *
+ * Base handler for platform and plugin commands
+ */
 export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         searchpath: String,

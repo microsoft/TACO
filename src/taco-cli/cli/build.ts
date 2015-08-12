@@ -34,7 +34,7 @@ import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import UtilHelper = tacoUtility.UtilHelper;
 
-/*
+/**
  * Build
  *
  * handles "taco build"

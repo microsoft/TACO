@@ -74,8 +74,7 @@ declare module TacoUtility {
              */
             public run(data: ICommandData): Q.Promise<any>;
             /**
-             * Concrete implementation of ICommand's getTelemetryProperties
-             * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
+             * Default implementation for returning telemetry properties.
              */
             public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties>;
         }

@@ -1,10 +1,10 @@
 ﻿/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 
 /// <reference path="../typings/commandExample.d.ts" />
 /// <reference path="../typings/node.d.ts" />
@@ -91,6 +91,9 @@ module TacoUtility {
                 }
             }
 
+            /**
+             * Default implementation for returning telemetry properties.
+             */
             public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
                 return Q(<ICommandTelemetryProperties>{});
             }
