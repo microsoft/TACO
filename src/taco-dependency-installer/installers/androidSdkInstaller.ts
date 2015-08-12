@@ -114,7 +114,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 // If some segments of the path the SDK was extracted to didn't exist before, it means they were created as part of the install. They will have root as the owner, so we 
                 // must change the owner back to the current user.
                 if (firstNonExistentDir) {
-                    fs.chownSync(firstNonExistentDir, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
                 }
             });
     }
@@ -128,7 +128,9 @@ class AndroidSdkInstaller extends InstallerBase {
         var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
         var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
         var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
-        var updateCommand: string = "sudo -u " + process.env.SUDO_USER + " echo '" + appendToBashProfile + "' >>~/.bash_profile";
+        var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
+        var updateCommand: string = "echo '" + appendToBashProfile + "' >> '" + bashProfilePath + "'";
+        var mustChown: boolean = !fs.existsSync(bashProfilePath);
 
         this.androidHomeValue = androidHomeValue;
 
@@ -136,6 +138,11 @@ class AndroidSdkInstaller extends InstallerBase {
             if (error) {
                 deferred.reject(error);
             } else {
+                // If .bash_profile didn't exist before, make sure the owner is the current user, not root
+                if (mustChown) {
+                    fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                }
+
                 deferred.resolve({});
             }
         });
@@ -207,6 +214,7 @@ class AndroidSdkInstaller extends InstallerBase {
     private postInstallDefault(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
+        var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.AndroidCommand);
         var args: string[] = [
             "update",
             "sdk",
@@ -217,7 +225,7 @@ class AndroidSdkInstaller extends InstallerBase {
         ];
         var options: childProcess.IExecOptions = os.platform() === "darwin" ? { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) } : null;
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = childProcess.spawn(AndroidSdkInstaller.AndroidCommand, args, options);
+        var cp: childProcess.ChildProcess = childProcess.spawn(command, args, options);
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData = data.toString();
