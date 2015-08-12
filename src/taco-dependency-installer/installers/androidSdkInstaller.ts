@@ -114,7 +114,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 // If some segments of the path the SDK was extracted to didn't exist before, it means they were created as part of the install. They will have root as the owner, so we 
                 // must change the owner back to the current user.
                 if (firstNonExistentDir) {
-                    fs.chownSync(firstNonExistentDir, process.env.SUDO_UID, process.env.SUDO_GID);
+                    fs.chownSync(firstNonExistentDir, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
                 }
             });
     }
@@ -215,7 +215,7 @@ class AndroidSdkInstaller extends InstallerBase {
             "--filter",
             AndroidSdkInstaller.AndroidPackages.join(",")
         ];
-        var options: childProcess.IExecOptions = os.platform() === "darwin" ? { uid: process.env.SUDO_UID, gid: process.env.SUDO_GID } : null;
+        var options: childProcess.IExecOptions = os.platform() === "darwin" ? { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) } : null;
         var errorOutput: string = "";
         var cp: childProcess.ChildProcess = childProcess.spawn(AndroidSdkInstaller.AndroidCommand, args, options);
 
