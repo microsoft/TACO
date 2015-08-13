@@ -7,11 +7,19 @@
 ﻿ */
 
 declare module DependencyInstallerInterfaces {
+    export interface IStepsDeclaration {
+        download: boolean;
+        install: boolean;
+        updateVariables: boolean;
+        postInstall: boolean;
+    }
+
     export interface IInstallerData {
         installSource: string;
         sha1: string;
         bytes: number;
-        installDestination: string;
+        installDestination?: string;
+        steps?: IStepsDeclaration;
     }
 
     export interface IArchitectureInstallerDictionary {

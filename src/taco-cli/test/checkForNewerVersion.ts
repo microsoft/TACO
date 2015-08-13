@@ -39,7 +39,7 @@ enum MessageExpectation {
     WontBeShown
 }
 
-describe.only("Check for newer version", function (): void {
+describe("Check for newer version", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "check-for-new-version");
 
     // Use a dummy home location so we don't trash any real configurations
