@@ -425,8 +425,10 @@ class RemoteBuildClientHelper {
                     deferred.reject(errorHelper.get(TacoErrorCodes.InvalidBuildSubmission400, errorsJson.status, errorsJson.errors.toString()));
                 } else if (response.statusCode === 202) {
                     // Expect http 202 for a valid submission which is "Accepted" with a content-location to the Url to check for build status
-                    console.info(resources.getString("NewRemoteBuildInfo", body));
-                    var buildInfo = JSON.parse(body);
+                    if (process.env["DEBUG"]) {
+                        console.info(resources.getString("NewRemoteBuildInfo", body));
+                    }
+
                     deferred.resolve(response.headers["content-location"]);
                 } else {
                     deferred.reject(errorHelper.get(TacoErrorCodes.ErrorDuringRemoteBuildSubmission, body));

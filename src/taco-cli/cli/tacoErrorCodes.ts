@@ -13,8 +13,9 @@ enum TacoErrorCode {
     ErrorTacoJsonMissingOrMalformed = 5007,
     ErrorNoPlatformsFound = 5008,
     CommandBuildTacoSettingsNotFound = 5009,
-    CommandBuildInvalidPlatformLocation = 5010,
-    CommandInstallCordovaTooOld = 5011,
+    TacoSettingsFileDoesNotExist = 5010,
+    CommandBuildInvalidPlatformLocation = 5011,
+    CommandInstallCordovaTooOld = 5012,
 
     // Errors to do with Create 5450-5499
     CommandCreateInvalidPath = 5451,
