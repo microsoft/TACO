@@ -34,7 +34,7 @@ import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
 
-/* 
+/**
  * Wrapper interface for create command parameters
  */
 interface ICreateParameters {
@@ -42,12 +42,12 @@ interface ICreateParameters {
     data: commands.ICommandData;
 }
 
-/*
+/**
  * Create
  *
  * Handles "taco create"
  */
-class Create implements commands.IDocumentedCommand {
+class Create extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.FlagTypeMap = {
         kit: String,
         template: String,
@@ -63,6 +63,7 @@ class Create implements commands.IDocumentedCommand {
 
     private commandParameters: ICreateParameters;
 
+    public name: string = "create";
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {

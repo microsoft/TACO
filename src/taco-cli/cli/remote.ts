@@ -39,12 +39,12 @@ interface ICliSession {
     close: () => void
 };
 
-/*
+/**
  * Remote
  *
  * handles "taco remote"
  */
-class Remote extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Remote extends commands.TacoCommandBase {
     private static HttpTimeoutMS: number = 20000;
     private static KnownOptions: Nopt.CommandData = {};
     private static ShortHands: Nopt.ShortFlags = {};

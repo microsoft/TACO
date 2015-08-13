@@ -33,7 +33,7 @@ import logger = tacoUtility.Logger;
  *
  * handles "taco emulate"
  */
-class Emulate extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Emulate extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,
@@ -72,15 +72,15 @@ class Emulate extends commands.TacoCommandBase implements commands.IDocumentedCo
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--remote", "--local");
         }
 
         if (parsedOptions.options["device"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--device", "--emulate");
         }
 
         if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDebugRelease);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
         }
 
         return parsedOptions;

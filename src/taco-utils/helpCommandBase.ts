@@ -29,7 +29,7 @@ import telemetryHelper = require ("./telemetryHelper");
 import CommandsFactory = commands.Commands.CommandFactory;
 import ICommandData = commands.Commands.ICommandData;
 import ICommandInfo = commands.Commands.ICommandInfo;
-import IDocumentedCommand = commands.Commands.IDocumentedCommand;
+import TacoCommandBase = commands.Commands.TacoCommandBase;
 import Logger = logger.Logger;
 import LoggerHelper = loggerHelper.LoggerHelper;
 import ResourceManager = resourceManager.ResourceManager;
@@ -41,7 +41,7 @@ module TacoUtility {
      *
      * handles "Taco Help"
      */
-    export class HelpCommandBase implements IDocumentedCommand {
+    export class HelpCommandBase extends TacoCommandBase {
         private static DefaultBullet: string = "*";
         private static OptionIndent: number = 5;
 
@@ -51,6 +51,7 @@ module TacoUtility {
         public info: ICommandInfo;
 
         constructor(cliName: string, commandJsonPath: string, resources: ResourceManager) {
+            super();
             this.cliName = cliName;
             this.commandsFactory = new CommandsFactory(commandJsonPath);
             this.cliResources = resources;
@@ -74,7 +75,6 @@ module TacoUtility {
                 this.printGeneralUsage();
             }
             
-            TelemetryHelper.sendBasicCommandTelemetry("help", data.original);
             return Q({});
         }
 

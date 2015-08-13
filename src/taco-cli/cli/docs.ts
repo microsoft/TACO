@@ -19,12 +19,12 @@ import opener = require ("opener");
 
 import commands = tacoUtility.Commands;
 
-/*
+/**
  * Documentation
  *
  * Handles "taco Documentation"
  */
-class Documentation implements commands.IDocumentedCommand {
+class Documentation extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {

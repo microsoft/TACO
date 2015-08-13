@@ -358,13 +358,6 @@
     "CommandUnsupportedPlatformIgnored": "Warning: Platform '{0}' is not supported and will be ignored.",
     "_CommandUnsupportedPlatformIgnored.comment": "Message printed when we 'taco build' or 'taco run' with a platform that is unsupported. {0} is the particular platform",
 
-    "CommandNotBothLocalRemote": "Error: must specify at most one of --local and --remote",
-    "_CommandNotBothLocalRemote.comment": "Error reported when both --local and --remote are specified for 'taco build' or 'taco run'",
-    "CommandNotBothDeviceEmulate": "Error: must specify at most one of --device and --emulator",
-    "_CommandNotBothDeviceEmulate.comment": "Error reported when both --device and --emulator are specified for 'taco build' or 'taco run'",
-    "CommandNotBothDebugRelease": "Error: must specify at most one of --debug and --release",
-    "_CommandNotBothDebugRelease.comment": "Error reported when both --debug and --release are specified for 'taco build' or 'taco run'",
-
     "CommandVersionDescription": "Display the current taco version",
     "_CommandVersionDescription.comment": "Description of the -v/--v/--version arguments to taco",
 
@@ -384,8 +377,8 @@
     "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of cordova.",
     "_RemoteBuildUnsupportedPlatformcomment": "Error message printed when trying to 'taco remote add <platform>' and the platform is not supported. {0} is the platform",
 
-    "UnsupportedPlatform": "Error: Unsupported platform {0}",
-    "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",
+    "UnsupportedHostPlatform": "Error: Unsupported platform {0}",
+    "_UnsupportedHostPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",
     "NoCertificateFound": "Error: No certificate '{0}' found",
     "_NoCertificateFound.comment": "Message printed when we fail to find a certificate. {0} is the certificate we were looking for",
     "GetCertificateFailed": "Error: unable to find certificate.",
@@ -445,8 +438,6 @@
     "_DoneExtractingRemoteBuild.comment": "Message printed after successfully unpacking the downloaded build artifacts. {0} is the location they were unpacked to.",
     "FailedToDeleteRemoteZip": "------ Failed to delete downloaded zip file {0}. This did not prevent a successful build.",
     "_FailedToDeleteRemoteZip.comment": "Message printed if deleting the packed build artifacts fails after already unpacking them. {0} is the location of the packed archive.",
-    "ErrorKitMetadataFileMalformed": "Error: The kit metadata file used by TACO is corrupt. Please fix this by re-installing taco-cli from npm.",
-    "_ErrorKitMetadataFileMalformed.comment": "Error thrown when the TacoKitMetadata.json is malformed",
     "ErrorInvalidPath": "Error: The specified path is invalid: {0}",
     "_ErrorInvalidPath.comment": "Error reported when the specified path passed to 'taco kit list --json' is invalid.",
     "ErrorInvalidJsonFilePath": "Error: The specified path is not a valid JSON file path: {0}",

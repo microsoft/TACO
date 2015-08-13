@@ -5,7 +5,6 @@
 ﻿ *                                                     *
 ﻿ *******************************************************
 ﻿ */
-
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
@@ -34,7 +33,7 @@ import logger = tacoUtility.Logger;
  *
  * handles "taco run"
  */
-class Run extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Run extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,
@@ -89,15 +88,15 @@ class Run extends commands.TacoCommandBase implements commands.IDocumentedComman
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--remote", "--local");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--device", "--emulator");
         }
 
         if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDebugRelease);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
         }
 
         return parsedOptions;
