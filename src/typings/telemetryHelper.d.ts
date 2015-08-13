@@ -7,6 +7,7 @@
  */
 
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/commands.d.ts" />
 
 declare module TacoUtility {
 	interface ITelemetryPropertyInfo {
@@ -25,5 +26,9 @@ declare module TacoUtility {
         static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void;
         static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void;
         static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo;
+        static telemetryPiiProperty(value: any): ITelemetryPropertyInfo;
+        static telemetryNonPiiProperty(value: any): ITelemetryPropertyInfo;
+        static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
+            commandData: TacoUtility.Commands.ICommandData, nonPiiOptions?: string[]): ICommandTelemetryProperties;
     }
 }

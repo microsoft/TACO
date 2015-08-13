@@ -12,17 +12,17 @@
 /// <reference path="../../../typings/nopt.d.ts" />
 "use strict";
 
-import fs = require ("fs");
-import os = require ("os");
-import path = require ("path");
-import Q = require ("q");
-import util = require ("util");
+import fs = require("fs");
+import os = require("os");
+import path = require("path");
+import Q = require("q");
+import util = require("util");
 
-import CordovaHelper = require ("./cordovaHelper");
-import resources = require ("../../resources/resourceManager");
-import TacoErrorCodes = require ("../tacoErrorCodes");
-import errorHelper = require ("../tacoErrorHelper");
-import tacoUtils = require ("taco-utils");
+import CordovaHelper = require("./cordovaHelper");
+import resources = require("../../resources/resourceManager");
+import TacoErrorCodes = require("../tacoErrorCodes");
+import errorHelper = require("../tacoErrorHelper");
+import tacoUtils = require("taco-utils");
 
 import commands = tacoUtils.Commands;
 import logger = tacoUtils.Logger;
@@ -137,6 +137,33 @@ class Settings {
         Settings.Settings = null;
     }
 
+    public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
+        var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
+        var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1 });
+
+        if (platforms.length > 0) {
+            // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
+            return platforms.map(function (platform: string): Settings.IPlatformWithLocation {
+                var buildLocation: Settings.BuildLocationType;
+                if (options.options["remote"]) {
+                    buildLocation = Settings.BuildLocationType.Remote;
+                } else if (options.options["local"]) {
+                    buildLocation = Settings.BuildLocationType.Local;
+                } else {                     
+                    // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
+                    buildLocation = (platform in settings.remotePlatforms) || !Settings.canBuildLocally(platform) ?
+                        Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
+                }
+
+                return { location: buildLocation, platform: platform };
+            });
+        }
+    }
+
+    public static loadSettingsOrReturnEmpty(): Q.Promise<Settings.ISettings> {
+        return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; });
+    }
+
     /**
      * Determine whether the given target platform can be built on the local machine
      *
@@ -155,51 +182,34 @@ class Settings {
     }
 
     private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
-            .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[]{
-
-                var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
-                var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1 });
-
-                if (platforms.length > 0) {
-                // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
-                return platforms.map(function (platform: string): Settings.IPlatformWithLocation {
-                    var buildLocation: Settings.BuildLocationType;
-                    if (options.options["remote"]) {
-                        buildLocation = Settings.BuildLocationType.Remote;
-                    } else if (options.options["local"]) {
-                        buildLocation = Settings.BuildLocationType.Local;
-                    } else {                     
-                        // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
-                        buildLocation = (platform in settings.remotePlatforms) || !Settings.canBuildLocally(platform) ?
-                            Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
+        return this.loadSettingsOrReturnEmpty()
+            .then((settings: Settings.ISettings) => {
+                if (options.remain.length > 0) {
+                    // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
+                    return this.determineSpecificPlatformsFromOptions(options, settings);
+                } else {
+                    // No platform specified: try to do 'all' of them
+                    var remotePlatforms: string[] = [];
+                    if (!options.options["local"]) {
+                        // If we are not only building locally, then we need to consider any remote-only builds we need to do
+                        var remotePlatforms = Object.keys(settings.remotePlatforms);
                     }
 
-                    return { location: buildLocation, platform: platform };
-                });
-            } else {
-                // No platform specified: try to do 'all' of them
-                var remotePlatforms: string[] = [];
-                if (!options.options["local"]) {
-                    // If we are not only building locally, then we need to consider any remote-only builds we need to do
-                    var remotePlatforms = Object.keys(settings.remotePlatforms);
-                }
+                    var localPlatforms: string[] = [];
+                    if (!options.options["remote"] && fs.existsSync("platforms")) {
+                        // Check for local platforms to try building
+                        localPlatforms = fs.readdirSync("platforms").filter(function (entry: string): boolean {
+                            return fs.statSync(path.join("platforms", entry)).isDirectory() && remotePlatforms.indexOf(entry) === -1;
+                        });
+                    }
 
-                var localPlatforms: string[] = [];
-                if (!options.options["remote"] && fs.existsSync("platforms")) {
-                    // Check for local platforms to try building
-                    localPlatforms = fs.readdirSync("platforms").filter(function (entry: string): boolean {
-                        return fs.statSync(path.join("platforms", entry)).isDirectory() && remotePlatforms.indexOf(entry) === -1;
-                    });
+                    return remotePlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
+                        return { location: Settings.BuildLocationType.Remote, platform: platform };
+                    }).concat(localPlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
+                        return { location: Settings.BuildLocationType.Local, platform: platform };
+                    }));
                 }
-
-                return remotePlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
-                    return { location: Settings.BuildLocationType.Remote, platform: platform };
-                }).concat(localPlatforms.map(function (platform: string): Settings.IPlatformWithLocation {
-                    return { location: Settings.BuildLocationType.Local, platform: platform };
-                }));
-            }
-        });
+            });
     }
 }
 

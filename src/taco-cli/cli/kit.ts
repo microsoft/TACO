@@ -69,6 +69,7 @@ class Kit extends commands.TacoCommandBase {
     public subcommands: commands.ICommand[] = [
         {
             // List kits
+            name: "list",
             run: Kit.list,
             canHandleArgs(commandData: commands.ICommandData): boolean {
                 return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "list";
@@ -76,6 +77,7 @@ class Kit extends commands.TacoCommandBase {
         },
         {
             // Change kit or CLI
+            name: "select",
             run: Kit.select,
             canHandleArgs(commandData: commands.ICommandData): boolean {
                 return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "select";
@@ -158,6 +160,10 @@ class Kit extends commands.TacoCommandBase {
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
         return true;
+    }
+
+    private static generateTelemetryProperties(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        return Q.when(tacoUtility.TelemetryHelper.addPropertiesFromOptions({}, Kit.KnownOptions, commandData, ["kit", "cli"]));
     }
 
     /**
@@ -698,7 +704,7 @@ class Kit extends commands.TacoCommandBase {
         });
     }
 
-    private static select(commandData: commands.ICommandData): Q.Promise<any> {
+    private static select(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var kitId: string = commandData.options["kit"];
         var cli: string = commandData.options["cli"];
         var projectInfo: projectHelper.IProjectInfo;
@@ -732,21 +738,24 @@ class Kit extends commands.TacoCommandBase {
             }
         }).then(function (): void {
             logger.log(resources.getString("CommandKitSelectStatusSuccess"));
-        });
+        }).then(() => Kit.generateTelemetryProperties(commandData));
     }
 
-    private static list(commandData: commands.ICommandData): Q.Promise<any> {
+    private static list(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         logger.logLine();
         var kitId: string = commandData.options["kit"];
         var jsonPath: any = commandData.options["json"];
 
+        var result: Q.Promise<any>;
         if (typeof jsonPath !== "undefined") {
-            return Kit.writeMetadataJsonFile(commandData);
+            result = Kit.writeMetadataJsonFile(commandData);
         } else {
             // If the user requested for info regarding a particular kit, print all the information regarding the kit  
             // Else print minimal information about all the kits
-            return kitId ? Kit.printKit(kitId) : Kit.printAllKits();
-        }       
+            result = (kitId ? Kit.printKit(kitId) : Kit.printAllKits());
+        }
+
+        return result.then(() => Kit.generateTelemetryProperties(commandData));
     }
 }
 

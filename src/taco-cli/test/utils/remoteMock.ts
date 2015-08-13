@@ -36,6 +36,10 @@ class RemoteMock {
         return Settings.loadSettings().catch(function (): Settings.ISettings {
             return { remotePlatforms: {} };
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {
+            if (!settings.remotePlatforms) {
+                settings.remotePlatforms = {};
+            }
+
             settings.remotePlatforms[platform] = config;
             return Settings.saveSettings(settings);
         });

@@ -59,6 +59,7 @@ class Remote extends commands.TacoCommandBase {
     public subcommands: commands.ICommand[] = [
         {
             // taco remote remove <platform>
+            name: "remove",
             run: Remote.remove,
             canHandleArgs: function (remoteData: commands.ICommandData): boolean {
                 return remoteData.remain[0] && /^(remove|rm)$/i.test(remoteData.remain[0]);
@@ -66,6 +67,7 @@ class Remote extends commands.TacoCommandBase {
         },
         {
             // taco remote list
+            name: "list",
             run: Remote.list,
             canHandleArgs: function (remoteData: commands.ICommandData): boolean {
                 return remoteData.remain[0] && /^(list|ls)$/i.test(remoteData.remain[0]);
@@ -73,6 +75,7 @@ class Remote extends commands.TacoCommandBase {
         },
         {
             // taco remote add [platform]
+            name: "add",
             run: Remote.add,
             canHandleArgs: function (remoteData: commands.ICommandData): boolean {
                 return remoteData.remain[0] && /^add$/i.test(remoteData.remain[0]);
@@ -80,6 +83,7 @@ class Remote extends commands.TacoCommandBase {
         },
         {
             // taco remote [unknown]
+            name: "help",
             run: Remote.help,
             canHandleArgs: function (remoteData: commands.ICommandData): boolean {
                 return true;

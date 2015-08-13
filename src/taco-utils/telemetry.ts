@@ -138,7 +138,8 @@ module TacoUtility {
             private static MachineId: string;
             private static TelemetrySettings: ITelemetrySettings = null;
             private static TelemetrySettingsFileName = "TelemetrySettings.json";
-            private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae";
+            private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae"; // Gui's key
+            // private static APPINSIGHTS_INSTRUMENTATIONKEY = "ed252602-3ebd-4f54-9721-191390997388"; // Dig's key
             private static SETTINGS_USERID_KEY = "userId";
             private static SETTINGS_MACHINEID_KEY = "machineId";
             private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";

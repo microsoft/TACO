@@ -16,9 +16,15 @@ declare module TacoUtility {
         Uri = 1,
     }
 
+    interface ITacoPackageLoader {
+        lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
+    }
+
     class TacoPackageLoader {
         public static GitUriRegex: RegExp;
         public static FileUriRegex: RegExp;
+
+        public static MockForTests: TacoUtility.ITacoPackageLoader;
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,

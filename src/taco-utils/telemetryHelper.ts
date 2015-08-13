@@ -10,6 +10,7 @@
 
 "use strict";
 
+import commands = require ("./commands");
 import packageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
 import Telemetry = telemetry.Telemetry;
@@ -80,6 +81,36 @@ module TacoUtility {
             }
         }
 
+        public static telemetryPiiProperty(value: any): ITelemetryPropertyInfo {
+            return { value: value, isPii: true };
+        }
+
+        public static telemetryNonPiiProperty(value: any): ITelemetryPropertyInfo {
+            return { value: value, isPii: false };
+        }
+
+        public static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
+            commandData: commands.Commands.ICommandData, nonPiiOptions: string[] = []): ICommandTelemetryProperties {
+            // We parse only the known options, to avoid potential private information that may appear on the command line
+            var unknownOptionIndex = 1;
+            Object.keys(commandData.options).forEach(key => {
+                var value = commandData.options[key];
+                if (Object.keys(knownOptions).indexOf(key) >= 0) {
+                    // This is a known option. We'll check the list to decide if it's pii or not
+                    if (typeof (value) !== "undefined") {
+                        // We encrypt all options values unless they are specifically marked as nonPii
+                        var serializingMethod = nonPiiOptions.indexOf(key) >= 0 ? this.telemetryNonPiiProperty : this.telemetryPiiProperty;
+                        telemetryProperties["options." + key] = serializingMethod(value);
+                    }
+                } else {
+                    // This is a not known option. We'll assume that both the option and the value are pii
+                    telemetryProperties["unknown_option" + unknownOptionIndex + ".name"] = this.telemetryPiiProperty(key);
+                    telemetryProperties["unknown_option" + unknownOptionIndex++ + ".value"] = this.telemetryPiiProperty(value);
+                }
+            });
+            return telemetryProperties;
+        }
+
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {
             var commandEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/command");
             
@@ -98,9 +129,9 @@ module TacoUtility {
         
         private static setTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             if (isPii) {
-                event.setPiiProperty(propertyName, propertyValue);
+                event.setPiiProperty(propertyName, "" + propertyValue);
             } else {
-                event.properties[propertyName] = propertyValue;
+                event.properties[propertyName] = "" + propertyValue;
             }       
         }
 

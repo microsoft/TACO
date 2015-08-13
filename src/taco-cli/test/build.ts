@@ -11,8 +11,9 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require("should"); // Note not import: We don"t want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
+import AdmZip = require ("adm-zip");
 import del = require ("del");
 import fs = require ("fs");
 import http = require ("http");
@@ -23,12 +24,17 @@ import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 import util = require ("util");
 
+import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import buildMod = require ("../cli/build");
 import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
+import mockCordova = require ("./utils/mockCordova");
+import Platform = require ("../cli/platform");
+import RemoteBuildClientHelper = require ("../cli/remoteBuild/remoteBuildClientHelper");
+import RemoteMock = require ("./utils/remoteMock");
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
-import RemoteMock = require ("./utils/remoteMock");
+import Settings = require ("../cli/utils/settings");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
@@ -42,6 +48,7 @@ describe("taco build", function (): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "build");
     var originalCwd: string;
     var vcordova: string = "4.0.0";
+    var projectPath = path.join(tacoHome, "example");
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
@@ -55,15 +62,16 @@ describe("taco build", function (): void {
                 remain: args
             });
         }).then(function (): void {
-            process.chdir(path.join(tacoHome, "example"));
+            process.chdir(projectPath);
         });
     }
 
+    var remoteServerConfiguration = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
     before(function (mocha: MochaDone): void {
         originalCwd = process.cwd();
         // Set up mocked out resources
         process.env["TACO_UNIT_TEST"] = true;
-        // Use a dummy home location so we don't trash any real configurations
+        // Use a dummy home location so we don"t trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Force KitHelper to fetch the package fresh
         kitHelper.KitPackagePromise = null;
@@ -72,11 +80,11 @@ describe("taco build", function (): void {
         var port = 3000;
         testHttpServer.listen(port);
         // Configure a dummy platform "test" to use the mocked out remote server
-        RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
+        RemoteMock.saveConfig("test", remoteServerConfiguration).done(function (): void {
             mocha();
         }, function (err: any): void {
-                mocha(err);
-            });
+            mocha(err);
+        });
 
         // Reduce the delay when polling for a change in status
         buildMod.RemoteBuild.PingInterval = 10;
@@ -93,11 +101,8 @@ describe("taco build", function (): void {
     beforeEach(function (mocha: MochaDone): void {
         // Start each test with a pristine cordova project
         this.timeout(50000);
-        Q.fcall(createCleanProject).done(function (): void {
-            mocha();
-        }, function (err: any): void {
-            mocha(err);
-        });
+        Q.fcall(createCleanProject)
+            .done(() => mocha(), mocha);
     });
 
     afterEach(function (mocha: MochaDone): void {
@@ -106,8 +111,9 @@ describe("taco build", function (): void {
         del("example", mocha);
     });
 
-    var buildRun = function (args: string[]): Q.Promise<any> {
-        return build.run({
+    var buildRun = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+        var command = new buildMod();
+        return command.run({
             options: {},
             original: args,
             remain: args
@@ -200,7 +206,7 @@ describe("taco build", function (): void {
         }).done(function (): void {
             mocha();
         }, function (err: any): void {
-                mocha(err);
+            mocha(err);
         });
     });
 
@@ -270,7 +276,7 @@ describe("taco build", function (): void {
                 response: "Logfile contents"
             }
         ];
-        
+
         var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
@@ -296,7 +302,7 @@ describe("taco build", function (): void {
         })));
         
         // Mock out the server on the other side
-        // Since this test is only whether we attempt incremental builds, we'll let the build fail to make the test shorter
+        // Since this test is only whether we attempt incremental builds, we"ll let the build fail to make the test shorter
         var sequence = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,
@@ -316,7 +322,8 @@ describe("taco build", function (): void {
                     vcli: require(path.join(__dirname, "..", "package.json")).version,
                     cfg: configuration,
                     platform: "test",
-                    buildNumber: buildNumber.toString() }),
+                    buildNumber: buildNumber.toString()
+                }),
                 head: {
                     "Content-Type": "application/json",
                     "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
@@ -357,7 +364,11 @@ describe("taco build", function (): void {
         }).done(function (): void {
             mocha(new Error("The build failing should result in an error"));
         }, function (err: any): void {
-                mocha();
+            mocha();
         });
+    });
+
+    describe("telemetry", () => {
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, buildRun, () => testHttpServer, true);
     });
 });
