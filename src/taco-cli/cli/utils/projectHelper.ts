@@ -11,16 +11,20 @@
 
 import child_process = require ("child_process");
 import Q = require ("q");
+import os = require ("os");
 import path = require ("path");
 import fs = require ("fs");
 
 import cordovaHelper = require ("./cordovaHelper");
+import cordovaWrapper = require ("./cordovaWrapper");
 import kitHelper = require ("./kitHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import telemetryHelper = tacoUtility.TelemetryHelper;
 
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
  */
@@ -236,6 +240,37 @@ class ProjectHelper {
             deferred.resolve({});
         });
         return deferred.promise;
+    }
+
+    
+    /**
+     *  public helper that resolves with a true value if the current project is a TACO TS project
+     */
+    public static isTypeScriptProject(): Q.Promise<boolean> {
+        
+    }
+
+    /**
+     *  public helper that returns the common telemetry properties for the current project
+     */
+     public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        return Q.all([ProjectHelper.getProjectInfo(), cordovaWrapper.getGlobalCordovaVersion()])
+        .spread<any>(function (projectInfo: ProjectHelper.IProjectInfo, globalCordovaVersion: string): Q.Promise<ICommandTelemetryProperties> {
+            var projectTelemetryProperties: ICommandTelemetryProperties;
+            projectTelemetryProperties["hostOS"] = { value: os.hostname(), isPii: false };
+            if (projectTelemetryProperties["isTacoProject"]) {
+                projectTelemetryProperties["isTacoProject"] = { value: true, isPii: false };
+                if (projectInfo.tacoKitId) {
+                    projectTelemetryProperties["kit"] = { value: projectInfo.tacoKitId, isPii: false };
+                } else {
+                    projectTelemetryProperties["cli"] = { value: projectInfo.cordovaCliVersion, isPii: false };
+                }
+            } else {
+                projectTelemetryProperties["isTacoProject"] = { value: true, isPii: false };
+                projectTelemetryProperties["cli"] = { value: globalCordovaVersion, isPii: false };
+            }
+            return Q.resolve(projectTelemetryProperties);
+        });
     }
 }
 
