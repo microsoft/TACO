@@ -60,7 +60,6 @@ describe("taco create", function (): void {
 
     // Persistent TemplateManager to count template entries
     var templateManager: TemplateManager;
-    var testMetadataPath: string = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
     
     // Project info
     var testAppId: string = "testId";
