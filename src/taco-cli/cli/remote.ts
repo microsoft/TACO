@@ -22,6 +22,7 @@ import util = require ("util");
 
 import CordovaHelper = require ("./utils/cordovaHelper");
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
+import HelpModule = require ("./help");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
@@ -71,6 +72,13 @@ class Remote extends commands.TacoCommandBase implements commands.IDocumentedCom
             run: Remote.add,
             canHandleArgs: function (remoteData: commands.ICommandData): boolean {
                 return remoteData.remain[0] && /^add$/i.test(remoteData.remain[0]);
+            }
+        },
+        {
+            // taco remote [unknown]
+            run: Remote.help,
+            canHandleArgs: function (remoteData: commands.ICommandData): boolean {
+                return true;
             }
         }
     ];
@@ -320,6 +328,12 @@ class Remote extends commands.TacoCommandBase implements commands.IDocumentedCom
         } else {
             return errorHelper.wrap(TacoErrorCodes.ErrorHttpGet, error, url);
         }
+    }
+
+    private static help(remoteData: commands.ICommandData): Q.Promise<any> {
+        remoteData.original.unshift("remote");
+        remoteData.remain.unshift("remote");
+        return new HelpModule().run(remoteData);
     }
 }
 

@@ -54,7 +54,7 @@ class Settings {
             if (e.code === "ENOENT") {
                 // File doesn't exist, no need for a stack trace.
                 // The error message will instruct the user to run "taco setup" to resolve the issue.
-                return Q.reject<Settings.ISettings>(errorHelper.get(TacoErrorCodes.CommandBuildTacoSettingsNotFound));
+                return Q.reject<Settings.ISettings>(errorHelper.get(TacoErrorCodes.TacoSettingsFileDoesNotExist));
             } else {
                 // Couldn't open the file, not sure why, so we'll keep the error around for the user
                 return Q.reject<Settings.ISettings>(errorHelper.wrap(TacoErrorCodes.CommandBuildTacoSettingsNotFound, e));
@@ -107,6 +107,34 @@ class Settings {
      */
     public static getRemoteServerUrl(server: Settings.IRemoteConnectionInfo): string {
         return util.format("http%s://%s:%d/%s", server.secure ? "s" : "", server.host, server.port, server.mountPoint);
+    }
+
+    /*
+     * Update settings from TACO_HOME/TacoSettings.json (It loads the settings, give you a chance to update them, and then it saves them again)
+     */
+    public static updateSettings(updateFunction: (settings: Settings.ISettings) => void): Q.Promise<Settings.ISettings> {
+        return this.loadSettings()
+            .fail((error: any) => {
+                if (error.errorCode === TacoErrorCodes.TacoSettingsFileDoesNotExist) {
+                    // If it fails because the file doesn't exist, we just return some empty settings and we continue...
+                    return {};
+                } else {
+                    /* If it fails for other reason, we rethrow the exception
+                        (we don't want to override a file if we are not sure about the contents) */
+                    throw error;
+                }
+            })
+            .then(settings => {
+                updateFunction(settings);
+                return this.saveSettings(settings);
+            });
+    }
+
+    /**
+     * Remove cached settings object, for use in tests
+     */
+    public static forgetSettings(): void {
+        Settings.Settings = null;
     }
 
     /**
@@ -169,13 +197,6 @@ class Settings {
             }
         });
     }
-
-    /**
-     * Remove cached settings object, for use in tests
-     */
-    private static forgetSettings(): void {
-        Settings.Settings = null;
-    }
 }
 
 module Settings {
@@ -191,7 +212,8 @@ module Settings {
         remotePlatforms?: {
             [platform: string]: IRemoteConnectionInfo
         };
-        language?: string
+        language?: string;
+        lastCheckForNewerVersionTimestamp?: number;
     }
 
     export enum BuildLocationType {
