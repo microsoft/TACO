@@ -24,6 +24,7 @@ import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import CheckForNewerVersion = require ("./utils/checkForNewerVersion");
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
@@ -51,6 +52,9 @@ class Taco {
      */
     public static run(): void {
         telemetry.init(require("../package.json").name, require("../package.json").version);
+
+        // We check if there is a new taco-cli version available, and if so, we print a message before exiting the application
+        new CheckForNewerVersion().showOnExitAndIgnoreFailures();
         
         var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
         var commandProperties: ICommandTelemetryProperties = {};

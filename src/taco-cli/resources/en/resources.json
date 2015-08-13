@@ -57,6 +57,9 @@
     "CommandCreateWarningDeprecatedKit": "<br/><warn>Warning: Kit {0} has been deprecated.</warn><br/>Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation. {0} is the name of deprecated kit",
 
+    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for the taco cli:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=619747</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
+    "_NewerTacoCLIVersionAvailable.comment": "Message printed to notify the user that there is a newer version of taco cli available, compared to the one he has currently installed.",
+
     "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <highlight>{1}</highlight>",
     "_CommandCreateSuccessProjectTemplate.comment": "Success message if the project was created using a template. {0} is the display name of the template the project was created with and {1} is the location where project is created",
     "CommandCreateSuccessProjectCustomWww": "<br/><success>Success!</success> Your project using custom assets from {0} is ready for use at <highlight>{1}</highlight>",
@@ -299,6 +302,8 @@
     "_CommandBuildLocalPlatformNotAdded.comment": "Error reported when a local build has explicitly been requested for a particular platform and that platform is not present. {0} is the user specified platform",
     "CommandBuildTacoSettingsNotFound": "Error: Unable to load settings. Please run 'taco remote add' before building remotely",
     "_CommandBuildTacoSettingsNotFound.comment": "Error reported when we try to look up configured remote builds and fail",
+    "TacoSettingsFileDoesNotExist": "Error: Unable to load settings. Please run 'taco remote add' before building remotely",
+    "_TacoSettingsFileDoesNotExist.comment": "This string should be exactly the same as CommandBuildTacoSettingsNotFound. We need to distinguish them inside the program, but we show the same error message to the user",
     "CommandBuildRemotePlatformNotConfigured": "Error: Unable to load remote settings for {0}. Please run 'taco remote add {0}' to configure remote builds for this platform",
     "_CommandBuildRemotePlatformNotConfigured.comment": "Error reported when we try to look up a specific platform for building remotely and it has not been configured. {0} is the platform requested by the user",
     "CommandBuildPlatformNotFound": "Error: Unable to find local or remote configuration of {0}. Please run 'taco platform add {0}' or 'taco remote add {0}'",
@@ -501,7 +506,7 @@
     "_HowToUseCommandDocs.comment": "This message is printed as part of the onboarding experience of several commands, to suggest the user how he can view the taco documentation",
     "HowToUseCreateProjectWithTemplate": "e.g: To create a new TypeScript project, use <bold>taco create <PATH> [ID] --template typescript</bold>",
     "_HowToUseCreateProjectWithTemplate.comment": "This message is printed as part of the onboarding experience of the 'taco templates' command, to suggest the user how to create a taco project using a particular template",
-    "ProgramDescription": "taco is a command line tool utility that makes it easy to create, build, run and emulate Cordova applications.",
+    "ProgramDescription": "taco is a command line tool that makes it easy to create, build, run, and emulate Cordova applications.",
     "_ProgramDescription.comment": "This is a description of the purpose of the whole taco program",
     "BlankTemplateName": "A blank starter Cordova JavaScript project.",
     "_BlankTemplateName.comment": "The description of an empty/blank cordova project using JavaScript",

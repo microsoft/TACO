@@ -85,19 +85,6 @@ describe("taco meta command tests: ", function (): void {
         return version.run(commandData);
     };
 
-    // Run help for all taco commands
-    describe("taco", function (): void {
-        Object.keys(commands).forEach(function (command: string): void {
-            it("help " + command + " executes with no error", function (done: MochaDone): void {
-                runHelp(command).then(function (): void {
-                    done();
-                }, function (err: tacoUtils.TacoError): void {
-                    done(err);
-                });
-            });
-        });
-    });
-
     // Run help for a cordova command not overriden by taco - ex, "info"
     describe("taco", function (): void {
         it("help info executes with no error", function (done: MochaDone): void {
