@@ -104,7 +104,7 @@ class KitHelper {
         if (!KitHelper.KitPackagePromise) {
             KitHelper.KitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TacoKits, KitHelper.DynamicDependenciesLocation, tacoUtility.InstallLogLevel.silent);
         }
-        
+
         return KitHelper.KitPackagePromise;
     }
 }

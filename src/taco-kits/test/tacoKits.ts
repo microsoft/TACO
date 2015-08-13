@@ -33,11 +33,11 @@ describe("KitHelper", function (): void {
     var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetaData.json");
 
     // Test Kit Info
-    var testDefaultKitId: string = "5.0.0-Kit";
-    var testDeprecatedKitId: string = "4.0.0-Kit";
+    var testDefaultKitId: string = "5.1.1-Kit";
+    var testDeprecatedKitId: string = "4.3.0-Kit";
     var testDefaultTemplateId: string = "blank";
     var testDeprecatedKitInfo: tacoKits.IKitInfo = {
-        "cordova-cli": "4.0.0",
+        "cordova-cli": "4.3.0",
         "taco-min": "1.0.0",
         releaseNotesUri: "http://cordova.apache.org/4.0.0/release.md",
         deprecated: true,
@@ -54,9 +54,9 @@ describe("KitHelper", function (): void {
         }
     };
 
-    var templateSrcPath = path.resolve(__dirname, "..", "templates", "5.0.0-Kit", "blank.zip");
+    var templateSrcPath = path.resolve(__dirname, "..", "templates", "default", "blank.zip");
     var testTemplateOverrideInfo: tacoKits.ITemplateOverrideInfo = {
-        kitId: "5.0.0-Kit",
+        kitId: "default",
         templateInfo: {
             name: "BlankTemplateName",
             url: templateSrcPath
@@ -65,54 +65,48 @@ describe("KitHelper", function (): void {
 
     var testPlatformOverridesForDefaultKit: tacoKits.IPlatformOverrideMetadata = {
         android: {
-            version: "4.2.1",
-            src: "https://github.com/apache/cordova-android/tree/4.2.1/archive/4.2.1.tgz"
+            version: "4.0.2"
         },
         ios: {
-            version: "4.2.2",
-            src: "https://github.com/apache/cordova-ios/tree/4.2.2/archive/4.2.2.tgz"
+            version: "3.8.0"
         },
         windows: {
-            version: "4.0.0",
-            src: "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0.tgz"
+            version: "4.0.0"
         },
         wp8: {
-            version: "4.0.2",
-            src: "https://github.com/apache/cordova-wp8/tree/4.0.2/archive/4.0.2.tgz"
+            version: "3.8.1"
         }
     };
 
     var testPluginOverridesForDefaultKit: tacoKits.IPluginOverrideMetadata = {
-        "cordova-plugin-camera": {
+        "cordova-plugin-console": {
             version: "1.0.1"
+        },
+        "cordova-plugin-device": {
+            version: "1.0.1"
+        },
+        "cordova-plugin-file": {
+            version: "2.1.0"
         }
     };
 
     var testDefaultKitInfo: tacoKits.IKitInfo = {
-        "cordova-cli": "5.0.0",
+        "cordova-cli": "5.1.1",
         "taco-min": "1.0.0",
         default: true,
-        releaseNotesUri: "http://cordova.apache.org/5.0.0/release.md",
+        releaseNotesUri: "http://cordova.apache.org/5.1.1/release.md",
         platforms: testPlatformOverridesForDefaultKit,
-        plugins: testPluginOverridesForDefaultKit,
-        name: "5.0.0-Kit",
-        description: "5.0.0-Kit-desc"
+        plugins: testPluginOverridesForDefaultKit
     };
 
     before(function (): void {
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
-        
-        // Set the kit metadata file location
-        kitHelper.kitMetadataFilePath = testMetadataPath;
     });
 
     after(function (): void {
         // Reset ResourcesManager back to production mode
         process.env["TACO_UNIT_TEST"] = false;
-
-        // Reset kit metadata path
-        kitHelper.kitMetadataFilePath = null;
     });
 
     describe("getKitMetadata()", function (): void {
@@ -121,7 +115,7 @@ describe("KitHelper", function (): void {
             kitHelper.getKitMetadata()
                 .then(function (kitMetadata: tacoKits.ITacoKitMetadata): void {
                     // Verify the returned kit metadata is expected
-                    kitMetadata.should.equal(require(kitHelper.kitMetadataFilePath));
+                    kitMetadata.should.equal(require(testMetadataPath));
                     done();
                 })
                 .catch(function (err: string): void {
@@ -229,17 +223,25 @@ describe("KitHelper", function (): void {
 
     describe("getTemplatesForKit()", function (): void {
         it("should return the correct list of templates when no kit is specified", function (done: MochaDone): void {
-            // The default kit in the test metadata is 5.0.0-Kit, so we expect the result to be the 5.0.0-Kit templates override
+            // The default kit in the test metadata is 5.1.1-Kit, so we expect the result to be the 5.1.1-Kit templates override
             var kitId: string = null;
             var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
-                kitId: "5.0.0-Kit",
+                kitId: "default",
                 templates: [
                     {
-                        kitId: "5.0.0-Kit",
+                        kitId: "default",
                         templateId: "blank",
                         templateInfo: {
                             name: "BlankTemplateName",
-                            url: "templates/5.0.0-Kit/blank.zip"
+                            url: "templates/default/blank.zip"
+                        }
+                    },
+                    {
+                        kitId: "default",
+                        templateId: "typescript",
+                        templateInfo: {
+                            name: "TypescriptTemplateName",
+                            url: "templates/default/typescript.zip"
                         }
                     }
                 ]
@@ -259,7 +261,7 @@ describe("KitHelper", function (): void {
         });
 
         it("should return the correct list of templates for a kit that doesn't have a template override node in the metadata", function (done: MochaDone): void {
-            var kitId: string = "4.2.0-Kit";
+            var kitId: string = "4.3.1-Kit";
             var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
                 kitId: "default",
                 templates: [
@@ -296,16 +298,16 @@ describe("KitHelper", function (): void {
         });
 
         it("should return the correct list of templates for a kit that has a template override node in the metadata", function (done: MochaDone): void {
-            var kitId: string = "5.0.0-Kit";
+            var kitId: string = "4.3.0-Kit";
             var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
-                kitId: "5.0.0-Kit",
+                kitId: "4.3.0-Kit",
                 templates: [
                     {
-                        kitId: "5.0.0-Kit",
+                        kitId: "4.3.0-Kit",
                         templateId: "blank",
                         templateInfo: {
                             name: "BlankTemplateName",
-                            url: "templates/5.0.0-Kit/blank.zip"
+                            url: "templates/4.3.0-Kit/blank.zip"
                         }
                     }
                 ]

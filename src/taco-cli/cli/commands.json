@@ -33,7 +33,7 @@
         "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
     },
     "kit": {
-        "synopsis": "<synopsis>[COMMAND] [--json]</synopsis>",
+        "synopsis": "<synopsis>[COMMAND] [options]</synopsis>",
         "modulePath": "./kit",
         "description": "<helptitle>[CommandKitDescription]</helptitle>",
         "args": [
@@ -44,6 +44,14 @@
                 "options": [
                     { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" },
                     { "name": "--kit <KIT-ID>", "description": "[CommandKitOptionKitDescription]" }
+                ]
+            },
+            {
+                "name": "select",
+                "description": "[CommandKitSelectSubcommandDescription]",
+                "options": [
+                    { "name": "--kit <KIT-ID>", "description": "[CommandKitSelectOptionKitDescription]" },
+                    { "name": "--cli <VERSION>", "description": "[CommandKitSelectOptionCliDescription]" }
                 ]
             }
         ]

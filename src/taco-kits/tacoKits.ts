@@ -25,7 +25,6 @@ import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 module TacoKits {
     export interface IKitHelper {
-        kitMetadataFilePath?: string;
         getKitMetadata?: () => Q.Promise<ITacoKitMetadata>;
         getKitInfo?: (kitId: string) => Q.Promise<IKitInfo>;
         getDefaultKit?: () => Q.Promise<string>;
@@ -120,31 +119,34 @@ module TacoKits {
         private static KitMetadata: ITacoKitMetadata;
         private static DefaultKitId: string;
         private static KitFileName: string = "TacoKitMetadata.json";
+        private static TestMetadataFilePath: string = path.resolve(__dirname, "test", "test-data", "test-kit-metadata.json");
         private static KitDesciptionSuffix: string = "-desc";
         private static DefaultTemplateKitOverride: string = "default";
         private static TsTemplateId: string = "typescript";
 
-        public kitMetadataFilePath: string;
+        public testMode: boolean;
         /**
          *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
          *   or resolved with the parsed metadata
          */
     
         public getKitMetadata(): Q.Promise<ITacoKitMetadata> {
+            var metadataFileName: string = path.resolve(__dirname, KitHelper.KitFileName);
+            
             if (KitHelper.KitMetadata) {
                 return Q(KitHelper.KitMetadata);
             }
             
-            if (!this.kitMetadataFilePath) {
-                this.kitMetadataFilePath = path.resolve(__dirname, KitHelper.KitFileName);
+            if (process.env["TACO_UNIT_TEST"]) {
+                metadataFileName = KitHelper.TestMetadataFilePath;
             }
 
             try {
-                if (!fs.existsSync(this.kitMetadataFilePath)) {
+                if (!fs.existsSync(metadataFileName)) {
                     return Q.reject<ITacoKitMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileNotFound));
                 }
 
-                KitHelper.KitMetadata = require(this.kitMetadataFilePath);
+                KitHelper.KitMetadata = require(metadataFileName);
                 return Q(KitHelper.KitMetadata);
             } catch (e) {
                 return Q.reject<ITacoKitMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileMalformed));

@@ -60,7 +60,8 @@ describe("taco create", function (): void {
 
     // Persistent TemplateManager to count template entries
     var templateManager: TemplateManager;
-
+    var testMetadataPath: string = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
+    
     // Project info
     var testAppId: string = "testId";
     var testAppName: string = "testAppName";
@@ -192,7 +193,7 @@ describe("taco create", function (): void {
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
-
+        
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
