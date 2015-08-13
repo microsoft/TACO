@@ -1,46 +1,6 @@
 ﻿{
-    "plugins": {
-        "org.apache.cordova.camera": {
-            "platforms": "ios, android, wp8, windows8"
-        }
-    },
-
     "kits": {
-        "4.3.0-Kit": {
-            "cordova-cli": "4.3.0",
-            "taco-min": "1.0.0",
-            "deprecated": "true",
-            "plugins": {
-                "cordova-plugin-camera": {
-                    "version": "1.1.0",
-                    "supported-platforms": "ios,android"
-                }
-            }
-        },
-        "4.3.1-Kit": {
-            "cordova-cli": "4.3.1",
-            "taco-min": "1.0.0",
-            "platforms": {
-                "ios": {
-                    "version": "3.8.0"
-                }
-            },
-            "plugins": {
-                "cordova-plugin-battery-status": {
-                    "src": "https://github.com/apache/cordova-plugin-battery-status.git",
-                    "supported-platforms": "android, windows"
-                },
-                "cordova-plugin-contacts": {
-                    "version": "1.0.0",
-                    "supported-platforms": "ios"
-                },
-                "cordova-plugin-device": {
-                    "version": "https://github.com/apache/cordova-plugin-device.git",
-                    "supported-platforms": "android, ios, windows"
-                }
-            }
-        },
-        "5.1.1-Kit": {
+        "tacokit@1.0.0": {
             "cordova-cli": "5.1.1",
             "default": true,
             "platforms": {
@@ -105,30 +65,14 @@
                 "url": "templates/default/typescript.zip"
             }
         },
-        "4.3.0-Kit": {
+        "tacokit@1.0.0": {
             "blank": {
                 "name": "BlankTemplateName",
-                "url": "templates/4.3.0-kit/blank.zip"
-            }
-        },
-        "4.3.1-Kit": {
-            "blank": {
-                "name": "BlankTemplateName",
-                "url": "templates/4.3.1-kit/blank.zip"
+                "url": "templates/tacokit@1.0.0/blank.zip"
             },
             "typescript": {
                 "name": "TypescriptTemplateName",
-                "url": "templates/4.3.1-kit/typescript.zip"
-            }
-        },
-        "5.0.0-Kit": {
-            "blank": {
-                "name": "BlankTemplateName",
-                "url": "templates/5.0.0-kit/blank.zip"
-            },
-            "typescript": {
-                "name": "TypescriptTemplateName",
-                "url": "templates/5.0.0-kit/typescript.zip"
+                "url": "templates/tacokit@1.0.0/typescript.zip"
             }
         }
     }

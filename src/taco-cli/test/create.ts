@@ -60,7 +60,7 @@ describe("taco create", function (): void {
 
     // Persistent TemplateManager to count template entries
     var templateManager: TemplateManager;
-
+    
     // Project info
     var testAppId: string = "testId";
     var testAppName: string = "testAppName";
@@ -192,7 +192,7 @@ describe("taco create", function (): void {
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
-
+        
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
@@ -460,7 +460,9 @@ describe("taco create", function (): void {
                 actual = actual.replace(/ {10,}/g, tenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
                 actual = actual.replace(/-{10,}/g, tenMinuses); // We don't want to count -----s when we have a lot of them, so we replace it with 10 (They also depend dynamically on the path length)
                 actual = actual.replace(/ +$/gm, ""); // We also don't want trailing spaces
-                actual = actual.replace(/ \.+ ?\n  +/gm, " ..... "); // We undo the word-wrapping, that we know happens in Mac
+                actual = actual.replace(/ \.+ ?\n  +/gm, " ..... "); // We undo the word-wrapping
+                actual = actual.replace(/ *\n +\(/gm, " ("); // We undo the word-wrapping
+                actual = actual.replace(/\n\n /gm, "\n "); // We undo the word-wrapping
                 actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
                 if (expected !== actual) {
                     var expected = alternativeExpectedMessages.join("\n");
@@ -549,6 +551,79 @@ describe("taco create", function (): void {
                 firstPart.concat(lastPart),
                 firstPart.concat(downloadingDependenciesOutput, lastPart),
                 done);
+        });
+
+        it("it adds (Deprecated) to a deprecated kit", function (done: MochaDone): void {
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+
+            var projectPath = getProjectPath("onboarding-experience", 3);
+
+            var firstPart = [
+                "CommandCreateStatusCreatingNewProject",
+                "      ----------",
+                "      CommandCreateStatusTableNameDescription ..... HelloTaco",
+                "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
+                "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
+                "      CommandCreateStatusTableKitVersionDescription ..... 4.3.0-Kit (CommandKitListDeprecatedKit)",
+                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
+                "      ----------"];
+
+            var lastPart = [
+                "CommandCreateWarningDeprecatedKit",
+                "CommandCreateSuccessProjectTemplate",
+                "OnboardingExperienceTitle",
+                " * HowToUseChangeToProjectFolder",
+                " * HowToUseCommandPlatformAddPlatform",
+                " * HowToUseCommandInstallReqsPlugin",
+                " * HowToUseCommandAddPlugin",
+                " * HowToUseCommandSetupRemote",
+                " * HowToUseCommandBuildPlatform",
+                " * HowToUseCommandEmulatePlatform",
+                " * HowToUseCommandRunPlatform",
+                "",
+                "HowToUseCommandHelp",
+                "HowToUseCommandDocs",
+                ""];
+            testCreateForArguments([projectPath, "--kit", "4.3.0-Kit"],
+                firstPart.concat(lastPart),
+                firstPart.concat(downloadingDependenciesOutput, lastPart),
+                done);
+        });
+
+        it("it adds (Default) to a default kit", function (done: MochaDone): void {
+            var projectPath = getProjectPath("onboarding-experience", 4);
+            this.timeout(60000); // Instaling the node packages during create can take a long time
+            kitHelper.getDefaultKit().done(defaultKitId => {
+                var firstPart = [
+                    "CommandCreateStatusCreatingNewProject",
+                    "      ----------",
+                    "      CommandCreateStatusTableNameDescription ..... HelloTaco",
+                    "      CommandCreateStatusTableIDDescription ..... io.cordova.hellocordova",
+                    "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
+                    "      CommandCreateStatusTableKitVersionDescription ..... " + defaultKitId + " (CommandKitListDefaultKit)",
+                    "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
+                    "      ----------"];
+
+                var lastPart = [
+                    "CommandCreateSuccessProjectTemplate",
+                    "OnboardingExperienceTitle",
+                    " * HowToUseChangeToProjectFolder",
+                    " * HowToUseCommandPlatformAddPlatform",
+                    " * HowToUseCommandInstallReqsPlugin",
+                    " * HowToUseCommandAddPlugin",
+                    " * HowToUseCommandSetupRemote",
+                    " * HowToUseCommandBuildPlatform",
+                    " * HowToUseCommandEmulatePlatform",
+                    " * HowToUseCommandRunPlatform",
+                    "",
+                    "HowToUseCommandHelp",
+                    "HowToUseCommandDocs",
+                    ""];
+                testCreateForArguments([projectPath, "--kit", defaultKitId],
+                    firstPart.concat(lastPart),
+                    firstPart.concat(downloadingDependenciesOutput, lastPart),
+                    done);
+            });
         });
     });
 });

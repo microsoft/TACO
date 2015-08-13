@@ -14,6 +14,7 @@
 
 import fs = require ("fs");
 import net = require ("net");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 
@@ -23,12 +24,17 @@ import InstallerRunner = require ("./installerRunner");
 import installerUtils = require ("./utils/installerUtils");
 import protocol = require ("./elevatedInstallerProtocol");
 import resources = require ("./resources/resourceManager");
+import tacoErrorCodes = require ("./tacoErrorCodes");
+import errorHelper = require ("./tacoErrorHelper");
+import tacoUtils = require ("taco-utils");
 
 import installerDataType = protocol.DataType;
 import protocolExitCode = protocol.ExitCode;
+import tacoLogger = tacoUtils.Logger;
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
-// Internal class for an ILogger specifically designed for the communication between the elevatedInstaller and the dependencyInstaller
-class InstallerLogger implements protocol.ILogger {
+// Internal class for an ILogger specifically designed for the communication between the elevatedInstaller and the dependencyInstaller on Windows, which requires socket communication over a local server
+class Win32Logger implements protocol.ILogger {
     private socketHandle: NodeJSNet.Socket;
 
     constructor(socket: NodeJSNet.Socket) {
@@ -49,6 +55,25 @@ class InstallerLogger implements protocol.ILogger {
 
     public promptForEnvVariableOverwrite(name: string): Q.Promise<any> {
         return installerUtils.promptForEnvVariableOverwrite(name, this.socketHandle);
+    }
+}
+
+// Internal class for an ILogger for communication between the elevatedInstaller and the dependencyInstaller on OSX
+class DarwinLogger implements protocol.ILogger {
+    public log(message: string): void {
+        tacoLogger.log(message);
+    }
+
+    public logWarning(message: string): void {
+        tacoLogger.logWarning(message);
+    }
+
+    public logError(message: string): void {
+        tacoLogger.logError(message);
+    }
+
+    public promptForEnvVariableOverwrite(name: string): Q.Promise<any> {
+        return Q({});
     }
 }
 
@@ -74,17 +99,15 @@ class ElevatedInstaller {
     private logger: protocol.ILogger;
 
     constructor() {
-        this.socketPath = process.argv[2];
-        this.configFile = process.argv[3];
+        this.configFile = process.argv[2];
+        this.socketPath = process.argv[3];
     }
 
     public run(): void {
         var self = this;
 
-        this.connectToServer()
+        this.prepareCommunications()
             .then(function (): Q.Promise<number> {
-                self.logger = new InstallerLogger(self.socketHandle);
-
                 var installerRunner: InstallerRunner = new InstallerRunner(self.configFile, self.logger);
 
                 return installerRunner.run();
@@ -99,6 +122,26 @@ class ElevatedInstaller {
             });
     }
 
+    private prepareCommunications(): Q.Promise<any> {
+        var self = this;
+
+        switch (process.platform) {
+            case "win32":
+                // Connect to the communication server
+                return this.connectToServer()
+                    .then(function (): void {
+                        // Instantiate the logger
+                        self.logger = new Win32Logger(self.socketHandle);
+                    });
+            case "darwin":
+                // Instantiate the logger
+                this.logger = new DarwinLogger();
+                return Q({});
+            default:
+                this.exitProcess(protocolExitCode.FatalError);
+        }
+    }
+
     private connectToServer(): Q.Promise<any> {
         if (!this.socketPath) {
             // If we can't connect to the DependencyInstaller's server, the only way to let the DependencyInstaller know is via exit code
@@ -106,6 +149,7 @@ class ElevatedInstaller {
         }
 
         var deferred: Q.Deferred<any> = Q.defer<any>();
+
         try {
             this.socketHandle = net.connect(this.socketPath, function (): void {
                 deferred.resolve({});

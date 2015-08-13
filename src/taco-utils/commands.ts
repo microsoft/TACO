@@ -18,9 +18,11 @@ import Q = require ("q");
 import logger = require ("./logger");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
+import telemetryHelper = require ("./telemetryHelper");
 import errorHelper = require ("./tacoErrorHelper");
 
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import ICommandTelemetryProperties = telemetryHelper.ICommandTelemetryProperties;
 
 module TacoUtility {
     export module Commands {
@@ -50,63 +52,12 @@ module TacoUtility {
             run(data: ICommandData): Q.Promise<any>;
             canHandleArgs(data: ICommandData): boolean;
         }
-        export interface IDocumentedCommand extends ICommand {
-            info: ICommandInfo;
-        }
-
-        /**
-         * Factory to create new Commands classes
-         */
-        export class CommandFactory {
-            public listings: any;
-
-            /**
-             * Factory to create new Commands classes
-             * initialize with json file containing commands
-             */
-            constructor(commandsInfoPath: string) {
-                if (!fs.existsSync(commandsInfoPath)) {
-                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
-                }
-
-                this.listings = require(commandsInfoPath);
-            }
-
-            /**
-             * get specific task object, given task name
-             */
-            public getTask(name: string, inputArgs: string[], commandsModulePath: string): IDocumentedCommand {
-                if (!name || !this.listings) {
-                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
-                }
-
-                var moduleInfo: ICommandInfo = this.listings[name];
-                if (!moduleInfo) {
-                    return null;
-                }
-
-                var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
-                if (!fs.existsSync(modulePath + ".js")) {
-                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionMissingcommand, name);
-                }
-
-                var commandMod: any = require(modulePath);
-                var moduleInstance: any = new commandMod();
-                moduleInstance.info = moduleInfo;
-
-                var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
-                if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
-                    return moduleInstance;
-                } else {
-                    return null;
-                }
-            }
-        }
 
         export class TacoCommandBase implements ICommand {
             public name: string;
             public subcommands: ICommand[];
             public info: ICommandInfo;
+            public data: ICommandData;
 
             /**
              * Abstract method to be implemented by derived class.
@@ -140,6 +91,13 @@ module TacoUtility {
                 }
             }
 
+            /**
+             * Default implementation for returning telemetry properties.
+             */
+            public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+                return Q(<ICommandTelemetryProperties>{});
+            }
+
             private getSubCommand(options: ICommandData): ICommand {
                 for (var i = 0; i < this.subcommands.length; ++i) {
                     var subCommand = this.subcommands[i];
@@ -149,6 +107,55 @@ module TacoUtility {
                 }
 
                 return null;
+            }
+        }
+
+        /**
+         * Factory to create new Commands classes
+         */
+        export class CommandFactory {
+            public listings: any;
+
+            /**
+             * Factory to create new Commands classes
+             * initialize with json file containing commands
+             */
+            constructor(commandsInfoPath: string) {
+                if (!fs.existsSync(commandsInfoPath)) {
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
+                }
+
+                this.listings = require(commandsInfoPath);
+            }
+
+            /**
+             * get specific task object, given task name
+             */
+            public getTask(name: string, inputArgs: string[], commandsModulePath: string): TacoCommandBase {
+                if (!name || !this.listings) {
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
+                }
+
+                var moduleInfo: ICommandInfo = this.listings[name];
+                if (!moduleInfo) {
+                    return null;
+                }
+
+                var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
+                if (!fs.existsSync(modulePath + ".js")) {
+                    throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionMissingcommand, name);
+                }
+
+                var commandMod: any = require(modulePath);
+                var moduleInstance: any = new commandMod();
+                moduleInstance.info = moduleInfo;
+
+                var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
+                if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
+                    return moduleInstance;
+                } else {
+                    return null;
+                }
             }
         }
     }

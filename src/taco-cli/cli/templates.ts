@@ -25,18 +25,16 @@ import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 
-/*
+/**
  * Templates
  *
  * Handles "taco templates"
  */
-class Templates implements commands.IDocumentedCommand {
+class Templates extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
         var self = this;
-
-        telemetryHelper.sendBasicCommandTelemetry("templates");
 
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {

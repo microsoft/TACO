@@ -16,7 +16,7 @@ Try
 Catch
 {
 	# Arbitrary exit code, defined in installerProtocol.ts, used to indicate that the elevated installer could not be launched
-	Exit 2674
+	Exit 33
 }
 
 # Send exit code back to dependencyInstaller.js

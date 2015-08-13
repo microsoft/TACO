@@ -17,7 +17,7 @@ import path = require ("path");
 import tacoUtility = require ("taco-utils");
 import HelpCommandBase = tacoUtility.HelpCommandBase;
 
-/*
+/**
  * Help handles "Taco Help"
  */
 class Help extends HelpCommandBase {

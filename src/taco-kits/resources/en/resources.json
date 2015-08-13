@@ -1,12 +1,6 @@
 ﻿{
-    "4.2.0-Kit": "4.2.0 Cordova Kit",
-    "4.2.0-Kit-desc": "A toolkit of plugins and platforms that works with Cordova CLI v4.2.0",
-    "4.3.0-Kit": "4.3.0 Cordova Kit",
-    "4.3.0-Kit-desc": "A toolkit of plugins and platforms that works with Cordova CLI v4.3.0",
-    "4.3.1-Kit": "4.3.1 Cordova Kit",
-    "4.3.1-Kit-desc": "A toolkit of plugins and platforms that works with Cordova CLI v4.3.1",
-    "5.0.0-Kit": "5.0.0 Cordova Kit",
-    "5.0.0-Kit-desc": "A toolkit of plugins and platforms that works with Cordova CLI v5.0.0",
+    "tacokit@1.0.0": "5.1.1 Cordova Kit",
+    "tacokit@1.0.0-desc": "A toolkit of plugins and platforms that works with Cordova CLI v5.1.1",
     "_KitNames.comment": "Localized names and descriptions for the different Cordova kits that taco-cli offers.",
 
     "BlankTemplateName": "Blank template",
