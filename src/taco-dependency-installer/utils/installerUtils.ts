@@ -218,6 +218,28 @@ class InstallerUtils {
         socketHandle.write(JSON.stringify(data) + os.EOL);
     }
 
+    /**
+     * Globally tnstalls the given package from npm
+     *
+     * @param {stringt} npmPackage The name of the npm package
+     *
+     * @return {Q.Promise} An empty promise if the operation succeeds
+     */
+    public static installNpmPackage(npmPackage: string): Q.Promise<any> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var command: string = "npm install -g " + npmPackage;
+
+        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            if (error) {
+                deferred.reject(error);
+            } else {
+                deferred.resolve({});
+            }
+        });
+
+        return deferred.promise;
+    }
+
     private static calculateFileSha1(filePath: string): string {
         var options: hashFiles.IOptions = {
             files: [filePath],

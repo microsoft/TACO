@@ -87,7 +87,31 @@ class DependencyDataWrapper {
      */
     public getInstallerInfo(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IInstallerData {
         if (this.isSystemSupported(id, version, platform, architecture)) {
-            return this.dependenciesData[id].versions[version][platform][architecture];
+            // We don't want to return the steps declaration, as this is for internal use, so we manually construct an IInstallerData while skipping the steps declaraion
+            var infoSource: DependencyInstallerInterfaces.IInstallerData = this.dependenciesData[id].versions[version][platform][architecture];
+            var infoResult: DependencyInstallerInterfaces.IInstallerData = {
+                installSource: infoSource.installSource,
+                sha1: infoSource.sha1,
+                bytes: infoSource.bytes
+            };
+
+            if (infoSource.installDestination) {
+                infoResult.installDestination = infoSource.installDestination;
+            }
+
+            return infoResult;
+        }
+
+        return null;
+    }
+
+    /*
+     * Returns the installer steps for the specified dependency. Will return null if either the dependency ID, the version ID or the platform (or the current system
+     * platform if no platform is specified) ID does not exist.
+     */
+    public getInstallerSteps(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IStepsDeclaration {
+        if (this.isSystemSupported(id, version, platform, architecture)) {
+            return this.dependenciesData[id].versions[version][platform][architecture].steps;
         }
 
         return null;

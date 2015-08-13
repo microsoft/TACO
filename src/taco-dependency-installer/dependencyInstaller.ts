@@ -73,9 +73,7 @@ module TacoDependencyInstaller {
         }
 
         public run(requirementsResult: any): Q.Promise<any> {
-            // Installing dependencies is currently only supported on Windows
-            // TODO (DevDiv 1172346): Support Mac OS as well
-            if (process.platform !== "win32") {
+            if (process.platform !== "win32" && process.platform !== "darwin") {
                 return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
 
@@ -99,12 +97,6 @@ module TacoDependencyInstaller {
             var self = this;
 
             return this.promptUserBeforeInstall()
-                .then(function (): void {
-                    self.createServer();
-                })
-                .then(function (): Q.Promise<any> {
-                    return self.connectServer();
-                })
                 .then(function (): Q.Promise<number> {
                     return self.spawnElevatedInstaller();
                 })
@@ -134,7 +126,7 @@ module TacoDependencyInstaller {
                     if (!self.dependenciesDataWrapper.isImplicit(value.id)) {
                         var versionToUse: string = value.metadata && value.metadata.version ? value.metadata.version : self.dependenciesDataWrapper.getFirstValidVersion(value.id);
                         var installPath: string = self.dependenciesDataWrapper.getInstallDirectory(value.id, versionToUse);
-                        var expandedInstallPath: string = path.resolve(utilHelper.expandEnvironmentVariables(installPath));
+                        var expandedInstallPath: string = installPath ? path.resolve(utilHelper.expandEnvironmentVariables(installPath)) : null;
 
                         var dependencyInfo: IDependency = {
                             id: value.id,
@@ -315,7 +307,10 @@ module TacoDependencyInstaller {
             this.missingDependencies.forEach(function (value: IDependency): void {
                 logger.log(resources.getString("DependencyLabel", value.displayName));
                 logger.log(resources.getString("DependencyVersion", value.version));
-                logger.log(resources.getString("InstallDestination", value.installDestination));
+
+                if (value.installDestination) {
+                    logger.log(resources.getString("InstallDestination", value.installDestination));
+                }
 
                 if (value.licenseUrl) {
                     logger.log(resources.getString("DependencyLicense", value.licenseUrl));
@@ -368,6 +363,23 @@ module TacoDependencyInstaller {
             } catch (err) {
                 throw errorHelper.get(TacoErrorCodes.ErrorCreatingInstallConfig, this.installConfigFilePath);
             }
+        }
+
+        private prepareCommunications(): Q.Promise<any> {
+            var self = this;
+
+            if (os.platform() === "win32") {
+                // For Windows we need to prepare a local server to communicate with the elevated installer process
+                return Q({})
+                    .then(function (): void {
+                        self.createServer();
+                    })
+                    .then(function (): Q.Promise<any> {
+                        return self.connectServer();
+                    });
+            }
+
+            return Q({});
         }
 
         private createServer(): void {
@@ -431,6 +443,8 @@ module TacoDependencyInstaller {
             switch (process.platform) {
                 case "win32":
                     return this.spawnElevatedInstallerWin32();
+                case "darwin":
+                    return this.spawnElevatedInstallerDarwin();
                 default:
                     return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
             }
@@ -438,34 +452,70 @@ module TacoDependencyInstaller {
 
         private spawnElevatedInstallerWin32(): Q.Promise<number> {
             var self = this;
+
+            // Set up the communication channels to talk with the elevated installer process
+            return this.prepareCommunications()
+                .then(function (): Q.Promise<any> {
+                    var deferred: Q.Deferred<number> = Q.defer<number>();
+                    var launcherPath: string = path.resolve(__dirname, "utils", "win32", "elevatedInstallerLauncher.ps1");
+                    var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
+                    var command: string = "powershell";
+                    var args: string[] = [
+                        "-executionpolicy",
+                        "unrestricted",
+                        "-file",
+                        launcherPath,
+                        utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
+                        utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
+                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
+                    ];
+                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+
+                    cp.on("error", function (err: Error): void {
+                        // Handle ENOENT if Powershell is not found
+                        if (err.name === "ENOENT") {
+                            deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
+                        } else {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
+                        }
+                    });
+                    cp.on("exit", function (code: number): void {
+                        self.serverHandle.close(function (): void {
+                            deferred.resolve(code);
+                        });
+                    });
+
+                    return deferred.promise;
+                });
+        }
+
+        private spawnElevatedInstallerDarwin(): Q.Promise<number> {
+            var self = this;
             var deferred: Q.Deferred<number> = Q.defer<number>();
-            var launcherPath: string = path.resolve(__dirname, "utils", "win32", "elevatedInstallerLauncher.ps1");
-            var elevatedInstallerPath: string = path.resolve(__dirname, "elevatedInstaller.js");
-            var command: string = "powershell";
-            var args: string[] = [
-                "-executionpolicy",
-                "unrestricted",
-                "-file",
-                launcherPath,
-                utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
-                utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath),
-                utilHelper.quotesAroundIfNecessary(this.installConfigFilePath)
-            ];
-            var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+            var elevatedInstallerScript: string = path.resolve(__dirname, "elevatedInstaller.js");
+            var command: string;
+            var args: string[];
+
+            if (process.env.USER === "root") {
+                command = "node";
+                args = [];
+            } else {
+                command = "sudo";
+                args = ["node"];
+            }
+
+            args = args.concat([
+                elevatedInstallerScript,
+                utilHelper.quotesAroundIfNecessary(self.installConfigFilePath)
+            ]);
+
+            var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "inherit" });
 
             cp.on("error", function (err: Error): void {
-                // Handle ENOENT if Powershell is not found
-                if (err.name === "ENOENT") {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
-                } else {
-                    deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
-                }
+                deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));
             });
-
             cp.on("exit", function (code: number): void {
-                self.serverHandle.close(function (): void {
-                    deferred.resolve(code);
-                });
+                deferred.resolve(code);
             });
 
             return deferred.promise;

@@ -67,8 +67,8 @@
     "_InstallingLabel.comment": "Progress indicator for when a dependency is being installed.",
     "ConfiguringLabel": "Configuring (this may take several minutes)...",
     "_ConfiguringLabel.comment": "Progress indicator for when a dependency is being configured after the installation is done.",
-    "SettingSystemVariablesLabel": "Updating system environment variables...",
-    "_SettingSystemVariablesLabel.comment": "Progress indicator for when a dependency is being installed via npm.",
+    "SettingSystemVariablesLabel": "Updating environment variables...",
+    "_SettingSystemVariablesLabel.comment": "Progress indicator for when the environment variables are being configured for the newly installed dependency.",
     "OverwritingVariable": "Overwriting '{0}'...",
     "_OverwritingVariable.comment": "Progress indicator for when taco is overwriting an existin system variable. {0} is the name of the variable.",
     "Success": "<success>Success!</success>",
@@ -98,5 +98,7 @@
     "InstallerError": "Error: The installer '{0}' didn't exit cleanly. Exit code: {1}",
     "_UnableToRunInstaller.comment": "Error shown when executing a dependency's installer yields a non-0 exit code. {0} is the path to the installer executable, {1} is the exit code.",
     "UnableToSetVariable": "Error: Unable to set '{0}' system environment variable (error code: {1}). Please set the '{0}' environment variable to the following value: {2}",
-    "_UnableToSetVariable.comment": "Error shown when the installer process fails to set a system environment variable. {0} is the variable name, {1} is the error code that was given when trying to set the variable, and {2} is the value the variable should be set to."
+    "_UnableToSetVariable.comment": "Error shown when the installer process fails to set a system environment variable. {0} is the variable name, {1} is the error code that was given when trying to set the variable, and {2} is the value the variable should be set to.",
+    "NeedInstallDestination": "Error: An installation destination is needed for this dependency. Please make sure there is an install path in the installation configuration file.",
+    "_NeedInstallDestination.comment": "Error shown when a dependency needs an install destination, but the install config file didn't contain one"
 }
