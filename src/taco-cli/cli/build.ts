@@ -99,7 +99,7 @@ class Build extends commands.TacoCommandBase {
         switch (platform.location) {
         case Settings.BuildLocationType.Local:
             // To clean locally, try and run the clean script
-            var cleanScriptPath = path.join("platforms", platform, "cordova", "clean");
+            var cleanScriptPath = path.join("platforms", platform.platform, "cordova", "clean");
             if (fs.existsSync(cleanScriptPath)) {
                 promise = promise.then(function (): Q.Promise<any> {
                     return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any): void {
