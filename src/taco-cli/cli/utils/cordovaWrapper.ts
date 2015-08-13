@@ -223,9 +223,7 @@ class CordovaWrapper {
             if (projectInfo.cordovaCliVersion) {
                 return Q.resolve(projectInfo.cordovaCliVersion);
             } else {
-                return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
-                    return output.split("\n")[0];
-                });
+                return CordovaWrapper.getGlobalCordovaVersion();
             }
         });
     }

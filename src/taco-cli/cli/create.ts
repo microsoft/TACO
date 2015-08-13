@@ -125,15 +125,15 @@ class Create implements commands.IDocumentedCommand {
      */
     private verifyArguments(): void {
         // Parameter exclusivity validation
-        if (this.commandParameters.data.options["template"] !== "undefined" && (this.commandParameters.data.options["copy-from"] !== "undefined" || this.commandParameters.data.options["link-to"] !== "undefined")) {
+        if (this.commandParameters.data.options.hasOwnProperty("template") && (this.commandParameters.data.options.hasOwnProperty("copy-from") || this.commandParameters.data.options.hasOwnProperty("link-to"))) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
 
-        if (this.commandParameters.data.options["cli"] !== "undefined" && this.commandParameters.data.options["kit"] !== "undefined") {
+        if (this.commandParameters.data.options.hasOwnProperty("cli") && this.commandParameters.data.options.hasOwnProperty("kit")) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothCliAndKit);
         }
 
-        if (this.commandParameters.data.options["cli"] !== "undefined" && this.commandParameters.data.options["template"] !== "undefined") {
+        if (this.commandParameters.data.options.hasOwnProperty("cli") && this.commandParameters.data.options.hasOwnProperty("template")) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
 

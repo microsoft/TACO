@@ -121,15 +121,15 @@ class Kit extends commands.TacoCommandBase implements commands.IDocumentedComman
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Kit.KnownOptions, Kit.ShortHands, args, 0);
 
         // Raise errors for invalid command line parameter combinations
-        if (parsedOptions.options["json"] !== "undefined" && parsedOptions.options["cli"] !== "undefined") {
+        if (parsedOptions.options.hasOwnProperty("json") && parsedOptions.options.hasOwnProperty("cli")) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--json", "--cli");
         }
         
-        if (parsedOptions.options["cli"] !== "undefined" && parsedOptions.options["kit"] !== "undefined") {
+        if (parsedOptions.options.hasOwnProperty("cli") && parsedOptions.options.hasOwnProperty("kit")) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--cli", "--kit");
         }
 
-        if (parsedOptions.options["json"] !== "undefined" && parsedOptions.options["kit"] !== "undefined") {
+        if (parsedOptions.options.hasOwnProperty("json") && parsedOptions.options.hasOwnProperty("kit")) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--kit", "--json");
         }
 
