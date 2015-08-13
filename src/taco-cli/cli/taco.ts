@@ -119,7 +119,7 @@ class Taco {
      * runs taco with raw args ensuring proper initialization
      */
     public static runWithArgs(args: string[]): Q.Promise<any> {
-        return Taco.runWithParsedArgs(Taco.parseArgs(process.argv.slice(2)));
+        return Taco.runWithParsedArgs(Taco.parseArgs(args));
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
