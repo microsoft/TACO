@@ -224,7 +224,7 @@ class ProjectHelper {
     }
 
     /**
-     *  public helper that gets the list of registry plugins installed
+     *  public helper that gets the list of plugins installed from the local file system or a GIT repository
      */
     public static getLocalOrGitPlugins(projectDir: string): Q.Promise<string[]> {
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
