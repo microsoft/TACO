@@ -35,31 +35,47 @@ import TacoError = tacoUtility.TacoError;
 import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
 import telemetryHelper = tacoUtility.TelemetryHelper;
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 import UtilHelper = tacoUtility.UtilHelper;
 
 interface IParsedArgs {
     args: string[];
-    command: commands.ICommand;
+    command: commands.TacoCommandBase;
+    commandName: string;
 }
 
-/*
+/**
  * Taco
  *
  * Main Taco class
  */
 class Taco { 
-    /*
+    /**
      * Runs taco with command line args
      */
     public static run(): void {
         telemetry.init(require("../package.json").name, require("../package.json").version);
+        TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
         // We check if there is a new taco-cli version available, and if so, we print a message before exiting the application
         new CheckForNewerVersion().showOnExitAndIgnoreFailures();
-
-        Taco.runWithArgs(process.argv.slice(2)).done(null, function (reason: any): any {
+        
+        var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
+        var commandProperties: ICommandTelemetryProperties = {};
+        
+        Taco.runWithParsedArgs(parsedArgs)
+        .then(function (): void {
+            if (parsedArgs.command) {
+                parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
+                    commandProperties = properties;
+                });
+            }
+        }).done(function (): void {
+            telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
+        }, function (reason: any): any {
             // Pretty print errors
             if (reason) {
+                telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, parsedArgs.args);
                 if (reason.isTacoError) {
                     logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else {
@@ -78,13 +94,12 @@ class Taco {
         });
     }
 
-    /*
-     * runs taco with passed array of args ensuring proper initialization
+    /**
+     * runs taco with parsed args ensuring proper initialization
      */
-    public static runWithArgs(args: string[]): Q.Promise<any> {
+    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<any> {
         return Q({})
             .then(function (): Q.Promise<any> {
-                var parsedArgs: IParsedArgs = Taco.parseArgs(args);
                 projectHelper.cdToProjectRoot();
 
                 // if no command found that can handle these args, route args directly to Cordova
@@ -93,10 +108,9 @@ class Taco {
                     return parsedArgs.command.run(commandData);
                 } else {
                     logger.logWarning(resources.getString("TacoCommandPassthrough"));
-
+                    
                     var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
-                    telemetryHelper.addMultiplePropertiesToEvent(routeToCordovaEvent, "argument", args, true);
-
+                    telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
                     return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
                         routeToCordovaEvent.properties["success"] = "true";
                         telemetry.send(routeToCordovaEvent);
@@ -108,6 +122,13 @@ class Taco {
                     });
                 }
         });
+    }
+
+    /**
+     * runs taco with raw args ensuring proper initialization
+     */
+    public static runWithArgs(args: string[]): Q.Promise<any> {
+        return Taco.runWithParsedArgs(Taco.parseArgs(args));
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
@@ -133,9 +154,9 @@ class Taco {
         UtilHelper.initializeLogLevel(args);
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
-        var command: commands.ICommand = commandsFactory.getTask(commandName, commandArgs, __dirname);
+        var command: commands.TacoCommandBase = commandsFactory.getTask(commandName, commandArgs, __dirname);
 
-        return <IParsedArgs>{ command: command, args: command ? commandArgs : args };
+        return <IParsedArgs>{ command: command, args: command ? commandArgs : args, commandName: commandName || command.name };
     }
 }
 

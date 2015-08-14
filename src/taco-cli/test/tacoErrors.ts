@@ -20,7 +20,7 @@ import TestHelper = testUtil.TestHelper;
 
 describe("taco Errors in taco-cli", function (): void {
     it("Verify taco Errors in taco-cli", function (): void {
-        TestHelper.verifyTacoErrors(path.join(__dirname, "../cli/tacoErrorCodes.js"), resources, 1000, 1999);
+        TestHelper.verifyTacoErrors(path.join(__dirname, "../cli/tacoErrorCodes.js"), resources, 5000, 5999);
     });
 });
 

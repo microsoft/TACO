@@ -161,10 +161,13 @@ describe("help for a command", function (): void {
             "   taco kit [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   COMMAND ................ CommandKitSubcommandDescription",
-            "   list ................... CommandKitListSubcommandDescription",
-            "        --json <PATH> ..... CommandKitJsonOptionDescription",
-            "        --kit <KIT-ID> .... CommandKitOptionKitDescription",
+            "   COMMAND ................. CommandKitSubcommandDescription",
+            "   list .................... CommandKitListSubcommandDescription",
+            "        --json <PATH> ...... CommandKitJsonOptionDescription",
+            "        --kit <KIT-ID> ..... CommandKitOptionKitDescription",
+            "   select .................. CommandKitSelectSubcommandDescription",
+            "        --kit <KIT-ID> ..... CommandKitSelectOptionKitDescription",
+            "        --cli <VERSION> .... CommandKitSelectOptionCliDescription",
             ""], done);
     });
 

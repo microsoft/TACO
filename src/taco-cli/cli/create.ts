@@ -28,13 +28,14 @@ import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
+import kit = require ("./kit");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
 
-/* 
+/**
  * Wrapper interface for create command parameters
  */
 interface ICreateParameters {
@@ -42,12 +43,12 @@ interface ICreateParameters {
     data: commands.ICommandData;
 }
 
-/*
+/**
  * Create
  *
  * Handles "taco create"
  */
-class Create implements commands.IDocumentedCommand {
+class Create extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.FlagTypeMap = {
         kit: String,
         template: String,
@@ -63,6 +64,7 @@ class Create implements commands.IDocumentedCommand {
 
     private commandParameters: ICreateParameters;
 
+    public name: string = "create";
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
@@ -125,15 +127,15 @@ class Create implements commands.IDocumentedCommand {
      */
     private verifyArguments(): void {
         // Parameter exclusivity validation
-        if (this.commandParameters.data.options["template"] && (this.commandParameters.data.options["copy-from"] || this.commandParameters.data.options["link-to"])) {
+        if (this.commandParameters.data.options.hasOwnProperty("template") && (this.commandParameters.data.options.hasOwnProperty("copy-from") || this.commandParameters.data.options.hasOwnProperty("link-to"))) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
 
-        if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["kit"]) {
+        if (this.commandParameters.data.options.hasOwnProperty("cli") && this.commandParameters.data.options.hasOwnProperty("kit")) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothCliAndKit);
         }
 
-        if (this.commandParameters.data.options["cli"] && this.commandParameters.data.options["template"]) {
+        if (this.commandParameters.data.options.hasOwnProperty("cli") && this.commandParameters.data.options.hasOwnProperty("template")) {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
         }
 
@@ -219,17 +221,10 @@ class Create implements commands.IDocumentedCommand {
             return Q({});
         } else {
             var kitId: string = this.commandParameters.data.options["kit"];
-            return Q({})
-                .then(function (): Q.Promise<string> {
-                    if (!kitId) {
-                        return kitHelper.getDefaultKit().then(kitId => resources.getString("CommandCreateStatusDefaultKitUsedAnnotation", kitId));
-                    }
-
-                    return Q(kitId);
-                })
-                .then(function (kitIdUsed: string): void {
-                    self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription", kitIdUsed);
-                });
+            return (kitId ? Q(kitId) : kitHelper.getDefaultKit())
+                .then((kitId: string) => kitHelper.getKitInfo(kitId)
+                    .then(kitInfo => self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription",
+                        kit.getKitTitle(kitId, kitInfo))));
         }
     }
 

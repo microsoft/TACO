@@ -45,6 +45,14 @@
                     { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" },
                     { "name": "--kit <KIT-ID>", "description": "[CommandKitOptionKitDescription]" }
                 ]
+            },
+            {
+                "name": "select",
+                "description": "[CommandKitSelectSubcommandDescription]",
+                "options": [
+                    { "name": "--kit <KIT-ID>", "description": "[CommandKitSelectOptionKitDescription]" },
+                    { "name": "--cli <VERSION>", "description": "[CommandKitSelectOptionCliDescription]" }
+                ]
             }
         ]
     },

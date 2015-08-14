@@ -62,11 +62,6 @@ declare module TacoKits {
          *   Returns a promise resolved with an ITemplateOverrideInfo[] that contains all the available templates regardless of kits
          */
         getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;
-        /*getTemplateOverrideInfo: (kitId: string, templateId: string) => Q.Promise<TacoKits.ITemplateOverrideInfo>;
-        getTemplatesForKit: (kitId: string) => Q.Promise<TacoKits.IKitTemplatesOverrideInfo>;
-        getAllTemplates?: () => Q.Promise<ITemplateOverrideInfo[]>;*/
-
-        kitMetadataFilePath?: string;
     }
 
     interface IPluginOverrideInfo {

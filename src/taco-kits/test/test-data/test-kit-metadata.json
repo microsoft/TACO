@@ -1,81 +1,73 @@
 ﻿{
-    "plugins": {
-        "org.apache.cordova.camera": {
-            "platforms": "ios, android, wp8, windows8"
-        }
-    },
-
-    "kits": {
-        "4.2.0-Win10-Beta": {   
-            "cordova-cli": "4.2.0",
-            "taco-min": "1.0.0",
-            "releaseNotesUri": "http://cordova.apache.org/4.2.0/release.md",
-            "plugins": {
-                "cordova-plugin-camera": {
-                    "version": "1.0.1",
-                    "platforms": "ios, android, wp8, windows"
-                }
-            },
-            "platforms": {
-                "windows": {
-                    "version": "4.0.0-beta",
-                    "src": "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0-beta.tgz"
-                }
-            }
-        },
-        "4.0.0-Kit": {
-            "cordova-cli": "4.0.0",
+   "kits": {
+        "4.3.0-Kit": {
+            "cordova-cli": "4.3.0",
             "taco-min": "1.0.0",
             "releaseNotesUri": "http://cordova.apache.org/4.0.0/release.md",
             "deprecated": true,
             "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
             "plugins": {
-                "cordova-plugin-camera": {
-                    "version": "1.0.1",
-                    "supported-platforms": "ios, android, wp8"
-                },
-                "cordova-plugin-media-capture": {
-                    "version": "1.0.1",
-                    "supported-platforms": "ios, android, windows, windows8"
-                }
+               "cordova-plugin-camera": {
+                "version": "1.0.1",
+                "supported-platforms": "ios, android, wp8"
+            },
+            "cordova-plugin-media-capture": {
+                "version": "1.0.1",
+                "supported-platforms": "ios, android, windows, windows8"
+            }
             }
         },
-        "4.2.0-Kit": {
-            "cordova-cli": "4.2.0",
+        "4.3.1-Kit": {
+            "cordova-cli": "4.3.1",
             "taco-min": "1.0.0",
-            "releaseNotesUri": "http://cordova.apache.org/4.2.0/release.md",
-            "plugins": {
-                "cordova-plugin-camera": {
-                    "version": "1.0.1"
-                }
-            }
-        },
-        "5.0.0-Kit": {
-            "cordova-cli": "5.0.0",
-            "taco-min": "1.0.0",
-            "default": true,
-            "releaseNotesUri": "http://cordova.apache.org/5.0.0/release.md",
             "platforms": {
-                "android": {
-                    "version": "4.2.1",
-                    "src": "https://github.com/apache/cordova-android/tree/4.2.1/archive/4.2.1.tgz"
-                },
                 "ios": {
-                    "version": "4.2.2",
-                    "src": "https://github.com/apache/cordova-ios/tree/4.2.2/archive/4.2.2.tgz"
-                },
-                "windows": {
-                    "version": "4.0.0",
-                    "src": "https://github.com/apache/cordova-windows/tree/4.0.0/archive/4.0.0.tgz"
-                },
-                "wp8": {
-                    "version": "4.0.2",
-                    "src": "https://github.com/apache/cordova-wp8/tree/4.0.2/archive/4.0.2.tgz"
+                    "version": "3.8.0"
                 }
             },
             "plugins": {
-                "cordova-plugin-camera": {
+                "cordova-plugin-battery-status": {
+                    "src": "https://github.com/apache/cordova-plugin-battery-status.git",
+                    "supported-platforms": "android, windows"
+                },
+                "cordova-plugin-contacts": {
+                    "version": "1.0.0",
+                    "supported-platforms": "ios"
+                },
+                "cordova-plugin-device": {
+                    "version": "https://github.com/apache/cordova-plugin-device.git",
+                    "supported-platforms": "android, ios, windows"
+                }
+            }
+        },
+        "5.1.1-Kit": {
+            "cordova-cli": "5.1.1",
+            "taco-min": "1.0.0",
+            "default": true,
+            "releaseNotesUri": "http://cordova.apache.org/5.1.1/release.md",
+            "platforms": {
+                "android": {
+                    "version": "4.0.2"
+                },
+                "ios": {
+                    "version": "3.8.0"
+                },
+                "windows": {
+                    "version": "4.0.0"
+                },
+                "wp8": {
+                    "version": "3.8.1"
+                }
+            },
+            "plugins": {
+                "cordova-plugin-console": {
                     "version": "1.0.1"
+                },
+                "cordova-plugin-device": {
+                    "version": "1.0.1"
+                },
+                "cordova-plugin-file": {
+                    "version": "2.1.0"
                 }
             }
         }
@@ -90,22 +82,6 @@
                 "name": "TypescriptTemplateName",
                 "url": "templates/default/typescript.zip"
             }
-        },
-        "4.0.0-Kit": {
-            "blank": {
-                "name": "BlankTemplateName",
-                "url": "templates/4.0.0-Kit/blank.zip"
-            },
-            "typescript": {
-                "name": "TypescriptTemplateName",
-                "url": "templates/4.0.0-Kit/typescript.zip"
-            }
-        },
-        "5.0.0-Kit": {
-            "blank": {
-                "name": "BlankTemplateName",
-                "url": "templates/5.0.0-Kit/blank.zip"
-            }
-        }	
-	}
+        }
+    }
 }

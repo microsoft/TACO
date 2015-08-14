@@ -212,14 +212,18 @@ class CordovaWrapper {
             });
     }
 
+    public static getGlobalCordovaVersion(): Q.Promise<string> {
+        return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
+            return output.split("\n")[0];
+        });
+    }
+
     public static getCordovaVersion(): Q.Promise<string> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
             if (projectInfo.cordovaCliVersion) {
                 return Q.resolve(projectInfo.cordovaCliVersion);
             } else {
-                return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
-                    return output.split("\n")[0];
-                });
+                return CordovaWrapper.getGlobalCordovaVersion();
             }
         });
     }

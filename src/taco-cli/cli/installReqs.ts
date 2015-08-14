@@ -25,12 +25,12 @@ import tacoUtils = require ("taco-utils");
 import commands = tacoUtils.Commands;
 import DependencyInstaller = dependencies.DependencyInstaller;
 
-/*
+/**
  * InstallDependencies
  *
  * Handles "taco install-dependencies"
  */
-class InstallReqs implements commands.IDocumentedCommand {
+class InstallReqs extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.FlagTypeMap = { };
 
     public info: commands.ICommandInfo;

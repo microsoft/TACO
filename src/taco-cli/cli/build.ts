@@ -34,12 +34,12 @@ import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import UtilHelper = tacoUtility.UtilHelper;
 
-/*
+/**
  * Build
  *
  * handles "taco build"
  */
-class Build extends commands.TacoCommandBase implements commands.IDocumentedCommand {
+class Build extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,
@@ -80,15 +80,15 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothLocalRemote);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--remote", "--local");
         }
 
         if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDeviceEmulate);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--device", "--emulator");
         }
 
         if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
-            throw errorHelper.get(TacoErrorCodes.CommandNotBothDebugRelease);
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
         }
 
         return parsedOptions;
@@ -99,7 +99,7 @@ class Build extends commands.TacoCommandBase implements commands.IDocumentedComm
         switch (platform.location) {
         case Settings.BuildLocationType.Local:
             // To clean locally, try and run the clean script
-            var cleanScriptPath = path.join("platforms", platform, "cordova", "clean");
+            var cleanScriptPath = path.join("platforms", platform.platform, "cordova", "clean");
             if (fs.existsSync(cleanScriptPath)) {
                 promise = promise.then(function (): Q.Promise<any> {
                     return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any): void {

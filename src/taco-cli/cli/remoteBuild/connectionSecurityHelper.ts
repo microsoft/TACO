@@ -62,7 +62,7 @@ class ConnectionSecurityHelper {
                 fs.readFile(certPath, bufferDeferred.makeNodeResolver());
                 break;
             default:
-                throw errorHelper.get(TacoErrorCodes.UnsupportedPlatform, os.platform());
+                throw errorHelper.get(TacoErrorCodes.UnsupportedHostPlatform, os.platform());
         }
 
         return bufferDeferred.promise.then(function (certificate: Buffer): https.Agent {
@@ -130,7 +130,7 @@ class ConnectionSecurityHelper {
                 });
                 break;
             default:
-                deferred.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, os.platform()));
+                deferred.reject(errorHelper.get(TacoErrorCodes.UnsupportedHostPlatform, os.platform()));
         }
 
         return deferred.promise;
