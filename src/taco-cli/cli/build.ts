@@ -23,6 +23,7 @@ import rimraf = require ("rimraf");
 
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import CordovaWrapper = require ("./utils/cordovaWrapper");
+import projectHelper = require ("./utils/projectHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -163,6 +164,9 @@ class Build extends commands.TacoCommandBase {
     }
 
     private static build(commandData: commands.ICommandData): Q.Promise<any> {
+        if(projectHelper.isTypeScriptProject()) {
+            logger.log(resources.getString("CommandCreateInstallGulp"));
+        }
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
