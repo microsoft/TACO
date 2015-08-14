@@ -28,11 +28,14 @@ import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
+import telemetryHelper = tacoUtility.TelemetryHelper;
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
+
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 /**
  * Wrapper interface for create command parameters
@@ -293,6 +296,25 @@ class Create extends commands.TacoCommandBase {
             "HowToUseCommandHelp",
             "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
     }
+
+    /**
+     * Overridden implementation for returning telemetry properties that are specific to create
+     */
+    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        var self = this;
+        return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
+            if (self.isKitProject()) {
+                telemetryProperties["kit"] = { value: self.commandParameters.data.options["kit"] || defaultKitId, isPii: false };
+                telemetryProperties["template"] = { value: self.commandParameters.data.options["template"] || "blank", isPii: false };
+            } else {
+                telemetryProperties["cli"] = { value: self.commandParameters.data.options["cli"], isPii: false };
+            }
+
+            return Q.resolve(telemetryProperties);
+        });
+    }
+
 }
 
 export = Create;

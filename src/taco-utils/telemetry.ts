@@ -100,6 +100,9 @@ module TacoUtility {
 
             if (appInsights.client) { // no-op if telemetry is not initialized
                 appInsights.client.trackEvent(event.name, event.properties);
+                console.log("Name : " + event.name);
+                console.log("properties : " + event.properties);
+                console.log(event);
             }
         }
 

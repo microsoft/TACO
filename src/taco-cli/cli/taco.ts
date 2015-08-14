@@ -62,12 +62,14 @@ class Taco {
         var commandProperties: ICommandTelemetryProperties = {};
         
         Taco.runWithParsedArgs(parsedArgs)
-        .then(function (): void {
+        .then(function (): Q.Promise<any> {
             if (parsedArgs.command) {
-                parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
+                return parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
                     commandProperties = properties;
                 });
             }
+
+            return Q.resolve({});
         }).done(function (): void {
             telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
         }, function (reason: any): any {

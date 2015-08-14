@@ -27,11 +27,13 @@ import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
-
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import utils = tacoUtility.UtilHelper;
+
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 export enum CommandOperationStatus {
     Error = -1,
@@ -205,5 +207,13 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             targets: targets,
             downloadOptions: this.downloadOptions
         };
+    }
+
+    /**
+     * Overridden implementation for returning telemetry properties that are specific to platform/plugin.
+     */
+    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        return Q.resolve(telemetryProperties);
     }
 }

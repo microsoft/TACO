@@ -31,6 +31,7 @@ import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
+    private static ProjectScriptsDir: string = "scripts";
 
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
@@ -246,18 +247,38 @@ class ProjectHelper {
     /**
      *  public helper that resolves with a true value if the current project is a TACO TS project
      */
-    public static isTypeScriptProject(): Q.Promise<boolean> {
-        
+    public static isTypeScriptProject(): Q.Promise<boolean> {   
+        var projectScriptsPath: string = path.resolve(ProjectHelper.getProjectRoot(), ProjectHelper.ProjectScriptsDir);
+        var tsFiles: string[] = [];
+        if (fs.existsSync(projectScriptsPath)) {
+            tsFiles = fs.readdirSync(projectScriptsPath).filter(function (file: string): boolean {
+                return path.extname(file) === ".ts";
+            });
+        }
+        return Q.resolve(tsFiles.length > 0);
+    }
+
+
+    /**
+     *  public helper that returns the common host machine telemetry properties
+     */
+     public static getHostMachineProperties(): ICommandTelemetryProperties {
+        var hostTelemetryProperties: ICommandTelemetryProperties = {};
+        var tacoCliVersion = require("../../package.json").version
+        hostTelemetryProperties["hostOS"] = { value: os.platform(), isPii: false };
+        hostTelemetryProperties["hostOSRelease"] = { value: os.release(), isPii: false };
+        hostTelemetryProperties["tacoCliVersion"] = { value: tacoCliVersion, isPii: false }
+
+        return hostTelemetryProperties;
     }
 
     /**
      *  public helper that returns the common telemetry properties for the current project
      */
      public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        return Q.all([ProjectHelper.getProjectInfo(), cordovaWrapper.getGlobalCordovaVersion()])
-        .spread<any>(function (projectInfo: ProjectHelper.IProjectInfo, globalCordovaVersion: string): Q.Promise<ICommandTelemetryProperties> {
-            var projectTelemetryProperties: ICommandTelemetryProperties;
-            projectTelemetryProperties["hostOS"] = { value: os.hostname(), isPii: false };
+        return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
+        .spread<any>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
+            var projectTelemetryProperties: ICommandTelemetryProperties = ProjectHelper.getHostMachineProperties();
             if (projectTelemetryProperties["isTacoProject"]) {
                 projectTelemetryProperties["isTacoProject"] = { value: true, isPii: false };
                 if (projectInfo.tacoKitId) {
@@ -267,8 +288,9 @@ class ProjectHelper {
                 }
             } else {
                 projectTelemetryProperties["isTacoProject"] = { value: true, isPii: false };
-                projectTelemetryProperties["cli"] = { value: globalCordovaVersion, isPii: false };
             }
+
+            projectTelemetryProperties["projectType"] = { value: isTsProject ? "TypeScript" : "JavaScript", isPii: false }; 
             return Q.resolve(projectTelemetryProperties);
         });
     }
