@@ -10,6 +10,7 @@
 /// <reference path="../../../typings/Q.d.ts" />
 
 import child_process = require ("child_process");
+import glob = require ("glob");
 import Q = require ("q");
 import os = require ("os");
 import path = require ("path");
