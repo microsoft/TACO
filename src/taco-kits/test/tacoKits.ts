@@ -297,35 +297,6 @@ describe("KitHelper", function (): void {
                 });
         });
 
-        it("should return the correct list of templates for a kit that has a template override node in the metadata", function (done: MochaDone): void {
-            var kitId: string = "4.3.0-Kit";
-            var expectedResult: TacoKits.IKitTemplatesOverrideInfo = {
-                kitId: "4.3.0-Kit",
-                templates: [
-                    {
-                        kitId: "4.3.0-Kit",
-                        templateId: "blank",
-                        templateInfo: {
-                            name: "BlankTemplateName",
-                            url: "templates/4.3.0-Kit/blank.zip"
-                        }
-                    }
-                ]
-            };
-
-            kitHelper.getTemplatesForKit(kitId)
-                .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
-                    // Verify the returned override info is correct
-                    var stringifiedInfo = JSON.stringify(kitOverride);
-
-                    stringifiedInfo.should.equal(JSON.stringify(expectedResult));
-                    done();
-                })
-                .catch(function (err: string): void {
-                    done(new Error(err));
-                });
-        });
-
         it("should return the correct error when asking for the templates of a kit that doesn't exist", function (done: MochaDone): void {
             var kitId: string = "unknown";
 

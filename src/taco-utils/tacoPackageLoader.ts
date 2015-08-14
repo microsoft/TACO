@@ -101,7 +101,7 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T> {
+        public static lazyRequire<T>(packageName: string, packageId: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<T> {
             return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
         }
 
@@ -116,7 +116,7 @@ module TacoUtility {
          *
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
-        public static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, logLevel?: InstallLogLevel): Q.Promise<T> {
+        public static lazyTacoRequire<T>(packageKey: string, dependencyConfigPath: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<T> {
             var request: IPackageInstallRequest = TacoPackageLoader.createTacoPackageInstallRequest(packageKey, dependencyConfigPath, logLevel);
             assert.notEqual(request, null, "Invalid Package request");
 
@@ -245,7 +245,7 @@ module TacoUtility {
             }
         }
 
-        private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel?: InstallLogLevel): IPackageInstallRequest {
+        private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel: InstallLogLevel): IPackageInstallRequest {
             if (fs.existsSync(dependencyConfigPath)) {
                 try {
                     var dependencyLookup: any = require(dependencyConfigPath);
@@ -313,7 +313,11 @@ module TacoUtility {
                         }
 
                         if (isFinite(err)) {
-                            // error code reported when npm fails due to EACCES
+                            if (request.logLevel > InstallLogLevel.silent) {
+                                logger.logError(resources.getString("PackageLoaderNpmInstallFailedConsoleMessage"));
+                            }
+
+                            // 243 is the error code reported when npm fails due to EACCES
                             var errorCode = (err === 243) ? TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess : TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode;
                             deferred.reject(errorHelper.get(errorCode, request.packageName, err));
                         } else {
