@@ -127,7 +127,7 @@
     "CommandKitSelectKitPreview.comment": "Message printed on command 'taco kit select --kit {0}' when updates to platforms or plugins added to the project are required",
     "CommandKitSelectCliPreview": "You have opted not to use a Kit. Cordova CLI {0} may pin different platform and plugin versions than are currently added to your project and has not been verified to work with the TACO CLI. Here is an overview of what this update will change:",
     "CommandKitSelectCliPreview.comment": "Message printed on command 'taco kit select --cli {0}' when updates to platforms or plugins added to the project are required",
-    "CommandKitSelectProjectUpdateWarning": "Warning: Platforms and plugins in your project will be removed and replaced with these updates.",
+    "CommandKitSelectProjectUpdateWarning": "Warning: Platforms and plugins in your project will be removed and replaced with these updates. Plugins installed from the local file system or a GIT respository will be ignored.",
     "CommandKitSelectProjectUpdateWarning.comment": "Warning message printed on command 'taco kit select' when updates to platforms or plugins added to the project are required",
     "CommandKitSelectProjectUpdatePrompt": "Make these changes now [y/n]?",
     "CommandKitSelectProjectUpdatePrompt.comment": "Prompt message printed on command 'taco kit select' before updates to the project are made",
