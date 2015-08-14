@@ -20,6 +20,7 @@ import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import wrench = require ("wrench");
 
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
@@ -245,7 +246,7 @@ class ProjectHelper {
         var projectScriptsPath: string = path.resolve(ProjectHelper.getProjectRoot(), ProjectHelper.ProjectScriptsDir);
         var tsFiles: string[] = [];
         if (fs.existsSync(projectScriptsPath)) {
-            tsFiles = fs.readdirSync(projectScriptsPath).filter(function (file: string): boolean {
+            tsFiles = wrench.readdirSyncRecursive(projectScriptsPath).filter(function (file: string): boolean {
                 return path.extname(file) === ".ts";
             });
         }
