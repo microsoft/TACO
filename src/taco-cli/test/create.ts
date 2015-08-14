@@ -214,7 +214,7 @@ describe("taco create", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(createTimeout);
+        this.timeout(2 * createTimeout); // Cleaning up can take a long time if we have several projects
         kitHelper.KitPackagePromise = null;
         rimraf(runFolder, done);
     });
