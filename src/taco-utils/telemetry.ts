@@ -162,6 +162,8 @@ module TacoUtility {
                 event.properties["userId"] = TelemetryUtils.UserId;
                 event.properties["machineId"] = TelemetryUtils.MachineId;
                 event.properties["sessionId"] = TelemetryUtils.SessionId;
+                event.properties["hostOS"] = os.platform();
+                event.properties["hostOSRelease"] = os.release();
             }
 
             public static generateGuid(): string {

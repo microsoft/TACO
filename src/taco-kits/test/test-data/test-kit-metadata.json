@@ -82,12 +82,6 @@
                 "name": "TypescriptTemplateName",
                 "url": "templates/default/typescript.zip"
             }
-        },
-        "4.3.0-Kit": {
-            "blank": {
-                "name": "BlankTemplateName",
-                "url": "templates/4.3.0-Kit/blank.zip"
-            }
         }
     }
 }

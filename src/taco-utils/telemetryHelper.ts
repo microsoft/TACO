@@ -10,6 +10,7 @@
 
 "use strict";
 
+import packageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
 import Telemetry = telemetry.Telemetry;
 
@@ -56,6 +57,19 @@ module TacoUtility {
             TelemetryHelper.addTelemetryEventProperties(successEvent, commandProperties);
 
             Telemetry.send(successEvent);
+        }
+
+        public static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo {
+            var propertyInfo = { value: targetString, isPii: false };
+            if (packageLoader.TacoPackageLoader.GitUriRegex.test(targetString)) {
+                propertyInfo.isPii = true;
+            } else if (packageLoader.TacoPackageLoader.FileUriRegex.test(targetString)) {
+                propertyInfo.isPii = true;
+            } else {
+                propertyInfo.value = targetString;
+            }
+
+            return propertyInfo;
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {

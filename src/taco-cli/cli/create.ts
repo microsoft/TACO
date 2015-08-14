@@ -21,6 +21,7 @@ import util = require ("util");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
+import kit = require ("./kit");
 import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
@@ -223,17 +224,10 @@ class Create extends commands.TacoCommandBase {
             return Q({});
         } else {
             var kitId: string = this.commandParameters.data.options["kit"];
-            return Q({})
-                .then(function (): Q.Promise<string> {
-                    if (!kitId) {
-                        return kitHelper.getDefaultKit().then(kitId => resources.getString("CommandCreateStatusDefaultKitUsedAnnotation", kitId));
-                    }
-
-                    return Q(kitId);
-                })
-                .then(function (kitIdUsed: string): void {
-                    self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription", kitIdUsed);
-                });
+            return (kitId ? Q(kitId) : kitHelper.getDefaultKit())
+                .then((kitId: string) => kitHelper.getKitInfo(kitId)
+                    .then(kitInfo => self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription",
+                        kit.getKitTitle(kitId, kitInfo))));
         }
     }
 
@@ -302,6 +296,7 @@ class Create extends commands.TacoCommandBase {
      */
     public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
+        telemetryProperties["cliVersion"] = { value: require("../../package.json").version, isPii: false };
         var self = this;
         return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
             if (self.isKitProject()) {

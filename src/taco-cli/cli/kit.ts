@@ -117,6 +117,20 @@ class Kit extends commands.TacoCommandBase {
         return Q({});
     }
 
+    /**
+     * Get kit title
+     */
+    public static getKitTitle(kitId: string, kitInfo: TacoKits.IKitInfo): string {
+        var name: string = util.format("<kitid>%s</kitid>", kitId);
+        if (!!kitInfo.default) {
+            return util.format("%s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
+        } else if (!!kitInfo.deprecated) {
+            return util.format("%s <deprecatedkit>(%s) </deprecatedkit>", name, resources.getString("CommandKitListDeprecatedKit"));
+        }
+
+        return name;
+    }
+
     public parseArgs(args: string[]): commands.ICommandData {
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Kit.KnownOptions, Kit.ShortHands, args, 0);
 
@@ -364,20 +378,6 @@ class Kit extends commands.TacoCommandBase {
             deferred.resolve(projectInfo.tacoKitId);
             return deferred.promise;
         });
-    }
-
-    /**
-     * Get kit title
-     */
-    private static getKitTitle(kitId: string, kitInfo: TacoKits.IKitInfo): string {
-        var name: string = util.format("<kitid>%s</kitid>", kitId);
-        if (!!kitInfo.default) {
-            return util.format("%s <defaultkit>(%s)</defaultkit>", name, resources.getString("CommandKitListDefaultKit"));
-        } else if (!!kitInfo.deprecated) {
-            return util.format("%s <deprecatedkit>(%s) </deprecatedkit>", name, resources.getString("CommandKitListDeprecatedKit"));
-        }
-
-        return name;
     }
 
     private static invokeComponentCommandSilent(cliVersion: string, component: string, subCommand: string, targets: string[], options: Cordova.ICordovaDownloadOptions): Q.Promise<any> {

@@ -210,10 +210,20 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     }
 
     /**
-     * Overridden implementation for returning telemetry properties that are specific to platform/plugin.
+     * Overridden implementation for returning telemetry properties that are specific to create
      */
     public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
-        return Q.resolve(telemetryProperties);
+        var self = this;
+        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+            var numericSuffix: number = 1;
+            telemetryProperties["subCommand"] = { value :self.cordovaCommandParams.subCommand, isPii: false };
+            self.cordovaCommandParams.targets.forEach (function (target: string): void {
+                telemetryProperties["targets"+numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
+                numericSuffix++;
+            });
+
+            return Q.resolve(telemetryProperties);
+        });
     }
 }
