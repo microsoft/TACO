@@ -249,6 +249,8 @@ class TemplateManager {
             })
             .on("exit", function (code: number): void {
                 if (code) {
+                    // Because the user already sees all output from git, and because we will intercept the error and use the template we have in cache even if the pull failed, there is no
+                    // strong reason to reject the promise here with an elaborate message, so we just reject with the error code (it won't even be showed to the user).
                     deferred.reject(code);
                 } else {
                     deferred.resolve(localRepo);
