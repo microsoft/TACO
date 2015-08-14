@@ -338,13 +338,6 @@ describe("taco create", function (): void {
             runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidTemplate).then(done, done);
         });
 
-        it("Failure scenario 3 [path, template (typescript, with a deprecated kit that doesn't have a typescript template)]", function (done: MochaDone): void {
-            // Similar to failure scenario 2 (create command should fail when a template is not found), but for typescript templates we have a specific message
-            var scenario: number = 3;
-
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionTypescriptNotSupported).then(done, done);
-        });
-
         it("Failure scenario 4 [path, kit, template, copy-from]", function (done: MochaDone): void {
             // Create command should fail when both --template and --copy-from are specified
             var scenario: number = 4;
