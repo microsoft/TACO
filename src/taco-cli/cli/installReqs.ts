@@ -62,6 +62,25 @@ class InstallReqs extends commands.TacoCommandBase {
     private parseArguments(args: commands.ICommandData): commands.ICommandData {
         return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KnownOptions, {}, args.original, 0);
     }
+
+    private getPlatforms(): Q.Promise<string[]> {
+
+    }
+
+    private getInstalledPlatformList(): Q.Promise<string[]> {
+    }
+
+    private removeInvalidPlatforms(requestedPlatforms: string[]): Q.Promise<string[]> {
+
+    }
+
+    private removeInvalidSystem(requestedPlatforms: string[]): string[] {
+
+    }
+
+    private removeNotAdded(requestedPlatforms: string[]): string[] {
+
+    }
 }
 
 export = InstallReqs;

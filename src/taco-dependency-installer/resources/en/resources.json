@@ -1,6 +1,8 @@
 {
     "UnsupportedDependenciesHeader": "The installation of the following dependencies is not supported, please install them manually:",
     "_UnsupportedDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that can't be installed by taco-cli.",
+    "UnsupportedMoreInfo": "To install, please see <link>{0}</link>",
+    "_UnsupportedMoreInfo.comment": "Message displayed for dependencies that are unsupported, but for which we want to provide additional info. {0} is a URL to a install guide / resource.",
     "DependencyLabel": "<br/>Dependency: <highlight>{0}</highlight>",
     "_DependencyLabel.comment": "Label for the name of a dependency. {0} is the name of the dependency.",
     "DependencyVersion": "Version: {0}",

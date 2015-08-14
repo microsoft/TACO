@@ -58,6 +58,10 @@ module TacoDependencyInstaller {
     export class DependencyInstaller {
         private static InstallConfigFileName: string = "installConfig.json";
         private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
+        private static KnownUnsupported: { [id: string]: string } = {   // Some dependencies are unsupported, but we still give a useful link to help the user install them
+            "xcode": "https://itunes.apple.com/us/app/xcode/id497799835?mt=12",
+            "visualstudio": "http://go.microsoft.com/fwlink/?LinkId=620937"
+        }
 
         private installConfigFilePath: string;
         private dependenciesDataWrapper: DependencyDataWrapper;
@@ -252,6 +256,11 @@ module TacoDependencyInstaller {
 
                     if (version) {
                         logger.log(resources.getString("DependencyVersion", version));
+                    }
+
+                    // If this is a known unsupported dependency for which we have additional info, print it here
+                    if (DependencyInstaller.KnownUnsupported[value.id]) {
+                        logger.log(resources.getString("UnsupportedMoreInfo", DependencyInstaller.KnownUnsupported[value.id]));
                     }
                 });
             }
