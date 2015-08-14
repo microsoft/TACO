@@ -1,14 +1,10 @@
 {
     "name": "taco-kits",
     "author": {
-        "name": "Microsoft Corp."
+        "name": "Microsoft Corporation"
     },
     "description": "Validated Kits metadata for taco CLI",
-    "version": "0.0.2",
-    "repository": {
-        "type": "git",
-        "url": "https://xxxxxgithub.com/Microsoft/taco-cli.git"
-    },
+    "version": "1.0.0",
     "main": "tacoKits.js",
     "scripts": {
         "test": "mocha"
