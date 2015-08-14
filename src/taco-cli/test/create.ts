@@ -96,17 +96,16 @@ describe("taco create", function (): void {
     var failureScenarios: IScenarioList = {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
         2: util.format("%s --template unknown", getProjectPath(failurePrefix, 2)),
-        3: util.format("%s --kit 4.3.0-Kit --template typescript", getProjectPath(failurePrefix, 3)),
-        4: util.format("%s --kit 5.1.1-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 4), copyFromPath),
-        5: util.format("%s --kit 5.1.1-Kit --cli 4.2.0", getProjectPath(failurePrefix, 5)),
-        6: util.format("%s --cli 4.3.0 --template typescript", getProjectPath(failurePrefix, 6)),
-        7: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 7), testAppId, testAppName),
-        8: util.format("%s --kit 5.1.1-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 8)),
-        9: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 9)),
-        10: util.format("%s 42", getProjectPath(failurePrefix, 10)),
-        11: "",
-        12: util.format("%s/invalid/project/path", getProjectPath(failurePrefix, 12)),
-        13: util.format("%s", getProjectPath(failurePrefix, 13)),
+        3: util.format("%s --kit 5.1.1-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 3), copyFromPath),
+        4: util.format("%s --kit 5.1.1-Kit --cli 4.2.0", getProjectPath(failurePrefix, 4)),
+        5: util.format("%s --cli 4.3.0 --template typescript", getProjectPath(failurePrefix, 5)),
+        6: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 6), testAppId, testAppName),
+        7: util.format("%s --kit 5.1.1-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 7)),
+        8: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 8)),
+        9: util.format("%s 42", getProjectPath(failurePrefix, 9)),
+        10: "",
+        11: util.format("%s/invalid/project/path", getProjectPath(failurePrefix, 11)),
+        12: util.format("%s", getProjectPath(failurePrefix, 12)),
     };
 
     function getProjectPath(suitePrefix: string, scenario: number): string {
@@ -338,37 +337,30 @@ describe("taco create", function (): void {
             runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidTemplate).then(done, done);
         });
 
-        it("Failure scenario 3 [path, template (typescript, with a deprecated kit that doesn't have a typescript template)]", function (done: MochaDone): void {
-            // Similar to failure scenario 2 (create command should fail when a template is not found), but for typescript templates we have a specific message
-            var scenario: number = 3;
-
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionTypescriptNotSupported).then(done, done);
-        });
-
-        it("Failure scenario 4 [path, kit, template, copy-from]", function (done: MochaDone): void {
+        it("Failure scenario 3 [path, kit, template, copy-from]", function (done: MochaDone): void {
             // Create command should fail when both --template and --copy-from are specified
-            var scenario: number = 4;
+            var scenario: number = 3;
 
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotTemplateIfCustomWww).then(done, done);
         });
 
-        it("Failure scenario 5 [path, kit, cli]", function (done: MochaDone): void {
+        it("Failure scenario 4 [path, kit, cli]", function (done: MochaDone): void {
             // Create command should fail when both --kit and --cli are specified
-            var scenario: number = 5;
+            var scenario: number = 4;
 
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCliAndKit).then(done, done);
         });
 
-        it("Failure scenario 6 [path, cli, template]", function (done: MochaDone): void {
+        it("Failure scenario 5 [path, cli, template]", function (done: MochaDone): void {
             // Create command should fail when both --cli and --template are specified
-            var scenario: number = 6;
+            var scenario: number = 5;
 
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCli).then(done, done);
         });
 
-        it("Failure scenario 7 [path (value is an existing project)]", function (done: MochaDone): void {
+        it("Failure scenario 6 [path (value is an existing project)]", function (done: MochaDone): void {
             // Create command should fail when the specified path is a non-empty existing folder (Cordova error)
-            var scenario: number = 7;
+            var scenario: number = 6;
             var copyDest: string = getProjectPath(failurePrefix, scenario);
 
             wrench.mkdirSyncRecursive(copyDest, 511); // 511 decimal is 0777 octal
@@ -379,44 +371,44 @@ describe("taco create", function (): void {
                 .then(done, done);
         });
 
-        it("Failure scenario 8 [path, copy-from (unknown path)]", function (done: MochaDone): void {
+        it("Failure scenario 7 [path, copy-from (unknown path)]", function (done: MochaDone): void {
             // Create command should fail when --copy-from is specified with a path that doesn't exist (Cordova error)
-            var scenario: number = 8;
+            var scenario: number = 7;
 
             runFailureScenario(scenario).then(done, done);
         });
 
-        it("Failure scenario 9 [path, cli (unknown value)]", function (done: MochaDone): void {
+        it("Failure scenario 8 [path, cli (unknown value)]", function (done: MochaDone): void {
             // Create command should fail when specified cli version doesn't exist
-            var scenario: number = 9;
+            var scenario: number = 8;
 
             runFailureScenario<TacoUtilsErrorCodes>(scenario, TacoUtilsErrorCodes.PackageLoaderInvalidPackageVersionSpecifier).then(done, done);
         });
 
-        it("Failure scenario 10 [path, appId (invalid value)]", function (done: MochaDone): void {
+        it("Failure scenario 9[path, appId (invalid value)]", function (done: MochaDone): void {
             // Create command should fail when an invalid app ID is specified (Cordova error)
-            var scenario: number = 10;
+            var scenario: number = 9;
 
             runFailureScenario(scenario).then(done, done);
         });
 
-        it("Failure scenario 11 [(NO path)]", function (done: MochaDone): void {
+        it("Failure scenario 10 [(NO path)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user doesn't provide a path to 'taco create'
-            var scenario: number = 11;
+            var scenario: number = 10;
 
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNoPath).then(done, done);
         });
 
-        it("Failure scenario 12 [path (invalid)]", function (done: MochaDone): void {
+        it("Failure scenario 11 [path (invalid)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user provides an invalid path to 'taco create'
-            var scenario: number = 12;
+            var scenario: number = 11;
 
             runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateInvalidPath).then(done, done);
         });
 
-        it("Failure scenario 13 [path (existing)]", function (done: MochaDone): void {
+        it("Failure scenario 12 [path (existing)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user provides an existing, non-empty path to 'taco create'
-            var scenario: number = 13;
+            var scenario: number = 12;
             var projectPath: string = getProjectPath(failurePrefix, scenario);
 
             wrench.mkdirSyncRecursive(path.join(projectPath, "some", "nested", "folders"), 511); // 511 decimal is 0777 octal
