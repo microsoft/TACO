@@ -230,13 +230,13 @@ class TemplateManager {
         }
     }
 
-    private gitPull(locaRepo: string): Q.Promise<string> {
+    private gitPull(localRepo: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command: string = "git";
         var args: string[] = [
             "pull"
         ];
-        var options: childProcess.IExecOptions = { cwd: locaRepo, stdio: "inherit" };
+        var options: childProcess.IExecOptions = { cwd: localRepo, stdio: "inherit" };
 
         childProcess.spawn(command, args, options)
             .on("error", function (err: any): void {
@@ -251,7 +251,7 @@ class TemplateManager {
                 if (code) {
                     deferred.reject(code);
                 } else {
-                    deferred.resolve(locaRepo);
+                    deferred.resolve(localRepo);
                 }
             });
 
