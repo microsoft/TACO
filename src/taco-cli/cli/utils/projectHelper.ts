@@ -28,7 +28,7 @@ import wrench = require ("wrench");
 class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
-    private static ProjectScriptsDir: string = "scripts"
+    private static ProjectScriptsDir: string = "scripts";
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
@@ -250,6 +250,7 @@ class ProjectHelper {
                 return path.extname(file) === ".ts";
             });
         }
+
         return tsFiles.length > 0;
     }
 }

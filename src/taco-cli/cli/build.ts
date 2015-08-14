@@ -164,9 +164,10 @@ class Build extends commands.TacoCommandBase {
     }
 
     private static build(commandData: commands.ICommandData): Q.Promise<any> {
-        if(projectHelper.isTypeScriptProject()) {
+        if (projectHelper.isTypeScriptProject()) {
             logger.log(resources.getString("CommandCreateInstallGulp"));
         }
+
         return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
             return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
                 return soFar.then(function (): Q.Promise<any> {
