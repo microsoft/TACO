@@ -20,6 +20,7 @@ import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import wrench = require ("wrench");
 
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
@@ -27,7 +28,7 @@ import tacoUtility = require ("taco-utils");
 class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
-
+    private static ProjectScriptsDir: string = "scripts";
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
@@ -236,6 +237,21 @@ class ProjectHelper {
             deferred.resolve({});
         });
         return deferred.promise;
+    }
+
+    /**
+     *  public helper that resolves with a true value if the current project is a TACO TS project
+     */
+    public static isTypeScriptProject(): boolean {   
+        var projectScriptsPath: string = path.resolve(ProjectHelper.getProjectRoot(), ProjectHelper.ProjectScriptsDir);
+        var tsFiles: string[] = [];
+        if (fs.existsSync(projectScriptsPath)) {
+            tsFiles = wrench.readdirSyncRecursive(projectScriptsPath).filter(function (file: string): boolean {
+                return path.extname(file) === ".ts";
+            });
+        }
+
+        return tsFiles.length > 0;
     }
 }
 
