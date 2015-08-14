@@ -102,6 +102,7 @@ class Kit extends commands.TacoCommandBase {
     public static promptAndUpdateProject(updateProject: boolean, cliVersion: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
         platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): Q.Promise<any> {
         if (updateProject) {
+            logger.logLine();
             return Kit.promptUser(resources.getString("CommandKitSelectProjectUpdatePrompt"))
             .then(function (answer: string): Q.Promise<any> {
                 if (answer && answer.length > 0 ) {
@@ -498,7 +499,7 @@ class Kit extends commands.TacoCommandBase {
                 Kit.printUpdateInfo(indent, installedPluginVersions, pluginVersionUpdates, ProjectComponentType.Plugin);
             }
             
-            logger.logWarning(resources.getString("CommandKitSelectProjectUpdateWarning"));
+            logger.log(resources.getString("CommandKitSelectProjectUpdateWarning"));
             return true;
         }
 
@@ -563,6 +564,20 @@ class Kit extends commands.TacoCommandBase {
     /**
      * Changes the current kit used for the project at {projectPath} to {kitId}
      */
+    private static printListOfComponentsSkippedForUpdate(components: string[]): void {
+        if (components && components.length > 0) {
+            logger.logLine();
+            logger.log(resources.getString("CommandKitSelectNoUpdateListHeader"));
+            logger.logLine();
+            components.forEach(function (component: string): void {
+               logger.logWarning(LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent) + component);
+            });
+        }
+    }
+
+    /**
+     * Changes the current kit used for the project at {projectPath} to {kitId}
+     */
     private static selectKit(projectPath: string, projectInfo: projectHelper.IProjectInfo, kitId: string): Q.Promise<any> {
         var installedPlatformVersions: IDictionary<string>;
         var installedPluginVersions: IDictionary<string>;
@@ -584,6 +599,10 @@ class Kit extends commands.TacoCommandBase {
                 pluginVersionUpdates = pluginVersions;
                 return Kit.printKitProjectUpdateInfo(currentCliVersion, kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
             }).then(function (projectRequiresUpdate: boolean): Q.Promise<any> {
+                if (projectRequiresUpdate) {
+                    Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
+                }
+                
                 return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
             });
         });
@@ -596,9 +615,13 @@ class Kit extends commands.TacoCommandBase {
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, false, cli)])
         .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], globalCordovaVersion: string): Q.Promise<any> {
             var currentCliVersion: string = (projectInfo.cordovaCliVersion.length === 0) ? globalCordovaVersion : projectInfo.cordovaCliVersion;
-            var pluginToUpdate = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);
-            var projectRequiresUpdate: boolean = Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginToUpdate);
-            return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, platformVersions, pluginToUpdate);
+            var pluginsToUpdate = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);
+            var projectRequiresUpdate: boolean = Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginsToUpdate);
+            if (projectRequiresUpdate) {
+                Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
+            }
+
+            return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, platformVersions, pluginsToUpdate);
         });
     }
 
