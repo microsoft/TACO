@@ -31,7 +31,7 @@
     "_PackageLoaderNpmInstallFailedWithCode.comment": "Message reported when npm install fails with an exit code.",
     "PackageLoaderNpmInstallFailedEaccess": "Error installing {0} via npm. Exit Code: {1}. Check permissions of npm cache. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=613751.",
     "_PackageLoaderNpmInstallFailedEaccess.comment": "Message reported when npm install fails due to permissions",
-    "PackageLoaderNpmInstallFailedConsoleMessage": "For more information please refer to http://aka.ms/tacocliknownissues",
+    "PackageLoaderNpmInstallFailedConsoleMessage": "For more information please refer to http://aka.ms/TacoCliKnownIssues",
     "_PackageLoaderNpmInstallFailedConsoleMessage.comment": "Message printed to the console when npm install fails",
     "PackageLoaderNpmUpdateErrorMessage": "Error updating {0} via npm. See output for details.",
     "_PackageLoaderNpmUpdateErrorMessage.comment": "Message reported when npm update returns a non-zero exit code.",
