@@ -67,7 +67,7 @@ class Taco {
 
                     // If we have a loglevel of diagnostic, and there is a stack, replace the error message with the stack (the stack contains the error message already)
                     if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && reason.stack) {
-                        toPrint = reason.stack
+                        toPrint = reason.stack;
                     }
 
                     logger.logError(toPrint);
