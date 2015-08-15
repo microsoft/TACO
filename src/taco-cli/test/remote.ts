@@ -45,12 +45,12 @@ describe("taco remote", function (): void {
         }
     });
 
-    after(function (): void {
+    after(function (done: MochaDone): void {
         if (fs.existsSync(tacoSettingsFile)) {
             fs.unlinkSync(tacoSettingsFile);
         }
 
-        rimraf(testHome, function (err: Error): void { /* ignored */ }); // Not sync, and ignore errors
+        rimraf(testHome, function (err: Error): void { done(); }); // ignore errors
     });
 
     function makeICommandData(args: string[]): TacoUtility.Commands.ICommandData {
