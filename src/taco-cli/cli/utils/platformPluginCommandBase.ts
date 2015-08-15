@@ -210,7 +210,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     }
 
     /**
-     * Overridden implementation for returning telemetry properties that are specific to create
+     * Overridden implementation for returning telemetry properties that are specific to plugin/platform
      */
     public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
