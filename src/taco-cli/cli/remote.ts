@@ -23,16 +23,19 @@ import util = require ("util");
 import CordovaHelper = require ("./utils/cordovaHelper");
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
 import HelpModule = require ("./help");
+import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
-
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import loggerHelper = tacoUtility.LoggerHelper;
 import UtilHelper = tacoUtility.UtilHelper;
+
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;
@@ -334,6 +337,20 @@ class Remote extends commands.TacoCommandBase {
         remoteData.original.unshift("remote");
         remoteData.remain.unshift("remote");
         return new HelpModule().run(remoteData);
+    }
+
+    /**
+     * Overridden implementation for returning telemetry properties that are specific to "taco remote"
+     */
+    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        var self = this;
+        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+            var numericSuffix: number = 1;
+            telemetryProperties["subCommand"] = { value : self.data.remain[0], isPii: false };
+
+            return Q.resolve(telemetryProperties);
+        });
     }
 }
 

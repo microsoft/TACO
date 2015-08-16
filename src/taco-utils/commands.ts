@@ -98,7 +98,7 @@ module TacoUtility {
                 return Q(<ICommandTelemetryProperties>{});
             }
 
-            private getSubCommand(options: ICommandData): ICommand {
+            public getSubCommand(options: ICommandData): ICommand {
                 for (var i = 0; i < this.subcommands.length; ++i) {
                     var subCommand = this.subcommands[i];
                     if (subCommand.canHandleArgs(options)) {
