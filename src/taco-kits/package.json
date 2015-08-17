@@ -1,21 +1,22 @@
 {
-    "name": "taco-kits",
-    "author": {
-        "name": "Microsoft Corporation"
-    },
-    "description": "Validated Kits metadata for taco CLI",
-    "version": "1.0.0",
-    "main": "tacoKits.js",
-    "scripts": {
-        "test": "mocha"
-    },
-    "dependencies": {
-        "q": "^1.1.2",
-        "taco-utils": "file:../taco-utils"
-    },
-    "devDependencies": {
-        "typescript": "1.4.1",
-        "mocha": "2.0.1",
-        "should": "4.3.0"
-    }
+  "name": "taco-kits",
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "description": "Validated Kits metadata for taco CLI",
+  "version": "1.0.0",
+  "main": "tacoKits.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "q": "^1.1.2",
+    "taco-utils": "file:../taco-utils"
+  },
+  "devDependencies": {
+    "typescript": "1.4.1",
+    "mocha": "2.0.1",
+    "should": "4.3.0"
+  },
+  "license": "MIT"
 }
