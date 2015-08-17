@@ -155,27 +155,30 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             .then(function (): Q.Promise<any> {
             self.printStatusMessage(self.cordovaCommandParams.targets, self.cordovaCommandParams.subCommand, CommandOperationStatus.Success);
             return Q({});
+        })
+            .then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return self.generateTelemetryProperties();
         });
     }
 
     /**
      * Overridden implementation for returning telemetry properties that are specific to plugin/platform
      */
-    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        var telemetryProperties: ICommandTelemetryProperties = {};
+    private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self = this;
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+            self.telemetryProperties = telemetryProperties;
             var numericSuffix: number = 1;
-            telemetryProperties["subCommand"] = { value: self.cordovaCommandParams.subCommand, isPii: false };
+            self.telemetryProperties["subCommand"] = { value: self.cordovaCommandParams.subCommand, isPii: false };
             self.cordovaCommandParams.targets.forEach(function (target: string): void {
-                telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
+                self.telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
                 numericSuffix++;
             });
 
-            return Q.resolve(telemetryProperties);
+            return Q.resolve(self.telemetryProperties);
         });
     }
-    
+
     private operationRequiresTargets(subCommand: string): boolean {
         return (subCommand === "add" || subCommand === "remove" || subCommand === "update");
     }

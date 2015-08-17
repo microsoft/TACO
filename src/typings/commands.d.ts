@@ -54,9 +54,11 @@ declare module TacoUtility {
 
         class TacoCommandBase implements ICommand {
             public name: string;
+            public executedSubcommand: ICommand;
             public subcommands: ICommand[];
             public info: ICommandInfo;
             public data: ICommandData;
+            public telemetryProperties: ICommandTelemetryProperties;
 
             /**
              * Abstract method to be implemented by derived class.

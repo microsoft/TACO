@@ -94,6 +94,8 @@ class Create extends commands.TacoCommandBase {
                 self.finalize(templateDisplayName);
 
                 return Q.resolve({});
+            }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+                return self.generateTelemetryProperties();
             });
     }
 
@@ -107,22 +109,21 @@ class Create extends commands.TacoCommandBase {
     /**
      * Overridden implementation for returning telemetry properties that are specific to create
      */
-    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        var telemetryProperties: ICommandTelemetryProperties = {};
-        telemetryProperties["cliVersion"] = { value: require("../package.json").version, isPii: false };
+    private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        this.telemetryProperties["cliVersion"] = { value: require("../package.json").version, isPii: false };
         var self = this;
         return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
             if (self.isKitProject()) {
-                telemetryProperties["kit"] = { value: self.commandParameters.data.options["kit"] || defaultKitId, isPii: false };
-                telemetryProperties["template"] = { value: self.commandParameters.data.options["template"] || "blank", isPii: false };
+                self.telemetryProperties["kit"] = { value: self.commandParameters.data.options["kit"] || defaultKitId, isPii: false };
+                self.telemetryProperties["template"] = { value: self.commandParameters.data.options["template"] || "blank", isPii: false };
             } else {
-                telemetryProperties["cli"] = { value: self.commandParameters.data.options["cli"], isPii: false };
+                self.telemetryProperties["cli"] = { value: self.commandParameters.data.options["cli"], isPii: false };
             }
 
-            return Q.resolve(telemetryProperties);
+            return Q.resolve(self.telemetryProperties);
         });
     }
-    
+
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, Create.ShortHands, args.original, 0);
         var cordovaParams: Cordova.ICordovaCreateParameters = {

@@ -59,7 +59,7 @@ module TacoUtility {
             public subcommands: ICommand[];
             public info: ICommandInfo;
             public data: ICommandData;
-            public telemetryProperties: ICommandTelemetryProperties;
+            public telemetryProperties: ICommandTelemetryProperties = {};
 
             /**
              * Abstract method to be implemented by derived class.
@@ -84,7 +84,7 @@ module TacoUtility {
             public run(data: ICommandData): Q.Promise<any> {
                 this.data = this.parseArgs(data.original);
 
-                // Determine which build subcommand we are doing
+                // Determine which subcommand we are executing
                 this.executedSubcommand = this.getSubCommand(this.data);
                 if (this.executedSubcommand) {
                     return this.executedSubcommand.run(this.data).then(function (telemetryProperties: ICommandTelemetryProperties): void {
@@ -99,7 +99,7 @@ module TacoUtility {
              * Default implementation for returning telemetry properties.
              */
             public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-                return Q(<ICommandTelemetryProperties>{}); 
+                return Q.resolve(this.telemetryProperties); 
             }
 
             private getSubCommand(options: ICommandData): ICommand {
