@@ -1,7 +1,7 @@
 ﻿{
   "taco-kits": {
     "packageName": "taco-kits",
-    "packageId": "taco-kits@latest",
+    "packageId": "taco-kits",
     "expirationIntervalInHours": 4,
     "dev":  true
   }
