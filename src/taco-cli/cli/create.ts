@@ -59,11 +59,11 @@ class Create extends commands.TacoCommandBase {
         "copy-from": String,
         "link-to": String
     };
+    private static DefaultAppId: string = "io.cordova.hellocordova";
+    private static DefaultAppName: string = "HelloTaco";
     private static ShortHands: Nopt.ShortFlags = {
         src: "--copy-from"
     };
-    private static DefaultAppId: string = "io.cordova.hellocordova";
-    private static DefaultAppName: string = "HelloTaco";
 
     private commandParameters: ICreateParameters;
 
@@ -104,10 +104,25 @@ class Create extends commands.TacoCommandBase {
         return true;
     }
 
-    private isKitProject(): boolean {
-        return !this.commandParameters.data.options["cli"];
-    }
+    /**
+     * Overridden implementation for returning telemetry properties that are specific to create
+     */
+    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        telemetryProperties["cliVersion"] = { value: require("../package.json").version, isPii: false };
+        var self = this;
+        return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
+            if (self.isKitProject()) {
+                telemetryProperties["kit"] = { value: self.commandParameters.data.options["kit"] || defaultKitId, isPii: false };
+                telemetryProperties["template"] = { value: self.commandParameters.data.options["template"] || "blank", isPii: false };
+            } else {
+                telemetryProperties["cli"] = { value: self.commandParameters.data.options["cli"], isPii: false };
+            }
 
+            return Q.resolve(telemetryProperties);
+        });
+    }
+    
     private parseArguments(args: commands.ICommandData): void {
         var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, Create.ShortHands, args.original, 0);
         var cordovaParams: Cordova.ICordovaCreateParameters = {
@@ -291,25 +306,9 @@ class Create extends commands.TacoCommandBase {
             "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
     }
 
-    /**
-     * Overridden implementation for returning telemetry properties that are specific to create
-     */
-    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        var telemetryProperties: ICommandTelemetryProperties = {};
-        telemetryProperties["cliVersion"] = { value: require("../../package.json").version, isPii: false };
-        var self = this;
-        return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
-            if (self.isKitProject()) {
-                telemetryProperties["kit"] = { value: self.commandParameters.data.options["kit"] || defaultKitId, isPii: false };
-                telemetryProperties["template"] = { value: self.commandParameters.data.options["template"] || "blank", isPii: false };
-            } else {
-                telemetryProperties["cli"] = { value: self.commandParameters.data.options["cli"], isPii: false };
-            }
-
-            return Q.resolve(telemetryProperties);
-        });
+    private isKitProject(): boolean {
+        return !this.commandParameters.data.options["cli"];
     }
-
 }
 
 export = Create;

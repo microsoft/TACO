@@ -268,6 +268,7 @@ class ProjectHelper {
             return Q.resolve(projectTelemetryProperties);
         });
     }
+
     /**
      *  public helper that resolves with a true value if the current project is a TACO TS project
      */
