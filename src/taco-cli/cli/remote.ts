@@ -102,42 +102,18 @@ class Remote extends commands.TacoCommandBase {
 
         return parsedOptions;
     }
-
+    
     /**
      * Overridden implementation for returning telemetry properties that are specific to "taco remote"
      */
     public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        var telemetryProperties: ICommandTelemetryProperties = {};
+        var telemetryProperties: ICommandTelemetryProperties = this.telemetryProperties;
         var self = this;
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = { value: self.data.remain[0], isPii: false };
 
             return Q.resolve(telemetryProperties);
-        });
-    }
-
-    private static findRemoteMountPath(hostPortAndCert: { host: string; port: number; certName?: string; secure: boolean }): Q.Promise<string> {
-        var mountDiscoveryUrl = util.format("http%s://%s:%d/modules/%s", hostPortAndCert.certName ? "s" : "", hostPortAndCert.host, hostPortAndCert.port, "taco-remote");
-        return ConnectionSecurityHelper.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
-            var options: request.Options = {
-                url: mountDiscoveryUrl,
-                agent: agent,
-                timeout: Remote.HttpTimeoutMS
-            };
-
-            var deferred = Q.defer<string>();
-            request.get(options, function (error: any, response: any, body: any): void {
-                if (error) {
-                    deferred.reject(Remote.getFriendlyHttpError(error, hostPortAndCert.host, hostPortAndCert.port, mountDiscoveryUrl, !!hostPortAndCert.certName));
-                } else if (response.statusCode !== 200) {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandRemoteCantFindRemoteMount, mountDiscoveryUrl));
-                } else {
-                    deferred.resolve(body);
-                }
-            });
-
-            return deferred.promise;
         });
     }
 
@@ -166,6 +142,79 @@ class Remote extends commands.TacoCommandBase {
             telemetryProperties["platform"] = { value: platform, isPii: false };
             return Q.resolve(telemetryProperties);
         });
+    }
+
+    private static list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+        var deferred = Q.defer<ICommandTelemetryProperties>();
+        Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+            // No settings or the settings were corrupted: start from scratch
+            return {};
+        }).then(function (settings: Settings.ISettings): void {
+            var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): INameDescription {
+                    var remote = settings.remotePlatforms[platform];
+                    var url = util.format("[%s] %s://%s:%d/%s",
+                        remote.secure ? resources.getString("CommandRemoteListSecured") : resources.getString("CommandRemoteListNotSecured"),
+                        remote.secure ? "https" : "http",
+                        remote.host,
+                        remote.port,
+                        remote.mountPoint);
+                    return { name: platform, description: url };
+            });
+            
+            if (platforms && platforms.length > 0) {
+                logger.log(resources.getString("CommandRemoteListPrelude"));
+                logger.logLine();
+                var header = { name: resources.getString("CommandRemoteListPlatformHeader"), description: resources.getString("CommandRemoteListDescriptionHeader") };
+                loggerHelper.logNameDescriptionTableWithHeader(header, platforms, null, null, " ");
+            } else {
+                logger.log(resources.getString("CommandRemoteListNoPlatforms"));
+            }
+        }).then(function (): void {
+            // Collect telemetry properties
+            var telemetryProperties: ICommandTelemetryProperties = {};
+            telemetryProperties["subCommand"] = { value: "list", isPii: false };
+            deferred.resolve(telemetryProperties);
+        }); 
+        return deferred.promise;
+    }
+
+    private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+        var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
+        var remoteInfo: Settings.IRemoteConnectionInfo;
+        var deferred = Q.defer<ICommandTelemetryProperties>();
+        CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): Q.Promise<any> {
+            if (supportedPlatforms && !(platform in supportedPlatforms)) {
+                throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
+            }
+
+            logger.log(resources.getString("CommandRemoteHeader"));
+
+            return Remote.queryUserForRemoteConfig()
+                .then(Remote.acquireCertificateIfRequired)
+                .then(Remote.constructRemotePlatformSettings)
+                .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
+                .then(function (): void {
+                    logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
+
+                    // Print the onboarding experience
+                    logger.log(resources.getString("OnboardingExperienceTitle"));
+                    loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
+                        "HowToUseCommandBuildPlatform",
+                        "HowToUseCommandEmulatePlatform",
+                        "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
+
+                    ["",
+                        "HowToUseCommandHelp",
+                        "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
+             });
+        }).then(function (): void {
+            // Collect telemetry properties
+            var telemetryProperties: ICommandTelemetryProperties = {};
+            telemetryProperties["platform"] = { value: platform, isPii: false };
+            telemetryProperties["isSecure"] = { value: remoteInfo.secure, isPii: false };
+            deferred.resolve(telemetryProperties);
+        });
+        return deferred.promise;
     }
 
     private static queryUserForRemoteConfig(): Q.Promise<{ host: string; port: number; pin: number }> {
@@ -246,43 +295,28 @@ class Remote extends commands.TacoCommandBase {
         return Q({ host: hostPortAndPin.host, port: hostPortAndPin.port, secure: false });
     }
 
-    private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
-        var remoteInfo: Settings.IRemoteConnectionInfo;
-        var deferred = Q.defer<ICommandTelemetryProperties>();
-        CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): Q.Promise<any> {
-            if (supportedPlatforms && !(platform in supportedPlatforms)) {
-                throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
-            }
+    private static findRemoteMountPath(hostPortAndCert: { host: string; port: number; certName?: string; secure: boolean }): Q.Promise<string> {
+        var mountDiscoveryUrl = util.format("http%s://%s:%d/modules/%s", hostPortAndCert.certName ? "s" : "", hostPortAndCert.host, hostPortAndCert.port, "taco-remote");
+        return ConnectionSecurityHelper.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
+            var options: request.Options = {
+                url: mountDiscoveryUrl,
+                agent: agent,
+                timeout: Remote.HttpTimeoutMS
+            };
 
-            logger.log(resources.getString("CommandRemoteHeader"));
+            var deferred = Q.defer<string>();
+            request.get(options, function (error: any, response: any, body: any): void {
+                if (error) {
+                    deferred.reject(Remote.getFriendlyHttpError(error, hostPortAndCert.host, hostPortAndCert.port, mountDiscoveryUrl, !!hostPortAndCert.certName));
+                } else if (response.statusCode !== 200) {
+                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandRemoteCantFindRemoteMount, mountDiscoveryUrl));
+                } else {
+                    deferred.resolve(body);
+                }
+            });
 
-            return Remote.queryUserForRemoteConfig()
-                .then(Remote.acquireCertificateIfRequired)
-                .then(Remote.constructRemotePlatformSettings)
-                .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
-                .then(function (): void {
-                    logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
-
-                    // Print the onboarding experience
-                    logger.log(resources.getString("OnboardingExperienceTitle"));
-                    loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
-                        "HowToUseCommandBuildPlatform",
-                        "HowToUseCommandEmulatePlatform",
-                        "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
-
-                    ["",
-                        "HowToUseCommandHelp",
-                        "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
-             });
-        }).then(function (): void {
-            // Collect telemetry properties
-            var telemetryProperties: ICommandTelemetryProperties = {};
-            telemetryProperties["platform"] = { value: platform, isPii: false };
-            telemetryProperties["isSecure"] = { value: remoteInfo.secure, isPii: false };
-            deferred.resolve(telemetryProperties);
+            return deferred.promise;
         });
-        return deferred.promise;
     }
 
     private static saveRemotePlatformSettings(platform: string, data: Settings.IRemoteConnectionInfo): Q.Promise<any> {
@@ -339,40 +373,6 @@ class Remote extends commands.TacoCommandBase {
         return new HelpModule().run(remoteData).then(function (): Q.Promise<ICommandTelemetryProperties> {
             return Q(<ICommandTelemetryProperties>{});
         });
-    }
-
-    private static list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        var deferred = Q.defer<ICommandTelemetryProperties>();
-        Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
-            // No settings or the settings were corrupted: start from scratch
-            return {};
-        }).then(function (settings: Settings.ISettings): void {
-            var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): INameDescription {
-                    var remote = settings.remotePlatforms[platform];
-                    var url = util.format("[%s] %s://%s:%d/%s",
-                        remote.secure ? resources.getString("CommandRemoteListSecured") : resources.getString("CommandRemoteListNotSecured"),
-                        remote.secure ? "https" : "http",
-                        remote.host,
-                        remote.port,
-                        remote.mountPoint);
-                    return { name: platform, description: url };
-            });
-            
-            if (platforms && platforms.length > 0) {
-                logger.log(resources.getString("CommandRemoteListPrelude"));
-                logger.logLine();
-                var header = { name: resources.getString("CommandRemoteListPlatformHeader"), description: resources.getString("CommandRemoteListDescriptionHeader") };
-                loggerHelper.logNameDescriptionTableWithHeader(header, platforms, null, null, " ");
-            } else {
-                logger.log(resources.getString("CommandRemoteListNoPlatforms"));
-            }
-        }).then(function (): void {
-            // Collect telemetry properties
-            var telemetryProperties: ICommandTelemetryProperties = {};
-            telemetryProperties["subCommand"] = { value: "list", isPii: false };
-            deferred.resolve(telemetryProperties);
-        }); 
-        return deferred.promise;
     }
 }
 

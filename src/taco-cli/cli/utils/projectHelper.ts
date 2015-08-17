@@ -10,7 +10,6 @@
 /// <reference path="../../../typings/Q.d.ts" />
 
 import child_process = require ("child_process");
-import glob = require ("glob");
 import Q = require ("q");
 import os = require ("os");
 import path = require ("path");
@@ -34,7 +33,6 @@ class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
     private static ProjectScriptsDir: string = "scripts";
-
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  

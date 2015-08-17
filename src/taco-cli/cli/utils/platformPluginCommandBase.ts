@@ -86,21 +86,11 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     }
 
     /**
-     * Overridden implementation for returning telemetry properties that are specific to plugin/platform
+     * Abstract method to be implemented by the derived class.
+     * Checks if the component has a version specification in config.xml of the cordova project
      */
-    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        var telemetryProperties: ICommandTelemetryProperties = {};
-        var self = this;
-        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
-            var numericSuffix: number = 1;
-            telemetryProperties["subCommand"] = { value: self.cordovaCommandParams.subCommand, isPii: false };
-            self.cordovaCommandParams.targets.forEach(function (target: string): void {
-                telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
-                numericSuffix++;
-            });
-
-            return Q.resolve(telemetryProperties);
-        });
+    public configXmlHasVersionOverride(componentName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
+        throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
     /**
@@ -169,13 +159,23 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     }
 
     /**
-     * Abstract method to be implemented by the derived class.
-     * Checks if the component has a version specification in config.xml of the cordova project
+     * Overridden implementation for returning telemetry properties that are specific to plugin/platform
      */
-    public configXmlHasVersionOverride(componentName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
-        throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
-    }
+    public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        var self = this;
+        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+            var numericSuffix: number = 1;
+            telemetryProperties["subCommand"] = { value: self.cordovaCommandParams.subCommand, isPii: false };
+            self.cordovaCommandParams.targets.forEach(function (target: string): void {
+                telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
+                numericSuffix++;
+            });
 
+            return Q.resolve(telemetryProperties);
+        });
+    }
+    
     private operationRequiresTargets(subCommand: string): boolean {
         return (subCommand === "add" || subCommand === "remove" || subCommand === "update");
     }
