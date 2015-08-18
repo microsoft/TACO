@@ -23,6 +23,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import replace = require ("replace");
+import rimraf = require ("rimraf");
 import wrench = require ("wrench");
 
 import cordovaHelper = require ("./cordovaHelper");
@@ -225,13 +226,13 @@ class TemplateManager {
 
         // Set up a temporary folder for the git clone
         var tmpDir: string = os.tmpdir();
-        var testDir: string = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
+        var cloneTo: string = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
 
-        while (fs.existsSync(path.join(tmpDir, testDir))) {
-            testDir = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
+        while (fs.existsSync(path.join(tmpDir, cloneTo))) {
+            cloneTo = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
         }
 
-        var destination: string = path.join(tmpDir, testDir);
+        var destination: string = path.join(tmpDir, cloneTo);
         var command: string = "git";
         var args: string[] = [
             "clone",
