@@ -29,10 +29,11 @@ import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
-import telemetryHelper = tacoUtility.TelemetryHelper;
+
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import loggerHelper = tacoUtility.LoggerHelper;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
@@ -49,8 +50,8 @@ interface ICliSession {
  */
 class Remote extends commands.TacoCommandBase {
     private static HttpTimeoutMS: number = 20000;
-    private static ShortHands: Nopt.ShortFlags = {};
     private static KnownOptions: Nopt.CommandData = {};
+    private static ShortHands: Nopt.ShortFlags = {};
     /**
      * Mockable CLI for test purposes
      */
@@ -104,7 +105,7 @@ class Remote extends commands.TacoCommandBase {
     }
     
     /**
-     * Overridden implementation for returning telemetry properties that are specific to "taco remote"
+     * Generates the telemetry properties for the remote operation
      */
     private static generateTelemetryProperties(subCommand: string, platform?: string, isSecure?: boolean): Q.Promise<ICommandTelemetryProperties> {
         var self = this;

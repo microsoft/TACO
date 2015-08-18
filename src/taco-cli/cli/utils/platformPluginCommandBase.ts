@@ -162,7 +162,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     }
 
     /**
-     * Overridden implementation for returning telemetry properties that are specific to plugin/platform
+     * Generates the telemetry properties for the platform/plugin operation
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self = this;

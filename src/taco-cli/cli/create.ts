@@ -107,7 +107,7 @@ class Create extends commands.TacoCommandBase {
     }
 
     /**
-     * Overridden implementation for returning telemetry properties that are specific to create
+     * Generates the telemetry properties for the create operation
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
