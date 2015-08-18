@@ -417,6 +417,8 @@ class Kit extends commands.TacoCommandBase {
                 });
             });
         }, Q({}));
+
+        logger.logLine();
     }
 
     /**
@@ -477,14 +479,13 @@ class Kit extends commands.TacoCommandBase {
      */
     private static printProjectUpdateInfo(id: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
         platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): void {
-        logger.logLine();
 
         var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(installedPlatformVersions ? Object.keys(installedPlatformVersions) : null, installedPluginVersions ? Object.keys(installedPluginVersions) : null));
 
         var platformsRequireUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates);
         var pluginsRequireUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPluginVersions, pluginVersionUpdates);
         
-        if (platformsRequireUpdate || pluginVersionUpdates) {
+        if (platformsRequireUpdate || pluginsRequireUpdate) {
             if (platformVersionUpdates || pluginVersionUpdates) {
                 logger.log(resources.getString("CommandKitSelectKitPreview", id));
             } else {
@@ -619,7 +620,7 @@ class Kit extends commands.TacoCommandBase {
             var currentCliVersion: string = (projectInfo.cordovaCliVersion.length === 0) ? globalCordovaVersion : projectInfo.cordovaCliVersion;
             var pluginsToUpdate = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);
             Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginsToUpdate);
-            var projectRequiresUpdate: boolean = (platformVersions || pluginVersions) ? true : false;
+            var projectRequiresUpdate: boolean = ((platformVersions && Object.keys(platformVersions).length > 0) || (pluginVersions && Object.keys(pluginVersions).length > 0)) ? true : false;
             if (projectRequiresUpdate) {
                 Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
             }
