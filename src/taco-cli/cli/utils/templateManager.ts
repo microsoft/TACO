@@ -109,11 +109,27 @@ class TemplateManager {
             })
             .then(function (): Q.Promise<any> {
                 var filterFunc = function (itemPath: string): boolean {
-                    return TemplateManager.GitFileList.indexOf(itemPath) !== -1;
+                    // Return true if the item path is not in our list of git files to ignore
+                    return TemplateManager.GitFileList.indexOf(itemPath) === -1;
                 };
                 var options: any = { clobber: false, filter: filterFunc };
 
                 return utils.copyRecursive(templateSrcPath, cordovaParameters.projectPath, options);
+            })
+            .then(function (): Q.Promise<any> {
+                // If we extracted a git template to the temp directory, attempt to clean it here
+                var deferred: Q.Deferred<any> = Q.defer<any>();
+
+                if (path.resolve(path.dirname(templateSrcPath)) === path.resolve(os.tmpdir())) {
+                    rimraf(templateSrcPath, function (err: Error): void {
+                        // This is best effort, resolve the promise whether there was an error or not
+                        deferred.resolve({});
+                    });
+                } else {
+                    deferred.resolve({});
+                }
+
+                return deferred.promise;
             })
             .then(function (): Q.Promise<any> {
                 return TemplateManager.performTokenReplacements(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName);
