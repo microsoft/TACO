@@ -15,7 +15,6 @@ enum TacoErrorCode {
     CommandBuildTacoSettingsNotFound = 5009,
     TacoSettingsFileDoesNotExist = 5010,
     CommandBuildInvalidPlatformLocation = 5011,
-    CommandInstallCordovaTooOld = 5012,
 
     // Errors to do with Create 5450-5499
     CommandCreateInvalidPath = 5451,
@@ -82,7 +81,12 @@ enum TacoErrorCode {
     RemoteBuildStatusPollFailed = 5628,
     RemoteBuildUnsuccessful = 5629,
     RemoteBuildUnsupportedPlatform = 5630,
-    ErrorPatchCreation = 5631
+    ErrorPatchCreation = 5631,
+
+    // Errors related to install-reqs 5700-5749
+    CommandInstallCordovaTooOld = 5700,
+    CommandInstallNoPlatformsAdded = 5701,
+    CommandInstallNoPlatformsFolder = 5702
 }
 
 export = TacoErrorCode;

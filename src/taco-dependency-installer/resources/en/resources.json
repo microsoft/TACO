@@ -1,5 +1,5 @@
 {
-    "UnsupportedDependenciesHeader": "The installation of the following dependencies is not supported, please install them manually:",
+    "UnsupportedDependenciesHeader": "<warn>The following dependencies will be skipped because their installation is not supported by this installer. Please install them manually.</warn>",
     "_UnsupportedDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that can't be installed by taco-cli.",
     "UnsupportedMoreInfo": "To install, please see <link>{0}</link>",
     "_UnsupportedMoreInfo.comment": "Message displayed for dependencies that are unsupported, but for which we want to provide additional info. {0} is a URL to a install guide / resource.",
@@ -21,8 +21,10 @@
     "_InstallationProceedQuestion.comment": "Message displayed after listing the dependencies that will be installed.",
     "InstallCompletedSuccessfully": "<success>The third-party dependencies have been installed successfully.</success>",
     "_InstallCompletedSuccessfully.comment": "Message shown after all dependencies have been installed and there are no errors",
-    "NothingToInstall": "<br/>There are no dependencies to install for your current project.",
+    "NothingToInstall": "<br/><success>Dependencies are already installed for your current project.</success>",
     "_NothingToInstall.comment": "Message shown if there are no dependencies to install (everything that we support is already installed).",
+    "SomeUnsupportedNote": "<warn>Note: Some dependencies are still needed for your project, but they are not supported by this installer. Please see above for details.</warn>",
+    "_SomeUnsupportedNote.comment": "Message shown after the success message to remind users that while everything we could install is installed, they still need to manually install some dependencies.",
     "RestartCommandPrompt": "<br/><warn>Please restart the command prompt to ensure that any newly installed software can be used correctly.</warn>",
     "_RestartCommandPrompt.comment": "Message shown after running the dependency installer if at least 1 dependency was successfully installed.",
 
@@ -54,7 +56,7 @@
     "_ErrorCreatingInstallConfig.comment": "Error shown when there is an exception when attempting to create the install config file. {0} is the path where we are attempting to create the config file.",
     "NoAdminRights": "Error: The installer process could not be launched. Please provide administrator privileges when prompted, or try again from an elevated command prompt.",
     "_NoAdminRights.comment": "Error shown when the installer does not have administrator privileges.",
-    "CouldNotConnect": "Error: The installer process could not establish a connection with Taco. Please try again.",
+    "CouldNotConnect": "Error: Could not establish a connection with the installer process. Please try again.",
     "_CouldNotConnect.comment": "Error shown when the installer process fails to connect to taco-cli for logging purposes.",
     "NoPowershell": "Error: The installer process requires Powershell. Please install Powershell and add it to your Path environment variable.",
     "_NoPowershell.comment": "Error shown if the user does not have Microsoft Powershell on their system.",
