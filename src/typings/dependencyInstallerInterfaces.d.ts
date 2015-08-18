@@ -47,6 +47,19 @@ declare module DependencyInstallerInterfaces {
         [dependencyId: string]: IDependencyData;
     }
 
+    export interface IUnsupportedDependency {
+        installHelp: string;
+    }
+
+    export interface IUnsupportedDictionary {
+        [dependencyId: string]: IUnsupportedDependency;
+    }
+
+    export interface IDependencyInstallerMetadata {
+        dependencies: IDependencyDictionary;
+        unsupported: IUnsupportedDictionary;
+    }
+
     export interface IDependency {
         id: string;
         version: string;

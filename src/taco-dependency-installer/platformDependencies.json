@@ -1,181 +1,200 @@
 ﻿{
-    "androidSdk": {
-        "displayName": "Android SDK",
-        "installerPath": "./installers/androidSdkInstaller",
-        "licenseUrl": "https://developer.android.com/sdk/terms.html",
-        "prerequisites": [
-            "java"
-        ],
-        "versions": {
-            "r24.3.3": {
-                "win32": {
-                    "ia32": {
-                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-windows.zip",
-                        "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
-                        "bytes": 187480692,
-                        "installDestination": "%programfiles%/Android",
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": true,
-                            "postInstall": true
+    "dependencies": {
+        "androidSdk": {
+            "displayName": "Android SDK",
+            "installerPath": "./installers/androidSdkInstaller",
+            "licenseUrl": "https://developer.android.com/sdk/terms.html",
+            "prerequisites": [
+                "java"
+            ],
+            "versions": {
+                "r24.3.3": {
+                    "win32": {
+                        "ia32": {
+                            "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-windows.zip",
+                            "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
+                            "bytes": 187480692,
+                            "installDestination": "%programfiles%/Android",
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": true,
+                                "postInstall": true
+                            }
+                        },
+                        "x64": {
+                            "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-windows.zip",
+                            "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
+                            "bytes": 187480692,
+                            "installDestination": "%programfiles(x86)%/Android",
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": true,
+                                "postInstall": true
+                            }
                         }
                     },
-                    "x64": {
-                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-windows.zip",
-                        "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
-                        "bytes": 187480692,
-                        "installDestination": "%programfiles(x86)%/Android",
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": true,
-                            "postInstall": true
+                    "darwin": {
+                        "ia32": {
+                            "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
+                            "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
+                            "bytes": 98330824,
+                            "installDestination": "$HOME/Library/Android",
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": true,
+                                "postInstall": true
+                            }
+                        },
+                        "x64": {
+                            "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
+                            "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
+                            "bytes": 98330824,
+                            "installDestination": "$HOME/Library/Android",
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": true,
+                                "postInstall": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "androidTarget": {
+            "isImplicit": true
+        },
+        "gradle": {
+            "isImplicit": true
+        },
+        "ios-deploy": {
+            "displayName": "ios-deploy",
+            "installerPath": "./installers/iosDeployInstaller",
+            "prerequisites": [ ],
+            "versions": {
+                "latest": {
+                    "darwin": {
+                        "ia32": {
+                            "installSource": "ios-deploy",
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        },
+                        "x64": {
+                            "installSource": "ios-deploy",
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ios-sim": {
+            "displayName": "ios-sim",
+            "installerPath": "./installers/iosSimInstaller",
+            "prerequisites": [ ],
+            "versions": {
+                "latest": {
+                    "darwin": {
+                        "ia32": {
+                            "installSource": "ios-sim",
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        },
+                        "x64": {
+                            "installSource": "ios-sim",
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "java": {
+            "displayName": "Java SE Development Kit",
+            "installerPath": "./installers/javaJdkInstaller",
+            "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
+            "prerequisites": [ ],
+            "versions": {
+                "7u55": {
+                    "win32": {
+                        "ia32": {
+                            "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
+                            "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
+                            "bytes": 129674656,
+                            "installDestination": "%programfiles%/Java/jdk1.7.0_55",
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": true,
+                                "postInstall": false
+                            }
+                        },
+                        "x64": {
+                            "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
+                            "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
+                            "bytes": 129674656,
+                            "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55",
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": true,
+                                "postInstall": false
+                            }
                         }
                     }
                 },
-                "darwin": {
-                    "ia32": {
-                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
-                        "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
-                        "bytes": 98330824,
-                        "installDestination": "$HOME/Library/Android",
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": true,
-                            "postInstall": true
-                        }
-                    },
-                    "x64": {
-                        "installSource": "http://dl.google.com/android/android-sdk_r24.3.3-macosx.zip",
-                        "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
-                        "bytes": 98330824,
-                        "installDestination": "$HOME/Library/Android",
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": true,
-                            "postInstall": true
+                "8u45": {
+                    "darwin": {
+                        "x64": {
+                            "installSource": "http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-macosx-x64.dmg",
+                            "sha1": "586012489bd31e56c4571a585b5ee66f4be4d17d",
+                            "bytes": 232764982,
+                            "steps": {
+                                "download": true,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
                         }
                     }
                 }
             }
         }
     },
-    "androidTarget": {
-        "isImplicit": true
-    },
-    "gradle": {
-        "isImplicit": true
-    },
-    "ios-deploy": {
-        "displayName": "ios-deploy",
-        "installerPath": "./installers/iosDeployInstaller",
-        "prerequisites": [ ],
-        "versions": {
-            "latest": {
-                "darwin": {
-                    "ia32": {
-                        "installSource": "ios-deploy",
-                        "steps": {
-                            "download": false,
-                            "install": true,
-                            "updateVariables": false,
-                            "postInstall": false
-                        }
-                    },
-                    "x64": {
-                        "installSource": "ios-deploy",
-                        "steps": {
-                            "download": false,
-                            "install": true,
-                            "updateVariables": false,
-                            "postInstall": false
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "ios-sim": {
-        "displayName": "ios-sim",
-        "installerPath": "./installers/iosSimInstaller",
-        "prerequisites": [ ],
-        "versions": {
-            "latest": {
-                "darwin": {
-                    "ia32": {
-                        "installSource": "ios-sim",
-                        "steps": {
-                            "download": false,
-                            "install": true,
-                            "updateVariables": false,
-                            "postInstall": false
-                        }
-                    },
-                    "x64": {
-                        "installSource": "ios-sim",
-                        "steps": {
-                            "download": false,
-                            "install": true,
-                            "updateVariables": false,
-                            "postInstall": false
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "java": {
-        "displayName": "Java SE Development Kit",
-        "installerPath": "./installers/javaJdkInstaller",
-        "licenseUrl": "http://www.oracle.com/technetwork/java/javase/terms/license/index.html",
-        "prerequisites": [ ],
-        "versions": {
-            "7u55": {
-                "win32": {
-                    "ia32": {
-                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
-                        "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
-                        "bytes": 129674656,
-                        "installDestination": "%programfiles%/Java/jdk1.7.0_55",
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": true,
-                            "postInstall": false
-                        }
-                    },
-                    "x64": {
-                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-windows-i586.exe",
-                        "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
-                        "bytes": 129674656,
-                        "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55",
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": true,
-                            "postInstall": false
-                        }
-                    }
-                }
-            },
-            "8u45": {
-                "darwin": {
-                    "x64": {
-                        "installSource": "http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-macosx-x64.dmg",
-                        "sha1": "586012489bd31e56c4571a585b5ee66f4be4d17d",
-                        "bytes": 232764982,
-                        "steps": {
-                            "download": true,
-                            "install": true,
-                            "updateVariables": false,
-                            "postInstall": false
-                        }
-                    }
-                }
-            }
+    "unsupported": {
+        "xcode": {
+            "installHelp": "https://itunes.apple.com/us/app/xcode/id497799835?mt=12"
+        },
+        "visualstudio": {
+            "installHelp": "http://go.microsoft.com/fwlink/?LinkId=620937"
+        },
+        "msbuild": {
+            "installHelp": "http://go.microsoft.com/fwlink/?LinkId=620937"
+        },
+        "windowssdk": {
+            "installHelp": "http://go.microsoft.com/fwlink/?LinkId=620937"
+        },
+        "phonesdk": {
+            "installHelp": "http://go.microsoft.com/fwlink/?LinkId=620937"
         }
     }
 }
