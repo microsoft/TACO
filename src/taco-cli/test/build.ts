@@ -82,11 +82,12 @@ describe("taco build", function (): void {
         buildMod.RemoteBuild.PingInterval = 10;
     });
 
-    after(function (): void {
+    after(function (done: MochaDone): void {
+        this.timeout(10000);
         process.chdir(originalCwd);
         kitHelper.KitPackagePromise = null;
         testHttpServer.close();
-        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(tacoHome, function (err: Error): void { done(); }); // ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {

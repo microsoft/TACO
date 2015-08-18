@@ -71,3 +71,6 @@ remotebuild test --device
 
 ## Configure remote build with VS Tools for Apache Cordova
 Please refer to [User Documentation](http://aka.ms/Og7gl9) for instructions on how to configure the remote build with Visual Studio Tools for Apache Cordova.
+
+## Known Issues
+See [Known issues](http://aka.ms/TacoCliKnownIssues) for known issues and workarounds.

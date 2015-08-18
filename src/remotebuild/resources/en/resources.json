@@ -87,7 +87,7 @@
         "Secure mode: True",
         "Security PIN: {2}",
         "",
-        "Alternately, use 'taco setup remote <platform>' to configure the taco CLI to use this build server for the chosen platform, specifying",
+        "Alternately to use the taco-cli run 'taco remote add <platform>' to configure the taco CLI to use this build server for the chosen platform, specifying",
         "Host: {0}",
         "Port: {1}",
         "PIN: {2}"
@@ -97,7 +97,7 @@
     "_OSXCertSetupNoPinTimeout.comment": "Message printed to console explaining how to generate new PINs. The following line is a console command to generate the certificates",
     "OSXCertSetupPinTimeout": "The security PIN is for one-time use and expires in {0} minutes. To generate additional PINs, use the following command:",
     "_OSXCertSetupPinTimeout.comment": "Message printed to console explaining how to generate new PINs. {0} is the number of minutes that the PIN lasts for. The following line is a console command to generate the certificates",
-    "CertExpirationInvalid": "certExpirationdays {0} would result in expired certs. Default cert expiration {1} days will be used instead.",
+    "CertExpirationInvalid": "certExpirationDays {0} would result in expired certs. Default cert expiration {1} days will be used instead.",
     "_CertExpirationInvalid.comment": "message printed to console when the user-configurable value certExpirationDays is invalid. {0} is the user-supplied value, and {1} is the value we are defaulting to",
     "CertificatesNotConfigured": "Error: Certificates not yet initialized!",
     "_CertificatesNotConfigured.comment": "Error returned when certificates are accessed before initialization.",

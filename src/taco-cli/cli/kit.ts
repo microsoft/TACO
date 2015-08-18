@@ -102,6 +102,7 @@ class Kit extends commands.TacoCommandBase {
     public static promptAndUpdateProject(updateProject: boolean, cliVersion: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
         platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): Q.Promise<any> {
         if (updateProject) {
+            logger.logLine();
             return Kit.promptUser(resources.getString("CommandKitSelectProjectUpdatePrompt"))
             .then(function (answer: string): Q.Promise<any> {
                 if (answer && answer.length > 0 ) {
@@ -416,6 +417,8 @@ class Kit extends commands.TacoCommandBase {
                 });
             });
         }, Q({}));
+
+        logger.logLine();
     }
 
     /**
@@ -466,19 +469,20 @@ class Kit extends commands.TacoCommandBase {
         logger.logLine();
     }
 
+    private static projectComponentNeedsUpdate(installedComponentVersions: IDictionary<string>, componentVersionUpdates: IDictionary<string> = null): boolean {
+        return (installedComponentVersions && Object.keys(componentVersionUpdates || installedComponentVersions).length > 0);
+    }
+
     /**
      * Pretty prints the platform and plugin update information
      */
     private static printProjectUpdateInfo(id: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
-        platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): boolean {
-        logger.logLine();
-
+        platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): void {
         var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(installedPlatformVersions ? Object.keys(installedPlatformVersions) : null, installedPluginVersions ? Object.keys(installedPluginVersions) : null));
+
+        var platformsRequireUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates);
+        var pluginsRequireUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPluginVersions, pluginVersionUpdates);
         
-        var platformsRequireUpdate: boolean = installedPlatformVersions && Object.keys(platformVersionUpdates || installedPlatformVersions).length > 0 ? true : false;
-
-        var pluginsRequireUpdate: boolean = installedPluginVersions && Object.keys(pluginVersionUpdates || installedPluginVersions).length > 0 ? true : false;
-
         if (platformsRequireUpdate || pluginsRequireUpdate) {
             if (platformVersionUpdates || pluginVersionUpdates) {
                 logger.log(resources.getString("CommandKitSelectKitPreview", id));
@@ -498,23 +502,20 @@ class Kit extends commands.TacoCommandBase {
                 Kit.printUpdateInfo(indent, installedPluginVersions, pluginVersionUpdates, ProjectComponentType.Plugin);
             }
             
-            logger.logWarning(resources.getString("CommandKitSelectProjectUpdateWarning"));
-            return true;
+            logger.log(resources.getString("CommandKitSelectProjectUpdateWarning"));
         }
-
-        return false;
     }
 
-    private static printCliProjectUpdateInfo(currentCli: string, newCli: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>): boolean {
+    private static printCliProjectUpdateInfo(currentCli: string, newCli: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>): void {
         Kit.printCordovaCliUpdateInfo(currentCli, newCli);
-        return Kit.printProjectUpdateInfo(newCli, installedPlatformVersions, installedPluginVersions);
+        Kit.printProjectUpdateInfo(newCli, installedPlatformVersions, installedPluginVersions);
     }
 
     private static printKitProjectUpdateInfo(currentCli: string, kitId: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>, 
-        platformVersionUpdates: IDictionary<string>, pluginVersionUpdates: IDictionary<string>): Q.Promise<boolean> {
-        return kitHelper.getKitInfo(kitId).then(function (info: TacoKits.IKitInfo): Q.Promise<any> {
+        platformVersionUpdates: IDictionary<string>, pluginVersionUpdates: IDictionary<string>): Q.Promise<any> {
+        return kitHelper.getKitInfo(kitId).then(function (info: TacoKits.IKitInfo): void {
             Kit.printCordovaCliUpdateInfo(currentCli, info["cordova-cli"]);
-            return Q.resolve(Kit.printProjectUpdateInfo(kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates));
+            Kit.printProjectUpdateInfo(kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
         });
     }
 
@@ -543,6 +544,38 @@ class Kit extends commands.TacoCommandBase {
     }
 
     /**
+     * Returns a map of plugin versions that were installed from NPM (as opposed to local file system or GIT)
+     */
+    private static getInstalledRegistryPluginVerions(pluginVersions: IDictionary<string>, localOrGitPlugins: string[]): IDictionary<string> {
+        if (localOrGitPlugins) {
+            var registryPlugins: IDictionary<string> = {};
+            Object.keys(pluginVersions).filter(function (pluginName: string): boolean {
+                return (localOrGitPlugins.indexOf(pluginName) === -1);
+            }).forEach(function (pluginName: string): void {
+                registryPlugins[pluginName] = pluginVersions[pluginName];
+            });
+
+            return registryPlugins;
+        } else {
+            return pluginVersions;
+        }
+    }
+
+    /**
+     * Prints the list of plugins that were skipped for auto-update
+     */
+    private static printListOfComponentsSkippedForUpdate(components: string[]): void {
+        if (components && components.length > 0) {
+            logger.logLine();
+            logger.log(resources.getString("CommandKitSelectNoUpdateListHeader"));
+            logger.logLine();
+            components.forEach(function (component: string): void {
+               logger.logWarning(LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent) + component);
+            });
+        }
+    }
+
+    /**
      * Changes the current kit used for the project at {projectPath} to {kitId}
      */
     private static selectKit(projectPath: string, projectInfo: projectHelper.IProjectInfo, kitId: string): Q.Promise<any> {
@@ -553,19 +586,24 @@ class Kit extends commands.TacoCommandBase {
         var kitInfo: TacoKits.IKitInfo;
         var currentCliVersion: string;
         
-        return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, true, kitId)])
-        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, globalCordovaVersion: string): Q.Promise<any> {
+        return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, true, kitId)])
+        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], globalCordovaVersion: string): Q.Promise<any> {
             installedPlatformVersions = platformVersions;
-            installedPluginVersions = pluginVersions;
+            installedPluginVersions = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);       
             currentCliVersion = (projectInfo.cordovaCliVersion.length === 0) ? globalCordovaVersion : projectInfo.cordovaCliVersion;
             return Kit.getComponentUpdateInfo(projectPath, kitId, installedPlatformVersions, ProjectComponentType.Platform)
             .then(function (platformVersions: IDictionary<string>): Q.Promise<any> {
                 platformVersionUpdates = platformVersions;
                 return Kit.getComponentUpdateInfo(projectPath, kitId, installedPluginVersions, ProjectComponentType.Plugin);
-            }).then(function (pluginVersions: IDictionary<string>): Q.Promise<boolean> {
+            }).then(function (pluginVersions: IDictionary<string>): Q.Promise<any> {
                 pluginVersionUpdates = pluginVersions;
                 return Kit.printKitProjectUpdateInfo(currentCliVersion, kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
-            }).then(function (projectRequiresUpdate: boolean): Q.Promise<any> {
+            }).then(function (): Q.Promise<any> {
+                var projectRequiresUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates) || Kit.projectComponentNeedsUpdate(installedPluginVersions, pluginVersionUpdates);
+                if (projectRequiresUpdate) {
+                    Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
+                }
+                
                 return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
             });
         });
@@ -575,11 +613,17 @@ class Kit extends commands.TacoCommandBase {
      * Changes the current Cordova CLI used for the project at {projectPath} to {cli}
      */
     private static selectCli(projectPath: string, projectInfo: projectHelper.IProjectInfo, cli: string): Q.Promise<any> {
-        return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, false, cli)])
-        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, globalCordovaVersion: string): Q.Promise<any> {
+        return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, false, cli)])
+        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], globalCordovaVersion: string): Q.Promise<any> {
             var currentCliVersion: string = (projectInfo.cordovaCliVersion.length === 0) ? globalCordovaVersion : projectInfo.cordovaCliVersion;
-            var projectRequiresUpdate: boolean = Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginVersions);
-            return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, platformVersions, pluginVersions);
+            var pluginsToUpdate = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);
+            Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginsToUpdate);
+            var projectRequiresUpdate: boolean = ((platformVersions && Object.keys(platformVersions).length > 0) || (pluginVersions && Object.keys(pluginVersions).length > 0)) ? true : false;
+            if (projectRequiresUpdate) {
+                Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
+            }
+
+            return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, platformVersions, pluginsToUpdate);
         });
     }
 
