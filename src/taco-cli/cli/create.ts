@@ -70,12 +70,12 @@ class Create extends commands.TacoCommandBase {
     public name: string = "create";
     public info: commands.ICommandInfo;
 
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         try {
             this.parseArguments(data);
             this.verifyArguments();
         } catch (err) {
-            return Q.reject(err);
+            return Q.reject<ICommandTelemetryProperties>(err);
         }
 
         var self = this;

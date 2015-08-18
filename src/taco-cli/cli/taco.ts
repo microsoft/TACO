@@ -87,12 +87,12 @@ class Taco {
                     }
 
                     logger.logError(toPrint);
-
-                    // Send command failure telemetry
-                    projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                        telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, telemetryProperties, reason, parsedArgs.args);
-                    });
                 }
+
+                // Send command failure telemetry
+                return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                    telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
+                });
             }
             
             process.exit(1);

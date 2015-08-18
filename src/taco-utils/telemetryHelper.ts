@@ -30,6 +30,10 @@ module TacoUtility {
         }
 
         public static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void {
+            if (!properties) {
+                return;
+            }
+            
             Object.keys(properties).forEach(function (propertyName: string): void {
                 TelemetryHelper.addTelemetryEventProperty(event, propertyName, properties[propertyName].value, properties[propertyName].isPii);
             });
@@ -59,9 +63,7 @@ module TacoUtility {
 
         public static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo {
             var propertyInfo = { value: targetString, isPii: false };
-            if (packageLoader.TacoPackageLoader.GitUriRegex.test(targetString)) {
-                propertyInfo.isPii = true;
-            } else if (packageLoader.TacoPackageLoader.FileUriRegex.test(targetString)) {
+            if (packageLoader.TacoPackageLoader.GitUriRegex.test(targetString) || packageLoader.TacoPackageLoader.FileUriRegex.test(targetString)) {
                 propertyInfo.isPii = true;
             } else {
                 propertyInfo.value = targetString;

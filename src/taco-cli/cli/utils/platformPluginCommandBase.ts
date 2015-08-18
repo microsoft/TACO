@@ -122,7 +122,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         try {
             this.parseArguments(data);
         } catch (err) {
-            Q.reject(err);
+            return Q.reject<ICommandTelemetryProperties>(err);
         }
 
         var self = this;
@@ -172,7 +172,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand, false);
             self.cordovaCommandParams.targets.forEach(function (target: string): void {
-                telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
+                telemetryProperties["target" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
                 numericSuffix++;
             });
 

@@ -253,21 +253,21 @@ class ProjectHelper {
         }
 
         return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
-        .spread<any>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
+        .spread<ICommandTelemetryProperties>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
             var projectTelemetryProperties: ICommandTelemetryProperties = {};
             if (projectTelemetryProperties["isTacoProject"]) {
-                projectTelemetryProperties["isTacoProject"] = { value: true, isPii: false };
+                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true, false);
                 if (projectInfo.tacoKitId) {
-                    projectTelemetryProperties["kit"] = { value: projectInfo.tacoKitId, isPii: false };
+                    projectTelemetryProperties["kit"] = telemetryHelper.telemetryProperty(projectInfo.tacoKitId, false);
                 } else {
-                    projectTelemetryProperties["cli"] = { value: projectInfo.cordovaCliVersion, isPii: false };
+                    projectTelemetryProperties["cli"] = telemetryHelper.telemetryProperty(projectInfo.cordovaCliVersion, false);
                 }
             } else {
-                projectTelemetryProperties["isTacoProject"] = { value: true, isPii: false };
+                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(false, false);
             }
 
-            projectTelemetryProperties["projectType"] = { value: isTsProject ? "TypeScript" : "JavaScript", isPii: false };
-            projectTelemetryProperties["cliVersion"] = { value: require("../../package.json").version, isPii: false }; 
+            projectTelemetryProperties["projectType"] = telemetryHelper.telemetryProperty(isTsProject ? "TypeScript" : "JavaScript", false);
+            projectTelemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../../package.json").version, false); 
             return Q.resolve(projectTelemetryProperties);
         });
     }

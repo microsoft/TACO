@@ -110,14 +110,13 @@ class Remote extends commands.TacoCommandBase {
     private static generateTelemetryProperties(subCommand: string, platform?: string, isSecure?: boolean): Q.Promise<ICommandTelemetryProperties> {
         var self = this;
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
-            var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(subCommand, false);
 
             if (platform) {
                 telemetryProperties["platform"] = telemetryHelper.telemetryProperty(platform, false);
             }
 
-            if (typeof (isSecure) !== "undefined") {
+            if (isSecure && typeof (isSecure) !== "undefined") {
                 telemetryProperties["isSecure"] = telemetryHelper.telemetryProperty(isSecure, false);
             }
 
