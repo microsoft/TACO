@@ -126,7 +126,6 @@ class Remote extends commands.TacoCommandBase {
     }
 
     private static remove(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        var deferred = Q.defer<ICommandTelemetryProperties>();
         if (remoteData.remain.length < 2) {
             throw errorHelper.get(TacoErrorCodes.CommandRemoteDeleteNeedsPlatform);
         }
@@ -134,7 +133,7 @@ class Remote extends commands.TacoCommandBase {
         var platform: string = (remoteData.remain[1]).toLowerCase();
         var telemetryProperties: ICommandTelemetryProperties = {};
 
-        Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
         }).then(function (settings: Settings.ISettings): Q.Promise<any> {
@@ -146,18 +145,13 @@ class Remote extends commands.TacoCommandBase {
             }
         }).then(function (): void {
             logger.log(resources.getString("CommandRemoteRemoveSuccessful", platform));
-        }).then(function (): void {
-            Remote.generateTelemetryProperties("remove", platform).then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                deferred.resolve(telemetryProperties);
-            });
-        }); 
-
-        return deferred.promise;
+        }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Remote.generateTelemetryProperties("remove", platform);
+        });
     }
 
     private static list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        var deferred = Q.defer<ICommandTelemetryProperties>();
-        Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
+        return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
         }).then(function (settings: Settings.ISettings): void {
@@ -180,20 +174,15 @@ class Remote extends commands.TacoCommandBase {
             } else {
                 logger.log(resources.getString("CommandRemoteListNoPlatforms"));
             }
-        }).then(function (): void {
-            Remote.generateTelemetryProperties("list").then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                deferred.resolve(telemetryProperties);
-            });
+        }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Remote.generateTelemetryProperties("list");
         });
-
-        return deferred.promise;
     }
 
     private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        var deferred = Q.defer<ICommandTelemetryProperties>();
         var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
         var remoteInfo: Settings.IRemoteConnectionInfo;
-        CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): void {
+        return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): void {
             if (supportedPlatforms && !(platform in supportedPlatforms)) {
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
             }
@@ -221,13 +210,10 @@ class Remote extends commands.TacoCommandBase {
             ["",
             "HowToUseCommandHelp",
             "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
-        }).then(function (): void {
-            Remote.generateTelemetryProperties("add", platform, remoteInfo.secure).then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                deferred.resolve(telemetryProperties);
-            });
+        }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Remote.generateTelemetryProperties("add", platform, remoteInfo.secure);
+                
         });
-
-        return deferred.promise;
     }
 
     private static queryUserForRemoteConfig(): Q.Promise<{ host: string; port: number; pin: number }> {
