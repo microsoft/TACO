@@ -79,11 +79,12 @@ describe("taco run", function (): void {
         });
     });
 
-    after(function (): void {
+    after(function (done: MochaDone): void {
+        this.timeout(30000);
         process.chdir(originalCwd);
         kitHelper.KitPackagePromise = null;
         testHttpServer.close();
-        rimraf(tacoHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(tacoHome, function (err: Error): void { done(); }); // ignore errors
     });
 
     beforeEach(function (mocha: MochaDone): void {

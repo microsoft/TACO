@@ -59,11 +59,11 @@ class Create extends commands.TacoCommandBase {
         "copy-from": String,
         "link-to": String
     };
-    private static DefaultAppId: string = "io.cordova.hellocordova";
-    private static DefaultAppName: string = "HelloTaco";
     private static ShortHands: Nopt.ShortFlags = {
         src: "--copy-from"
     };
+    private static DefaultAppId: string = "io.taco.hellotaco";
+    private static DefaultAppName: string = "HelloTaco";
 
     private commandParameters: ICreateParameters;
 
