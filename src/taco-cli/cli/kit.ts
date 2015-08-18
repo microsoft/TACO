@@ -469,7 +469,6 @@ class Kit extends commands.TacoCommandBase {
         logger.logLine();
     }
 
-
     private static projectComponentNeedsUpdate(installedComponentVersions: IDictionary<string>, componentVersionUpdates: IDictionary<string> = null): boolean {
         return (installedComponentVersions && Object.keys(componentVersionUpdates || installedComponentVersions).length > 0);
     }
@@ -479,7 +478,6 @@ class Kit extends commands.TacoCommandBase {
      */
     private static printProjectUpdateInfo(id: string, installedPlatformVersions: IDictionary<string>, installedPluginVersions: IDictionary<string>,
         platformVersionUpdates: IDictionary<string> = null, pluginVersionUpdates: IDictionary<string> = null): void {
-
         var indent = LoggerHelper.getDescriptionColumnIndent(Kit.getLongestPlatformPluginLength(installedPlatformVersions ? Object.keys(installedPlatformVersions) : null, installedPluginVersions ? Object.keys(installedPluginVersions) : null));
 
         var platformsRequireUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates);
