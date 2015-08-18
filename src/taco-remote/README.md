@@ -5,3 +5,5 @@ Build agent for the *remotebuild* server to build, run, and debug iOS apps creat
 
 *taco-remote* provides an HTTP API for submitting Apache Cordova build requests. It uses *taco-remote-multiplexer* to map a given build request to the most appropriate build agent. *taco-remote* then forwards the build request to a selected build agent (like *taco-remote-lib*)
 
+## Known Issues
+See [Known issues](http://aka.ms/TacoCliKnownIssues) for known issues and workarounds.
