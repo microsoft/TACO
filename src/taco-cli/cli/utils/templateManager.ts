@@ -17,7 +17,9 @@
 
 import admZip = require ("adm-zip");
 import childProcess = require ("child_process");
+import crypto = require ("crypto");
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import replace = require ("replace");
@@ -66,6 +68,11 @@ class TemplateManager {
     private static TemplatesFolderName: string = "templates";
     private static GitTemplatesFolderName: string = "git-templates";
     private static GitPrefix: string = "template_"; // Because Cordova checks for "http" at the start of the --copy-from path, we need some prefix for the git templates, otherwise they will get rejected
+    private static GitFileList: string[] = [
+        ".git",
+        ".gitignore",
+        ".gitattributes"
+    ];
 
     private templateCachePath: string = null;
     private kitHelper: TacoKits.IKitHelper = null;
@@ -101,11 +108,7 @@ class TemplateManager {
             })
             .then(function (): Q.Promise<any> {
                 var filterFunc = function (itemPath: string): boolean {
-                    if (itemPath.indexOf(".git") !== -1) {
-                        return false;
-                    }
-
-                    return true;
+                    return TemplateManager.GitFileList.indexOf(itemPath) !== -1;
                 };
                 var options: any = { clobber: false, filter: filterFunc };
 
@@ -214,29 +217,30 @@ class TemplateManager {
         loggerHelper.logSeparatorLine();
         logger.log(resources.getString("CommandCreateGitTemplateHeader"));
 
-        if (!fs.existsSync(templateLocation)) {
-            // Make sure the repo for the git templates exists
-            wrench.mkdirSyncRecursive(path.join(this.templateCachePath, TemplateManager.GitTemplatesFolderName), 511); // 511 decimal is 0777 octal
-
-            // Clone the repo
-            return this.gitClone(templateUrl, templateLocation);
-        } else {
-            return this.gitPull(templateLocation)
-                .catch(function (reason: any): string {
-                    logger.log(resources.getString("CommandCreateGitPullWarn"));
-
-                    return templateLocation;
-                });
-        }
+        return this.gitClone(templateUrl);
     }
 
-    private gitPull(localRepo: string): Q.Promise<string> {
+    private gitClone(repo: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
+
+        // Set up a temporary folder for the git clone
+        var tmpDir: string = os.tmpdir();
+        var testDir: string = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
+
+        while (fs.existsSync(path.join(tmpDir, testDir))) {
+            testDir = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
+        }
+
+        var destination: string = path.join(tmpDir, testDir);
         var command: string = "git";
         var args: string[] = [
-            "pull"
+            "clone",
+            "--depth",  // Use the "--depth 1" option to minimize bandwidth usage, as we are only interested in the final state of the repo
+            "1",
+            repo,
+            destination
         ];
-        var options: childProcess.IExecOptions = { cwd: localRepo, stdio: "inherit" };
+        var options: childProcess.IExecOptions = { cwd: tmpDir, stdio: "inherit" }; // Set cwd for the git child process to be in the temporary dir to ensure any created log or other files get created there
 
         childProcess.spawn(command, args, options)
             .on("error", function (err: any): void {
@@ -249,43 +253,11 @@ class TemplateManager {
             })
             .on("exit", function (code: number): void {
                 if (code) {
-                    // Because the user already sees all output from git, and because we will intercept the error and use the template we have in cache even if the pull failed, there is no
-                    // strong reason to reject the promise here with an elaborate message, so we just reject with the error code (it won't even be showed to the user).
-                    deferred.reject(code);
+                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateGitCloneError));
                 } else {
-                    deferred.resolve(localRepo);
+                    deferred.resolve(destination);
                 }
             });
-
-        return deferred.promise;
-    }
-
-    private gitClone(repo: string, destination: string): Q.Promise<string> {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "git";
-        var args: string[] = [
-            "clone",
-            repo,
-            destination
-        ];
-        var options: childProcess.IExecOptions = { cwd: path.dirname(destination), stdio: "inherit" };
-
-        childProcess.spawn(command, args, options)
-            .on("error", function (err: any): void {
-            if (err.code === "ENOENT") {
-                // ENOENT error thrown if no git is found
-                deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateNoGit));
-            } else {
-                deferred.reject(err);
-            }
-        })
-            .on("exit", function (code: number): void {
-            if (code) {
-                deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateGitCloneError));
-            } else {
-                deferred.resolve(destination);
-            }
-        });
 
         return deferred.promise;
     }

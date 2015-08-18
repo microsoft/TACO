@@ -36,8 +36,6 @@
     "_CommandCreateInvalidPath.comment": "Error reported when the specified path at which to create the cordova project has segments that are invalid directory names for the current OS. {0} is the path that was given by the user.",
     "CommandCreateNoGit": "Error: No git found. Please ensure git is installed and is in your system's Path environment variable.",
     "_CommandCreateNoGit.comment": "Error shown when the user tries to use a git template, but doesn't have git installed.",
-    "CommandCreateGitPullWarn": "<warn>Unable to perform 'git pull' for the specified template; using a cached version instead...</warn>",
-    "_CommandCreateGitPullWarn.comment": "Warning shown for creating a project from a git template. If we already have the specified template in the cache, we try to do a git pull to get the latest changes. If we fail to git pull, we display this warning and use the version that we have in cache.",
     "CommandCreateGitCloneError": "Error: unable to perform 'git clone' for the specified template. Please see the output from git for more details.",
     "_CommandCreateGitCloneError.comment": "Error displayed when the user tries to use a template from git, but git is unable to perform the clone.",
     "CommandCreateGitTemplateName": "custom git template",
