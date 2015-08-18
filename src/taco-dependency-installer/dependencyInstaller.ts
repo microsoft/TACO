@@ -59,12 +59,12 @@ module TacoDependencyInstaller {
         private static InstallConfigFileName: string = "installConfig.json";
         private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
         private static KnownUnsupported: { [id: string]: string } = {   // Some dependencies are unsupported, but we still give a useful link to help the user install them
-            "xcode": "https://itunes.apple.com/us/app/xcode/id497799835?mt=12",
-            "visualstudio": "http://go.microsoft.com/fwlink/?LinkId=620937",
-            "msbuild": "http://go.microsoft.com/fwlink/?LinkId=620937",
-            "windowssdk": "http://go.microsoft.com/fwlink/?LinkId=620937",
-            "phonesdk": "http://go.microsoft.com/fwlink/?LinkId=620937"
-        }
+            xcode: "https://itunes.apple.com/us/app/xcode/id497799835?mt=12",
+            visualstudio: "http://go.microsoft.com/fwlink/?LinkId=620937",
+            msbuild: "http://go.microsoft.com/fwlink/?LinkId=620937",
+            windowssdk: "http://go.microsoft.com/fwlink/?LinkId=620937",
+            phonesdk: "http://go.microsoft.com/fwlink/?LinkId=620937"
+        };
 
         private installConfigFilePath: string;
         private dependenciesDataWrapper: DependencyDataWrapper;
@@ -94,10 +94,6 @@ module TacoDependencyInstaller {
             if (!this.missingDependencies.length) {
                 logger.log(resources.getString("NothingToInstall"));
                 logger.logLine();
-
-                if (this.unsupportedMissingDependencies.length != 0) {
-                    logger.log(resources.getString("SomeUnsupportedNote"));
-                }
 
                 return Q.resolve({});
             }
@@ -249,7 +245,7 @@ module TacoDependencyInstaller {
 
         private displayUnsupportedWarning(): void {
             if (this.unsupportedMissingDependencies.length > 0) {
-                logger.log(resources.getString("UnsupportedDependenciesHeader"));
+                logger.logWarning(resources.getString("UnsupportedDependenciesHeader"));
 
                 this.unsupportedMissingDependencies.forEach(function (value: ICordovaRequirement): void {
                     var displayName: string = value.name || value.id;

@@ -1,5 +1,5 @@
 {
-    "UnsupportedDependenciesHeader": "<warn>The following dependencies will be skipped because their installation is not supported by this installer. Please install them manually.</warn>",
+    "UnsupportedDependenciesHeader": "The following dependencies will be skipped because they are not supported. Please install them manually.",
     "_UnsupportedDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that can't be installed by taco-cli.",
     "UnsupportedMoreInfo": "To install, please see <link>{0}</link>",
     "_UnsupportedMoreInfo.comment": "Message displayed for dependencies that are unsupported, but for which we want to provide additional info. {0} is a URL to a install guide / resource.",
@@ -23,8 +23,6 @@
     "_InstallCompletedSuccessfully.comment": "Message shown after all dependencies have been installed and there are no errors",
     "NothingToInstall": "<br/><success>Dependencies are already installed for your current project.</success>",
     "_NothingToInstall.comment": "Message shown if there are no dependencies to install (everything that we support is already installed).",
-    "SomeUnsupportedNote": "<warn>Note: Some dependencies are still needed for your project, but they are not supported by this installer. Please see above for details.</warn>",
-    "_SomeUnsupportedNote.comment": "Message shown after the success message to remind users that while everything we could install is installed, they still need to manually install some dependencies.",
     "RestartCommandPrompt": "<br/><warn>Please restart the command prompt to ensure that any newly installed software can be used correctly.</warn>",
     "_RestartCommandPrompt.comment": "Message shown after running the dependency installer if at least 1 dependency was successfully installed.",
 
