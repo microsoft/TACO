@@ -110,17 +110,18 @@ class Create extends commands.TacoCommandBase {
      * Overridden implementation for returning telemetry properties that are specific to create
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        this.telemetryProperties["cliVersion"] = { value: require("../package.json").version, isPii: false };
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        telemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../package.json").version, false);
         var self = this;
         return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
             if (self.isKitProject()) {
-                self.telemetryProperties["kit"] = { value: self.commandParameters.data.options["kit"] || defaultKitId, isPii: false };
-                self.telemetryProperties["template"] = { value: self.commandParameters.data.options["template"] || "blank", isPii: false };
+                telemetryProperties["kit"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["kit"] || defaultKitId, false);
+                telemetryProperties["template"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["template"] || "blank", false);
             } else {
-                self.telemetryProperties["cli"] = { value: self.commandParameters.data.options["cli"], isPii: false };
+                telemetryProperties["cli"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["cli"], false);
             }
 
-            return Q.resolve(self.telemetryProperties);
+            return Q.resolve(telemetryProperties);
         });
     }
 

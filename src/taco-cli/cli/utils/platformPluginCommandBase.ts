@@ -118,11 +118,11 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         return true;
     }
 
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         try {
             this.parseArguments(data);
         } catch (err) {
-            return Q.reject(err);
+            Q.reject(err);
         }
 
         var self = this;
@@ -166,16 +166,17 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self = this;
+        var telemetryProperties: ICommandTelemetryProperties = {};
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
-            self.telemetryProperties = telemetryProperties;
+            telemetryProperties = telemetryProperties;
             var numericSuffix: number = 1;
-            self.telemetryProperties["subCommand"] = { value: self.cordovaCommandParams.subCommand, isPii: false };
+            telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand, false);
             self.cordovaCommandParams.targets.forEach(function (target: string): void {
-                self.telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
+                telemetryProperties["targets" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
                 numericSuffix++;
             });
 
-            return Q.resolve(self.telemetryProperties);
+            return Q.resolve(telemetryProperties);
         });
     }
 

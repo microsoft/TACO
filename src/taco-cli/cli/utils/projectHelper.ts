@@ -247,6 +247,11 @@ class ProjectHelper {
      *  public helper that returns the common telemetry properties for the current project
      */
      public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var projectRoot: string = ProjectHelper.getProjectRoot();
+        if (!projectRoot) {
+            return Q.resolve(<ICommandTelemetryProperties>{});
+        }
+
         return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
         .spread<any>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
             var projectTelemetryProperties: ICommandTelemetryProperties = {};
@@ -270,8 +275,13 @@ class ProjectHelper {
     /**
      *  public helper that resolves with a true value if the current project is a TACO TS project
      */
-    public static isTypeScriptProject(): boolean {   
-        var projectScriptsPath: string = path.resolve(ProjectHelper.getProjectRoot(), ProjectHelper.ProjectScriptsDir);
+    public static isTypeScriptProject(): boolean {
+        var projectRoot: string = ProjectHelper.getProjectRoot();
+        if (!projectRoot) {
+            return false;
+        }
+
+        var projectScriptsPath: string = path.resolve(projectRoot, ProjectHelper.ProjectScriptsDir);
         var tsFiles: string[] = [];
         if (fs.existsSync(projectScriptsPath)) {
             tsFiles = wrench.readdirSyncRecursive(projectScriptsPath).filter(function (file: string): boolean {

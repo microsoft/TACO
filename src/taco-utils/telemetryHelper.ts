@@ -25,12 +25,8 @@ module TacoUtility {
     };
 
     export class TelemetryHelper {
-        public static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void {
-            if (Array.isArray(propertyValue)) {
-                TelemetryHelper.addMultiValuedTelemetryEventProperty(event, propertyName, propertyValue, isPii);
-            } else {
-                TelemetryHelper.setTelemetryEventProperty(event, propertyName, propertyValue, isPii);
-            }
+        public static telemetryProperty(propertyValue: any, isPii: boolean): ITelemetryPropertyInfo {
+            return { value: String(propertyValue), isPii: isPii };  
         }
 
         public static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void {
@@ -39,14 +35,16 @@ module TacoUtility {
             });
         }
 
-        public static sendCommandFailureTelemetry(commandName: string, error: any, args: string[] = null): void { 
+        public static sendCommandFailureTelemetry(commandName: string, error: any, projectProperties: ICommandTelemetryProperties, args: string[] = null): void { 
             var errorEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
             
             if (error.isTacoError) {
                 errorEvent.properties["tacoErrorCode"] = error.errorCode;
             } else if (error.message) {
                 errorEvent.setPiiProperty("errorMessage", error.message);
-            } 
+            }
+
+            TelemetryHelper.addTelemetryEventProperties(errorEvent, projectProperties);
 
             Telemetry.send(errorEvent);
         }
@@ -70,6 +68,14 @@ module TacoUtility {
             }
 
             return propertyInfo;
+        }
+
+        public static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void {
+            if (Array.isArray(propertyValue)) {
+                TelemetryHelper.addMultiValuedTelemetryEventProperty(event, propertyName, propertyValue, isPii);
+            } else {
+                TelemetryHelper.setTelemetryEventProperty(event, propertyName, propertyValue, isPii);
+            }
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {

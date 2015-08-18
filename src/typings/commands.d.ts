@@ -58,7 +58,6 @@ declare module TacoUtility {
             public subcommands: ICommand[];
             public info: ICommandInfo;
             public data: ICommandData;
-            public telemetryProperties: ICommandTelemetryProperties;
 
             /**
              * Abstract method to be implemented by derived class.
@@ -75,10 +74,6 @@ declare module TacoUtility {
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
             public run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
-            /**
-             * Default implementation for returning telemetry properties.
-             */
-            public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties>;
         }
     }
 }

@@ -62,25 +62,28 @@ class Taco {
         var commandProperties: ICommandTelemetryProperties = {};
         
         Taco.runWithParsedArgs(parsedArgs)
-        .then(function (): Q.Promise<any> {
+        .then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
             if (parsedArgs.command) {
-                return parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
-                    commandProperties = properties;
-                });
+                commandProperties = telemetryProperties;
             }
 
             return Q.resolve({});
         }).done(function (): void {
+            // Send command success telemetry
             telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
         }, function (reason: any): any {
             // Pretty print errors
             if (reason) {
-                telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, parsedArgs.args);
                 if (reason.isTacoError) {
                     logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else if (reason.message) {
                     logger.logError(errorHelper.wrap(TacoErrorCodes.CommandError, reason).toString());
-                } 
+                }
+
+                // Send command failure telemetry
+                projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                    telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, telemetryProperties, reason, parsedArgs.args);
+                });
             }
             
             process.exit(1);
@@ -90,7 +93,7 @@ class Taco {
     /**
      * runs taco with parsed args ensuring proper initialization
      */
-    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<any> {
+    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<ICommandTelemetryProperties> {
         return Q({})
             .then(function (): Q.Promise<any> {
                 projectHelper.cdToProjectRoot();
@@ -98,7 +101,9 @@ class Taco {
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
-                    return parsedArgs.command.run(commandData);
+                    return parsedArgs.command.run(commandData).then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
+                        return Q.resolve(telemetryProperties);
+                    });
                 } else {
                     logger.logWarning(resources.getString("TacoCommandPassthrough"));
                     
