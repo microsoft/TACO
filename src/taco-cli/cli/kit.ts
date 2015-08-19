@@ -316,7 +316,7 @@ class Kit extends commands.TacoCommandBase {
         }
 
         if (fs.existsSync(jsonFilePath)) {
-            return Kit.promptUser(resources.getString("CommandKitListJsonOverwritePrompt"))
+            return Kit.promptUser(resources.getString("CommandKitListJsonOverwritePrompt", jsonFilePath))
             .then(function (answer: string): void {
                 if (answer && answer.length > 0 ) {
                     answer = answer.toLowerCase();
@@ -637,15 +637,16 @@ class Kit extends commands.TacoCommandBase {
         }
 
         var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-        var npmProcess = child_process.spawn(npmCommand, ["info", "cordova"]);
+        var npmProcess = child_process.spawn(npmCommand, ["view", "cordova", "versions"]);
         npmProcess.on("error", function (error: Error): void {
             throw errorHelper.get(TacoErrorCodes.ErrorReadingPackageVersions, "cordova");
         });
             
         npmProcess.stdout.on("data", function (data: any): void {
             try {
-                var versions: string[] = JSON.parse(data.toString()).versions;
-                if (versions.indexOf(version) !== -1) {
+                // The versions are returned as stringified array of strings
+                var versions: string = data.toString();
+                if (versions.indexOf("'" + version + "'") !== -1) {
                     deferred.resolve(version);
                 } else {
                     deferred.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
