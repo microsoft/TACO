@@ -109,7 +109,7 @@ class Kit extends commands.TacoCommandBase {
             .then(function (answer: string): Q.Promise<any> {
                 if (answer && answer.length > 0 ) {
                     answer = answer.toLowerCase();
-                    if (resources.getString("ProjectUpdatePromptResponseYes").split("\n").indexOf(answer) !== -1) {
+                    if (resources.getString("PromptResponseYes").split("\n").indexOf(answer) !== -1) {
                         logger.logLine();
                         return Kit.updateProject(cliVersion, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
                     }
@@ -329,6 +329,7 @@ class Kit extends commands.TacoCommandBase {
         }
 
         utils.createDirectoryIfNecessary(path.dirname(jsonFilePath));
+        return Q.resolve({});
     }
 
     /**
@@ -342,13 +343,14 @@ class Kit extends commands.TacoCommandBase {
             jsonFilePath = path.join(utils.tacoHome, Kit.DefaultMetadataFileName);
         }
 
-        Kit.validateJsonFilePath(jsonFilePath);
-        
-        return kitHelper.getKitMetadata()
-            .then(function (meta: TacoKits.ITacoKitMetadata): Q.Promise<any> {
+        return Kit.validateJsonFilePath(jsonFilePath)
+        .then(function (): Q.Promise<any> {
+            return kitHelper.getKitMetadata();
+        })
+        .then(function (meta: TacoKits.ITacoKitMetadata): Q.Promise<any> {
             return projectHelper.createJsonFileWithContents(jsonFilePath, meta.kits); 
         })
-            .then(function (): Q.Promise<any> {
+        .then(function (): Q.Promise<any> {
             logger.log(resources.getString("CommandKitListJsonFileStatus", jsonFilePath));
             return Q.resolve({});
         });
@@ -642,7 +644,7 @@ class Kit extends commands.TacoCommandBase {
             
         npmProcess.stdout.on("data", function (data: any): void {
             try {
-                var versions: string[] = eval("(" + data.toString() + ")").versions;
+                var versions: string[] = JSON.parse(data.toString()).versions;
                 if (versions.indexOf(version) !== -1) {
                     deferred.resolve(version);
                 } else {
