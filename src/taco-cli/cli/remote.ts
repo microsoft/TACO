@@ -116,8 +116,8 @@ class Remote extends commands.TacoCommandBase {
                 telemetryProperties["platform"] = telemetryHelper.telemetryProperty(platform, false);
             }
 
-            if (isSecure !== null && typeof (isSecure) !== "undefined") {
-                telemetryProperties["isSecure"] = telemetryHelper.telemetryProperty(isSecure, false);
+            if (typeof (isSecure) !== "undefined") {
+                telemetryProperties["isSecure"] = telemetryHelper.telemetryProperty(isSecure || false, false);
             }
 
             return Q.resolve(telemetryProperties);
@@ -181,34 +181,35 @@ class Remote extends commands.TacoCommandBase {
     private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
         var remoteInfo: Settings.IRemoteConnectionInfo;
-        return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): void {
+        return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): Q.Promise<any> {
             if (supportedPlatforms && !(platform in supportedPlatforms)) {
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
             }
 
             logger.log(resources.getString("CommandRemoteHeader"));
-        })
-        .then(Remote.queryUserForRemoteConfig)
-        .then(Remote.acquireCertificateIfRequired)
-        .then(Remote.constructRemotePlatformSettings)
-        .then(function (remoteConnectionInfo: Settings.IRemoteConnectionInfo): Q.Promise<Settings.IRemoteConnectionInfo> {
-            remoteInfo = remoteConnectionInfo;
-            return Q.resolve(remoteInfo);
-        })
-        .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
-        .then(function (): void {
-            logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
 
-            // Print the onboarding experience
-            logger.log(resources.getString("OnboardingExperienceTitle"));
-            loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
-            "HowToUseCommandBuildPlatform",
-            "HowToUseCommandEmulatePlatform",
-            "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
+            return Remote.queryUserForRemoteConfig()
+                .then(Remote.acquireCertificateIfRequired)
+                .then(Remote.constructRemotePlatformSettings)
+                .then(function (remoteConnectionInfo: Settings.IRemoteConnectionInfo): Q.Promise<Settings.IRemoteConnectionInfo> {
+                    remoteInfo = remoteConnectionInfo;
+                    return Q.resolve(remoteInfo);
+                })
+                .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
+                .then(function (): void {
+                    logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
 
-            ["",
-            "HowToUseCommandHelp",
-            "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
+                    // Print the onboarding experience
+                    logger.log(resources.getString("OnboardingExperienceTitle"));
+                    loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
+                        "HowToUseCommandBuildPlatform",
+                        "HowToUseCommandEmulatePlatform",
+                        "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
+
+                    ["",
+                        "HowToUseCommandHelp",
+                        "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
+             });
         }).then(function (): Q.Promise<ICommandTelemetryProperties> {
             return Remote.generateTelemetryProperties("add", platform, remoteInfo.secure);            
         });

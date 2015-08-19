@@ -168,7 +168,6 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         var self = this;
         var telemetryProperties: ICommandTelemetryProperties = {};
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
-            telemetryProperties = telemetryProperties;
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand, false);
             self.cordovaCommandParams.targets.forEach(function (target: string): void {

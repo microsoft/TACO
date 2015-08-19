@@ -64,12 +64,11 @@ class Taco {
         var commandProperties: ICommandTelemetryProperties = {};
         
         Taco.runWithParsedArgs(parsedArgs)
-        .then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
+        .then(function (telemetryProperties: ICommandTelemetryProperties): void {
             if (parsedArgs.command) {
                 commandProperties = telemetryProperties;
             }
-
-            return Q.resolve({});
+            
         }).done(function (): void {
             // Send command success telemetry
             telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
@@ -110,9 +109,7 @@ class Taco {
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
                     var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
-                    return parsedArgs.command.run(commandData).then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
-                        return Q.resolve(telemetryProperties);
-                    });
+                    return parsedArgs.command.run(commandData);
                 } else {
                     logger.logWarning(resources.getString("TacoCommandPassthrough"));
                     
