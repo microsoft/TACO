@@ -401,7 +401,7 @@ class RemoteBuildClientHelper {
         };
 
         if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
-            params["options"] = "--device";
+            params["options"] = "--device " + settings.options;
         }
 
         if (settings.incrementalBuild) {

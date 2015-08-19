@@ -31,6 +31,7 @@ class BuildSettings {
     public language: string;
     public changeListJsonFile: string;
     public certFile: string;
+    public options: string[];
 
     public buildCommand: string;
     public platformConfigurationBldDir: string;
@@ -48,6 +49,7 @@ class BuildSettings {
         this.buildTarget = args.buildTarget;
         this.language = args.language;
         this.changeListJsonFile = args.changeListJsonFile;
+        this.options = args.options;
 
         this.platformConfigurationBldDir = path.join(this.projectSourceDir, "remote", this.platform, this.configuration);
 
@@ -75,6 +77,7 @@ module BuildSettings {
         cordovaVersion: string;
         buildTarget?: string;
         changeListJsonFile?: string;
+        options?: string[];
     }
 }
 
