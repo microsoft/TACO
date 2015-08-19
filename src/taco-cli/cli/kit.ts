@@ -15,10 +15,12 @@
 "use strict";
 
 import assert = require ("assert");
+import child_process = require ("child_process");
 import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
+import semver = require ("semver");
 import util = require ("util");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
@@ -302,7 +304,7 @@ class Kit extends commands.TacoCommandBase {
     /**
      * Validates the file path passed. Throw appropriate errors if path passed is invalid.
      */
-    private static validateJsonFilePath(jsonFilePath: string): void {
+    private static validateJsonFilePath(jsonFilePath: string): Q.Promise<any> {
         assert(jsonFilePath);
         // Make sure the specified path is valid
         if (!utils.isPathValid(jsonFilePath)) {
@@ -311,6 +313,19 @@ class Kit extends commands.TacoCommandBase {
 
         if (path.extname(jsonFilePath).toLowerCase() !== ".json") {
             throw errorHelper.get(TacoErrorCodes.ErrorInvalidJsonFilePath, jsonFilePath);
+        }
+
+        if (fs.existsSync(jsonFilePath)) {
+            return Kit.promptUser(resources.getString("CommandKitListJsonOverwritePrompt"))
+            .then(function (answer: string): void {
+                if (answer && answer.length > 0 ) {
+                    answer = answer.toLowerCase();
+                    logger.logLine();
+                    if (resources.getString("PromptResponseYes").split("\n").indexOf(answer) === -1) {
+                        throw resources.getString("ErrorOperationCancelled");
+                    }
+                }
+            });
         }
 
         utils.createDirectoryIfNecessary(path.dirname(jsonFilePath));
@@ -608,22 +623,57 @@ class Kit extends commands.TacoCommandBase {
             });
         });
     }
-    
+
+    /**
+     * Validates whether the version string passed is a valid Cordova version
+     */
+    private static validateCliVersion(version: string): Q.Promise<any> {
+        var deferred = Q.defer<any>();
+
+        if (!semver.valid(version)) {
+            return Q.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
+        }
+
+        var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+        var npmProcess = child_process.spawn(npmCommand, ["info", "cordova"]);
+        npmProcess.on("error", function (error: Error): void {
+            throw errorHelper.get(TacoErrorCodes.ErrorReadingPackageVersions, "cordova");
+        });
+            
+        npmProcess.stdout.on("data", function (data: any): void {
+            try {
+                var versions: string[] = eval("(" + data.toString() + ")").versions;
+                if (versions.indexOf(version) !== -1) {
+                    deferred.resolve(version);
+                } else {
+                    deferred.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
+                }
+            } catch (error) {
+                deferred.reject(errorHelper.get(TacoErrorCodes.ErrorReadingPackageVersions, "cordova"));
+            }
+        });
+
+        return deferred.promise;
+    }
+
     /**
      * Changes the current Cordova CLI used for the project at {projectPath} to {cli}
      */
     private static selectCli(projectPath: string, projectInfo: projectHelper.IProjectInfo, cli: string): Q.Promise<any> {
-        return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, false, cli)])
-        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], globalCordovaVersion: string): Q.Promise<any> {
-            var currentCliVersion: string = (projectInfo.cordovaCliVersion.length === 0) ? globalCordovaVersion : projectInfo.cordovaCliVersion;
-            var pluginsToUpdate = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);
-            Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginsToUpdate);
-            var projectRequiresUpdate: boolean = ((platformVersions && Object.keys(platformVersions).length > 0) || (pluginVersions && Object.keys(pluginVersions).length > 0)) ? true : false;
-            if (projectRequiresUpdate) {
-                Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
-            }
+        return Kit.validateCliVersion(cli)
+        .then(function (): Q.Promise<any> {
+            return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), cordovaWrapper.getGlobalCordovaVersion(), projectHelper.createTacoJsonFile(projectPath, false, cli)])
+            .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], globalCordovaVersion: string): Q.Promise<any> {
+                var currentCliVersion: string = (projectInfo.cordovaCliVersion.length === 0) ? globalCordovaVersion : projectInfo.cordovaCliVersion;
+                var pluginsToUpdate = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);
+                Kit.printCliProjectUpdateInfo(currentCliVersion, cli, platformVersions, pluginsToUpdate);
+                var projectRequiresUpdate: boolean = ((platformVersions && Object.keys(platformVersions).length > 0) || (pluginVersions && Object.keys(pluginVersions).length > 0)) ? true : false;
+                if (projectRequiresUpdate) {
+                    Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
+                }
 
-            return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, platformVersions, pluginsToUpdate);
+                return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, platformVersions, pluginsToUpdate);
+            });
         });
     }
 
