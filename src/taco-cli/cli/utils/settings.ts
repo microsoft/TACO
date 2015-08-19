@@ -158,10 +158,10 @@ class Settings {
         return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
             .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[]{
 
-                var ignores = options.remain.slice(options.remain.indexOf("--"));
-                var platforms = options.remain.filter(function (platform: string): boolean { return ignores.indexOf(platform) === -1 });
+                var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
+                var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1 });
 
-                if (platforms.filter(function (platform: string): boolean { return platform.indexOf("--") !== 0 }).length > 0) {
+                if (platforms.length > 0) {
                 // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
                 return platforms.map(function (platform: string): Settings.IPlatformWithLocation {
                     var buildLocation: Settings.BuildLocationType;
