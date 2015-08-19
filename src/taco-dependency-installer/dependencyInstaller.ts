@@ -481,7 +481,7 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
                     ];
-                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" });
 
                     cp.on("error", function (err: Error): void {
                         // Handle ENOENT if Powershell is not found

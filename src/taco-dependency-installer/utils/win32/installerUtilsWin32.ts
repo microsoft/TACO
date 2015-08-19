@@ -99,7 +99,7 @@ class InstallerUtilsWin32 {
         ];
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var errorOutput: string = "";
-        var variableProcess: childProcess.ChildProcess = childProcess.spawn(command, commandArgs);
+        var variableProcess: childProcess.ChildProcess = childProcess.spawn(command, commandArgs, { stdio: ["ignore", "ignore", "pipe"] });
 
         variableProcess.stderr.on("data", function (data: any): void {
             errorOutput += data.toString();
