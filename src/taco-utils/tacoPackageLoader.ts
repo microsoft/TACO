@@ -23,16 +23,20 @@ import Q = require ("q");
 
 import installLogLevel = require ("./installLogLevel");
 import loggerUtil = require ("./logger");
+import logLevel = require ("./logLevel");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoError = require ("./tacoError");
+import globalConfig = require ("./tacoGlobalConfig");
 import UtilHelper = require ("./utilHelper");
 
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 import logger = loggerUtil.Logger;
+import LogLevel = logLevel.LogLevel;
 import TacoError = tacoError.TacoError;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = globalConfig.TacoGlobalConfig;
 import utils = UtilHelper.UtilHelper;
 
 module TacoUtility {
@@ -167,7 +171,9 @@ module TacoUtility {
 
                             fs.renameSync(targetPath, backupPath);
                         } catch (e) {
-                            logger.logWarning(e.toString());
+                            if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
+                                logger.logWarning(e.toString());
+                            }
                             // log but ignore the error, the user shouldn't have to care if the backup is in an inconsistent state
                         }
 
@@ -175,7 +181,9 @@ module TacoUtility {
                             try {
                                 rimraf.sync(backupPath);
                             } catch (e) {
-                                logger.logWarning(e.toString());
+                                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
+                                    logger.logWarning(e.toString());
+                                }
                                 // log but ignore the error, the user shouldn't have to care if the backup is in an inconsistent state
                             }
 
