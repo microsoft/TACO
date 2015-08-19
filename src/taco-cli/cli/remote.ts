@@ -116,7 +116,7 @@ class Remote extends commands.TacoCommandBase {
                 telemetryProperties["platform"] = telemetryHelper.telemetryProperty(platform, false);
             }
 
-            if (isSecure && typeof (isSecure) !== "undefined") {
+            if (isSecure !== null && typeof (isSecure) !== "undefined") {
                 telemetryProperties["isSecure"] = telemetryHelper.telemetryProperty(isSecure, false);
             }
 
@@ -210,8 +210,7 @@ class Remote extends commands.TacoCommandBase {
             "HowToUseCommandHelp",
             "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
         }).then(function (): Q.Promise<ICommandTelemetryProperties> {
-            return Remote.generateTelemetryProperties("add", platform, remoteInfo.secure);
-                
+            return Remote.generateTelemetryProperties("add", platform, remoteInfo.secure);            
         });
     }
 

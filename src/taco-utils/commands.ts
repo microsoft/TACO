@@ -87,11 +87,9 @@ module TacoUtility {
                 // Determine which subcommand we are executing
                 this.executedSubcommand = this.getSubCommand(this.data);
                 if (this.executedSubcommand) {
-                    this.executedSubcommand.run(this.data).then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                        deferred.resolve(telemetryProperties);
-                    });
+                    return this.executedSubcommand.run(this.data);
                 } else {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
                 }
 
                 return deferred.promise;

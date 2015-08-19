@@ -95,7 +95,7 @@ module TacoUtility {
             try {
                 Telemetry.appName = appName;
                 TelemetryUtils.init(appVersion);
-            } catch(err) {
+            } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
                 }
@@ -113,7 +113,7 @@ module TacoUtility {
                 if (appInsights.client) { // no-op if telemetry is not initialized
                     appInsights.client.trackEvent(event.name, event.properties);
                 }
-            } catch(err) {
+            } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
                 }
