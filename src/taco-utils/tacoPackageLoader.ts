@@ -160,10 +160,25 @@ module TacoUtility {
                     if (updateRequested) {
                         var targetPath = request.targetPath;
                         var backupPath = request.targetPath + "_backup";
-                        fs.renameSync(targetPath, backupPath);
+                        try {
+                            if (fs.existsSync(backupPath)) {
+                                rimraf.sync(backupPath);
+                            }
+
+                            fs.renameSync(targetPath, backupPath);
+                        } catch (e) {
+                            logger.logWarning(e.toString());
+                            // log but ignore the error, the user shouldn't have to care if the backup is in an inconsistent state
+                        }
 
                         return TacoPackageLoader.lazyRequireInternal<T>(request).then(function (obj: T): Q.Promise<T> {
-                            rimraf.sync(backupPath);
+                            try {
+                                rimraf.sync(backupPath);
+                            } catch (e) {
+                                logger.logWarning(e.toString());
+                                // log but ignore the error, the user shouldn't have to care if the backup is in an inconsistent state
+                            }
+
                             TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
                             return Q<T>(obj);
                         }, function (error: any): Q.Promise<T> {
