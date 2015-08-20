@@ -229,6 +229,32 @@ class ProjectHelper {
     }
 
     /**
+     *  public helper that gets the list of plugins installed from the local file system or a GIT repository
+     */
+    public static getLocalOrGitPlugins(projectDir: string): Q.Promise<string[]> {
+        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        var localOrGitPlugins: string[] = [];
+        var fetchJsonPath: string = path.resolve(projectDir, "plugins", "fetch.json");
+
+        if (!fs.existsSync(path.resolve(projectDir, "plugins", "fetch.json"))) {
+            return Q.resolve(localOrGitPlugins);
+        }
+
+        try {
+            var fetchJson: ProjectHelper.IPluginFetchInfo = require(fetchJsonPath);
+            Object.keys(fetchJson).forEach(function (plugin: string): void {
+                if (fetchJson[plugin].source && fetchJson[plugin].source.type !== "registry") {
+                    localOrGitPlugins.push(plugin);
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+
+        return Q.resolve(localOrGitPlugins);
+    }
+
+    /**
      *  public helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
      */
     public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
@@ -304,6 +330,15 @@ module ProjectHelper {
         cordovaCliVersion: string;
         configXmlPath: string;
         tacoKitId?: string;
+    }
+
+    export interface IPluginFetchInfo {
+        [plugin: string]: {
+            source: {
+                type: string;
+                id: string;
+            }
+        };
     }
 }
 
