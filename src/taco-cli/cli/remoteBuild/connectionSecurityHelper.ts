@@ -35,7 +35,8 @@ class ConnectionSecurityHelper {
         switch (os.platform()) {
             case "win32":
                 var certScriptPath = path.resolve(__dirname, "win32", "certificates.ps1");
-                var certLoadProcess = child_process.spawn("powershell", ["-executionpolicy", "unrestricted", "-file", certScriptPath, "get", connectionInfo.certName]);
+                // Note: On windows 7, powershell -file will still attempt to use input from stdin as commands. If we do not close stdin then the process will not exit
+                var certLoadProcess = child_process.spawn("powershell", ["-executionpolicy", "unrestricted", "-file", certScriptPath, "get", connectionInfo.certName], { stdio: ["ignore", "pipe", "inherit"] });
                 var output = "";
                 certLoadProcess.stdout.on("data", function (data: any): void {
                     output += data.toString();
