@@ -33,7 +33,7 @@ declare module TacoUtility {
          * Base command class, all other commands inherit from this
          */
         interface ICommand {
-            run(data: ICommandData): Q.Promise<any>;
+            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
         }
         
@@ -54,6 +54,7 @@ declare module TacoUtility {
 
         class TacoCommandBase implements ICommand {
             public name: string;
+            public executedSubcommand: ICommand;
             public subcommands: ICommand[];
             public info: ICommandInfo;
             public data: ICommandData;
@@ -72,11 +73,7 @@ declare module TacoUtility {
              * Concrete implementation of ICommand's run
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
-            public run(data: ICommandData): Q.Promise<any>;
-            /**
-             * Default implementation for returning telemetry properties.
-             */
-            public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties>;
+            public run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
         }
     }
 }

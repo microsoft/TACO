@@ -49,12 +49,13 @@ module TacoUtility {
          * Base command class, all other commands inherit from this
          */
         export interface ICommand {
-            run(data: ICommandData): Q.Promise<any>;
+            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
         }
 
         export class TacoCommandBase implements ICommand {
             public name: string;
+            public executedSubcommand: ICommand;
             public subcommands: ICommand[];
             public info: ICommandInfo;
             public data: ICommandData;
@@ -80,22 +81,18 @@ module TacoUtility {
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
             public run(data: ICommandData): Q.Promise<any> {
-                var commandData = this.parseArgs(data.original);
+                var deferred = Q.defer();
+                this.data = this.parseArgs(data.original);
 
-                // Determine which build subcommand we are doing
-                var subcommand = this.getSubCommand(commandData);
-                if (subcommand) {
-                    return subcommand.run(commandData);
+                // Determine which subcommand we are executing
+                this.executedSubcommand = this.getSubCommand(this.data);
+                if (this.executedSubcommand) {
+                    return this.executedSubcommand.run(this.data);
                 } else {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, commandData.original.toString()));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
                 }
-            }
 
-            /**
-             * Default implementation for returning telemetry properties.
-             */
-            public getTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-                return Q(<ICommandTelemetryProperties>{});
+                return deferred.promise;
             }
 
             private getSubCommand(options: ICommandData): ICommand {

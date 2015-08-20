@@ -21,6 +21,7 @@ import util = require ("util");
 
 import cordovaHelper = require ("./utils/cordovaHelper");
 import cordovaWrapper = require ("./utils/cordovaWrapper");
+import kit = require ("./kit");
 import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
@@ -28,12 +29,14 @@ import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import templateManager = require ("./utils/templateManager");
-import kit = require ("./kit");
+import telemetryHelper = tacoUtility.TelemetryHelper;
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
+
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 /**
  * Wrapper interface for create command parameters
@@ -67,12 +70,12 @@ class Create extends commands.TacoCommandBase {
     public name: string = "create";
     public info: commands.ICommandInfo;
 
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         try {
             this.parseArguments(data);
             this.verifyArguments();
         } catch (err) {
-            return Q.reject(err);
+            return Q.reject<ICommandTelemetryProperties>(err);
         }
 
         var self = this;
@@ -91,6 +94,8 @@ class Create extends commands.TacoCommandBase {
                 self.finalize(templateDisplayName);
 
                 return Q.resolve({});
+            }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+                return self.generateTelemetryProperties();
             });
     }
 
@@ -101,8 +106,23 @@ class Create extends commands.TacoCommandBase {
         return true;
     }
 
-    private isKitProject(): boolean {
-        return !this.commandParameters.data.options["cli"];
+    /**
+     * Generates the telemetry properties for the create operation
+     */
+    private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        telemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../package.json").version);
+        var self = this;
+        return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
+            if (self.isKitProject()) {
+                telemetryProperties["kit"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["kit"] || defaultKitId);
+                telemetryProperties["template"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["template"] || "blank");
+            } else {
+                telemetryProperties["cli"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["cli"]);
+            }
+
+            return Q.resolve(telemetryProperties);
+        });
     }
 
     private parseArguments(args: commands.ICommandData): void {
@@ -286,6 +306,10 @@ class Create extends commands.TacoCommandBase {
         ["",
             "HowToUseCommandHelp",
             "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
+    }
+
+    private isKitProject(): boolean {
+        return !this.commandParameters.data.options["cli"];
     }
 }
 

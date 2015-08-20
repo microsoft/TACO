@@ -15,6 +15,9 @@ enum TacoErrorCode {
     CommandBuildTacoSettingsNotFound = 5009,
     TacoSettingsFileDoesNotExist = 5010,
     CommandBuildInvalidPlatformLocation = 5011,
+    ErrorOperationCancelled = 5012,
+    ErrorInvalidVersion = 5013,
+    ErrorReadingPackageVersions = 5014,
 
     // Errors to do with Create 5450-5499
     CommandCreateInvalidPath = 5451,
