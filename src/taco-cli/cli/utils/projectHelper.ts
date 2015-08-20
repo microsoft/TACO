@@ -11,17 +11,21 @@
 
 import child_process = require ("child_process");
 import Q = require ("q");
+import os = require ("os");
 import path = require ("path");
 import fs = require ("fs");
 
 import cordovaHelper = require ("./cordovaHelper");
+import cordovaWrapper = require ("./cordovaWrapper");
 import kitHelper = require ("./kitHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import wrench = require ("wrench");
 
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
  */
@@ -266,10 +270,44 @@ class ProjectHelper {
     }
 
     /**
+     *  public helper that returns the common telemetry properties for the current project
+     */
+     public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var projectRoot: string = ProjectHelper.getProjectRoot();
+        if (!projectRoot) {
+            return Q.resolve(<ICommandTelemetryProperties>{});
+        }
+
+        return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
+        .spread<ICommandTelemetryProperties>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
+            var projectTelemetryProperties: ICommandTelemetryProperties = {};
+            if (projectTelemetryProperties["isTacoProject"]) {
+                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true);
+                if (projectInfo.tacoKitId) {
+                    projectTelemetryProperties["kit"] = telemetryHelper.telemetryProperty(projectInfo.tacoKitId);
+                } else {
+                    projectTelemetryProperties["cli"] = telemetryHelper.telemetryProperty(projectInfo.cordovaCliVersion);
+                }
+            } else {
+                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(false);
+            }
+
+            projectTelemetryProperties["projectType"] = telemetryHelper.telemetryProperty(isTsProject ? "TypeScript" : "JavaScript");
+            projectTelemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../../package.json").version); 
+            return Q.resolve(projectTelemetryProperties);
+        });
+    }
+
+    /**
      *  public helper that resolves with a true value if the current project is a TACO TS project
      */
-    public static isTypeScriptProject(): boolean {   
-        var projectScriptsPath: string = path.resolve(ProjectHelper.getProjectRoot(), ProjectHelper.ProjectScriptsDir);
+    public static isTypeScriptProject(): boolean {
+        var projectRoot: string = ProjectHelper.getProjectRoot();
+        if (!projectRoot) {
+            return false;
+        }
+
+        var projectScriptsPath: string = path.resolve(projectRoot, ProjectHelper.ProjectScriptsDir);
         var tsFiles: string[] = [];
         if (fs.existsSync(projectScriptsPath)) {
             tsFiles = wrench.readdirSyncRecursive(projectScriptsPath).filter(function (file: string): boolean {

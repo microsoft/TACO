@@ -64,18 +64,16 @@ class Taco {
         var commandProperties: ICommandTelemetryProperties = {};
         
         Taco.runWithParsedArgs(parsedArgs)
-        .then(function (): void {
+        .then(function (telemetryProperties: ICommandTelemetryProperties): void {
             if (parsedArgs.command) {
-                parsedArgs.command.getTelemetryProperties().then(function (properties: ICommandTelemetryProperties): void {
-                    commandProperties = properties;
-                });
-            }
+                commandProperties = telemetryProperties;
+            }         
         }).done(function (): void {
+            // Send command success telemetry
             telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
         }, function (reason: any): any {
             // Pretty print errors
             if (reason) {
-                telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, parsedArgs.args);
                 if (reason.isTacoError) {
                     logger.logError((<tacoUtility.TacoError>reason).toString());
                 } else {
@@ -87,17 +85,24 @@ class Taco {
                     }
 
                     logger.logError(toPrint);
-                } 
+                }
+
+                // Send command failure telemetry
+                projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                    telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
+                }).finally(function (): void {
+                    process.exit(1);
+                });
+            } else {
+                process.exit(1);
             }
-            
-            process.exit(1);
         });
     }
 
     /**
      * runs taco with parsed args ensuring proper initialization
      */
-    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<any> {
+    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<ICommandTelemetryProperties> {
         return Q({})
             .then(function (): Q.Promise<any> {
                 projectHelper.cdToProjectRoot();

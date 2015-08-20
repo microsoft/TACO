@@ -16,6 +16,9 @@ enum TacoErrorCode {
     TacoSettingsFileDoesNotExist = 5010,
     CommandBuildInvalidPlatformLocation = 5011,
     CommandInstallCordovaTooOld = 5012,
+    ErrorOperationCancelled = 5013,
+    ErrorInvalidVersion = 5014,
+    ErrorReadingPackageVersions = 5015,
 
     // Errors to do with Create 5450-5499
     CommandCreateGitCloneError = 5451,

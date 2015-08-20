@@ -27,11 +27,13 @@ import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
-
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import utils = tacoUtility.UtilHelper;
+
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 export enum CommandOperationStatus {
     Error = -1,
@@ -116,11 +118,11 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         return true;
     }
 
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         try {
             this.parseArguments(data);
         } catch (err) {
-            return Q.reject(err);
+            return Q.reject<ICommandTelemetryProperties>(err);
         }
 
         var self = this;
@@ -153,6 +155,27 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             .then(function (): Q.Promise<any> {
             self.printStatusMessage(self.cordovaCommandParams.targets, self.cordovaCommandParams.subCommand, CommandOperationStatus.Success);
             return Q({});
+        })
+            .then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return self.generateTelemetryProperties();
+        });
+    }
+
+    /**
+     * Generates the telemetry properties for the platform/plugin operation
+     */
+    private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        var self = this;
+        var telemetryProperties: ICommandTelemetryProperties = {};
+        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+            var numericSuffix: number = 1;
+            telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand);
+            self.cordovaCommandParams.targets.forEach(function (target: string): void {
+                telemetryProperties["target" + numericSuffix] = telemetryHelper.sanitizeTargetStringPropertyInfo(target);
+                numericSuffix++;
+            });
+
+            return Q.resolve(telemetryProperties);
         });
     }
 

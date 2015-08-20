@@ -23,6 +23,7 @@ import util = require ("util");
 import CordovaHelper = require ("./utils/cordovaHelper");
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
 import HelpModule = require ("./help");
+import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
@@ -32,7 +33,10 @@ import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import loggerHelper = tacoUtility.LoggerHelper;
+import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
+
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;
@@ -99,13 +103,34 @@ class Remote extends commands.TacoCommandBase {
 
         return parsedOptions;
     }
+    
+    /**
+     * Generates the telemetry properties for the remote operation
+     */
+    private static generateTelemetryProperties(subCommand: string, platform?: string, isSecure?: boolean): Q.Promise<ICommandTelemetryProperties> {
+        var self = this;
+        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+            telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(subCommand);
 
-    private static remove(remoteData: commands.ICommandData): Q.Promise<any> {
+            if (platform) {
+                telemetryProperties["platform"] = telemetryHelper.telemetryProperty(platform);
+            }
+
+            if (typeof (isSecure) !== "undefined") {
+                telemetryProperties["isSecure"] = telemetryHelper.telemetryProperty(isSecure || false);
+            }
+
+            return Q.resolve(telemetryProperties);
+        });
+    }
+
+    private static remove(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         if (remoteData.remain.length < 2) {
             throw errorHelper.get(TacoErrorCodes.CommandRemoteDeleteNeedsPlatform);
         }
 
         var platform: string = (remoteData.remain[1]).toLowerCase();
+        var telemetryProperties: ICommandTelemetryProperties = {};
 
         return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
@@ -119,10 +144,12 @@ class Remote extends commands.TacoCommandBase {
             }
         }).then(function (): void {
             logger.log(resources.getString("CommandRemoteRemoveSuccessful", platform));
+        }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Remote.generateTelemetryProperties("remove", platform);
         });
     }
 
-    private static list(remoteData: commands.ICommandData): Q.Promise<any> {
+    private static list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
@@ -146,12 +173,14 @@ class Remote extends commands.TacoCommandBase {
             } else {
                 logger.log(resources.getString("CommandRemoteListNoPlatforms"));
             }
+        }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Remote.generateTelemetryProperties("list");
         });
     }
 
-    private static add(remoteData: commands.ICommandData): Q.Promise<any> {
+    private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
-
+        var remoteInfo: Settings.IRemoteConnectionInfo;
         return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): Q.Promise<any> {
             if (supportedPlatforms && !(platform in supportedPlatforms)) {
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
@@ -162,6 +191,10 @@ class Remote extends commands.TacoCommandBase {
             return Remote.queryUserForRemoteConfig()
                 .then(Remote.acquireCertificateIfRequired)
                 .then(Remote.constructRemotePlatformSettings)
+                .then(function (remoteConnectionInfo: Settings.IRemoteConnectionInfo): Q.Promise<Settings.IRemoteConnectionInfo> {
+                    remoteInfo = remoteConnectionInfo;
+                    return Q.resolve(remoteInfo);
+                })
                 .then(Remote.saveRemotePlatformSettings.bind(Remote, platform))
                 .then(function (): void {
                     logger.log(resources.getString("CommandRemoteSettingsStored", Settings.settingsFile));
@@ -177,6 +210,8 @@ class Remote extends commands.TacoCommandBase {
                         "HowToUseCommandHelp",
                         "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
              });
+        }).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Remote.generateTelemetryProperties("add", platform, remoteInfo.secure);            
         });
     }
 
@@ -291,7 +326,7 @@ class Remote extends commands.TacoCommandBase {
                 settings.remotePlatforms = {};
                 }
 
-            settings.remotePlatforms[platform] = data;
+            settings.remotePlatforms[platform] = data; 
             return Settings.saveSettings(settings);
         });
     }
@@ -330,10 +365,12 @@ class Remote extends commands.TacoCommandBase {
         }
     }
 
-    private static help(remoteData: commands.ICommandData): Q.Promise<any> {
+    private static help(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         remoteData.original.unshift("remote");
         remoteData.remain.unshift("remote");
-        return new HelpModule().run(remoteData);
+        return new HelpModule().run(remoteData).then(function (): Q.Promise<ICommandTelemetryProperties> {
+            return Q(<ICommandTelemetryProperties>{});
+        });
     }
 }
 
