@@ -11,7 +11,7 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don"t want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import AdmZip = require ("adm-zip");
 import del = require ("del");
@@ -264,7 +264,7 @@ module BuildAndRunTelemetryTests {
             return Settings.saveSettings({ remotePlatforms: platforms });
         }
 
-        var expectedGzipedSizeAbsoluteError = 20;
+        var expectedGzipedSizeAbsoluteError = 30;
 
         // We use this function to validate that the gzip size is near the expected ratio (non-deterministic changes in dates or other 
         // numbers might change the compression ratio, so it's difficult to predict the exact size), and then replace the number with
