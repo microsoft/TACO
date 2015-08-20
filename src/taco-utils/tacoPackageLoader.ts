@@ -23,16 +23,20 @@ import Q = require ("q");
 
 import installLogLevel = require ("./installLogLevel");
 import loggerUtil = require ("./logger");
+import logLevel = require ("./logLevel");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoError = require ("./tacoError");
+import globalConfig = require ("./tacoGlobalConfig");
 import UtilHelper = require ("./utilHelper");
 
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 import logger = loggerUtil.Logger;
+import LogLevel = logLevel.LogLevel;
 import TacoError = tacoError.TacoError;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = globalConfig.TacoGlobalConfig;
 import utils = UtilHelper.UtilHelper;
 
 module TacoUtility {
@@ -160,10 +164,29 @@ module TacoUtility {
                     if (updateRequested) {
                         var targetPath = request.targetPath;
                         var backupPath = request.targetPath + "_backup";
-                        fs.renameSync(targetPath, backupPath);
+                        try {
+                            if (fs.existsSync(backupPath)) {
+                                rimraf.sync(backupPath);
+                            }
+
+                            fs.renameSync(targetPath, backupPath);
+                        } catch (e) {
+                            if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
+                                logger.logWarning(e.toString());
+                            }
+                            // log but ignore the error, the user shouldn't have to care if the backup is in an inconsistent state
+                        }
 
                         return TacoPackageLoader.lazyRequireInternal<T>(request).then(function (obj: T): Q.Promise<T> {
-                            rimraf.sync(backupPath);
+                            try {
+                                rimraf.sync(backupPath);
+                            } catch (e) {
+                                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
+                                    logger.logWarning(e.toString());
+                                }
+                                // log but ignore the error, the user shouldn't have to care if the backup is in an inconsistent state
+                            }
+
                             TacoPackageLoader.updateLastCheckTimestamp(request.targetPath);
                             return Q<T>(obj);
                         }, function (error: any): Q.Promise<T> {

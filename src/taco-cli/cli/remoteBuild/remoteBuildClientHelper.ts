@@ -36,6 +36,8 @@ import tacoUtils = require ("taco-utils");
 
 import BuildInfo = tacoUtils.BuildInfo;
 import CountStream = tacoUtils.CountStream;
+import LogLevel = tacoUtils.LogLevel;
+import GlobalConfig = tacoUtils.TacoGlobalConfig;
 import NewlineNormalizerStream = tacoUtils.NewlineNormalizerStream;
 import UtilHelper = tacoUtils.UtilHelper;
 
@@ -425,7 +427,7 @@ class RemoteBuildClientHelper {
                     deferred.reject(errorHelper.get(TacoErrorCodes.InvalidBuildSubmission400, errorsJson.status, errorsJson.errors.toString()));
                 } else if (response.statusCode === 202) {
                     // Expect http 202 for a valid submission which is "Accepted" with a content-location to the Url to check for build status
-                    if (process.env["DEBUG"]) {
+                    if (GlobalConfig.logLevel === LogLevel.Diagnostic) {
                         console.info(resources.getString("NewRemoteBuildInfo", body));
                     }
 
