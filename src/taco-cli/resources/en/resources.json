@@ -372,8 +372,8 @@
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option(s) of 'taco install-reqs'",
 
-    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova version {0}. 'taco install-reqs' supports projects using Cordova version 5.1.0 or higher.<br/><br/>If your project was created using a taco kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=618544.",
-    "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than 5.1.0. {0} is the Cordova version used by the current project.",
+    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova version {0}. 'taco install-reqs' supports projects using Cordova version {1} or higher.<br/><br/>If your project was created using a taco kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=618544.",
+    "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than the minimum version. {0} is the Cordova version used by the current project, {1} is the minimum required Cordova version.",
     "CommandInstallNoPlatformsAdded": "Error: No platforms added to your project. To install the dependencies for a given platform, please add it to your project first.",
     "_CommandInstallNoPlatformsAdded.comment": "Error shown when a user uses 'taco install-reqs' but there are no platforms added to the current project.",
     "CommandInstallNoPlatformsFolder": "Error: No 'platforms' folder found. Please make sure the current directory is the root of a Cordova project, and at least one platform has been added.",
