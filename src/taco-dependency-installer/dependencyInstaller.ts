@@ -86,6 +86,7 @@ module TacoDependencyInstaller {
             // If there are no supported missing dependencies, we are done
             if (!this.missingDependencies.length) {
                 logger.log(resources.getString("NothingToInstall"));
+                logger.logLine();
 
                 return Q.resolve({});
             }
@@ -236,8 +237,10 @@ module TacoDependencyInstaller {
         }
 
         private displayUnsupportedWarning(): void {
+            var self = this;
+
             if (this.unsupportedMissingDependencies.length > 0) {
-                logger.log(resources.getString("UnsupportedDependenciesHeader"));
+                logger.logWarning(resources.getString("UnsupportedDependenciesHeader"));
 
                 this.unsupportedMissingDependencies.forEach(function (value: ICordovaRequirement): void {
                     var displayName: string = value.name || value.id;
@@ -253,7 +256,16 @@ module TacoDependencyInstaller {
                     if (version) {
                         logger.log(resources.getString("DependencyVersion", version));
                     }
+
+                    // If this is a known unsupported dependency for which we have additional info, print it here
+                    var installHelp: string = self.dependenciesDataWrapper.getInstallHelp(value.id);
+
+                    if (installHelp) {
+                        logger.log(resources.getString("UnsupportedMoreInfo", installHelp));
+                    }
                 });
+
+                logger.logLine();
             }
         }
 
@@ -469,7 +481,7 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
                     ];
-                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args);
+                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 
                     cp.on("error", function (err: Error): void {
                         // Handle ENOENT if Powershell is not found

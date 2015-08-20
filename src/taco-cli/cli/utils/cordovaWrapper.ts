@@ -34,7 +34,7 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaWrapper {
     private static CordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
-    private static CordovaRequirementsMinVersion: string = "5.1.0";
+    private static CordovaRequirementsMinVersion: string = "5.1.1";
     private static CordovaNpmPackageName: string = "cordova";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
@@ -169,7 +169,7 @@ class CordovaWrapper {
 
                 // If the cordova version is older than 5.1.0, the 'requirements' command does not exist
                 if (!semver.gte(version, CordovaWrapper.CordovaRequirementsMinVersion)) {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld, version));
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld, version, CordovaWrapper.CordovaRequirementsMinVersion));
                 }
 
                 return Q.resolve({});
