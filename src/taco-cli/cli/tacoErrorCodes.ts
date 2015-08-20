@@ -20,10 +20,12 @@ enum TacoErrorCode {
     ErrorReadingPackageVersions = 5014,
 
     // Errors to do with Create 5450-5499
-    CommandCreateInvalidPath = 5451,
-    CommandCreateTacoJsonFileCreationError = 5452,
-    CommandCreateTacoJsonFileWriteError = 5453,
-    CommandCreateTemplatesUnavailable = 5454,
+    CommandCreateGitCloneError = 5451,
+    CommandCreateInvalidPath = 5452,
+    CommandCreateNoGit = 5453,
+    CommandCreateTacoJsonFileCreationError = 5454,
+    CommandCreateTacoJsonFileWriteError = 5455,
+    CommandCreateTemplatesUnavailable = 5456,
     
     // Invalid Arguments 5500 - 5599
     // General invalid arguments 5500 - 5509
