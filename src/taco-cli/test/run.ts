@@ -37,7 +37,6 @@ import utils = TacoUtility.UtilHelper;
 var create = new createMod();
 
 describe("taco run", function (): void {
-    this.timeout(10000000);
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;
