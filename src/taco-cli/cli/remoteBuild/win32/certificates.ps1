@@ -1,7 +1,9 @@
 ﻿param(
-    [Parameter(Mandatory=$True)][string]$Command,
-    [Parameter(Mandatory=$False)][string]$CertificateName = "remotebuild"
+    [Parameter(Mandatory=$True, ValueFromPipeline=$False)][string]$Command,
+    [Parameter(Mandatory=$False, ValueFromPipeline=$False)][string]$CertificateName = "remotebuild",
+    [Parameter(Mandatory=$False, ValueFromPipeline=$True)][string]$base64Cert
 )
+# To work on windows 7, we declare $base64Cert as a value from a pipeline, so it may fill it in automatically from stdin
 
 # Uncaught exceptions do not correctly set the exit code in powershell scripts invoked via the -file argument!
 trap
@@ -37,9 +39,12 @@ if ($Command -eq "get") {
     $newCertsToAdd = new-object $X509Certificate2Collection;
     $oldCertsToRemove = new-object $X509Certificate2Collection;
 
-    $base64Cert = [System.Console]::ReadLine()
+    if (! $base64Cert) {
+        # On non windows 7 powershell, the pipeline argument does not seem to get used, so we explicitly read from stdin.
+        $base64Cert = [System.Console]::ReadLine();
+    }
     # no password, mark private key as exportable
-    [byte[]]$CertBytes = [System.Convert]::FromBase64String($base64Cert)
+    [byte[]]$CertBytes = [System.Convert]::FromBase64String($base64Cert);
     [string]$Password = ""
     [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]$KeyFlags = $X509KeyStorageFlags::UserKeySet -bor $X509KeyStorageFlags::PersistKeySet -bor $X509KeyStorageFlags::Exportable
     $newCertsToAdd.Import($CertBytes, $Password, $KeyFlags);
