@@ -67,8 +67,7 @@ class Taco {
         .then(function (telemetryProperties: ICommandTelemetryProperties): void {
             if (parsedArgs.command) {
                 commandProperties = telemetryProperties;
-            }
-            
+            }         
         }).done(function (): void {
             // Send command success telemetry
             telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
@@ -89,7 +88,7 @@ class Taco {
                 }
 
                 // Send command failure telemetry
-                return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
                     telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
                 });
             }
