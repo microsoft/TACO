@@ -302,7 +302,7 @@ describe("taco build", function (): void {
         })));
         
         // Mock out the server on the other side
-        // Since this test is only whether we attempt incremental builds, we"ll let the build fail to make the test shorter
+        // Since this test is only whether we attempt incremental builds, we'll let the build fail to make the test shorter
         var sequence = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,

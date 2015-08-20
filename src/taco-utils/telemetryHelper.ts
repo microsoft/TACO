@@ -129,9 +129,9 @@ module TacoUtility {
         
         private static setTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             if (isPii) {
-                event.setPiiProperty(propertyName, "" + propertyValue);
+                event.setPiiProperty(propertyName, String(propertyValue));
             } else {
-                event.properties[propertyName] = "" + propertyValue;
+                event.properties[propertyName] = String(propertyValue);
             }       
         }
 

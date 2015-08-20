@@ -34,6 +34,8 @@ class ServerMock {
                 if (request.url !== data.expectedUrl) {
                     onErr(new Error("Expected request to " + data.expectedUrl + " got " + request.url));
                 } else {
+                    // Next line can be uncommented for debugging tests
+                    // console.log("Got request: " + request.url);
                     var sendResponse = function (): void {
                         setTimeout(() => {
                             response.writeHead(data.statusCode, data.head);

@@ -52,7 +52,7 @@ interface IExpectedRequest {
 }
 
 /**
- * Build telemetry test plan
+ * Build/Run telemetry test plan
  *
  * Concerns to test:
  * options: local, remote, clean, debug, release, device, emulator, target
@@ -62,6 +62,7 @@ interface IExpectedRequest {
  *   + specifying contradictory options in the command line (e.g.: --debug --release) --> The command fails, so we don't need to test this
  * remote build: project"s size, gziped project"s size, changed files" count, was incremental build, secure HTTPs server?
  * Unexpected behavior: --uknown_option and unknown_platform
+ * Run specific options: nobuild, debuginfo
  *
  * Test cases:
  * 1. android local clean release emulator
@@ -69,6 +70,7 @@ interface IExpectedRequest {
  * 3. android ios unsecure_server not_incremental
  * 4. no command line, implicit windows wp8
  * 5. --uknown_option unknown_platform
+ * 6. nobuild debuginfo (Only for Run)
  *
  * TODO: We currently aren't testing a secure server, because we need to find a good way of either
  *       installing the client certificate in both Windows and Mac, or mocking the certificate path
@@ -84,6 +86,7 @@ module BuildAndRunTelemetryTests {
         var cordova: Cordova.ICordova = new mockCordova.MockCordova510();
         var vcordova: string = "4.0.0";
         var remoteServerConfiguration = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
+        var buildNumber = 12341;
 
         var customLoader: TacoUtility.ITacoPackageLoader = {
             lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel) => {
@@ -106,9 +109,8 @@ module BuildAndRunTelemetryTests {
         };
 
         function generateCompleteBuildSequence(platform: string, shouldSupportIncrementalBuild: boolean,
-            shouldSupportDownloadSequence: boolean, options?: string): any {
+            shouldSupportDownloadSequence: boolean, shouldDeployToDevice: boolean, options?: string): any {
             var configuration = "debug";
-            var buildNumber = 12341;
         
             // Mock out the server on the other side
             var queryOptions: { [key: string]: string } = {
@@ -127,24 +129,24 @@ module BuildAndRunTelemetryTests {
             var zippedAppBuffer = zip.toBuffer();
 
             var nonIncrementalBuildStart: IExpectedRequest[] = [{
-                    expectedUrl: "/cordova/build/tasks?" + querystring.stringify(queryOptions),
-                    head: {
-                        "Content-Type": "application/json",
-                        "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
-                    },
-                    statusCode: 202,
-                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADING, buildNumber: buildNumber })),
-                    waitForPayload: true
-                }];
-
-            queryOptions["buildNumber"] = "12340";
-            var incrementalBuildStart: IExpectedRequest[] = [{
-                    expectedUrl: "/cordova/build/12340",
-                    head: { "Content-Type": "application/json" },
-                    statusCode: 200,
-                    response: "",
-                    waitForPayload: false
+                expectedUrl: "/cordova/build/tasks?" + querystring.stringify(queryOptions),
+                head: {
+                    "Content-Type": "application/json",
+                    "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
                 },
+                statusCode: 202,
+                response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADING, buildNumber: buildNumber, buildLang: "en" })),
+                waitForPayload: true
+            }];
+
+            queryOptions["buildNumber"] = "" + buildNumber;
+            var incrementalBuildStart: IExpectedRequest[] = [{
+                expectedUrl: "/cordova/build/" + buildNumber,
+                head: { "Content-Type": "application/json" },
+                statusCode: 200,
+                response: JSON.stringify(new BuildInfo({ status: BuildInfo.COMPLETE, buildNumber: buildNumber, buildLang: "en" })),
+                waitForPayload: false
+            },
                 {
                     expectedUrl: "/cordova/build/tasks?" + querystring.stringify(queryOptions),
                     head: {
@@ -152,17 +154,17 @@ module BuildAndRunTelemetryTests {
                         "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
                     },
                     statusCode: 202,
-                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.COMPLETE, buildNumber: buildNumber })),
+                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADING, buildNumber: buildNumber, buildLang: "en" })),
                     waitForPayload: true
                 }];
 
             var remainingBuildSequence: IExpectedRequest[] = [{
-                    expectedUrl: "/cordova/build/tasks/" + buildNumber,
-                    head: { "Content-Type": "application/json" },
-                    statusCode: 200,
-                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADED, buildNumber: buildNumber })),
-                    waitForPayload: false
-                },
+                expectedUrl: "/cordova/build/tasks/" + buildNumber,
+                head: { "Content-Type": "application/json" },
+                statusCode: 200,
+                response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADED, buildNumber: buildNumber, buildLang: "en" })),
+                waitForPayload: false
+            },
                 {
                     expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=0",
                     head: { "Content-Type": "application/json" },
@@ -174,7 +176,7 @@ module BuildAndRunTelemetryTests {
                     expectedUrl: "/cordova/build/tasks/" + buildNumber,
                     head: { "Content-Type": "application/json" },
                     statusCode: 200,
-                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.COMPLETE, buildNumber: buildNumber })),
+                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.COMPLETE, buildNumber: buildNumber, buildLang: "en" })),
                     waitForPayload: false
                 },
                 {
@@ -194,27 +196,60 @@ module BuildAndRunTelemetryTests {
             ];
 
             var downloadSequence = [{
-                    expectedUrl: util.format("/cordova/build/%d/download", buildNumber),
-                    head: { "Content-Type": "application/zip", "Content-disposition": "attachment; filename=app.zip" },
-                    statusCode: 200,
-                    response: zippedAppBuffer,
-                    waitForPayload: false
-                }];
+                expectedUrl: util.format("/cordova/build/%d/download", buildNumber),
+                head: { "Content-Type": "application/zip", "Content-disposition": "attachment; filename=app.zip" },
+                statusCode: 200,
+                response: zippedAppBuffer,
+                waitForPayload: false
+            }];
 
             var buildSequence = (shouldSupportIncrementalBuild ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
             if (shouldSupportDownloadSequence) {
                 buildSequence = buildSequence.concat(downloadSequence);
             }
 
+            if (!isBuild && !shouldDeployToDevice) {
+                var runSequence = [{
+                    expectedUrl: "/cordova/build/" + buildNumber + "/emulate?" + querystring.stringify({ target: "" }),
+                    head: { "Content-Type": "application/json" },
+                    statusCode: 200,
+                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.EMULATED, buildNumber: buildNumber })),
+                    waitForPayload: false
+                }];
+                buildSequence = buildSequence.concat(runSequence);
+            }
+
+            if (shouldDeployToDevice) {
+                var deployToDeviceSequence = [
+                    {
+                        expectedUrl: "/cordova/build/" + buildNumber + "/deploy",
+                        head: { "Content-Type": "application/json" },
+                        statusCode: 200,
+                        response: JSON.stringify(new BuildInfo({ status: BuildInfo.INSTALLED, buildNumber: buildNumber })),
+                        waitForPayload: false
+                    },
+                    {
+                        expectedUrl: "/cordova/build/" + buildNumber + "/run",
+                        head: { "Content-Type": "application/json" },
+                        statusCode: 200,
+                        response: JSON.stringify(new BuildInfo({ status: BuildInfo.RUNNING, buildNumber: buildNumber })),
+                        waitForPayload: false
+                    }
+                ];
+
+                buildSequence = buildSequence.concat(deployToDeviceSequence);
+            }
+
             return buildSequence;
         }
 
         function configureRemoteServer(done: MochaDone, shouldSupportAndroid: boolean, shouldSupportIncrementalBuild: boolean,
-            shouldSupportDownloadSequence: boolean, options?: string): Q.Promise<any> {
-            var sequence = generateCompleteBuildSequence("ios", shouldSupportIncrementalBuild, shouldSupportDownloadSequence, options);
+            shouldSupportDownloadSequence: boolean, shouldDeployToDevice: boolean, options?: string): Q.Promise<any> {
+            var sequence = generateCompleteBuildSequence("ios", shouldSupportIncrementalBuild,
+                shouldSupportDownloadSequence, shouldDeployToDevice, options);
             if (shouldSupportAndroid) {
                 var androidSequence = generateCompleteBuildSequence("android", shouldSupportIncrementalBuild,
-                    shouldSupportDownloadSequence, options);
+                    shouldSupportDownloadSequence, shouldDeployToDevice);
                 sequence = androidSequence.concat(sequence);
             }
 
@@ -274,7 +309,7 @@ module BuildAndRunTelemetryTests {
                 "options.release": { isPii: false, value: true },
                 "options.emulator": { isPii: false, value: true },
                 "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
-                subCommand: { isPii: false, value: "build" }
+                subCommand: { isPii: false, value: isBuild ? "build" : "local" }
             };
 
             if (isBuild) { // Run doesn't support clean, and local run doesn't report the actuallyBuilt platforms
@@ -289,6 +324,16 @@ module BuildAndRunTelemetryTests {
             });
         });
 
+        function mockProjectWithIncrementalBuild(): void {
+            // We write an empty changes file, and a build info file so we'll get an incremental build
+            var changeTimeFileDirectory = path.join(projectPath, "remote", "ios", "debug");
+            utils.createDirectoryIfNecessary(changeTimeFileDirectory);
+            var changeTimeFile = path.join(changeTimeFileDirectory, "lastChangeTime.json");
+            var buildInfoFile = path.join(changeTimeFileDirectory, "buildInfo.json");
+            fs.writeFileSync(changeTimeFile, "{}");
+            fs.writeFileSync(buildInfoFile, "{\"buildNumber\": " + buildNumber + "}");
+        }
+
         it("2. ios remote debug device target non_secure_server incremental", (done: MochaDone) => {
             var args = ["--remote", "--debug", "--device", "--target=my_device", "ios"];
 
@@ -299,7 +344,7 @@ module BuildAndRunTelemetryTests {
                 "options.target": { isPii: false, value: "my_device" },
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "ios" },
-                subCommand: { isPii: false, value: "build" },
+                subCommand: { isPii: false, value: isBuild ? "build" : "remote" },
                 "platforms.remote.ios.is_secure": { isPii: false, value: false },
                 "remoteBuild.ios.filesChangedCount": { isPii: false, value: 8 },
                 "remoteBuild.ios.wasIncremental": { isPii: false, value: true },
@@ -307,14 +352,8 @@ module BuildAndRunTelemetryTests {
                 "remotebuild.ios.projectSizeInBytes": { isPii: false, value: 48128 }
             };
 
-            // We write an empty changes file, and a builf info file so we'll get an incremental build
-            var changeTimeFileDirectory = path.join(projectPath, "remote", "ios", "debug");
-            utils.createDirectoryIfNecessary(changeTimeFileDirectory);
-            var changeTimeFile = path.join(changeTimeFileDirectory, "lastChangeTime.json");
-            var buildInfoFile = path.join(changeTimeFileDirectory, "buildInfo.json");
-            fs.writeFileSync(changeTimeFile, "{}");
-            fs.writeFileSync(buildInfoFile, "{\"buildNumber\": 12340}");
-            configureRemoteServer(done, false, true, true, "--device")
+            mockProjectWithIncrementalBuild();
+            configureRemoteServer(done, false, true, true, true, "--device")
                 .then(() => runCommand(args))
                 .finally(() => testHttpServer.removeAllListeners("request"))
                 .done(telemetryProperties => {
@@ -330,7 +369,7 @@ module BuildAndRunTelemetryTests {
                 "platforms.actuallyBuilt.remote2": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "android" },
                 "platforms.requestedViaCommandLine.remote2": { isPii: false, value: "ios" },
-                subCommand: { isPii: false, value: "build" },
+                subCommand: { isPii: false, value: isBuild ? "build" : "fallback" },
                 "platforms.remote.android.is_secure": { isPii: false, value: false },
                 "platforms.remote.ios.is_secure": { isPii: false, value: false },
                 "remoteBuild.android.filesChangedCount": { isPii: false, value: 8 },
@@ -343,7 +382,7 @@ module BuildAndRunTelemetryTests {
                 "remotebuild.ios.projectSizeInBytes": { isPii: false, value: 49152 }
             };
 
-            configureRemoteServer(done, true, false, false, null)
+            configureRemoteServer(done, true, false, false, false, null)
                 .then(() => runCommand(args))
                 .done(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
@@ -360,7 +399,7 @@ module BuildAndRunTelemetryTests {
             var expected = {
                 "platforms.actuallyBuilt.local1": { isPii: false, value: "windows" },
                 "platforms.actuallyBuilt.local2": { isPii: false, value: "wp8" },
-                subCommand: { isPii: false, value: "build" }
+                subCommand: { isPii: false, value: isBuild ? "build" : "fallback" }
             };
 
             runCommand(args).done(telemetryProperties => {
@@ -374,7 +413,7 @@ module BuildAndRunTelemetryTests {
             var expected = {
                 "platforms.actuallyBuilt.local1": { isPii: true, value: "unknown_platform" },
                 "platforms.requestedViaCommandLine.local1": { isPii: true, value: "unknown_platform" },
-                subCommand: { isPii: false, value: "build" },
+                subCommand: { isPii: false, value: isBuild ? "build" : "fallback" },
                 "unknown_option1.name": { isPii: true, value: "uknown_option" },
                 "unknown_option1.value": { isPii: true, value: "unknown_value" }
             };
@@ -384,6 +423,25 @@ module BuildAndRunTelemetryTests {
                 done();
             });
         });
+
+        if (!isBuild) {
+            it("6. nobuild debuginfo", (done: MochaDone) => {
+                utils.createDirectoryIfNecessary(path.join(projectPath, "platforms", "android"));
+                var args = ["--nobuild", "--debuginfo", "android"];
+                var expected = {
+                    "options.nobuild": { isPii: false, value: true },
+                    "options.debuginfo": { isPii: false, value: true },
+                    "platforms.actuallyBuilt.local1": { isPii: false, value: "android" },
+                    "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
+                    subCommand: { isPii: false, value: isBuild ? "build" : "fallback" }
+                };
+
+                runCommand(args).done(telemetryProperties => {
+                    telemetryShouldEqual(telemetryProperties, expected);
+                    done();
+                });
+            });
+        }
     }
 }
 
