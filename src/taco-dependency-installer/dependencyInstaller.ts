@@ -481,7 +481,7 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
                     ];
-                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" });
+                    var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 
                     cp.on("error", function (err: Error): void {
                         // Handle ENOENT if Powershell is not found
