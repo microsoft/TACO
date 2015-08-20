@@ -19,7 +19,7 @@ declare module TacoUtility {
     }
 
     class TelemetryHelper {
-        static telemetryProperty(propertyValue: any, isPii: boolean): ITelemetryPropertyInfo;
+        static telemetryProperty(propertyValue: any, isPii?: boolean): ITelemetryPropertyInfo;
         static sendCommandSuccessTelemetry(commandName: string, commandProperties: ICommandTelemetryProperties, args: string[]): void;
         static sendCommandFailureTelemetry(commandName: string, error: any, properties: ICommandTelemetryProperties, args: string[]): void;
         static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void;

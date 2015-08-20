@@ -90,10 +90,12 @@ class Taco {
                 // Send command failure telemetry
                 projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
                     telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
+                }).finally(function (): void {
+                    process.exit(1);
                 });
+            } else {
+                process.exit(1);
             }
-            
-            process.exit(1);
         });
     }
 

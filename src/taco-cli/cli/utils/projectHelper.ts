@@ -282,18 +282,18 @@ class ProjectHelper {
         .spread<ICommandTelemetryProperties>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
             var projectTelemetryProperties: ICommandTelemetryProperties = {};
             if (projectTelemetryProperties["isTacoProject"]) {
-                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true, false);
+                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true);
                 if (projectInfo.tacoKitId) {
-                    projectTelemetryProperties["kit"] = telemetryHelper.telemetryProperty(projectInfo.tacoKitId, false);
+                    projectTelemetryProperties["kit"] = telemetryHelper.telemetryProperty(projectInfo.tacoKitId);
                 } else {
-                    projectTelemetryProperties["cli"] = telemetryHelper.telemetryProperty(projectInfo.cordovaCliVersion, false);
+                    projectTelemetryProperties["cli"] = telemetryHelper.telemetryProperty(projectInfo.cordovaCliVersion);
                 }
             } else {
-                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(false, false);
+                projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(false);
             }
 
-            projectTelemetryProperties["projectType"] = telemetryHelper.telemetryProperty(isTsProject ? "TypeScript" : "JavaScript", false);
-            projectTelemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../../package.json").version, false); 
+            projectTelemetryProperties["projectType"] = telemetryHelper.telemetryProperty(isTsProject ? "TypeScript" : "JavaScript");
+            projectTelemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../../package.json").version); 
             return Q.resolve(projectTelemetryProperties);
         });
     }

@@ -25,8 +25,8 @@ module TacoUtility {
     };
 
     export class TelemetryHelper {
-        public static telemetryProperty(propertyValue: any, isPii: boolean): ITelemetryPropertyInfo {
-            return { value: String(propertyValue), isPii: isPii };  
+        public static telemetryProperty(propertyValue: any, pii?: boolean): ITelemetryPropertyInfo {
+            return { value: String(propertyValue), isPii: pii || false };  
         }
 
         public static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void {
