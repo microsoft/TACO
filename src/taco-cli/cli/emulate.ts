@@ -160,20 +160,22 @@ class Emulate extends commands.TacoCommandBase {
 
     private static emulate(commandData: commands.ICommandData): Q.Promise<any> {
         var telemetryProperties: ICommandTelemetryProperties = {};
-        return Settings.determinePlatform(commandData).then(function (platforms: Settings.IPlatformWithLocation[]): Q.Promise<any> {
-            return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
-                return soFar.then(function (): Q.Promise<any> {
-                    switch (platform.location) {
-                        case Settings.BuildLocationType.Local:
-                            // Just run local, and failures are failures
-                            return CordovaWrapper.emulate(commandData, platform.platform);
-                        case Settings.BuildLocationType.Remote:
-                            // Just run remote, and failures are failures
-                            return Emulate.runRemotePlatform(platform.platform, commandData, telemetryProperties);
-                    }
-                });
-            }, Q({}));
-        }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
+        return Q.all([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
+            .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
+                buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
+                return platforms.reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation): Q.Promise<any> {
+                    return soFar.then(function (): Q.Promise<any> {
+                        switch (platform.location) {
+                            case Settings.BuildLocationType.Local:
+                                // Just run local, and failures are failures
+                                return CordovaWrapper.emulate(commandData, platform.platform);
+                            case Settings.BuildLocationType.Remote:
+                                // Just run remote, and failures are failures
+                                return Emulate.runRemotePlatform(platform.platform, commandData, telemetryProperties);
+                        }
+                    });
+                }, Q({}));
+            }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
     }
 }
 

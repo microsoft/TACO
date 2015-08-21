@@ -32,11 +32,13 @@ import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
+import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
 var create = new createMod();
 
 describe("taco run", function (): void {
+    this.timeout(20000); // The remote tests sometimes take some time to run
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;
@@ -241,8 +243,8 @@ describe("taco run", function (): void {
             }
         });
     });
-
+    
     describe("telemetry", () => {
-        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, runRun, () => testHttpServer, false);
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, runRun, () => testHttpServer, Command.Run);
     });
 });

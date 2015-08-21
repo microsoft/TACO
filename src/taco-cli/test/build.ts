@@ -38,6 +38,7 @@ import Settings = require ("../cli/utils/settings");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
+import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
 var build = new buildMod();
@@ -369,6 +370,6 @@ describe("taco build", function (): void {
     });
 
     describe("telemetry", () => {
-        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, buildRun, () => testHttpServer, true);
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, buildRun, () => testHttpServer, Command.Build);
     });
 });

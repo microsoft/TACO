@@ -464,7 +464,7 @@ class RemoteBuildClientHelper {
     }
 
     private static isDeviceBuild(settings: BuildSettings): boolean {
-        return settings.buildTarget && !!settings.buildTarget.match(/device/i);
+        return settings.buildTarget && (settings.buildTarget.toLowerCase() === "device");
     }
 
     /*

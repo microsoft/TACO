@@ -66,9 +66,9 @@ interface IExpectedRequest {
  *
  * Test cases:
  * 1. android local clean release emulator
- * 2. ios remote debug device target secure_server incremental --> We are not testing secure_server currently
+ * 2. ios remote debug target secure_server incremental --> We are not testing secure_server currently
  * 3. android ios unsecure_server not_incremental
- * 4. no command line, implicit windows wp8
+ * 4. no command line platforms, implicit windows wp8 device
  * 5. --uknown_option unknown_platform
  * 6. nobuild debuginfo (Only for Run)
  *
@@ -77,9 +77,15 @@ interface IExpectedRequest {
  */
 
 module BuildAndRunTelemetryTests {
+    export enum Command {
+        Build,
+        Run,
+        Emulate
+    }
+
     export function createBuildAndRunTelemetryTests(runCommand: { (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> },
-        getTestHttpServer: { (): http.Server }, isBuild: boolean): void {
-        var tacoHome = path.join(os.tmpdir(), "taco-cli", isBuild ? "build" : "run");
+        getTestHttpServer: { (): http.Server }, command: Command): void {
+        var tacoHome = path.join(os.tmpdir(), "taco-cli", commandSwitch("build", "run", "emulate"));
         var projectPath = path.join(tacoHome, "example");
         var testHttpServer: http.Server;
 
@@ -87,6 +93,7 @@ module BuildAndRunTelemetryTests {
         var vcordova: string = "4.0.0";
         var remoteServerConfiguration = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
         var buildNumber = 12341;
+        var isNotEmulate = command !== Command.Emulate;
 
         var customLoader: TacoUtility.ITacoPackageLoader = {
             lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel) => {
@@ -108,8 +115,12 @@ module BuildAndRunTelemetryTests {
             return Q({});
         };
 
-        function generateCompleteBuildSequence(platform: string, shouldSupportIncrementalBuild: boolean,
-            shouldSupportDownloadSequence: boolean, shouldDeployToDevice: boolean, options?: string): any {
+        // We mock cordova emulate
+        cordova.raw.emulate = function (options: Cordova.ICordovaRawOptions): Q.Promise<any> {
+            return Q({});
+        };
+
+        function generateCompleteBuildSequence(platform: string, isIncrementalTest: boolean, options?: string): any {
             var configuration = "debug";
         
             // Mock out the server on the other side
@@ -203,14 +214,15 @@ module BuildAndRunTelemetryTests {
                 waitForPayload: false
             }];
 
-            var buildSequence = (shouldSupportIncrementalBuild ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
-            if (shouldSupportDownloadSequence) {
-                buildSequence = buildSequence.concat(downloadSequence);
+            var buildSequence = (isIncrementalTest ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
+            if (isIncrementalTest && isNotEmulate) {
+                // buildSequence = buildSequence.concat(downloadSequence);
             }
 
-            if (!isBuild && !shouldDeployToDevice) {
+            if (command !== Command.Build) {
+                var target = isIncrementalTest ? "ipad 2" : "";
                 var runSequence = [{
-                    expectedUrl: "/cordova/build/" + buildNumber + "/emulate?" + querystring.stringify({ target: "" }),
+                    expectedUrl: "/cordova/build/" + buildNumber + "/emulate?" + querystring.stringify({ target: target }),
                     head: { "Content-Type": "application/json" },
                     statusCode: 200,
                     response: JSON.stringify(new BuildInfo({ status: BuildInfo.EMULATED, buildNumber: buildNumber })),
@@ -219,7 +231,7 @@ module BuildAndRunTelemetryTests {
                 buildSequence = buildSequence.concat(runSequence);
             }
 
-            if (shouldDeployToDevice) {
+            if (false) {
                 var deployToDeviceSequence = [
                     {
                         expectedUrl: "/cordova/build/" + buildNumber + "/deploy",
@@ -243,13 +255,10 @@ module BuildAndRunTelemetryTests {
             return buildSequence;
         }
 
-        function configureRemoteServer(done: MochaDone, shouldSupportAndroid: boolean, shouldSupportIncrementalBuild: boolean,
-            shouldSupportDownloadSequence: boolean, shouldDeployToDevice: boolean, options?: string): Q.Promise<any> {
-            var sequence = generateCompleteBuildSequence("ios", shouldSupportIncrementalBuild,
-                shouldSupportDownloadSequence, shouldDeployToDevice, options);
-            if (shouldSupportAndroid) {
-                var androidSequence = generateCompleteBuildSequence("android", shouldSupportIncrementalBuild,
-                    shouldSupportDownloadSequence, shouldDeployToDevice);
+        function configureRemoteServer(done: MochaDone, isIncrementalTest: boolean, options?: string): Q.Promise<any> {
+            var sequence = generateCompleteBuildSequence("ios", isIncrementalTest, options);
+            if (!isIncrementalTest) {
+                var androidSequence = generateCompleteBuildSequence("android", isIncrementalTest);
                 sequence = androidSequence.concat(sequence);
             }
 
@@ -257,7 +266,7 @@ module BuildAndRunTelemetryTests {
             testHttpServer.on("request", serverFunction);
 
             var platforms: { [platform: string]: Settings.IRemoteConnectionInfo } = { ios: remoteServerConfiguration };
-            if (shouldSupportAndroid) {
+            if (!isIncrementalTest) {
                 platforms["android"] = remoteServerConfiguration;
             }
 
@@ -301,20 +310,38 @@ module BuildAndRunTelemetryTests {
             TacoUtility.TacoPackageLoader.MockForTests = null;
         });
 
+        function commandSwitch<T>(buildResult: T, runResult: T, emulateResult: T): T {
+            switch (command) {
+                case Command.Build:
+                    return buildResult;
+                case Command.Run:
+                    return runResult;
+                case Command.Emulate:
+                    return emulateResult;
+                default:
+                    throw new Error("Unknown command");
+            }
+        }
+
         it("1. android local clean release emulator", (done: MochaDone) => {
-            var args = ["--local", "--release", "--emulator", "android"];
+            var args = ["--local", "--release", "android"];
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "options.local": { isPii: false, value: true },
                 "options.release": { isPii: false, value: true },
-                "options.emulator": { isPii: false, value: true },
                 "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
-                subCommand: { isPii: false, value: isBuild ? "build" : "local" }
+                subCommand: { isPii: false, value: commandSwitch("build", "local", "emulate") }
             };
 
-            if (isBuild) { // Run doesn't support clean, and local run doesn't report the actuallyBuilt platforms
-                args.unshift("--clean");
+            if ((command === Command.Build)) {
+                args.unshift("--clean"); // Only build supports clean
                 expected["options.clean"] = { isPii: false, value: true };
+            } else if (command !== Command.Emulate) {
+                args.unshift("--emulator"); // Emulator doesn't support emulator
+                expected["options.emulator"] = { isPii: false, value: true };
+            }
+
+            if (command !== Command.Run) { // Local run doesn't report the actuallyBuilt platforms
                 expected["platforms.actuallyBuilt.local1"] = { isPii: false, value: "android" };
             }
 
@@ -334,17 +361,16 @@ module BuildAndRunTelemetryTests {
             fs.writeFileSync(buildInfoFile, "{\"buildNumber\": " + buildNumber + "}");
         }
 
-        it("2. ios remote debug device target non_secure_server incremental", (done: MochaDone) => {
-            var args = ["--remote", "--debug", "--device", "--target=my_device", "ios"];
+        it("2. ios remote debug target non_secure_server incremental", (done: MochaDone) => {
+            var args = ["--remote", "--debug", "--target=ipad 2", "ios"];
 
-            var expected = {
+            var expected: TacoUtility.ICommandTelemetryProperties = {
                 "options.remote": { isPii: false, value: true },
                 "options.debug": { isPii: false, value: true },
-                "options.device": { isPii: false, value: true },
-                "options.target": { isPii: false, value: "my_device" },
+                "options.target": { isPii: false, value: "ipad 2" },
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "ios" },
-                subCommand: { isPii: false, value: isBuild ? "build" : "remote" },
+                subCommand: { isPii: false, value: commandSwitch("build", "remote", "emulate") },
                 "platforms.remote.ios.is_secure": { isPii: false, value: false },
                 "remoteBuild.ios.filesChangedCount": { isPii: false, value: 8 },
                 "remoteBuild.ios.wasIncremental": { isPii: false, value: true },
@@ -353,7 +379,7 @@ module BuildAndRunTelemetryTests {
             };
 
             mockProjectWithIncrementalBuild();
-            configureRemoteServer(done, false, true, true, true, "--device")
+            configureRemoteServer(done, /* Incremental test*/ true)
                 .then(() => runCommand(args))
                 .finally(() => testHttpServer.removeAllListeners("request"))
                 .done(telemetryProperties => {
@@ -364,12 +390,12 @@ module BuildAndRunTelemetryTests {
 
         it("3. android ios unsecure_server not_incremental", (done: MochaDone) => {
             var args = ["android", "ios"];
-            var expected = {
+            var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "android" },
                 "platforms.actuallyBuilt.remote2": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "android" },
                 "platforms.requestedViaCommandLine.remote2": { isPii: false, value: "ios" },
-                subCommand: { isPii: false, value: isBuild ? "build" : "fallback" },
+                subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") },
                 "platforms.remote.android.is_secure": { isPii: false, value: false },
                 "platforms.remote.ios.is_secure": { isPii: false, value: false },
                 "remoteBuild.android.filesChangedCount": { isPii: false, value: 8 },
@@ -382,7 +408,7 @@ module BuildAndRunTelemetryTests {
                 "remotebuild.ios.projectSizeInBytes": { isPii: false, value: 49152 }
             };
 
-            configureRemoteServer(done, true, false, false, false, null)
+            configureRemoteServer(done, /* Not incremental test*/ false, null)
                 .then(() => runCommand(args))
                 .done(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
@@ -390,17 +416,22 @@ module BuildAndRunTelemetryTests {
                 });
         });
 
-        it("4. no command line, implicit windows wp8", (done: MochaDone) => {
+        it("4. no command line platforms, implicit windows wp8 device", (done: MochaDone) => {
             // taco platform add windows wp8: We mock adding the platform
             utils.createDirectoryIfNecessary(path.join(projectPath, "platforms", "windows"));
             utils.createDirectoryIfNecessary(path.join(projectPath, "platforms", "wp8"));
 
-            var args: string[] = [];
-            var expected = {
+            var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.actuallyBuilt.local1": { isPii: false, value: "windows" },
                 "platforms.actuallyBuilt.local2": { isPii: false, value: "wp8" },
-                subCommand: { isPii: false, value: isBuild ? "build" : "fallback" }
+                subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
             };
+
+            var args: string[] = [];
+            if (isNotEmulate) {
+                args.unshift("--device");
+                expected["options.device"] = { isPii: false, value: true };
+            }
 
             runCommand(args).done(telemetryProperties => {
                 telemetryShouldEqual(telemetryProperties, expected);
@@ -410,10 +441,10 @@ module BuildAndRunTelemetryTests {
 
         it("5. --uknown_option unknown_platform", (done: MochaDone) => {
             var args = ["--uknown_option=unknown_value", "unknown_platform"];
-            var expected = {
-                "platforms.actuallyBuilt.local1": { isPii: true, value: "unknown_platform" },
+            var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.requestedViaCommandLine.local1": { isPii: true, value: "unknown_platform" },
-                subCommand: { isPii: false, value: isBuild ? "build" : "fallback" },
+                "platforms.actuallyBuilt.local1": { isPii: true, value: "unknown_platform" },
+                subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") },
                 "unknown_option1.name": { isPii: true, value: "uknown_option" },
                 "unknown_option1.value": { isPii: true, value: "unknown_value" }
             };
@@ -424,16 +455,16 @@ module BuildAndRunTelemetryTests {
             });
         });
 
-        if (!isBuild) {
+        if ((command !== Command.Build)) {
             it("6. nobuild debuginfo", (done: MochaDone) => {
                 utils.createDirectoryIfNecessary(path.join(projectPath, "platforms", "android"));
                 var args = ["--nobuild", "--debuginfo", "android"];
-                var expected = {
+                var expected: TacoUtility.ICommandTelemetryProperties = {
                     "options.nobuild": { isPii: false, value: true },
                     "options.debuginfo": { isPii: false, value: true },
                     "platforms.actuallyBuilt.local1": { isPii: false, value: "android" },
                     "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
-                    subCommand: { isPii: false, value: isBuild ? "build" : "fallback" }
+                    subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
                 };
 
                 runCommand(args).done(telemetryProperties => {
