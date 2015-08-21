@@ -15,11 +15,16 @@
 import appInsights = require ("applicationinsights");
 import crypto = require ("crypto");
 import fs = require ("fs");
+import loggerUtil = require ("./logger");
+import logLevel = require ("./logLevel");
+import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import os = require ("os");
 import path = require ("path");
-
 import utilHelper = require ("./utilHelper");
 
+import logger = loggerUtil.Logger;
+import LogLevel = logLevel.LogLevel;
+import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 import UtilHelper = utilHelper.UtilHelper;
 
 /**
@@ -87,19 +92,32 @@ module TacoUtility {
         };
 
         export function init(appName: string, appVersion?: string): void {
-            Telemetry.appName = appName;
-            TelemetryUtils.init(appVersion);
+            try {
+                Telemetry.appName = appName;
+                TelemetryUtils.init(appVersion);
+            } catch (err) {
+                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
+                    logger.logError(err);
+                }
+            }
         }
 
         export function send(event: TelemetryEvent): void {
             TelemetryUtils.addCommonProperties(event);
 
-            if (event instanceof TelemetryActivity) {
-                (<TelemetryActivity>event).end();
-            }
+            try {
+                if (event instanceof TelemetryActivity) {
+                    (<TelemetryActivity>event).end();
+                }
 
-            if (appInsights.client) { // no-op if telemetry is not initialized
-                appInsights.client.trackEvent(event.name, event.properties);
+                if (appInsights.client) { // no-op if telemetry is not initialized
+                    appInsights.client.trackEvent(event.name, event.properties);
+                    console.log(event.properties);
+                }
+            } catch (err) {
+                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
+                    logger.logError(err);
+                }
             }
         }
 
@@ -159,6 +177,8 @@ module TacoUtility {
                 event.properties["userId"] = TelemetryUtils.UserId;
                 event.properties["machineId"] = TelemetryUtils.MachineId;
                 event.properties["sessionId"] = TelemetryUtils.SessionId;
+                event.properties["hostOS"] = os.platform();
+                event.properties["hostOSRelease"] = os.release();
             }
 
             public static generateGuid(): string {

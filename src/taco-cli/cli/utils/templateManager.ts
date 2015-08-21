@@ -16,10 +16,14 @@
 "use strict";
 
 import admZip = require ("adm-zip");
+import childProcess = require ("child_process");
+import crypto = require ("crypto");
 import fs = require ("fs");
+import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import replace = require ("replace");
+import rimraf = require ("rimraf");
 import wrench = require ("wrench");
 
 import cordovaHelper = require ("./cordovaHelper");
@@ -30,6 +34,7 @@ import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import logger = tacoUtility.Logger;
+import loggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
 
 module TemplateManager {
@@ -61,13 +66,22 @@ class TemplateDescriptor implements TemplateManager.ITemplateDescriptor {
 
 class TemplateManager {
     private static DefaultTemplateId: string = "blank";
+    private static TemplatesFolderName: string = "templates";
+    private static GitTemplatesFolderName: string = "git-templates";
+    private static GitPrefix: string = "template_"; // Because Cordova checks for "http" at the start of the --copy-from path, we need some prefix for the git templates, otherwise they will get rejected
+    private static GitFileList: string[] = [
+        ".git",
+        ".gitignore",
+        ".gitattributes"
+    ];
 
     private templateCachePath: string = null;
     private kitHelper: TacoKits.IKitHelper = null;
+    private templateName: string = null;
 
     constructor(kits: TacoKits.IKitHelper, templateCache?: string) {
         this.kitHelper = kits;
-        this.templateCachePath = templateCache || path.join(utils.tacoHome, "templates");
+        this.templateCachePath = templateCache || path.join(utils.tacoHome, TemplateManager.TemplatesFolderName);
     }
 
     /**
@@ -82,19 +96,11 @@ class TemplateManager {
      */
     public createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<string> {
         var self = this;
-        var templateName: string = null;
         var templateSrcPath: string = null;
-      
+
         templateId = templateId ? templateId : TemplateManager.DefaultTemplateId;
-        
-        return this.kitHelper.getTemplateOverrideInfo(kitId, templateId)
-            .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
-                var templateInfo = templateOverrideForKit.templateInfo;
 
-                templateName = templateInfo.name;
-
-                return self.findTemplatePath(templateId, templateOverrideForKit.kitId, templateInfo);
-            })
+        return this.acquireTemplate(templateId, kitId)
             .then(function (templatePath: string): Q.Promise<any> {
                 templateSrcPath = templatePath;
                 cordovaParameters.copyFrom = templateSrcPath;
@@ -102,15 +108,34 @@ class TemplateManager {
                 return cordovaWrapper.create(cordovaCliVersion, cordovaParameters);
             })
             .then(function (): Q.Promise<any> {
-                var options: any = { clobber: false };
+                var filterFunc = function (itemPath: string): boolean {
+                    // Return true if the item path is not in our list of git files to ignore
+                    return TemplateManager.GitFileList.indexOf(itemPath) === -1;
+                };
+                var options: any = { clobber: false, filter: filterFunc };
 
                 return utils.copyRecursive(templateSrcPath, cordovaParameters.projectPath, options);
+            })
+            .then(function (): Q.Promise<any> {
+                // If we extracted a git template to the temp directory, attempt to clean it here
+                var deferred: Q.Deferred<any> = Q.defer<any>();
+
+                if (path.resolve(path.dirname(templateSrcPath)) === path.resolve(os.tmpdir())) {
+                    rimraf(templateSrcPath, function (err: Error): void {
+                        // This is best effort, resolve the promise whether there was an error or not
+                        deferred.resolve({});
+                    });
+                } else {
+                    deferred.resolve({});
+                }
+
+                return deferred.promise;
             })
             .then(function (): Q.Promise<any> {
                 return TemplateManager.performTokenReplacements(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName);
             })
             .then(function (): Q.Promise<string> {
-                return Q.resolve(templateName);
+                return Q.resolve(self.templateName);
             });
     }
 
@@ -187,6 +212,86 @@ class TemplateManager {
         return Q.resolve(null);
     }
 
+    private acquireTemplate(templateId: string, kitId: string): Q.Promise<string> {
+        if (/^https?:\/\//.test(templateId)) {
+            this.templateName = resources.getString("CommandCreateGitTemplateName");
+
+            return this.acquireFromGit(templateId)
+                .then(function (templateLocation: string): string {
+                    loggerHelper.logSeparatorLine();
+
+                    return templateLocation;
+                });
+        } else {
+            return this.acquireFromTacoKits(templateId, kitId);
+        }
+    }
+
+    private acquireFromGit(templateUrl: string): Q.Promise<string> {
+        var gitTemplatesCache: string = path.join(this.templateCachePath, TemplateManager.GitTemplatesFolderName);
+        var templateLocation: string = path.join(gitTemplatesCache, this.getSafeGitTemplateName(templateUrl));
+
+        loggerHelper.logSeparatorLine();
+        logger.log(resources.getString("CommandCreateGitTemplateHeader"));
+
+        return this.gitClone(templateUrl);
+    }
+
+    private gitClone(repo: string): Q.Promise<string> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+
+        // Set up a temporary folder for the git clone
+        var tmpDir: string = os.tmpdir();
+        var cloneTo: string = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
+
+        while (fs.existsSync(path.join(tmpDir, cloneTo))) {
+            cloneTo = "taco_template_" + crypto.pseudoRandomBytes(20).toString("hex");
+        }
+
+        var destination: string = path.join(tmpDir, cloneTo);
+        var command: string = "git";
+        var args: string[] = [
+            "clone",
+            "--depth",  // Use the "--depth 1" option to minimize bandwidth usage, as we are only interested in the final state of the repo
+            "1",
+            repo,
+            destination
+        ];
+        var options: childProcess.IExecOptions = { cwd: tmpDir, stdio: "inherit" }; // Set cwd for the git child process to be in the temporary dir to ensure any created log or other files get created there
+
+        childProcess.spawn(command, args, options)
+            .on("error", function (err: any): void {
+                if (err.code === "ENOENT") {
+                    // ENOENT error thrown if no git is found
+                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateNoGit));
+                } else {
+                    deferred.reject(err);
+                }
+            })
+            .on("exit", function (code: number): void {
+                if (code) {
+                    deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateGitCloneError));
+                } else {
+                    deferred.resolve(destination);
+                }
+            });
+
+        return deferred.promise;
+    }
+
+    private acquireFromTacoKits(templateId: string, kitId: string): Q.Promise<string> {
+        var self = this;
+
+        return this.kitHelper.getTemplateOverrideInfo(kitId, templateId)
+            .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
+                var templateInfo = templateOverrideForKit.templateInfo;
+
+                self.templateName = templateInfo.name;
+
+                return self.findTemplatePath(templateId, templateOverrideForKit.kitId, templateInfo);
+            });
+    }
+
     private findTemplatePath(templateId: string, kitId: string, templateInfo: TacoKits.ITemplateInfo): Q.Promise<string> {
         var cachedTemplateKitPath: string = path.join(this.templateCachePath, kitId);
         var cachedTemplatePath: string = path.join(cachedTemplateKitPath, templateId);
@@ -207,6 +312,10 @@ class TemplateManager {
         }
 
         return Q.resolve(cachedTemplatePath);
+    }
+
+    private getSafeGitTemplateName(gitUrl: string): string {
+        return TemplateManager.GitPrefix + encodeURIComponent(gitUrl);
     }
 }
 

@@ -17,12 +17,16 @@ import path = require ("path");
 class DependencyDataWrapper {
     private static DefaultDependenciesMetadataFilePath: string = path.resolve(__dirname, "..", "platformDependencies.json");
 
-    private dependenciesData: DependencyInstallerInterfaces.IDependencyDictionary;
+    private dependencies: DependencyInstallerInterfaces.IDependencyDictionary;
+    private unsupported: DependencyInstallerInterfaces.IUnsupportedDictionary;
 
     constructor(dependenciesMetadataFilePath?: string) {
         var loadPath: string = dependenciesMetadataFilePath || DependencyDataWrapper.DefaultDependenciesMetadataFilePath;
 
-        this.dependenciesData = JSON.parse(fs.readFileSync(loadPath, "utf8"));
+        var metadata: DependencyInstallerInterfaces.IDependencyInstallerMetadata = JSON.parse(fs.readFileSync(loadPath, "utf8"));
+
+        this.dependencies = metadata.dependencies;
+        this.unsupported = metadata.unsupported;
     }
 
     /*
@@ -31,7 +35,7 @@ class DependencyDataWrapper {
      */
     public getInstallDirectory(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): string {
         if (this.isSystemSupported(id, version, platform, architecture)) {
-            return this.dependenciesData[id].versions[version][platform][architecture].installDestination;
+            return this.dependencies[id].versions[version][platform][architecture].installDestination;
         }
 
         return null;
@@ -42,7 +46,7 @@ class DependencyDataWrapper {
      */
     public getDisplayName(id: string): string {
         if (this.dependencyExists(id)) {
-            return this.dependenciesData[id].displayName;
+            return this.dependencies[id].displayName;
         }
 
         return null;
@@ -53,7 +57,7 @@ class DependencyDataWrapper {
      */
     public getInstallerPath(id: string): string {
         if (this.dependencyExists(id)) {
-            return this.dependenciesData[id].installerPath;
+            return this.dependencies[id].installerPath;
         }
 
         return null;
@@ -64,7 +68,7 @@ class DependencyDataWrapper {
      */
     public getLicenseUrl(id: string): string {
         if (this.dependencyExists(id)) {
-            return this.dependenciesData[id].licenseUrl;
+            return this.dependencies[id].licenseUrl;
         }
 
         return null;
@@ -75,7 +79,7 @@ class DependencyDataWrapper {
      */
     public getPrerequisites(id: string): string[] {
         if (this.dependencyExists(id)) {
-            return this.dependenciesData[id].prerequisites;
+            return this.dependencies[id].prerequisites;
         }
 
         return null;
@@ -88,7 +92,7 @@ class DependencyDataWrapper {
     public getInstallerInfo(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IInstallerData {
         if (this.isSystemSupported(id, version, platform, architecture)) {
             // We don't want to return the steps declaration, as this is for internal use, so we manually construct an IInstallerData while skipping the steps declaraion
-            var infoSource: DependencyInstallerInterfaces.IInstallerData = this.dependenciesData[id].versions[version][platform][architecture];
+            var infoSource: DependencyInstallerInterfaces.IInstallerData = this.dependencies[id].versions[version][platform][architecture];
             var infoResult: DependencyInstallerInterfaces.IInstallerData = {
                 installSource: infoSource.installSource,
                 sha1: infoSource.sha1,
@@ -111,7 +115,7 @@ class DependencyDataWrapper {
      */
     public getInstallerSteps(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IStepsDeclaration {
         if (this.isSystemSupported(id, version, platform, architecture)) {
-            return this.dependenciesData[id].versions[version][platform][architecture].steps;
+            return this.dependencies[id].versions[version][platform][architecture].steps;
         }
 
         return null;
@@ -125,8 +129,8 @@ class DependencyDataWrapper {
         var self = this;
         var validVersion: string;
 
-        if (this.dependencyExists(id) && !!this.dependenciesData[id].versions) {
-            Object.keys(this.dependenciesData[id].versions).some(function (version: string): boolean {
+        if (this.dependencyExists(id) && !!this.dependencies[id].versions) {
+            Object.keys(this.dependencies[id].versions).some(function (version: string): boolean {
                 if (self.isSystemSupported(id, version, platform, architecture)) {
                     validVersion = version;
 
@@ -141,10 +145,21 @@ class DependencyDataWrapper {
     }
 
     /*
+     * Returns the link for the help of the specified known unsupported dependency, or null if the dependency is not a known unsupported or if it doesn't have any help link.
+     */
+    public getInstallHelp(id: string): string {
+        if (this.isKnownUnsupported(id)) {
+            return this.unsupported[id].installHelp;
+        }
+
+        return null;
+    }
+
+    /*
      * Returns true if the specified dependency exists, false otherwise.
      */
     public dependencyExists(id: string): boolean {
-        return !!this.dependenciesData[id];
+        return !!this.dependencies[id];
     }
 
     /*
@@ -152,8 +167,8 @@ class DependencyDataWrapper {
      */
     public versionExists(id: string, version: string): boolean {
         return this.dependencyExists(id) &&
-            !!this.dependenciesData[id].versions &&
-            !!this.dependenciesData[id].versions[version];
+            !!this.dependencies[id].versions &&
+            !!this.dependencies[id].versions[version];
     }
 
     /*
@@ -162,8 +177,8 @@ class DependencyDataWrapper {
      */
     public isSystemSupported(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): boolean {
         return this.versionExists(id, version) &&
-            !!this.dependenciesData[id].versions[version][platform] &&
-            !!this.dependenciesData[id].versions[version][platform][architecture];
+            !!this.dependencies[id].versions[version][platform] &&
+            !!this.dependencies[id].versions[version][platform][architecture];
     }
 
     /*
@@ -172,7 +187,14 @@ class DependencyDataWrapper {
      * to handle these packages specifically. Thus, they are marked as implicit dependencies.
      */
     public isImplicit(id: string): boolean {
-        return !!this.dependenciesData[id] && !!this.dependenciesData[id].isImplicit;
+        return this.dependencyExists(id) && !!this.dependencies[id].isImplicit;
+    }
+
+    /*
+     * Returns true if the specified dependency is known to be unsupported, false otherwise.
+     */
+    public isKnownUnsupported(id: string): boolean {
+        return !!this.unsupported[id];
     }
 }
 
