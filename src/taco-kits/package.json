@@ -4,7 +4,7 @@
     "name": "Microsoft Corporation"
   },
   "description": "Validated Kits metadata for taco CLI",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "main": "tacoKits.js",
   "scripts": {
     "test": "mocha"

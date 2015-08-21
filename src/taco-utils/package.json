@@ -5,7 +5,7 @@
     "email": "vscordovatools-admin@microsoft.com"
   },
   "description": "Common utilities used by the Tools for Apache Cordova node modules",
-  "version": "1.1.0",
+  "version": "1.1.0-beta",
   "main": "tacoUtils.js",
   "scripts": {
     "test": "mocha"

@@ -4,7 +4,7 @@
     "name": "Microsoft Corporation"
   },
   "description": "Install platform-specific third-party dependencies for Cordova development",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "main": "dependencyInstaller.js",
   "scripts": {
     "test": "mocha"

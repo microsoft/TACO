@@ -4,7 +4,7 @@
     "name": "Microsoft Corporation"
   },
   "homepage": "http://www.visualstudio.com/en-us/explore/cordova-vs.aspx",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "description": "taco-cli is a command-line interface for rapid Apache Cordova development",
   "keywords": [
     "Cordova",
