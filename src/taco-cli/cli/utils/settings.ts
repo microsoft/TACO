@@ -137,14 +137,7 @@ class Settings {
         Settings.Settings = null;
     }
 
-    public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
-        var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
-        if (!options.remain) {
-            debugger;
-        }
-        var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
-
-        if (platforms.length > 0) {
+    public static determineSpecificPlatformsFromOptions(platforms: string[], options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
             // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
             return platforms.map(function (platform: string): Settings.IPlatformWithLocation {
                 var buildLocation: Settings.BuildLocationType;
@@ -160,7 +153,6 @@ class Settings {
 
                 return { location: buildLocation, platform: platform };
             });
-        }
     }
 
     public static loadSettingsOrReturnEmpty(): Q.Promise<Settings.ISettings> {
@@ -187,9 +179,12 @@ class Settings {
     private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
         return this.loadSettingsOrReturnEmpty()
             .then((settings: Settings.ISettings) => {
-                if (options.remain.length > 0) {
+                var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
+                var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
+
+                if (platforms.length > 0) {
                     // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
-                    return this.determineSpecificPlatformsFromOptions(options, settings);
+                    return this.determineSpecificPlatformsFromOptions(platforms, options, settings);
                 } else {
                     // No platform specified: try to do 'all' of them
                     var remotePlatforms: string[] = [];
