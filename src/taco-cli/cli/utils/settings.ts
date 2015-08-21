@@ -12,17 +12,17 @@
 /// <reference path="../../../typings/nopt.d.ts" />
 "use strict";
 
-import fs = require("fs");
-import os = require("os");
-import path = require("path");
-import Q = require("q");
-import util = require("util");
+import fs = require ("fs");
+import os = require ("os");
+import path = require ("path");
+import Q = require ("q");
+import util = require ("util");
 
-import CordovaHelper = require("./cordovaHelper");
-import resources = require("../../resources/resourceManager");
-import TacoErrorCodes = require("../tacoErrorCodes");
-import errorHelper = require("../tacoErrorHelper");
-import tacoUtils = require("taco-utils");
+import CordovaHelper = require ("./cordovaHelper");
+import resources = require ("../../resources/resourceManager");
+import TacoErrorCodes = require ("../tacoErrorCodes");
+import errorHelper = require ("../tacoErrorHelper");
+import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
 import logger = tacoUtils.Logger;
@@ -139,7 +139,10 @@ class Settings {
 
     public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
         var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
-        var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1 });
+        if (!options.remain) {
+            debugger;
+        }
+        var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
 
         if (platforms.length > 0) {
             // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
