@@ -12,11 +12,10 @@ import Q = require ("q");
 
 import commands = tacoUtility.Commands;
 
+var telemetryProperty = tacoUtility.TelemetryHelper.telemetryProperty;
+
 module BuildTelemetryHelper {
     import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
-
-    var pii = tacoUtility.TelemetryHelper.telemetryPiiProperty;
-    var npii = tacoUtility.TelemetryHelper.telemetryNonPiiProperty;
 
     function extractPlatformsList(platforms: Settings.IPlatformWithLocation[], buildLocationType: Settings.BuildLocationType): string[] {
         var filteredPlatforms = platforms.filter(platform => platform.location === buildLocationType);
@@ -34,8 +33,8 @@ module BuildTelemetryHelper {
     function encodePlatforms(telemetryProperties: ICommandTelemetryProperties, baseName: string, platforms: string[]): void {
         var platformIndex = 1; // This is a one-based index
         platforms.forEach(platform => {
-            var encodedPlatform = (knownPlatforms.indexOf(platform.toLocaleLowerCase()) >= 0 ? npii : pii)(platform);
-            telemetryProperties[baseName + platformIndex++] = encodedPlatform;
+            var isPii = knownPlatforms.indexOf(platform.toLocaleLowerCase()) < 0;
+            telemetryProperties[baseName + platformIndex++] = telemetryProperty(platform, isPii);
         });
     }
 
@@ -55,7 +54,7 @@ module BuildTelemetryHelper {
 
         remotePlatforms.forEach(platform => {
             if (settings.remotePlatforms && settings.remotePlatforms[platform]) {
-                telemetryProperties["platforms.remote." + platform + ".is_secure"] = npii(settings.remotePlatforms[platform].secure);
+                telemetryProperties["platforms.remote." + platform + ".is_secure"] = telemetryProperty(settings.remotePlatforms[platform].secure, /*isPii*/ false);
             }
         });
     }
@@ -64,7 +63,7 @@ module BuildTelemetryHelper {
     export function addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
         commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettingsOrReturnEmpty().then(settings => {
-            var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData,
+            var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options,
                 buildAndRunNonPiiOptions);
 
             var platforms = Settings.determineSpecificPlatformsFromOptions(commandData, settings);

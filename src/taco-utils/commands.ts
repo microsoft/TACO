@@ -89,7 +89,7 @@ module TacoUtility {
                 this.executedSubcommand = this.getSubCommand(this.data);
                 if (this.executedSubcommand) {
                     return this.executedSubcommand.run(this.data).then(telemetryProperties => {
-                        telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryNonPiiProperty(this.executedSubcommand.name);
+                        telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(this.executedSubcommand.name, /*isPii*/ false);
                         return telemetryProperties;
                     });
                 } else {

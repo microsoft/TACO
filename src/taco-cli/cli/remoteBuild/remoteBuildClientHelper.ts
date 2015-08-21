@@ -45,8 +45,7 @@ import UtilHelper = tacoUtils.UtilHelper;
 
 import ICommandTelemetryProperties = tacoUtils.ICommandTelemetryProperties;
 
-var pii = tacoUtils.TelemetryHelper.telemetryPiiProperty;
-var npii = tacoUtils.TelemetryHelper.telemetryNonPiiProperty;
+var telemetryProperty = tacoUtils.TelemetryHelper.telemetryProperty;
 
 class RemoteBuildClientHelper {
     public static PingInterval: number = 5000;
@@ -270,7 +269,7 @@ class RemoteBuildClientHelper {
             // File is missing or malformed: no incremental build
         }
 
-        telemetryProperties["remoteBuild." + platform + ".wasIncremental"] = npii(isIncremental);
+        telemetryProperties["remoteBuild." + platform + ".wasIncremental"] = telemetryProperty(isIncremental, /*isPii*/ false);
 
         var upToDateFiles: string[] = [];
 
@@ -295,7 +294,7 @@ class RemoteBuildClientHelper {
             return false;
         };
 
-        var property = npii(0);
+        var property = telemetryProperty(0, /*isPii*/ false);
         telemetryProperties["remoteBuild." + platform + ".filesChangedCount"] = property;
         var filterForTar = (reader: fstream.Reader, props: any) => {
             var appRelPath = path.relative(settings.projectSourceDir, reader.path);
@@ -341,9 +340,9 @@ class RemoteBuildClientHelper {
         return deferred.promise.then(() => {
             var projectSourceDirReader = new fstream.Reader({ path: projectSourceDir, type: "Directory", filter: filterForTar });
             var tarProducingStream = CountStream.count(projectSourceDirReader.pipe(tar.Pack()),
-                (sz: number) => telemetryProperties["remotebuild." + platform + ".projectSizeInBytes"] = npii(sz));
+                (sz: number) => telemetryProperties["remotebuild." + platform + ".projectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
             var tgzProducingStream = CountStream.count(tarProducingStream.pipe(zlib.createGzip()),
-                (sz: number) => telemetryProperties["remotebuild." + platform + ".gzipedProjectSizeInBytes"] = npii(sz));
+                (sz: number) => telemetryProperties["remotebuild." + platform + ".gzipedProjectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
             return tgzProducingStream;
         });
     }

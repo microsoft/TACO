@@ -38,9 +38,6 @@ import UtilHelper = tacoUtility.UtilHelper;
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
-var pii = tacoUtility.TelemetryHelper.telemetryPiiProperty;
-var npii = tacoUtility.TelemetryHelper.telemetryNonPiiProperty;
-
 /**
  * Build
  *

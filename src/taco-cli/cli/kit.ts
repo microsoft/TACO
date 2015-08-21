@@ -163,7 +163,7 @@ class Kit extends commands.TacoCommandBase {
     }
 
     private static generateTelemetryProperties(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
-        return Q.when(tacoUtility.TelemetryHelper.addPropertiesFromOptions({}, Kit.KnownOptions, commandData, ["kit", "cli"]));
+        return Q.when(tacoUtility.TelemetryHelper.addPropertiesFromOptions({}, Kit.KnownOptions, commandData.options, ["kit", "cli"]));
     }
 
     /**

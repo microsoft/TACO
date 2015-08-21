@@ -27,22 +27,22 @@ module TacoUtility {
 
     export class TelemetryHelper {
         public static telemetryProperty(propertyValue: any, pii?: boolean): ITelemetryPropertyInfo {
-            return { value: String(propertyValue), isPii: pii || false };  
+            return { value: String(propertyValue), isPii: pii || false };
         }
 
         public static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void {
             if (!properties) {
                 return;
             }
-            
+
             Object.keys(properties).forEach(function (propertyName: string): void {
                 TelemetryHelper.addTelemetryEventProperty(event, propertyName, properties[propertyName].value, properties[propertyName].isPii);
             });
         }
 
-        public static sendCommandFailureTelemetry(commandName: string, error: any, projectProperties: ICommandTelemetryProperties, args: string[] = null): void { 
+        public static sendCommandFailureTelemetry(commandName: string, error: any, projectProperties: ICommandTelemetryProperties, args: string[] = null): void {
             var errorEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
-            
+
             if (error.isTacoError) {
                 errorEvent.properties["tacoErrorCode"] = error.errorCode;
             } else if (error.message) {
@@ -56,7 +56,7 @@ module TacoUtility {
 
         public static sendCommandSuccessTelemetry(commandName: string, commandProperties: ICommandTelemetryProperties, args: string[] = null): void {
             var successEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
-            
+
             TelemetryHelper.addTelemetryEventProperties(successEvent, commandProperties);
 
             Telemetry.send(successEvent);
@@ -81,31 +81,22 @@ module TacoUtility {
             }
         }
 
-        public static telemetryPiiProperty(value: any): ITelemetryPropertyInfo {
-            return { value: value, isPii: true };
-        }
-
-        public static telemetryNonPiiProperty(value: any): ITelemetryPropertyInfo {
-            return { value: value, isPii: false };
-        }
-
         public static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
-            commandData: commands.Commands.ICommandData, nonPiiOptions: string[] = []): ICommandTelemetryProperties {
+            commandOptions: { [flag: string]: any }, nonPiiOptions: string[] = []): ICommandTelemetryProperties {
             // We parse only the known options, to avoid potential private information that may appear on the command line
             var unknownOptionIndex = 1;
-            Object.keys(commandData.options).forEach(key => {
-                var value = commandData.options[key];
+            Object.keys(commandOptions).forEach(key => {
+                var value = commandOptions[key];
                 if (Object.keys(knownOptions).indexOf(key) >= 0) {
                     // This is a known option. We'll check the list to decide if it's pii or not
                     if (typeof (value) !== "undefined") {
                         // We encrypt all options values unless they are specifically marked as nonPii
-                        var serializingMethod = nonPiiOptions.indexOf(key) >= 0 ? this.telemetryNonPiiProperty : this.telemetryPiiProperty;
-                        telemetryProperties["options." + key] = serializingMethod(value);
+                        telemetryProperties["options." + key] = this.telemetryProperty(value, nonPiiOptions.indexOf(key) < 0);
                     }
                 } else {
                     // This is a not known option. We'll assume that both the option and the value are pii
-                    telemetryProperties["unknown_option" + unknownOptionIndex + ".name"] = this.telemetryPiiProperty(key);
-                    telemetryProperties["unknown_option" + unknownOptionIndex++ + ".value"] = this.telemetryPiiProperty(value);
+                    telemetryProperties["unknownOption" + unknownOptionIndex + ".name"] = this.telemetryProperty(key, /*isPii*/ true);
+                    telemetryProperties["unknownOption" + unknownOptionIndex++ + ".value"] = this.telemetryProperty(value, /*isPii*/ true);
                 }
             });
             return telemetryProperties;

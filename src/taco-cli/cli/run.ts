@@ -31,9 +31,6 @@ import logger = tacoUtility.Logger;
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
-var pii = tacoUtility.TelemetryHelper.telemetryPiiProperty;
-var npii = tacoUtility.TelemetryHelper.telemetryNonPiiProperty;
-
 /**
  * Run
  *

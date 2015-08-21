@@ -284,7 +284,7 @@ module BuildAndRunTelemetryTests {
                 var value = telemetryProperties[keyName].value;
                 value.should.be.above(expectedGzipedSizeAbsoluteError - expectedGzippedSize);
                 value.should.be.below(expectedGzipedSizeAbsoluteError + expectedGzippedSize);
-                telemetryProperties[keyName].value = expectedGzippedSize;
+                telemetryProperties[keyName].value = String(expectedGzippedSize);
             } else {
                 (typeof telemetryProperties[keyName] === "undefined").should.be.true;
             }
@@ -327,18 +327,18 @@ module BuildAndRunTelemetryTests {
             var args = ["--local", "--release", "android"];
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
-                "options.local": { isPii: false, value: true },
-                "options.release": { isPii: false, value: true },
+                "options.local": { isPii: false, value: "true" },
+                "options.release": { isPii: false, value: "true" },
                 "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
                 subCommand: { isPii: false, value: commandSwitch("build", "local", "emulate") }
             };
 
             if ((command === Command.Build)) {
                 args.unshift("--clean"); // Only build supports clean
-                expected["options.clean"] = { isPii: false, value: true };
+                expected["options.clean"] = { isPii: false, value: "true" };
             } else if (command !== Command.Emulate) {
                 args.unshift("--emulator"); // Emulator doesn't support emulator
-                expected["options.emulator"] = { isPii: false, value: true };
+                expected["options.emulator"] = { isPii: false, value: "true" };
             }
 
             if (command !== Command.Run) { // Local run doesn't report the actuallyBuilt platforms
@@ -365,17 +365,17 @@ module BuildAndRunTelemetryTests {
             var args = ["--remote", "--debug", "--target=ipad 2", "ios"];
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
-                "options.remote": { isPii: false, value: true },
-                "options.debug": { isPii: false, value: true },
+                "options.remote": { isPii: false, value: "true" },
+                "options.debug": { isPii: false, value: "true" },
                 "options.target": { isPii: false, value: "ipad 2" },
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "ios" },
                 subCommand: { isPii: false, value: commandSwitch("build", "remote", "emulate") },
-                "platforms.remote.ios.is_secure": { isPii: false, value: false },
+                "platforms.remote.ios.is_secure": { isPii: false, value: "false" },
                 "remoteBuild.ios.filesChangedCount": { isPii: false, value: 8 },
-                "remoteBuild.ios.wasIncremental": { isPii: false, value: true },
-                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: 28382 },
-                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: 48128 }
+                "remoteBuild.ios.wasIncremental": { isPii: false, value: "true" },
+                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: "28382" },
+                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "48128" }
             };
 
             mockProjectWithIncrementalBuild();
@@ -396,16 +396,16 @@ module BuildAndRunTelemetryTests {
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "android" },
                 "platforms.requestedViaCommandLine.remote2": { isPii: false, value: "ios" },
                 subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") },
-                "platforms.remote.android.is_secure": { isPii: false, value: false },
-                "platforms.remote.ios.is_secure": { isPii: false, value: false },
+                "platforms.remote.android.is_secure": { isPii: false, value: "false" },
+                "platforms.remote.ios.is_secure": { isPii: false, value: "false" },
                 "remoteBuild.android.filesChangedCount": { isPii: false, value: 8 },
-                "remoteBuild.android.wasIncremental": { isPii: false, value: false },
-                "remotebuild.android.gzipedProjectSizeInBytes": { isPii: false, value: 28379 },
-                "remotebuild.android.projectSizeInBytes": { isPii: false, value: 48128 },
+                "remoteBuild.android.wasIncremental": { isPii: false, value: "false" },
+                "remotebuild.android.gzipedProjectSizeInBytes": { isPii: false, value: "28379" },
+                "remotebuild.android.projectSizeInBytes": { isPii: false, value: "48128" },
                 "remoteBuild.ios.filesChangedCount": { isPii: false, value: 9 },
-                "remoteBuild.ios.wasIncremental": { isPii: false, value: false },
-                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: 28427 },
-                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: 49152 }
+                "remoteBuild.ios.wasIncremental": { isPii: false, value: "false" },
+                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: "28427" },
+                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "49152" }
             };
 
             configureRemoteServer(done, /* Not incremental test*/ false, null)
@@ -430,7 +430,7 @@ module BuildAndRunTelemetryTests {
             var args: string[] = [];
             if (isNotEmulate) {
                 args.unshift("--device");
-                expected["options.device"] = { isPii: false, value: true };
+                expected["options.device"] = { isPii: false, value: "true" };
             }
 
             runCommand(args).done(telemetryProperties => {
@@ -445,8 +445,8 @@ module BuildAndRunTelemetryTests {
                 "platforms.requestedViaCommandLine.local1": { isPii: true, value: "unknown_platform" },
                 "platforms.actuallyBuilt.local1": { isPii: true, value: "unknown_platform" },
                 subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") },
-                "unknown_option1.name": { isPii: true, value: "uknown_option" },
-                "unknown_option1.value": { isPii: true, value: "unknown_value" }
+                "unknownOption1.name": { isPii: true, value: "uknown_option" },
+                "unknownOption1.value": { isPii: true, value: "unknown_value" }
             };
 
             runCommand(args).done(telemetryProperties => {
@@ -460,8 +460,8 @@ module BuildAndRunTelemetryTests {
                 utils.createDirectoryIfNecessary(path.join(projectPath, "platforms", "android"));
                 var args = ["--nobuild", "--debuginfo", "android"];
                 var expected: TacoUtility.ICommandTelemetryProperties = {
-                    "options.nobuild": { isPii: false, value: true },
-                    "options.debuginfo": { isPii: false, value: true },
+                    "options.nobuild": { isPii: false, value: "true" },
+                    "options.debuginfo": { isPii: false, value: "true" },
                     "platforms.actuallyBuilt.local1": { isPii: false, value: "android" },
                     "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
                     subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
