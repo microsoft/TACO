@@ -64,7 +64,8 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     };
 
     public name: string;
-    
+    public data: commands.ICommandData;
+
     public cordovaCommandParams: Cordova.ICordovaCommandParameters;
     public downloadOptions: Cordova.ICordovaDownloadOptions;
     public info: commands.ICommandInfo;
@@ -157,14 +158,14 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             return Q({});
         })
             .then(function (): Q.Promise<ICommandTelemetryProperties> {
-            return self.generateTelemetryProperties();
+            return self.generateTelemetryProperties(data);
         });
     }
 
     /**
      * Generates the telemetry properties for the platform/plugin operation
      */
-    private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+    private generateTelemetryProperties(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         var self = this;
         var telemetryProperties: ICommandTelemetryProperties = {};
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
@@ -175,7 +176,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
                 numericSuffix++;
             });
 
-            return Q.resolve(telemetryProperties);
+            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, PlatformPluginCommandBase.KnownOptions, self.data.options, ["link", "save", "browserify", "shrinkwrap"]));
         });
     }
 
@@ -221,6 +222,8 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
                 self.downloadOptions.cli_variables[key] = keyval[1];
             });
         }
+
+        this.data = commandData;
 
         // Set appropriate subcommand, target and download options
         this.cordovaCommandParams = {

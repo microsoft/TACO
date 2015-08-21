@@ -93,11 +93,21 @@ describe("taco remote", function (): void {
         ];
         var mockServer = http.createServer();
         var serverFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
+
+        var cliVersion = require("../package.json").version;
+        var expectedTelemetryProperties: TacoUtility.ICommandTelemetryProperties = {
+                        "subCommand": { isPii: false, value: "add" },
+                        "platform": { isPii: false, value: "ios" },
+                        "isSecure": { isPii: false, value: "false" }
+        };
+
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
         RemoteMod.CliSession = RemoteMock.makeCliMock(mocha, () => { sessionClosed = true; }, desiredState, () => { questionsAsked++; });
-        Q(["add", "ios"]).then(remoteRun).then(function (): void {
+        Q(["add", "ios"]).then(remoteRun).then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties) {
+            // Verify telemetry properties               
+            telemetryParameters.should.be.eql(expectedTelemetryProperties);
             if (questionsAsked !== 3) {
                 throw new Error("Wrong number of questions asked: " + questionsAsked);
             } else if (!sessionClosed) {

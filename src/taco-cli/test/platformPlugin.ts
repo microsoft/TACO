@@ -41,6 +41,8 @@ var create = new createMod();
 
 var testKitId: string = "5.1.1-Kit";
 
+var cliVersion = require("../package.json").version;
+
 interface IComponentVersionMap {
     [component: string]: string;
 }
@@ -48,6 +50,7 @@ interface IComponentVersionMap {
 interface ICommandAndResult {
     command: string;
     expectedVersions: IComponentVersionMap;
+    expectedTelemetryProperties: TacoUtility.ICommandTelemetryProperties;
 }
 
 // Expected valued for various scenarios
@@ -76,23 +79,149 @@ var kitPluginVersions: IComponentVersionMap = {
     "cordova-plugin-contacts": "1.0.0"
 };
 
-var kitPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: kitPlatformVersions },
-        { command: "remove android ios", expectedVersions: {} },
-        { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions }
+var kitPlatformOperations: ICommandAndResult[] = [ 
+            {   command: "add android ios",
+                expectedVersions: kitPlatformVersions,
+                expectedTelemetryProperties: {
+                    "kit": { isPii: false, value: "5.1.1-Kit" },
+                    "cliVersion": { isPii: false, value: cliVersion },
+                    "isTacoProject": { isPii: false, value: "true" },
+                    "projectType": { isPii: false, value: "JavaScript" },
+                    "subCommand": { isPii: false, value: "add" },
+                    "target1": { isPii: false, value: "android@4.0.2" },
+                    "target2": { isPii: false, value: "ios@3.8.0" }
+                }
+            },
+            {   command: "remove android ios", 
+                expectedVersions: {}, 
+                expectedTelemetryProperties: {
+                        "kit": { isPii: false, value: "5.1.1-Kit" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" },
+                        "subCommand": { isPii: false, value: "remove" },
+                        "target1": { isPii: false, value: "android" },
+                        "target2": { isPii: false, value: "ios" }
+                }
+            },
+            {   command: "add android@4.0.1 ios@3.8.0", 
+                expectedVersions: userOverridePlatformVersions, 
+                expectedTelemetryProperties: {
+                        "kit": { isPii: false, value: "5.1.1-Kit" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" },
+                        "subCommand": { isPii: false, value: "add" },
+                        "target1": { isPii: false, value: "android@4.0.1" },
+                        "target2": { isPii: false, value: "ios@3.8.0" }
+            } 
+        }
     ];
         
-var cliPlatformOperations: ICommandAndResult[] = [ { command: "add android ios", expectedVersions: cliPlatformVersions },
-        { command: "remove android ios", expectedVersions: {} },
-        { command: "add android@4.0.1 ios@3.8.0", expectedVersions: userOverridePlatformVersions },
-        { command: "remove android ios", expectedVersions: {} }
+var cliPlatformOperations: ICommandAndResult[] = [ 
+        {   command: "add android ios", 
+            expectedVersions: cliPlatformVersions,
+            expectedTelemetryProperties: {
+                        "cli": { isPii: false, value: "5.0.0" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" },
+                        "subCommand": { isPii: false, value: "add" },
+                        "target1": { isPii: false, value: "android" },
+                        "target2": { isPii: false, value: "ios" }
+            }
+        },
+        {   command: "remove android ios", 
+            expectedVersions: {}, 
+            expectedTelemetryProperties: {
+                "cli": { isPii: false, value: "5.0.0" },
+                "cliVersion": { isPii: false, value: cliVersion },
+                "isTacoProject": { isPii: false, value: "true" },
+                "projectType": { isPii: false, value: "JavaScript" },        
+                "subCommand": { isPii: false, value: "remove" },
+                "target1": { isPii: false, value: "android" },
+                "target2": { isPii: false, value: "ios" }
+            }
+        },
+
+        {   command: "add android@4.0.1 ios@3.8.0", 
+            expectedVersions: userOverridePlatformVersions, 
+            expectedTelemetryProperties: {
+                    "cli": { isPii: false, value: "5.0.0" },
+                    "cliVersion": { isPii: false, value: cliVersion },
+                    "isTacoProject": { isPii: false, value: "true" },
+                    "projectType": { isPii: false, value: "JavaScript" },   
+                    "subCommand": { isPii: false, value: "add" },
+                    "target1": { isPii: false, value: "android@4.0.1" },
+                    "target2": { isPii: false, value: "ios@3.8.0" } 
+            }
+        },
+        {   command: "remove android ios", 
+            expectedVersions: {}, 
+            expectedTelemetryProperties: {
+                    "cli": { isPii: false, value: "5.0.0" },
+                    "cliVersion": { isPii: false, value: cliVersion },
+                    "isTacoProject": { isPii: false, value: "true" },
+                    "projectType": { isPii: false, value: "JavaScript" },   
+                    "subCommand": { isPii: false, value: "remove" },
+                    "target1": { isPii: false, value: "android" },
+                    "target2": { isPii: false, value: "ios" } 
+            }
+        }
     ];
 
-var kitPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
-        { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} }
+var kitPluginOperations: ICommandAndResult[] = [ 
+                    { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", 
+                      expectedVersions: userOverridePluginVersions, 
+                      expectedTelemetryProperties: {
+                         "kit": { isPii: false, value: "5.1.1-Kit" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" }, 
+                        "subCommand": { isPii: false, value: "add" },
+                        "target1": { isPii: false, value: "cordova-plugin-camera@1.0.0" },
+                        "target2": { isPii: false, value: "cordova-plugin-contacts@1.0.0" } 
+                    } 
+        },
+        {   command: "remove cordova-plugin-camera cordova-plugin-contacts", 
+            expectedVersions: {},
+            expectedTelemetryProperties: {
+                         "kit": { isPii: false, value: "5.1.1-Kit" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" },   
+                        "subCommand": { isPii: false, value: "remove" },
+                        "target1": { isPii: false, value: "cordova-plugin-camera" },
+                        "target2": { isPii: false, value: "cordova-plugin-contacts" } 
+                    } 
+        }
     ];
 
-var cliPluginOperations: ICommandAndResult[] = [ { command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", expectedVersions: userOverridePluginVersions },
-        { command: "remove cordova-plugin-camera cordova-plugin-contacts", expectedVersions: {} }
+var cliPluginOperations: ICommandAndResult[] = [ 
+        {   command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", 
+            expectedVersions: userOverridePluginVersions,
+            expectedTelemetryProperties: {
+                         "cli": { isPii: false, value: "5.0.0" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" },   
+                        "subCommand": { isPii: false, value: "add" },
+                        "target1": { isPii: false, value: "cordova-plugin-camera@1.0.0" },
+                        "target2": { isPii: false, value: "cordova-plugin-contacts@1.0.0" } 
+                    } 
+        },
+        {   command: "remove cordova-plugin-camera cordova-plugin-contacts", 
+            expectedVersions: {},
+            expectedTelemetryProperties: {
+                         "cli": { isPii: false, value: "5.0.0" },
+                        "cliVersion": { isPii: false, value: cliVersion },
+                        "isTacoProject": { isPii: false, value: "true" },
+                        "projectType": { isPii: false, value: "JavaScript" },   
+                        "subCommand": { isPii: false, value: "remove" },
+                        "target1": { isPii: false, value: "cordova-plugin-camera" },
+                        "target2": { isPii: false, value: "cordova-plugin-contacts" } 
+            } 
+        }
     ];
 
 describe("taco platform for kit", function (): void {
@@ -252,8 +381,9 @@ describe("taco platform for kit", function (): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
-                .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
+                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties) {
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
@@ -271,8 +401,9 @@ describe("taco platform for kit", function (): void {
             it("taco plugin " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
-                .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
+                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties) {
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
@@ -308,8 +439,9 @@ describe("taco platform for kit", function (): void {
             it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
-                .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
+                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties) {
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {
@@ -327,8 +459,9 @@ describe("taco platform for kit", function (): void {
             it("taco plugin " + scenario.command + " executes with no error", function (done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
-                .then(function (): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking
+                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties) {
+                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
                     return sleep(5);
                 }).then(function (): void {
                     if (args[0] === "add") {

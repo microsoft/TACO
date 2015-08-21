@@ -7,9 +7,11 @@
 ﻿ */
 
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/commands.d.ts" />
 
 "use strict";
 
+import commands = require ("./commands");
 import packageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
 import Telemetry = telemetry.Telemetry;
@@ -78,6 +80,27 @@ module TacoUtility {
             } else {
                 TelemetryHelper.setTelemetryEventProperty(event, propertyName, propertyValue, isPii);
             }
+        }
+
+        public static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
+            commandOptions: { [flag: string]: any }, nonPiiOptions: string[] = []): ICommandTelemetryProperties {
+            // We parse only the known options, to avoid potential private information that may appear on the command line
+            var unknownOptionIndex = 1;
+            Object.keys(commandOptions).forEach(key => {
+                var value = commandOptions[key];
+                if (Object.keys(knownOptions).indexOf(key) >= 0) {
+                    // This is a known option. We'll check the list to decide if it's pii or not
+                    if (typeof (value) !== "undefined") {
+                        // We encrypt all options values unless they are specifically marked as nonPii
+                        telemetryProperties["options." + key] = this.telemetryProperty(value, nonPiiOptions.indexOf(key) < 0);
+                    }
+                } else {
+                    // This is a not known option. We'll assume that both the option and the value are pii
+                    telemetryProperties["unknownOption" + unknownOptionIndex + ".name"] = this.telemetryProperty(key, /*isPii*/ true);
+                    telemetryProperties["unknownOption" + unknownOptionIndex++ + ".value"] = this.telemetryProperty(value, /*isPii*/ true);
+                }
+            });
+            return telemetryProperties;
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {
