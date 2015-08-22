@@ -111,6 +111,11 @@ module TacoUtility {
          * Factory to create new Commands classes
          */
         export class CommandFactory {
+            private static CommandAliasMap: { [alias: string]: string; } = {
+                "platforms": "platform",
+                "plugins": "plugin"
+            };
+
             public listings: any;
 
             /**
@@ -124,7 +129,6 @@ module TacoUtility {
 
                 this.listings = require(commandsInfoPath);
             }
-
             /**
              * get specific task object, given task name
              */
@@ -135,7 +139,13 @@ module TacoUtility {
 
                 var moduleInfo: ICommandInfo = this.listings[name];
                 if (!moduleInfo) {
-                    return null;
+                    // Check if {name} is a command alias
+                    var commandForAlias = CommandFactory.CommandAliasMap[name];
+                    if (commandForAlias) {
+                        moduleInfo = this.listings[commandForAlias];
+                    } else {
+                        return null;
+                    }
                 }
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
