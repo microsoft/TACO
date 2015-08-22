@@ -473,7 +473,7 @@ describe("taco create", function (): void {
             "PackageLoaderDownloadCompletedMessage"];
 
         it("prints the onboarding experience when using a kit", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("onboarding-experience", 1);
 
@@ -509,7 +509,7 @@ describe("taco create", function (): void {
         });
 
         it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("onboarding-experience", 2);
 
@@ -546,7 +546,7 @@ describe("taco create", function (): void {
         });
 
         it("it adds (Deprecated) to a deprecated kit", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("onboarding-experience", 3);
 
@@ -584,7 +584,7 @@ describe("taco create", function (): void {
 
         it("it adds (Default) to a default kit", function (done: MochaDone): void {
             var projectPath = getProjectPath("onboarding-experience", 4);
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
             kitHelper.getDefaultKit().done(defaultKitId => {
                 var firstPart = [
                     "CommandCreateStatusCreatingNewProject",
@@ -638,7 +638,7 @@ describe("taco create", function (): void {
         }
 
         it("Returns the expected telemetry properties for a kit project created with the Blank template", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("Telemetry properties for Create command", 1);
 
@@ -652,7 +652,7 @@ describe("taco create", function (): void {
         });
 
         it("Returns the expected telemetry properties for a kit project created with TypeScript template", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("Telemetry properties for Create command", 2);
 
@@ -668,7 +668,7 @@ describe("taco create", function (): void {
         });
 
         it("Returns the expected telemetry properties for a CLI project", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("Telemetry properties for Create command", 3);
 
