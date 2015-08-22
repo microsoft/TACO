@@ -121,7 +121,7 @@ class Run extends commands.TacoCommandBase {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
-            var buildOptions = commandData.remain.filter(function (opt: string): boolean { return opt.indexOf("--") === 0 });
+            var buildOptions = commandData.remain.filter(function (opt: string): boolean { return opt.indexOf("--") === 0; });
             var buildInfoPath = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
             var buildSettings = new RemoteBuildSettings({

@@ -62,12 +62,12 @@ class Settings {
         }
     }
 
-    public static saveSettings(settings: Settings.ISettings): Q.Promise<any> {
+    public static saveSettings(settings: Settings.ISettings): Q.Promise<Settings.ISettings> {
         // save to TACO_HOME/TacoSettings.json and store as the cached version
         Settings.Settings = settings;
         utils.createDirectoryIfNecessary(utils.tacoHome);
         fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
-        return Q({});
+        return Q(settings);
     }    
 
     /*
@@ -156,10 +156,9 @@ class Settings {
 
     private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
         return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
-            .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[]{
-
+            .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
                 var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
-                var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1 });
+                var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
 
                 if (platforms.length > 0) {
                 // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
