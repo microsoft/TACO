@@ -157,7 +157,7 @@ class Settings {
     private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
         return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; })
             .then(function (settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
-                var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
+                var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
                 var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
 
                 if (platforms.length > 0) {
