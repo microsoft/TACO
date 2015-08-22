@@ -620,7 +620,6 @@ describe("taco create", function (): void {
     });
 
     describe("Telemetry properties", () => {
-
         var cliVersion = require("../package.json").version;
 
         function createProjectAndVerifyTelemetryProps(args: string[], expectedProperties: TacoUtility.ICommandTelemetryProperties, done: MochaDone): void {
@@ -644,13 +643,11 @@ describe("taco create", function (): void {
             var projectPath = getProjectPath("Telemetry properties for Create command", 1);
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
-                        "cliVersion": { isPii: false, value: cliVersion },
-                        "kit": { isPii: false, value: "5.1.1-Kit" },
-                        "template": { isPii: false, value: "blank" },
+                        cliVersion: { isPii: false, value: cliVersion },
+                        kit: { isPii: false, value: "5.1.1-Kit" },
+                        template: { isPii: false, value: "blank" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
-
             };
-
             createProjectAndVerifyTelemetryProps([projectPath, "--kit", "5.1.1-Kit"], expected, done);
         });
 
@@ -660,12 +657,11 @@ describe("taco create", function (): void {
             var projectPath = getProjectPath("Telemetry properties for Create command", 2);
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
-                        "cliVersion": { isPii: false, value: cliVersion },
-                        "kit": { isPii: false, value: "5.1.1-Kit" },
-                        "template": { isPii: false, value: "typescript" },
+                        cliVersion: { isPii: false, value: cliVersion },
+                        kit: { isPii: false, value: "5.1.1-Kit" },
+                        template: { isPii: false, value: "typescript" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" },
                         "options.template": { isPii: false, value: "typescript" }
-
             };
 
             createProjectAndVerifyTelemetryProps([projectPath, "--kit", "5.1.1-Kit", "--template", "typescript"], expected, done);
@@ -677,10 +673,9 @@ describe("taco create", function (): void {
             var projectPath = getProjectPath("Telemetry properties for Create command", 3);
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
-                        "cliVersion": { isPii: false, value: cliVersion },
-                        "cli": { isPii: false, value: "5.2.0" },
+                        cliVersion: { isPii: false, value: cliVersion },
+                        cli: { isPii: false, value: "5.2.0" },
                         "options.cli": { isPii: false, value: "5.2.0" }
-
             };
 
             createProjectAndVerifyTelemetryProps([projectPath, "--cli", "5.2.0"], expected, done);

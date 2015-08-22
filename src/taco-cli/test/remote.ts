@@ -96,16 +96,16 @@ describe("taco remote", function (): void {
 
         var cliVersion = require("../package.json").version;
         var expectedTelemetryProperties: TacoUtility.ICommandTelemetryProperties = {
-                        "subCommand": { isPii: false, value: "add" },
-                        "platform": { isPii: false, value: "ios" },
-                        "isSecure": { isPii: false, value: "false" }
+                        subCommand: { isPii: false, value: "add" },
+                        platform: { isPii: false, value: "ios" },
+                        isSecure: { isPii: false, value: "false" }
         };
 
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
         RemoteMod.CliSession = RemoteMock.makeCliMock(mocha, () => { sessionClosed = true; }, desiredState, () => { questionsAsked++; });
-        Q(["add", "ios"]).then(remoteRun).then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties) {
+        Q(["add", "ios"]).then(remoteRun).then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
             // Verify telemetry properties               
             telemetryParameters.should.be.eql(expectedTelemetryProperties);
             if (questionsAsked !== 3) {
