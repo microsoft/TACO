@@ -112,8 +112,8 @@ module TacoUtility {
          */
         export class CommandFactory {
             private static CommandAliasMap: { [alias: string]: string; } = {
-                "platforms": "platform",
-                "plugins": "plugin"
+                platforms: "platform",
+                plugins: "plugin"
             };
 
             public listings: any;
@@ -129,6 +129,7 @@ module TacoUtility {
 
                 this.listings = require(commandsInfoPath);
             }
+            
             /**
              * get specific task object, given task name
              */
