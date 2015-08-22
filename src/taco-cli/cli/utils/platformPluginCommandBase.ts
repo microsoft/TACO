@@ -64,7 +64,6 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     };
 
     public name: string;
-    public data: commands.ICommandData;
 
     public cordovaCommandParams: Cordova.ICordovaCommandParameters;
     public downloadOptions: Cordova.ICordovaDownloadOptions;
@@ -158,14 +157,14 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             return Q({});
         })
             .then(function (): Q.Promise<ICommandTelemetryProperties> {
-            return self.generateTelemetryProperties(data);
+            return self.generateTelemetryProperties();
         });
     }
 
     /**
      * Generates the telemetry properties for the platform/plugin operation
      */
-    private generateTelemetryProperties(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self = this;
         var telemetryProperties: ICommandTelemetryProperties = {};
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
