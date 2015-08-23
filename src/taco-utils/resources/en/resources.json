@@ -60,5 +60,7 @@
     "CommandHelpUsageAliases": "<br/><helptitle>Aliases:</helptitle><br/>",
     "_CommandHelpUsageAliases.comment": "options header when user types 'taco help'",
     "CommandHelpTableTitle":  "Commands:",
-    "_CommandHelpTableTitle.comment": "This is the title that we use for the commands list table that we show when executing 'taco help'"
+    "_CommandHelpTableTitle.comment": "This is the title that we use for the commands list table that we show when executing 'taco help'",
+    "TelemetryOptInMessage": "Do you want to help improve the quality of {0} by allowing us to collect anonymous usage data?<br/> We do not collect personally identifiable information or any of your code.<br/> You can change your choice later.<br/> We will send the result of this question even if you select No.<br/> Read more about the {0} privacy policy at https://www.visualstudio.com/en-us/dn948229.",
+    "_TelemetryOptInMessage.comment":  "This is the string presented to the user before asking to opt in for telemetry."
 }

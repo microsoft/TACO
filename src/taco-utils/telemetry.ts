@@ -10,18 +10,21 @@
 
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/applicationinsights.d.ts" />
-/// <reference path="../typings/configstore.d.ts" />
 
 import appInsights = require ("applicationinsights");
 import crypto = require ("crypto");
 import fs = require ("fs");
+import logFormathelper = require ("./logFormatHelper");
 import loggerUtil = require ("./logger");
 import logLevel = require ("./logLevel");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import os = require ("os");
 import path = require ("path");
+import readline = require ("readline");
 import utilHelper = require ("./utilHelper");
+import utilResources = require ("./resources/resourceManager");
 
+import LogFormatHelper = logFormathelper.LogFormatHelper;
 import logger = loggerUtil.Logger;
 import LogLevel = logLevel.LogLevel;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
@@ -33,6 +36,7 @@ import UtilHelper = utilHelper.UtilHelper;
 module TacoUtility {
     export module Telemetry {
         export var appName: string;
+        export var isOptedIn: boolean = false;
 
         export interface ITelemetryProperties {
             [propertyName: string]: any;
@@ -102,21 +106,23 @@ module TacoUtility {
             }
         }
 
-        export function send(event: TelemetryEvent): void {
-            TelemetryUtils.addCommonProperties(event);
+        export function send(event: TelemetryEvent, ignoreOptIn: boolean = false): void {
+            if (Telemetry.isOptedIn || ignoreOptIn) { 
+                TelemetryUtils.addCommonProperties(event);
 
-            try {
-                if (event instanceof TelemetryActivity) {
-                    (<TelemetryActivity>event).end();
-                }
+                try {
+                    if (event instanceof TelemetryActivity) {
+                        (<TelemetryActivity>event).end();
+                    }
 
-                if (appInsights.client) { // no-op if telemetry is not initialized
-                    appInsights.client.trackEvent(event.name, event.properties);
-                    console.log(event.properties);
-                }
-            } catch (err) {
-                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
-                    logger.logError(err);
+                    if (appInsights.client) { // no-op if telemetry is not initialized
+                        appInsights.client.trackEvent(event.name, event.properties);
+                        console.log(event.properties);
+                    }
+                } catch (err) {
+                    if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
+                        logger.logError(err);
+                    }
                 }
             }
         }
@@ -127,7 +133,7 @@ module TacoUtility {
         }
 
         interface ITelemetrySettings {
-            [settingKey: string]: string;
+            [settingKey: string]: any;
             userId?: string;
             machineId?: string;
         }
@@ -141,10 +147,12 @@ module TacoUtility {
             private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae";
             private static SETTINGS_USERID_KEY = "userId";
             private static SETTINGS_MACHINEID_KEY = "machineId";
+            private static SETTINGS_OPTIN_KEY = "optIn";
             private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE = "UserId";
             private static REGISTRY_MACHINEID_KEY = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
+            private static TELEMETRY_OPTIN_STRING = "TelemetryOptInMessage";
 
             private static get telemetrySettingsFile(): string {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
@@ -152,7 +160,7 @@ module TacoUtility {
 
             public static init(appVersion: string): void {
                 TelemetryUtils.loadSettings();
-                
+
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
@@ -169,6 +177,7 @@ module TacoUtility {
                 TelemetryUtils.UserId = TelemetryUtils.getOrCreateId(IdType.User);
                 TelemetryUtils.MachineId = TelemetryUtils.getOrCreateId(IdType.Machine);
                 TelemetryUtils.SessionId = TelemetryUtils.generateGuid();
+                TelemetryUtils.getOptIn();
 
                 TelemetryUtils.saveSettings();
             }
@@ -194,6 +203,23 @@ module TacoUtility {
                 // "Set the two most significant bits (bits 6 and 7) of the clock_seq_hi_and_reserved to zero and one, respectively"
                 var clockSequenceHi = hexValues[8 + (Math.random() * 4) | 0];
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
+            }
+
+            private static getOptIn(): void {
+                var optin: boolean = TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_OPTIN_KEY];
+                if (typeof optin === "undefined") {
+                    var readlineSync = require("readline-sync");
+                    var optinMessage = utilResources.getString(TelemetryUtils.TELEMETRY_OPTIN_STRING, Telemetry.appName);
+                    optin = readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
+
+                    if (!optin) {
+                        Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
+                    }
+
+                    TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_OPTIN_KEY] = optin;
+                }
+
+                Telemetry.isOptedIn = optin;
             }
 
             private static getRegistryValue(key: string, value: string): string {
