@@ -137,22 +137,24 @@ class Settings {
         Settings.Settings = null;
     }
 
-    public static determineSpecificPlatformsFromOptions(platforms: string[], options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
-            // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
-            return platforms.map(function (platform: string): Settings.IPlatformWithLocation {
-                var buildLocation: Settings.BuildLocationType;
-                if (options.options["remote"]) {
-                    buildLocation = Settings.BuildLocationType.Remote;
-                } else if (options.options["local"]) {
-                    buildLocation = Settings.BuildLocationType.Local;
-                } else {                     
-                    // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
-                    buildLocation = (platform in (settings.remotePlatforms || {})) || !Settings.canBuildLocally(platform) ?
-                        Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
-                }
+    public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
+        var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
+        var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
+        // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
+        return platforms.map(function (platform: string): Settings.IPlatformWithLocation {
+            var buildLocation: Settings.BuildLocationType;
+            if (options.options["remote"]) {
+                buildLocation = Settings.BuildLocationType.Remote;
+            } else if (options.options["local"]) {
+                buildLocation = Settings.BuildLocationType.Local;
+            } else {                     
+                // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
+                buildLocation = (platform in (settings.remotePlatforms || {})) || !Settings.canBuildLocally(platform) ?
+                    Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
+            }
 
-                return { location: buildLocation, platform: platform };
-            });
+            return { location: buildLocation, platform: platform };
+        });
     }
 
     public static loadSettingsOrReturnEmpty(): Q.Promise<Settings.ISettings> {
@@ -179,12 +181,11 @@ class Settings {
     private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
         return this.loadSettingsOrReturnEmpty()
             .then((settings: Settings.ISettings) => {
-                var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
-                var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
+                // if one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
+                var platformsFromOptions = this.determineSpecificPlatformsFromOptions(options, settings);
 
-                if (platforms.length > 0) {
-                    // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
-                    return this.determineSpecificPlatformsFromOptions(platforms, options, settings);
+                if (platformsFromOptions.length > 0) {
+                    return platformsFromOptions;
                 } else {
                     // No platform specified: try to do 'all' of them
                     var remotePlatforms: string[] = [];
