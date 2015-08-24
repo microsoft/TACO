@@ -51,7 +51,8 @@
   },
   "readmeFilename": "README.md",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "postinstall": "node cli/logo"
   },
   "license": "MIT"
 }
