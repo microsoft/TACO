@@ -129,9 +129,12 @@ module BuildAndRunTelemetryTests {
                 vcordova: vcordova,
                 vcli: require(path.join(__dirname, "..", "package.json")).version,
                 cfg: configuration,
-                platform: platform,
-                options: ""
+                platform: platform
             };
+
+            if (command === Command.Run) {
+                queryOptions["options"] = ""; // Build always sends the empty string
+            }
 
             var zip = new AdmZip();
             zip.addFile("test.txt", new Buffer("test file"), "comment");
