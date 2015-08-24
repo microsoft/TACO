@@ -1,230 +1,236 @@
 ﻿{
-    "help": {
-        "synopsis": "<synopsis>[COMMAND]</synopsis>",
-        "modulePath": "./help",
-        "description": "<helptitle>[CommandHelpDescription]</helptitle>"
+    "commands": {
+        "help": {
+            "synopsis": "<synopsis>[COMMAND]</synopsis>",
+            "modulePath": "./help",
+            "description": "<helptitle>[CommandHelpDescription]</helptitle>"
+        },
+        "docs": {
+            "synopsis": "<synopsis></synopsis>",
+            "modulePath": "./docs",
+            "description": "<helptitle>[CommandDocumentationDescription]</helptitle>"
+        },
+        "create": {
+            "synopsis": "<synopsis><PATH> [ID [NAME [CONFIG]]] [--OPTIONS]</synopsis>",
+            "modulePath": "./create",
+            "description": "<helptitle>[CommandCreateDescription]</helptitle>",
+            "args": [
+                { "name": "PATH", "description": "[CommandCreateArgsPath]" },
+                { "name": "ID", "description": "[CommandCreateArgsId]" },
+                { "name": "NAME", "description": "[CommandCreateArgsName]" },
+                { "name": "CONFIG", "description": "[CommandCreateArgsConfig]" }
+            ],
+            "options": [
+                { "name": "--kit [NAME]", "description": "[CommandCreateOptionsKit]" },
+                { "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]" },
+                { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
+                { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
+                { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" }
+            ]
+        },
+        "templates": {
+            "synopsis": "<synopsis></synopsis>",
+            "modulePath": "./templates",
+            "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
+        },
+        "kit": {
+            "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
+            "modulePath": "./kit",
+            "description": "<helptitle>[CommandKitDescription]</helptitle>",
+            "args": [
+                { "name": "COMMAND", "description": "[CommandKitSubcommandDescription]" },
+                {
+                    "name": "list",
+                    "description": "[CommandKitListSubcommandDescription]",
+                    "options": [
+                        { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" },
+                        { "name": "--kit <KIT-ID>", "description": "[CommandKitOptionKitDescription]" }
+                    ]
+                },
+                {
+                    "name": "select",
+                    "description": "[CommandKitSelectSubcommandDescription]",
+                    "options": [
+                        { "name": "--kit <KIT-ID>", "description": "[CommandKitSelectOptionKitDescription]" },
+                        { "name": "--cli <VERSION>", "description": "[CommandKitSelectOptionCliDescription]" }
+                    ]
+                }
+            ]
+        },
+        "remote": {
+            "synopsis": "<synopsis>COMMAND</synopsis>",
+            "modulePath": "./remote",
+            "description": "<helptitle>[CommandRemoteDescription]</helptitle>",
+            "args": [
+                { "name": "COMMAND", "description": "[CommandRemoteSubcommandDescription]" },
+                {
+                    "name": "add <PLATFORM>",
+                    "description": "[CommandRemoteAddSubcommandDescription]"
+                },
+                {
+                    "name": "remove <PLATFORM>",
+                    "description": "[CommandRemoteRemoveSubcommandDescription]"
+                },
+                {
+                    "name": "list",
+                    "description": "[CommandRemoteListSubcommandDescription]"
+                }
+            ],
+            "aliases": [
+                { "alias": "rm", "command": "remove" },
+                { "alias": "ls", "command": "list" }
+            ]
+        },
+        "platform": {
+            "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
+            "modulePath": "./platform",
+            "description": "<helptitle>[CommandPlatformDescription]</helptitle>",
+            "args": [
+                { "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]" },
+                {
+                    "name": "add <PLAT-SPEC>",
+                    "description": "[CommandPlatformAddSubcommandDescription]",
+                    "options": [
+                        { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+                        { "name": "--save", "description": "[CommandPlatformSaveAddDescription]" },
+                        { "name": "--link", "description": "[CommandPlatformLinkDescription]" }
+                    ]
+                },
+                {
+                    "name": "remove <PLATFORM>",
+                    "description": "[CommandPlatformRemoveSubcommandDescription]",
+                    "options": [
+                        { "name": "--save", "description": "[CommandPlatformSaveRemoveDescription]" }
+                    ]
+                },
+                { "name": "list", "description": "[CommandPlatformListSubcommandDescription]" },
+                {
+                    "name": "update <PLAT-SPEC>",
+                    "description": "[CommandPlatformUpdateSubcommandDescription]",
+                    "options": [
+                        { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
+                        { "name": "--save", "description": "[CommandPlatformSaveUpdateDescription]" }
+                    ]
+                },
+                { "name": "check", "description": "[CommandPlatformCheckSubcommandDescription]" }
+            ],
+            "syntax": [
+                { "name": "plat-spec", "description": "[CommandPlatformOptPlatSpecDescription]" },
+                { "name": "platform-ver", "description": "[CommandPlatformOptPlatVersionDescription]" },
+                { "name": "platform", "description": "[CommandPlatformOptPlatformDescription]" },
+                { "name": "path", "description": "[CommandPlatformOptPathDescription]" },
+                { "name": "git-url", "description": "[CommandPlatformOptGitUrlDescription]" },
+                { "name": "url", "description": "[CommandPlatformOptUrlDescription]" },
+                { "name": "version", "description": "[CommandPlatformOptVersionDescription]" },
+                { "name": "branch", "description": "[CommandPlatformOptBranchDescription]" }
+            ],
+            "aliases": [
+                { "alias": "platforms", "command": "platform" },
+                { "alias": "rm", "command": "remove" },
+                { "alias": "ls", "command": "list" }
+            ]
+        },
+        "plugin": {
+            "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
+            "modulePath": "./plugin",
+            "description": "<helptitle>[CommandPluginDescription]</helptitle>",
+            "args": [
+                { "name": "COMMAND", "description": "[CommandPluginSubcommandDescription]" },
+                {
+                    "name": "add <PLAT-SPEC>",
+                    "description": "[CommandPluginAddSubcommandDescription]",
+                    "options": [
+                        { "name": "[--searchpath <DIRECTORY>]", "description": "[CommandPluginSearchPathDescription]" },
+                        { "name": "[--noregistry]", "description": "[CommandPluginNoRegistryDescription]" },
+                        { "name": "[--link]", "description": "[CommandPluginLinkDescription]" },
+                        { "name": "[--save]", "description": "[CommandPluginSaveAddDescription]" },
+                        { "name": "[--shrinkwrap]", "description": "[CommandPluginShrinkwrapDescription]" }
+                    ]
+                },
+                {
+                    "name": "remove <PLUGINID> [...]",
+                    "description": "[CommandPluginRemoveSubcommandDescription]",
+                    "options": [
+                        { "name": "[--save]", "description": "[CommandPluginSaveRemoveDescription]" }
+                    ]
+                },
+                { "name": "list", "description": "[CommandPluginListSubcommandDescription]" },
+                { "name": "search", "description": "[CommandPluginSearchSubcommandDescription]" }
+            ],
+            "aliases": [
+                { "alias": "plugins", "command": "plugin" },
+                { "alias": "rm", "command": "remove" },
+                { "alias": "ls", "command": "list" }
+            ]
+        },
+        "install-reqs": {
+            "synopsis": "<synopsis>[PLATFORM]</synopsis>",
+            "modulePath": "./installReqs",
+            "description": "<helptitle>[CommandInstallReqsDescription]</helptitle>",
+            "args": [
+                { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
+            ]
+        },
+        "build": {
+            "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+            "modulePath": "./build",
+            "description": "<helptitle>[CommandBuildDescription]</helptitle>",
+            "args": [
+                { "name": "PLATFORM", "description": "[CommandBuildPlatformDescription]" }
+            ],
+            "options": [
+                { "name": "--remote", "description": "[CommandBuildRemoteDescription]" },
+                { "name": "--local", "description": "[CommandBuildLocalDescription]" },
+                { "name": "--clean", "description": "[CommandBuildCleanDescription]" },
+                { "name": "--debug", "description": "[CommandBuildDebugDescription]" },
+                { "name": "--release", "description": "[CommandBuildReleaseDescription]" },
+                { "name": "--device", "description": "[CommandBuildDeviceDescription]" },
+                { "name": "--emulator", "description": "[CommandBuildEmulatorDescription]" },
+                { "name": "--target=TARGET", "description": "[CommandBuildTargetDescription]" }
+            ]
+        },
+        "run": {
+            "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+            "modulePath": "./run",
+            "description": "<helptitle>[CommandRunDescription]</helptitle>",
+            "args": [
+                { "name": "PLATFORM", "description": "[CommandRunPlatformDescription]" }
+            ],
+            "options": [
+                { "name": "--remote", "description": "[CommandRunRemoteDescription]" },
+                { "name": "--local", "description": "[CommandRunLocalDescription]" },
+                { "name": "--nobuild", "description": "[CommandRunNobuildDescription]" },
+                { "name": "--debuginfo", "description": "[CommandRunDebuginfoDescription]" },
+                { "name": "--debug", "description": "[CommandRunDebugDescription]" },
+                { "name": "--release", "description": "[CommandRunReleaseDescription]" },
+                { "name": "--device", "description": "[CommandRunDeviceDescription]" },
+                { "name": "--emulator", "description": "[CommandRunEmulatorDescription]" },
+                { "name": "--target=TARGET", "description": "[CommandRunTargetDescription]" }
+            ]
+        },
+        "emulate": {
+            "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+            "modulePath": "./emulate",
+            "description": "<helptitle>[CommandEmulateDescription]</helptitle>",
+            "args": [
+                { "name": "PLATFORM", "description": "[CommandRunPlatformDescription]" },
+                { "name": "--remote", "description": "[CommandRunRemoteDescription]" },
+                { "name": "--local", "description": "[CommandRunLocalDescription]" },
+                { "name": "--nobuild", "description": "[CommandRunNobuildDescription]" },
+                { "name": "--debuginfo", "description": "[CommandRunDebuginfoDescription]" },
+                { "name": "--debug", "description": "[CommandRunDebugDescription]" },
+                { "name": "--release", "description": "[CommandRunReleaseDescription]" },
+                { "name": "--target=TARGET", "description": "[CommandRunTargetDescription]" }
+            ]
+        },
+        "version": {
+            "synopsis": "<synopsis></synopsis>",
+            "modulePath": "./version",
+            "description": "<helptitle>[CommandVersionDescription]</helptitle>"
+        }
     },
-    "docs": {
-        "synopsis": "<synopsis></synopsis>",
-        "modulePath": "./docs",
-        "description": "<helptitle>[CommandDocumentationDescription]</helptitle>"
-    },
-    "create": {
-        "synopsis": "<synopsis><PATH> [ID [NAME [CONFIG]]] [--OPTIONS]</synopsis>",
-        "modulePath": "./create",
-        "description": "<helptitle>[CommandCreateDescription]</helptitle>",
-        "args": [
-            { "name": "PATH", "description": "[CommandCreateArgsPath]" },
-            { "name": "ID", "description": "[CommandCreateArgsId]" },
-            { "name": "NAME", "description": "[CommandCreateArgsName]" },
-            { "name": "CONFIG", "description": "[CommandCreateArgsConfig]" }
-        ],
-        "options": [
-            { "name": "--kit [NAME]", "description": "[CommandCreateOptionsKit]" },
-            { "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]" },
-            { "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]" },
-            { "name": "--copy-from|src <PATH>", "description": "[CommandCreateOptionsCopy]" },
-            { "name": "--link-to <PATH>", "description": "[CommandCreateOptionsLinkto]" }
-        ]
-    },
-    "templates": {
-        "synopsis": "<synopsis></synopsis>",
-        "modulePath": "./templates",
-        "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
-    },
-    "kit": {
-        "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
-        "modulePath": "./kit",
-        "description": "<helptitle>[CommandKitDescription]</helptitle>",
-        "args": [
-            { "name": "COMMAND", "description": "[CommandKitSubcommandDescription]" },
-            {
-                "name": "list",
-                "description": "[CommandKitListSubcommandDescription]",
-                "options": [
-                    { "name": "--json <PATH>", "description": "[CommandKitJsonOptionDescription]" },
-                    { "name": "--kit <KIT-ID>", "description": "[CommandKitOptionKitDescription]" }
-                ]
-            },
-            {
-                "name": "select",
-                "description": "[CommandKitSelectSubcommandDescription]",
-                "options": [
-                    { "name": "--kit <KIT-ID>", "description": "[CommandKitSelectOptionKitDescription]" },
-                    { "name": "--cli <VERSION>", "description": "[CommandKitSelectOptionCliDescription]" }
-                ]
-            }
-        ]
-    },
-    "remote": {
-        "synopsis": "<synopsis>COMMAND</synopsis>",
-        "modulePath": "./remote",
-        "description": "<helptitle>[CommandRemoteDescription]</helptitle>",
-        "args": [
-            { "name": "COMMAND", "description": "[CommandRemoteSubcommandDescription]" },
-            {
-                "name": "add <PLATFORM>",
-                "description": "[CommandRemoteAddSubcommandDescription]"
-            },
-            {
-                "name": "remove <PLATFORM>",
-                "description": "[CommandRemoteRemoveSubcommandDescription]"
-            },
-            {
-                "name": "list",
-                "description": "[CommandRemoteListSubcommandDescription]"
-            }
-        ],
-        "aliases": [
-            { "alias": "rm", "command": "remove" },
-            { "alias": "ls", "command": "list" }
-        ]
-    },
-    "platform": {
-        "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
-        "modulePath": "./platform",
-        "description": "<helptitle>[CommandPlatformDescription]</helptitle>",
-        "args": [
-            { "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]" },
-            {
-                "name": "add <PLAT-SPEC>",
-                "description": "[CommandPlatformAddSubcommandDescription]",
-                "options": [
-                    { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
-                    { "name": "--save", "description": "[CommandPlatformSaveAddDescription]" },
-                    { "name": "--link", "description": "[CommandPlatformLinkDescription]" }
-                ]
-            },
-            {
-                "name": "remove <PLATFORM>",
-                "description": "[CommandPlatformRemoveSubcommandDescription]",
-                "options": [
-                    { "name": "--save", "description": "[CommandPlatformSaveRemoveDescription]" }
-                ]
-            },
-            { "name": "list", "description": "[CommandPlatformListSubcommandDescription]" },
-            {
-                "name": "update <PLAT-SPEC>",
-                "description": "[CommandPlatformUpdateSubcommandDescription]",
-                "options": [
-                    { "name": "--usegit", "description": "[CommandPlatformUsegitDescription]" },
-                    { "name": "--save", "description": "[CommandPlatformSaveUpdateDescription]" }
-                ]
-            },
-            { "name": "check", "description": "[CommandPlatformCheckSubcommandDescription]" }
-        ],
-        "syntax": [
-            { "name": "plat-spec", "description": "[CommandPlatformOptPlatSpecDescription]" },
-            { "name": "platform-ver", "description": "[CommandPlatformOptPlatVersionDescription]" },
-            { "name": "platform", "description": "[CommandPlatformOptPlatformDescription]" },
-            { "name": "path", "description": "[CommandPlatformOptPathDescription]" },
-            { "name": "git-url", "description": "[CommandPlatformOptGitUrlDescription]" },
-            { "name": "url", "description": "[CommandPlatformOptUrlDescription]" },
-            { "name": "version", "description": "[CommandPlatformOptVersionDescription]" },
-            { "name": "branch", "description": "[CommandPlatformOptBranchDescription]" }
-        ],
-        "aliases": [
-            { "alias": "platforms", "command": "platform" },
-            { "alias": "rm", "command": "remove" },
-            { "alias": "ls", "command": "list" }
-        ]
-    },
-    "plugin": {
-        "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
-        "modulePath": "./plugin",
-        "description": "<helptitle>[CommandPluginDescription]</helptitle>",
-        "args": [
-            { "name": "COMMAND", "description": "[CommandPluginSubcommandDescription]" },
-            {
-                "name": "add <PLAT-SPEC>",
-                "description": "[CommandPluginAddSubcommandDescription]",
-                "options": [
-                    { "name": "[--searchpath <DIRECTORY>]", "description": "[CommandPluginSearchPathDescription]" },
-                    { "name": "[--noregistry]", "description": "[CommandPluginNoRegistryDescription]" },
-                    { "name": "[--link]", "description": "[CommandPluginLinkDescription]" },
-                    { "name": "[--save]", "description": "[CommandPluginSaveAddDescription]" },
-                    { "name": "[--shrinkwrap]", "description": "[CommandPluginShrinkwrapDescription]" }
-                ]
-            },
-            {
-                "name": "remove <PLUGINID> [...]",
-                "description": "[CommandPluginRemoveSubcommandDescription]",
-                "options": [
-                    { "name": "[--save]", "description": "[CommandPluginSaveRemoveDescription]" }
-                ]
-            },
-            { "name": "list", "description": "[CommandPluginListSubcommandDescription]" },
-            { "name": "search", "description": "[CommandPluginSearchSubcommandDescription]" }
-        ],
-        "aliases": [
-            { "alias": "plugins", "command": "plugin" },
-            { "alias": "rm", "command": "remove" },
-            { "alias": "ls", "command": "list" }
-        ]
-    },
-    "install-reqs": {
-        "synopsis": "<synopsis>[PLATFORM]</synopsis>",
-        "modulePath": "./installReqs",
-        "description": "<helptitle>[CommandInstallReqsDescription]</helptitle>",
-        "args": [
-            { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
-        ]
-    },
-    "build": {
-        "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
-        "modulePath": "./build",
-        "description": "<helptitle>[CommandBuildDescription]</helptitle>",
-        "args": [
-            { "name": "PLATFORM", "description": "[CommandBuildPlatformDescription]" }
-        ],
-        "options": [
-            { "name": "--remote", "description": "[CommandBuildRemoteDescription]" },
-            { "name": "--local", "description": "[CommandBuildLocalDescription]" },
-            { "name": "--clean", "description": "[CommandBuildCleanDescription]" },
-            { "name": "--debug", "description": "[CommandBuildDebugDescription]" },
-            { "name": "--release", "description": "[CommandBuildReleaseDescription]" },
-            { "name": "--device", "description": "[CommandBuildDeviceDescription]" },
-            { "name": "--emulator", "description": "[CommandBuildEmulatorDescription]" },
-            { "name": "--target=TARGET", "description": "[CommandBuildTargetDescription]" }
-        ]
-    },
-    "run": {
-        "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
-        "modulePath": "./run",
-        "description": "<helptitle>[CommandRunDescription]</helptitle>",
-        "args": [
-            { "name": "PLATFORM", "description": "[CommandRunPlatformDescription]" }
-        ],
-        "options": [
-            { "name": "--remote", "description": "[CommandRunRemoteDescription]" },
-            { "name": "--local", "description": "[CommandRunLocalDescription]" },
-            { "name": "--nobuild", "description": "[CommandRunNobuildDescription]" },
-            { "name": "--debuginfo", "description": "[CommandRunDebuginfoDescription]" },
-            { "name": "--debug", "description": "[CommandRunDebugDescription]" },
-            { "name": "--release", "description": "[CommandRunReleaseDescription]" },
-            { "name": "--device", "description": "[CommandRunDeviceDescription]" },
-            { "name": "--emulator", "description": "[CommandRunEmulatorDescription]" },
-            { "name": "--target=TARGET", "description": "[CommandRunTargetDescription]" }
-        ]
-    },
-    "emulate": {
-        "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
-        "modulePath": "./emulate",
-        "description": "<helptitle>[CommandEmulateDescription]</helptitle>",
-        "args": [
-            { "name": "PLATFORM", "description": "[CommandRunPlatformDescription]" },
-            { "name": "--remote", "description": "[CommandRunRemoteDescription]" },
-            { "name": "--local", "description": "[CommandRunLocalDescription]" },
-            { "name": "--nobuild", "description": "[CommandRunNobuildDescription]" },
-            { "name": "--debuginfo", "description": "[CommandRunDebuginfoDescription]" },
-            { "name": "--debug", "description": "[CommandRunDebugDescription]" },
-            { "name": "--release", "description": "[CommandRunReleaseDescription]" },
-            { "name": "--target=TARGET", "description": "[CommandRunTargetDescription]" }
-        ]
-    },
-    "version": {
-        "synopsis": "<synopsis></synopsis>",
-        "modulePath": "./version",
-        "description": "<helptitle>[CommandVersionDescription]</helptitle>"
+    "aliases": {
+        "platforms": "platform",
+        "plugins": "plugin"
     }
 }
