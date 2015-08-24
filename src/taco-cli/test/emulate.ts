@@ -38,7 +38,6 @@ import utils = TacoUtility.UtilHelper;
 var create = new createMod();
 
 describe("taco emulate", function (): void {
-    this.timeout(1000000); // DIEGO REMOVE THIS
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "emulate");
     var originalCwd: string;
