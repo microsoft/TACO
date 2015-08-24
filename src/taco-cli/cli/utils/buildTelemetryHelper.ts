@@ -55,14 +55,17 @@ class BuildTelemetryHelper {
         });
     }
 
+    public static getIsPlatformPii(): { (platform: string): boolean } {
+        return platform => this.KnownPlatforms.indexOf(platform.toLocaleLowerCase()) < 0;
+    }
+
     /*
      * Encode platform with pii or npii as required
      */
     private static encodePlatforms(telemetryProperties: ICommandTelemetryProperties, baseName: string, platforms: string[]): void {
         var platformIndex = 1; // This is a one-based index
         platforms.forEach(platform => {
-            var isPii = this.KnownPlatforms.indexOf(platform.toLocaleLowerCase()) < 0;
-            telemetryProperties[baseName + platformIndex++] = telemetryProperty(platform, isPii);
+            telemetryProperties[baseName + platformIndex++] = telemetryProperty(platform, this.getIsPlatformPii()(platform));
         });
     }
 

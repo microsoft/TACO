@@ -36,7 +36,7 @@ class JavaJdkInstaller extends InstallerBase {
     private darwinMountpointName: string;
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
-        super(installerInfo, softwareVersion, installTo, logger, steps);
+        super(installerInfo, softwareVersion, installTo, logger, steps, "java");
     }
 
     protected downloadWin32(): Q.Promise<any> {

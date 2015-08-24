@@ -24,7 +24,7 @@ import ILogger = installerProtocol.ILogger;
 
 class IosSimInstaller extends InstallerBase {
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
-        super(installerInfo, softwareVersion, installTo, logger, steps);
+        super(installerInfo, softwareVersion, installTo, logger, steps, "ios-sim");
     }
 
     protected installWin32(): Q.Promise<any> {

@@ -8,12 +8,17 @@
 
 /// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/underscore.d.ts" />
 
 "use strict";
+
+import _ = require ("underscore");
+import Q = require ("q");
 
 import commands = require ("./commands");
 import packageLoader = require ("./tacoPackageLoader");
 import telemetry = require ("./telemetry");
+
 import Telemetry = telemetry.Telemetry;
 
 module TacoUtility {
@@ -25,6 +30,115 @@ module TacoUtility {
     export interface ICommandTelemetryProperties {
         [propertyName: string]: ITelemetryPropertyInfo;
     };
+
+    export class TelemetryGenerator {
+        private telemetryProperties: ICommandTelemetryProperties = {};
+        private componentName: string;
+        private currentStepStartTime: number[] = process.hrtime();
+        private currentStep: string = "<initial-step>";
+
+        public constructor(componentName: string) {
+            this.componentName = componentName;
+        }
+
+        public add(baseName: string, value: any, isPii: boolean): TelemetryGenerator {
+            return this.addWithPiiEvaluator(baseName, value, () => isPii);
+        }
+
+        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string): boolean }): TelemetryGenerator {
+            // We have 3 cases:
+            //     * Object is an array, we add each element as baseNameNNN
+            //     * Object is a hash, we add each element as baseName.KEY
+            //     * Object is a value, we add the element as baseName
+            try {
+                if (Array.isArray(value)) {
+                    this.addArray(baseName, <any[]>value, piiEvaluator);
+                } else if (_.isObject(value)) {
+                    this.addHash(baseName, <{ [key: string]: any }>value, piiEvaluator);
+                } else {
+                    this.addString(baseName, String(value), piiEvaluator);
+                }
+            } catch (error) {
+                // We don't want to crash the functionality if the telemetry fails.
+                // This error message will be a javascript error message, so it's not pii
+                this.addString("telemetryGenerationError." + baseName, String(error), () => false);
+            }
+
+            return this;
+        }
+
+        public time<T>(name: string, codeToMeasure: { (): T }): T {
+            var startTime = process.hrtime();
+            return executeAfter(codeToMeasure(),
+                () => this.finishTime(name, startTime),
+                (reason: any) => {
+                    this.add(this.combine(name, "failureReason"), String(reason), /*isPii*/ false);
+                    return Q.reject(reason);
+                });
+        }
+
+        public step(name: string): TelemetryGenerator {
+            this.finishTime(this.currentStep, this.currentStepStartTime),
+            this.currentStep = name;
+            this.currentStepStartTime = process.hrtime();
+            return this;
+        }
+
+        public send(): void {
+            if (this.currentStep) {
+                this.add("lastStepExecuted", this.currentStep, false);
+            }
+
+            this.step(null); // Store last step's time
+
+            var telemetryEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/component/" + this.componentName);
+            TelemetryHelper.addTelemetryEventProperties(telemetryEvent, this.telemetryProperties);
+            Telemetry.send(telemetryEvent);
+            console.log("Telemetry: " + JSON.stringify(telemetryEvent, null, 2));
+        }
+
+        private addArray(baseName: string, array: any[], piiEvaluator: { (value: string): boolean }): void {
+            // Object is an array, we add each element as baseNameNNN
+            var elementIndex = 1; // We send telemetry properties in a one-based index
+            array.forEach((element: any) => this.addWithPiiEvaluator(baseName + elementIndex++, element, piiEvaluator));
+        }
+
+        private addHash(baseName: string, hash: { [key: string]: any }, piiEvaluator: { (value: string): boolean }): void {
+            // Object is a hash, we add each element as baseName.KEY
+            Object.keys(hash).forEach(key => this.addWithPiiEvaluator(baseName + "." + key, hash[key], piiEvaluator));
+        }
+
+        private addString(name: string, value: string, piiEvaluator: { (value: string): boolean }): void {
+            this.telemetryProperties[name] = TelemetryHelper.telemetryProperty(value, piiEvaluator(value));
+        }
+
+        private combine(...components: string[]): string {
+            var nonNullComponents = components.filter(component => !_.isNull(component));
+            return nonNullComponents.join(".");
+        }
+
+        private finishTime(name: string, startTime: number[]): void {
+            var endTime = process.hrtime(startTime);
+            this.add(this.combine(name, "time"), String(endTime[0] * 1000 + endTime[1] / 1000000), /*isPii*/ false);
+        }
+    }
+
+    /* 
+    * Given an object that might be either a value or a promise, we'll execute a callback after the object gets "finished"
+    *    In the case of a promise, that means on the .finally handler. In the case of a value, that means immediately.
+    *    It also supports attaching a fail callback in case it's a promise
+    */
+    function executeAfter<T>(valueOrPromise: T, afterCallback: { (): void }, failCallback: { (reason: any): void } = (reason: any) => Q.reject(reason)): T {
+        var valueAsPromise = <Q.Promise<any>><Object>valueOrPromise;
+        if (_.isObject(valueAsPromise) && _.isFunction(valueAsPromise.finally)) {
+            // valueOrPromise must be a promise. We'll add the callback as a finally handler
+            return <T><Object>valueAsPromise.finally(afterCallback).fail(failCallback);
+        } else {
+            // valueOrPromise is just a value. We'll execute the callback now
+            afterCallback();
+            return valueOrPromise;
+        }
+    }
 
     export class TelemetryHelper {
         public static telemetryProperty(propertyValue: any, pii?: boolean): ITelemetryPropertyInfo {
@@ -101,6 +215,11 @@ module TacoUtility {
                 }
             });
             return telemetryProperties;
+        }
+
+        public static generate<T>(name: string, codeGeneratingTelemetry: { (telemetry: TelemetryGenerator): T }): T {
+            var generator = new TelemetryGenerator(name);
+            return executeAfter(generator.time(null, () => codeGeneratingTelemetry(generator)), () => generator.send());
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {

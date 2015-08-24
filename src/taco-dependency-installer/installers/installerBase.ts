@@ -31,6 +31,8 @@ import ILogger = installerProtocol.ILogger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 class InstallerBase {
+    private id: string;
+
     protected static InstallerCache: string = path.join(tacoUtils.UtilHelper.tacoHome, "third-party-installers");
 
     protected installerInfo: DependencyInstallerInterfaces.IInstallerData;
@@ -39,30 +41,36 @@ class InstallerBase {
     protected installDestination: string;
     protected logger: ILogger;
 
-    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
+    constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string,
+        logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration, id: string) {
         this.installerInfo = installerInfo;
         this.steps = steps;
         this.softwareVersion = softwareVersion;
         this.installDestination = installTo;
         this.logger = logger;
+        this.id = id;
     }
 
     public run(): Q.Promise<any> {
         var self = this;
-
-        return this.download()
+        return tacoUtils.TelemetryHelper.generate("Installer:" + this.id,
+            telemetry => this.download()
             .then(function (): Q.Promise<any> {
+                telemetry.step("install");
                 return self.install();
             })
             .then(function (): Q.Promise<any> {
+                telemetry.step("updateVariables");
                 return self.updateVariables();
             })
             .then(function (): Q.Promise<any> {
+                telemetry.step("postInstall");
                 return self.postInstall();
             })
             .then(function (): void {
+                telemetry.step("logSuccess");
                 self.logger.log(resources.getString("Success"));
-            });
+            }));
     }
 
     protected download(): Q.Promise<any> {

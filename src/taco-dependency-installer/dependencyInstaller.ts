@@ -73,37 +73,47 @@ module TacoDependencyInstaller {
         }
 
         public run(requirementsResult: any): Q.Promise<any> {
-            if (process.platform !== "win32" && process.platform !== "darwin") {
-                return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
-            }
+            return tacoUtils.TelemetryHelper.generate<any>("dependencyInstaller", telemetry => {
+                telemetry.add("requirements", requirementsResult, /*isPii*/ false);
 
-            // Parse 'cordova requirements' results and extract missing dependencies to end up with an array of IDs
-            this.parseMissingDependencies(requirementsResult);
+                if (process.platform !== "win32" && process.platform !== "darwin") {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
+                }
 
-            // Warn the user for any dependencies for which installation is not supported
-            this.displayUnsupportedWarning();
+                // Parse 'cordova requirements' results and extract missing dependencies to end up with an array of IDs
+                this.parseMissingDependencies(requirementsResult);
+                telemetry
+                    .add("missingDependencies", this.missingDependencies, /*isPii*/ false)
+                    .add("unsupportedMissingDependencies", this.unsupportedMissingDependencies, /*isPii*/ false);
 
-            // If there are no supported missing dependencies, we are done
-            if (!this.missingDependencies.length) {
-                logger.log(resources.getString("NothingToInstall"));
-                logger.logLine();
+                // Warn the user for any dependencies for which installation is not supported
+                this.displayUnsupportedWarning();
 
-                return Q.resolve({});
-            }
+                // If there are no supported missing dependencies, we are done
+                if (!this.missingDependencies.length) {
+                    logger.log(resources.getString("NothingToInstall"));
+                    logger.logLine();
 
-            // Sort the array of dependency IDs based on the order in which they need to be installed
-            this.sortDependencies();
+                    return Q.resolve({});
+                }
 
-            // Print a summary of what is about to be installed, Wait for user confirmation, then spawn the elevated process which will perform the installations
-            var self = this;
+                // Sort the array of dependency IDs based on the order in which they need to be installed
+                this.sortDependencies();
 
-            return this.promptUserBeforeInstall()
-                .then(function (): Q.Promise<number> {
-                    return self.spawnElevatedInstaller();
-                })
-                .then(function (exitCode: number): void {
-                    self.printSummaryLine(exitCode);
-                });
+                // Print a summary of what is about to be installed, Wait for user confirmation, then spawn the elevated process which will perform the installations
+                var self = this;
+
+                telemetry.step("promptUserBeforeInstall");
+                return this.promptUserBeforeInstall()
+                    .then(function (): Q.Promise<number> {
+                        telemetry.step("spawnElevatedInstaller");
+                        return self.spawnElevatedInstaller();
+                    })
+                    .then(function (exitCode: number): void {
+                        telemetry.step("printSummaryLine").add("exitCode", exitCode, /*isPii*/ false);
+                        self.printSummaryLine(exitCode);
+                    });
+            });
         }
 
         private parseMissingDependencies(cordovaChecksResult: any): void {
