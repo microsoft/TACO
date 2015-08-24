@@ -101,7 +101,7 @@ class Emulate extends commands.TacoCommandBase {
             var configuration = commandData.options["release"] ? "release" : "debug";
             var buildTarget = commandData.options["target"] || "";
             var language = settings.language || "en";
-            var remoteConfig = settings.remotePlatforms[platform];
+            var remoteConfig = settings.remotePlatforms && settings.remotePlatforms[platform];
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }

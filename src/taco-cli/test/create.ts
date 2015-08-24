@@ -473,7 +473,7 @@ describe("taco create", function (): void {
             "PackageLoaderDownloadCompletedMessage"];
 
         it("prints the onboarding experience when using a kit", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("onboarding-experience", 1);
 
@@ -509,7 +509,7 @@ describe("taco create", function (): void {
         });
 
         it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("onboarding-experience", 2);
 
@@ -546,7 +546,7 @@ describe("taco create", function (): void {
         });
 
         it("it adds (Deprecated) to a deprecated kit", function (done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
 
             var projectPath = getProjectPath("onboarding-experience", 3);
 
@@ -584,7 +584,7 @@ describe("taco create", function (): void {
 
         it("it adds (Default) to a default kit", function (done: MochaDone): void {
             var projectPath = getProjectPath("onboarding-experience", 4);
-            this.timeout(60000); // Instaling the node packages during create can take a long time
+            this.timeout(60000); // installing the node packages during create can take a long time
             kitHelper.getDefaultKit().done(defaultKitId => {
                 var firstPart = [
                     "CommandCreateStatusCreatingNewProject",
@@ -616,6 +616,69 @@ describe("taco create", function (): void {
                     firstPart.concat(downloadingDependenciesOutput, lastPart),
                     done);
             });
+        });
+    });
+
+    describe("Telemetry properties", () => {
+        var cliVersion = require("../package.json").version;
+
+        function createProjectAndVerifyTelemetryProps(args: string[], expectedProperties: TacoUtility.ICommandTelemetryProperties, done: MochaDone): void {
+            var create = new Create();
+            var commandData: tacoUtils.Commands.ICommandData = {
+                options: {},
+                original: args,
+                remain: args.slice()
+            };
+
+            // Create a dummy test project with no platforms added
+            create.run(commandData).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {                  
+                telemetryParameters.should.be.eql(expectedProperties);
+                done();
+            }, done);
+        }
+
+        it("Returns the expected telemetry properties for a kit project created with the Blank template", function (done: MochaDone): void {
+            this.timeout(60000); // installing the node packages during create can take a long time
+
+            var projectPath = getProjectPath("Telemetry properties for Create command", 1);
+
+            var expected: TacoUtility.ICommandTelemetryProperties = {
+                        cliVersion: { isPii: false, value: cliVersion },
+                        kit: { isPii: false, value: "5.1.1-Kit" },
+                        template: { isPii: false, value: "blank" },
+                        "options.kit": { isPii: false, value: "5.1.1-Kit" }
+            };
+            createProjectAndVerifyTelemetryProps([projectPath, "--kit", "5.1.1-Kit"], expected, done);
+        });
+
+        it("Returns the expected telemetry properties for a kit project created with TypeScript template", function (done: MochaDone): void {
+            this.timeout(60000); // installing the node packages during create can take a long time
+
+            var projectPath = getProjectPath("Telemetry properties for Create command", 2);
+
+            var expected: TacoUtility.ICommandTelemetryProperties = {
+                        cliVersion: { isPii: false, value: cliVersion },
+                        kit: { isPii: false, value: "5.1.1-Kit" },
+                        template: { isPii: false, value: "typescript" },
+                        "options.kit": { isPii: false, value: "5.1.1-Kit" },
+                        "options.template": { isPii: false, value: "typescript" }
+            };
+
+            createProjectAndVerifyTelemetryProps([projectPath, "--kit", "5.1.1-Kit", "--template", "typescript"], expected, done);
+        });
+
+        it("Returns the expected telemetry properties for a CLI project", function (done: MochaDone): void {
+            this.timeout(60000); // installing the node packages during create can take a long time
+
+            var projectPath = getProjectPath("Telemetry properties for Create command", 3);
+
+            var expected: TacoUtility.ICommandTelemetryProperties = {
+                        cliVersion: { isPii: false, value: cliVersion },
+                        cli: { isPii: false, value: "5.2.0" },
+                        "options.cli": { isPii: false, value: "5.2.0" }
+            };
+
+            createProjectAndVerifyTelemetryProps([projectPath, "--cli", "5.2.0"], expected, done);
         });
     });
 });

@@ -158,8 +158,8 @@ class Remote extends commands.TacoCommandBase {
             // No settings or the settings were corrupted: start from scratch
             return {};
         }).then(function (settings: Settings.ISettings): void {
-            var platforms = settings.remotePlatforms && Object.keys(settings.remotePlatforms).map(function (platform: string): INameDescription {
-                    var remote = settings.remotePlatforms[platform];
+            var platforms = Object.keys(settings.remotePlatforms || {}).map(function (platform: string): INameDescription {
+                    var remote = settings.remotePlatforms && settings.remotePlatforms[platform];
                     var url = util.format("[%s] %s://%s:%d/%s",
                         remote.secure ? resources.getString("CommandRemoteListSecured") : resources.getString("CommandRemoteListNotSecured"),
                         remote.secure ? "https" : "http",

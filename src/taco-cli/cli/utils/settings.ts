@@ -62,12 +62,12 @@ class Settings {
         }
     }
 
-    public static saveSettings(settings: Settings.ISettings): Q.Promise<any> {
+    public static saveSettings(settings: Settings.ISettings): Q.Promise<Settings.ISettings> {
         // save to TACO_HOME/TacoSettings.json and store as the cached version
         Settings.Settings = settings;
         utils.createDirectoryIfNecessary(utils.tacoHome);
         fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
-        return Q({});
+        return Q(settings);
     }    
 
     /*
@@ -147,7 +147,7 @@ class Settings {
                     buildLocation = Settings.BuildLocationType.Local;
                 } else {                     
                     // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
-                    buildLocation = (platform in settings.remotePlatforms) || !Settings.canBuildLocally(platform) ?
+                    buildLocation = (platform in (settings.remotePlatforms || {})) || !Settings.canBuildLocally(platform) ?
                         Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;
                 }
 
@@ -179,7 +179,7 @@ class Settings {
     private static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
         return this.loadSettingsOrReturnEmpty()
             .then((settings: Settings.ISettings) => {
-                var optionsToIgnore = options.original.slice(options.original.indexOf("--"));
+                var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
                 var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
 
                 if (platforms.length > 0) {
@@ -190,7 +190,7 @@ class Settings {
                     var remotePlatforms: string[] = [];
                     if (!options.options["local"]) {
                         // If we are not only building locally, then we need to consider any remote-only builds we need to do
-                        var remotePlatforms = Object.keys(settings.remotePlatforms);
+                        remotePlatforms = Object.keys(settings.remotePlatforms || {});
                     }
 
                     var localPlatforms: string[] = [];

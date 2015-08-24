@@ -22,6 +22,7 @@ import cordovaWrapper = require ("./utils/cordovaWrapper");
 import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
+import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
@@ -54,48 +55,56 @@ class Taco {
      * Runs taco with command line args
      */
     public static run(): void {
-        telemetry.init(require("../package.json").name, require("../package.json").version);
-        TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
+        Settings.loadSettings().fail(function (err: any): Q.Promise<Settings.ISettings> {
+            // No settings found: print the logo and query the user for telemetry opt in/out
+            require("./logo"); // Prints the logo as a side effect of requiring it. Require caching will make sure we don't execute it twice in the one session.
+            // TODO: query user for telemetry opt in/out
+            return Settings.saveSettings({});
+        }).then(function (settings: Settings.ISettings): void {
+            // TODO: opt in/out of telemetry based on settings
+            telemetry.init(require("../package.json").name, require("../package.json").version);
+            TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
-        // We check if there is a new taco-cli version available, and if so, we print a message before exiting the application
-        new CheckForNewerVersion().showOnExitAndIgnoreFailures();
-        
-        var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
-        var commandProperties: ICommandTelemetryProperties = {};
-        
-        Taco.runWithParsedArgs(parsedArgs)
-        .then(function (telemetryProperties: ICommandTelemetryProperties): void {
-            if (parsedArgs.command) {
-                commandProperties = telemetryProperties;
-            }         
-        }).done(function (): void {
-            // Send command success telemetry
-            telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
-        }, function (reason: any): any {
-            // Pretty print errors
-            if (reason) {
-                if (reason.isTacoError) {
-                    logger.logError((<tacoUtility.TacoError>reason).toString());
-                } else {
-                    var toPrint: string = reason.toString();
+            // We check if there is a new taco-cli version available, and if so, we print a message before exiting the application
+            new CheckForNewerVersion().showOnExitAndIgnoreFailures();
 
-                    // If we have a loglevel of diagnostic, and there is a stack, replace the error message with the stack (the stack contains the error message already)
-                    if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && reason.stack) {
-                        toPrint = reason.stack;
+            var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
+            var commandProperties: ICommandTelemetryProperties = {};
+
+            Taco.runWithParsedArgs(parsedArgs)
+                .then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                    if (parsedArgs.command) {
+                        commandProperties = telemetryProperties;
                     }
+                }).done(function (): void {
+                    // Send command success telemetry
+                    telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
+                }, function (reason: any): any {
+                    // Pretty print errors
+                    if (reason) {
+                        if (reason.isTacoError) {
+                            logger.logError((<tacoUtility.TacoError>reason).toString());
+                        } else {
+                            var toPrint: string = reason.toString();
 
-                    logger.logError(toPrint);
-                }
+                            // If we have a loglevel of diagnostic, and there is a stack, replace the error message with the stack (the stack contains the error message already)
+                            if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && reason.stack) {
+                                toPrint = reason.stack;
+                            }
 
-                // Send command failure telemetry
-                projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                    telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
-                }).finally(function (): void {
-                    process.exit(1);
+                            logger.logError(toPrint);
+                        }
+
+                        // Send command failure telemetry
+                        projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                            telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
+                        }).finally(function (): void {
+                            process.exit(1);
+                        });
+                    } else {
+                        process.exit(1);
+                    }
                 });
-            } else {
-                process.exit(1);
-            }
         });
     }
 
@@ -126,7 +135,7 @@ class Taco {
                         return Q.reject(reason);
                     });
                 }
-        });
+            });
     }
 
     /**

@@ -121,7 +121,7 @@ class Create extends commands.TacoCommandBase {
                 telemetryProperties["cli"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["cli"]);
             }
 
-            return Q.resolve(telemetryProperties);
+            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, Create.KnownOptions, self.commandParameters.data.options, ["cli", "kit", "template"]));
         });
     }
 

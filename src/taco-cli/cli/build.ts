@@ -153,7 +153,7 @@ class Build extends commands.TacoCommandBase {
         var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
         return Q.all([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>((settings: Settings.ISettings, cordovaVersion: string) => {
             var language = settings.language || "en";
-            var remoteConfig = settings.remotePlatforms[platform];
+            var remoteConfig = settings.remotePlatforms && settings.remotePlatforms[platform];
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
