@@ -116,11 +116,12 @@ class Run extends commands.TacoCommandBase {
             var configuration = commandData.options["release"] ? "release" : "debug";
             var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
             var language = settings.language || "en";
-            var remoteConfig = settings.remotePlatforms[platform];
+            var remoteConfig = settings.remotePlatforms && settings.remotePlatforms[platform];
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
+            var buildOptions = commandData.remain.filter(function (opt: string): boolean { return opt.indexOf("--") === 0; });
             var buildInfoPath = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
             var buildSettings = new RemoteBuildSettings({
@@ -131,7 +132,8 @@ class Run extends commands.TacoCommandBase {
                 configuration: configuration,
                 buildTarget: buildTarget,
                 language: language,
-                cordovaVersion: cordovaVersion
+                cordovaVersion: cordovaVersion,
+                options: buildOptions
             });
 
             // Find the build that we are supposed to run

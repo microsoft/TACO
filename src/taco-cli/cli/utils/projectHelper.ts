@@ -281,7 +281,7 @@ class ProjectHelper {
         return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
         .spread<ICommandTelemetryProperties>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
             var projectTelemetryProperties: ICommandTelemetryProperties = {};
-            if (projectTelemetryProperties["isTacoProject"]) {
+            if (projectInfo.isTacoProject) {
                 projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true);
                 if (projectInfo.tacoKitId) {
                     projectTelemetryProperties["kit"] = telemetryHelper.telemetryProperty(projectInfo.tacoKitId);

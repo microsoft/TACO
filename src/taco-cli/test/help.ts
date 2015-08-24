@@ -23,8 +23,8 @@ var colors = require("colors/safe");
 import commands = tacoUtils.Commands.ICommandData;
 
 describe("help for a command", function (): void {
+    var help = new Help();
     function helpRun(command: string): Q.Promise<any> {
-        var help = new Help();
         var data: commands = {
             options: {},
             original: [command],
