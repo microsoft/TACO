@@ -112,7 +112,6 @@ module TacoUtility {
 
                 if (appInsights.client) { // no-op if telemetry is not initialized
                     appInsights.client.trackEvent(event.name, event.properties);
-                    console.log(event.properties);
                 }
             } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {

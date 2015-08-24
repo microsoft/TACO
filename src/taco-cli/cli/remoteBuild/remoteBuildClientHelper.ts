@@ -402,7 +402,10 @@ class RemoteBuildClientHelper {
             platform: settings.platform
         };
 
-        params["options"] = settings.options.join(" ");
+        if (settings.options) {
+            params["options"] = settings.options.join(" ");
+        }
+
         if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
             params["options"] = "--device " + params["options"];
         }

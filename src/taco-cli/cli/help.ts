@@ -24,6 +24,7 @@ class Help extends HelpCommandBase {
     private static TacoString: string = "taco";
     constructor() {
         super(Help.TacoString, path.join(__dirname, "./commands.json"), require("../resources/resourceManager"));
+        require("./logo");
     }
 }
 
