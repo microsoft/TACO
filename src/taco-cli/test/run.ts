@@ -243,8 +243,8 @@ describe("taco run", function (): void {
             }
         });
     });
-    
-    describe("telemetry", () => {
+
+    describe.only("telemetry", () => {
         buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, runRun, () => testHttpServer, Command.Run);
     });
 });

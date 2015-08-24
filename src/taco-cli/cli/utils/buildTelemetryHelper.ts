@@ -65,8 +65,7 @@ module BuildTelemetryHelper {
         return Settings.loadSettingsOrReturnEmpty().then(settings => {
             var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options,
                 buildAndRunNonPiiOptions);
-            // TODO: DIEGO
-            var platforms = Settings.determineSpecificPlatformsFromOptions(commandData.remain, commandData, settings);
+            var platforms = Settings.determineSpecificPlatformsFromOptions(commandData, settings);
             storePlatforms(properties, "requestedViaCommandLine", platforms, settings);
             return properties;
         });

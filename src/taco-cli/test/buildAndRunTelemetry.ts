@@ -120,7 +120,7 @@ module BuildAndRunTelemetryTests {
             return Q({});
         };
 
-        function generateCompleteBuildSequence(platform: string, isIncrementalTest: boolean, options?: string): any {
+        function generateCompleteBuildSequence(platform: string, isIncrementalTest: boolean): any {
             var configuration = "debug";
         
             // Mock out the server on the other side
@@ -129,11 +129,9 @@ module BuildAndRunTelemetryTests {
                 vcordova: vcordova,
                 vcli: require(path.join(__dirname, "..", "package.json")).version,
                 cfg: configuration,
-                platform: platform
+                platform: platform,
+                options: ""
             };
-            if (options) {
-                queryOptions["options"] = options;
-            }
 
             var zip = new AdmZip();
             zip.addFile("test.txt", new Buffer("test file"), "comment");
@@ -152,12 +150,12 @@ module BuildAndRunTelemetryTests {
 
             queryOptions["buildNumber"] = "" + buildNumber;
             var incrementalBuildStart: IExpectedRequest[] = [{
-                expectedUrl: "/cordova/build/" + buildNumber,
-                head: { "Content-Type": "application/json" },
-                statusCode: 200,
-                response: JSON.stringify(new BuildInfo({ status: BuildInfo.COMPLETE, buildNumber: buildNumber, buildLang: "en" })),
-                waitForPayload: false
-            },
+                    expectedUrl: "/cordova/build/" + buildNumber,
+                    head: { "Content-Type": "application/json" },
+                    statusCode: 200,
+                    response: JSON.stringify(new BuildInfo({ status: BuildInfo.COMPLETE, buildNumber: buildNumber, buildLang: "en" })),
+                    waitForPayload: false
+                },
                 {
                     expectedUrl: "/cordova/build/tasks?" + querystring.stringify(queryOptions),
                     head: {
@@ -206,18 +204,7 @@ module BuildAndRunTelemetryTests {
                 }
             ];
 
-            var downloadSequence = [{
-                expectedUrl: util.format("/cordova/build/%d/download", buildNumber),
-                head: { "Content-Type": "application/zip", "Content-disposition": "attachment; filename=app.zip" },
-                statusCode: 200,
-                response: zippedAppBuffer,
-                waitForPayload: false
-            }];
-
             var buildSequence = (isIncrementalTest ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
-            if (isIncrementalTest && isNotEmulate) {
-                // buildSequence = buildSequence.concat(downloadSequence);
-            }
 
             if (command !== Command.Build) {
                 var target = isIncrementalTest ? "ipad 2" : "";
@@ -231,32 +218,11 @@ module BuildAndRunTelemetryTests {
                 buildSequence = buildSequence.concat(runSequence);
             }
 
-            if (false) {
-                var deployToDeviceSequence = [
-                    {
-                        expectedUrl: "/cordova/build/" + buildNumber + "/deploy",
-                        head: { "Content-Type": "application/json" },
-                        statusCode: 200,
-                        response: JSON.stringify(new BuildInfo({ status: BuildInfo.INSTALLED, buildNumber: buildNumber })),
-                        waitForPayload: false
-                    },
-                    {
-                        expectedUrl: "/cordova/build/" + buildNumber + "/run",
-                        head: { "Content-Type": "application/json" },
-                        statusCode: 200,
-                        response: JSON.stringify(new BuildInfo({ status: BuildInfo.RUNNING, buildNumber: buildNumber })),
-                        waitForPayload: false
-                    }
-                ];
-
-                buildSequence = buildSequence.concat(deployToDeviceSequence);
-            }
-
             return buildSequence;
         }
 
-        function configureRemoteServer(done: MochaDone, isIncrementalTest: boolean, options?: string): Q.Promise<any> {
-            var sequence = generateCompleteBuildSequence("ios", isIncrementalTest, options);
+        function configureRemoteServer(done: MochaDone, isIncrementalTest: boolean): Q.Promise<any> {
+            var sequence = generateCompleteBuildSequence("ios", isIncrementalTest);
             if (!isIncrementalTest) {
                 var androidSequence = generateCompleteBuildSequence("android", isIncrementalTest);
                 sequence = androidSequence.concat(sequence);
@@ -408,7 +374,7 @@ module BuildAndRunTelemetryTests {
                 "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "49152" }
             };
 
-            configureRemoteServer(done, /* Not incremental test*/ false, null)
+            configureRemoteServer(done, /* Not incremental test*/ false)
                 .then(() => runCommand(args))
                 .done(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
