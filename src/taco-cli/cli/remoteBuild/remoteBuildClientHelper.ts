@@ -402,12 +402,18 @@ class RemoteBuildClientHelper {
             platform: settings.platform
         };
 
-        if (settings.options) {
-            params["options"] = settings.options.join(" ");
-        }
+        var buildOptions: string[] = [];
 
         if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
-            params["options"] = "--device " + params["options"];
+            buildOptions.push("--device");
+        }
+
+        if (settings.options) {
+            buildOptions.concat(settings.options);
+        }
+
+        if (buildOptions.length > 0) {
+            params["options"] = buildOptions.join(" ");
         }
 
         if (settings.incrementalBuild) {
