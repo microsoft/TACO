@@ -86,7 +86,7 @@ var kitPlatformOperations: ICommandAndResult[] = [
                 expectedTelemetryProperties: {
                     kit: { isPii: false, value: "5.1.1-Kit" },
                     cliVersion: { isPii: false, value: cliVersion },
-                    isTacoProjec: { isPii: false, value: "true" },
+                    isTacoProject: { isPii: false, value: "true" },
                     projectType: { isPii: false, value: "JavaScript" },
                     subCommand: { isPii: false, value: "add" },
                     target1: { isPii: false, value: "android@4.0.2" },
