@@ -61,9 +61,12 @@ module TacoUtility {
             public setPiiProperty(name: string, value: string): void {                
                 var hmac = crypto.createHmac("sha256", new Buffer(TelemetryEvent.PII_HASH_KEY, "utf8"));
                 var hashedValue = hmac.update(value).digest("hex");
-
-                // TODO: Task 1184230:Support for sending unhashed values for internal users
+                
                 this.properties[name] = hashedValue;
+
+                if (Telemetry.isInternal()) {
+                    this.properties[name + ".nothashed"] = value;
+                }
             }
         };
 
@@ -127,6 +130,10 @@ module TacoUtility {
             }
         }
 
+        export function isInternal(): boolean {
+            return TelemetryUtils.UserType === TelemetryUtils.USERTYPE_INTERNAL;
+        }
+
         enum IdType {
             Machine,
             User
@@ -148,11 +155,17 @@ module TacoUtility {
             private static SETTINGS_USERID_KEY = "userId";
             private static SETTINGS_MACHINEID_KEY = "machineId";
             private static SETTINGS_OPTIN_KEY = "optIn";
+            private static SETTINGS_USERTYPE_KEY = "userType";
             private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE = "UserId";
             private static REGISTRY_MACHINEID_KEY = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
             private static TELEMETRY_OPTIN_STRING = "TelemetryOptInMessage";
+            private static INTERNAL_DOMAIN_SUFFIX = "microsoft.com";
+            private static INTERNAL_USER_ENV_VAR = "TACOINTERNAL";
+            public static USERTYPE_INTERNAL = "Internal";
+            public static USERTYPE_EXTERNAL = "External";
+            public static UserType: string;
 
             private static get telemetrySettingsFile(): string {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
@@ -177,6 +190,7 @@ module TacoUtility {
                 TelemetryUtils.UserId = TelemetryUtils.getOrCreateId(IdType.User);
                 TelemetryUtils.MachineId = TelemetryUtils.getOrCreateId(IdType.Machine);
                 TelemetryUtils.SessionId = TelemetryUtils.generateGuid();
+                TelemetryUtils.UserType = TelemetryUtils.getUserType();
                 TelemetryUtils.getOptIn();
 
                 TelemetryUtils.saveSettings();
@@ -186,6 +200,7 @@ module TacoUtility {
                 event.properties["userId"] = TelemetryUtils.UserId;
                 event.properties["machineId"] = TelemetryUtils.MachineId;
                 event.properties["sessionId"] = TelemetryUtils.SessionId;
+                event.properties["userType"] = TelemetryUtils.UserType;
                 event.properties["hostOS"] = os.platform();
                 event.properties["hostOSRelease"] = os.release();
             }
@@ -220,6 +235,24 @@ module TacoUtility {
                 }
 
                 Telemetry.isOptedIn = optin;
+            }
+
+            private static getUserType(): string {
+                var userType: string = TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_USERTYPE_KEY];
+
+                if (typeof userType === "undefined") {
+                    if (process.env[TelemetryUtils.INTERNAL_USER_ENV_VAR]) {
+                        userType = TelemetryUtils.USERTYPE_INTERNAL;
+                    } else if (os.platform() === "win32") {
+                        var domain: string = process.env["USERDNSDOMAIN"];
+                        domain = domain ? domain.toLowerCase().substring(domain.length - TelemetryUtils.INTERNAL_DOMAIN_SUFFIX.length) : null;
+                        userType = domain === TelemetryUtils.INTERNAL_DOMAIN_SUFFIX ? TelemetryUtils.USERTYPE_INTERNAL : TelemetryUtils.USERTYPE_EXTERNAL;
+                    }
+                                        
+                    TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_USERTYPE_KEY] = userType;
+                }
+
+                return userType;
             }
 
             private static getRegistryValue(key: string, value: string): string {
