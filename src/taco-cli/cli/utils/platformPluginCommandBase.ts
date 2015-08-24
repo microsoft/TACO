@@ -64,7 +64,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     };
 
     public name: string;
-    
+
     public cordovaCommandParams: Cordova.ICordovaCommandParameters;
     public downloadOptions: Cordova.ICordovaDownloadOptions;
     public info: commands.ICommandInfo;
@@ -175,7 +175,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
                 numericSuffix++;
             });
 
-            return Q.resolve(telemetryProperties);
+            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, PlatformPluginCommandBase.KnownOptions, self.data.options, ["link", "save", "browserify", "shrinkwrap"]));
         });
     }
 
@@ -221,6 +221,8 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
                 self.downloadOptions.cli_variables[key] = keyval[1];
             });
         }
+
+        this.data = commandData;
 
         // Set appropriate subcommand, target and download options
         this.cordovaCommandParams = {

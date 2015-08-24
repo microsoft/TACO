@@ -61,12 +61,12 @@ module TacoUtility {
             public setPiiProperty(name: string, value: string): void {                
                 var hmac = crypto.createHmac("sha256", new Buffer(TelemetryEvent.PII_HASH_KEY, "utf8"));
                 var hashedValue = hmac.update(value).digest("hex");
-                
+
                 this.properties[name] = hashedValue;
 
                 if (Telemetry.isInternal()) {
                     this.properties[name + ".nothashed"] = value;
-                }
+            }
             }
         };
 
@@ -111,23 +111,22 @@ module TacoUtility {
 
         export function send(event: TelemetryEvent, ignoreOptIn: boolean = false): void {
             if (Telemetry.isOptedIn || ignoreOptIn) { 
-                TelemetryUtils.addCommonProperties(event);
+            TelemetryUtils.addCommonProperties(event);
 
-                try {
-                    if (event instanceof TelemetryActivity) {
-                        (<TelemetryActivity>event).end();
-                    }
+            try {
+                if (event instanceof TelemetryActivity) {
+                    (<TelemetryActivity>event).end();
+                }
 
-                    if (appInsights.client) { // no-op if telemetry is not initialized
-                        appInsights.client.trackEvent(event.name, event.properties);
-                        console.log(event.properties);
-                    }
-                } catch (err) {
-                    if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
-                        logger.logError(err);
-                    }
+                if (appInsights.client) { // no-op if telemetry is not initialized
+                    appInsights.client.trackEvent(event.name, event.properties);
+                }
+            } catch (err) {
+                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
+                    logger.logError(err);
                 }
             }
+        }
         }
 
         export function isInternal(): boolean {
@@ -168,7 +167,7 @@ module TacoUtility {
 
             public static init(appVersion: string): void {
                 TelemetryUtils.loadSettings();
-
+                
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
                     .setAutoCollectConsole(false)
                     .setAutoCollectRequests(false)
@@ -308,8 +307,7 @@ module TacoUtility {
 
                     return !!macAddress;
                 });
-
-                console.log(macAddress);
+                
                 return macAddress;
             }
 
