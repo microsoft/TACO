@@ -6,8 +6,8 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/commands.d.ts" />
+/// <reference path="../typings/node.d.ts" />
 
 "use strict";
 
