@@ -146,7 +146,7 @@ module TacoUtility {
             private static MachineId: string;
             private static TelemetrySettings: ITelemetrySettings = null;
             private static TelemetrySettingsFileName = "TelemetrySettings.json";
-            private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae";
+            private static APPINSIGHTS_INSTRUMENTATIONKEY = "10baf391-c2e3-4651-a726-e9b25d8470fd";
             private static SETTINGS_USERID_KEY = "userId";
             private static SETTINGS_MACHINEID_KEY = "machineId";
             private static SETTINGS_OPTIN_KEY = "optIn";
