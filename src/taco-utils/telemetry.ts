@@ -134,11 +134,6 @@ module TacoUtility {
             return TelemetryUtils.UserType === TelemetryUtils.USERTYPE_INTERNAL;
         }
 
-        enum IdType {
-            Machine,
-            User
-        }
-
         interface ITelemetrySettings {
             [settingKey: string]: any;
             userId?: string;
@@ -187,8 +182,8 @@ module TacoUtility {
                     context.tags[context.keys.applicationVersion] = appVersion;
                 }
 
-                TelemetryUtils.UserId = TelemetryUtils.getOrCreateId(IdType.User);
-                TelemetryUtils.MachineId = TelemetryUtils.getOrCreateId(IdType.Machine);
+                TelemetryUtils.UserId = TelemetryUtils.getUserId();
+                TelemetryUtils.MachineId = TelemetryUtils.getMachineId();
                 TelemetryUtils.SessionId = TelemetryUtils.generateGuid();
                 TelemetryUtils.UserType = TelemetryUtils.getUserType();
                 TelemetryUtils.getOptIn();
@@ -290,20 +285,44 @@ module TacoUtility {
                 fs.writeFileSync(TelemetryUtils.telemetrySettingsFile, JSON.stringify(TelemetryUtils.TelemetrySettings));
             }
 
-            private static getOrCreateId(idType: IdType): string {
-                var settingsKey: string = idType === IdType.User ? TelemetryUtils.SETTINGS_USERID_KEY : TelemetryUtils.SETTINGS_MACHINEID_KEY;
-                var registryKey: string = idType === IdType.User ? TelemetryUtils.REGISTRY_USERID_KEY : TelemetryUtils.REGISTRY_MACHINEID_KEY;
-                var registryValue: string = idType === IdType.User ? TelemetryUtils.REGISTRY_USERID_VALUE : TelemetryUtils.REGISTRY_MACHINEID_VALUE;
+            private static getMachineId(): string {
+                var id: string = TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_MACHINEID_KEY];
+                if (!id) {
+                    var macAddress: string = TelemetryUtils.getMacAddress();
+                    id = crypto.createHash("sha256").update(macAddress, "utf8").digest("hex");
+                    TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_MACHINEID_KEY] = id;
+                }
 
-                var id: string = TelemetryUtils.TelemetrySettings[settingsKey];
+                return id;
+            }
+
+            private static getMacAddress(): string {
+                var macAddress: string;
+                var interfaces = os.networkInterfaces();
+                Object.keys(interfaces).some((key: string) => {
+                    var mac = interfaces[key][0]["mac"];
+
+                    if (mac && mac !== "00:00:00:00:00:00") {
+                        macAddress = mac;
+                    }
+
+                    return !!macAddress;
+                });
+
+                console.log(macAddress);
+                return macAddress;
+            }
+
+            private static getUserId(): string {
+                var id: string = TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_USERID_KEY];
                 if (!id) {
                     if (os.platform() === "win32") {
-                        id = TelemetryUtils.getRegistryValue(registryKey, registryValue);
+                        id = TelemetryUtils.getRegistryValue(TelemetryUtils.REGISTRY_USERID_KEY, TelemetryUtils.REGISTRY_USERID_VALUE);
                     }
 
                     id = id ? id.replace(/[{}]/g, "") : TelemetryUtils.generateGuid();
 
-                    TelemetryUtils.TelemetrySettings[settingsKey] = id;
+                    TelemetryUtils.TelemetrySettings[TelemetryUtils.SETTINGS_USERID_KEY] = id;
                 }
 
                 return id;
