@@ -92,6 +92,10 @@ module TacoUtility {
         };
 
         export function init(appName: string, appVersion?: string): void {
+            /* No-op for DroidCon release. We do not track TACO usage for the DroidCon release.
+               Hence disabling initialization of Application Insights */
+            return;
+
             try {
                 Telemetry.appName = appName;
                 TelemetryUtils.init(appVersion);
@@ -103,6 +107,10 @@ module TacoUtility {
         }
 
         export function send(event: TelemetryEvent): void {
+            /* No-op for DroidCon release. We do not track TACO usage for the DroidCon release.
+               Hence disabling sending telemetry events */
+            return;
+
             TelemetryUtils.addCommonProperties(event);
 
             try {
