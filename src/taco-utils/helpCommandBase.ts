@@ -97,7 +97,7 @@ module TacoUtility {
                 nameDescriptionPairs.push({ name: i, description: this.commandsFactory.listings[i].description, category: this.commandsFactory.listings[i].categoryTitle });
             }
 
-            // we use first entry to conclude we command table has categories
+            // we use first entry to conclude if command table has categories
             if (nameDescriptionPairs.length > 0 && !nameDescriptionPairs[0].category) {
                 Logger.log(resources.getString("CommandHelpTableTitle"));
             }
