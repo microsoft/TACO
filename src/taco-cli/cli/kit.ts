@@ -273,6 +273,7 @@ class Kit extends commands.TacoCommandBase {
     private static printPlatformOverrideInfo(kitInfo: TacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.platforms) {
             logger.log(resources.getString("CommandKitListPlatformOverridesForKit"));
+            logger.logLine();
             LoggerHelper.logNameDescriptionTable(
                 Object.keys(kitInfo.platforms).map(function (platformName: string): INameDescription {
                     return <INameDescription>{
@@ -290,6 +291,7 @@ class Kit extends commands.TacoCommandBase {
     private static printPluginOverrideInfo(kitInfo: TacoKits.IKitInfo, valuesIndent: number): void {
         if (kitInfo.plugins) {
             logger.log(resources.getString("CommandKitListPluginOverridesForKit"));
+            logger.logLine();
             LoggerHelper.logNameDescriptionTable(
                 Object.keys(kitInfo.plugins).map(function (pluginId: string): INameDescription {
                     return <INameDescription>{
@@ -628,6 +630,7 @@ class Kit extends commands.TacoCommandBase {
         var platformVersionUpdates: IDictionary<string>;
         var pluginVersionUpdates: IDictionary<string>;
         var kitInfo: TacoKits.IKitInfo;
+        var currentCliVersion: string;
         
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), projectHelper.createTacoJsonFile(projectPath, true, kitId)])
         .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], globalCordovaVersion: string): Q.Promise<any> {
@@ -636,16 +639,18 @@ class Kit extends commands.TacoCommandBase {
             return Q.all([Kit.getComponentUpdateInfo(projectPath, kitId, installedPlatformVersions, ProjectComponentType.Platform), Kit.getComponentUpdateInfo(projectPath, kitId, installedPluginVersions, ProjectComponentType.Plugin)])
             .spread<any>(function (platformVersionUpdates: IDictionary<string>, pluginVersionUpdates: IDictionary<string>): Q.Promise<any> {
                 return Kit.getCliversion(projectInfo)
-                .then(function (currentCliVersion: string): Q.Promise<any> {
-                    Kit.printKitProjectUpdateInfo(currentCliVersion, kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
-                    
-                    var projectRequiresUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates) || Kit.projectComponentNeedsUpdate(installedPluginVersions, pluginVersionUpdates);
-                    if (projectRequiresUpdate) {
-                        Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
-                        return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
-                    } else {
-                        return Q.resolve({});
-                    }
+                .then(function (cliVersion: string): Q.Promise<any> {
+                    currentCliVersion = cliVersion;
+                    return Kit.printKitProjectUpdateInfo(currentCliVersion, kitId, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates)
+                    .then(function (): Q.Promise<any> {
+                        var projectRequiresUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates) || Kit.projectComponentNeedsUpdate(installedPluginVersions, pluginVersionUpdates);
+                        if (projectRequiresUpdate) {
+                            Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
+                            return Kit.promptAndUpdateProject(projectRequiresUpdate, currentCliVersion, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
+                        } else {
+                            return Q.resolve({});
+                        }
+                    });    
                 });
             });
         });
