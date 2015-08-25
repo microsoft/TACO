@@ -92,11 +92,14 @@ module TacoUtility {
 
             Logger.log(util.format("   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
 
-            Logger.log(resources.getString("CommandHelpTableTitle"));
-
             var nameDescriptionPairs: INameDescription[] = new Array();
             for (var i in this.commandsFactory.listings) {
-                nameDescriptionPairs.push({ name: i, description: this.commandsFactory.listings[i].description });
+                nameDescriptionPairs.push({ name: i, description: this.commandsFactory.listings[i].description, category: this.commandsFactory.listings[i].categoryTitle });
+            }
+
+            // we use first entry to conclude if command table has categories
+            if (nameDescriptionPairs.length > 0 && !nameDescriptionPairs[0].category) {
+                Logger.log(resources.getString("CommandHelpTableTitle"));
             }
 
             this.printCommandTable(nameDescriptionPairs);
@@ -170,7 +173,10 @@ module TacoUtility {
 
         private printCommandTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number): void {
             for (var i = 0; i < nameDescriptionPairs.length; i++) {
-                nameDescriptionPairs[i].description = this.getDescriptionString(nameDescriptionPairs[i].description);
+                nameDescriptionPairs[i].description = this.getResourceString(nameDescriptionPairs[i].description);
+                if (nameDescriptionPairs[i].category) {
+                    nameDescriptionPairs[i].category = this.getResourceString(nameDescriptionPairs[i].category);
+                }
             }
 
             LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1, indent2);
@@ -182,7 +188,7 @@ module TacoUtility {
                 var indent: string = LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent);
                 var indent2: string = LoggerHelper.repeat(" ", 2 * LoggerHelper.DefaultIndent);
                 for (var i = 0; i < examples.length; i++) {
-                    Logger.log(util.format("%s%s %s", indent, HelpCommandBase.DefaultBullet, this.getDescriptionString(examples[i].description)));
+                    Logger.log(util.format("%s%s %s", indent, HelpCommandBase.DefaultBullet, this.getResourceString(examples[i].description)));
                     Logger.logLine();
                     if (typeof examples[i].example === "string") {
                         Logger.log(util.format("%s  %s", indent2, examples[i].example));
@@ -201,7 +207,7 @@ module TacoUtility {
                 var indent: string = LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent);
                 for (var i = 0; i < notes.length; i++) {
                     var bullet: string = (notes.length > 1) ? (i + 1) + "." : HelpCommandBase.DefaultBullet;
-                    Logger.log(util.format("%s%s %s", indent, bullet, this.getDescriptionString(notes[i])));
+                    Logger.log(util.format("%s%s %s", indent, bullet, this.getResourceString(notes[i])));
                     Logger.logLine();
                 }
             }
@@ -209,7 +215,7 @@ module TacoUtility {
 
         private printCommandHeader(cliName: string, commandName: string, synopsis: string, description?: string): void {
             if (description) {
-                Logger.log(this.getDescriptionString(description));
+                Logger.log(this.getResourceString(description));
             }
 
             if (synopsis) {
@@ -230,7 +236,7 @@ module TacoUtility {
          * if no bracket, just return the string
          * @param {string} id - string to get
          */
-        private getDescriptionString(id: string): string {
+        private getResourceString(id: string): string {
             var regex: RegExp = new RegExp("(\\[.*\\])");
             var res: ResourceManager = this.cliResources;
             return id.replace(regex, function (id: string): string {
