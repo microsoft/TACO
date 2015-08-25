@@ -204,8 +204,12 @@ module TacoUtility {
             }
 
             public static addCommonProperties(event: any): void {
-                event.properties["userId"] = TelemetryUtils.UserId;
-                event.properties["machineId"] = TelemetryUtils.MachineId;
+                if (Telemetry.isOptedIn) {
+                    // for the opt out event, don't include tracking properties
+                    event.properties["userId"] = TelemetryUtils.UserId;
+                    event.properties["machineId"] = TelemetryUtils.MachineId;
+                }
+
                 event.properties["sessionId"] = TelemetryUtils.SessionId;
                 event.properties["userType"] = TelemetryUtils.UserType;
                 event.properties["hostOS"] = os.platform();
@@ -232,11 +236,12 @@ module TacoUtility {
             }
 
             public static setTelemetryOptInSetting(optIn: boolean): void {
+                TelemetryUtils.TelemetrySettings.optIn = optIn;
+
                 if (!optIn) {
                     Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
                 }
 
-                TelemetryUtils.TelemetrySettings.optIn = optIn;
                 TelemetryUtils.saveSettings();
             }
 
