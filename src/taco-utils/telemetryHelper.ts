@@ -28,22 +28,22 @@ module TacoUtility {
 
     export class TelemetryHelper {
         public static telemetryProperty(propertyValue: any, pii?: boolean): ITelemetryPropertyInfo {
-            return { value: String(propertyValue), isPii: pii || false };  
+            return { value: String(propertyValue), isPii: pii || false };
         }
 
         public static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void {
             if (!properties) {
                 return;
             }
-            
+
             Object.keys(properties).forEach(function (propertyName: string): void {
                 TelemetryHelper.addTelemetryEventProperty(event, propertyName, properties[propertyName].value, properties[propertyName].isPii);
             });
         }
 
-        public static sendCommandFailureTelemetry(commandName: string, error: any, projectProperties: ICommandTelemetryProperties, args: string[] = null): void { 
+        public static sendCommandFailureTelemetry(commandName: string, error: any, projectProperties: ICommandTelemetryProperties, args: string[] = null): void {
             var errorEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
-            
+
             if (error.isTacoError) {
                 errorEvent.properties["tacoErrorCode"] = error.errorCode;
             } else if (error.message) {
@@ -57,7 +57,7 @@ module TacoUtility {
 
         public static sendCommandSuccessTelemetry(commandName: string, commandProperties: ICommandTelemetryProperties, args: string[] = null): void {
             var successEvent = TelemetryHelper.createBasicCommandTelemetry(commandName, args);
-            
+
             TelemetryHelper.addTelemetryEventProperties(successEvent, commandProperties);
 
             Telemetry.send(successEvent);
@@ -121,9 +121,9 @@ module TacoUtility {
         
         private static setTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             if (isPii) {
-                event.setPiiProperty(propertyName, propertyValue);
+                event.setPiiProperty(propertyName, String(propertyValue));
             } else {
-                event.properties[propertyName] = propertyValue;
+                event.properties[propertyName] = String(propertyValue);
             }       
         }
 

@@ -17,6 +17,7 @@ declare module TacoUtility {
      * console.log(cs.count + " bytes written");
      */
     class CountStream extends NodeJSStream.Transform {
+        public static count(originalStream: NodeJS.ReadableStream, callback: { (length: number): void }): NodeJS.ReadableStream;
         count: number;
         constructor(options?: NodeJSStream.TransformOptions);
         _transform(chunk: any, encoding: string, callback: (err: Error, buf: Buffer) => void): void;

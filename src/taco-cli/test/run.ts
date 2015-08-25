@@ -22,6 +22,7 @@ import Q = require ("q");
 import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 
+import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
@@ -31,12 +32,13 @@ import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
+import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
 var create = new createMod();
-var run = new runMod();
 
 describe("taco run", function (): void {
+    this.timeout(20000); // The remote tests sometimes take some time to run
     var testHttpServer: http.Server;
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;
@@ -101,7 +103,8 @@ describe("taco run", function (): void {
         del("example", mocha);
     });
 
-    var runRun = function (args: string[]): Q.Promise<any> {
+    var runRun = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+        var run = new runMod();
         return run.run({
             options: {},
             original: args,
@@ -239,5 +242,9 @@ describe("taco run", function (): void {
                 mocha();
             }
         });
+    });
+
+    describe("telemetry", () => {
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, runRun, () => testHttpServer, Command.Run);
     });
 });
