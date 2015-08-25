@@ -392,7 +392,7 @@
     "_CommandInstallSkipNotAdded.comment": "Warning shown when skipping platforms for install-reqs due to the platform not being added to the user's project.",
     "CommandInstallSkipNoReqsSupport": "The following platforms will be skipped because they don't support Cordova's requirements checking:<br/>",
     "_CommandInstallSkipNoReqsSupport.comment": "Warning shown when skipping platforms for install-reqs due to the platform not being recent enough to support 'cordova requirements' command.",
-    "CommandInstallNoReqsSupportHint": "<highlight>Note:</highlight> To manually update a single platform, remove the platform from your project and then run:<br/><br/>    taco platform add [platform]@[version]",
+    "CommandInstallNoReqsSupportHint": "<highlight>Note:</highlight> To manually update a single platform, remove the platform from your project and then run:<br/><br/>    <highlight>taco platform add </highlight>[platform]<highlight>@</highlight>[version]",
     "_CommandInstallNoReqsSupportHint.comment": "Hint shown when skipping platforms for install-reqs due to the platform not being recent enough to support 'cordova requirements' command.",
     "CommandInstallNothingToInstall": "There is nothing to install. Please see the above messages for details.",
     "_CommandInstallNothingToInstall.comment": "Hint shown when skipping platforms for install-reqs due to the platform not being recent enough to support 'cordova requirements' command.",
@@ -400,7 +400,7 @@
     "_CommandInstallFinalPlatforms.comment": "List of the platforms for which the dependencies will be installed. {0} is a comma-separated list of the platforms.",
     "CommandInstallPlatformBullet": "- <highlight>{0}</highlight>",
     "_CommandInstallPlatformBullet.comment": "An item entry in a bullet list for skipped platforms. {0} is the name of the platform.",
-    "CommandInstallPlatformVersion": "Minimum version required: {0}@{1}",
+    "CommandInstallPlatformVersion": "Minimum version required: {0}@<highlight>{1}</highlight>",
     "_CommandInstallPlatformVersion.comment": "An item entry in the bullet list for platforms that don't support Cordova's check_reqs. {0} is the name of the platform, {1} is the minimum version for that platform that supports check_reqs.",
 
     "NoRemoteBuildIdFound": "Error: No remote build found. Please run '{0}' first",
