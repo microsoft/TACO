@@ -121,16 +121,6 @@
                 "name": "TypescriptTemplateName",
                 "url": "templates/default/typescript.zip"
             }
-        },
-        "tacokit@1.0.0": {
-            "blank": {
-                "name": "BlankTemplateName",
-                "url": "templates/tacokit@1.0.0/blank.zip"
-            },
-            "typescript": {
-                "name": "TypescriptTemplateName",
-                "url": "templates/tacokit@1.0.0/typescript.zip"
-            }
         }
     }
 }

@@ -88,7 +88,7 @@ class CheckForNewerVersion {
                     var latestVersion = body.version;
                     deferredLatestVersion.resolve(latestVersion);
                 } else {
-                    deferredLatestVersion.reject("error = " + error + ", status code = " + response.statusCode + ", body = " + body);
+                    deferredLatestVersion.reject("error = " + error + ", status code = " + (response ? response.statusCode : "none") + ", body = " + body);
                 }
             } catch (e) {
                 deferredLatestVersion.reject(e);

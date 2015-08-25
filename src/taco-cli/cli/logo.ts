@@ -8,11 +8,11 @@
 // NOTE: This file is intended to run on-require, and print the logo, only once.
 var version = require("../package.json").version;
 
-console.log("_____________________________");
-console.log("___  __/__    |_  ____/_  __ \\");
-console.log("__  /  __  /| |  /    _  / / /");
-console.log("_  /   _  ___ / /___  / /_/ /");
-var lstLn = "/_/    /_/  |_\\____/  \\____/   CLI v" + version;
+console.log("  _____________________________");
+console.log("  ___  __/_    |__  ____/_  __ \\");
+console.log("  __  /  _  /| |_  /    _  / / /");
+console.log("  _  /  _  ___ |/ /___  / /_/ /");
+var lstLn = "  /_/   /_/  |_|\\____/  \\____/   CLI v" + version;
 console.log(lstLn);
 console.log();
 

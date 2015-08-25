@@ -10,6 +10,7 @@
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/nameDescription.d.ts" />
 /// <reference path="../typings/commandAlias.d.ts" />
+/// <reference path="../typings/telemetryHelper.d.ts" />
 declare module TacoUtility {
     module Commands {
         interface ICommandInfo {
@@ -33,6 +34,7 @@ declare module TacoUtility {
          * Base command class, all other commands inherit from this
          */
         interface ICommand {
+            name: string;
             run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
         }

@@ -11,4 +11,5 @@
 interface INameDescription {
     name: string;
     description: string;
+    category?: string;
 }
