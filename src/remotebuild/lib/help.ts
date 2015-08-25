@@ -44,7 +44,7 @@ class Help extends HelpCommandBase {
         // for remotebuild help, we always want to show extra comments in the end suggesting users to use 'remotebuild help taco-remote'
         return Q({})
             .then(function (): Q.Promise<void> {
-                var commands: any = require("./commands.json");
+                var commands: any = require("./commands.json").commands;
                 var topic: string = data.remain[0];
                 if (!topic || commands[topic]) {
                     return baseRun(data);
