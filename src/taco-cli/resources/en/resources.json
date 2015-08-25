@@ -542,8 +542,8 @@
     "_HowToUseCreateProjectWithTemplate.comment": "This message is printed as part of the onboarding experience of the 'taco templates' command, to suggest the user how to create a taco project using a particular template",
     "ProgramDescription": "taco is a command line tool that makes it easy to create, build, run, and emulate Cordova applications.",
     "_ProgramDescription.comment": "This is a description of the purpose of the whole taco program",
-    "ProjectCommandsTitle": "<highlight>Project Commands:</highlight>",
+    "ProjectCommandsTitle": "Project Commands:",
     "_ProjectCommandsTitle.comment": "This is the string used to show project commands category for taco help",
-    "GeneralCommandsTitle": "<highlight>General Commands:</highlight>",
+    "GeneralCommandsTitle": "General Commands:",
     "_GeneralCommandsTitle.comment": "This is the string used to show general commands category for taco help"
 }
