@@ -239,5 +239,11 @@
         "categoryTitle": "[GeneralCommandsTitle]",
         "modulePath": "./version",
         "description": "<helptitle>[CommandVersionDescription]</helptitle>"
+    },
+    "feedback": {
+        "synopsis": "<synopsis>[COMMAND]</synopsis>",
+        "categoryTitle": "[GeneralCommandsTitle]",
+        "modulePath": "./feedback",
+        "description": "<helptitle>[CommandFeedbackDescription]</helptitle>"
     }
 }

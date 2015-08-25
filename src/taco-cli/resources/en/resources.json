@@ -103,6 +103,9 @@
     "_CommandKitSelectOptionKitDescription.comment": "Description for --kit argument to taco kit select",
     "CommandKitSelectOptionCliDescription": "Use the specified version of Cordova CLI for the project.",
     "_CommandKitSelectOptionCliDescription.comment": "Description for --cli argument to taco kit select",
+
+    "CommandFeedbackDescription": "Change feedback setting",
+    "_CommandFeedbackDescription.comment": "Description for 'taco feedback' command",
     
 
     "CommandKitListCurrentKit": "<bold>Current Kit</bold>: {0}",
@@ -212,7 +215,7 @@
     "CommandRemoteListPrelude": "Current remote configuration(s):",
     "_CommandRemoteListPrelude.comment": "Text printed introducing the table of remote platforms when you 'taco remote list'",
 
-    "CommandPlatformDescription": "Manage project platforms (currently supports Windows, Android & iOS)",
+    "CommandPlatformDescription": "Manage project platforms",
     "_CommandPlatformDescription.comment": "Description for 'taco platform'",
     "CommandPlatformSubcommandDescription": "The subcommand to be run - add, remove, list, update or check",
     "_CommandPlatformSubcommandDescription.comment": "Description of the COMMAND argument to 'taco build'",

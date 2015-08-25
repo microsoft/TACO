@@ -41,5 +41,6 @@ declare module TacoUtility {
         function init(appName: string, appVersion?: string): void;
         function isInternal(): boolean;
         function send(event: TelemetryEvent, ignoreOptIn?: boolean): void;
+        function changeTelemetryOptInSetting(): void;
     }
 }

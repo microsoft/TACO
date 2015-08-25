@@ -111,26 +111,42 @@ module TacoUtility {
 
         export function send(event: TelemetryEvent, ignoreOptIn: boolean = false): void {
             if (Telemetry.isOptedIn || ignoreOptIn) { 
-            TelemetryUtils.addCommonProperties(event);
+                TelemetryUtils.addCommonProperties(event);
 
-            try {
-                if (event instanceof TelemetryActivity) {
-                    (<TelemetryActivity>event).end();
-                }
+                try {
+                    if (event instanceof TelemetryActivity) {
+                        (<TelemetryActivity>event).end();
+                    }
 
-                if (appInsights.client) { // no-op if telemetry is not initialized
-                    appInsights.client.trackEvent(event.name, event.properties);
-                }
-            } catch (err) {
-                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
-                    logger.logError(err);
+                    if (appInsights.client) { // no-op if telemetry is not initialized
+                        appInsights.client.trackEvent(event.name, event.properties);
+                    }
+                } catch (err) {
+                    if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
+                        logger.logError(err);
+                    }
                 }
             }
-        }
         }
 
         export function isInternal(): boolean {
             return TelemetryUtils.UserType === TelemetryUtils.USERTYPE_INTERNAL;
+        }
+
+        export function changeTelemetryOptInSetting(): void {
+            var currentOptIn: boolean = TelemetryUtils.getTelemetryOptInSetting();
+            var newOptIn: boolean;
+
+            logger.logLine();
+            logger.log(utilResources.getString(currentOptIn ? "TelemetryOptInYes" : "TelemetryOptInNo", Telemetry.appName));
+            
+            var promptStringId = currentOptIn ? "TelemetryCurrentlyOptedInPrompt" : "TelemetryCurrentlyOptedOutPrompt";
+
+            newOptIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString(promptStringId, Telemetry.appName));
+            
+            // Change and save the new setting
+            TelemetryUtils.setTelemetryOptInSetting(newOptIn);
+            Telemetry.isOptedIn = newOptIn;
         }
 
         interface ITelemetrySettings {
@@ -212,21 +228,36 @@ module TacoUtility {
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
             }
 
-            private static getOptIn(): boolean {
-                var optin: boolean = TelemetryUtils.TelemetrySettings.optIn;
-                if (typeof optin === "undefined") {
-                    var readlineSync = require("readline-sync");
-                    var optinMessage = utilResources.getString(TelemetryUtils.TELEMETRY_OPTIN_STRING, Telemetry.appName);
-                    optin = readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
+            public static getTelemetryOptInSetting() {
+                return TelemetryUtils.TelemetrySettings.optIn;
+            }
 
-                    if (!optin) {
-                        Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
-                    }
-
-                    TelemetryUtils.TelemetrySettings.optIn = optin;
+            public static setTelemetryOptInSetting(optIn: boolean) : void {
+                if (!optIn) {
+                    Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
                 }
 
-                return optin;
+                TelemetryUtils.TelemetrySettings.optIn = optIn;
+                TelemetryUtils.saveSettings();
+            }
+
+            private static getOptIn(): boolean {
+                var optIn: boolean = TelemetryUtils.TelemetrySettings.optIn;
+                if (typeof optIn === "undefined") {
+                    logger.logLine();
+                    logger.log(utilResources.getString("TelemetryOptInMessage", Telemetry.appName));
+                    logger.logLine();
+                    optIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInNote"));
+                    TelemetryUtils.setTelemetryOptInSetting(optIn);
+                }
+
+                return optIn;
+            }
+
+            public static getUserConsentForTelemetry(optinMessage: string = "") : boolean {
+                logger.logLine();
+                var readlineSync = require("readline-sync");
+                return !!readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
             }
 
             private static getUserType(): string {
