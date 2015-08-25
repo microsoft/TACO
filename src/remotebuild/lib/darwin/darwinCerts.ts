@@ -128,6 +128,7 @@ class Certs {
             }
 
             utils.createDirectoryIfNecessary(certsDir);
+            fs.chmodSync(certsDir, 448); // 0700, user read/write/executable, no other permissions
             var options = Certs.certOptionsFromConf(conf);
             return Certs.makeSelfSigningCACert(certPaths.caKeyPath, certPaths.caCertPath, options).
                 then(function (): Q.Promise<void> {
