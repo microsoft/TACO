@@ -26,7 +26,7 @@ Follow the easy-to-follow instructions to start building your Apache Cordova app
 ## Build an App in Five-ish Easy Steps
 We are going to show you how to build an app for Android, but the steps for Windows and iOS are pretty darn close.
 
-***1. Install the TACO-CLI executable (in case you haven't already):***
+***1. Install the taco-cli executable (in case you haven't already):***
 
 ```sh
 npm -g install taco-cli
@@ -58,7 +58,7 @@ taco emulate android
 After a few moments, your app will be running inside the Android emulator in all its awesomeness.
 
 ## More Resources
-For more information about using the TACO-CLI, check out the following resources:
+For more information about using TACO, check out the following resources:
 
 - [VS TACO Home Page](https://www.visualstudio.com/en-US/explore/cordova-vs)
 - [Documentation](https://msdn.microsoft.com/en-us/library/dn771545.aspx)
