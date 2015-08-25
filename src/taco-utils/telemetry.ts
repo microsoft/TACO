@@ -228,17 +228,23 @@ module TacoUtility {
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
             }
 
-            public static getTelemetryOptInSetting() {
+            public static getTelemetryOptInSetting(): boolean {
                 return TelemetryUtils.TelemetrySettings.optIn;
             }
 
-            public static setTelemetryOptInSetting(optIn: boolean) : void {
+            public static setTelemetryOptInSetting(optIn: boolean): void {
                 if (!optIn) {
                     Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
                 }
 
                 TelemetryUtils.TelemetrySettings.optIn = optIn;
                 TelemetryUtils.saveSettings();
+            }
+
+            public static getUserConsentForTelemetry(optinMessage: string = ""): boolean {
+                logger.logLine();
+                var readlineSync = require("readline-sync");
+                return !!readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
             }
 
             private static getOptIn(): boolean {
@@ -252,12 +258,6 @@ module TacoUtility {
                 }
 
                 return optIn;
-            }
-
-            public static getUserConsentForTelemetry(optinMessage: string = "") : boolean {
-                logger.logLine();
-                var readlineSync = require("readline-sync");
-                return !!readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
             }
 
             private static getUserType(): string {
