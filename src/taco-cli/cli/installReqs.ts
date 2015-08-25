@@ -39,6 +39,11 @@ class InstallReqs extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.FlagTypeMap = { };
     private static PlatformsFolderName: string = "platforms";
     private static PathToCheckReqs: string = path.join("cordova", "lib", "check_reqs.js");
+    private static MinPlatformVersions: { [id: string]: string } = {
+        ios: "3.9.0",
+        android: "4.1.0",
+        windows: "4.1.0"
+    };
 
     public info: commands.ICommandInfo;
 
@@ -54,48 +59,50 @@ class InstallReqs extends commands.TacoCommandBase {
 
         return Q({})
             .then(function (): Q.Promise<any> {
-            // Get a list of the installed platforms
-            var installedPlatforms: string[] = InstallReqs.getInstalledPlatforms();
+                logger.logLine();
 
-            if (installedPlatforms.length === 0) {
-                return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallNoPlatformsAdded));
-            }
+                // Get a list of the installed platforms
+                var installedPlatforms: string[] = InstallReqs.getInstalledPlatforms();
 
-            // Get a list of the requested platforms (either what is specified by the user, or all the installed platforms if nothing is specified)
-            var requestedPlatforms: string[] = parsed.remain.length > 0 ? parsed.remain : installedPlatforms.slice();   // Using slice() to clone the array
+                if (installedPlatforms.length === 0) {
+                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallNoPlatformsAdded));
+                }
 
-            requestedPlatforms = InstallReqs.removeDuplicates(requestedPlatforms);
+                // Get a list of the requested platforms (either what is specified by the user, or all the installed platforms if nothing is specified)
+                var requestedPlatforms: string[] = parsed.remain.length > 0 ? parsed.remain : installedPlatforms.slice();   // Using slice() to clone the array
 
-            // From the requested platforms, skip the ones where the current system isn't supported (for example, iOS on Windows machines)
-            requestedPlatforms = InstallReqs.skipSystemPlatforms(requestedPlatforms);
+                requestedPlatforms = InstallReqs.removeDuplicates(requestedPlatforms);
 
-            // From the remaining platforms, skip the ones that are not added to the project
-            requestedPlatforms = InstallReqs.skipNotInstalled(requestedPlatforms, installedPlatforms);
+                // From the requested platforms, skip the ones where the current system isn't supported (for example, iOS on Windows machines)
+                requestedPlatforms = InstallReqs.skipSystemPlatforms(requestedPlatforms);
 
-            // From the remaining platforms, skip the ones that don't support 'cordova check_reqs'
-            requestedPlatforms = InstallReqs.skipNoReqsSupport(requestedPlatforms);
+                // From the remaining platforms, skip the ones that are not added to the project
+                requestedPlatforms = InstallReqs.skipNotInstalled(requestedPlatforms, installedPlatforms);
 
-            // If we don't have any remaining platforms, print message and return
-            loggerHelper.logSeparatorLine();
-            logger.logLine();
+                // From the remaining platforms, skip the ones that don't support 'cordova check_reqs'
+                requestedPlatforms = InstallReqs.skipNoReqsSupport(requestedPlatforms);
 
-            if (requestedPlatforms.length === 0) {
-                logger.log(resources.getString("CommandInstallNothingToInstall"));
+                // If we don't have any remaining platforms, print message and return
+                loggerHelper.logSeparatorLine();
+                logger.logLine();
 
-                return Q({});
-            }
+                if (requestedPlatforms.length === 0) {
+                    logger.log(resources.getString("CommandInstallNothingToInstall"));
 
-            // Run the dependency installer on the remaining platforms
-            logger.log(resources.getString("CommandInstallFinalPlatforms", requestedPlatforms.join(", ")));
-            logger.logLine();
+                    return Q({});
+                }
 
-            return cordovaWrapper.requirements(requestedPlatforms)
-                .then(function (result: any): Q.Promise<any> {
-                var installer: DependencyInstaller = new DependencyInstaller();
+                // Run the dependency installer on the remaining platforms
+                logger.log(resources.getString("CommandInstallFinalPlatforms", requestedPlatforms.join(", ")));
+                logger.logLine();
 
-                return installer.run(result);
+                return cordovaWrapper.requirements(requestedPlatforms)
+                    .then(function (result: any): Q.Promise<any> {
+                        var installer: DependencyInstaller = new DependencyInstaller();
+
+                        return installer.run(result);
+                    });
             });
-        });
     }
 
     /**
@@ -113,10 +120,10 @@ class InstallReqs extends commands.TacoCommandBase {
 
         var platforms: string[] = [];
 
-        fs.readdirSync(InstallReqs.PlatformsFolderName).forEach(function (value: string): void {
-            if (fs.statSync(path.join(InstallReqs.PlatformsFolderName, value)).isDirectory()) {
+        fs.readdirSync(InstallReqs.PlatformsFolderName).forEach(function (file: string): void {
+            if (fs.statSync(path.join(InstallReqs.PlatformsFolderName, file)).isDirectory()) {
                 // Assume that every folder under root/platforms is an installed platform
-                platforms.push(value);
+                platforms.push(file);
             }
         });
 
@@ -127,10 +134,10 @@ class InstallReqs extends commands.TacoCommandBase {
         var seen: { [platform: string]: boolean } = {};
         var uniques: string[] = [];
 
-        platforms.forEach(function (value: string): void {
-            if (!seen[value]) {
-                seen[value] = true;
-                uniques.push(value);
+        platforms.forEach(function (platform: string): void {
+            if (!seen[platform]) {
+                seen[platform] = true;
+                uniques.push(platform);
             }
         });
 
@@ -141,10 +148,19 @@ class InstallReqs extends commands.TacoCommandBase {
         return requestedPlatforms.filter((p: string) => p !== platform);
     }
 
-    private static printPlatformList(platforms: string[]): void {
-        platforms.forEach(function (value: string): void {
-            logger.log("    - " + value);
+    private static printPlatformList(platforms: string[], printVersions?: boolean): void {
+        var table: INameDescription[] = platforms.map(function (platform: string): INameDescription {
+            var name: string = resources.getString("CommandInstallPlatformBullet", platform);
+            var desc: string = "";
+
+            if (printVersions && !!InstallReqs.MinPlatformVersions[platform]) {
+                desc = resources.getString("CommandInstallPlatformVersion", platform, InstallReqs.MinPlatformVersions[platform]);
+            }
+
+            return { name: name, description: desc };
         });
+
+        loggerHelper.logNameDescriptionTable(table);
     }
 
     private static supportsCheckReqs(platform: string): boolean {
@@ -200,11 +216,11 @@ class InstallReqs extends commands.TacoCommandBase {
         var skippedPlatforms: string[] = [];
         var result: string[] = [];
 
-        requestedPlatforms.forEach(function (value: string): void {
-            if (installedPlatforms.indexOf(value) === -1) {
-                skippedPlatforms.push(value);
+        requestedPlatforms.forEach(function (platform: string): void {
+            if (installedPlatforms.indexOf(platform) === -1) {
+                skippedPlatforms.push(platform);
             } else {
-                result.push(value);
+                result.push(platform);
             }
         });
 
@@ -222,17 +238,17 @@ class InstallReqs extends commands.TacoCommandBase {
         var skippedPlatforms: string[] = [];
         var result: string[] = [];
 
-        requestedPlatforms.forEach(function (value: string): void {
-            if (!InstallReqs.supportsCheckReqs(value)) {
-                skippedPlatforms.push(value);
+        requestedPlatforms.forEach(function (platform: string): void {
+            if (!InstallReqs.supportsCheckReqs(platform)) {
+                skippedPlatforms.push(platform);
             } else {
-                result.push(value);
+                result.push(platform);
             }
         });
 
         if (skippedPlatforms.length > 0) {
             logger.logWarning(resources.getString("CommandInstallSkipNoReqsSupport"));
-            InstallReqs.printPlatformList(skippedPlatforms);
+            InstallReqs.printPlatformList(skippedPlatforms, true);
             logger.logLine();
             logger.log(resources.getString("CommandInstallNoReqsSupportHint"));
             logger.logLine();
