@@ -107,6 +107,7 @@ module TacoUtility {
                 categories.forEach(function (category: string): void {
                     Logger.logLine();
                     Logger.log(category);
+                    Logger.logLine();
                     categoryGroups[category].forEach(function (nvp: INameDescription): void {
                         LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2, dotsCharacter);
                     });
