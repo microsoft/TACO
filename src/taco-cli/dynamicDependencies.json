@@ -1,7 +1,7 @@
 ﻿{
   "taco-kits": {
     "packageName": "taco-kits",
-    "packageId": "taco-kits@1.1.0-beta",
+    "packageId": "taco-kits@0.8.0",
     "expirationIntervalInHours": 4,
     "dev":  true
   }
