@@ -175,7 +175,7 @@ module TacoUtility {
             for (var i = 0; i < nameDescriptionPairs.length; i++) {
                 nameDescriptionPairs[i].description = this.getResourceString(nameDescriptionPairs[i].description);
                 if (nameDescriptionPairs[i].category) {
-                    nameDescriptionPairs[i].category = this.getResourceString(nameDescriptionPairs[i].category);
+                    nameDescriptionPairs[i].category = util.format("<highlight>%s</highlight>", this.getResourceString(nameDescriptionPairs[i].category));
                 }
             }
 

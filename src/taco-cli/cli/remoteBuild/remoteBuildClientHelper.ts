@@ -22,11 +22,13 @@ import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
 import request = require ("request");
+import stream = require ("stream");
 import tar = require ("tar");
 import util = require ("util");
 import zlib = require ("zlib");
 
 import BuildSettings = require ("./buildSettings");
+import buildTelemetryHelper = require ("../utils/buildTelemetryHelper");
 import ConnectionSecurityHelper = require ("./connectionSecurityHelper");
 import resources = require ("../../resources/resourceManager");
 import Settings = require ("../utils/settings");
@@ -41,13 +43,17 @@ import GlobalConfig = tacoUtils.TacoGlobalConfig;
 import NewlineNormalizerStream = tacoUtils.NewlineNormalizerStream;
 import UtilHelper = tacoUtils.UtilHelper;
 
+import ICommandTelemetryProperties = tacoUtils.ICommandTelemetryProperties;
+
+var telemetryProperty = tacoUtils.TelemetryHelper.telemetryProperty;
+
 class RemoteBuildClientHelper {
     public static PingInterval: number = 5000;
 
     /**
      * Submit a build to a remote build server, poll for completion, print the build log when the build completes, and if building for a device then download the end result
      */
-    public static build(settings: BuildSettings): Q.Promise<BuildInfo> {
+    public static build(settings: BuildSettings, telemetryProperties: ICommandTelemetryProperties): Q.Promise<BuildInfo> {
         var outputBuildDir: string = settings.platformConfigurationBldDir;
         var buildInfoFilePath = settings.buildInfoFilePath;
 
@@ -60,70 +66,68 @@ class RemoteBuildClientHelper {
 
         var promise: Q.Promise<any> = RemoteBuildClientHelper.checkForBuildOnServer(settings, buildInfoFilePath)
             .then(function (buildInfo: BuildInfo): void {
-            settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
+                settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
 
-            console.info(resources.getString("IncrementalBuild", !!settings.incrementalBuild));
-            if (!settings.incrementalBuild) {
-                try {
-                    fs.unlinkSync(changeTimeFile);
-                } catch (e) {
-                    // File didn't exist, or other error we can't do much about
+                console.info(resources.getString("IncrementalBuild", !!settings.incrementalBuild));
+                if (!settings.incrementalBuild) {
+                    try {
+                        fs.unlinkSync(changeTimeFile);
+                    } catch (e) {
+                        // File didn't exist, or other error we can't do much about
+                    }
                 }
-            }
 
-            var platformJsonFile = path.join(settings.projectSourceDir, "plugins", util.format("remote_%s.json", settings.platform));
-            if (fs.existsSync(platformJsonFile)) {
-                fs.unlinkSync(platformJsonFile);
-            }
-        })
-            .then(function (): Q.Promise<zlib.Gzip> {
-            return RemoteBuildClientHelper.appAsTgzStream(settings, lastChangeTime, changeTimeFile);
-        })
+                var platformJsonFile = path.join(settings.projectSourceDir, "plugins", util.format("remote_%s.json", settings.platform));
+                if (fs.existsSync(platformJsonFile)) {
+                    fs.unlinkSync(platformJsonFile);
+                }
+            })
+            .then(() => RemoteBuildClientHelper.appAsTgzStream(settings, lastChangeTime, changeTimeFile, telemetryProperties))
             .then(function (tgz: zlib.Gzip): Q.Promise<string> {
-            return RemoteBuildClientHelper.submitBuildRequestToServer(settings, tgz);
-        })
+                return RemoteBuildClientHelper.submitBuildRequestToServer(settings, tgz);
+            })
             .then(function (buildingUrl: string): Q.Promise<BuildInfo> {
-            return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, RemoteBuildClientHelper.PingInterval, 0);
-        })
+                return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, RemoteBuildClientHelper.PingInterval, 0);
+            })
             .then(function (result: BuildInfo): Q.Promise<BuildInfo> {
-            if (result.buildNumber) {
-                console.info(resources.getString("RemoteBuildSuccessful"));
-                return RemoteBuildClientHelper.logBuildOutput(result, settings);
-            }
-        }, function (err: any): Q.Promise<BuildInfo> {
+                if (result.buildNumber) {
+                    console.info(resources.getString("RemoteBuildSuccessful"));
+                    return RemoteBuildClientHelper.logBuildOutput(result, settings);
+                }
+            }, function (err: any): Q.Promise<BuildInfo> {
                 if (err.buildInfo) {
                     // If we successfully submitted a build but the remote build server reports an error about the build, then grab the
                     // build log from the remote machine before propagating the reported failure
                     return RemoteBuildClientHelper.logBuildOutput(err.buildInfo, settings)
                         .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                             throw errorHelper.wrap(TacoErrorCodes.RemoteBuildUnsuccessful, err);
-                    });
+                        });
                 }
 
                 throw errorHelper.wrap(TacoErrorCodes.RemoteBuildUnsuccessful, err);
             })
             .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-            return RemoteBuildClientHelper.downloadRemotePluginFile(buildInfo, settings, path.join(settings.projectSourceDir, "plugins"));
-        })
+                return RemoteBuildClientHelper.downloadRemotePluginFile(buildInfo, settings, path.join(settings.projectSourceDir, "plugins"));
+            })
             .then(function (buildInfo: BuildInfo): BuildInfo {
-            UtilHelper.createDirectoryIfNecessary(outputBuildDir);
-            fs.writeFileSync(buildInfoFilePath, JSON.stringify(buildInfo));
-            fs.writeFileSync(changeTimeFile, JSON.stringify(lastChangeTime));
-                
-            return buildInfo;
-        });
+                UtilHelper.createDirectoryIfNecessary(outputBuildDir);
+                fs.writeFileSync(buildInfoFilePath, JSON.stringify(buildInfo));
+                fs.writeFileSync(changeTimeFile, JSON.stringify(lastChangeTime));
+
+                return buildInfo;
+            });
 
         // If build is for a device we will download the build as a zip with the build output in it
         if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
             promise = promise
                 .then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                return RemoteBuildClientHelper.downloadBuild(buildInfo, settings, outputBuildDir)
-                    .then(function (zipFile: string): Q.Promise<{}> {
-                    return RemoteBuildClientHelper.unzipBuildFiles(zipFile, outputBuildDir);
-                }).then(function (): BuildInfo {
-                    return buildInfo;
+                    return RemoteBuildClientHelper.downloadBuild(buildInfo, settings, outputBuildDir)
+                        .then(function (zipFile: string): Q.Promise<{}> {
+                            return RemoteBuildClientHelper.unzipBuildFiles(zipFile, outputBuildDir);
+                        }).then(function (): BuildInfo {
+                            return buildInfo;
+                        });
                 });
-            });
         }
 
         return promise;
@@ -135,10 +139,10 @@ class RemoteBuildClientHelper {
 
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/deploy", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (): Q.Promise<{ response: any; body: string }> {
-            return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/run", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet);
-        }).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
-            return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
-        });
+                return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/run", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet);
+            }).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
+                return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
+            });
     }
 
     public static emulate(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo, target: string): Q.Promise<BuildInfo> {
@@ -146,8 +150,8 @@ class RemoteBuildClientHelper {
         var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/emulate?" + querystring.stringify({ target: target }), httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): BuildInfo {
-            return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
-        });
+                return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
+            });
     }
 
     public static debug(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
@@ -248,18 +252,24 @@ class RemoteBuildClientHelper {
     /**
      * Create a gzipped tarball of the cordova project ready to submit to the server.
      */
-    private static appAsTgzStream(settings: BuildSettings, lastChangeTime: { [file: string]: number }, changeTimeFile: string): Q.Promise<zlib.Gzip> {
+    private static appAsTgzStream(settings: BuildSettings, lastChangeTime: { [file: string]: number }, changeTimeFile: string,
+        telemetryProperties: ICommandTelemetryProperties): Q.Promise<NodeJS.ReadableStream> {
+        var platform = settings.platform;
         var projectSourceDir = settings.projectSourceDir;
         var changeListFile = path.join(projectSourceDir, "changeList.json");
         var newChangeTime: { [file: string]: number } = {};
+        var isIncremental = false;
         try {
             var json: { [file: string]: number } = JSON.parse(<any>fs.readFileSync(changeTimeFile));
             Object.keys(json).forEach(function (file: string): void {
                 lastChangeTime[file] = json[file];
             });
+            isIncremental = true;
         } catch (e) {
             // File is missing or malformed: no incremental build
         }
+
+        telemetryProperties["remoteBuild." + platform + ".wasIncremental"] = telemetryProperty(isIncremental, /*isPii*/ false);
 
         var upToDateFiles: string[] = [];
 
@@ -284,9 +294,16 @@ class RemoteBuildClientHelper {
             return false;
         };
 
-        var filterForTar = function (reader: fstream.Reader, props: any): boolean {
+        var property = telemetryProperty(0, /*isPii*/ false);
+        telemetryProperties["remoteBuild." + platform + ".filesChangedCount"] = property;
+        var filterForTar = (reader: fstream.Reader, props: any) => {
             var appRelPath = path.relative(settings.projectSourceDir, reader.path);
-            return appRelPath === "changeList.json" || appRelPath in newChangeTime;
+            var wasModifiedRecently = appRelPath === "changeList.json" || appRelPath in newChangeTime;
+            if (wasModifiedRecently && reader.props.type !== "Directory") {
+                property.value++; // We found another file that was modified
+            }
+
+            return wasModifiedRecently;
         };
 
         var deferred = Q.defer();
@@ -320,9 +337,12 @@ class RemoteBuildClientHelper {
             deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorPatchCreation, err));
         });
 
-        return deferred.promise.then(function (): zlib.Gzip {
+        return deferred.promise.then(() => {
             var projectSourceDirReader = new fstream.Reader({ path: projectSourceDir, type: "Directory", filter: filterForTar });
-            var tgzProducingStream = projectSourceDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
+            var tarProducingStream = CountStream.count(projectSourceDirReader.pipe(tar.Pack()),
+                (sz: number) => telemetryProperties["remotebuild." + platform + ".projectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
+            var tgzProducingStream = CountStream.count(tarProducingStream.pipe(zlib.createGzip()),
+                (sz: number) => telemetryProperties["remotebuild." + platform + ".gzipedProjectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
             return tgzProducingStream;
         });
     }
@@ -446,7 +466,7 @@ class RemoteBuildClientHelper {
     }
 
     private static isDeviceBuild(settings: BuildSettings): boolean {
-        return settings.buildTarget && !!settings.buildTarget.match(/device/i);
+        return settings.buildTarget && (settings.buildTarget.toLowerCase() === "device");
     }
 
     /*

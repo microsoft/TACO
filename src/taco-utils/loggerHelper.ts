@@ -107,6 +107,7 @@ module TacoUtility {
                 categories.forEach(function (category: string): void {
                     Logger.logLine();
                     Logger.log(category);
+                    Logger.logLine();
                     categoryGroups[category].forEach(function (nvp: INameDescription): void {
                         LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2, dotsCharacter);
                     });
@@ -152,7 +153,15 @@ module TacoUtility {
             value = LoggerHelper.wordWrapString(value, indent2, LoggerHelper.MaxRight);
 
             var keyString: string = LogFormatHelper.isFormattedString(key) ? key : util.format("<key>%s</key>", key);
-            Logger.log(util.format("%s%s %s %s", leftIndent, keyString, dots, value));
+            var toLog: string = "";
+
+            if (value) {
+                toLog = util.format("%s%s %s %s", leftIndent, keyString, dots, value);
+            } else {
+                toLog = util.format("%s%s", leftIndent, keyString);
+            }
+
+            Logger.log(toLog);
         }
 
         /**

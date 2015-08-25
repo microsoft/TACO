@@ -49,6 +49,7 @@ module TacoUtility {
          * Base command class, all other commands inherit from this
          */
         export interface ICommand {
+            name: String;
             run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
         }
@@ -87,7 +88,10 @@ module TacoUtility {
                 // Determine which subcommand we are executing
                 this.executedSubcommand = this.getSubCommand(this.data);
                 if (this.executedSubcommand) {
-                    return this.executedSubcommand.run(this.data);
+                    return this.executedSubcommand.run(this.data).then(telemetryProperties => {
+                        telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(this.executedSubcommand.name, /*isPii*/ false);
+                        return telemetryProperties;
+                    });
                 } else {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
                 }
@@ -112,6 +116,7 @@ module TacoUtility {
          */
         export class CommandFactory {
             public listings: any;
+            public aliases: any;
 
             /**
              * Factory to create new Commands classes
@@ -122,9 +127,10 @@ module TacoUtility {
                     throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
                 }
 
-                this.listings = require(commandsInfoPath);
+                this.listings = require(commandsInfoPath).commands;
+                this.aliases = require(commandsInfoPath).aliases;
             }
-
+            
             /**
              * get specific task object, given task name
              */
@@ -135,7 +141,13 @@ module TacoUtility {
 
                 var moduleInfo: ICommandInfo = this.listings[name];
                 if (!moduleInfo) {
-                    return null;
+                    // Check if {name} is a command alias
+                    var commandForAlias = this.aliases ? this.aliases[name] : null;
+                    if (commandForAlias) {
+                        moduleInfo = this.listings[commandForAlias];
+                    } else {
+                        return null;
+                    }
                 }
 
                 var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
