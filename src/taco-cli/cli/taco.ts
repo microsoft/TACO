@@ -56,7 +56,6 @@ class Taco {
      */
     public static run(): void {
         Settings.loadSettings().fail(function (err: any): Q.Promise<Settings.ISettings> {
-            // No settings found: print the logo and query the user for telemetry opt in/out
             require("./logo"); // Prints the logo as a side effect of requiring it. Require caching will make sure we don't execute it twice in the one session.
             return Settings.saveSettings({});
         }).then(function (settings: Settings.ISettings): void {

@@ -168,7 +168,6 @@ module TacoUtility {
             private static REGISTRY_USERID_VALUE = "UserId";
             private static REGISTRY_MACHINEID_KEY = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
-            private static TELEMETRY_OPTIN_STRING = "TelemetryOptInMessage";
             private static INTERNAL_DOMAIN_SUFFIX = "microsoft.com";
             private static INTERNAL_USER_ENV_VAR = "TACOINTERNAL";
             public static USERTYPE_INTERNAL = "Internal";
@@ -327,7 +326,7 @@ module TacoUtility {
             }
 
             private static getMacAddress(): string {
-                var macAddress: string;
+                var macAddress: string = "";
                 var interfaces = os.networkInterfaces();
                 Object.keys(interfaces).some((key: string) => {
                     var mac = interfaces[key][0]["mac"];
