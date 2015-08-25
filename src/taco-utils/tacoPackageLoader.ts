@@ -9,6 +9,7 @@
 /// <reference path="../typings/rimraf.d.ts" />
 /// <reference path="../typings/semver.d.ts" />
 /// <reference path="../typings/dynamicDependencyEntry.d.ts" />
+/// <reference path="../typings/tacoPackageLoader.d.ts" />
 
 "use strict";
 
@@ -85,9 +86,15 @@ module TacoUtility {
         logLevel: InstallLogLevel;
     };
 
+    export interface ITacoPackageLoader {
+        lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
+    }
+
     export class TacoPackageLoader {
         public static GitUriRegex: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
         public static FileUriRegex: RegExp = /^file:\/\/.*/;
+
+        public static MockForTests: TacoUtility.ITacoPackageLoader;
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,
@@ -106,7 +113,11 @@ module TacoUtility {
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
         public static lazyRequire<T>(packageName: string, packageId: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<T> {
-            return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
+            if (!this.MockForTests) {
+                return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
+            } else {
+                return this.MockForTests.lazyRequire<T>(packageName, packageId, logLevel);
+            }
         }
 
         /**
