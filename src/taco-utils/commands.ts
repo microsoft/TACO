@@ -142,7 +142,7 @@ module TacoUtility {
                 var moduleInfo: ICommandInfo = this.listings[name];
                 if (!moduleInfo) {
                     // Check if {name} is a command alias
-                    var commandForAlias = this.aliases? this.aliases[name] : null;
+                    var commandForAlias = this.aliases ? this.aliases[name] : null;
                     if (commandForAlias) {
                         moduleInfo = this.listings[commandForAlias];
                     } else {
