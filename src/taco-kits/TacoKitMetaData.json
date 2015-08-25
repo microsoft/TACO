@@ -55,6 +55,7 @@
         },
         "tacokit@2.0.0": {
             "cordova-cli": "5.2.0",
+            "releaseNotesUri": "http://cordova.apache.org/4.0.0/release.md",
             "platforms": {
                 "android": {
                     "version": "4.1.1"

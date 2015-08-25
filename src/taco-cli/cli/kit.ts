@@ -302,6 +302,16 @@ class Kit extends commands.TacoCommandBase {
     }
 
     /**
+     * Prints the release notes information for a kit
+     */
+    private static printReleaseNotesInformation(kitInfo: TacoKits.IKitInfo): void {
+        if (kitInfo.releaseNotesUri && kitInfo.releaseNotesUri.length > 0) {
+            logger.logLine();
+            logger.log(resources.getString("CommandKitListReleaseNotes", kitInfo.releaseNotesUri));
+        }
+    }  
+
+    /**
      * Validates the file path passed. Throw appropriate errors if path passed is invalid.
      */
     private static validateJsonFilePath(jsonFilePath: string): Q.Promise<any> {
@@ -384,6 +394,7 @@ class Kit extends commands.TacoCommandBase {
             Kit.printCordovaCliVersion(kitInfo);
             Kit.printPlatformOverrideInfo(kitInfo, indent);
             Kit.printPluginOverrideInfo(kitInfo, indent);
+            Kit.printReleaseNotesInformation(kitInfo);
         });
     }
 
