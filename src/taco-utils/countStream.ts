@@ -20,12 +20,21 @@ module TacoUtility {
      * readableStream.pipe(cs).pipe(writableStream);
      * [... later]
      * console.log(cs.count + " bytes written");
+     *
+     * Alternatively:
+     * CountStream.count(streamToCount, (sz: number) => doSomethingWithStreamSize(sz));
      */
     export class CountStream extends Transform {
         public count: number;
         constructor(options?: stream.TransformOptions) {
             super(options);
             this.count = 0;
+        }
+
+        public static count(originalStream: NodeJS.ReadableStream, callback: { (length: number): void }): NodeJS.ReadableStream {
+            var countedStream = originalStream.pipe(new CountStream());
+            countedStream.on("end", () => callback(countedStream.count));
+            return countedStream;
         }
 
         public _transform(chunk: any, encoding: string, callback: (err: Error, buf: Buffer) => void): void {

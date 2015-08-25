@@ -49,6 +49,7 @@ module TacoUtility {
          * Base command class, all other commands inherit from this
          */
         export interface ICommand {
+            name: String;
             run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
         }
@@ -87,7 +88,10 @@ module TacoUtility {
                 // Determine which subcommand we are executing
                 this.executedSubcommand = this.getSubCommand(this.data);
                 if (this.executedSubcommand) {
-                    return this.executedSubcommand.run(this.data);
+                    return this.executedSubcommand.run(this.data).then(telemetryProperties => {
+                        telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(this.executedSubcommand.name, /*isPii*/ false);
+                        return telemetryProperties;
+                    });
                 } else {
                     return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
                 }

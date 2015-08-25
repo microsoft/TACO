@@ -1,16 +1,7 @@
 ﻿{
-    "help": {
-        "synopsis": "<synopsis>[COMMAND]</synopsis>",
-        "modulePath": "./help",
-        "description": "<helptitle>[CommandHelpDescription]</helptitle>"
-    },
-    "docs": {
-        "synopsis": "<synopsis></synopsis>",
-        "modulePath": "./docs",
-        "description": "<helptitle>[CommandDocumentationDescription]</helptitle>"
-    },
     "create": {
         "synopsis": "<synopsis><PATH> [ID [NAME [CONFIG]]] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./create",
         "description": "<helptitle>[CommandCreateDescription]</helptitle>",
         "args": [
@@ -29,11 +20,13 @@
     },
     "templates": {
         "synopsis": "<synopsis></synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./templates",
         "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
     },
     "kit": {
         "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./kit",
         "description": "<helptitle>[CommandKitDescription]</helptitle>",
         "args": [
@@ -56,32 +49,9 @@
             }
         ]
     },
-    "remote": {
-        "synopsis": "<synopsis>COMMAND</synopsis>",
-        "modulePath": "./remote",
-        "description": "<helptitle>[CommandRemoteDescription]</helptitle>",
-        "args": [
-            { "name": "COMMAND", "description": "[CommandRemoteSubcommandDescription]" },
-            {
-                "name": "add <PLATFORM>",
-                "description": "[CommandRemoteAddSubcommandDescription]"
-            },
-            {
-                "name": "remove <PLATFORM>",
-                "description": "[CommandRemoteRemoveSubcommandDescription]"
-            },
-            {
-                "name": "list",
-                "description": "[CommandRemoteListSubcommandDescription]"
-            }
-        ],
-        "aliases": [
-            { "alias": "rm", "command": "remove" },
-            { "alias": "ls", "command": "list" }
-        ]
-    },
     "platform": {
         "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./platform",
         "description": "<helptitle>[CommandPlatformDescription]</helptitle>",
         "args": [
@@ -131,6 +101,7 @@
     },
     "plugin": {
         "synopsis": "<synopsis>[COMMAND] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./plugin",
         "description": "<helptitle>[CommandPluginDescription]</helptitle>",
         "args": [
@@ -164,14 +135,41 @@
     },
     "install-reqs": {
         "synopsis": "<synopsis>[PLATFORM]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./installReqs",
         "description": "<helptitle>[CommandInstallReqsDescription]</helptitle>",
         "args": [
             { "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]" }
         ]
     },
+    "remote": {
+        "synopsis": "<synopsis>COMMAND</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
+        "modulePath": "./remote",
+        "description": "<helptitle>[CommandRemoteDescription]</helptitle>",
+        "args": [
+            { "name": "COMMAND", "description": "[CommandRemoteSubcommandDescription]" },
+            {
+                "name": "add <PLATFORM>",
+                "description": "[CommandRemoteAddSubcommandDescription]"
+            },
+            {
+                "name": "remove <PLATFORM>",
+                "description": "[CommandRemoteRemoveSubcommandDescription]"
+            },
+            {
+                "name": "list",
+                "description": "[CommandRemoteListSubcommandDescription]"
+            }
+        ],
+        "aliases": [
+            { "alias": "rm", "command": "remove" },
+            { "alias": "ls", "command": "list" }
+        ]
+    },
     "build": {
         "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./build",
         "description": "<helptitle>[CommandBuildDescription]</helptitle>",
         "args": [
@@ -190,6 +188,7 @@
     },
     "run": {
         "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./run",
         "description": "<helptitle>[CommandRunDescription]</helptitle>",
         "args": [
@@ -209,6 +208,7 @@
     },
     "emulate": {
         "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+        "categoryTitle": "[ProjectCommandsTitle]",
         "modulePath": "./emulate",
         "description": "<helptitle>[CommandEmulateDescription]</helptitle>",
         "args": [
@@ -222,8 +222,21 @@
             { "name": "--target=TARGET", "description": "[CommandRunTargetDescription]" }
         ]
     },
+    "help": {
+        "synopsis": "<synopsis>[COMMAND]</synopsis>",
+        "categoryTitle": "[GeneralCommandsTitle]",
+        "modulePath": "./help",
+        "description": "<helptitle>[CommandHelpDescription]</helptitle>"
+    },
+    "docs": {
+        "synopsis": "<synopsis></synopsis>",
+        "categoryTitle": "[GeneralCommandsTitle]",
+        "modulePath": "./docs",
+        "description": "<helptitle>[CommandDocumentationDescription]</helptitle>"
+    },
     "version": {
         "synopsis": "<synopsis></synopsis>",
+        "categoryTitle": "[GeneralCommandsTitle]",
         "modulePath": "./version",
         "description": "<helptitle>[CommandVersionDescription]</helptitle>"
     }
