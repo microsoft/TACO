@@ -158,7 +158,7 @@ class Emulate extends commands.TacoCommandBase {
         });
     }
 
-    private static emulate(commandData: commands.ICommandData): Q.Promise<any> {
+    private static emulate(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
         return Q.all([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
