@@ -40,18 +40,18 @@ class InstallReqs extends commands.TacoCommandBase {
     private static PlatformsFolderName: string = "platforms";
     private static PathToCheckReqs: string = path.join("cordova", "lib", "check_reqs.js");
     private static PlatformNames: { [id: string]: string } = {
-        "ios": "ios    ",   // Extra padding to align with other platforms
-        "android": "android",
-        "windows": "windows"
+        ios: "ios    ",   // Extra padding to align with other platforms
+        android": "android",
+        windows": "windows"
     };
     private static MinPlatformVersions: { [id: string]: string } = {
-        "ios": "3.9.0",
-        "android": "4.1.0",
-        "windows": "4.1.0"
+        ios: "3.9.0",
+        android: "4.1.0",
+        windows: "4.1.0"
     };
     private static MinCordovaVersions: { [id: string]: string } = {
-        "ios": "5.2.0",
-        "android": "5.2.0"
+        ios: "5.2.0",
+        android: "5.2.0"
     };
 
     public info: commands.ICommandInfo;
@@ -258,7 +258,7 @@ class InstallReqs extends commands.TacoCommandBase {
 
         if (skippedPlatforms.length > 0) {
             logger.logWarning(resources.getString("CommandInstallSkipNoReqsSupport"));
-            InstallReqs.printPlatformList(skippedPlatforms);
+            InstallReqs.printPlatformList(skippedPlatforms, true);
             logger.logLine();
             logger.log(resources.getString("CommandInstallNoReqsSupportHint"));
             logger.logLine();
