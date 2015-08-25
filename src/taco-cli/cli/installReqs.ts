@@ -39,19 +39,10 @@ class InstallReqs extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.FlagTypeMap = { };
     private static PlatformsFolderName: string = "platforms";
     private static PathToCheckReqs: string = path.join("cordova", "lib", "check_reqs.js");
-    private static PlatformNames: { [id: string]: string } = {
-        ios: "ios    ",   // Extra padding to align with other platforms
-        android": "android",
-        windows": "windows"
-    };
     private static MinPlatformVersions: { [id: string]: string } = {
         ios: "3.9.0",
         android: "4.1.0",
         windows: "4.1.0"
-    };
-    private static MinCordovaVersions: { [id: string]: string } = {
-        ios: "5.2.0",
-        android: "5.2.0"
     };
 
     public info: commands.ICommandInfo;
@@ -156,21 +147,18 @@ class InstallReqs extends commands.TacoCommandBase {
     }
 
     private static printPlatformList(platforms: string[], printVersions?: boolean): void {
-        platforms.forEach(function (value: string): void {
-            var str: string = "";
+        var table: INameDescription[] = platforms.map(function (value: string): INameDescription {
+            var name: string = resources.getString("CommandInstallPlatformBullet", value);
+            var desc: string = "";
 
-            if (printVersions) {
-                if (InstallReqs.MinCordovaVersions[value]) {
-                    str = resources.getString("CommandInstallPlatformBulletVersion", InstallReqs.PlatformNames[value], InstallReqs.MinPlatformVersions[value], InstallReqs.MinCordovaVersions[value]);
-                } else {
-                    str = resources.getString("CommandInstallPlatformBulletVersionNoCdv", InstallReqs.PlatformNames[value], InstallReqs.MinPlatformVersions[value]);
-                }
-            } else {
-                str = resources.getString("CommandInstallPlatformBullet", value);
+            if (printVersions && !!InstallReqs.MinPlatformVersions[value]) {
+                desc = resources.getString("CommandInstallPlatformVersion", value, InstallReqs.MinPlatformVersions[value]);
             }
 
-            logger.log(str);
+            return { name: name, description: desc };
         });
+
+        loggerHelper.logNameDescriptionTable(table);
     }
 
     private static supportsCheckReqs(platform: string): boolean {
