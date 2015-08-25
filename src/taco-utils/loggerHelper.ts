@@ -63,6 +63,10 @@ module TacoUtility {
          * @param {string} dotsCharacter The character to use to pad between names and descriptions. Defaults to '.'
          */
         public static logNameDescriptionTable(nameDescriptionPairs: INameDescription[], indent1?: number, indent2?: number, dotsCharacter: string = "."): void {
+            if (!nameDescriptionPairs || nameDescriptionPairs.length === 0) {
+                return;
+            }
+
             // 0 is a valid indent on the left
             if (indent1 !== 0) {
                 indent1 = indent1 || LoggerHelper.DefaultIndent;
@@ -73,11 +77,41 @@ module TacoUtility {
                 indent2 = LoggerHelper.getDescriptionColumnIndent(maxNameLength, indent1);
             }
 
-            nameDescriptionPairs.forEach(function (nvp: INameDescription): void {
-                if (nvp.name) {
-                    LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2, dotsCharacter);
-                }
-            });
+            // if first entry has a category defined, we assume all the entries have categories and vice versa
+            if (!nameDescriptionPairs[0].category) {
+                nameDescriptionPairs.forEach(function (nvp: INameDescription): void {
+                    if (nvp.name) {
+                        LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2, dotsCharacter);
+                    }
+                });
+            } else {
+                // if we are dealing with name description pairs with categories
+                // we need to group these pairs into categories before logging
+                var categoryGroups: { [key: string]: INameDescription[] } = {};
+                
+                // Since Object.keys doesn't guarantee an order, we need to store keys in a seperate array
+                // this allows us to log name description pairs grouped by their categories as they appeared in original array
+                var categories: string[] = [];
+
+                nameDescriptionPairs.forEach(function (nvp: INameDescription): void {
+                    if (nvp.name && nvp.category) {
+                        if (!categoryGroups[nvp.category]) {
+                            categoryGroups[nvp.category] = [];
+                            categories.push(nvp.category);
+                        }
+
+                        categoryGroups[nvp.category].push(nvp);
+                    }
+                });
+
+                categories.forEach(function (category: string): void {
+                    Logger.logLine();
+                    Logger.log(category);
+                    categoryGroups[category].forEach(function (nvp: INameDescription): void {
+                        LoggerHelper.logNameDescription(nvp.name, nvp.description, indent1, indent2, dotsCharacter);
+                    });
+                });
+            }
         }
 
         /**
