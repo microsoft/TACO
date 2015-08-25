@@ -99,7 +99,7 @@
     "_CommandKitListSubcommandDescription.comment": "Description for the 'list' subcommand for 'taco kit'",
     "CommandKitSelectSubcommandDescription": "Select a kit or a Cordova CLI version for the project",
     "_CommandKitSelectSubcommandDescription.comment": "Description for the 'select' subcommand for 'taco kit'",
-    "CommandKitSelectOptionKitDescription": "Use the specified taco kit for the project. Use \"taco kit list\" to see a list of available kits.",
+    "CommandKitSelectOptionKitDescription": "Use the specified TACO kit for the project. Use \"taco kit list\" to see a list of available kits.",
     "_CommandKitSelectOptionKitDescription.comment": "Description for --kit argument to taco kit select",
     "CommandKitSelectOptionCliDescription": "Use the specified version of Cordova CLI for the project.",
     "_CommandKitSelectOptionCliDescription.comment": "Description for --cli argument to taco kit select",
