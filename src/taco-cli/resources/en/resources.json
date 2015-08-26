@@ -103,6 +103,8 @@
     "_CommandKitSelectOptionKitDescription.comment": "Description for --kit argument to taco kit select",
     "CommandKitSelectOptionCliDescription": "Use the specified version of Cordova CLI for the project.",
     "_CommandKitSelectOptionCliDescription.comment": "Description for --cli argument to taco kit select",
+    "CommandKitListReleaseNotes": "For more information about this kit, please visit <link>{0}</link>.",
+    "_CommandKitListReleaseNotes.comment": "The message printed at the bottom on 'taco kit list --kit <KIT-ID>' with the release notes URI",
 
     "CommandFeedbackDescription": "Change feedback setting",
     "_CommandFeedbackDescription.comment": "Description for 'taco feedback' command",
