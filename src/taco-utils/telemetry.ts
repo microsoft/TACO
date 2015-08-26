@@ -187,7 +187,7 @@ module TacoUtility {
                     .setAutoCollectPerformance(false)
                     .setAutoCollectExceptions(true)
                     .start();
-                appInsights.client.config.maxBatchIntervalMs = 100;
+                appInsights.client.config.maxBatchIntervalMs = 0;
 
                 if (appVersion) {
                     var context: Context = appInsights.client.context;
