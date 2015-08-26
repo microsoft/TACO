@@ -84,10 +84,10 @@ class InstallReqs extends commands.TacoCommandBase {
                     requestedPlatforms = InstallReqs.skipSystemPlatforms(requestedPlatforms);
 
                     // From the remaining platforms, skip the ones that are not added to the project
-                    requestedPlatforms = InstallReqs.skipNotInstalled(requestedPlatforms, installedPlatforms);
+                    requestedPlatforms = InstallReqs.skipNotInstalled(requestedPlatforms, installedPlatforms, telemetry);
 
                     // From the remaining platforms, skip the ones that don't support 'cordova check_reqs'
-                    requestedPlatforms = InstallReqs.skipNoReqsSupport(requestedPlatforms);
+                    requestedPlatforms = InstallReqs.skipNoReqsSupport(requestedPlatforms, telemetry);
 
                     // If we don't have any remaining platforms, print message and return
                     loggerHelper.logSeparatorLine();
@@ -221,7 +221,7 @@ class InstallReqs extends commands.TacoCommandBase {
         return result;
     }
 
-    private static skipNotInstalled(requestedPlatforms: string[], installedPlatforms: string[]): string[] {
+    private static skipNotInstalled(requestedPlatforms: string[], installedPlatforms: string[], telemetry: tacoUtils.TelemetryGenerator): string[] {
         var skippedPlatforms: string[] = [];
         var result: string[] = [];
 
@@ -234,6 +234,7 @@ class InstallReqs extends commands.TacoCommandBase {
         });
 
         if (skippedPlatforms.length > 0) {
+            telemetry.addWithPiiEvaluator("platformsSkippedDueToNotAdded", skippedPlatforms, buildTelemetryHelper.getIsPlatformPii());
             logger.logWarning(resources.getString("CommandInstallSkipNotAdded"));
             InstallReqs.printPlatformList(skippedPlatforms);
             logger.logLine();
@@ -243,7 +244,7 @@ class InstallReqs extends commands.TacoCommandBase {
         return result;
     }
 
-    private static skipNoReqsSupport(requestedPlatforms: string[]): string[] {
+    private static skipNoReqsSupport(requestedPlatforms: string[], telemetry: tacoUtils.TelemetryGenerator): string[]{
         var skippedPlatforms: string[] = [];
         var result: string[] = [];
 
@@ -256,6 +257,7 @@ class InstallReqs extends commands.TacoCommandBase {
         });
 
         if (skippedPlatforms.length > 0) {
+            telemetry.addWithPiiEvaluator("platformsSkippedDueToNoReqsSupport", skippedPlatforms, buildTelemetryHelper.getIsPlatformPii());
             logger.logWarning(resources.getString("CommandInstallSkipNoReqsSupport"));
             InstallReqs.printPlatformList(skippedPlatforms, true);
             logger.logLine();
