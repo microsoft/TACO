@@ -436,15 +436,13 @@ class Kit extends commands.TacoCommandBase {
         } else {
             logger.log(resources.getString("CommandKitSelectStatusUpdatingPlugins"));
         }
-
-        var componentInfo: Cordova.ICordovaPlatformPluginInfo[] = [];
+        
         return Object.keys(components).reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, componentName: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
                 // No override on the case of CLI project update - Cordova CLI gets its pinned version
                 var componentOverride: string = updateToCliProject ? componentName : componentName + "@" + components[componentName];
                 var downloadOptions: Cordova.ICordovaDownloadOptions = { searchpath: "", noregistry: false, usegit: false, cli_variables: {}, browserify: "", link: "", save: true, shrinkwrap: false };
                 var command = (componentType === ProjectComponentType.Platform) ? "platform" : "plugin";
-                componentInfo.push()
                 return Kit.invokeComponentCommandSilent(cliVersion, command, "remove", [componentName], downloadOptions)
                 .then(function (): Q.Promise<any> {    
                     // Do not save in the case of updating to CLI project
