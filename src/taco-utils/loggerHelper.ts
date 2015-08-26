@@ -118,15 +118,12 @@ module TacoUtility {
             value = LoggerHelper.wordWrapString(value, indent2, LoggerHelper.MaxRight);
 
             var keyString: string = LogFormatHelper.isFormattedString(key) ? key : util.format("<key>%s</key>", key);
-            var toLog: string = "";
 
             if (value) {
-                toLog = util.format("%s%s %s %s", leftIndent, keyString, dots, value);
+                Logger.log(util.format("%s%s %s %s", leftIndent, keyString, dots, value));
             } else {
-                toLog = util.format("%s%s", leftIndent, keyString);
+                Logger.log(util.format("%s%s", leftIndent, keyString));
             }
-
-            Logger.log(toLog);
         }
 
         /**
