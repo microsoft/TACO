@@ -10,18 +10,21 @@
 
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/applicationinsights.d.ts" />
-/// <reference path="../typings/configstore.d.ts" />
 
 import appInsights = require ("applicationinsights");
 import crypto = require ("crypto");
 import fs = require ("fs");
+import logFormathelper = require ("./logFormatHelper");
 import loggerUtil = require ("./logger");
 import logLevel = require ("./logLevel");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import os = require ("os");
 import path = require ("path");
+import readline = require ("readline");
 import utilHelper = require ("./utilHelper");
+import utilResources = require ("./resources/resourceManager");
 
+import LogFormatHelper = logFormathelper.LogFormatHelper;
 import logger = loggerUtil.Logger;
 import LogLevel = logLevel.LogLevel;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
@@ -33,6 +36,7 @@ import UtilHelper = utilHelper.UtilHelper;
 module TacoUtility {
     export module Telemetry {
         export var appName: string;
+        export var isOptedIn: boolean = false;
 
         export interface ITelemetryProperties {
             [propertyName: string]: any;
@@ -58,8 +62,11 @@ module TacoUtility {
                 var hmac = crypto.createHmac("sha256", new Buffer(TelemetryEvent.PII_HASH_KEY, "utf8"));
                 var hashedValue = hmac.update(value).digest("hex");
 
-                // TODO: Task 1184230:Support for sending unhashed values for internal users
                 this.properties[name] = hashedValue;
+
+                if (Telemetry.isInternal()) {
+                    this.properties[name + ".nothashed"] = value;
+            }
             }
         };
 
@@ -92,10 +99,6 @@ module TacoUtility {
         };
 
         export function init(appName: string, appVersion?: string): void {
-            /* No-op for DroidCon release. We do not track TACO usage for the DroidCon release.
-               Hence disabling initialization of Application Insights */
-            return;
-
             try {
                 Telemetry.appName = appName;
                 TelemetryUtils.init(appVersion);
@@ -106,37 +109,52 @@ module TacoUtility {
             }
         }
 
-        export function send(event: TelemetryEvent): void {
-            /* No-op for DroidCon release. We do not track TACO usage for the DroidCon release.
-               Hence disabling sending telemetry events */
-            return;
+        export function send(event: TelemetryEvent, ignoreOptIn: boolean = false): void {
+            if (Telemetry.isOptedIn || ignoreOptIn) { 
+                TelemetryUtils.addCommonProperties(event);
 
-            TelemetryUtils.addCommonProperties(event);
+                try {
+                    if (event instanceof TelemetryActivity) {
+                        (<TelemetryActivity>event).end();
+                    }
 
-            try {
-                if (event instanceof TelemetryActivity) {
-                    (<TelemetryActivity>event).end();
-                }
-
-                if (appInsights.client) { // no-op if telemetry is not initialized
-                    appInsights.client.trackEvent(event.name, event.properties);
-                }
-            } catch (err) {
-                if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
-                    logger.logError(err);
+                    if (appInsights.client) { // no-op if telemetry is not initialized
+                        appInsights.client.trackEvent(event.name, event.properties);
+                    }
+                } catch (err) {
+                    if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
+                        logger.logError(err);
+                    }
                 }
             }
         }
 
-        enum IdType {
-            Machine,
-            User
+        export function isInternal(): boolean {
+            return TelemetryUtils.UserType === TelemetryUtils.USERTYPE_INTERNAL;
+        }
+
+        export function changeTelemetryOptInSetting(): void {
+            var currentOptIn: boolean = TelemetryUtils.getTelemetryOptInSetting();
+            var newOptIn: boolean;
+
+            logger.logLine();
+            logger.log(utilResources.getString(currentOptIn ? "TelemetryOptInYes" : "TelemetryOptInNo", Telemetry.appName));
+            
+            var promptStringId = currentOptIn ? "TelemetryCurrentlyOptedInPrompt" : "TelemetryCurrentlyOptedOutPrompt";
+
+            newOptIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString(promptStringId, Telemetry.appName));
+            
+            // Change and save the new setting
+            TelemetryUtils.setTelemetryOptInSetting(newOptIn);
+            Telemetry.isOptedIn = newOptIn;
         }
 
         interface ITelemetrySettings {
-            [settingKey: string]: string;
+            [settingKey: string]: any;
             userId?: string;
             machineId?: string;
+            optIn?: boolean;
+            userType?: string;
         }
 
         class TelemetryUtils {
@@ -145,13 +163,16 @@ module TacoUtility {
             private static MachineId: string;
             private static TelemetrySettings: ITelemetrySettings = null;
             private static TelemetrySettingsFileName = "TelemetrySettings.json";
-            private static APPINSIGHTS_INSTRUMENTATIONKEY = "1917bf1c-325d-408e-a31c-4b724d099cae";
-            private static SETTINGS_USERID_KEY = "userId";
-            private static SETTINGS_MACHINEID_KEY = "machineId";
+            private static APPINSIGHTS_INSTRUMENTATIONKEY = "10baf391-c2e3-4651-a726-e9b25d8470fd";
             private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE = "UserId";
             private static REGISTRY_MACHINEID_KEY = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_MACHINEID_VALUE = "MachineId";
+            private static INTERNAL_DOMAIN_SUFFIX = "microsoft.com";
+            private static INTERNAL_USER_ENV_VAR = "TACOINTERNAL";
+            public static USERTYPE_INTERNAL = "Internal";
+            public static USERTYPE_EXTERNAL = "External";
+            public static UserType: string;
 
             private static get telemetrySettingsFile(): string {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
@@ -173,17 +194,24 @@ module TacoUtility {
                     context.tags[context.keys.applicationVersion] = appVersion;
                 }
 
-                TelemetryUtils.UserId = TelemetryUtils.getOrCreateId(IdType.User);
-                TelemetryUtils.MachineId = TelemetryUtils.getOrCreateId(IdType.Machine);
+                TelemetryUtils.UserId = TelemetryUtils.getUserId();
+                TelemetryUtils.MachineId = TelemetryUtils.getMachineId();
                 TelemetryUtils.SessionId = TelemetryUtils.generateGuid();
+                TelemetryUtils.UserType = TelemetryUtils.getUserType();
+                Telemetry.isOptedIn = TelemetryUtils.getOptIn();
 
                 TelemetryUtils.saveSettings();
             }
 
             public static addCommonProperties(event: any): void {
-                event.properties["userId"] = TelemetryUtils.UserId;
-                event.properties["machineId"] = TelemetryUtils.MachineId;
+                if (Telemetry.isOptedIn) {
+                    // for the opt out event, don't include tracking properties
+                    event.properties["userId"] = TelemetryUtils.UserId;
+                    event.properties["machineId"] = TelemetryUtils.MachineId;
+                }
+
                 event.properties["sessionId"] = TelemetryUtils.SessionId;
+                event.properties["userType"] = TelemetryUtils.UserType;
                 event.properties["hostOS"] = os.platform();
                 event.properties["hostOSRelease"] = os.release();
             }
@@ -201,6 +229,59 @@ module TacoUtility {
                 // "Set the two most significant bits (bits 6 and 7) of the clock_seq_hi_and_reserved to zero and one, respectively"
                 var clockSequenceHi = hexValues[8 + (Math.random() * 4) | 0];
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
+            }
+
+            public static getTelemetryOptInSetting(): boolean {
+                return TelemetryUtils.TelemetrySettings.optIn;
+            }
+
+            public static setTelemetryOptInSetting(optIn: boolean): void {
+                TelemetryUtils.TelemetrySettings.optIn = optIn;
+
+                if (!optIn) {
+                    Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
+                }
+
+                TelemetryUtils.saveSettings();
+            }
+
+            public static getUserConsentForTelemetry(optinMessage: string = ""): boolean {
+                logger.logLine();
+                var readlineSync = require("readline-sync");
+                return !!readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
+            }
+
+            private static getOptIn(): boolean {
+                var optIn: boolean = TelemetryUtils.TelemetrySettings.optIn;
+                if (typeof optIn === "undefined") {
+                    logger.logLine();
+                    logger.log(utilResources.getString("TelemetryOptInMessage", Telemetry.appName));
+                    logger.logLine();
+                    optIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInNote"));
+                    TelemetryUtils.setTelemetryOptInSetting(optIn);
+                }
+
+                return optIn;
+            }
+
+            private static getUserType(): string {
+                var userType: string = TelemetryUtils.TelemetrySettings.userType;
+
+                if (typeof userType === "undefined") {
+                    if (process.env[TelemetryUtils.INTERNAL_USER_ENV_VAR]) {
+                        userType = TelemetryUtils.USERTYPE_INTERNAL;
+                    } else if (os.platform() === "win32") {
+                        var domain: string = process.env["USERDNSDOMAIN"];
+                        domain = domain ? domain.toLowerCase().substring(domain.length - TelemetryUtils.INTERNAL_DOMAIN_SUFFIX.length) : null;
+                        userType = domain === TelemetryUtils.INTERNAL_DOMAIN_SUFFIX ? TelemetryUtils.USERTYPE_INTERNAL : TelemetryUtils.USERTYPE_EXTERNAL;
+                    } else {
+                        userType = TelemetryUtils.USERTYPE_EXTERNAL;
+                    }
+
+                    TelemetryUtils.TelemetrySettings.userType = userType;
+                }
+
+                return userType;
             }
 
             private static getRegistryValue(key: string, value: string): string {
@@ -238,23 +319,46 @@ module TacoUtility {
                 fs.writeFileSync(TelemetryUtils.telemetrySettingsFile, JSON.stringify(TelemetryUtils.TelemetrySettings));
             }
 
-            private static getOrCreateId(idType: IdType): string {
-                var settingsKey: string = idType === IdType.User ? TelemetryUtils.SETTINGS_USERID_KEY : TelemetryUtils.SETTINGS_MACHINEID_KEY;
-                var registryKey: string = idType === IdType.User ? TelemetryUtils.REGISTRY_USERID_KEY : TelemetryUtils.REGISTRY_MACHINEID_KEY;
-                var registryValue: string = idType === IdType.User ? TelemetryUtils.REGISTRY_USERID_VALUE : TelemetryUtils.REGISTRY_MACHINEID_VALUE;
-
-                var id: string = TelemetryUtils.TelemetrySettings[settingsKey];
-                if (!id) {
-                    if (os.platform() === "win32") {
-                        id = TelemetryUtils.getRegistryValue(registryKey, registryValue);
-                    }
-
-                    id = id ? id.replace(/[{}]/g, "") : TelemetryUtils.generateGuid();
-
-                    TelemetryUtils.TelemetrySettings[settingsKey] = id;
+            private static getMachineId(): string {
+                var machineId: string = TelemetryUtils.TelemetrySettings.machineId;
+                if (!machineId) {
+                    var macAddress: string = TelemetryUtils.getMacAddress();
+                    machineId = crypto.createHash("sha256").update(macAddress, "utf8").digest("hex");
+                    TelemetryUtils.TelemetrySettings.machineId = machineId;
                 }
 
-                return id;
+                return machineId;
+            }
+
+            private static getMacAddress(): string {
+                var macAddress: string = "";
+                var interfaces = os.networkInterfaces();
+                Object.keys(interfaces).some((key: string) => {
+                    var mac = interfaces[key][0]["mac"];
+
+                    if (mac && mac !== "00:00:00:00:00:00") {
+                        macAddress = mac;
+                    }
+
+                    return !!macAddress;
+                });
+                
+                return macAddress;
+            }
+
+            private static getUserId(): string {
+                var userId: string = TelemetryUtils.TelemetrySettings.userId;
+                if (!userId) {
+                    if (os.platform() === "win32") {
+                        userId = TelemetryUtils.getRegistryValue(TelemetryUtils.REGISTRY_USERID_KEY, TelemetryUtils.REGISTRY_USERID_VALUE);
+                    }
+
+                    userId = userId ? userId.replace(/[{}]/g, "") : TelemetryUtils.generateGuid();
+
+                    TelemetryUtils.TelemetrySettings.userId = userId;
+                }
+
+                return userId;
             }
         };
     };

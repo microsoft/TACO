@@ -56,13 +56,11 @@ class Taco {
      */
     public static run(): void {
         Settings.loadSettings().fail(function (err: any): Q.Promise<Settings.ISettings> {
-            // No settings found: print the logo and query the user for telemetry opt in/out
             require("./logo"); // Prints the logo as a side effect of requiring it. Require caching will make sure we don't execute it twice in the one session.
-            // TODO: query user for telemetry opt in/out
             return Settings.saveSettings({});
         }).then(function (settings: Settings.ISettings): void {
             // TODO: opt in/out of telemetry based on settings
-            telemetry.init(require("../package.json").name, require("../package.json").version);
+            telemetry.init("TACO", require("../package.json").version);
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
             // We check if there is a new taco-cli version available, and if so, we print a message before exiting the application

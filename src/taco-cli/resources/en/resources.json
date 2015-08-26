@@ -105,7 +105,8 @@
     "_CommandKitSelectOptionCliDescription.comment": "Description for --cli argument to taco kit select",
     "CommandKitListReleaseNotes": "For more information about this kit, please visit <link>{0}</link>.",
     "_CommandKitListReleaseNotes.comment": "The message printed at the bottom on 'taco kit list --kit <KIT-ID>' with the release notes URI",
-    
+    "CommandFeedbackDescription": "Change feedback setting",
+    "_CommandFeedbackDescription.comment": "Description for 'taco feedback' command",
 
     "CommandKitListCurrentKit": "<bold>Current Kit</bold>: {0}",
     "_CommandKitListCurrentKit.comment": "Title for the Currently used kit Id displayed on executing the 'taco kit list' command",
@@ -214,7 +215,7 @@
     "CommandRemoteListPrelude": "Current remote configuration(s):",
     "_CommandRemoteListPrelude.comment": "Text printed introducing the table of remote platforms when you 'taco remote list'",
 
-    "CommandPlatformDescription": "Manage project platforms (currently supports Windows, Android & iOS)",
+    "CommandPlatformDescription": "Manage project platforms",
     "_CommandPlatformDescription.comment": "Description for 'taco platform'",
     "CommandPlatformSubcommandDescription": "The subcommand to be run - add, remove, list, update or check",
     "_CommandPlatformSubcommandDescription.comment": "Description of the COMMAND argument to 'taco build'",
