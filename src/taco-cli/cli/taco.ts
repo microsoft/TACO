@@ -79,6 +79,9 @@ class Taco {
                     telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
                     telemetry.sendPendingData();
                 }, function (reason: any): any {
+                    // set exit code to report error
+                    process.on("exit", function (): void { process.exit(1); });
+
                     // Pretty print errors
                     if (reason) {
                         if (reason.isTacoError) {
@@ -98,13 +101,9 @@ class Taco {
                         projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<string> {
                             telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
                             return telemetry.sendPendingData();
-                        }).finally(function (): void {
-                            process.exit(1);
                         });
                     } else {
-                        telemetry.sendPendingData().finally(function (): void {
-                            process.exit(1);
-                        });
+                        telemetry.sendPendingData();
                     }
                 });
         });
