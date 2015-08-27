@@ -255,7 +255,7 @@ module TacoUtility {
                 var optIn: boolean = TelemetryUtils.TelemetrySettings.optIn;
                 if (typeof optIn === "undefined") {
                     logger.logLine();
-                    logger.log(utilResources.getString("TelemetryOptInMessage", Telemetry.appName));
+                    logger.log(utilResources.getString("TelemetryOptInMessage"));
                     logger.logLine();
                     optIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInNote"));
                     TelemetryUtils.setTelemetryOptInSetting(optIn);
