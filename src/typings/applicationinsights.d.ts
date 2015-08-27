@@ -319,7 +319,7 @@ interface Client {
     /**
      * Immediately send all queued telemetry.
      */
-    sendPendingData(): void;
+    sendPendingData(callback?: (result: string) => void): void;
     getEnvelope(data: ContractsModule.Data<ContractsModule.Domain>, tagOverrides?: {
         [key: string]: string;
     }): ContractsModule.Envelope;

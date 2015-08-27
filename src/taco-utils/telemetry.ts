@@ -20,6 +20,7 @@ import logLevel = require ("./logLevel");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import os = require ("os");
 import path = require ("path");
+import Q = require ("q");
 import readline = require ("readline");
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
@@ -127,6 +128,12 @@ module TacoUtility {
                     }
                 }
             }
+        }
+
+        export function sendPendingData(): Q.Promise<string> {
+            var defer = Q.defer<string>();
+            appInsights.client.sendPendingData((result: string) => defer.resolve(result));
+            return defer.promise;
         }
 
         export function isInternal(): boolean {
