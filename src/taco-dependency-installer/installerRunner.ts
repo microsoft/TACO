@@ -157,11 +157,11 @@ class InstallerRunner {
 
             // We want to know if the users like to change the default installation directory, or not, to improve the experience if neccesary
             var defaultInstallDirectory = self.dependenciesDataWrapper.getInstallDirectory(value.id, value.version);
-            var normalizeddDfaultInstallDirectory = path.normalize(utilHelper.expandEnvironmentVariables(defaultInstallDirectory));
+            var normalizedDefaultInstallDirectory = path.normalize(utilHelper.expandEnvironmentVariables(defaultInstallDirectory));
             var normalizedInstallDestination = path.normalize(value.installDestination);
-            var isDefault = normalizeddDfaultInstallDirectory === normalizedInstallDestination;
+            var isDefault = normalizedDefaultInstallDirectory === normalizedInstallDestination;
             telemetry.add("installDestination.isDefault", isDefault, /*isPii*/ false);
-            telemetry.add("installDestination.path", path.normalize(normalizedInstallDestination), /*isPii*/ true);
+            telemetry.add("installDestination.path", normalizedInstallDestination, /*isPii*/ true);
 
             // Add the dependency to our list of dependencies to install
             self.missingDependencies.push(dependencyWrapper);

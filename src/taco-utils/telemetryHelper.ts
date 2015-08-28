@@ -35,6 +35,10 @@ module TacoUtility {
         [key: string]: T
     }
 
+    interface IHasErrorCode {
+        errorCode: number
+    }
+
     export class TelemetryGenerator {
         private telemetryProperties: ICommandTelemetryProperties = {};
         private componentName: string;
@@ -72,10 +76,11 @@ module TacoUtility {
             return this;
         }
 
-        public addError(error: any): TelemetryGenerator {
+        public addError(error: Error): TelemetryGenerator {
             this.add("error.message" + ++this.errorIndex, error, /*isPii*/ true);
-            if (error.errorCode) {
-                this.add("error.code" + this.errorIndex, error.errorCode, /*isPii*/ false);
+            var errorWithErrorCode = <IHasErrorCode><Object>error;
+            if (errorWithErrorCode.errorCode) {
+                this.add("error.code" + this.errorIndex, errorWithErrorCode.errorCode, /*isPii*/ false);
             }
 
             return this;
@@ -105,14 +110,14 @@ module TacoUtility {
 
         public send(): void {
             if (this.currentStep) {
-                this.add("lastStepExecuted", this.currentStep, false);
+                this.add("lastStepExecuted", this.currentStep, /*isPii*/ false);
             }
 
             this.step(null); // Send the last step
         }
 
         private sendCurrentStep(): void {
-            this.add("step", this.currentStep, false);
+            this.add("step", this.currentStep, /*isPii*/ false);
             var telemetryEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/component/" + this.componentName);
             TelemetryHelper.addTelemetryEventProperties(telemetryEvent, this.telemetryProperties);
             Telemetry.send(telemetryEvent);

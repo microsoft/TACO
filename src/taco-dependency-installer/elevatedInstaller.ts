@@ -32,7 +32,6 @@ import installerDataType = protocol.DataType;
 import protocolExitCode = protocol.ExitCode;
 import tacoLogger = tacoUtils.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
-import telemetry = tacoUtils.Telemetry;
 
 // Internal class for an ILogger specifically designed for the communication between the elevatedInstaller and the dependencyInstaller on Windows, which requires socket communication over a local server
 class Win32Logger implements protocol.ILogger {
@@ -107,8 +106,8 @@ class ElevatedInstaller {
     }
 
     public run(): void {
-        telemetry.init("TACO-dependency-installer", require("./package.json").version);
-        telemetry.setSessionId(this.parentSessionId);
+        tacoUtils.Telemetry.init("TACO-dependency-installer", require("./package.json").version);
+        tacoUtils.Telemetry.setSessionId(this.parentSessionId);
         tacoUtils.TelemetryHelper.generate("ElevatedInstaller", telemetry => {
             var self = this;
 

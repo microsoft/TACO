@@ -26,7 +26,7 @@ declare module TacoUtility {
         public add(baseName: string, value: any, isPii: boolean): TelemetryGenerator;
         public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string): boolean }): TelemetryGenerator;
         public send(): void;
-        public addError(error: any): TelemetryGenerator;
+        public addError(error: Error): TelemetryGenerator;
     }
 
     class TelemetryHelper {

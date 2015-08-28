@@ -136,7 +136,9 @@ class AndroidSdkInstaller extends InstallerBase {
 
         childProcess.exec(updateCommand, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
-                this.telemetry.add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", false);
+                this.telemetry
+                    .add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", /*isPii*/ false)
+                    .addError(error);
                 deferred.reject(error);
             } else {
                 // If .bash_profile didn't exist before, make sure the owner is the current user, not root
@@ -182,7 +184,7 @@ class AndroidSdkInstaller extends InstallerBase {
     private installDefault(): Q.Promise<any> {
         // Make sure we have an install location
         if (!this.installDestination) {
-            this.telemetry.add("error.description", "NeedInstallDestination on installDefault", false);
+            this.telemetry.add("error.description", "NeedInstallDestination on installDefault", /*isPii*/ false);
             return Q.reject(new Error(resources.getString("NeedInstallDestination")));
         }
 
@@ -204,7 +206,9 @@ class AndroidSdkInstaller extends InstallerBase {
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
-                this.telemetry.add("error.description", "ErrorOnChildProcess on addExecutePermission", false);
+                this.telemetry
+                    .add("error.description", "ErrorOnChildProcess on addExecutePermission", /*isPii*/ false)
+                    .addError(error);
                 deferred.reject(error);
             } else {
                 deferred.resolve({});
@@ -241,12 +245,17 @@ class AndroidSdkInstaller extends InstallerBase {
             errorOutput += data.toString();
         });
         cp.on("error", function (err: Error): void {
-            this.telemetry.add("error.description", "ErrorOnChildProcess on postInstallDefault", false);
+            this.telemetry
+                .add("error.description", "ErrorOnChildProcess on postInstallDefault", /*isPii*/ false)
+                .addError(err);
             deferred.reject(err);
         });
         cp.on("exit", function (code: number): void {
             if (errorOutput) {
-                this.telemetry.add("error.description", "ErrorOnExitOfChildProcess on postInstallDefault", false);
+                this.telemetry
+                    .add("error.description", "ErrorOnExitOfChildProcess on postInstallDefault", /*isPii*/ false)
+                    .add("error.code", code, /*isPii*/ false)
+                    .add("error.message", errorOutput, /*isPii*/ true);
                 deferred.reject(new Error(errorOutput));
             } else {
                 deferred.resolve({});
