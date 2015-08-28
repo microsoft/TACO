@@ -22,7 +22,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
-var sender = require ("applicationinsights/Library/Sender");
+import sender = require ("applicationinsights/Library/Sender");
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
 

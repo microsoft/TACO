@@ -379,8 +379,9 @@ interface Context {
     constructor(packageJsonPath?: string): Context;
 }
 
-interface Sender {
-    constructor(getUrl: () => string, onSuccess?: (response: string) => void, onError?: (error: Error) => void): Sender;
+declare class Sender {
+    static WAIT_BETWEEN_RESEND: number;
+    constructor(getUrl: () => string, onSuccess?: (response: string) => void, onError?: (error: Error) => void);
     send(payload: any/* Buffer */): void;
     saveOnCrash(payload: string): void;
     /**
@@ -459,4 +460,8 @@ declare class ApplicationInsights {
 
 declare module "applicationinsights" {
     export = ApplicationInsights;
+}
+
+declare module "applicationinsights/Library/Sender" {
+    export = Sender;
 }

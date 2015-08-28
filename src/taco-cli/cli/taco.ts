@@ -74,10 +74,9 @@ class Taco {
                     if (parsedArgs.command) {
                         commandProperties = telemetryProperties;
                     }
-                }).done(function (): void {
+                }).then(function (): void {
                     // Send command success telemetry
                     telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
-                    telemetry.sendPendingData();
                 }, function (reason: any): any {
                     // set exit code to report error
                     process.on("exit", function (): void { process.exit(1); });
@@ -98,14 +97,11 @@ class Taco {
                         }
 
                         // Send command failure telemetry
-                        projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<string> {
+                        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
                             telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
-                            return telemetry.sendPendingData();
                         });
-                    } else {
-                        telemetry.sendPendingData();
                     }
-                });
+                }).done((): any => telemetry.sendPendingData());
         });
     }
 
