@@ -32,6 +32,7 @@ import installerDataType = protocol.DataType;
 import protocolExitCode = protocol.ExitCode;
 import tacoLogger = tacoUtils.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import telemetry = tacoUtils.Telemetry;
 
 // Internal class for an ILogger specifically designed for the communication between the elevatedInstaller and the dependencyInstaller on Windows, which requires socket communication over a local server
 class Win32Logger implements protocol.ILogger {
@@ -104,22 +105,29 @@ class ElevatedInstaller {
     }
 
     public run(): void {
-        var self = this;
+        telemetry.init("TACO-dependency-installer", require("./package.json").version);
+        tacoUtils.TelemetryHelper.generate("ElevatedInstaller", telemetry => {
+            var self = this;
 
-        this.prepareCommunications()
-            .then(function (): Q.Promise<number> {
-                var installerRunner: InstallerRunner = new InstallerRunner(self.configFile, self.logger);
+            telemetry.step("prepareCommunications");
+            this.prepareCommunications()
+                .then(function (): Q.Promise<number> {
+                    telemetry.step("installerRunner.run");
+                    var installerRunner: InstallerRunner = new InstallerRunner(self.configFile, self.logger);
 
-                return installerRunner.run();
-            })
-            .then(function (code: number): void {
-                self.exitProcess(code);
-            })
-            .catch(function (err: Error): void {
-                // If we have an uncaught error, log it and exit with a FatalError code
-                self.logger.logError(err.message);
-                self.exitProcess(protocolExitCode.FatalError);
-            });
+                    return installerRunner.run();
+                })
+                .then(function (code: number): void {
+                    telemetry.step("exitProcessSuccesfully");
+                    self.exitProcess(code);
+                })
+                .catch(function (err: Error): void {
+                    // If we have an uncaught error, log it and exit with a FatalError code
+                    telemetry.step("exitProcessUnsuccesfully").addError(err);
+                    self.logger.logError(err.message);
+                    self.exitProcess(protocolExitCode.FatalError);
+                });
+        });
     }
 
     private prepareCommunications(): Q.Promise<any> {
@@ -167,7 +175,7 @@ class ElevatedInstaller {
             this.socketHandle.end();
         }
 
-        process.exit(code);
+        process.on("exit", () => process.exit(code));
     }
 }
 

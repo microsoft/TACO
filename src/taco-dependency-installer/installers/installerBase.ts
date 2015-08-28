@@ -40,6 +40,7 @@ class InstallerBase {
     protected softwareVersion: string;
     protected installDestination: string;
     protected logger: ILogger;
+    protected telemetry: tacoUtils.TelemetryGenerator;
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string,
         logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration, id: string) {
@@ -54,23 +55,23 @@ class InstallerBase {
     public run(): Q.Promise<any> {
         var self = this;
         return tacoUtils.TelemetryHelper.generate("Installer:" + this.id,
-            telemetry => this.download()
-            .then(function (): Q.Promise<any> {
-                telemetry.step("install");
-                return self.install();
-            })
-            .then(function (): Q.Promise<any> {
-                telemetry.step("updateVariables");
-                return self.updateVariables();
-            })
-            .then(function (): Q.Promise<any> {
-                telemetry.step("postInstall");
-                return self.postInstall();
-            })
-            .then(function (): void {
-                telemetry.step("logSuccess");
-                self.logger.log(resources.getString("Success"));
-            }));
+            telemetry => {
+                this.telemetry = telemetry; // So any method can access it
+                return this.download()
+                    .then(function (): Q.Promise<any> {
+                        return self.install();
+                    })
+                    .then(function (): Q.Promise<any> {
+                        return self.updateVariables();
+                    })
+                    .then(function (): Q.Promise<any> {
+                        return self.postInstall();
+                    })
+                    .then(function (): void {
+                        telemetry.step("logSuccess");
+                        self.logger.log(resources.getString("Success"));
+                    });
+            });
     }
 
     protected download(): Q.Promise<any> {
@@ -78,6 +79,7 @@ class InstallerBase {
             return Q({});
         }
 
+        this.telemetry.step("download");
         this.logger.log(resources.getString("DownloadingLabel"));
 
         switch (process.platform) {
@@ -108,6 +110,7 @@ class InstallerBase {
             return Q({});
         }
 
+        this.telemetry.step("install");
         this.logger.log(resources.getString("InstallingLabel"));
 
         switch (process.platform) {
@@ -133,6 +136,7 @@ class InstallerBase {
             return Q({});
         }
 
+        this.telemetry.step("updateVariables");
         this.logger.log(resources.getString("SettingSystemVariablesLabel"));
 
         switch (process.platform) {
@@ -158,6 +162,7 @@ class InstallerBase {
             return Q({});
         }
 
+        this.telemetry.step("postInstall");
         this.logger.log(resources.getString("ConfiguringLabel"));
 
         switch (process.platform) {

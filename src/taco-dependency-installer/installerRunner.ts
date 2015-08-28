@@ -49,32 +49,37 @@ class InstallerRunner {
     }
 
     public run(): Q.Promise<number> {
-        var self = this;
+        return tacoUtils.TelemetryHelper.generate("InstallerRunner", telemetry => {
+            var self = this;
+            return Q({})
+                .then(function (): void {
+                    telemetry.step("parseInstallConfig");
+                    self.parseInstallConfig(telemetry);
+                })
+                .then(function (): Q.Promise<any> {
+                    telemetry.step("runInstallers");
+                    return self.runInstallers();
+                })
+                .then(function (): number {
+                    // If we reach this point, it means we ran the installers. Verify if there was an installation error and return appropriately.
+                    telemetry.step("runInstallersFinished").add("installerErrorFlag", self.installerErrorFlag, /*isPii*/ false);
+                    if (self.installerErrorFlag) {
+                        return ExitCode.CompletedWithErrors;
+                    }
 
-        return Q({})
-            .then(function (): void {
-                self.parseInstallConfig();
-            })
-            .then(function (): Q.Promise<any> {
-                return self.runInstallers();
-            })
-            .then(function (): number {
-                // If we reach this point, it means we ran the installers. Verify if there was an installation error and return appropriately.
-                if (self.installerErrorFlag) {
-                    return ExitCode.CompletedWithErrors;
-                }
+                    return ExitCode.Success;
+                })
+                .catch(function (err: Error): number {
+                    // If we reach this point, it either means we had an unknown error or a config file validation error. Both cases have a return code of FatalError.
+                    telemetry.step("catch").add("errorMessage", err.message, /*isPii*/ false);
+                    self.logger.logError(err.message);
 
-                return ExitCode.Success;
-            })
-            .catch(function (err: Error): number {
-                // If we reach this point, it either means we had an unknown error or a config file validation error. Both cases have a return code of FatalError.
-                self.logger.logError(err.message);
-
-                return ExitCode.FatalError;
-            });
+                    return ExitCode.FatalError;
+                });
+        });
     }
 
-    private parseInstallConfig(): void {
+    private parseInstallConfig(telemetry: tacoUtils.TelemetryGenerator): void {
         var self = this;
         var parsedData: DependencyInstallerInterfaces.IInstallerConfig = null;
 
@@ -149,6 +154,14 @@ class InstallerRunner {
                 dependency: value,
                 installer: self.instantiateInstaller(value)
             };
+
+            // We want to know if the users like to change the default installation directory, or not, to improve the experience if neccesary
+            var defaultInstallDirectory = self.dependenciesDataWrapper.getInstallDirectory(value.id, value.version);
+            var normalizeddDfaultInstallDirectory = path.normalize(utilHelper.expandEnvironmentVariables(defaultInstallDirectory));
+            var normalizedInstallDestination = path.normalize(value.installDestination);
+            var isDefault = normalizeddDfaultInstallDirectory === normalizedInstallDestination;
+            telemetry.add("installDestination.isDefault", isDefault, /*isPii*/ false);
+            telemetry.add("installDestination.path", path.normalize(normalizedInstallDestination), /*isPii*/ true);
 
             // Add the dependency to our list of dependencies to install
             self.missingDependencies.push(dependencyWrapper);

@@ -8,11 +8,11 @@
 
 /// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/underscore.d.ts" />
+/// <reference path="../typings/lodash.d.ts" />
 
 "use strict";
 
-import _ = require ("underscore");
+import _ = require ("lodash");
 import Q = require ("q");
 
 import commands = require ("./commands");
@@ -31,13 +31,18 @@ module TacoUtility {
         [propertyName: string]: ITelemetryPropertyInfo;
     };
 
+    interface IDictionary<T> {
+        [key: string]: T
+    }
+
     export class TelemetryGenerator {
         private telemetryProperties: ICommandTelemetryProperties = {};
         private componentName: string;
         private currentStepStartTime: number[] = process.hrtime();
-        private currentStep: string = "<initial-step>";
+        private currentStep: string = "initialStep";
+        private errorIndex: number = -1; // In case we have more than one error (We start at -1 because we increment it before using it)
 
-        public constructor(componentName: string) {
+        constructor(componentName: string) {
             this.componentName = componentName;
         }
 
@@ -54,7 +59,8 @@ module TacoUtility {
                 if (Array.isArray(value)) {
                     this.addArray(baseName, <any[]>value, piiEvaluator);
                 } else if (_.isObject(value)) {
-                    this.addHash(baseName, <{ [key: string]: any }>value, piiEvaluator);
+                    /// <disable code="SA1012" justification="We have two rules fighting each other in the next line" />
+                    this.addHash(baseName, <IDictionary<any>>value, piiEvaluator);
                 } else {
                     this.addString(baseName, String(value), piiEvaluator);
                 }
@@ -67,12 +73,21 @@ module TacoUtility {
             return this;
         }
 
+        public addError(error: any): TelemetryGenerator {
+            this.add("error.message" + ++this.errorIndex, error, /*isPii*/ true);
+            if (error.errorCode) {
+                this.add("error.code" + this.errorIndex, error.errorCode, /*isPii*/ false);
+            }
+
+            return this;
+        }
+
         public time<T>(name: string, codeToMeasure: { (): T }): T {
             var startTime = process.hrtime();
             return executeAfter(codeToMeasure(),
                 () => this.finishTime(name, startTime),
                 (reason: any) => {
-                    this.add(this.combine(name, "failureReason"), String(reason), /*isPii*/ false);
+                    this.addError(reason);
                     return Q.reject(reason);
                 });
         }
@@ -103,7 +118,7 @@ module TacoUtility {
             array.forEach((element: any) => this.addWithPiiEvaluator(baseName + elementIndex++, element, piiEvaluator));
         }
 
-        private addHash(baseName: string, hash: { [key: string]: any }, piiEvaluator: { (value: string): boolean }): void {
+        private addHash(baseName: string, hash: IDictionary<any>, piiEvaluator: { (value: string): boolean }): void {
             // Object is a hash, we add each element as baseName.KEY
             Object.keys(hash).forEach(key => this.addWithPiiEvaluator(baseName + "." + key, hash[key], piiEvaluator));
         }

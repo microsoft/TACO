@@ -10,7 +10,6 @@
 /// <reference path="../../typings/nopt.d.ts" />
 /// <reference path="../../typings/tacoDependencyInstaller.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/underscore.d.ts" />
 
 "use strict";
 
@@ -244,7 +243,7 @@ class InstallReqs extends commands.TacoCommandBase {
         return result;
     }
 
-    private static skipNoReqsSupport(requestedPlatforms: string[], telemetry: tacoUtils.TelemetryGenerator): string[]{
+    private static skipNoReqsSupport(requestedPlatforms: string[], telemetry: tacoUtils.TelemetryGenerator): string[] {
         var skippedPlatforms: string[] = [];
         var result: string[] = [];
 
