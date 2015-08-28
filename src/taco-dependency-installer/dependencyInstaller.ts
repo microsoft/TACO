@@ -59,6 +59,7 @@ module TacoDependencyInstaller {
         private static InstallConfigFileName: string = "installConfig.json";
         private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
 
+        private parentSessionId: string;
         private installConfigFilePath: string;
         private dependenciesDataWrapper: DependencyDataWrapper;
         private unsupportedMissingDependencies: ICordovaRequirement[];
@@ -67,7 +68,8 @@ module TacoDependencyInstaller {
         private socketHandle: NodeJSNet.Socket;
         private serverHandle: NodeJSNet.Server;
 
-        constructor(dependenciesMetadataFilePath?: string) {
+        constructor(parentSessionId: string, dependenciesMetadataFilePath?: string) {
+            this.parentSessionId = parentSessionId;
             this.dependenciesDataWrapper = !!dependenciesMetadataFilePath ? new DependencyDataWrapper(dependenciesMetadataFilePath) : new DependencyDataWrapper();
             this.installConfigFilePath = path.join(utilHelper.tacoHome, DependencyInstaller.InstallConfigFileName);
         }
@@ -489,6 +491,7 @@ module TacoDependencyInstaller {
                         launcherPath,
                         utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
+                        self.parentSessionId,
                         utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns

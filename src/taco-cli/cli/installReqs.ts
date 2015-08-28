@@ -105,7 +105,7 @@ class InstallReqs extends commands.TacoCommandBase {
 
                     return cordovaWrapper.requirements(requestedPlatforms)
                         .then(function (result: any): Q.Promise<any> {
-                            var installer: DependencyInstaller = new DependencyInstaller();
+                            var installer: DependencyInstaller = new DependencyInstaller(tacoUtils.Telemetry.getSessionId());
 
                             return installer.run(result);
                         });

@@ -97,15 +97,18 @@ class ElevatedInstaller {
     private socketPath: string;
     private socketHandle: NodeJSNet.Socket;
     private configFile: string;
+    private parentSessionId: string;
     private logger: protocol.ILogger;
 
     constructor() {
         this.configFile = process.argv[2];
-        this.socketPath = process.argv[3];
+        this.parentSessionId = process.argv[3];
+        this.socketPath = process.argv[4];
     }
 
     public run(): void {
         telemetry.init("TACO-dependency-installer", require("./package.json").version);
+        telemetry.setSessionId(this.parentSessionId);
         tacoUtils.TelemetryHelper.generate("ElevatedInstaller", telemetry => {
             var self = this;
 

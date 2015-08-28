@@ -59,7 +59,6 @@ module TacoUtility {
                 if (Array.isArray(value)) {
                     this.addArray(baseName, <any[]>value, piiEvaluator);
                 } else if (_.isObject(value)) {
-                    /// <disable code="SA1012" justification="We have two rules fighting each other in the next line" />
                     this.addHash(baseName, <IDictionary<any>>value, piiEvaluator);
                 } else {
                     this.addString(baseName, String(value), piiEvaluator);

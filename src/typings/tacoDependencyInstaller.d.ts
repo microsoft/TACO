@@ -10,7 +10,7 @@
 
 declare module TacoDependencyInstaller {
     class DependencyInstaller {
-        constructor();
+        constructor(parentSessionId: string);
 
         /**
          * Runs the dependenciesInstaller package to install missing 3rd party software for the current project
