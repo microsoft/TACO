@@ -104,11 +104,9 @@ module TacoUtility {
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {
-            var commandEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/command");
+            var commandEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/" + (commandName || "command"));
             
-            if (commandName) {
-                commandEvent.properties["command"] = commandName;
-            } else if (args && args.length > 0) {
+            if (!commandName && args && args.length > 0) {
                 commandEvent.setPiiProperty("command", args[0]);
             }
 
