@@ -109,8 +109,6 @@ describe("InstallerRunner", function (): void {
             ];
 
             createBuildConfig(missingDependencies);
-            var obj = Object.keys(tacoUtils);
-            console.log("libs " + JSON.stringify(obj, null, 2));
             (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
         });
 
