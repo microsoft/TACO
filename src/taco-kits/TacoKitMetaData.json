@@ -31,8 +31,8 @@
                 "cordova-plugin-inappbrowser": {
                     "version": "1.0.1"
                 },
-                "cordova-plugin-spashscreen": {
-                    "version": "1.0.1"
+                "cordova-plugin-splashscreen": {
+                    "version": "2.1.0"
                 },
                 "cordova-plugin-network-information": {
                     "version": "1.0.1"
@@ -50,7 +50,7 @@
                     "version": "1.0.1"
                 },
                 "cordova-plugin-battery-status": {
-                    "version": "1.0.1"
+                    "version": "1.1.0"
                 }
             }
         },
@@ -99,7 +99,7 @@
                 "cordova-plugin-network-information": {
                     "version": "1.0.1"
                 },
-                "cordova-plugin-spashscreen": {
+                "cordova-plugin-splashscreen": {
                     "version": "2.1.0"
                 },
                 "cordova-plugin-statusbar": {
