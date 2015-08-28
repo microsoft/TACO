@@ -93,8 +93,13 @@ module TacoUtility {
         }
 
         public step(name: string): TelemetryGenerator {
-            this.finishTime(this.currentStep, this.currentStepStartTime),
+            // First we finish measuring this step time, and we send a telemetry event for this step
+            this.finishTime(this.currentStep, this.currentStepStartTime);
+            this.sendCurrentStep();
+
+            // Then we prepare to start gathering information about the next step
             this.currentStep = name;
+            this.telemetryProperties = {};
             this.currentStepStartTime = process.hrtime();
             return this;
         }
@@ -104,12 +109,14 @@ module TacoUtility {
                 this.add("lastStepExecuted", this.currentStep, false);
             }
 
-            this.step(null); // Store last step's time
+            this.step(null); // Send the last step
+        }
 
+        private sendCurrentStep(): void {
+            this.add("step", this.currentStep, false);
             var telemetryEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/component/" + this.componentName);
             TelemetryHelper.addTelemetryEventProperties(telemetryEvent, this.telemetryProperties);
             Telemetry.send(telemetryEvent);
-            console.log("Telemetry: " + JSON.stringify(telemetryEvent, null, 2));
         }
 
         private addArray(baseName: string, array: any[], piiEvaluator: { (value: string): boolean }): void {
