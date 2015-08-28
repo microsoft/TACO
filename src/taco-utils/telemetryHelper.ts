@@ -118,7 +118,7 @@ module TacoUtility {
 
         private sendCurrentStep(): void {
             this.add("step", this.currentStep, /*isPii*/ false);
-            var telemetryEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/component/" + this.componentName);
+            var telemetryEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/" + this.componentName);
             TelemetryHelper.addTelemetryEventProperties(telemetryEvent, this.telemetryProperties);
             Telemetry.send(telemetryEvent);
         }
