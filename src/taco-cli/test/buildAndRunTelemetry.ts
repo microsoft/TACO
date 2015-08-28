@@ -242,7 +242,8 @@ module BuildAndRunTelemetryTests {
             return Settings.saveSettings({ remotePlatforms: platforms });
         }
 
-        var expectedGzipedSizeAbsoluteError = 30;
+        var expectedGzipedSizeAbsoluteError = 60; /* This is how much the gzip size changes because of the different 
+                                                     compression rate of different file modification dates, etc... */
 
         // We use this function to validate that the gzip size is near the expected ratio (non-deterministic changes in dates or other 
         // numbers might change the compression ratio, so it's difficult to predict the exact size), and then replace the number with
