@@ -36,7 +36,7 @@ class JavaJdkInstaller extends InstallerBase {
     private darwinMountpointName: string;
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
-        super(installerInfo, softwareVersion, installTo, logger, steps);
+        super(installerInfo, softwareVersion, installTo, logger, steps, "java");
     }
 
     protected downloadWin32(): Q.Promise<any> {
@@ -49,6 +49,7 @@ class JavaJdkInstaller extends InstallerBase {
 
         // Make sure we have an install location
         if (!this.installDestination) {
+            this.telemetry.add("error.description", "InstallDestination needed on installWin32", /*isPii*/ false);
             deferred.reject(new Error(resources.getString("NeedInstallDestination")));
         }
 
@@ -57,11 +58,17 @@ class JavaJdkInstaller extends InstallerBase {
 
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
+                this.telemetry.addError(err);
                 var code: number = (<any>err).code;
-
                 if (code) {
+                    this.telemetry
+                        .add("error.description", "InstallerError on installWin32", /*isPii*/ false)
+                        .add("error.code", code, /*isPii*/ false);
                     deferred.reject(new Error(resources.getString("InstallerError", self.installerDownloadPath, code)));
                 } else {
+                    this.telemetry
+                        .add("error.description", "CouldNotRunInstaller on installWin32", /*isPii*/ false)
+                        .add("error.name", err.name, /*isPii*/ false);
                     deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerDownloadPath, err.name)));
                 }
             } else {
@@ -113,6 +120,9 @@ class JavaJdkInstaller extends InstallerBase {
             self.darwinMountpointName = capturedResult[1];
 
             if (error) {
+                this.telemetry
+                    .add("error.description", "ErrorOnChildProcess on attachDmg", /*isPii*/ false)
+                    .addError(error);
                 deferred.reject(error);
             } else {
                 deferred.resolve({});
@@ -130,11 +140,17 @@ class JavaJdkInstaller extends InstallerBase {
 
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
+                this.telemetry.addError(err);
                 var code: number = (<any>err).code;
-
                 if (code) {
+                    this.telemetry
+                        .add("error.description", "InstallerError on installPkg", /*isPii*/ false)
+                        .add("error.code", code, /*isPii*/ false);
                     deferred.reject(new Error(resources.getString("InstallerError", self.installerDownloadPath, code)));
                 } else {
+                    this.telemetry
+                        .add("error.description", "CouldNotRunInstaller on installPkg", /*isPii*/ false)
+                        .add("error.name", err.name, /*isPii*/ false);
                     deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerDownloadPath, err.name)));
                 }
             } else {
@@ -152,6 +168,9 @@ class JavaJdkInstaller extends InstallerBase {
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
+                this.telemetry
+                    .add("error.description", "ErrorOnChildProcess on detachDmg", /*isPii*/ false)
+                    .addError(error);
                 deferred.reject(error);
             } else {
                 deferred.resolve({});

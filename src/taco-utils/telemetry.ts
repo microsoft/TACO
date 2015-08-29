@@ -149,6 +149,14 @@ module TacoUtility {
             Telemetry.isOptedIn = newOptIn;
         }
 
+        export function getSessionId(): string {
+            return TelemetryUtils.SessionId;
+        }
+
+        export function setSessionId(sessionId: string): void {
+            TelemetryUtils.SessionId = sessionId;
+        }
+
         interface ITelemetrySettings {
             [settingKey: string]: any;
             userId?: string;
@@ -158,7 +166,6 @@ module TacoUtility {
         }
 
         class TelemetryUtils {
-            private static SessionId: string;
             private static UserId: string;
             private static MachineId: string;
             private static TelemetrySettings: ITelemetrySettings = null;
@@ -173,6 +180,7 @@ module TacoUtility {
             public static USERTYPE_INTERNAL = "Internal";
             public static USERTYPE_EXTERNAL = "External";
             public static UserType: string;
+            public static SessionId: string;
 
             private static get telemetrySettingsFile(): string {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);

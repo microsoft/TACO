@@ -49,6 +49,7 @@ module TacoUtility {
     export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
     export var TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
     export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
+    export var TelemetryGenerator = telemetryHelper.TelemetryGenerator;
     export var Telemetry = telemetry.Telemetry;
     export var TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper = utilHelper.UtilHelper;
