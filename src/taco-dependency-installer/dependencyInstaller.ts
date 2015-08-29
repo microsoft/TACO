@@ -531,7 +531,8 @@ module TacoDependencyInstaller {
 
             args = args.concat([
                 elevatedInstallerScript,
-                utilHelper.quotesAroundIfNecessary(self.installConfigFilePath)
+                utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
+                self.parentSessionId
             ]);
 
             var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "inherit" });

@@ -65,7 +65,7 @@ class BuildTelemetryHelper {
     private static encodePlatforms(telemetryProperties: ICommandTelemetryProperties, baseName: string, platforms: string[]): void {
         var platformIndex = 1; // This is a one-based index
         platforms.forEach(platform => {
-            telemetryProperties[baseName + platformIndex++] = telemetryProperty(platform, this.getIsPlatformPii()(platform));
+            telemetryProperties[baseName + platformIndex++] = telemetryProperty(platform, BuildTelemetryHelper.getIsPlatformPii()(platform));
         });
     }
 
