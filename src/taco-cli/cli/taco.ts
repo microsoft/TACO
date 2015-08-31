@@ -59,7 +59,6 @@ class Taco {
             require("./logo"); // Prints the logo as a side effect of requiring it. Require caching will make sure we don't execute it twice in the one session.
             return Settings.saveSettings({});
         }).then(function (settings: Settings.ISettings): void {
-            // TODO: opt in/out of telemetry based on settings
             telemetry.init("TACO", require("../package.json").version);
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
