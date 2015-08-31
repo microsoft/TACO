@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "typescript": "latest",
-    "del": "^1.0.0",
+    "del": "1.2.1",
     "event-stream": "^3.1.7",
     "gulp": "^3.8.10",
     "gulp-concat": "^2.4.2",

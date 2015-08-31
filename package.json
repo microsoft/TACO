@@ -7,7 +7,7 @@
     "description": "specifies dependencies needed for developing taco",
     "version": "0.0.1",
     "devDependencies": {
-        "del": "latest",
+        "del": "1.2.1",
         "gulp": "latest",
         "typescript": "latest",
         "gulp-json-editor": "latest",
