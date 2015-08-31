@@ -54,7 +54,7 @@ module TacoUtility {
             return this.addWithPiiEvaluator(baseName, value, () => isPii);
         }
 
-        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string): boolean }): TelemetryGenerator {
+        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGenerator {
             // We have 3 cases:
             //     * Object is an array, we add each element as baseNameNNN
             //     * Object is a hash, we add each element as baseName.KEY
@@ -123,19 +123,19 @@ module TacoUtility {
             Telemetry.send(telemetryEvent);
         }
 
-        private addArray(baseName: string, array: any[], piiEvaluator: { (value: string): boolean }): void {
+        private addArray(baseName: string, array: any[], piiEvaluator: { (value: string, name: string): boolean }): void {
             // Object is an array, we add each element as baseNameNNN
             var elementIndex = 1; // We send telemetry properties in a one-based index
             array.forEach((element: any) => this.addWithPiiEvaluator(baseName + elementIndex++, element, piiEvaluator));
         }
 
-        private addHash(baseName: string, hash: IDictionary<any>, piiEvaluator: { (value: string): boolean }): void {
+        private addHash(baseName: string, hash: IDictionary<any>, piiEvaluator: { (value: string, name: string): boolean }): void {
             // Object is a hash, we add each element as baseName.KEY
             Object.keys(hash).forEach(key => this.addWithPiiEvaluator(baseName + "." + key, hash[key], piiEvaluator));
         }
 
-        private addString(name: string, value: string, piiEvaluator: { (value: string): boolean }): void {
-            this.telemetryProperties[name] = TelemetryHelper.telemetryProperty(value, piiEvaluator(value));
+        private addString(name: string, value: string, piiEvaluator: { (value: string, name: string): boolean }): void {
+            this.telemetryProperties[name] = TelemetryHelper.telemetryProperty(value, piiEvaluator(value, name));
         }
 
         private combine(...components: string[]): string {
