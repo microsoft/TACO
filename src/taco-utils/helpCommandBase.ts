@@ -191,7 +191,7 @@ module TacoUtility {
                     Logger.log(util.format("%s%s %s", indent, HelpCommandBase.DefaultBullet, this.getResourceString(examples[i].description)));
                     Logger.logLine();
                     if (typeof examples[i].example === "string") {
-                        Logger.log(util.format("%s  %s", indent2, examples[i].example));
+                        Logger.log(util.format("%s  <highlight>%s</highlight>", indent2, examples[i].example));
                     } else {
                         LoggerHelper.printJson(<any>examples[i].example, 2 * LoggerHelper.DefaultIndent);
                     }

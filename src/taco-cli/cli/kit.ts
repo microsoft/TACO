@@ -172,7 +172,15 @@ class Kit extends commands.TacoCommandBase {
             kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
         }
 
-        return kitInfo.description || kitDefaultDescription;
+        kitDefaultDescription = kitInfo.description || kitDefaultDescription;;
+
+        if (!!kitInfo.default) {
+            return util.format("%s <defaultkit>%s</defaultkit>", kitDefaultDescription, resources.getString("CommandKitListDefaultKitDescSuffix"));
+        } else if (!!kitInfo.deprecated) {
+            return util.format("%s <deprecatedkit>%s</deprecatedkit>", kitDefaultDescription, resources.getString("CommandKitListDeprecatedKitDescSuffix"));
+        } else {
+            return kitDefaultDescription;
+        }
     }
 
     /**
