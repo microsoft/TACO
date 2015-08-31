@@ -100,11 +100,11 @@
                 "description": "[TacoKitListExample1]" 
             },
             { 
-                "example": "taco kit list --kit tacokit@1.0.0", 
+                "example": "taco kit list --kit tacokit@2.0.0", 
                 "description": "[TacoKitListExample2]" 
             },
             { 
-                "example": "taco kit select --kit tacokit@1.0.0", 
+                "example": "taco kit select --kit tacokit@2.0.0", 
                 "description": "[TacoKitSelectExample1]" 
             },
             { 
