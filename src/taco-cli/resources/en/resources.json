@@ -108,10 +108,10 @@
 
     "TacoKitListExample1": "List all the available TACO kits",
     "_TacoKitListExample1.comment": "Text shown in examples section describing an example when user invokes 'taco kit list'",
-    "TacoKitListExample2": "List the pinned versions of Cordova CLI, platforms and plugins for kit with ID tacokit@1.0.0",
-    "_TacoKitListExample2.comment": "Text shown in examples section describing an example when user invokes 'taco kit list --kit tacokit@1.0.0'",
-    "TacoKitSelectExample1": "Update the current project to a TACO kit project that uses the kit with ID tacokit@1.0.0",
-    "_TacoKitSelectExample1.comment": "Text shown in examples section describing an example when user invokes 'taco kit select --kit tacokit@1.0.0'",
+    "TacoKitListExample2": "List the pinned versions of Cordova CLI, platforms and plugins for kit with ID tacokit@2.0.0",
+    "_TacoKitListExample2.comment": "Text shown in examples section describing an example when user invokes 'taco kit list --kit tacokit@2.0.0'",
+    "TacoKitSelectExample1": "Update the current project to a TACO kit project that uses the kit with ID tacokit@2.0.0",
+    "_TacoKitSelectExample1.comment": "Text shown in examples section describing an example when user invokes 'taco kit select --kit tacokit@2.0.0'",
     "TacoKitSelectExample2": "Update the current project to a CLI project that uses Cordova CLI v5.2.0",
     "_TacoKitSelectExample2.comment": "Text shown in examples section describing an example when user invokes 'taco kit select --cli 5.2.0'",
 
