@@ -139,7 +139,7 @@ class ProjectHelper {
             }
 
             if (tacoJson.kit) {
-                kitHelper.getValidCordovaCli(projectInfo.tacoKitId).then(function (cordovaCli: string): void {
+                kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): void {
                     projectInfo.isTacoProject = true;
                     projectInfo.tacoKitId = tacoJson.kit;
                     projectInfo.cordovaCliVersion = cordovaCli;

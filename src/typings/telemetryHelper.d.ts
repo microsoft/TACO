@@ -19,6 +19,16 @@ declare module TacoUtility {
         [propertyName: string]: ITelemetryPropertyInfo;
     }
 
+    class TelemetryGenerator {
+        public constructor(componentName: string);
+        public time<T>(name: string, codeToMeasure: { (): Q.Promise<T> }): Q.Promise<T>;
+        public step(name: string): TelemetryGenerator;
+        public add(baseName: string, value: any, isPii: boolean): TelemetryGenerator;
+        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string): boolean }): TelemetryGenerator;
+        public send(): void;
+        public addError(error: Error): TelemetryGenerator;
+    }
+
     class TelemetryHelper {
         static telemetryProperty(propertyValue: any, isPii?: boolean): ITelemetryPropertyInfo;
         public static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
@@ -30,5 +40,7 @@ declare module TacoUtility {
         static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo;
         static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
              commandOptions: { [flag: string]: any }, nonPiiOptions?: string[]): ICommandTelemetryProperties;
+        static addObjectToTelemetry(telemetryProperties: ICommandTelemetryProperties, baseName: string, value: any, isPii: boolean): void;
+        static generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TelemetryGenerator): T }): T;
     }
 }

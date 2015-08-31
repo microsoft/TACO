@@ -103,6 +103,8 @@
     "_CommandKitSelectOptionKitDescription.comment": "Description for --kit argument to taco kit select",
     "CommandKitSelectOptionCliDescription": "Use the specified version of Cordova CLI for the project.",
     "_CommandKitSelectOptionCliDescription.comment": "Description for --cli argument to taco kit select",
+    "CommandKitListReleaseNotes": "For more information about this kit, please visit <link>{0}</link>.",
+    "_CommandKitListReleaseNotes.comment": "The message printed at the bottom on 'taco kit list --kit <KIT-ID>' with the release notes URI",
 
     "CommandFeedbackDescription": "Change feedback setting",
     "_CommandFeedbackDescription.comment": "Description for 'taco feedback' command",
@@ -531,7 +533,7 @@
     "_HowToUseCommandPlatformAddPlatform.comment": "This message is printed after the user created a new project, to suggest him some actions he can do that are usually done just after creating a new project, such as adding a new platform for the project",
     "HowToUseCommandInstallReqsPlugin": "Install the build tools for each platform:  <bold>taco install-reqs <PLATFORM></bold>",
     "_HowToUseCommandInstallReqsPlugin.comment": "This message is printed after the user created a new project, to suggest him some actions he can do that are usually done just after creating a new project, such as adding all the requisits needed to develop for a certain platform",
-    "HowToUseCommandAddPlugin": "Add a Cordova plugin: <bold>taco add plugin <PLUGIN-ID></bold>",
+    "HowToUseCommandAddPlugin": "Add a Cordova plugin: <bold>taco plugin add <PLUGIN-ID></bold>",
     "_HowToUseCommandAddPlugin.comment": "This message is printed after the user created a new project or added a new plugin, to suggest the user some actions he can do that are usually done just after those, such as adding a plugin",
     "HowToUseCommandSetupRemote": "Connect to a remote build agent: <bold>taco remote add <PLATFORM></bold>",
     "_HowToUseCommandSetupRemote.comment": "This message is printed as part of the onboarding experience of several commands, to suggest the user some actions he can do that are usually done after executing the command he has just executed, such as configuring a remote configuration for building",

@@ -136,7 +136,7 @@ describe("DependencyInstaller", function (): void {
         process.env["TACO_HOME"] = tacoHome;
 
         // Instantiate the persistent DependencyInstaller
-        dependencyInstaller = new DependencyInstaller(testMetadataFile);
+        dependencyInstaller = new DependencyInstaller("parentSessionId", testMetadataFile);
 
         // Delete existing run folder if necessary
         rimraf(runFolder, function (err: Error): void {

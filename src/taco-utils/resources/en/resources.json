@@ -67,7 +67,7 @@
     "_TelemetryOptInNote.comment":  "Additional information that data will be sent once when the user chooses NOT to send telemetry data.",
     "TelemetryOptInYes": "<bold>You are currently providing usage feedback to help improve Microsoft products and services. Thank you!</bold>",
     "_TelemetryOptInYes.comment":  "The prompt string presented to the user before asking to opt in for telemetry.",
-     "TelemetryOptInNo": "<bold>You are currently not providing usage feedback.</bold><br/><br/>How you use {0} is an important data point we use to help improve Microsoft products and services, and you can read our privacy policy that provides information on what data we collect and how we will use it at the following location: <link>https://www.visualstudio.com/en-us/dn948229</link>",
+    "TelemetryOptInNo": "<bold>You are currently not providing usage feedback.</bold><br/><br/>How you use {0} is an important data point we use to help improve Microsoft products and services, and you can read our privacy policy that provides information on what data we collect and how we will use it at the following location: <link>https://www.visualstudio.com/en-us/dn948229</link>",
     "_TelemetryOptInNo.comment":  "The prompt string presented to the user before asking to opt in for telemetry.",
     "TelemetryCurrentlyOptedInPrompt": "Would you like to continue doing so?",
     "_TelemetryCurrentlyOptedInPrompt.comment":  "This is the string presented to the user before asking to opt in for telemetry when he has currently opted in.",

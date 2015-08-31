@@ -96,30 +96,40 @@ class ElevatedInstaller {
     private socketPath: string;
     private socketHandle: NodeJSNet.Socket;
     private configFile: string;
+    private parentSessionId: string;
     private logger: protocol.ILogger;
 
     constructor() {
         this.configFile = process.argv[2];
-        this.socketPath = process.argv[3];
+        this.parentSessionId = process.argv[3];
+        this.socketPath = process.argv[4];
     }
 
     public run(): void {
-        var self = this;
+        tacoUtils.Telemetry.init("TACO/dependencyInstaller", require("./package.json").version);
+        tacoUtils.Telemetry.setSessionId(this.parentSessionId);
+        tacoUtils.TelemetryHelper.generate("ElevatedInstaller", telemetry => {
+            var self = this;
 
-        this.prepareCommunications()
-            .then(function (): Q.Promise<number> {
-                var installerRunner: InstallerRunner = new InstallerRunner(self.configFile, self.logger);
+            telemetry.step("prepareCommunications");
+            this.prepareCommunications()
+                .then(function (): Q.Promise<number> {
+                    telemetry.step("installerRunner.run");
+                    var installerRunner: InstallerRunner = new InstallerRunner(self.configFile, self.logger);
 
-                return installerRunner.run();
-            })
-            .then(function (code: number): void {
-                self.exitProcess(code);
-            })
-            .catch(function (err: Error): void {
-                // If we have an uncaught error, log it and exit with a FatalError code
-                self.logger.logError(err.message);
-                self.exitProcess(protocolExitCode.FatalError);
-            });
+                    return installerRunner.run();
+                })
+                .then(function (code: number): void {
+                    telemetry.step("exitProcessSuccesfully");
+                    self.exitProcess(code);
+                })
+                .catch(function (err: Error): void {
+                    // If we have an uncaught error, log it and exit with a FatalError code
+                    telemetry.step("exitProcessUnsuccesfully").addError(err);
+                    self.logger.logError(err.message);
+                    self.exitProcess(protocolExitCode.FatalError);
+                });
+        });
     }
 
     private prepareCommunications(): Q.Promise<any> {
@@ -167,7 +177,7 @@ class ElevatedInstaller {
             this.socketHandle.end();
         }
 
-        process.exit(code);
+        process.on("exit", () => process.exit(code));
     }
 }
 

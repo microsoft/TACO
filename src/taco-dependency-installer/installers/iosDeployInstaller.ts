@@ -24,7 +24,7 @@ import ILogger = installerProtocol.ILogger;
 
 class IosDeployInstaller extends InstallerBase {
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
-        super(installerInfo, softwareVersion, installTo, logger, steps);
+        super(installerInfo, softwareVersion, installTo, logger, steps, "ios-deploy");
     }
 
     protected installWin32(): Q.Promise<any> {
