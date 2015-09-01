@@ -63,10 +63,6 @@
             "description": "<helptitle>[CommandKitDescription]</helptitle>",
             "args": [
             {
-                "name": "COMMAND", "description": "[CommandKitSubcommandDescription]"
-            }
-            ,
-            {
                 "name": "list",
                 "description": "[CommandKitListSubcommandDescription]",
                 "options": [
@@ -93,6 +89,23 @@
                 }
                 ]
             }
+            ],
+            "examples": [
+            { 
+                "example": "taco kit list --kit tacokit@2.0.0", 
+                "description": "[TacoKitListExample]" 
+            },
+            { 
+                "example": "taco kit select --kit tacokit@2.0.0", 
+                "description": "[TacoKitSelectExample1]" 
+            },
+            { 
+                "example": "taco kit select --cli 5.2.0", 
+                "description": "[TacoKitSelectExample2]" 
+            }
+            ],
+            "notes": [
+                "[TacoKitNotes]"
             ]
         }
         ,
@@ -103,10 +116,6 @@
             "modulePath": "./platform",
             "description": "<helptitle>[CommandPlatformDescription]</helptitle>",
             "args": [
-            {
-                "name": "COMMAND", "description": "[CommandPlatformSubcommandDescription]"
-            }
-            ,
             {
                 "name": "add <PLAT-SPEC>",
                 "description": "[CommandPlatformAddSubcommandDescription]",
@@ -212,10 +221,6 @@
             "modulePath": "./plugin",
             "description": "<helptitle>[CommandPluginDescription]</helptitle>",
             "args": [
-            {
-                "name": "COMMAND", "description": "[CommandPluginSubcommandDescription]"
-            }
-            ,
             {
                 "name": "add <PLAT-SPEC>",
                 "description": "[CommandPluginAddSubcommandDescription]",
