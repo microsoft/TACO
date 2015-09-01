@@ -142,6 +142,9 @@ class Taco {
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
+        // Set the loglevel global setting
+        args = UtilHelper.initializeLogLevel(args);
+
         var commandName: string = null;
         var commandArgs: string[] = null;
 
@@ -159,9 +162,6 @@ class Taco {
                 commandArgs = args.slice(1);
             }
         }
-
-        // Set the loglevel global setting
-        UtilHelper.initializeLogLevel(args);
 
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.TacoCommandBase = commandsFactory.getTask(commandName, commandArgs, __dirname);

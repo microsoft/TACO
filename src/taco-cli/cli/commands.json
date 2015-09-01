@@ -30,7 +30,7 @@
             }
             ,
             {
-                "name": "--template [NAME]", "description": "[CommandCreateOptionsTemplate]"
+                "name": "--template <NAME|GIT-URL>", "description": "[CommandCreateOptionsTemplate]"
             }
             ,
             {
