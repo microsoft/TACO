@@ -6,21 +6,25 @@
  *******************************************************
  */
 // NOTE: This file is intended to run on-require, and print the logo, only once.
+import colors = require ("colors/safe");
 var version = require("../package.json").version;
 
-console.log("  _____________________________");
-console.log("  ___  __/_    |__  ____/_  __ \\");
-console.log("  __  /  _  /| |_  /    _  / / /");
-console.log("  _  /  _  ___ |/ /___  / /_/ /");
-var lstLn = "  /_/   /_/  |_|\\____/  \\____/   CLI v" + version;
-console.log(lstLn);
+var logoColorFunction = colors.yellow;
+
+console.log(logoColorFunction("  _____________________________"));
+console.log(logoColorFunction("  ___  __/_    |__  ____/_  __ \\"));
+console.log(logoColorFunction("  __  /  _  /| |_  /    _  / / /"));
+console.log(logoColorFunction("  _  /  _  ___ |/ /___  / /_/ /"));
+var lastLine = /*  align   */ "  /_/   /_/  |_|\\____/  \\____/   CLI v" + version;
+console.log(logoColorFunction(lastLine));
 console.log();
 
-var len = lstLn.length;
+var len = lastLine.length;
 var line = new Array(len + 1).join("-");
 var title = "Tools for Apache Cordova";
 var spaces = Math.floor((len - title.length) / 2);
 
-console.log(line);
-console.log(new Array(spaces + 1).join(" ") + title);
-console.log(line);
+console.log(logoColorFunction(line));
+console.log(logoColorFunction(new Array(spaces + 1).join(" ") + title));
+console.log(logoColorFunction(line));
+console.log();
