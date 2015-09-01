@@ -269,7 +269,6 @@ describe("taco remote", function (): void {
                 var messages = ["CommandRemoteHeader",
                     "CommandRemoteSettingsStored",
                     "OnboardingExperienceTitle",
-                    " * HowToUseCommandInstallReqsPlugin",
                     " * HowToUseCommandBuildPlatform",
                     " * HowToUseCommandEmulatePlatform",
                     " * HowToUseCommandRunPlatform",
