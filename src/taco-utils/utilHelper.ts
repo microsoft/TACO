@@ -321,7 +321,7 @@ module TacoUtility {
          */
         public static initializeLogLevel(args: string[]): string[] {
             if (!args) {
-                return;
+                return args;
             }
 
             // Note: Not using nopt to look for "--loglevel", because the autocmplete feature would catch things like "-l", when these may be intended for the command itself (not for taco loglevel).
@@ -329,7 +329,7 @@ module TacoUtility {
             var logLevelTagIndex = args.indexOf(logLevelTag);
 
             if (logLevelTagIndex === -1) {
-                return;
+                return args;
             }
 
             var logLevelValueIndex: number = logLevelTagIndex + 1;
@@ -348,10 +348,9 @@ module TacoUtility {
             }
 
             // Clean up the --loglevel tag and its value, if present, from the args
-            return args.filter(function (arg: string, index: number): boolean {
-                // We only accept values that don't have the same index as the loglevel tag and the loglevel value
-                return index !== logLevelTagIndex && index !== logLevelValueIndex;
-            });
+            args.splice(logLevelTagIndex, 1 + (logLevelValueIndex === -1 ? 0 : 1));
+
+            return args;
         }
     }
 }
