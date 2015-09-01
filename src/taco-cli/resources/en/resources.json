@@ -87,7 +87,7 @@
     "_CommandDocumentationDescription.comment": "Description of what's the purpose of invoking the 'taco docs' command",
     "TacoDocumentationLink": "http://go.microsoft.com/fwlink/?LinkId=619747",
     "_TacoDocumentationLink.comment":  "The link to the taco documentation webpage that we open when 'taco docs' is invoked. We don't need to translate this link, but we might want to change if if we have a 'localized' version of the taco documentation webpage",
-    "CommandKitDescription": "View or update details about your Kit. A Kit is a validated set of Cordova CLI, platforms, and plugins.",
+    "CommandKitDescription": "View or update details about your Kit (Cordova CLI, platforms, and plugins)",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
     "CommandKitJsonOptionDescription": "Save the list of known Kits to a json file at path <PATH>.",
     "_CommandKitJsonOptionDescription.comment": "Description for --json argument to taco kit list",
