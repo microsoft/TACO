@@ -67,7 +67,9 @@ describe("help for a command", function (): void {
 
     it("prints the help for create", function (done: MochaDone): void {
         testHelpForCommand("create", [
+            "",
             "CommandCreateDescription",
+            "",
             "   taco create <PATH> [ID [NAME [CONFIG]]] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
@@ -86,7 +88,9 @@ describe("help for a command", function (): void {
 
     it("prints the help for templates", function (done: MochaDone): void {
         testHelpForCommand("templates", [
+            "",
             "CommandTemplatesDescription",
+            "",
             "   taco templates",
             "",
             ""], done);
@@ -94,7 +98,9 @@ describe("help for a command", function (): void {
 
     it("prints the help for remote", function (done: MochaDone): void {
         testHelpForCommand("remote", [
+            "",
             "CommandRemoteDescription",
+            "",
             "   taco remote COMMAND",
             "",
             "CommandHelpUsageParameters",
@@ -110,11 +116,12 @@ describe("help for a command", function (): void {
 
     it("prints the help for platform", function (done: MochaDone): void {
         testHelpForCommand("platform", [
+            "",
             "CommandPlatformDescription",
+            "",
             "   taco platform [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   COMMAND ............... CommandPlatformSubcommandDescription",
             "   add <PLAT-SPEC> ....... CommandPlatformAddSubcommandDescription",
             "        --usegit ......... CommandPlatformUsegitDescription",
             "        --save ........... CommandPlatformSaveAddDescription",
@@ -134,11 +141,13 @@ describe("help for a command", function (): void {
     });
 
     it("prints the help for plugin", function (done: MochaDone): void {
-        testHelpForCommand("plugin", ["CommandPluginDescription",
+        testHelpForCommand("plugin", [
+            "",
+            "CommandPluginDescription",
+            "",
             "   taco plugin [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   COMMAND ............................ CommandPluginSubcommandDescription",
             "   add <PLAT-SPEC> .................... CommandPluginAddSubcommandDescription",
             "        [--searchpath <DIRECTORY>] .... CommandPluginSearchPathDescription",
             "        [--noregistry] ................ CommandPluginNoRegistryDescription",
@@ -157,23 +166,43 @@ describe("help for a command", function (): void {
     });
 
     it("prints the help for kit", function (done: MochaDone): void {
-        testHelpForCommand("kit", ["CommandKitDescription",
+        testHelpForCommand("kit", [
+            "",
+            "CommandKitDescription",
+            "",
             "   taco kit [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   COMMAND ................. CommandKitSubcommandDescription",
             "   list .................... CommandKitListSubcommandDescription",
             "        --json <PATH> ...... CommandKitJsonOptionDescription",
             "        --kit <KIT-ID> ..... CommandKitOptionKitDescription",
             "   select .................. CommandKitSelectSubcommandDescription",
             "        --kit <KIT-ID> ..... CommandKitSelectOptionKitDescription",
             "        --cli <VERSION> .... CommandKitSelectOptionCliDescription",
+            "CommandHelpUsageExamples",
+            "   * TacoKitListExample",
+            "",
+            "        taco kit list --kit tacokit@2.0.0",
+            "",
+            "   * TacoKitSelectExample1",
+            "",
+            "        taco kit select --kit tacokit@2.0.0",
+            "",
+            "   * TacoKitSelectExample2",
+            "",
+            "        taco kit select --cli 5.2.0",
+            "",
+            "CommandHelpUsageNotes",
+            "   * TacoKitNotes",
+            "",
             ""], done);
     });
 
     it("prints the help for build", function (done: MochaDone): void {
         testHelpForCommand("build", [
+            "",
             "CommandBuildDescription",
+            "",
             "   taco build [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
@@ -192,7 +221,9 @@ describe("help for a command", function (): void {
 
     it("prints the help for run", function (done: MochaDone): void {
         testHelpForCommand("run", [
+            "",
             "CommandRunDescription",
+            "",
             "   taco run [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
@@ -210,9 +241,11 @@ describe("help for a command", function (): void {
             ""], done);
     });
 
-    it("prints the help for kit", function (done: MochaDone): void {
+    it("prints the help for install-reqs", function (done: MochaDone): void {
         testHelpForCommand("install-reqs", [
+            "",
             "CommandInstallReqsDescription",
+            "",
             "   taco install-reqs [PLATFORM]",
             "",
             "CommandHelpUsageParameters",
@@ -222,7 +255,9 @@ describe("help for a command", function (): void {
 
     it("prints the help for emulate", function (done: MochaDone): void {
         testHelpForCommand("emulate", [
+            "",
             "CommandEmulateDescription",
+            "",
             "   taco emulate [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",

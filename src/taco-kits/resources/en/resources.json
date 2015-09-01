@@ -1,6 +1,8 @@
 ﻿{
     "tacokit@1.0.0": "5.1.1 Cordova Kit",
-    "tacokit@1.0.0-desc": "A toolkit of plugins and platforms that works with Cordova CLI v5.1.1",
+    "tacokit@1.0.0-desc": "A toolkit of plugins and platforms that works with Cordova CLI v5.1.1.",
+    "tacokit@2.0.0": "5.2.0 Cordova Kit",
+    "tacokit@2.0.0-desc": "A toolkit of plugins and platforms that works with Cordova CLI v5.2.0.",
     "_KitNames.comment": "Localized names and descriptions for the different Cordova kits that taco-cli offers.",
 
     "BlankTemplateName": "Blank template",

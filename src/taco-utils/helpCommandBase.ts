@@ -84,6 +84,7 @@ module TacoUtility {
         private printGeneralUsage(): void {
             var programDescription: string = this.cliResources.getString("ProgramDescription");
             if (programDescription) {
+                Logger.logLine();
                 Logger.log(programDescription); // If we have a ProgramDescription we use the new format
                 Logger.logLine();
             } else {
@@ -191,7 +192,7 @@ module TacoUtility {
                     Logger.log(util.format("%s%s %s", indent, HelpCommandBase.DefaultBullet, this.getResourceString(examples[i].description)));
                     Logger.logLine();
                     if (typeof examples[i].example === "string") {
-                        Logger.log(util.format("%s  %s", indent2, examples[i].example));
+                        Logger.log(util.format("%s  <highlight>%s</highlight>", indent2, examples[i].example));
                     } else {
                         LoggerHelper.printJson(<any>examples[i].example, 2 * LoggerHelper.DefaultIndent);
                     }
@@ -214,11 +215,13 @@ module TacoUtility {
         }
 
         private printCommandHeader(cliName: string, commandName: string, synopsis: string, description?: string): void {
+            Logger.logLine();
             if (description) {
                 Logger.log(this.getResourceString(description));
             }
 
             if (synopsis) {
+                Logger.logLine();
                 var leftIndent: string = LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent);
                 Logger.log(util.format("%s<synopsis>%s %s %s</synopsis><br/>", leftIndent, cliName, commandName, synopsis));
             }

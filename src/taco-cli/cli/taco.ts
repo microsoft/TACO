@@ -59,7 +59,6 @@ class Taco {
             require("./logo"); // Prints the logo as a side effect of requiring it. Require caching will make sure we don't execute it twice in the one session.
             return Settings.saveSettings({});
         }).then(function (settings: Settings.ISettings): void {
-            // TODO: opt in/out of telemetry based on settings
             telemetry.init("TACO", require("../package.json").version);
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
@@ -74,10 +73,13 @@ class Taco {
                     if (parsedArgs.command) {
                         commandProperties = telemetryProperties;
                     }
-                }).done(function (): void {
+                }).then(function (): void {
                     // Send command success telemetry
                     telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
                 }, function (reason: any): any {
+                    // set exit code to report error
+                    process.on("exit", function (): void { process.exit(1); });
+
                     // Pretty print errors
                     if (reason) {
                         if (reason.isTacoError) {
@@ -94,15 +96,11 @@ class Taco {
                         }
 
                         // Send command failure telemetry
-                        projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
                             telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
-                        }).finally(function (): void {
-                            process.on("exit", function (): void { process.exit(1); });
                         });
-                    } else {
-                        process.on("exit", function (): void { process.exit(1); });
                     }
-                });
+                }).finally((): any => telemetry.sendPendingData()).done();
         });
     }
 

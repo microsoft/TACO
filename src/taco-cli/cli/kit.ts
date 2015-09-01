@@ -172,7 +172,15 @@ class Kit extends commands.TacoCommandBase {
             kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
         }
 
-        return kitInfo.description || kitDefaultDescription;
+        kitDefaultDescription = kitInfo.description || kitDefaultDescription;
+
+        if (!!kitInfo.default) {
+            return util.format("%s <defaultkit>%s</defaultkit>", kitDefaultDescription, resources.getString("CommandKitListDefaultKitDescSuffix"));
+        } else if (!!kitInfo.deprecated) {
+            return util.format("%s <deprecatedkit>%s</deprecatedkit>", kitDefaultDescription, resources.getString("CommandKitListDeprecatedKitDescSuffix"));
+        } else {
+            return kitDefaultDescription;
+        }
     }
 
     /**
@@ -209,7 +217,7 @@ class Kit extends commands.TacoCommandBase {
                 return Q.all(Object.keys(meta.kits).map(function (kitId: string): Q.Promise<any> {
                     return kitHelper.getKitInfo(kitId).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {                     
                         var kitNameDescription = {
-                            name: Kit.getKitTitle(kitId, kitInfo),
+                            name: util.format("<kitid>%s</kitid>", kitId),
                             description: Kit.getKitDescription(kitInfo)
                         };
 
