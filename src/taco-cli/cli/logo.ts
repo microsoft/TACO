@@ -6,10 +6,15 @@
  *******************************************************
  */
 // NOTE: This file is intended to run on-require, and print the logo, only once.
-import colors = require ("colors/safe");
 var version = require("../package.json").version;
 
-var logoColorFunction = colors.yellow;
+function logoColorFunction(s: string): string {
+    // https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+    // \u001b[39m == "reset foreground colour"
+    // \u001b[9Xm == "set foreground colour to bright colour in slot X
+    // Slot 3 defaults to yellow
+    return "\u001b[93m" + s + "\u001b[39m";
+}
 
 console.log(logoColorFunction("  _____________________________"));
 console.log(logoColorFunction("  ___  __/_    |__  ____/_  __ \\"));
