@@ -12,10 +12,12 @@ var version = require("../package.json").version;
 
 function logoColorFunction(s: string): string {
     // https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
-    // \u001b[39m == "reset foreground colour"
-    // \u001b[9Xm == "set foreground colour to bright colour in slot X
+    // \u001b[3Xm == "set foreground colour to colour in slot X"
     // Slot 3 defaults to yellow
-    return "\u001b[93m" + s + "\u001b[39m";
+    // \u001b[39m == "reset foreground colour"
+    // \u001b[1m == "bold" which is interpreted differently by different terminals
+    // \u001b[22m == "stop being bold (or faint)"
+    return "\u001b[33m\u001b[1m" + s + "\u001b[22m\u001b[39m";
 }
 
 console.log(logoColorFunction("  _____________________________"));
