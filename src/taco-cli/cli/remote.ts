@@ -205,7 +205,7 @@ class Remote extends commands.TacoCommandBase {
 
                     // Print the onboarding experience
                     logger.log(resources.getString("OnboardingExperienceTitle"));
-                    loggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
+                    loggerHelper.logList([
                         "HowToUseCommandBuildPlatform",
                         "HowToUseCommandEmulatePlatform",
                         "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));

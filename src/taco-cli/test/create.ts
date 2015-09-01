@@ -484,7 +484,6 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
                 "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
                 "      CommandCreateStatusTableKitVersionDescription ..... 4.3.1-Kit",
-                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                 "      ----------"];
 
             var lastPart = [
@@ -520,7 +519,6 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
                 "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
                 "      CommandCreateStatusTableCordovaCLIVersionDescription ..... 5.1.1",
-                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                 "      ----------"];
 
             var lastPart = [
@@ -557,7 +555,6 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
                 "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
                 "      CommandCreateStatusTableKitVersionDescription ..... 4.3.0-Kit (CommandKitListDeprecatedKit)",
-                "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                 "      ----------"];
 
             var lastPart = [
@@ -593,7 +590,6 @@ describe("taco create", function (): void {
                     "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
                     "      CommandCreateStatusTableLocationDescription ..... " + projectPath,
                     "      CommandCreateStatusTableKitVersionDescription ..... " + defaultKitId + " (CommandKitListDefaultKit)",
-                    "      CommandCreateStatusTableReleaseNotesDescription ..... CommandCreateStatusTableReleaseNotesLink",
                     "      ----------"];
 
                 var lastPart = [
