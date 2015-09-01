@@ -265,7 +265,6 @@ class Create extends commands.TacoCommandBase {
             { name: resources.getString("CommandCreateStatusTableIDDescription"), description: cordovaParameters.appId },
             { name: resources.getString("CommandCreateStatusTableLocationDescription"), description: projectFullPath },
             { name: resources.getString(kitOrCordovaStringResource), description: kitOrCordovaVersion },
-            { name: resources.getString("CommandCreateStatusTableReleaseNotesDescription"), description: resources.getString("CommandCreateStatusTableReleaseNotesLink") },
         ];
         LoggerHelper.logNameDescriptionTableWithHorizontalBorders(nameDescriptionPairs, indentation);
     }
