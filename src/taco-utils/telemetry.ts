@@ -20,7 +20,9 @@ import logLevel = require ("./logLevel");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import os = require ("os");
 import path = require ("path");
+import Q = require ("q");
 import readline = require ("readline");
+import sender = require ("applicationinsights/Library/Sender");
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
 
@@ -129,6 +131,12 @@ module TacoUtility {
             }
         }
 
+        export function sendPendingData(): Q.Promise<string> {
+            var defer = Q.defer<string>();
+            appInsights.client.sendPendingData((result: string) => defer.resolve(result));
+            return defer.promise;
+        }
+
         export function isInternal(): boolean {
             return TelemetryUtils.UserType === TelemetryUtils.USERTYPE_INTERNAL;
         }
@@ -196,7 +204,9 @@ module TacoUtility {
                     .setAutoCollectExceptions(true)
                     .start();
                 appInsights.client.config.maxBatchIntervalMs = 100;
-
+                appInsights.client.channel.setOfflineMode(true);
+                sender.WAIT_BETWEEN_RESEND = 0; 
+                
                 if (appVersion) {
                     var context: Context = appInsights.client.context;
                     context.tags[context.keys.applicationVersion] = appVersion;

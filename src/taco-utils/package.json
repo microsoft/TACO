@@ -11,7 +11,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "applicationinsights": "0.15.2",
+    "applicationinsights": "0.15.5",
     "colors": "^1.0.3",
     "elementtree": "0.1.6",
     "mkdirp": "0.5.0",
