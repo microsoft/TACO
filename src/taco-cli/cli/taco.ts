@@ -100,7 +100,11 @@ class Taco {
                             telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
                         });
                     }
-                }).finally((): any => telemetry.sendPendingData()).done();
+                }).finally((): any => {
+                    // Make sure to leave a line after the last of our output
+                    logger.logLine();
+                    telemetry.sendPendingData();
+                }).done();
         });
     }
 

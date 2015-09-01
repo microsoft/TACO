@@ -45,3 +45,7 @@ interface String {
 declare module "colors" {
     export = colors;
 }
+
+declare module "colors/safe" {
+    export = colors;
+}
