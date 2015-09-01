@@ -142,6 +142,12 @@ module TacoUtility {
         }
 
         export function changeTelemetryOptInSetting(): void {
+            // If user's choice was already collected during initialization
+            // for this session, do not prompt again
+            if (TelemetryUtils.OptInCollectedForCurrentSession) {
+                return;
+            }
+
             var currentOptIn: boolean = TelemetryUtils.getTelemetryOptInSetting();
             var newOptIn: boolean;
 
@@ -189,6 +195,7 @@ module TacoUtility {
             public static USERTYPE_EXTERNAL = "External";
             public static UserType: string;
             public static SessionId: string;
+            public static OptInCollectedForCurrentSession: boolean;
 
             private static get telemetrySettingsFile(): string {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
@@ -260,6 +267,7 @@ module TacoUtility {
                     Telemetry.send(new TelemetryEvent(Telemetry.appName + "/telemetryOptOut"), true);
                 }
 
+                TelemetryUtils.OptInCollectedForCurrentSession = true;
                 TelemetryUtils.saveSettings();
             }
 
