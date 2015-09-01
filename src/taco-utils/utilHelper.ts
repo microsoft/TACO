@@ -313,32 +313,45 @@ module TacoUtility {
         }
 
         /**
-         * Sets the global LogLevel setting for Taco by parsing the given command line args. If the specified log level is
-         * not recognized, then it is ignored (this method won't set the global setting in that case).
+         * Sets the global LogLevel setting for Taco by specifically looking for the "--loglevel" string. If found, and the string after it is a valid loglevel value, the global config's loglevel
+         * is set. Finally, the "--loglevel" string (and the following value, if present, whether it is valid or not) are removed from the args so that they are not passed to the command.
          *
          * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
+         * @return {string[]} The args where --loglevel and its value have been removed
          */
-        public static initializeLogLevel(args: string[]): void {
+        public static initializeLogLevel(args: string[]): string[] {
             if (!args) {
                 return;
             }
 
-            var knownOptionsLogLevel: Nopt.FlagTypeMap = { loglevel: String };
-            var initialArgsParse: ICommandData = ArgsHelper.parseArguments(knownOptionsLogLevel, {}, args);
-            var logLevelString: string = initialArgsParse.options["loglevel"];
+            // Note: Not using nopt to look for "--loglevel", because the autocmplete feature would catch things like "-l", when these may be intended for the command itself (not for taco loglevel).
+            var logLevelTag: string = "--loglevel";
+            var logLevelTagIndex = args.indexOf(logLevelTag);
 
-            if (!logLevelString) {
+            if (logLevelTagIndex === -1) {
                 return;
             }
 
-            // Convert the provided string value to Pascalcase (which is the format of our LogLevel enum)
-            logLevelString = logLevelString.toLowerCase();
-            logLevelString = logLevelString.charAt(0).toUpperCase() + logLevelString.slice(1);
+            var logLevelValueIndex: number = logLevelTagIndex + 1;
 
-            // If we understand the provided log level, convert the string value to the actual enum value and save it in the global settings
-            if (LogLevel.hasOwnProperty(logLevelString)) {
-                TacoGlobalConfig.logLevel = (<any>LogLevel)[logLevelString];
+            if (logLevelValueIndex <= args.length - 1 && args[logLevelValueIndex].indexOf("--") === -1) {
+                // We have a --loglevel tag and we have a value; validate the specified value
+                var logLevelString: string = args[logLevelValueIndex].charAt(0).toUpperCase() + args[logLevelValueIndex].toLowerCase().substr(1);
+
+                // If we understand the provided log level value, convert the string value to the actual enum value and save it in the global settings
+                if (LogLevel.hasOwnProperty(logLevelString)) {
+                    TacoGlobalConfig.logLevel = (<any>LogLevel)[logLevelString];
+                }
+            } else {
+                // We don't have a log level value; set its index to -1
+                logLevelValueIndex = -1;
             }
+
+            // Clean up the --loglevel tag and its value, if present, from the args
+            return args.filter(function (arg: string, index: number): boolean {
+                // We only accept values that don't have the same index as the loglevel tag and the loglevel value
+                return index !== logLevelTagIndex && index !== logLevelValueIndex;
+            });
         }
     }
 }
