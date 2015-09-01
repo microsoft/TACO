@@ -96,12 +96,8 @@
             ],
             "examples": [
             { 
-                "example": "taco kit list", 
-                "description": "[TacoKitListExample1]" 
-            },
-            { 
                 "example": "taco kit list --kit tacokit@2.0.0", 
-                "description": "[TacoKitListExample2]" 
+                "description": "[TacoKitListExample]" 
             },
             { 
                 "example": "taco kit select --kit tacokit@2.0.0", 
@@ -111,6 +107,9 @@
                 "example": "taco kit select --cli 5.2.0", 
                 "description": "[TacoKitSelectExample2]" 
             }
+            ],
+            "notes": [
+                "[TacoKitNotes]"
             ]
         }
         ,
