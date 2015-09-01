@@ -172,7 +172,7 @@ class Kit extends commands.TacoCommandBase {
             kitDefaultDescription = resources.getString("CommandKitListDefaultDescription", kitInfo["cordova-cli"]);
         }
 
-        kitDefaultDescription = kitInfo.description || kitDefaultDescription;;
+        kitDefaultDescription = kitInfo.description || kitDefaultDescription;
 
         if (!!kitInfo.default) {
             return util.format("%s <defaultkit>%s</defaultkit>", kitDefaultDescription, resources.getString("CommandKitListDefaultKitDescSuffix"));
