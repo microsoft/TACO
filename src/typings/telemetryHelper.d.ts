@@ -24,7 +24,7 @@ declare module TacoUtility {
         public time<T>(name: string, codeToMeasure: { (): Q.Promise<T> }): Q.Promise<T>;
         public step(name: string): TelemetryGenerator;
         public add(baseName: string, value: any, isPii: boolean): TelemetryGenerator;
-        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string): boolean }): TelemetryGenerator;
+        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGenerator;
         public send(): void;
         public addError(error: Error): TelemetryGenerator;
     }
