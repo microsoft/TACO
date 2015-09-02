@@ -271,7 +271,7 @@ class CordovaWrapper {
         var deferred = Q.defer<T>();
 
         dom.on("error", function (err: any): void {
-            deferred.reject(err);
+            deferred.reject(errorHelper.get(TacoErrorCodes.CordovaCommandUnhandledException, err));
             // Note: At this point the state can be arbitrarily bad, so we really shouldn't try to recover much from here
         });
 
