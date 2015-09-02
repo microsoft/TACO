@@ -85,7 +85,8 @@ module TacoDependencyInstaller {
                 // Parse 'cordova requirements' results and extract missing dependencies to end up with an array of IDs
                 this.parseMissingDependencies(requirementsResult);
                 telemetry
-                    .addWithPiiEvaluator("missingDependencies", this.missingDependencies, /*isPii*/(value, name) => name.indexOf(".installDestination") >= 0)
+                    .addWithPiiEvaluator("missingDependencies", this.missingDependencies,
+                        (value: string, name: string) => name.indexOf(".installDestination") >= 0)
                     .add("unsupportedMissingDependencies", this.unsupportedMissingDependencies, /*isPii*/ false);
 
                 // Warn the user for any dependencies for which installation is not supported
