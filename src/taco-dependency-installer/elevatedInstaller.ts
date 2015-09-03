@@ -106,7 +106,7 @@ class ElevatedInstaller {
     }
 
     public run(): void {
-        tacoUtils.Telemetry.init("TACO/dependencyInstaller", require("./package.json").version);
+        tacoUtils.Telemetry.init("TACO/dependencyInstaller", require("./package.json").version, !!this.parentSessionId);
         tacoUtils.Telemetry.setSessionId(this.parentSessionId);
         tacoUtils.TelemetryHelper.generate("ElevatedInstaller", telemetry => {
             var self = this;
