@@ -642,7 +642,6 @@ class Kit extends commands.TacoCommandBase {
         var platformVersionUpdates: IDictionary<string>;
         var pluginVersionUpdates: IDictionary<string>;
         var currentCliVersion: string;
-        
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), 
             kitHelper.getValidCordovaCli(kitId), projectHelper.createTacoJsonFile(projectPath, true, kitId)])
         .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], newCliVersion: string): Q.Promise<any> {
@@ -734,20 +733,21 @@ class Kit extends commands.TacoCommandBase {
         var projectPath: string = projectHelper.getProjectRoot();
 
         logger.logLine();
-
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
             projectInfo = info;
             if (info.configXmlPath === "") {
                 throw errorHelper.get(TacoErrorCodes.NotInCordovaProject);
             }
         })
-            .then(function (): Q.Promise<any> {
+        .then(function (): Q.Promise<any> {
             var usedkitId: string = projectInfo.tacoKitId;
             if (kitId) {
                 if (usedkitId && usedkitId === kitId ) {
                     throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameKit, kitId);
                 } else {
-                    return Kit.selectKit(projectPath, projectInfo, kitId);
+                    return kitHelper.getKitInfo(kitId).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {  
+                        return Kit.selectKit(projectPath, projectInfo, kitId);
+                    });
                 }
             } else if (cli) {
                 var usedCli: string = projectInfo.cordovaCliVersion;
