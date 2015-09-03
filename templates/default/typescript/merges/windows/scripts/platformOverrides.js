@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     // Append the safeHTML polyfill
     var scriptElem = document.createElement('script');
     scriptElem.setAttribute('src', 'scripts/winstore-jscompat.js');

@@ -1,4 +1,4 @@
-﻿/*
+/*
 JavaScript Dynamic Content shim for Windows Store apps.
 winstore-jscompat.js
 

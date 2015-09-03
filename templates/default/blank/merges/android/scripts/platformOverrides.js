@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     // Append the bind() polyfill
     var scriptElem = document.createElement('script');
     scriptElem.setAttribute('src', 'scripts/android2.3-jscompat.js');
