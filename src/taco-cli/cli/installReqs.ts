@@ -107,7 +107,7 @@ class InstallReqs extends commands.TacoCommandBase {
                         .then(function (result: any): Q.Promise<any> {
                             var sessionId = tacoUtils.Telemetry.isOptedIn ?
                                 tacoUtils.Telemetry.getSessionId() : // Valid session ID to publish telemetry
-                                null; // Null session ID to not publish telemetry
+                                "null"; // Null session ID to not publish telemetry
                             var installer: DependencyInstaller = new DependencyInstaller(sessionId);
 
                             return installer.run(result);
