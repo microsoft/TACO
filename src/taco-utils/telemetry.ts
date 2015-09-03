@@ -203,7 +203,7 @@ module TacoUtility {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
             }
 
-            public static init(appVersion: string, isOptedIn: boolean): void {
+            public static init(appVersion: string, isOptedIn?: boolean): void {
                 TelemetryUtils.loadSettings();
                 
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
