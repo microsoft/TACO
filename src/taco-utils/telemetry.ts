@@ -26,6 +26,8 @@ import sender = require ("applicationinsights/Library/Sender");
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
 
+import _ = require ("lodash");
+
 import LogFormatHelper = logFormathelper.LogFormatHelper;
 import logger = loggerUtil.Logger;
 import LogLevel = logLevel.LogLevel;
@@ -100,10 +102,10 @@ module TacoUtility {
             }
         };
 
-        export function init(appName: string, appVersion?: string): void {
+        export function init(appName: string, appVersion?: string, isOptedIn?: boolean): void {
             try {
                 Telemetry.appName = appName;
-                TelemetryUtils.init(appVersion);
+                TelemetryUtils.init(appVersion, isOptedIn);
             } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
@@ -201,7 +203,7 @@ module TacoUtility {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TelemetrySettingsFileName);
             }
 
-            public static init(appVersion: string): void {
+            public static init(appVersion: string, isOptedIn?: boolean): void {
                 TelemetryUtils.loadSettings();
                 
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
@@ -223,7 +225,9 @@ module TacoUtility {
                 TelemetryUtils.MachineId = TelemetryUtils.getMachineId();
                 TelemetryUtils.SessionId = TelemetryUtils.generateGuid();
                 TelemetryUtils.UserType = TelemetryUtils.getUserType();
-                Telemetry.isOptedIn = TelemetryUtils.getOptIn();
+                Telemetry.isOptedIn = _.isUndefined(isOptedIn) ?
+                    TelemetryUtils.getOptIn() : // If isOptedIn is undefined, we try to retrive or ask the user for the value
+                    isOptedIn; // If it's defined, we just use it
 
                 TelemetryUtils.saveSettings();
             }
