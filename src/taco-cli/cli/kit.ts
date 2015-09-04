@@ -636,16 +636,17 @@ class Kit extends commands.TacoCommandBase {
     /**
      * Changes the current kit used for the project at {projectPath} to {kitId}
      */
-    private static selectKit(projectPath: string, projectInfo: projectHelper.IProjectInfo, kitId: string): Q.Promise<any> {
+    private static selectKit(projectPath: string, projectInfo: projectHelper.IProjectInfo, kitInfo: TacoKits.IKitInfo, kitId: string): Q.Promise<any> {
         var installedPlatformVersions: IDictionary<string>;
         var installedPluginVersions: IDictionary<string>;
         var platformVersionUpdates: IDictionary<string>;
         var pluginVersionUpdates: IDictionary<string>;
         var currentCliVersion: string;
-        
+
+        // Query the installed platform/plugin versions, local/GIT plugin info and over-write taco.json with the new kit ID
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), 
-            kitHelper.getValidCordovaCli(kitId), projectHelper.createTacoJsonFile(projectPath, true, kitId)])
-        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[], newCliVersion: string): Q.Promise<any> {
+            projectHelper.createTacoJsonFile(projectPath, true, kitId)])
+        .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[]): Q.Promise<any> {
             installedPlatformVersions = platformVersions;
             installedPluginVersions = Kit.getInstalledRegistryPluginVerions(pluginVersions, localOrGitPlugins);       
             return Q.all([Kit.getComponentUpdateInfo(projectPath, kitId, installedPlatformVersions, ProjectComponentType.Platform), Kit.getComponentUpdateInfo(projectPath, kitId, installedPluginVersions, ProjectComponentType.Plugin)])
@@ -658,7 +659,7 @@ class Kit extends commands.TacoCommandBase {
                         var projectRequiresUpdate: boolean = Kit.projectComponentNeedsUpdate(installedPlatformVersions, platformVersionUpdates) || Kit.projectComponentNeedsUpdate(installedPluginVersions, pluginVersionUpdates);
                         if (projectRequiresUpdate) {
                             Kit.printListOfComponentsSkippedForUpdate(localOrGitPlugins);
-                            return Kit.promptAndUpdateProject(false, newCliVersion, installedPlatformVersions, 
+                            return Kit.promptAndUpdateProject(false, kitInfo["cordova-cli"], installedPlatformVersions, 
                                 installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
                         } else {
                             return Q.resolve({});
@@ -734,20 +735,22 @@ class Kit extends commands.TacoCommandBase {
         var projectPath: string = projectHelper.getProjectRoot();
 
         logger.logLine();
-
+        
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): void {
             projectInfo = info;
             if (info.configXmlPath === "") {
                 throw errorHelper.get(TacoErrorCodes.NotInCordovaProject);
             }
         })
-            .then(function (): Q.Promise<any> {
+        .then(function (): Q.Promise<any> {
             var usedkitId: string = projectInfo.tacoKitId;
             if (kitId) {
                 if (usedkitId && usedkitId === kitId ) {
                     throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameKit, kitId);
                 } else {
-                    return Kit.selectKit(projectPath, projectInfo, kitId);
+                    return kitHelper.getKitInfo(kitId).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {  
+                        return Kit.selectKit(projectPath, projectInfo, kitInfo, kitId);
+                    });
                 }
             } else if (cli) {
                 var usedCli: string = projectInfo.cordovaCliVersion;
