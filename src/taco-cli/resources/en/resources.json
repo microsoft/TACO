@@ -183,7 +183,7 @@
     "CommandRemoteListSubcommandDescription": "List all currently configured remote build agents",
     "_CommandRemoteListSubcommandDescription.comment": "Description for 'taco remote list'",
 
-    "CommandRemoteHeader": "Please ensure that remotebuild is running on the remote server.<br/> You can generate new client information at any time by typing remotebuild certificates generate. For more details, see http://go.microsoft.com/fwlink/?LinkId=624345",
+    "CommandRemoteHeader": "Please ensure that remotebuild is running on the remote server.<br/> You can generate new client information at any time by typing 'remotebuild certificates generate'. For more details, see http://go.microsoft.com/fwlink/?LinkId=624345",
     "_CommandRemoteHeader.comment": "Message printed to console when running taco remote",
     "CommandRemoteQueryHost": "Remote host name / IP address: ",
     "_CommandRemoteQueryHost.comment": "Query asking the user to enter the host name or IP address of the remote server",
