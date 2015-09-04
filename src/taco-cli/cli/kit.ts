@@ -643,6 +643,7 @@ class Kit extends commands.TacoCommandBase {
         var pluginVersionUpdates: IDictionary<string>;
         var currentCliVersion: string;
 
+        // Query the installed platform/plugin versions, local/GIT plugin info and over-write taco.json with the new kit ID
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getLocalOrGitPlugins(projectPath), 
             projectHelper.createTacoJsonFile(projectPath, true, kitId)])
         .spread<any>(function (platformVersions: IDictionary<string>, pluginVersions: IDictionary<string>, localOrGitPlugins: string[]): Q.Promise<any> {
