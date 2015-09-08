@@ -48,7 +48,7 @@
     "_RemoteBuildStartExample2.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help start'",
 
     "GenerateClientCertExample1": "Generate a new certificate for use in the client that will expire in 1 year",
-    "_GenerateClientCertExample1.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help generateClientCert'",
+    "_GenerateClientCertExample1.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help certificates'",
 
     "ResetServerCertExample1": "Reset server certificates to expire in 1 year",
     "_ResetServerCertExample1.comment": "Text shown in examples section describing an example when user invokes 'remotebuild help resetServerCert'",

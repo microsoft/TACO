@@ -353,7 +353,7 @@ class Certs {
             console.info(resources.getString("OSXCertSetupNoPinTimeout"));
         }
 
-        console.info("remotebuild generateClientCert");
+        console.info("remotebuild certificates generate");
         console.info("");
     }
 }
