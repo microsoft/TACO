@@ -156,20 +156,20 @@ class ElevatedInstaller {
         if (!this.socketPath) {
             // If we can't connect to the DependencyInstaller's server, the only way to let the DependencyInstaller know is via exit code
             this.exitProcess(protocolExitCode.CouldNotConnect);
+        } else {
+            var deferred: Q.Deferred<any> = Q.defer<any>();
+
+            try {
+                this.socketHandle = net.connect(this.socketPath, function (): void {
+                    deferred.resolve({});
+                });
+            } catch (err) {
+                // If we can't connect to the DependencyInstaller's server, the only way to let the DependencyInstaller know is via exit code
+                this.exitProcess(protocolExitCode.CouldNotConnect);
+            }
+
+            return deferred.promise;
         }
-
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-
-        try {
-            this.socketHandle = net.connect(this.socketPath, function (): void {
-                deferred.resolve({});
-            });
-        } catch (err) {
-            // If we can't connect to the DependencyInstaller's server, the only way to let the DependencyInstaller know is via exit code
-            this.exitProcess(protocolExitCode.CouldNotConnect);
-        }
-
-        return deferred.promise;
     }
 
     private exitProcess(code: number): void {
