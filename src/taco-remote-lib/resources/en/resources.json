@@ -19,10 +19,8 @@
     "_UnableToDebug.comment": "Message reported if we are unable to start ios_webkit_debug_proxy to enable debugging",
     "BuildNotFound": "Build {0} does not exist",
     "_BuildNotFound.comment": "Message sent back to Visual Studio or user when it queries for a build but the build no longer exists, for example an old build that has been deleted. {0} is the build number",
-    "BuildRequestMissingCordovaVersion": "A cordova version must be specified on the build request.",
+    "BuildRequestMissingCordovaVersion": "A Cordova version must be specified on the build request.",
     "_BuildRequestMissingCordovaVersion.comment": "Message sent back to Visual Studio if the build request does not specify the version of Cordova to build with",
-    "BuildRequestUnsupportedCordovaVersion": "The build request for cordova version {0} is not supported by the iOS build server. The server is installed with cordova version {1}.",
-    "_BuildRequestUnsupportedCordovaVersion.comment": "Message sent back to Visual Studio if the build server does not support the version of Cordova specified in the build request",
     "BuildRequestUnsupportedCommand": "The requested build command {0} is not supported by this build manager.",
     "_BuildRequestUnsupportedCommand.comment": "Message sent back to Visual Studio if the build server does not support the build command specified in the build request (only build and emulate are currently supported)",
     "BuildRequestUnsupportedConfiguration": "The requested build configuration {0} is not supported by this build manager. Only debug and release are supported.",
@@ -66,7 +64,7 @@
 
     "UnsupportedPlatform": "Unable to build: requested platform not supported",
     "_UnsupportedPlatform.comment": "Message reported to the client when a request for an unsupported platform is made",
-    "NoCordovaVersionSpecified": "No cordova version specified!",
+    "NoCordovaVersionSpecified": "No Cordova version specified!",
     "_NoCordovaVersionSpecified.comment": "Error reported when trying to build without any version specified",
 
     "DoneBuilding": "Done building {0}",
@@ -76,9 +74,9 @@
     "ErrorXcconfigDirNotFound": "Directory for build.xcconfig does not exist.",
     "_ErrorXcconfigDirNotFound.comment": "Message logged when we can't find the directory that build.xcconfig ",
 
-    "AcquiringCordova": "Acquiring cordova.",
+    "AcquiringCordova": "Acquiring Cordova.",
     "_AcquiringCordova.comment": "Status message returned when downloading and installing the requested version of cordova",
-    "RequireCordovaFailed": "Error: Failed to acquire cordova version {0}. {1}",
+    "RequireCordovaFailed": "Error: Failed to acquire Cordova version {0}. {1}",
     "_RequireCordovaFailed.comment": "Error message reported when a build fails to install the requested cordova version. {0} is the cordova version, and {1} is the error",
     "UpdatingIOSPlatform": "Updating iOS platform.",
     "_UpdatingIOSPlatform.comment": "Status message returned when doing a 'cordova platform add ios' or 'cordova prepare ios'",

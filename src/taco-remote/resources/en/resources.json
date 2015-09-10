@@ -63,7 +63,7 @@
     "_BuildNotCompleted.comment": "Message when attempting to perform an action on a build which is not yet ready. {0} is the current state of the build",
     "ExceededMaxPings": "Exceeded max # of pings: {0}",
     "_ExceededMaxPings.comment": "Error printed when the self test times out. {0} is the number of attempts made to get the build status",
-    "CordovaAcquisitionFailed": "Failed to load cordova {0}: {1}",
+    "CordovaAcquisitionFailed": "Failed to load Cordova {0}: {1}",
     "_CordovaAcquisitionFailed.comment": "Message printed when dynamically acquiring cordova for the self test fails. {0} is the cordova version, and {1} is the error message",
 
     "FirstRunDependencyConfiguration": "Configuring first-run dependencies.\nTo deploy to physical iOS devices, or to debug a device or simulator, we need some packages from Homebrew, a third party package manager.\nInstalling Homebrew may ask you for an admin password. Do you want to continue?",

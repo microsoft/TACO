@@ -2,8 +2,8 @@
     "CommandError": "Error: An error occurred while running the command.",
     "_CommandError.comment": "A generic error message displayed when an error occurs. This will be followed by the inner error, which should contain more details.",
 
-    "TacoCommandPassthrough": "Unknown TACO command, passing it to cordova",
-    "_TacoCommandPassthrough.comment": "Message printed when taco is given a command we don't understand and we pass through to cordova",
+    "TacoCommandPassthrough": "Unknown TACO command, passing it to Cordova",
+    "_TacoCommandPassthrough.comment": "Message printed when taco is given a command we don't understand and we pass through to Cordova",
 
     "CommandCreateDescription": "Create a new Cordova based TACO project",
     "_CommandCreateDescription.comment": "Description of the 'taco create' command",
@@ -235,7 +235,7 @@
     "_CommandPlatformRemoveSubcommandDescription.comment": "Description for 'taco platform remove'",
     "CommandPlatformListSubcommandDescription": "List all the installed and available platforms",
     "_CommandPlatformListSubcommandDescription.comment": "Description for 'taco platform list'",
-    "CommandPlatformUpdateSubcommandDescription": "Update the version of cordova used for a specific platform; Update to the latest <VERSION>, if no <VERSION>, path or <URL> is specified.",
+    "CommandPlatformUpdateSubcommandDescription": "Update the version of Cordova used for a specific platform; Update to the latest <VERSION>, if no <VERSION>, path or <URL> is specified.",
     "_CommandPlatformUpdateSubcommandDescription.comment": "Description for 'taco platform update'",
     "CommandPlatformCheckSubcommandDescription": "List platforms which can be updated by 'taco platform update'",
     "_CommandPlatformCheckSubcommandDescription.comment": "Description for 'taco platform check'",
@@ -355,7 +355,7 @@
 
     "CommandRunDescription": "Run the project for a given platform on the selected device/emulator target",
     "_CommandRunDescription.comment": "Description for 'taco run'",
-    "CommandEmulateDescription": "Emulate a cordova project",
+    "CommandEmulateDescription": "Emulate a Cordova project",
     "_CommandEmulateDescription.comment": "Description for 'taco emulate'",
     "CommandRunPlatformDescription": "The platform that you wish to run or emulate",
     "_CommandRunPlatformDescription.comment": "Description of the PLATFORM argument to 'taco run'",
@@ -421,7 +421,7 @@
     "NotInCordovaProject": "Error: Current working directory is not a Cordova-based project",
     "_NotInCordovaProject.comment": "Message printed when attempting to run a taco command in a directory which is not a Cordova-based project ",
 
-    "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of cordova.",
+    "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of Cordova.",
     "_RemoteBuildUnsupportedPlatformcomment": "Error message printed when trying to 'taco remote add <platform>' and the platform is not supported. {0} is the platform",
 
     "UnsupportedHostPlatform": "Error: Unsupported platform {0}",
