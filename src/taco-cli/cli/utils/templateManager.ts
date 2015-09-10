@@ -67,8 +67,6 @@ class TemplateDescriptor implements TemplateManager.ITemplateDescriptor {
 class TemplateManager {
     private static DefaultTemplateId: string = "blank";
     private static TemplatesFolderName: string = "templates";
-    private static GitTemplatesFolderName: string = "git-templates";
-    private static GitPrefix: string = "template_"; // Because Cordova checks for "http" at the start of the --copy-from path, we need some prefix for the git templates, otherwise they will get rejected
     private static GitFileList: string[] = [
         ".git",
         ".gitignore",
@@ -110,7 +108,7 @@ class TemplateManager {
             .then(function (): Q.Promise<any> {
                 var filterFunc = function (itemPath: string): boolean {
                     // Return true if the item path is not in our list of git files to ignore
-                    return TemplateManager.GitFileList.indexOf(itemPath) === -1;
+                    return TemplateManager.GitFileList.indexOf(path.basename(itemPath)) === -1;
                 };
                 var options: any = { clobber: false, filter: filterFunc };
 
@@ -228,9 +226,6 @@ class TemplateManager {
     }
 
     private acquireFromGit(templateUrl: string): Q.Promise<string> {
-        var gitTemplatesCache: string = path.join(this.templateCachePath, TemplateManager.GitTemplatesFolderName);
-        var templateLocation: string = path.join(gitTemplatesCache, this.getSafeGitTemplateName(templateUrl));
-
         loggerHelper.logSeparatorLine();
         logger.log(resources.getString("CommandCreateGitTemplateHeader"));
 
@@ -312,10 +307,6 @@ class TemplateManager {
         }
 
         return Q.resolve(cachedTemplatePath);
-    }
-
-    private getSafeGitTemplateName(gitUrl: string): string {
-        return TemplateManager.GitPrefix + encodeURIComponent(gitUrl);
     }
 }
 
