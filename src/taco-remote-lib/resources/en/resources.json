@@ -75,9 +75,9 @@
     "_ErrorXcconfigDirNotFound.comment": "Message logged when we can't find the directory that build.xcconfig ",
 
     "AcquiringCordova": "Acquiring Cordova.",
-    "_AcquiringCordova.comment": "Status message returned when downloading and installing the requested version of cordova",
+    "_AcquiringCordova.comment": "Status message returned when downloading and installing the requested version of Cordova",
     "RequireCordovaFailed": "Error: Failed to acquire Cordova version {0}. {1}",
-    "_RequireCordovaFailed.comment": "Error message reported when a build fails to install the requested cordova version. {0} is the cordova version, and {1} is the error",
+    "_RequireCordovaFailed.comment": "Error message reported when a build fails to install the requested Cordova version. {0} is the Cordova version, and {1} is the error",
     "UpdatingIOSPlatform": "Updating iOS platform.",
     "_UpdatingIOSPlatform.comment": "Status message returned when doing a 'cordova platform add ios' or 'cordova prepare ios'",
     "CopyingNativeOverrides": "Copying native overrides.",
