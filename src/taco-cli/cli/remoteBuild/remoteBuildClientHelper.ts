@@ -421,13 +421,19 @@ class RemoteBuildClientHelper {
             cfg: cfg,
             platform: settings.platform
         };
-
-        if (settings.options) {
-            params["options"] = settings.options.join(" ");
+        
+        var buildOptions: string[] = [];
+        
+        if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
+            buildOptions.push("--device");
         }
 
-        if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
-            params["options"] = "--device " + params["options"];
+        if (settings.options) {
+            buildOptions.concat(settings.options);
+        }
+        
+        if (buildOptions.length > 0) {
+            params["options"] = buildOptions.join(" ");
         }
 
         if (settings.incrementalBuild) {

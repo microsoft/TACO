@@ -132,10 +132,6 @@ module BuildAndRunTelemetryTests {
                 platform: platform
             };
 
-            if (command === Command.Run) {
-                queryOptions["options"] = ""; // Build always sends the empty string
-            }
-
             var zip = new AdmZip();
             zip.addFile("test.txt", new Buffer("test file"), "comment");
             var zippedAppBuffer = zip.toBuffer();
@@ -210,7 +206,7 @@ module BuildAndRunTelemetryTests {
             var buildSequence = (isIncrementalTest ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
 
             if (command !== Command.Build) {
-                var target = isIncrementalTest ? "ipad 2" : "";
+                var target = isIncrementalTest ? "iPad-2" : "";
                 var runSequence = [{
                     expectedUrl: "/cordova/build/" + buildNumber + "/emulate?" + querystring.stringify({ target: target }),
                     head: { "Content-Type": "application/json" },
@@ -332,12 +328,12 @@ module BuildAndRunTelemetryTests {
         }
 
         it("2. ios remote debug target non_secure_server incremental", (done: MochaDone) => {
-            var args = ["--remote", "--debug", "--target=ipad 2", "ios"];
+            var args = ["--remote", "--debug", "--target=iPad-2", "ios"];
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "options.remote": { isPii: false, value: "true" },
                 "options.debug": { isPii: false, value: "true" },
-                "options.target": { isPii: false, value: "ipad 2" },
+                "options.target": { isPii: false, value: "iPad-2" },
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "ios" },
                 subCommand: { isPii: false, value: commandSwitch("build", "remote", "emulate") },
@@ -352,10 +348,9 @@ module BuildAndRunTelemetryTests {
             configureRemoteServer(done, /* Incremental test*/ true)
                 .then(() => runCommand(args))
                 .finally(() => testHttpServer.removeAllListeners("request"))
-                .done(telemetryProperties => {
+                .then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28382);
-                    done();
-                });
+                }).done(() => done(), done);
         });
 
         it("3. android ios unsecure_server not_incremental", (done: MochaDone) => {
@@ -380,6 +375,7 @@ module BuildAndRunTelemetryTests {
 
             configureRemoteServer(done, /* Not incremental test*/ false)
                 .then(() => runCommand(args))
+                .finally(() => testHttpServer.removeAllListeners("request"))
                 .done(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
                     done();
@@ -419,10 +415,9 @@ module BuildAndRunTelemetryTests {
                 "unknownOption1.value": { isPii: true, value: "unknown_value" }
             };
 
-            runCommand(args).done(telemetryProperties => {
+            runCommand(args).then(telemetryProperties => {
                 telemetryShouldEqual(telemetryProperties, expected);
-                done();
-            });
+            }).done(() => done(), done);
         });
 
         if ((command !== Command.Build)) {
