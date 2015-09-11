@@ -132,10 +132,6 @@ module BuildAndRunTelemetryTests {
                 platform: platform
             };
 
-            if (command === Command.Run) {
-                queryOptions["options"] = ""; // Build always sends the empty string
-            }
-
             var zip = new AdmZip();
             zip.addFile("test.txt", new Buffer("test file"), "comment");
             var zippedAppBuffer = zip.toBuffer();
@@ -352,10 +348,9 @@ module BuildAndRunTelemetryTests {
             configureRemoteServer(done, /* Incremental test*/ true)
                 .then(() => runCommand(args))
                 .finally(() => testHttpServer.removeAllListeners("request"))
-                .done(telemetryProperties => {
+                .then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28382);
-                    done();
-                });
+                }).done(() => done(), done);
         });
 
         it("3. android ios unsecure_server not_incremental", (done: MochaDone) => {
@@ -380,6 +375,7 @@ module BuildAndRunTelemetryTests {
 
             configureRemoteServer(done, /* Not incremental test*/ false)
                 .then(() => runCommand(args))
+                .finally(() => testHttpServer.removeAllListeners("request"))
                 .done(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
                     done();
@@ -419,10 +415,9 @@ module BuildAndRunTelemetryTests {
                 "unknownOption1.value": { isPii: true, value: "unknown_value" }
             };
 
-            runCommand(args).done(telemetryProperties => {
+            runCommand(args).then(telemetryProperties => {
                 telemetryShouldEqual(telemetryProperties, expected);
-                done();
-            });
+            }).done(() => done(), done);
         });
 
         if ((command !== Command.Build)) {
