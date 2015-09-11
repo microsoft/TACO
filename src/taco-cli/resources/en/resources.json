@@ -59,7 +59,7 @@
     "CommandCreateWarningDeprecatedKit": "<br/><warn>Warning: Kit {0} has been deprecated.</warn><br/>Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation. {0} is the name of deprecated kit",
 
-    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for taco-cli:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=619747</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
+    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for taco-cli:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=624555</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
     "_NewerTacoCLIVersionAvailable.comment": "Message printed to notify the user that there is a newer version of taco cli available, compared to the one he has currently installed.",
 
     "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <highlight>{1}</highlight>",
@@ -81,7 +81,7 @@
     "_CommandHelpDescription.comment": "Description of what's the purpose of invoking the 'taco help' command",
     "CommandDocumentationDescription": "Open up the documentation page in your default browser",
     "_CommandDocumentationDescription.comment": "Description of what's the purpose of invoking the 'taco docs' command",
-    "TacoDocumentationLink": "http://go.microsoft.com/fwlink/?LinkId=619747",
+    "TacoDocumentationLink": "http://go.microsoft.com/fwlink/?LinkId=624556",
     "_TacoDocumentationLink.comment":  "The link to the taco documentation webpage that we open when 'taco docs' is invoked. We don't need to translate this link, but we might want to change if if we have a 'localized' version of the taco documentation webpage",
     "CommandKitDescription": "View or update details about your Kit (Cordova CLI, platforms, and plugins)",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
