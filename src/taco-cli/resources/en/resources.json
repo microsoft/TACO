@@ -13,7 +13,7 @@
     "CommandCreateArgsConfig": "json string whose key/values will be included in '[PATH]/.cordova/config.json'",
     "CommandCreateOptionsKit": "Use the specified Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits.",
     "CommandCreateOptionsTemplate": "Use an alternate project template instead of blank. The argument can either be a TACO template ID or a Git repository URL.",
-    "CommandCreateOptionsCli": "Use a version of the Cordova CLI rather than a TACO Dev Kit.",
+    "CommandCreateOptionsCli": "Use a version of the Cordova CLI rather than a Kit.",
     "CommandCreateOptionsCopy": "Use custom www assets instead of using a TACO template.",
     "CommandCreateOptionsLinkto": "Symlink to custom www assets without creating a copy.",
     "CommandCreateNotTemplateIfCustomWww": "Error: Cannot specify --template if specifying --copy-from or --link-to",
