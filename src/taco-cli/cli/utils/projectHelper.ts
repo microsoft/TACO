@@ -218,10 +218,13 @@ class ProjectHelper {
         return ProjectHelper.getInstalledComponents(projectDir, "plugins")
         .then(function (pluginsInstalled: string[]): Q.Promise<any> {
             pluginsInstalled.forEach(function (plugin: string): void {
+                // Ignore plugins without a package.json
                 var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
-                var pluginInfo = require(pluginPackgeJson);
-                if (pluginInfo) {
-                    pluginVersions[plugin] = pluginInfo["version"];
+                if (fs.existsSync(pluginPackgeJson)) {
+                    var pluginInfo = require(pluginPackgeJson);
+                    if (pluginInfo) {
+                        pluginVersions[plugin] = pluginInfo["version"];
+                    }
                 }
             });       
             return Q.resolve(pluginVersions);
@@ -229,29 +232,29 @@ class ProjectHelper {
     }
 
     /**
-     *  public helper that gets the list of plugins installed from the local file system or a GIT repository
+     *  public helper that gets the list of plugins that are 1. installed from the local file system or a GIT repository 2. that are not top-level plugins
      */
-    public static getLocalOrGitPlugins(projectDir: string): Q.Promise<string[]> {
+    public static getNonUpdatablePlugins(projectDir: string): Q.Promise<string[]> {
         var projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var localOrGitPlugins: string[] = [];
+        var nonUpdatablePlugins: string[] = [];
         var fetchJsonPath: string = path.resolve(projectDir, "plugins", "fetch.json");
 
         if (!fs.existsSync(path.resolve(projectDir, "plugins", "fetch.json"))) {
-            return Q.resolve(localOrGitPlugins);
+            return Q.resolve(nonUpdatablePlugins);
         }
 
         try {
             var fetchJson: ProjectHelper.IPluginFetchInfo = require(fetchJsonPath);
             Object.keys(fetchJson).forEach(function (plugin: string): void {
-                if (fetchJson[plugin].source && fetchJson[plugin].source.type !== "registry") {
-                    localOrGitPlugins.push(plugin);
+                if ((fetchJson[plugin].source && fetchJson[plugin].source.type !== "registry") || !fetchJson[plugin]["is_top_level"]) {
+                    nonUpdatablePlugins.push(plugin);
                 }
             });
         } catch (error) {
             console.log(error);
         }
 
-        return Q.resolve(localOrGitPlugins);
+        return Q.resolve(nonUpdatablePlugins);
     }
 
     /**
@@ -337,7 +340,8 @@ module ProjectHelper {
             source: {
                 type: string;
                 id: string;
-            }
+            };
+            "is_top_level": boolean;
         };
     }
 }
