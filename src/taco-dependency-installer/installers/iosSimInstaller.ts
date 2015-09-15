@@ -9,8 +9,6 @@
 /// <reference path="../../typings/dependencyInstallerInterfaces.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 
-/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
-
 "use strict";
 
 import childProcess = require ("child_process");

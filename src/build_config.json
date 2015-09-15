@@ -6,8 +6,6 @@
     "buildPackages": "../build/packages/node_modules",
     "buildTools": "../build/tools",
     "buildTemplates": "../build/packages/node_modules/taco-kits/templates",
-    "copPath":  "../tools/internal/TSStyleCop/TSStyleCop.js",
-    "copConfig": "../tools/internal/TSStyleCop/TSStyleAllRules.json",
     "tsCompileOptions": { "noImplicitAny": true, "noEmitOnError": true, "target": "ES5", "module": "commonjs", "sourceMap": true, "sortOutput": true }
 
 }
