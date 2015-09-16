@@ -421,9 +421,9 @@ class RemoteBuildClientHelper {
             cfg: cfg,
             platform: settings.platform
         };
-        
+
         var buildOptions: string[] = [];
-        
+
         if (RemoteBuildClientHelper.isDeviceBuild(settings)) {
             buildOptions.push("--device");
         }
@@ -431,7 +431,7 @@ class RemoteBuildClientHelper {
         if (settings.options) {
             buildOptions.concat(settings.options);
         }
-        
+
         if (buildOptions.length > 0) {
             params["options"] = buildOptions.join(" ");
         }
