@@ -39,5 +39,3 @@ class IosSimInstaller extends InstallerBase {
 }
 
 export = IosSimInstaller;
-
-/// <enable code="SA1400" />

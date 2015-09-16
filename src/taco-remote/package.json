@@ -8,8 +8,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Microsoft/taco"
-    },    
+        "url": "https://github.com/Microsoft/TACO"
+    },
+    "bugs": {
+        "url" : "https://github.com/Microsoft/TACO/issues", 
+        "email" : "vscordovatools-admin@microsoft.com"
+    },
     "homepage": "http://taco.tools",
     "main": "./lib/server.js",
     "preferGlobal": true,
