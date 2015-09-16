@@ -15,6 +15,11 @@
         "email" : "vscordovatools-admin@microsoft.com"
     },
     "homepage": "http://taco.tools",
+    "keywords": [
+        "cordova",
+        "osx ",
+        "remote build"
+    ],
     "main": "./lib/server.js",
     "preferGlobal": true,
     "dependencies": {
