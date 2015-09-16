@@ -18,6 +18,7 @@ enum TacoErrorCode {
     ErrorOperationCancelled = 5012,
     ErrorInvalidVersion = 5013,
     ErrorReadingPackageVersions = 5014,
+    CordovaCommandUnhandledException = 5015,
 
     // Errors to do with Create 5450-5499
     CommandCreateGitCloneError = 5451,

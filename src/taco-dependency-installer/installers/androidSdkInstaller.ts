@@ -12,8 +12,6 @@
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/wrench.d.ts" />
 
-/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
-
 "use strict";
 
 import admZip = require ("adm-zip");
@@ -218,7 +216,28 @@ class AndroidSdkInstaller extends InstallerBase {
         return deferred.promise;
     }
 
-    private postInstallDefault(): Q.Promise<any> {
+    private killAdb(): Q.Promise<any> {
+        // Kill stray adb processes - this is an important step
+        // as stray adb processes spawned by the android installer
+        // can result in a hang post installation
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+
+        var adbProcess: childProcess.ChildProcess = childProcess.spawn("adb", ["kill-server"]);
+        adbProcess.on("error", function (error: Error): void {
+            this.telemetry
+                .add("error.description", "ErrorOnKillingAdb in killAdb", /*isPii*/ false)
+                .addError(error);
+            deferred.reject(error);
+        });
+            
+        adbProcess.on("exit", function (code: number): void {
+            deferred.resolve({});
+        });
+
+        return deferred.promise;
+    }
+
+    private installAndroidPackages(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.AndroidCommand);
@@ -239,6 +258,7 @@ class AndroidSdkInstaller extends InstallerBase {
             if (/\[y\/n\]:/.test(stringData)) {
                 // Accept license terms
                 cp.stdin.write("y" + os.EOL);
+                cp.stdin.end();
             }
         });
         cp.stderr.on("data", function (data: Buffer): void {
@@ -264,8 +284,14 @@ class AndroidSdkInstaller extends InstallerBase {
 
         return deferred.promise;
     }
+
+    private postInstallDefault(): Q.Promise<any> {
+        var self = this;
+        return this.installAndroidPackages()
+        .then(function (): Q.Promise<any> {
+            return self.killAdb();
+        });
+    }
 }
 
 export = AndroidSdkInstaller;
-
-/// <enable code="SA1400" />

@@ -1,4 +1,4 @@
-﻿module MyApp {
+module MyApp {
     "use strict";
 
     export module Application {

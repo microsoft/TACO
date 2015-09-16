@@ -6,10 +6,23 @@
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/TACO"
+    },
+    "bugs": {
+        "url" : "https://github.com/Microsoft/TACO/issues", 
+        "email" : "vscordovatools-admin@microsoft.com"
+    },
+    "homepage": "http://taco.tools",
+    "keywords": [
+        "cordova",
+        "osx ",
+        "remote build"
+    ],
     "dependencies": {
         "semver":  "4.3.4"
     },
-    "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
     "main": "./tacoRemoteMultiplexer.js",
     "readmeFilename": "README.md",
     "license": "MIT"

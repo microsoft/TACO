@@ -31,7 +31,6 @@ import logFormatHelper = require ("./logFormatHelper");
 
 module TacoUtility {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
-    /// <disable code="SA1301" justification="We are exporting classes" />
     export var ArgsHelper = argsHelper.ArgsHelper;
     export var BuildInfo = buildInfo.BuildInfo;
     export var Commands = commands.Commands;
@@ -54,7 +53,6 @@ module TacoUtility {
     export var TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper = utilHelper.UtilHelper;
     export var LogFormatHelper = logFormatHelper.LogFormatHelper;
-    /// <enable code="SA1301" />
 }
 
 export = TacoUtility;

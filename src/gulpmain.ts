@@ -18,7 +18,6 @@ import path = require ("path");
 import Q = require ("q");
 import replace = require ("replace");
 
-import stylecopUtil = require ("../tools/stylecopUtil");
 import gulpUtils = require ("../tools/GulpUtils");
  
 var buildConfig = require("../../src/build_config.json");
@@ -72,15 +71,9 @@ gulp.task("rebuild", function (callback: Function): void {
 });
 
 /* Task to install the compiled modules */
-gulp.task("install-build", ["build"], function (): Q.Promise<any> {
+gulp.task("install-build", ["package"], function (): Q.Promise<any> {
     return gulpUtils.installModules(tacoModules, buildConfig.buildPackages);
 });
-
-/* Runs style cop on the sources. */
-gulp.task("run-stylecop", function (callback: Function): void {
-    var styleCop = new stylecopUtil.StyleCopUtil();
-    styleCop.runCop(buildConfig.src, buildConfig.copPath, buildConfig.copConfig, callback);
-}); 
 
 /* Cleans up the build location, will have to call "gulp prep" again */
 gulp.task("clean", ["uninstall-build"], function (): void {

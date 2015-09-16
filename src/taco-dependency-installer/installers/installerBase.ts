@@ -10,8 +10,6 @@
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 
-/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
-
 "use strict";
 
 import fs = require ("fs");
@@ -185,5 +183,3 @@ class InstallerBase {
 }
 
 export = InstallerBase;
-
-/// <enable code="SA1400" />

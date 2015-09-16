@@ -11,6 +11,7 @@
 declare module TacoUtility {
     module Telemetry {
         var appName: string;
+        var isOptedIn: boolean;
 
         interface ITelemetryProperties {
             [propertyName: string]: any;
@@ -38,7 +39,7 @@ declare module TacoUtility {
             start(): void;
             end(): void;
         }
-        function init(appName: string, appVersion?: string): void;
+        function init(appName: string, appVersion?: string, isOptedIn?: boolean): void;
         function isInternal(): boolean;
         function send(event: TelemetryEvent, ignoreOptIn?: boolean): void;
         function changeTelemetryOptInSetting(): void;

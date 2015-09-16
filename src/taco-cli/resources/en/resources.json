@@ -2,8 +2,8 @@
     "CommandError": "Error: An error occurred while running the command.",
     "_CommandError.comment": "A generic error message displayed when an error occurs. This will be followed by the inner error, which should contain more details.",
 
-    "TacoCommandPassthrough": "Unknown TACO command, passing it to cordova",
-    "_TacoCommandPassthrough.comment": "Message printed when taco is given a command we don't understand and we pass through to cordova",
+    "TacoCommandPassthrough": "Unknown TACO command, passing it to Cordova",
+    "_TacoCommandPassthrough.comment": "Message printed when taco is given a command we don't understand and we pass through to Cordova",
 
     "CommandCreateDescription": "Create a new Cordova based TACO project",
     "_CommandCreateDescription.comment": "Description of the 'taco create' command",
@@ -11,9 +11,9 @@
     "CommandCreateArgsId": "Package ID for the project",
     "CommandCreateArgsName": "Human readable app name",
     "CommandCreateArgsConfig": "json string whose key/values will be included in '[PATH]/.cordova/config.json'",
-    "CommandCreateOptionsKit": "Use the specified Cordova Dev Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits.",
+    "CommandCreateOptionsKit": "Use the specified Kit for this project rather than the default.  Use \"taco kit list\" to see a list of available Kits.",
     "CommandCreateOptionsTemplate": "Use an alternate project template instead of blank. The argument can either be a TACO template ID or a Git repository URL.",
-    "CommandCreateOptionsCli": "Use a version of the Cordova CLI rather than a TACO Dev Kit.",
+    "CommandCreateOptionsCli": "Use a version of the Cordova CLI rather than a Kit.",
     "CommandCreateOptionsCopy": "Use custom www assets instead of using a TACO template.",
     "CommandCreateOptionsLinkto": "Symlink to custom www assets without creating a copy.",
     "CommandCreateNotTemplateIfCustomWww": "Error: Cannot specify --template if specifying --copy-from or --link-to",
@@ -29,11 +29,11 @@
     "CommandCreateInstallGulp": "<br/>Please install gulp and gulp-typescript by following the installation steps listed at <link>http://go.microsoft.com/fwlink/?LinkId=620942</link>.<br/><br/>Once installed, run 'gulp typescript' to pre-compile the TS files before building your project.<br/><br/>Once your TS files are pre-compiled, use 'taco build [platform]' to build your project.",
     "_CommandCreateInstallGulp.comment": "Message shown at the end of project creation for typescript projects, asking the user to install gulp and gulp-typescript in order to precompile their typescript files.",
     "CommandCreatePathNotEmpty": "Error: Could not create the project because the specified path already exists and is not empty: {0}",
-    "_CommandCreatePathNotEmpty.comment": "Error reported when the specified path at which to create the cordova project is an existing directory and isn't empty. {0} is the path that was given by the user.",
+    "_CommandCreatePathNotEmpty.comment": "Error reported when the specified path at which to create the Cordova project is an existing directory and isn't empty. {0} is the path that was given by the user.",
     "CommandCreateNoPath": "Error: A directory name must be specified in order to create a project. See 'taco help create'.",
     "_CommandCreateNoPath.comment": "Error reported when the user runs 'taco create' without providing a path at which to create the project.",
     "CommandCreateInvalidPath": "Error: The specified path is invalid: {0}",
-    "_CommandCreateInvalidPath.comment": "Error reported when the specified path at which to create the cordova project has segments that are invalid directory names for the current OS. {0} is the path that was given by the user.",
+    "_CommandCreateInvalidPath.comment": "Error reported when the specified path at which to create the Cordova project has segments that are invalid directory names for the current OS. {0} is the path that was given by the user.",
     "CommandCreateNoGit": "Error: No git found. Please ensure git is installed and is in your system's Path environment variable.",
     "_CommandCreateNoGit.comment": "Error shown when the user tries to use a git template, but doesn't have git installed.",
     "CommandCreateGitCloneError": "Error: unable to perform 'git clone' for the specified template. Please see the output from git for more details.",
@@ -59,7 +59,7 @@
     "CommandCreateWarningDeprecatedKit": "<br/><warn>Warning: Kit {0} has been deprecated.</warn><br/>Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation. {0} is the name of deprecated kit",
 
-    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for taco-cli:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=619747</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
+    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for taco-cli:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=624555</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
     "_NewerTacoCLIVersionAvailable.comment": "Message printed to notify the user that there is a newer version of taco cli available, compared to the one he has currently installed.",
 
     "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <highlight>{1}</highlight>",
@@ -81,7 +81,7 @@
     "_CommandHelpDescription.comment": "Description of what's the purpose of invoking the 'taco help' command",
     "CommandDocumentationDescription": "Open up the documentation page in your default browser",
     "_CommandDocumentationDescription.comment": "Description of what's the purpose of invoking the 'taco docs' command",
-    "TacoDocumentationLink": "http://go.microsoft.com/fwlink/?LinkId=619747",
+    "TacoDocumentationLink": "http://go.microsoft.com/fwlink/?LinkId=624556",
     "_TacoDocumentationLink.comment":  "The link to the taco documentation webpage that we open when 'taco docs' is invoked. We don't need to translate this link, but we might want to change if if we have a 'localized' version of the taco documentation webpage",
     "CommandKitDescription": "View or update details about your Kit (Cordova CLI, platforms, and plugins)",
     "_CommandKitDescription.comment": "Description for 'taco kit'",
@@ -91,11 +91,11 @@
     "_CommandKitOptionKitDescription.comment": "Description for --kit argument to taco kit list",
     "CommandKitSubcommandDescription": "Perform Kit related operations (like list)",
     "_CommandKitSubcommandDescription.comment": "Description for the 'COMMAND' argument to 'taco kit'",
-    "CommandKitListSubcommandDescription": "List available TACO Kits",
+    "CommandKitListSubcommandDescription": "List available Kits",
     "_CommandKitListSubcommandDescription.comment": "Description for the 'list' subcommand for 'taco kit'",
     "CommandKitSelectSubcommandDescription": "Select a Kit or a Cordova CLI version for the project",
     "_CommandKitSelectSubcommandDescription.comment": "Description for the 'select' subcommand for 'taco kit'",
-    "CommandKitSelectOptionKitDescription": "Use the specified TACO Kit for the project. Use \"taco kit list\" to see a list of available kits.",
+    "CommandKitSelectOptionKitDescription": "Use the specified Kit for the project. Use \"taco kit list\" to see a list of available Kits.",
     "_CommandKitSelectOptionKitDescription.comment": "Description for --kit argument to taco kit select",
     "CommandKitSelectOptionCliDescription": "Use the specified version of Cordova CLI for the project.",
     "_CommandKitSelectOptionCliDescription.comment": "Description for --cli argument to taco kit select",
@@ -109,7 +109,7 @@
     "TacoKitSelectExample2": "Update the current project to a CLI project targeting Cordova CLI <bold>v5.2.0</bold>",
     "_TacoKitSelectExample2.comment": "Text shown in examples section describing an example when user invokes 'taco kit select --cli 5.2.0'",
     "TacoKitNotes": "For more information about Kits, visit <link>http://go.microsoft.com/fwlink/?LinkId=619747</link>",
-    "_TacoKitNotes.comment": "Text displaying more information on TACO Kits",
+    "_TacoKitNotes.comment": "Text displaying more information on Kits",
 
     "CommandFeedbackDescription": "Change feedback setting",
     "_CommandFeedbackDescription.comment": "Description for 'taco feedback' command",
@@ -183,7 +183,7 @@
     "CommandRemoteListSubcommandDescription": "List all currently configured remote build agents",
     "_CommandRemoteListSubcommandDescription.comment": "Description for 'taco remote list'",
 
-    "CommandRemoteHeader": "Please ensure that remotebuild is running on the remote server.<br/> You can generate new client information at any time by typing remotebuild generateClientCert. For more details, see <fwlink goes here>",
+    "CommandRemoteHeader": "Please ensure that remotebuild is running on the remote server.<br/> You can generate new client information at any time by typing 'remotebuild certificates generate'. For more details, see <link>http://go.microsoft.com/fwlink/?LinkId=624345</link>",
     "_CommandRemoteHeader.comment": "Message printed to console when running taco remote",
     "CommandRemoteQueryHost": "Remote host name / IP address: ",
     "_CommandRemoteQueryHost.comment": "Query asking the user to enter the host name or IP address of the remote server",
@@ -235,7 +235,7 @@
     "_CommandPlatformRemoveSubcommandDescription.comment": "Description for 'taco platform remove'",
     "CommandPlatformListSubcommandDescription": "List all the installed and available platforms",
     "_CommandPlatformListSubcommandDescription.comment": "Description for 'taco platform list'",
-    "CommandPlatformUpdateSubcommandDescription": "Update the version of cordova used for a specific platform; Update to the latest <VERSION>, if no <VERSION>, path or <URL> is specified.",
+    "CommandPlatformUpdateSubcommandDescription": "Update the version of Cordova used for a specific platform; Update to the latest <VERSION>, if no <VERSION>, path or <URL> is specified.",
     "_CommandPlatformUpdateSubcommandDescription.comment": "Description for 'taco platform update'",
     "CommandPlatformCheckSubcommandDescription": "List platforms which can be updated by 'taco platform update'",
     "_CommandPlatformCheckSubcommandDescription.comment": "Description for 'taco platform check'",
@@ -355,7 +355,7 @@
 
     "CommandRunDescription": "Run the project for a given platform on the selected device/emulator target",
     "_CommandRunDescription.comment": "Description for 'taco run'",
-    "CommandEmulateDescription": "Emulate a cordova project",
+    "CommandEmulateDescription": "Emulate a Cordova project",
     "_CommandEmulateDescription.comment": "Description for 'taco emulate'",
     "CommandRunPlatformDescription": "The platform that you wish to run or emulate",
     "_CommandRunPlatformDescription.comment": "Description of the PLATFORM argument to 'taco run'",
@@ -393,7 +393,7 @@
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option(s) of 'taco install-reqs'",
 
-    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova version {0}. 'taco install-reqs' supports projects using Cordova version {1} or higher.<br/><br/>If your project was created using a TACO kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=618544.",
+    "CommandInstallCordovaTooOld": "Error: The current project uses Cordova version {0}. 'taco install-reqs' supports projects using Cordova version {1} or higher.<br/><br/>If your project was created using a Kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=618544.",
     "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than the minimum version. {0} is the Cordova version used by the current project, {1} is the minimum required Cordova version.",
     "CommandInstallNoPlatformsAdded": "Error: No platforms added to your project. To install the dependencies for a given platform, please add it to your project first.",
     "_CommandInstallNoPlatformsAdded.comment": "Error shown when a user uses 'taco install-reqs' but there are no platforms added to the current project.",
@@ -421,7 +421,7 @@
     "NotInCordovaProject": "Error: Current working directory is not a Cordova-based project",
     "_NotInCordovaProject.comment": "Message printed when attempting to run a taco command in a directory which is not a Cordova-based project ",
 
-    "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of cordova.",
+    "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of Cordova.",
     "_RemoteBuildUnsupportedPlatformcomment": "Error message printed when trying to 'taco remote add <platform>' and the platform is not supported. {0} is the platform",
 
     "UnsupportedHostPlatform": "Error: Unsupported platform {0}",
@@ -527,6 +527,9 @@
 
     "CordovaCommandFailedWithError": "'cordova {0}' failed.",
     "_CordovaCommandFailedWithError.comment": "Error message passed back after invoking Cordova fails. {0} is the exit code, and {1} is the arguments passed to it",
+
+    "CordovaCommandUnhandledException": "Cordova threw an unhandled exception, check http://go.microsoft.com/fwlink/?LinkId=623759 for possible details.",
+    "_CordovaCommandUnhandledException.comment": "Error message reported when Cordova throws an unhandled exception",
 
     "CordovaCmdNotFound": "Cordova not found, please run 'npm install –g cordova' to install Cordova globally",
     "_CordovaCmdNotFound.comment": "Error message shown when no Cordova is found on the machine",
