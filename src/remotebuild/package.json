@@ -6,12 +6,24 @@
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
     },
-    "homepage": "http://msdn.microsoft.com/en-us/vstudio/dn722381",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/TACO"
+    },
+    "bugs": {
+        "url" : "https://github.com/Microsoft/TACO/issues", 
+        "email" : "vscordovatools-admin@microsoft.com"
+    },
+    "homepage": "http://taco.tools",
+    "keywords": [
+        "cordova",
+        "osx ",
+        "remote build"
+    ],
     "main": "./lib/server.js",
     "bin": {
         "remotebuild": "./bin/remotebuild"
     },
-
     "preferGlobal": true,
     "dependencies": {
         "express": "4.12.2",

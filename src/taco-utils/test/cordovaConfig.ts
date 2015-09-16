@@ -15,9 +15,7 @@ import should = require ("should");
 
 import util = require ("../tacoUtils");
 
-/// <disable code="SA1301" justification="CordovaConfig is a class" /> 
 var CordovaConfig = util.CordovaConfig;
-/// <enable code="SA1301" />
 
 describe("CordovaConfig", function (): void {
     it("should correctly parse config files", function (): void {

@@ -463,9 +463,7 @@ module TacoKits {
 
     export var kitHelper: IKitHelper = new KitHelper();
 
-    /// <disable code="SA1301" justification="We are exporting classes" />
     export var TacoErrorCode = TacoErrorCodes;
-    /// <enable code="SA1301" />
 }
 
 export = TacoKits;

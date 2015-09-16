@@ -9,7 +9,6 @@
 
 "use strict";
 module TacoUtility {
-    /// <disable code="SA9016" justification="we need to match npm log levels" />
     export enum InstallLogLevel {
         silent,
         error,
@@ -19,7 +18,6 @@ module TacoUtility {
         verbose,
         silly,
     }
-    /// <enable code="SA9016" justification="we need to match npm log levels" />
 }
 
 export = TacoUtility;

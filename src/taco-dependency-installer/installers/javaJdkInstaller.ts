@@ -10,8 +10,6 @@
 /// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/request.d.ts" />
 
-/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
-
 "use strict";
 
 import admZip = require ("adm-zip");
@@ -210,5 +208,3 @@ class JavaJdkInstaller extends InstallerBase {
 }
 
 export = JavaJdkInstaller;
-
-/// <enable code="SA1400" />
