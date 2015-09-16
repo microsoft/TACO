@@ -1,9 +1,9 @@
 ﻿# TACO CLI
 
-The Tools for Apache Cordova (“TACO” for short) provide a set of command line utilities that make hybrid app development easier, friendlier, and faster.
+The Tools for Apache Cordova ("TACO" for short) provide a set of command line utilities that make hybrid app development easier, friendlier, and faster.
 
 ## Getting Started
-You need to first do an install of our package:
+You need to first install our package:
 
 ```sh
 npm -g install taco-cli
@@ -18,7 +18,7 @@ Follow these simple steps to start building your Apache Cordova app.
 
 ## Cool Features
 
- - **100% Cordova CLI Compatible:** If you know how to use the [Cordova CLI](http://cordova.apache.org/docs/en/5.0.0/guide_cli_index.md.html#The%20Command-Line%20Interface), you already know how to use us!
+ - **100% Cordova CLI Compatible:** If you know how to use the [Cordova CLI](http://cordova.apache.org/docs/en/edge/guide_cli_index.md.html#The%20Command-Line%20Interface), you already know how to use us!
  - **Guided Help:** After each command, our *guided steps* will help show you where to go next
  - **Fast Dependency Acquisition for Android, iOS, and Windows Platforms:** We take care of installing and configuring everything properly for each platform so that you can have more time to build your app
  - **Validated Kits:** Take the guesswork out of determining whether your plugins, platforms, build tools, and other components work with a particular version of Cordova.
