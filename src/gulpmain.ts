@@ -71,7 +71,7 @@ gulp.task("rebuild", function (callback: Function): void {
 });
 
 /* Task to install the compiled modules */
-gulp.task("install-build", ["build"], function (): Q.Promise<any> {
+gulp.task("install-build", ["package"], function (): Q.Promise<any> {
     return gulpUtils.installModules(tacoModules, buildConfig.buildPackages);
 });
 
