@@ -1,8 +1,8 @@
 ﻿# REST API
-### GET http://localhost:3000/certs/<PIN>
+### GET http://localhost:3000/certs/&lt;PIN>
 If PIN corresponds to a valid certificate and has not yet been used, then return the certificate file and invalidate the PIN. Otherwise returns a 404
 
-### GET http://localhost:3000/modules/<packageName>
+### GET http://localhost:3000/modules/&lt;packageName>
 Find where a specified package services requests.
 If the server configuration specified
 
