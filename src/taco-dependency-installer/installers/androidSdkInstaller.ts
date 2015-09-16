@@ -12,8 +12,6 @@
 /// <reference path="../../typings/request.d.ts" />
 /// <reference path="../../typings/wrench.d.ts" />
 
-/// <disable code="SA1400" justification="protected statements are currently broken in StyleCop" />
-
 "use strict";
 
 import admZip = require ("adm-zip");
@@ -297,5 +295,3 @@ class AndroidSdkInstaller extends InstallerBase {
 }
 
 export = AndroidSdkInstaller;
-
-/// <enable code="SA1400" />

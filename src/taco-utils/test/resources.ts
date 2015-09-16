@@ -80,9 +80,7 @@ describe("resources", function (): void {
 
     it("should return undefined for bad resource identifiers", function (): void {
         var actual = resources.getStringForLanguage("en", "NoResourceDefinedForThis");
-        /// <disable code="SA9017" justification="We want to capture any changes in behavior, and currently it returns undefined" /> 
         should(actual).be.equal(undefined);
-        /// <enable code="SA9017" />
     });
 
     it("should handle unicode in resource strings", function (): void {
