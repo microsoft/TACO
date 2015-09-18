@@ -169,7 +169,7 @@ describe("Kit", function (): void {
     describe("'taco kit select' to convert a Kit project to a cli project works as expected", function (): void {
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
-        var tacoJsonFileContents: string = "{\"cli\":\"5.1.1\"}";
+        var tacoJsonFileContents: string = "{<br/>\"cordova-cli\":<br/>\"5.1.1\"<br/>}";
         this.timeout(50000);
 
         before(function (done: MochaDone): void {
@@ -202,7 +202,7 @@ describe("Kit", function (): void {
     describe("'taco kit select' to convert CLI project to a Kit project works as expected", function (): void {
         var cliProjectpath: string = path.join(tacoHome, cliProjectDir);
         var tacoJsonPath: string = path.resolve(cliProjectpath, "taco.json");
-        var tacoJsonFileContents: string = "{\"kit\":\"5.1.1-Kit\"}";
+        var tacoJsonFileContents: string = "{<br/>\"kit\":<br/>\"5.1.1-Kit\",<br/>\"cordova-cli\":<br/>\"5.1.1\"<br/>}";
         this.timeout(50000);
 
         before(function (done: MochaDone): void {

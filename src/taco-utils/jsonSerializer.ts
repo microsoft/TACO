@@ -28,11 +28,13 @@ module TacoUtility {
 
         /**
          * Constructs a JsonSerializer  
-         * @param {number} number of spaces (indentation) for every nested level
-         * @param {number} max number of columns allowed in a row
+         * @param {number} Optional, number of spaces (indentation) for every nested level
+         * @param {number} Optional, max number of columns allowed in a row
          * @param {number} Optional, initial indentation offset
          */
         constructor(indent?: number, maxRight?: number, indentOffset?: number) {
+            indent = indent || 0;
+            maxRight = maxRight || 0;
             indentOffset = indentOffset || 0;
             this.levelIndent = LogFormatHelper.repeat(" ", indent);
             this.indentOffset = LogFormatHelper.repeat(" ", indentOffset);

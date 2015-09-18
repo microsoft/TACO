@@ -11,8 +11,8 @@ declare module TacoUtility {
     class JsonSerializer {
         /**
          * Constructs a JsonSerializer  
-         * @param {number} number of spaces (indentation) for every nested level
-         * @param {number} max number of columns allowed in a row
+         * @param {number} Optional, number of spaces (indentation) for every nested level
+         * @param {number} Optional, max number of columns allowed in a row
          * @param {number} Optional, initial indentation offset
          */
         constructor(indent?: number, maxRight?: number, indentOffset?: number);

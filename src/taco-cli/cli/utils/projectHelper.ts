@@ -26,9 +26,7 @@ import tacoUtility = require ("taco-utils");
 import telemetryHelper = tacoUtility.TelemetryHelper;
 import wrench = require ("wrench");
 
-var JsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer(3, 80, 10);
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
-
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
  */
@@ -48,13 +46,8 @@ class ProjectHelper {
         if (isKitProject) {
             return kitHelper.getDefaultKit()
             .then(function (kitId: string): Q.Promise<any> {
-                if (!versionValue) {
-                    tacoJson.kit = kitId;
-                } else {
-                    tacoJson.kit = versionValue;
-                }
-
-                return kitHelper.getValidCordovaCli(kitId);
+                tacoJson.kit = versionValue || kitId;
+                return kitHelper.getValidCordovaCli(tacoJson.kit);
             }).then(function (cordovaCli: string): Q.Promise<any> {                    
                 tacoJson["cordova-cli"] = cordovaCli;
                 return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
@@ -271,21 +264,14 @@ class ProjectHelper {
     /**
      *  public helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
      */
-    public static getformattedJson(jsonData: any): string {
-        if (!jsonData) {
-            return "";
-        }  
-
-        var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
-        return jsonSerializer.serialize(jsonData);
-    }
-
-    /**
-     *  public helper that serializes the JSON blob {jsonData} passed to a file @ {tacoJsonPath}
-     */
     public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var formattedTacoJson = ProjectHelper.getformattedJson(jsonData);
+        
+        // Write the JSON data to the file in the standard JSON format.
+        // JsonSerializer class in the taco-utils does the necessary formatting
+        var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
+        var formattedTacoJson = jsonSerializer.serialize(jsonData);
+        
         fs.writeFile(tacoJsonPath, formattedTacoJson, function (err: NodeJS.ErrnoException): void {
             if (err) {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.CommandCreateTacoJsonFileWriteError, err, tacoJsonPath));
