@@ -32,7 +32,7 @@ module TacoUtility {
          * @param {number} max number of columns allowed in a row
          * @param {number} Optional, initial indentation offset
          */
-        constructor(indent: number, maxRight: number, indentOffset?: number) {
+        constructor(indent?: number, maxRight?: number, indentOffset?: number) {
             indentOffset = indentOffset || 0;
             this.levelIndent = LogFormatHelper.repeat(" ", indent);
             this.indentOffset = LogFormatHelper.repeat(" ", indentOffset);
@@ -48,7 +48,7 @@ module TacoUtility {
         }
 
         private static stringifyKvp(key: string, value: string): string {
-            return util.format("%s : %s", JSON.stringify(key), value);
+            return util.format("%s: %s", JSON.stringify(key), value);
         }
 
         /**
