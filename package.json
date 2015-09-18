@@ -9,7 +9,7 @@
     "devDependencies": {
         "del": "^1.2.1",
         "gulp": "latest",
-        "typescript": "latest",
+        "typescript": "1.5.3",
         "gulp-json-editor": "latest",
         "gulp-typescript": "latest",
         "gulp-sourcemaps": "latest",
