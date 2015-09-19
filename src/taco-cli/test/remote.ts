@@ -199,7 +199,8 @@ describe("taco remote", function (): void {
             });
             return ConnectionSecurityHelper.getAgent(data.remotePlatforms["ios"]).then(function (agent: https.Agent): Q.Promise<any> {
                 // Now that a cert is configured, try making a secure connection to the (mocked) server to make sure the cert works.
-                var options: request.Options = {
+                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+                var options: request.Options = <request.Options>{
                     url: Settings.getRemoteServerUrl(data.remotePlatforms["ios"]) + "/testCertUsage",
                     headers: { "Accept-Language": "en" },
                     agent: agent

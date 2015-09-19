@@ -58,7 +58,8 @@ describe("server", function (): void {
     });
 
     it("should start correctly in insecure mode", function (done: MochaDone): void {
-        nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
         server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
             fs.existsSync(serverDir).should.be.true;
@@ -84,7 +85,8 @@ describe("server", function (): void {
         });
 
         deferred.promise.then(function (): Q.Promise<any> {
-            nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+            nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
             return server.start(new RemoteBuildConf(nconf, true));
         }).then(function (): void {
             dummyServer.close(function (): void {
@@ -104,7 +106,8 @@ describe("server", function (): void {
     // TODO (Devdiv: 1160573): Still need to work out how windows should work with certificates.
     darwinOnlyTest("should start correctly in secure mode on mac", function (done: MochaDone): void {
         this.timeout(10000);
-        nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en" });
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: true, lang: "en" });
         server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
             fs.existsSync(serverDir).should.be.ok;
@@ -127,7 +130,8 @@ describe("server", function (): void {
 
     darwinOnlyTest("should be able to download a certificate exactly once on mac", function (done: MochaDone): void {
         this.timeout(10000); // Certificates can take ages to generate apparently
-        nconf.overrides({ serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
         var config = new RemoteBuildConf(nconf, true);
         HostSpecifics.hostSpecifics.initialize(config).then(function (): Q.Promise<any> {
             return server.start(config);
@@ -171,7 +175,8 @@ describe("server", function (): void {
         var testModules: { [key: string]: any } = {};
         testModules["testServerModuleFactory"] = { mountPath: "testRoute", requirePath: modPath };
 
-        nconf.overrides({ serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
         server.start(new RemoteBuildConf(nconf, true)).then(function (): void {
             testServerModuleFactory.TestServerModule.ModConfig.mountPath.should.equal("testRoute");
         }).then(function (): Q.Promise<any> {

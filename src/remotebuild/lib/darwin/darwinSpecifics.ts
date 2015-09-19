@@ -98,7 +98,8 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
                 var pfxPath = path.join(conf.serverDir, "certs", "client", pin.toString(), "client.pfx");
                 var cert = fs.readFileSync(pfxPath);
                 fs.unlinkSync(pfxPath);
-                return new https.Agent({ strictSSL: true, pfx: cert });
+                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+                return new https.Agent(<https.RequestOptions>{ strictSSL: true, pfx: cert });
             });
         } else {
             return Q.resolve<NodeJSHttp.Agent>(null);
