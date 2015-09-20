@@ -34,6 +34,10 @@ import utils = TacoUtility.UtilHelper;
 
 import commands = tacoUtils.Commands.ICommandData;
 
+interface IKeyValuePair<T> {
+    [key: string]: T;
+}
+
 describe("Kit", function (): void {
     this.timeout(20000);
 
@@ -82,14 +86,18 @@ describe("Kit", function (): void {
     }
 
     function runKitCommandAndVerifyTacoJsonContents(args: string[],
-        tacoJsonPath: string, tacoJsonFileContents: string): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+        tacoJsonPath: string, tacoJsonKeyValues: IKeyValuePair<string>): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
         return kitRun(args)
-            .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                fs.existsSync(tacoJsonPath).should.be.true;
-                var fileContents: string = fs.readFileSync(tacoJsonPath).toString();
-                fileContents.should.be.exactly(tacoJsonFileContents);
-                return telemetryParameters;
+        .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+            fs.existsSync(tacoJsonPath).should.be.true;
+
+            var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
+
+            Object.keys(tacoJsonKeyValues).forEach(function (key: string): void {
+                tacoJson[key].should.be.exactly(tacoJsonKeyValues[key]);
             });
+            return telemetryParameters;
+        });
     }
 
     before(() => {
@@ -169,8 +177,11 @@ describe("Kit", function (): void {
     describe("'taco kit select' to convert a Kit project to a cli project works as expected", function (): void {
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
-        var tacoJsonFileContents: string = "{<br/>\"cordova-cli\":<br/>\"5.1.1\"<br/>}";
-        this.timeout(50000);
+        var expectedCliTacoJsonKeyValues: IKeyValuePair<string> = {
+            "cordova-cli": "5.1.1" 
+        };
+
+        this.timeout(60000);
 
         before(function (done: MochaDone): void {
             createKitProject("5.1.1-Kit")
@@ -181,14 +192,14 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(30000);
+            this.timeout(60000);
             process.chdir(tacoHome);
             rimraf(kitProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
 
         it("'taco kit select --cli {CLI-VERSION}' should execute with no errors", function (done: MochaDone): void {
-            runKitCommandAndVerifyTacoJsonContents(["select", "--cli", "5.1.1"], tacoJsonPath, tacoJsonFileContents)
-                .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+            runKitCommandAndVerifyTacoJsonContents(["select", "--cli", "5.1.1"], tacoJsonPath, expectedCliTacoJsonKeyValues)
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     var expected = {
                         subCommand: { isPii: false, value: "select" },
                         "options.cli": { isPii: false, value: "5.1.1" }
@@ -202,8 +213,11 @@ describe("Kit", function (): void {
     describe("'taco kit select' to convert CLI project to a Kit project works as expected", function (): void {
         var cliProjectpath: string = path.join(tacoHome, cliProjectDir);
         var tacoJsonPath: string = path.resolve(cliProjectpath, "taco.json");
-        var tacoJsonFileContents: string = "{<br/>\"kit\":<br/>\"5.1.1-Kit\",<br/>\"cordova-cli\":<br/>\"5.1.1\"<br/>}";
-        this.timeout(50000);
+        var expectedKitTacoJsonKeyValues: IKeyValuePair<string> = {
+            kit: "5.1.1-Kit", "cordova-cli": "5.1.1" 
+        };
+        
+        this.timeout(60000);
 
         before(function (done: MochaDone): void {
             createCliProject("5.1.1")
@@ -214,14 +228,14 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(30000);
+            this.timeout(60000);
             process.chdir(tacoHome);
             rimraf(cliProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
 
         it("'taco kit select --kit {kit-ID}' should execute with no errors", function (done: MochaDone): void {
-            runKitCommandAndVerifyTacoJsonContents(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, tacoJsonFileContents)
-                .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+            runKitCommandAndVerifyTacoJsonContents(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     var expected = {
                         subCommand: { isPii: false, value: "select" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }

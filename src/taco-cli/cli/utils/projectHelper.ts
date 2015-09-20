@@ -34,6 +34,17 @@ class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
     private static ProjectScriptsDir: string = "scripts";
+
+    private static parseKitId(versionValue: string):  Q.Promise<string> {
+        if (!versionValue) {
+            return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
+                return Q.resolve(kitId);
+            });
+        } else {
+            return Q.resolve(versionValue);
+        }
+    }
+
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
@@ -41,12 +52,12 @@ class ProjectHelper {
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TacoJsonFileName);
-        var tacoJson: ProjectHelper.ITacoJsonMetadata = {};
+        var tacoJson: ProjectHelper.ITacoJsonMetadata = fs.existsSync(tacoJsonPath) ? require (tacoJsonPath) : {};
 
         if (isKitProject) {
-            return kitHelper.getDefaultKit()
-            .then(function (kitId: string): Q.Promise<any> {
-                tacoJson.kit = versionValue || kitId;
+           return ProjectHelper.parseKitId(versionValue)
+           .then(function (kitId: string): Q.Promise<any> {
+                tacoJson.kit = kitId;
                 return kitHelper.getValidCordovaCli(tacoJson.kit);
             }).then(function (cordovaCli: string): Q.Promise<any> {                    
                 tacoJson["cordova-cli"] = cordovaCli;
@@ -58,7 +69,8 @@ class ProjectHelper {
                 return deferred.promise;
             }
 
-            return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { "cordova-cli": versionValue });
+            tacoJson["cordova-cli"] = versionValue;
+            return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
         }
     }
 
