@@ -112,7 +112,7 @@ describe("Kit", function (): void {
         // Force KitHelper to fetch the package fresh
         kitHelper.KitPackagePromise = null;
 
-        this.timeout(100000);
+        this.timeout(30000);
         rimraf.sync(runFolder);
     });
 
@@ -181,7 +181,7 @@ describe("Kit", function (): void {
             "cordova-cli": "5.1.1" 
         };
 
-        this.timeout(60000);
+        this.timeout(30000);
 
         before(function (done: MochaDone): void {
             createKitProject("5.1.1-Kit")
@@ -192,7 +192,7 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(60000);
+            this.timeout(30000);
             process.chdir(tacoHome);
             rimraf(kitProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
@@ -217,7 +217,7 @@ describe("Kit", function (): void {
             kit: "5.1.1-Kit", "cordova-cli": "5.1.1" 
         };
         
-        this.timeout(60000);
+        this.timeout(30000);
 
         before(function (done: MochaDone): void {
             createCliProject("5.1.1")
@@ -228,7 +228,7 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(60000);
+            this.timeout(30000);
             process.chdir(tacoHome);
             rimraf(cliProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
