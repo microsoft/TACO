@@ -64,6 +64,10 @@ class ProjectHelper {
                 return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
             });
         } else {
+            if(tacoJson.kit) {
+                delete tacoJson.kit;
+            }
+
             if (!versionValue) {
                 deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateTacoJsonFileCreationError));
                 return deferred.promise;
@@ -281,6 +285,7 @@ class ProjectHelper {
         
         // Write the JSON data to the file in the standard JSON format.
         // JsonSerializer class in the taco-utils does the necessary formatting
+        // This is important as VS expects the JSON file to be in the standard JSON format
         var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
         var formattedTacoJson = jsonSerializer.serialize(jsonData);
         

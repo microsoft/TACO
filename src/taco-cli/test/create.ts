@@ -158,9 +158,7 @@ describe("taco create", function (): void {
 
         var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
 
-        Object.keys(keyValues).forEach(function (key: string): void {
-            tacoJson[key].should.be.exactly(keyValues[key]);
-        });
+        tacoJson.should.be.eql(tacoJson);
     }
 
     function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {

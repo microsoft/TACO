@@ -93,9 +93,7 @@ describe("Kit", function (): void {
 
             var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
 
-            Object.keys(tacoJsonKeyValues).forEach(function (key: string): void {
-                tacoJson[key].should.be.exactly(tacoJsonKeyValues[key]);
-            });
+            tacoJsonKeyValues.should.be.eql(tacoJson)
             return telemetryParameters;
         });
     }
@@ -205,8 +203,8 @@ describe("Kit", function (): void {
                         "options.cli": { isPii: false, value: "5.1.1" }
                     };
                     telemetryParameters.should.be.eql(expected);
-                    done();
-                }, done);
+                })
+                .done(() => done(), done)
         });
     });
 
@@ -241,8 +239,8 @@ describe("Kit", function (): void {
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
                     };
                     telemetryParameters.should.be.eql(expected);
-                    done();
-                }, done);
+                })
+                .done(() => done(), done);
         });   
     });
 });
