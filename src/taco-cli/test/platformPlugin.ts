@@ -123,7 +123,7 @@ var kitPlatformOperations: ICommandAndResult[] = [
         
 var cliPlatformOperations: ICommandAndResult[] = [ 
         {   
-            command: "add android ios", 
+            command: "add android windows", 
             expectedVersions: cliPlatformVersions,
             expectedTelemetryProperties: {
                     cli: { isPii: false, value: "5.0.0" },
@@ -132,11 +132,11 @@ var cliPlatformOperations: ICommandAndResult[] = [
                     projectType: { isPii: false, value: "JavaScript" },
                     subCommand: { isPii: false, value: "add" },
                     target1: { isPii: false, value: "android" },
-                    target2: { isPii: false, value: "ios" }
+                    target2: { isPii: false, value: "windows" }
             }
         },
         {   
-            command: "remove android ios", 
+            command: "remove android windows", 
             expectedVersions: {}, 
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
@@ -145,12 +145,12 @@ var cliPlatformOperations: ICommandAndResult[] = [
                 projectType: { isPii: false, value: "JavaScript" },        
                 subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: false, value: "android" },
-                target2: { isPii: false, value: "ios" }
+                target2: { isPii: false, value: "windows" }
             }
         },
 
         {   
-            command: "add android@4.0.1 ios@3.8.0", 
+            command: "add android@4.0.1 windows@4.0.0", 
             expectedVersions: userOverridePlatformVersions, 
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
@@ -159,11 +159,11 @@ var cliPlatformOperations: ICommandAndResult[] = [
                 projectType: { isPii: false, value: "JavaScript" },   
                 subCommand: { isPii: false, value: "add" },
                 target1: { isPii: false, value: "android@4.0.1" },
-                target2: { isPii: false, value: "ios@3.8.0" } 
+                target2: { isPii: false, value: "windows@4.0.0" } 
             }
         },
         {   
-            command: "remove android ios", 
+            command: "remove android windows", 
             expectedVersions: {}, 
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
@@ -172,7 +172,7 @@ var cliPlatformOperations: ICommandAndResult[] = [
                 projectType: { isPii: false, value: "JavaScript" },   
                 subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: false, value: "android" },
-                target2: { isPii: false, value: "ios" } 
+                target2: { isPii: false, value: "windows" } 
             }
         }
     ];
