@@ -1,4 +1,4 @@
-﻿# TACO CLI
+﻿# TACO
 
 The Tools for Apache Cordova ("TACO" for short) provide a set of command line utilities that make hybrid app development easier, friendlier, and faster.
 

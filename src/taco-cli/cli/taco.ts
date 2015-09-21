@@ -62,7 +62,7 @@ class Taco {
             telemetry.init("TACO", require("../package.json").version);
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
-            // We check if there is a new taco-cli version available, and if so, we print a message before exiting the application
+            // We check if there is a new TACO version available, and if so, we print a message before exiting the application
             new CheckForNewerVersion().showOnExitAndIgnoreFailures();
 
             var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
