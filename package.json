@@ -11,7 +11,7 @@
         "gulp": "latest",
         "typescript": "1.5.3",
         "gulp-json-editor": "latest",
-        "gulp-typescript": "latest",
+        "gulp-typescript": "2.8.3",
         "gulp-sourcemaps": "latest",
         "merge2": "latest",
         "ncp": "latest",
