@@ -89,12 +89,9 @@ class CordovaWrapper {
     public static build(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
-                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                        return CordovaWrapper.catchUncaughtCordovaErrors<any>(function (): Q.Promise<any> {
-                            return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(commandData, platform));
-                        });
-                });
+                return CordovaWrapper.wrapCordovaInvocation<any>(projectInfo.cordovaCliVersion, (cordova: Cordova.ICordova) => {
+                    return cordova.raw.build(cordovaHelper.toCordovaBuildArguments(commandData, platform));
+                }, tacoUtility.InstallLogLevel.taco);
             } else {
                 return CordovaWrapper.cli(["build"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
             }
@@ -113,12 +110,7 @@ class CordovaWrapper {
     public static invokePlatformPluginCommand(command: string, cordovaCliVersion: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData = null, isSilent: boolean = false): Q.Promise<any> {
         if (cordovaCliVersion) {
             var cordova: typeof Cordova;
-            return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion)
-                .then(function (cdv: typeof Cordova): Q.Promise<any> {
-                return CordovaWrapper.catchUncaughtCordovaErrors<any>(function (): Q.Promise<any> {
-                    cordova = cdv;
-                    // Hook the event listeners. This will help us get the logs that cordova emits during platform/plugin operations
-                    CordovaWrapper.changeCordovaEventSubscription(cordova, !isSilent /* Subscribe only if we are not in silent mode */);
+            return CordovaWrapper.wrapCordovaInvocation<any>(cordovaCliVersion, (cordova: Cordova.ICordova) => {
                     if (command === "platform") {
                         return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
                     } else if (command === "plugin") {
@@ -126,13 +118,7 @@ class CordovaWrapper {
                     } else {
                         return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
                     }
-                });
-            }).then(function (): Q.Promise<any> {
-                // Unhook the event listeners after we are done
-                // (Cordova has an upper limit for the number of active event listeners - we do not want to exceed the max) 
-                CordovaWrapper.changeCordovaEventSubscription(cordova, false /* Unscubscribe */);
-                return Q({});
-            });
+            }, tacoUtility.InstallLogLevel.warn, isSilent); // Subscribe to event listeners only if we are not in silent mode
         } else {
             assert(data);
             var cliArgs: string[] = [command];
@@ -143,12 +129,9 @@ class CordovaWrapper {
     public static emulate(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
-                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                        return CordovaWrapper.catchUncaughtCordovaErrors<any>(function (): Q.Promise<any> {
-                            return cordova.raw.emulate(cordovaHelper.toCordovaRunArguments(commandData, platform));
-                        });
-                    });
+                return CordovaWrapper.wrapCordovaInvocation<any>(projectInfo.cordovaCliVersion, (cordova: Cordova.ICordova) => {
+                    return cordova.raw.emulate(cordovaHelper.toCordovaRunArguments(commandData, platform));
+                }, tacoUtility.InstallLogLevel.taco);
             } else {
                 return CordovaWrapper.cli(["emulate"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
             }
@@ -185,12 +168,9 @@ class CordovaWrapper {
                 // Execute the requirements command
                 if (projectInfo.cordovaCliVersion) {
                     // If we are in a taco project, use the raw api
-                    return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.silent)
-                        .then(function (cordova: Cordova.ICordova510): Q.Promise<any> {
-                            return CordovaWrapper.catchUncaughtCordovaErrors<any>(function (): Q.Promise<any> {
-                                return cordova.raw.requirements(platforms);
-                            });
-                        });
+                    return CordovaWrapper.wrapCordovaInvocation<any>(projectInfo.cordovaCliVersion, (cordova: Cordova.ICordova510) => {
+                        return cordova.raw.requirements(platforms);
+                    }, tacoUtility.InstallLogLevel.silent);
                 }
 
                 // Fallback to the global Cordova via the command line
@@ -213,14 +193,10 @@ class CordovaWrapper {
      * @return {Q.Promise<any>} An empty promise
      */
     public static create(cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<any> {
-        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-            .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                cordovaHelper.prepareCordovaConfig(cordovaParameters);
-
-                return CordovaWrapper.catchUncaughtCordovaErrors<any>(function (): Q.Promise<any> {
-                    return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
-                });
-            });
+        cordovaHelper.prepareCordovaConfig(cordovaParameters);
+        return CordovaWrapper.wrapCordovaInvocation<any>(cordovaCliVersion, (cordova: Cordova.ICordova) => {
+            return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
+        }, tacoUtility.InstallLogLevel.taco);
     }
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {
@@ -242,44 +218,46 @@ class CordovaWrapper {
     public static run(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
-                return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + projectInfo.cordovaCliVersion, tacoUtility.InstallLogLevel.taco)
-                    .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                        return CordovaWrapper.catchUncaughtCordovaErrors<any>(function (): Q.Promise<any> {
-                            return cordova.raw.run(cordovaHelper.toCordovaRunArguments(commandData, platform));
-                        });
-                });
+                return CordovaWrapper.wrapCordovaInvocation<any>(projectInfo.cordovaCliVersion, (cordova: Cordova.ICordova) => {
+                    return cordova.raw.run(cordovaHelper.toCordovaRunArguments(commandData, platform));
+                }, tacoUtility.InstallLogLevel.taco);
             } else {
                 return CordovaWrapper.cli(["run"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
             }
         });
     }
 
-    private static changeCordovaEventSubscription(cordova: typeof Cordova, subscribe: boolean): void {
-        if (subscribe) {
-            cordova.on("results", console.info);
-            cordova.on("warn", console.warn);
-            cordova.on("error", console.error);
-        } else {
-            cordova.off("results", console.info);
-            cordova.off("warn", console.warn);
-            cordova.off("error", console.error);
-        }
-    }
+    private static wrapCordovaInvocation<T>(cliVersion: string, func: (cordova: Cordova.ICordova) => Q.Promise<T>, logVerbosity: tacoUtility.InstallLogLevel = tacoUtility.InstallLogLevel.warn, silent: boolean = false): Q.Promise<T> {
+        return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cliVersion, logVerbosity)
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                if (!silent) {
+                    cordova.on("results", console.info);
+                    cordova.on("warn", console.warn);
+                    cordova.on("error", console.error);
+                    cordova.on("log", console.log);
+                }
 
-    private static catchUncaughtCordovaErrors<T>(func: () => Q.Promise<T>): Q.Promise<T> {
-        var dom = domain.create();
-        var deferred = Q.defer<T>();
+                var dom = domain.create();
+                var deferred = Q.defer<T>();
 
-        dom.on("error", function (err: any): void {
-            deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandUnhandledException, err));
-            // Note: At this point the state can be arbitrarily bad, so we really shouldn't try to recover much from here
-        });
+                dom.on("error", function (err: any): void {
+                    deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandUnhandledException, err));
+                    // Note: At this point the state can be arbitrarily bad, so we really shouldn't try to recover much from here
+                });
 
-        dom.run(function (): void {
-            func().done((result: T) => deferred.resolve(result), (err: any) => deferred.reject(err));
-        });
+                dom.run(function (): void {
+                    func(cordova).done((result: T) => deferred.resolve(result), (err: any) => deferred.reject(err));
+                });
 
-        return deferred.promise;
+                return deferred.promise.finally(() => {
+                    if (!silent) {
+                        cordova.off("results", console.info);
+                        cordova.off("warn", console.warn);
+                        cordova.off("error", console.error);
+                        cordova.off("log", console.log);
+                    }
+                });
+            });
     }
 }
 

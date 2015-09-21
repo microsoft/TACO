@@ -89,7 +89,7 @@ module BuildAndRunTelemetryTests {
         var projectPath = path.join(tacoHome, "example");
         var testHttpServer: http.Server;
 
-        var cordova: Cordova.ICordova = new mockCordova.MockCordova510();
+        var cordova: Cordova.ICordova = mockCordova.MockCordova510.default;
         var vcordova: string = "4.0.0";
         var remoteServerConfiguration = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
         var buildNumber = 12341;
@@ -311,10 +311,9 @@ module BuildAndRunTelemetryTests {
                 expected["platforms.actuallyBuilt.local1"] = { isPii: false, value: "android" };
             }
 
-            runCommand(args).done(telemetryProperties => {
+            runCommand(args).then(telemetryProperties => {
                 telemetryShouldEqual(telemetryProperties, expected);
-                done();
-            });
+            }).done(() => done(), done);
         });
 
         function mockProjectWithIncrementalBuild(): void {
@@ -376,10 +375,9 @@ module BuildAndRunTelemetryTests {
             configureRemoteServer(done, /* Not incremental test*/ false)
                 .then(() => runCommand(args))
                 .finally(() => testHttpServer.removeAllListeners("request"))
-                .done(telemetryProperties => {
+                .then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
-                    done();
-                });
+                }).done(() => done(), done);
         });
 
         it("4. no command line platforms, implicit windows wp8 device", (done: MochaDone) => {
@@ -399,10 +397,9 @@ module BuildAndRunTelemetryTests {
                 expected["options.device"] = { isPii: false, value: "true" };
             }
 
-            runCommand(args).done(telemetryProperties => {
+            runCommand(args).then(telemetryProperties => {
                 telemetryShouldEqual(telemetryProperties, expected);
-                done();
-            });
+            }).done(() => done(), done);
         });
 
         it("5. --uknown_option unknown_platform", (done: MochaDone) => {
@@ -432,10 +429,9 @@ module BuildAndRunTelemetryTests {
                     subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
                 };
 
-                runCommand(args).done(telemetryProperties => {
+                runCommand(args).then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected);
-                    done();
-                });
+                }).done(() => done(), done);
             });
         }
     }
