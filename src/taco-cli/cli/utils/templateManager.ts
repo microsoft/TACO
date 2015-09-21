@@ -106,6 +106,20 @@ class TemplateManager {
                 return cordovaWrapper.create(cordovaCliVersion, cordovaParameters);
             })
             .then(function (): Q.Promise<any> {
+                // If there is no "www" folder at the root of the template, it means Cordova already copied everything to [project]\www\
+                var skipCopy: boolean = !fs.readdirSync(templateSrcPath).some(function (itemPath: string): boolean {
+                    if (path.basename(itemPath) === "www") {
+                        return true;
+                    }
+
+                    return false;
+                });
+
+                if (skipCopy) {
+                    return Q.resolve({});
+                }
+
+                // If we reach this point, it means there is a "www" folder at the root of the template; we need to perform a recursive copy from the template to the project
                 var filterFunc = function (itemPath: string): boolean {
                     // Return true if the item path is not in our list of git files to ignore
                     return TemplateManager.GitFileList.indexOf(path.basename(itemPath)) === -1;
