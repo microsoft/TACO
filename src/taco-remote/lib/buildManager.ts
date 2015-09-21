@@ -10,6 +10,7 @@
 /// <reference path="../../typings/expressExtensions.d.ts" />
 /// <reference path="../../typings/fstream.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/tacoRemote.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tar.d.ts" />
@@ -190,7 +191,7 @@ class BuildManager {
         logStream.pipe(res);
     }
 
-    public getAllBuildInfo(): { metrics: any; queued: number; currentBuild: BuildInfo; queuedBuilds: BuildInfo[]; allBuilds: any } {
+    public getAllBuildInfo(): TacoRemote.IServerInfo {
         return {
             metrics: this.buildMetrics,
             queued: this.queuedBuilds.length,
