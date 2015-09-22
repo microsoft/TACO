@@ -132,7 +132,7 @@ class ProjectHelper {
             }
 
             if (fs.existsSync(tacoJsonFilePath)) {
-                tacoJson = require(tacoJsonFilePath);
+                tacoJson = JSON.parse(<any>fs.readFileSync(tacoJsonFilePath));
             } else {
                 deferred.resolve(projectInfo);
                 return deferred.promise;
