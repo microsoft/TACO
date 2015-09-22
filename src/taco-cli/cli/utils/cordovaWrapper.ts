@@ -178,18 +178,23 @@ class CordovaWrapper {
         }, () => ["run"].concat(cordovaHelper.toCordovaCliArguments(commandData, platform)));
     }
 
-    private static cordovaApiOrProcess(apiFunction: (cordova: Cordova.ICordova) => Q.Promise<any>, processArgs: () => string[],
-            options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean, captureOutput?: boolean} = {}): Q.Promise<any> {
+    public static cordovaApiOrOther<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, otherFunction: () => Q.Promise<T>,
+        options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean } = {}): Q.Promise<T> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
             if (projectInfo.cordovaCliVersion) {
-                return CordovaWrapper.wrapCordovaInvocation<any>(projectInfo.cordovaCliVersion, apiFunction, options.logLevel || tacoUtility.InstallLogLevel.taco, options.isSilent);
+                return CordovaWrapper.wrapCordovaInvocation<T>(projectInfo.cordovaCliVersion, apiFunction, options.logLevel || tacoUtility.InstallLogLevel.taco, options.isSilent);
             } else {
-                return CordovaWrapper.cli(processArgs(), options.captureOutput);
+                return otherFunction();
             }
         });
     }
 
-    private static wrapCordovaInvocation<T>(cliVersion: string, func: (cordova: Cordova.ICordova) => Q.Promise<T>, logVerbosity: tacoUtility.InstallLogLevel = tacoUtility.InstallLogLevel.warn, silent: boolean = false): Q.Promise<T> {
+    private static cordovaApiOrProcess<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, processArgs: () => string[],
+        options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean, captureOutput?: boolean } = {}): Q.Promise<T | string> {
+        return CordovaWrapper.cordovaApiOrOther<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
+    }
+
+    private static wrapCordovaInvocation<T>(cliVersion: string, func: (cordova: Cordova.ICordova) => T | Q.Promise<T>, logVerbosity: tacoUtility.InstallLogLevel = tacoUtility.InstallLogLevel.warn, silent: boolean = false): Q.Promise<T> {
         return packageLoader.lazyRequire(CordovaWrapper.CordovaNpmPackageName, CordovaWrapper.CordovaNpmPackageName + "@" + cliVersion, logVerbosity)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
                 if (!silent) {
@@ -208,7 +213,7 @@ class CordovaWrapper {
                 });
 
                 dom.run(function (): void {
-                    func(cordova).done((result: T) => deferred.resolve(result), (err: any) => deferred.reject(err));
+                    Q(func(cordova)).done((result: T) => deferred.resolve(result), (err: any) => deferred.reject(err));
                 });
 
                 return deferred.promise.finally(() => {

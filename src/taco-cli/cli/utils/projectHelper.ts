@@ -33,11 +33,14 @@ class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
     private static ProjectScriptsDir: string = "scripts";
+
+    private static CachedProjectInfo: Q.Promise<ProjectHelper.IProjectInfo> = null;
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
      */
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
+        ProjectHelper.CachedProjectInfo = null;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TacoJsonFileName);
         if (isKitProject) {
@@ -108,7 +111,10 @@ class ProjectHelper {
      *  An object of type IProjectInfo is returned to the caller.
      */
     public static getProjectInfo(): Q.Promise<ProjectHelper.IProjectInfo> {
-        var deferred: Q.Deferred<ProjectHelper.IProjectInfo> = Q.defer<ProjectHelper.IProjectInfo>();
+        if (ProjectHelper.CachedProjectInfo) {
+            return ProjectHelper.CachedProjectInfo;
+        }
+
         var projectInfo: ProjectHelper.IProjectInfo = {
             isTacoProject: false,
             cordovaCliVersion: "",
@@ -116,11 +122,10 @@ class ProjectHelper {
             tacoKitId: ""
         };
 
-        var projectPath = ProjectHelper.getProjectRoot();
-        try {
+        
+        return Q.fcall(ProjectHelper.getProjectRoot).then((projectPath: string): ProjectHelper.IProjectInfo | Q.Promise<ProjectHelper.IProjectInfo> => {
             if (!projectPath) {
-                deferred.resolve(projectInfo);
-                return deferred.promise;
+                return projectInfo;
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata;
@@ -134,29 +139,31 @@ class ProjectHelper {
             if (fs.existsSync(tacoJsonFilePath)) {
                 tacoJson = JSON.parse(<any>fs.readFileSync(tacoJsonFilePath));
             } else {
-                deferred.resolve(projectInfo);
-                return deferred.promise;
+                return projectInfo;
             }
 
             if (tacoJson.kit) {
-                kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): void {
+                return kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): ProjectHelper.IProjectInfo {
                     projectInfo.isTacoProject = true;
                     projectInfo.tacoKitId = tacoJson.kit;
                     projectInfo.cordovaCliVersion = cordovaCli;
-                    deferred.resolve(projectInfo);
+                    return projectInfo;
                 });
             } else if (tacoJson.cli) {
                 projectInfo.isTacoProject = true;
                 projectInfo.cordovaCliVersion = tacoJson.cli;
-                deferred.resolve(projectInfo);
+                return projectInfo;
             } else {
-                deferred.resolve(projectInfo);
+                return projectInfo;
             }
-        } catch (e) {
-            deferred.reject(errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed));
-        }
-
-        return deferred.promise;
+        }).then((projectInfo: ProjectHelper.IProjectInfo): ProjectHelper.IProjectInfo => {
+            if (projectInfo.isTacoProject) {
+                ProjectHelper.CachedProjectInfo = Q(projectInfo);
+            }
+            return projectInfo;
+        }).catch((e: Error): ProjectHelper.IProjectInfo => {
+            throw errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed);
+        });
     }
 
     /**

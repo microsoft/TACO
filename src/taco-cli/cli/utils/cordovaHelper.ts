@@ -251,21 +251,14 @@ class CordovaHelper {
      * for older versions of cordova or for non-kit projects, we default back to being permissive
      */
     public static getSupportedPlatforms(): Q.Promise<CordovaHelper.IDictionary<any>> {
-        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<CordovaHelper.IDictionary<any>> {
-            if (projectInfo.cordovaCliVersion) {
-                return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
-                    .then(function (cordova: typeof Cordova): CordovaHelper.IDictionary<any> {
-                        if (!cordova.cordova_lib) {
-                            // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
-                            return null;
-                        } else {
-                            return cordova.cordova_lib.cordova_platforms;
-                        }
-                });
+        return CordovaWrapper.cordovaApiOrOther<CordovaHelper.IDictionary<any>>((cordova: typeof Cordova): CordovaHelper.IDictionary<any> => {
+            if (!cordova.cordova_lib) {
+                // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
+                return null;
             } else {
-                return Q<CordovaHelper.IDictionary<any>>(null);
+                return cordova.cordova_lib.cordova_platforms;
             }
-        });
+        }, () => Q<CordovaHelper.IDictionary<any>>(null));
     }
    
     /**
