@@ -492,7 +492,7 @@
         },
         "feedback":
         {
-            "synopsis": "<synopsis>[COMMAND]</synopsis>",
+            "synopsis": "<synopsis></synopsis>",
             "categoryTitle": "[GeneralCommandsTitle]",
             "modulePath": "./feedback",
             "description": "<helptitle>[CommandFeedbackDescription]</helptitle>"
