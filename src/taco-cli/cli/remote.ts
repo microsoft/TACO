@@ -352,7 +352,9 @@ class Remote extends commands.TacoCommandBase {
     }
 
     private static getFriendlyHttpError(error: any, host: string, port: number, url: string, secure: boolean): Error {
-        if (error.code === "ECONNREFUSED") {
+        if (error.code.indexOf("CERT_") !== -1) {
+            return errorHelper.get(TacoErrorCodes.InvalidRemoteBuildClientCert);
+        } else if (error.code === "ECONNREFUSED") {
             return errorHelper.get(TacoErrorCodes.CommandRemoteConnectionRefused, util.format("%s://%s:%s", secure ? "https" : "http", host, port));
         } else if (error.code === "ENOTFOUND") {
             return errorHelper.get(TacoErrorCodes.CommandRemoteNotfound, host);
