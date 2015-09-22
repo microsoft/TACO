@@ -461,7 +461,7 @@
     "_InvalidRemoteBuildClientCert.comment": "Error message reported when a build request fails due to a bad certificate",
     "CheckingRemoteBuildStatus": "------ {0} Checking on build status from {1} [Attempt {2}]",
     "_CheckingRemoteBuildStatus.comment": "Message printed when polling for a build result. {0} is the current time, {1} is the URL we are fetching, and {2} is the number of times we have tried so far",
-    "RemoteBuildQueued": "There is {0} build ahead of you in the queue.",
+    "RemoteBuildQueued": "Your build is in the queue at position {0}.",
     "_RemoteBuildQueued.comment": "Message printed when the remote build is in the queue. {0} is the number of builds to be done before this build",
     "RemoteBuildError": "Remote build error from the build server {0}",
     "_RemoteBuildError.comment": "Error message reported when a build errors out on the server. {0} is the error from the server",
