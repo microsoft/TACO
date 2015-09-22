@@ -28,11 +28,13 @@ module TacoUtility {
 
         /**
          * Constructs a JsonSerializer  
-         * @param {number} number of spaces (indentation) for every nested level
-         * @param {number} max number of columns allowed in a row
+         * @param {number} Optional, number of spaces (indentation) for every nested level
+         * @param {number} Optional, max number of columns allowed in a row
          * @param {number} Optional, initial indentation offset
          */
-        constructor(indent: number, maxRight: number, indentOffset?: number) {
+        constructor(indent?: number, maxRight?: number, indentOffset?: number) {
+            indent = indent || 0;
+            maxRight = maxRight || 0;
             indentOffset = indentOffset || 0;
             this.levelIndent = LogFormatHelper.repeat(" ", indent);
             this.indentOffset = LogFormatHelper.repeat(" ", indentOffset);
@@ -48,7 +50,7 @@ module TacoUtility {
         }
 
         private static stringifyKvp(key: string, value: string): string {
-            return util.format("%s : %s", JSON.stringify(key), value);
+            return util.format("%s: %s", JSON.stringify(key), value);
         }
 
         /**
@@ -57,7 +59,7 @@ module TacoUtility {
         private getIndentedJson(obj: any, indent: string): string {
             if (util.isArray(obj)) {
                 var valuesJson: string = this.getIndentedJsonForArrayValues(<Array<any>>obj, indent + this.levelIndent);
-                return util.format("[<br/>%s<br/>%s]", valuesJson, indent);
+                return util.format("[\n%s\n%s]", valuesJson, indent);
             } else if (typeof obj === "object") {
                 var keyValuesJson: string = this.getMinifiedJsonForObjectKeys(obj, indent);
                 if (keyValuesJson) {
@@ -65,7 +67,7 @@ module TacoUtility {
                 }
 
                 keyValuesJson = this.getIndentedJsonForObjectKeys(obj, indent + this.levelIndent);
-                return util.format("{<br/>%s<br/>%s}", keyValuesJson, indent);
+                return util.format("{\n%s\n%s}", keyValuesJson, indent);
             } else {
                 return JSON.stringify(obj);
             }
@@ -80,7 +82,7 @@ module TacoUtility {
                 items.push(this.getIndentedJson(arr[i], indent));
             }
 
-            return items.join(",<br/>" + indent);
+            return items.join(",\n" + indent);
         }
 
         /**
@@ -94,7 +96,7 @@ module TacoUtility {
                 keyValuePairs.push(JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], indent)));
             }
 
-            return indent + keyValuePairs.join(",<br/>" + indent);
+            return indent + keyValuePairs.join(",\n" + indent);
         }
 
         /**
