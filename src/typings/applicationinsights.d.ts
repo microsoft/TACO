@@ -394,6 +394,14 @@ declare class Sender {
     disableCacheOnError(): void;
 }
 
+declare class Logging {
+    static enableDebug: boolean;
+    static disableWarnings: boolean;
+    static TAG: string;
+    info(message: string): void;
+    warn(message: string): void;
+}
+
 /**
  * The singleton meta interface for the default client of the client. This interface is used to setup/start and configure
  * the auto-collection behavior of the application insights module.
@@ -464,4 +472,8 @@ declare module "applicationinsights" {
 
 declare module "applicationinsights/Library/Sender" {
     export = Sender;
+}
+
+declare module "applicationinsights/Library/Logging" {
+    export = Logging;
 }

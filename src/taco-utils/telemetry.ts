@@ -23,6 +23,7 @@ import path = require ("path");
 import Q = require ("q");
 import readline = require ("readline");
 import sender = require ("applicationinsights/Library/Sender");
+import telemetryLogger = require ("applicationinsights/Library/Logging");
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
 
@@ -215,6 +216,7 @@ module TacoUtility {
                 appInsights.client.config.maxBatchIntervalMs = 100;
                 appInsights.client.channel.setOfflineMode(true);
                 sender.WAIT_BETWEEN_RESEND = 0; 
+                telemetryLogger.disableWarnings = true;
                 
                 if (appVersion) {
                     var context: Context = appInsights.client.context;
