@@ -63,14 +63,14 @@ class SelfTest {
             var buildOptions = deviceBuild ? "--device" : "--emulator";
 
             var tgzProducingStream: NodeJS.ReadableStream = null;
-            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             var cordovaAppDirReader = new fstream.Reader(<fstream.IReaderProps>{ path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
             tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
             var deferred = Q.defer();
 
             var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
-            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             tgzProducingStream.pipe(request.post(<request.Options>{ url: buildUrl, agent: agent }, function (error: any, response: any, body: any): void {
                 if (error) {
                     deferred.reject(error);
@@ -87,7 +87,7 @@ class SelfTest {
                 var ping = setInterval(function (): void {
                     i++;
                     console.log(util.format("%d...", i));
-                    // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+                    // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
                     request.get(<request.Options>{ url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
                         if (error) {
                             clearInterval(ping);
@@ -109,7 +109,7 @@ class SelfTest {
                                 writeStream.on("error", function (err: Error): void {
                                     deferred.reject(err);
                                 });
-                                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+                                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
                                 request(<request.Options>{ url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
                                     deferred.resolve({});
                                 }).on("error", function (err: Error): void {

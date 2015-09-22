@@ -98,7 +98,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
                 var pfxPath = path.join(conf.serverDir, "certs", "client", pin.toString(), "client.pfx");
                 var cert = fs.readFileSync(pfxPath);
                 fs.unlinkSync(pfxPath);
-                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
                 return new https.Agent(<https.RequestOptions>{ strictSSL: true, pfx: cert });
             });
         } else {

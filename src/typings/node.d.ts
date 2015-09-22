@@ -630,8 +630,8 @@ declare module NodeJSChildProcess {
         custom?: any;
         env?: any;
         detached?: boolean;
-        uid?: Number; // See https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
-        gid?: Number; // See https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
+        uid?: Number; // See https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options. See https://github.com/Microsoft/TACO/issues/18
+        gid?: Number; // See https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options. See https://github.com/Microsoft/TACO/issues/18
     }): ChildProcess;
     export function exec(command: string, options: IExecOptions , callback: (error: Error, stdout: Buffer, stderr: Buffer) =>void ): ChildProcess;
     export function exec(command: string, callback: (error: Error, stdout: Buffer, stderr: Buffer) =>void ): ChildProcess;
@@ -653,7 +653,7 @@ declare module NodeJSChildProcess {
         cwd?: string;
         env?: any;
         encoding?: string;
-        silent?: boolean; // See https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
+        silent?: boolean; // See https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options. See https://github.com/Microsoft/TACO/issues/18
     }): ChildProcess;
 }
 declare module "child_process" {
@@ -954,13 +954,13 @@ declare module "fs" {
         fd?: string;
         mode?: string;
         bufferSize?: number;
-        start?: number; // See https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
+        start?: number; // See https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options. See https://github.com/Microsoft/TACO/issues/18
     }): ReadStream;
     export function createWriteStream(path: string, options?: {
         flags?: string;
         encoding?: string;
         string?: string;
-        start?: number; // https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options
+        start?: number; // See https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options. See https://github.com/Microsoft/TACO/issues/18
     }): WriteStream;
 }
 

@@ -216,7 +216,7 @@ class RemoteBuildClientHelper {
 
     private static httpOptions(url: string, settings: { language: string; agent: Q.Promise<https.Agent> }): Q.Promise<request.Options> {
         return settings.agent.then(function (agent: https.Agent): request.Options {
-            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             return <request.Options>{
                 url: url,
                 headers: { "Accept-Language": settings.language },
@@ -309,7 +309,7 @@ class RemoteBuildClientHelper {
 
         var deferred = Q.defer();
 
-        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
         var firstPassReader = new fstream.Reader(<fstream.IReaderProps>{ path: projectSourceDir, type: "Directory", filter: filterForChanges });
         firstPassReader.on("close", function (): void {
             // We have now determined which files are new and which files are old. Construct changeList.json
@@ -340,7 +340,7 @@ class RemoteBuildClientHelper {
         });
 
         return deferred.promise.then(() => {
-            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             var projectSourceDirReader = new fstream.Reader(<fstream.IReaderProps>{ path: projectSourceDir, type: "Directory", filter: filterForTar });
             var tarProducingStream = CountStream.count(projectSourceDirReader.pipe(tar.Pack()),
                 (sz: number) => telemetryProperties["remotebuild." + platform + ".projectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
@@ -531,7 +531,7 @@ class RemoteBuildClientHelper {
                 endOfFile = logFileStat.size;
             }
 
-            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             var logStream = fs.createWriteStream(logPath, { start: endOfFile, flags: logFlags });
             var countStream = new CountStream();
             var newlineNormalizerStream = new NewlineNormalizerStream();
