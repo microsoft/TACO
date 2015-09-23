@@ -181,6 +181,15 @@ module BuildAndRunTelemetryTests {
                     waitForPayload: false
                 },
                 {
+                    expectedUrl: "/cordova/build/tasks",
+                    head: {
+                        "Content-Type": "application/json"
+                    },
+                    statusCode: 200,
+                    response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
+                    waitForPayload: false
+                },
+                {
                     expectedUrl: "/cordova/build/tasks/" + buildNumber,
                     head: { "Content-Type": "application/json" },
                     statusCode: 200,
