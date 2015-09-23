@@ -56,7 +56,7 @@ describe("taco build", function (): void {
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
-            var args = ["example", "--cli", vcordova];
+            var args = ["example", "--cordova", vcordova];
             return create.run({
                 options: {},
                 original: args,
