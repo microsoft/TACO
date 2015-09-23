@@ -11,6 +11,7 @@
 /// <reference path="../typings/commands.d.ts" />
 /// <reference path="../typings/cordovaConfig.d.ts" />
 /// <reference path="../typings/countStream.d.ts" />
+/// <reference path="../typings/jsonSerializer.d.ts" />
 /// <reference path="../typings/logger.d.ts" />
 /// <reference path="../typings/loggerHelper.d.ts" />
 /// <reference path="../typings/logLevel.d.ts" />
