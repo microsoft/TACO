@@ -80,15 +80,12 @@ describe("taco build", function (): void {
         testHttpServer = http.createServer();
         var port = 3000;
         testHttpServer.listen(port);
-        // Configure a dummy platform "test" to use the mocked out remote server
-        RemoteMock.saveConfig("test", remoteServerConfiguration).done(function (): void {
-            mocha();
-        }, function (err: any): void {
-            mocha(err);
-        });
 
         // Reduce the delay when polling for a change in status
         buildMod.RemoteBuild.PingInterval = 10;
+
+        // Configure a dummy platform "test" to use the mocked out remote server
+        RemoteMock.saveConfig("test", remoteServerConfiguration).done(() => mocha(), mocha);
     });
 
     after(function (done: MochaDone): void {
@@ -166,6 +163,15 @@ describe("taco build", function (): void {
                 },
                 statusCode: 200,
                 response: "1",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
                 waitForPayload: false
             },
             {
@@ -255,6 +261,15 @@ describe("taco build", function (): void {
                 },
                 statusCode: 200,
                 response: "1",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
                 waitForPayload: false
             },
             {
