@@ -287,7 +287,7 @@ module TacoUtility {
                     logger.logLine();
                     logger.log(utilResources.getString("TelemetryOptInMessage"));
                     logger.logLine();
-                    optIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInNote"));
+                    optIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInQuestion"));
                     TelemetryUtils.setTelemetryOptInSetting(optIn);
                 }
 
