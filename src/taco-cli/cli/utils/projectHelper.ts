@@ -10,10 +10,11 @@
 /// <reference path="../../../typings/Q.d.ts" />
 
 import child_process = require ("child_process");
+import fs = require ("fs");
 import Q = require ("q");
 import os = require ("os");
 import path = require ("path");
-import fs = require ("fs");
+import util = require ("util");
 
 import cordovaHelper = require ("./cordovaHelper");
 import cordovaWrapper = require ("./cordovaWrapper");
@@ -33,6 +34,17 @@ class ProjectHelper {
     private static TacoJsonFileName: string = "taco.json";
     private static ConfigXmlFileName: string = "config.xml";
     private static ProjectScriptsDir: string = "scripts";
+
+    private static parseKitId(versionValue: string):  Q.Promise<string> {
+        if (!versionValue) {
+            return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
+                return Q.resolve(kitId);
+            });
+        } else {
+            return Q.resolve(versionValue);
+        }
+    }
+
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
@@ -40,21 +52,29 @@ class ProjectHelper {
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TacoJsonFileName);
+        var tacoJson: ProjectHelper.ITacoJsonMetadata = fs.existsSync(tacoJsonPath) ? require (tacoJsonPath) : {};
+
         if (isKitProject) {
-            if (!versionValue) {
-                return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
-                    return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: kitId });
-                });
-            } else {
-                return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { kit: versionValue });
-            }
+           return ProjectHelper.parseKitId(versionValue)
+           .then(function (kitId: string): Q.Promise<any> {
+                tacoJson.kit = kitId;
+                return kitHelper.getValidCordovaCli(tacoJson.kit);
+            }).then(function (cordovaCli: string): Q.Promise<any> {                    
+                tacoJson["cordova-cli"] = cordovaCli;
+                return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
+            });
         } else {
+            if(tacoJson.kit) {
+                delete tacoJson.kit;
+            }
+
             if (!versionValue) {
                 deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateTacoJsonFileCreationError));
                 return deferred.promise;
             }
 
-            return ProjectHelper.createJsonFileWithContents(tacoJsonPath, { cli: versionValue });
+            tacoJson["cordova-cli"] = versionValue;
+            return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
         }
     }
 
@@ -145,9 +165,9 @@ class ProjectHelper {
                     projectInfo.cordovaCliVersion = cordovaCli;
                     deferred.resolve(projectInfo);
                 });
-            } else if (tacoJson.cli) {
+            } else if (tacoJson["cordova-cli"]) {
                 projectInfo.isTacoProject = true;
-                projectInfo.cordovaCliVersion = tacoJson.cli;
+                projectInfo.cordovaCliVersion = tacoJson["cordova-cli"];
                 deferred.resolve(projectInfo);
             } else {
                 deferred.resolve(projectInfo);
@@ -262,7 +282,14 @@ class ProjectHelper {
      */
     public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        fs.writeFile(tacoJsonPath, JSON.stringify(jsonData), function (err: NodeJS.ErrnoException): void {
+        
+        // Write the JSON data to the file in the standard JSON format.
+        // JsonSerializer class in the taco-utils does the necessary formatting
+        // This is important as VS expects the JSON file to be in the standard JSON format
+        var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
+        var formattedTacoJson = jsonSerializer.serialize(jsonData);
+        
+        fs.writeFile(tacoJsonPath, formattedTacoJson, function (err: NodeJS.ErrnoException): void {
             if (err) {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.CommandCreateTacoJsonFileWriteError, err, tacoJsonPath));
             }
@@ -325,7 +352,7 @@ class ProjectHelper {
 module ProjectHelper {
     export interface ITacoJsonMetadata {
         kit?: string;
-        cli?: string;
+        "cordova-cli"?: string;
     }
 
     export interface IProjectInfo {
