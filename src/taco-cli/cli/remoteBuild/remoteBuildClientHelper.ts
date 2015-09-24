@@ -10,6 +10,7 @@
 /// <reference path="../../../typings/request.d.ts" />
 /// <reference path="../../../typings/fstream.d.ts" />
 /// <reference path="../../../typings/tar.d.ts" />
+/// <reference path="../../../typings/tacoRemote.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/adm-zip.d.ts" />
 "use strict";
@@ -232,7 +233,7 @@ class RemoteBuildClientHelper {
      * Convert errors from error codes to localizable strings
      */
     private static errorFromRemoteBuildServer(serverUrl: string, requestError: any, fallbackErrorCode: TacoErrorCodes): Error {
-        if (requestError.toString().indexOf("CERT_") !== -1) {
+        if (requestError.code.indexOf("CERT_") !== -1) {
             return errorHelper.get(TacoErrorCodes.InvalidRemoteBuildClientCert);
         } else if (serverUrl.indexOf("https://") === 0 && requestError.code === "ECONNRESET") {
             return errorHelper.get(TacoErrorCodes.RemoteBuildSslConnectionReset, serverUrl);
@@ -502,11 +503,35 @@ class RemoteBuildClientHelper {
             }
 
             return RemoteBuildClientHelper.logBuildOutput(buildInfo, settings).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                return Q.delay(interval).then(function (): Q.Promise<BuildInfo> {
+                return Q.all([Q.delay(interval), RemoteBuildClientHelper.checkQueuePosition(settings, buildInfo)]).then(function (): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt, buildInfo["logOffset"]);
                 });
             });
         });
+    }
+
+    
+
+    private static checkQueuePosition(settings: BuildSettings, buildInfo: BuildInfo): Q.Promise<any> {
+        if (buildInfo.status === BuildInfo.BUILDING) {
+            return Q({});
+        }
+
+        var queueUrl = settings.buildServerUrl + "/build/tasks";
+        return RemoteBuildClientHelper.httpOptions(queueUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
+            .then(function (responseAndBody: { response: any; body: string }): Q.Promise<any> {
+                try {
+                    var serverInfo: TacoRemote.IServerInfo = JSON.parse(responseAndBody.body);
+                    var queueIndex = serverInfo.queuedBuilds.map((bi: BuildInfo) => bi.buildNumber === buildInfo.buildNumber).indexOf(true);
+
+                    if (queueIndex >= 0) {
+                        console.info(resources.getString("RemoteBuildQueued", queueIndex + 1));
+                    }
+                } catch (e) {
+                    console.info(e);
+                }
+                return Q({});
+            });
     }
 
     /*

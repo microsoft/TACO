@@ -15,6 +15,7 @@ import countStream = require ("./countStream");
 import resourceManager = require ("./resourceManager");
 import helpCommandBase = require ("./helpCommandBase");
 import installLogLevel = require ("./installLogLevel");
+import jsonSerializer = require ("./jsonSerializer");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
 import logLevel = require ("./logLevel");
@@ -42,6 +43,7 @@ module TacoUtility {
     export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
     export var HelpCommandBase = helpCommandBase.HelpCommandBase;
     export var InstallLogLevel = installLogLevel.InstallLogLevel;
+    export var JsonSerializer = jsonSerializer.JsonSerializer;
     export var ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager = resourceManager.ResourceManager;
     export var TacoError = tacoError.TacoError;
