@@ -36,6 +36,7 @@ class ProjectHelper {
     private static ProjectScriptsDir: string = "scripts";
 
     private static CachedProjectInfo: Q.Promise<ProjectHelper.IProjectInfo> = null;
+    private static CachedProjectFilePath: string = null;
 
     private static parseKitId(versionValue: string):  Q.Promise<string> {
         if (!versionValue) {
@@ -53,6 +54,7 @@ class ProjectHelper {
      */
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
         ProjectHelper.CachedProjectInfo = null;
+        ProjectHelper.CachedProjectFilePath = null;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TacoJsonFileName);
         var tacoJson: ProjectHelper.ITacoJsonMetadata = fs.existsSync(tacoJsonPath) ? require (tacoJsonPath) : {};
@@ -131,9 +133,6 @@ class ProjectHelper {
      *  An object of type IProjectInfo is returned to the caller.
      */
     public static getProjectInfo(): Q.Promise<ProjectHelper.IProjectInfo> {
-        if (ProjectHelper.CachedProjectInfo) {
-            return ProjectHelper.CachedProjectInfo;
-        }
 
         var projectInfo: ProjectHelper.IProjectInfo = {
             isTacoProject: false,
@@ -152,12 +151,21 @@ class ProjectHelper {
             var tacoJsonFilePath = path.join(projectPath, ProjectHelper.TacoJsonFileName);
             var configFilePath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
 
+            if (ProjectHelper.CachedProjectInfo) {
+                if (tacoJsonFilePath === ProjectHelper.CachedProjectFilePath) {
+                    return ProjectHelper.CachedProjectInfo;
+                } else {
+                    ProjectHelper.CachedProjectInfo = null;
+                }
+            }
+
             if (fs.existsSync(configFilePath)) {
                 projectInfo.configXmlPath = configFilePath;
             }
 
             if (fs.existsSync(tacoJsonFilePath)) {
                 tacoJson = JSON.parse(<any>fs.readFileSync(tacoJsonFilePath));
+                ProjectHelper.CachedProjectFilePath = tacoJsonFilePath;
             } else {
                 return projectInfo;
             }

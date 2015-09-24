@@ -8,10 +8,10 @@
 
 "use strict";
 
+import domain = require("domain");
 import path = require ("path");
 import Q = require ("q");
 
-import CordovaWrapper = require ("./cordovaWrapper");
 import errorHelper = require ("../tacoErrorHelper");
 import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
@@ -251,7 +251,7 @@ class CordovaHelper {
      * for older versions of cordova or for non-kit projects, we default back to being permissive
      */
     public static getSupportedPlatforms(): Q.Promise<CordovaHelper.IDictionary<any>> {
-        return CordovaWrapper.cordovaApiOrOther<CordovaHelper.IDictionary<any>>((cordova: typeof Cordova): CordovaHelper.IDictionary<any> => {
+        return CordovaHelper.cordovaApiOrOther<CordovaHelper.IDictionary<any>>((cordova: typeof Cordova): CordovaHelper.IDictionary<any> => {
             if (!cordova.cordova_lib) {
                 // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
                 return null;
@@ -261,6 +261,50 @@ class CordovaHelper {
         }, () => Q<CordovaHelper.IDictionary<any>>(null));
     }
    
+    public static cordovaApiOrOther<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, otherFunction: () => Q.Promise<T>,
+        options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean } = {}): Q.Promise<T> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+            if (projectInfo.cordovaCliVersion) {
+                return CordovaHelper.wrapCordovaInvocation<T>(projectInfo.cordovaCliVersion, apiFunction, options.logLevel || tacoUtility.InstallLogLevel.taco, options.isSilent);
+            } else {
+                return otherFunction();
+            }
+        });
+    }
+
+    public static wrapCordovaInvocation<T>(cliVersion: string, func: (cordova: Cordova.ICordova) => T | Q.Promise<T>, logVerbosity: tacoUtility.InstallLogLevel = tacoUtility.InstallLogLevel.warn, silent: boolean = false): Q.Promise<T> {
+        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cliVersion, logVerbosity)
+            .then(function (cordova: typeof Cordova): Q.Promise<any> {
+                if (!silent) {
+                    cordova.on("results", console.info);
+                    cordova.on("warn", console.warn);
+                    cordova.on("error", console.error);
+                    cordova.on("log", console.log);
+                }
+
+                var dom = domain.create();
+                var deferred = Q.defer<T>();
+
+                dom.on("error", function (err: any): void {
+                    deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandUnhandledException, err));
+                    // Note: At this point the state can be arbitrarily bad, so we really shouldn't try to recover much from here
+                });
+
+                dom.run(function (): void {
+                    Q(func(cordova)).done((result: T) => deferred.resolve(result), (err: any) => deferred.reject(err));
+                });
+
+                return deferred.promise.finally(() => {
+                    if (!silent) {
+                        cordova.off("results", console.info);
+                        cordova.off("warn", console.warn);
+                        cordova.off("error", console.error);
+                        cordova.off("log", console.log);
+                    }
+                });
+            });
+    }
+
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
      */
