@@ -330,12 +330,14 @@ class BuildManager {
         var extractDeferred = Q.defer();
         var extractPluginDeferred = Q.defer();
         // strip: 1 means take the top level directory name off when extracting (we want buildInfo.appDir to be the top level dir.)
-        var tarExtractor = tar.Extract({ path: extractToDir, strip: 1, filter: tarFilter });
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+        var tarExtractor = tar.Extract(<tar.ExtractOptions>{ path: extractToDir, strip: 1, filter: tarFilter });
         tarExtractor.on("end", function (): void {
             self.removeDeletedFiles(buildInfo);
             extractDeferred.resolve({});
         });
-        var pluginExtractor = tar.Extract({ path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
+        // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+        var pluginExtractor = tar.Extract(<tar.ExtractOptions>{ path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
         pluginExtractor.on("end", function (): void {
             extractPluginDeferred.resolve({});
         });

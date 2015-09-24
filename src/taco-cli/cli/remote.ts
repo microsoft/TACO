@@ -300,7 +300,8 @@ class Remote extends commands.TacoCommandBase {
     private static findRemoteMountPath(hostPortAndCert: { host: string; port: number; certName?: string; secure: boolean }): Q.Promise<string> {
         var mountDiscoveryUrl = util.format("http%s://%s:%d/modules/%s", hostPortAndCert.certName ? "s" : "", hostPortAndCert.host, hostPortAndCert.port, "taco-remote");
         return ConnectionSecurityHelper.getAgent(hostPortAndCert).then(function (agent: https.Agent): Q.Promise<string> {
-            var options: request.Options = {
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+            var options: request.Options = <request.Options>{
                 url: mountDiscoveryUrl,
                 agent: agent,
                 timeout: Remote.HttpTimeoutMS
