@@ -55,7 +55,7 @@ class Kit extends commands.TacoCommandBase {
     private static KnownOptions: Nopt.CommandData = {
         kit: String,
         json: String,
-        cli: String
+        cordova: String
     };
 
     private static IndentWidth: number = 3; // indent string
@@ -136,12 +136,12 @@ class Kit extends commands.TacoCommandBase {
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Kit.KnownOptions, Kit.ShortHands, args, 0);
 
         // Raise errors for invalid command line parameter combinations
-        if (parsedOptions.options.hasOwnProperty("json") && parsedOptions.options.hasOwnProperty("cli")) {
-            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--json", "--cli");
+        if (parsedOptions.options.hasOwnProperty("json") && parsedOptions.options.hasOwnProperty("cordova")) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--json", "--cordova");
         }
         
-        if (parsedOptions.options.hasOwnProperty("cli") && parsedOptions.options.hasOwnProperty("kit")) {
-            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--cli", "--kit");
+        if (parsedOptions.options.hasOwnProperty("cordova") && parsedOptions.options.hasOwnProperty("kit")) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--cordova", "--kit");
         }
 
         if (parsedOptions.options.hasOwnProperty("json") && parsedOptions.options.hasOwnProperty("kit")) {
@@ -159,7 +159,7 @@ class Kit extends commands.TacoCommandBase {
     }
 
     private static generateTelemetryProperties(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
-        return Q.when(tacoUtility.TelemetryHelper.addPropertiesFromOptions({}, Kit.KnownOptions, commandData.options, ["kit", "cli"]));
+        return Q.when(tacoUtility.TelemetryHelper.addPropertiesFromOptions({}, Kit.KnownOptions, commandData.options, ["kit", "cordova"]));
     }
 
     /**
@@ -730,7 +730,7 @@ class Kit extends commands.TacoCommandBase {
 
     private static select(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var kitId: string = commandData.options["kit"];
-        var cli: string = commandData.options["cli"];
+        var cli: string = commandData.options["cordova"];
         var projectInfo: projectHelper.IProjectInfo;
         var projectPath: string = projectHelper.getProjectRoot();
 
@@ -755,7 +755,7 @@ class Kit extends commands.TacoCommandBase {
             } else if (cli) {
                 var usedCli: string = projectInfo.cordovaCliVersion;
                 if (!usedkitId && usedCli && usedCli === cli ) {
-                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameCli, cli);
+                    throw errorHelper.get(TacoErrorCodes.CommandKitProjectUsesSameCordovaCli, cli);
                 } else {
                     return Kit.selectCli(projectPath, projectInfo, cli);
                 }

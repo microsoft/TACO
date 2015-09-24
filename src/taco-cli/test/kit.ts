@@ -78,7 +78,7 @@ describe("Kit", function (): void {
     }
 
     function createCliProject(cli: string): Q.Promise<any> {
-         return createProject(["cliProject", "--cli", cli], cliProjectDir);
+         return createProject(["cliProject", "--cordova", cli], cliProjectDir);
     }
 
     function createKitProject(kit: string): Q.Promise<any> {
@@ -195,12 +195,12 @@ describe("Kit", function (): void {
             rimraf(kitProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
 
-        it("'taco kit select --cli {CLI-VERSION}' should execute with no errors", function (done: MochaDone): void {
-            runKitCommandAndVerifyTacoJsonContents(["select", "--cli", "5.1.1"], tacoJsonPath, expectedCliTacoJsonKeyValues)
+        it("'taco kit select --cordova {CLI-VERSION}' should execute with no errors", function (done: MochaDone): void {
+            runKitCommandAndVerifyTacoJsonContents(["select", "--cordova", "5.1.1"], tacoJsonPath, expectedCliTacoJsonKeyValues)
                 .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     var expected = {
                         subCommand: { isPii: false, value: "select" },
-                        "options.cli": { isPii: false, value: "5.1.1" }
+                        "options.cordova": { isPii: false, value: "5.1.1" }
                     };
                     telemetryParameters.should.be.eql(expected);
                 })
