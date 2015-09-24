@@ -307,7 +307,7 @@ describe("taco create", function (): void {
             var scenario: number = 10;
 
             // CLI 4.2.0 + default Cordova project
-            // taco-cli: adds 1 file
+            // TACO: adds 1 file
             var totalEntries = cordovaDefaultProjectFileCount + tacoFileCount;
 
             runScenarioWithExpectedFileCount(scenario, totalEntries, expectedCliTacoJsonKeyValues["4.3.0"]).then(done, done);

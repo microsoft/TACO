@@ -87,7 +87,7 @@
         "Secure mode: True",
         "Security PIN: {2}",
         "",
-        "Alternately to use the taco-cli run 'taco remote add <platform>' to configure the taco CLI to use this build server for the chosen platform, specifying",
+        "Alternately to use TACO run 'taco remote add <platform>' to configure TACO to use this build server for the chosen platform, specifying",
         "Host: {0}",
         "Port: {1}",
         "PIN: {2}"
