@@ -41,8 +41,8 @@ enum TacoErrorCode {
 
     // Invalid arguments for create 5530 - 5549
     CommandCreateNoPath = 5531,
-    CommandCreateNotBothCliAndKit = 5532,
-    CommandCreateNotBothTemplateAndCli = 5533,
+    CommandCreateNotBothCordovaCliAndKit = 5532,
+    CommandCreateNotBothTemplateAndCordovaCli = 5533,
     CommandCreateNotTemplateIfCustomWww = 5534,
     CommandCreateOnlyLocalCustomWww = 5535,
     CommandCreatePathNotEmpty = 5536,
@@ -50,7 +50,7 @@ enum TacoErrorCode {
     // Invalid arguments for kits 5550 - 5569
     CommandKitCliOrKitShouldBeSpecified = 5551,
     CommandKitProjectUsesSameKit = 5552,
-    CommandKitProjectUsesSameCli = 5553,
+    CommandKitProjectUsesSameCordovaCli = 5553,
     ErrorInvalidJsonFilePath = 5554,
     ErrorInvalidPath = 5555,
     ErrorNoPluginOrPlatformSpecified = 5556,
