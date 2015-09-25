@@ -238,10 +238,34 @@ class Server {
                 return Q(certStore);
             }).
             then(function (certStore: HostSpecifics.ICertStore): https.Server {
+              // A slight reordering of the node v4.1.1 cipher list
+              var cipherList = ["ECDHE-ECDSA-AES256-GCM-SHA384",
+                  "ECDHE-ECDSA-AES128-GCM-SHA256",
+                  "ECDHE-RSA-AES256-GCM-SHA384",
+                  "ECDHE-RSA-AES128-GCM-SHA256",
+                  "ECDHE-RSA-AES256-SHA384",
+                  "ECDHE-RSA-AES256-SHA256",
+                  "ECDHE-RSA-AES128-SHA256",
+                  "DHE-RSA-AES128-GCM-SHA256",
+                  "DHE-RSA-AES256-SHA384",
+                  "DHE-RSA-AES256-SHA256",
+                  "DHE-RSA-AES128-SHA256",
+                  "HIGH",
+                  "!aNULL",
+                  "!eNULL",
+                  "!EXPORT",
+                  "!DES",
+                  "!RC4",
+                  "!MD5",
+                  "!PSK",
+                  "!SRP",
+                  "!CAMELLIA"];
                 var sslSettings = {
                     key: certStore.getKey(),
                     cert: certStore.getCert(),
                     ca: certStore.getCA(),
+                    ciphers: cipherList.join(":"),
+                    secureProtocol: "TLSv1_2_server_method",
                     requestCert: true,
                     rejectUnauthorized: false
                 };
