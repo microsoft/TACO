@@ -54,7 +54,7 @@ class JavaJdkInstaller extends InstallerBase {
         // Run installer
         var commandLine: string = this.installerDownloadPath + " /quiet /norestart /lvx %temp%/javajdk.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
 
-        childProcess.exec(commandLine, function (err: Error): void {
+        childProcess.exec(commandLine, (err: Error) => {
             if (err) {
                 this.telemetry.addError(err);
                 var code: number = (<any>err).code;
@@ -110,7 +110,7 @@ class JavaJdkInstaller extends InstallerBase {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command: string = "hdiutil attach " + this.installerDownloadPath;
 
-        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        childProcess.exec(command, (error: Error, stdout: Buffer, stderr: Buffer) => {
             // Save the mounted volume's name
             var stringOutput: string = stdout.toString();
             var capturedResult: string[] = /\/Volumes\/(.+)/.exec(stringOutput);
@@ -136,7 +136,7 @@ class JavaJdkInstaller extends InstallerBase {
         var pkgPath: string = path.join("/", "Volumes", this.darwinMountpointName, this.darwinMountpointName + ".pkg");
         var commandLine: string = "installer -pkg \"" + pkgPath + "\" -target \"/\"";
 
-        childProcess.exec(commandLine, function (err: Error): void {
+        childProcess.exec(commandLine, (err: Error) => {
             if (err) {
                 this.telemetry.addError(err);
                 var code: number = (<any>err).code;
@@ -164,7 +164,7 @@ class JavaJdkInstaller extends InstallerBase {
         var mountPath: string = path.join("/", "Volumes", this.darwinMountpointName);
         var command: string = "hdiutil detach \"" + mountPath + "\"";
 
-        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        childProcess.exec(command, (error: Error, stdout: Buffer, stderr: Buffer) => {
             if (error) {
                 this.telemetry
                     .add("error.description", "ErrorOnChildProcess on detachDmg", /*isPii*/ false)
