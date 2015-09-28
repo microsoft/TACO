@@ -360,16 +360,13 @@ module TacoDependencyInstaller {
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
-                    logger.logLine();
-
-                    if (answer === resources.getString("YesString")) {
+                    if (answer.toLocaleLowerCase() === resources.getString("YesString")) {
+                        logger.logLine();
                         loggerHelper.logSeparatorLine();
                         logger.logLine();
 
                         return Q.resolve(true);
                     } else {
-                        logger.log(resources.getString("LicenseAgreementRefused"));
-
                         return Q.resolve(false);
                     }
                 });
@@ -557,10 +554,6 @@ module TacoDependencyInstaller {
         }
 
         private printSummaryLine(code: number): void {
-            if (code === installerProtocol.ExitCode.RefusedPrompt) {
-                return;
-            }
-
             logger.logLine();
             loggerHelper.logSeparatorLine();
             logger.logLine();
@@ -580,6 +573,9 @@ module TacoDependencyInstaller {
                     break;
                 case installerExitCode.FatalError:
                     throw errorHelper.get(TacoErrorCodes.FatalError);
+                case installerExitCode.RefusedPrompt:
+                    logger.log(resources.getString("LicenseAgreementRefused"));
+                    break;
                 default:
                     throw errorHelper.get(TacoErrorCodes.UnknownExitCode);
             }

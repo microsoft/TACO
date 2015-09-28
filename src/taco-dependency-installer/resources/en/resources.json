@@ -26,9 +26,9 @@
     "RestartCommandPrompt": "<br/><warn>Please restart the command prompt to ensure that any newly installed software can be used correctly.</warn>",
     "_RestartCommandPrompt.comment": "Message shown after running the dependency installer if at least 1 dependency was successfully installed.",
 
-    "YesExampleString": "[yes]: ",
+    "YesExampleString": "[y/n]: ",
     "_YesExampleString.comment": "When the user gets prompted to type 'yes' to accept a prompt, this will be shown as an example of what the user has to type. This must be localized to exactly the localized YesString string in this file, surrounded with square brackets.",
-    "YesString": "yes",
+    "YesString": "y",
     "_YesString.comment": "The string that the user needs to type to confirm various prompts during the installation. This string is not shown to the user; this string is what we use internally to compare with the user's input during prompts. So, even though it is not user facing, it still needs to be localized.",
 
     "InstallCompletedWithErrors": "There were some errors while installing the third-party dependencies. Please see above for details.",
