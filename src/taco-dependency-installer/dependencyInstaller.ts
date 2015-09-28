@@ -108,9 +108,14 @@ module TacoDependencyInstaller {
 
                 telemetry.step("promptUserBeforeInstall");
                 return this.promptUserBeforeInstall()
-                    .then(function (): Q.Promise<number> {
-                        telemetry.step("spawnElevatedInstaller");
-                        return self.spawnElevatedInstaller();
+                    .then(function (acceptedPrompt: boolean): Q.Promise<number> {
+                        if (acceptedPrompt) {
+                            telemetry.step("spawnElevatedInstaller");
+
+                            return self.spawnElevatedInstaller();
+                        } else {
+                            return Q.resolve(installerProtocol.ExitCode.RefusedPrompt);
+                        }
                     })
                     .then(function (exitCode: number): void {
                         telemetry.step("printSummaryLine").add("exitCode", exitCode, /*isPii*/ false);
@@ -317,7 +322,7 @@ module TacoDependencyInstaller {
             });
         }
 
-        private promptUserBeforeInstall(): Q.Promise<any> {
+        private promptUserBeforeInstall(): Q.Promise<boolean> {
             this.buildInstallConfigFile();
 
             var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: IDependency): boolean {
@@ -355,14 +360,17 @@ module TacoDependencyInstaller {
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
+                    logger.logLine();
+
                     if (answer === resources.getString("YesString")) {
-                        logger.logLine();
                         loggerHelper.logSeparatorLine();
                         logger.logLine();
 
-                        return Q.resolve({});
+                        return Q.resolve(true);
                     } else {
-                        return Q.reject(errorHelper.get(TacoErrorCodes.LicenseAgreementError));
+                        logger.log(resources.getString("LicenseAgreementRefused"));
+
+                        return Q.resolve(false);
                     }
                 });
         }
@@ -549,6 +557,10 @@ module TacoDependencyInstaller {
         }
 
         private printSummaryLine(code: number): void {
+            if (code === installerProtocol.ExitCode.RefusedPrompt) {
+                return;
+            }
+
             logger.logLine();
             loggerHelper.logSeparatorLine();
             logger.logLine();

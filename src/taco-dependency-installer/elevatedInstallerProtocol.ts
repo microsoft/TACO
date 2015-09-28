@@ -23,6 +23,7 @@ module ElevatedInstallerProtocol {
         CompletedWithErrors = 12,
         NoAdminRights = 33,
         CouldNotConnect = 37,
+        RefusedPrompt = 42,
         FatalError = 108
     }
 

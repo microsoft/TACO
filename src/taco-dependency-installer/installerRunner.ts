@@ -122,8 +122,13 @@ class InstallerRunner {
 
                 // Verify that the destination folder is empty if it already exists
                 if (fs.existsSync(value.installDestination)) {
-                    if (fs.readdirSync(value.installDestination).length > 0) {
-                        throw new Error(resources.getString("PathNotEmpty", value.displayName, value.installDestination));
+                    var dirItems: string[] = fs.readdirSync(value.installDestination);
+
+                    if (dirItems.length > 0) {
+                        // For Darwin platform, the directory can contain a ".DS_Store" file, which we need to ignore (the directory is essentially empty in that case)
+                        if (process.platform !== "darwin" || dirItems.length !== 1 || dirItems[0] !== ".DS_Store") {
+                            throw new Error(resources.getString("PathNotEmpty", value.displayName, value.installDestination));
+                        }
                     }
                 }
 

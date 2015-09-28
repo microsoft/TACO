@@ -144,7 +144,7 @@ class InstallerUtils {
     public static mustSetSystemVariable(name: string, value: string, logger: ILogger): Q.Promise<boolean> {
         if (!process.env[name]) {
             return Q.resolve(true);
-        } else if (path.resolve(process.env[name]) === path.resolve(value)) {
+        } else if (path.resolve(utils.expandEnvironmentVariables(process.env[name])) === path.resolve(utils.expandEnvironmentVariables(value))) {
             // If this environment variable is already defined, but it is already set to what we need, we don't need to set it again
             return Q.resolve(false);
         }
@@ -198,7 +198,7 @@ class InstallerUtils {
      */
     public static pathContains(valueToCheck: string, pathValue: string = process.env["Path"]): boolean {
         return pathValue.split(path.delimiter).some(function (segment: string): boolean {
-            return path.resolve(segment) === path.resolve(valueToCheck);
+            return path.resolve(utils.expandEnvironmentVariables(segment)) === path.resolve(utils.expandEnvironmentVariables(valueToCheck));
         });
     }
 

@@ -122,31 +122,69 @@ class AndroidSdkInstaller extends InstallerBase {
 
         // Initialize values
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
+        var fullPathTools: string = path.join(androidHomeValue, "tools");
+        var fullPathPlatformTools: string = path.join(androidHomeValue, "platform-tools");
         var addToPathTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/tools/";
         var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
-        var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
-        var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
-        var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
-        var updateCommand: string = "echo '" + appendToBashProfile + "' >> '" + bashProfilePath + "'";
-        var mustChown: boolean = !fs.existsSync(bashProfilePath);
+        var addToPath: string = "";
+        var exportPathLine: string = "";
+        var exportAndroidHomeLine: string = "";
+        var updateCommand: string = "";
 
+        // Save Android home value
         this.androidHomeValue = androidHomeValue;
 
-        childProcess.exec(updateCommand, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-            if (error) {
-                this.telemetry
-                    .add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", /*isPii*/ false)
-                    .addError(error);
-                deferred.reject(error);
-            } else {
-                // If .bash_profile didn't exist before, make sure the owner is the current user, not root
-                if (mustChown) {
-                    fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
-                }
+        // Check if we need to update PATH
+        if (!installerUtils.pathContains(fullPathTools)) {
+            addToPath += path.delimiter + addToPathTools;
+        }
 
-                deferred.resolve({});
-            }
-        });
+        if (!installerUtils.pathContains(fullPathPlatformTools)) {
+            addToPath += path.delimiter + addToPathPlatformTools;
+        }
+
+        if (addToPath) {
+            exportPathLine = "\nexport PATH=\"$PATH" + addToPath + "\"";
+        }
+
+        // Check if we need to add an ANDROID_HOME value
+        if (!process.env[AndroidSdkInstaller.AndroidHomeName]) {
+            exportAndroidHomeLine = "\nexport " + AndroidSdkInstaller.AndroidHomeName + "=\"" + androidHomeValue + "\"";
+        }
+
+        // If a conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
+        if (path.resolve(utilHelper.expandEnvironmentVariables(process.env[AndroidSdkInstaller.AndroidHomeName])) !== androidHomeValue) {
+            this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.AndroidHomeName, this.androidHomeValue));
+        }
+
+        // Check if we need to update .bash_profile
+        var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
+        var mustChown: boolean = !fs.existsSync(bashProfilePath);
+
+        if (exportAndroidHomeLine || exportPathLine) {
+
+            updateCommand = "echo '# Android SDK" + exportAndroidHomeLine + exportPathLine + "' >> '" + bashProfilePath + "'";
+        }
+
+        if (updateCommand) {
+            childProcess.exec(updateCommand, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+                if (error) {
+                    this.telemetry
+                        .add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", /*isPii*/ false)
+                        .addError(error);
+                    deferred.reject(error);
+                } else {
+                    // If .bash_profile didn't exist before, make sure the owner is the current user, not root
+                    if (mustChown) {
+                        fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                    }
+
+                    deferred.resolve({});
+                }
+            });
+        } else {
+            deferred.resolve({});
+        }
 
         return deferred.promise;
     }

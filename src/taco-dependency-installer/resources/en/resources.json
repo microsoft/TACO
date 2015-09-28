@@ -44,8 +44,8 @@
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform.",
     "InstallationErrors": "There were some errors in the isntallation process. Please see above for details.",
     "_InstallationErrors.comment": "Message shown after all dependencies have been installed and there were errors.",
-    "LicenseAgreementError": "Error: User refused to proceed with the installation.",
-    "_LicenseAgreementError.comment": "Error shown when the user doesn't type the correct acceptance string.",
+    "LicenseAgreementRefused": "You have chosen not to proceed. Nothing has been installed on your system.",
+    "_LicenseAgreementRefused.comment": "Message shown when the user doesn't type the correct acceptance string when prompted to proceed with the installation.",
     "FileCorruptError": "Error: There is a problem with the downloaded installer file. Please try again later.",
     "_FileCorruptError.comment": "Error shown when the downloaded installer is corrupt or invalid.",
     "ErrorDeletingInstallConfig": "Error: Unable to delete the existing installation configuration file located at {0}.",
@@ -78,6 +78,8 @@
 
     "SystemVariableExists": "<warn>'{0}' environment variable already exists. Overwriting it may cause your current software to stop working correctly. Not overwriting it may result in your Cordova project not building correctly. Do you want to overwrite the existing '{0}'?</warn>",
     "_SystemVariableExists.comment": "Warning shown when we attempt to set an environment variable, but one with the same name already exists. {0} is the name of the variable.",
+    "SystemVariableExistsDarwin": "Cannot set '{0}' environment variable, because it already exists. To ensure Cordova can build Android projects, please update the '{0}' variable to point to the following location:<br/>{1}</warn>",
+    "_SystemVariableExistsDarwin.comment": "Warning shown when we attempt to set an environment variable, but one with the same name already exists. {0} is the name of the variable.",
     "SkipOverwriteWarning": "<warn>To ensure your Cordova project builds correctly, please set the '{0}' environment variable to the following value: {1}</warn>",
     "_SkipOverwriteWarning.comment": "Warning shown when the user opts to skip overwriting an existing environment variable. {0} is the variable name, {1} is the value we wanted to set it to.",
 
