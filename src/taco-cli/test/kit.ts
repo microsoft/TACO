@@ -222,7 +222,7 @@ describe("Kit", function (): void {
             .done(function (): void {
                 process.chdir(cliProjectpath);
                 done();
-            });  
+            },done);  
         });
 
         after(function (done: MochaDone): void {
