@@ -177,6 +177,14 @@ class CordovaWrapper {
         }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
     }
 
+    /**
+     * Perform an operation using either the Cordova API, or spwaning a Cordova process.
+     * The first argument is a function which is given a Cordova object, and can operate on it as it wishes.
+     * The second argument is a function which should return a list of strings to use as arguments to a Cordova process.
+     *
+     * We use a function for the second argument to delay computation until it is needed: If we are able to use the Cordova
+     * in-process then we don't need to bother computing the CLI arguments.
+     */
     private static cordovaApiOrProcess<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, processArgs: () => string[],
         options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean, captureOutput?: boolean } = {}): Q.Promise<T | string> {
         return CordovaHelper.tryInvokeCordova<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
