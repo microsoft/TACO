@@ -1,8 +1,10 @@
 ﻿/// <reference path="../../../typings/node.d.ts" />
+/// <reference path="../../../typings/zip-stream.d.ts" />
 import fs = require ("fs");
 import http = require ("http");
 import https = require ("https");
-import path = require ("path");
+import path = require("path");
+import packer = require("zip-stream");
 
 class ServerMock {
     /*
@@ -24,7 +26,7 @@ class ServerMock {
     /*
      * Create a simple state machine that expects a particular sequence of HTTP requests, and errors out if that expectation is not matched
      */
-    public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean, responseDelay?: number }[]):
+    public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean; responseDelay?: number; sendMockFile?: boolean }[]):
         (request: http.ServerRequest, response: http.ServerResponse) => void {
         var sequenceIndex = 0;
         return function (request: http.ServerRequest, response: http.ServerResponse): void {
@@ -38,6 +40,12 @@ class ServerMock {
                         setTimeout(() => {
                             response.writeHead(data.statusCode, data.head);
                             response.write(data.response);
+
+                            if (data.sendMockFile) {
+                                var archive = new packer();
+                                archive.pipe(response);
+                                archive.finalize();
+                            }
                             response.end();
                         }, data.responseDelay || 0);
                     };
