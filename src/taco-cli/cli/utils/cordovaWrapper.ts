@@ -179,7 +179,7 @@ class CordovaWrapper {
 
     private static cordovaApiOrProcess<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, processArgs: () => string[],
         options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean, captureOutput?: boolean } = {}): Q.Promise<T | string> {
-        return CordovaHelper.cordovaApiOrOther<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
+        return CordovaHelper.tryInvokeCordova<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
     }
 }
 

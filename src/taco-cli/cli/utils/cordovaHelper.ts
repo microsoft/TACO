@@ -251,27 +251,37 @@ class CordovaHelper {
      * for older versions of cordova or for non-kit projects, we default back to being permissive
      */
     public static getSupportedPlatforms(): Q.Promise<CordovaHelper.IDictionary<any>> {
-        return CordovaHelper.cordovaApiOrOther<CordovaHelper.IDictionary<any>>((cordova: typeof Cordova): CordovaHelper.IDictionary<any> => {
+        return CordovaHelper.tryInvokeCordova<CordovaHelper.IDictionary<any>>((cordova: typeof Cordova): CordovaHelper.IDictionary<any> => {
             if (!cordova.cordova_lib) {
                 // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
                 return null;
             } else {
                 return cordova.cordova_lib.cordova_platforms;
             }
-        }, () => Q<CordovaHelper.IDictionary<any>>(null));
+        }, (): CordovaHelper.IDictionary<any> => null);
     }
    
-    public static cordovaApiOrOther<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, otherFunction: () => Q.Promise<T>,
+    /**
+     * Given two functions, one which operates on a Cordova object and one which does not, this function will attempt to
+     * get access to an appropriate Cordova object and invoke the first function. If we do not know which Cordova to use, then it
+     * calls the second function instead.
+     */
+    public static tryInvokeCordova<T>(cordovaFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, otherFunction: () => T | Q.Promise<T>,
         options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean } = {}): Q.Promise<T> {
-        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): T | Q.Promise<T> {
             if (projectInfo.cordovaCliVersion) {
-                return CordovaHelper.wrapCordovaInvocation<T>(projectInfo.cordovaCliVersion, apiFunction, options.logLevel || tacoUtility.InstallLogLevel.taco, options.isSilent);
+                return CordovaHelper.wrapCordovaInvocation<T>(projectInfo.cordovaCliVersion, cordovaFunction, options.logLevel || tacoUtility.InstallLogLevel.taco, options.isSilent);
             } else {
                 return otherFunction();
             }
         });
     }
 
+    /**
+     * Acquire the specified version of Cordova, and then invoke the given function with that Cordova as an argument.
+     * The function invocation is wrapped in a domain, so any uncaught errors can be encapsulated, and the Cordova object
+     * has listeners added to print any messages to the output.
+     */
     public static wrapCordovaInvocation<T>(cliVersion: string, func: (cordova: Cordova.ICordova) => T | Q.Promise<T>, logVerbosity: tacoUtility.InstallLogLevel = tacoUtility.InstallLogLevel.warn, silent: boolean = false): Q.Promise<T> {
         return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cliVersion, logVerbosity)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
