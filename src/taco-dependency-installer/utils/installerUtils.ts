@@ -196,7 +196,13 @@ class InstallerUtils {
      *
      * @return {boolean} A boolean set to true if the Path system variable already contains the specified value in one of its segments
      */
-    public static pathContains(valueToCheck: string, pathValue: string = process.env["Path"]): boolean {
+    public static pathContains(valueToCheck: string, pathValue: string = null): boolean {
+        pathValue = pathValue || os.platform() === "win32" ? process.env["Path"] : process.env["PATH"];
+
+        if (!pathValue) {
+            return false;
+        }
+
         return pathValue.split(path.delimiter).some(function (segment: string): boolean {
             return path.resolve(utils.expandEnvironmentVariables(segment)) === path.resolve(utils.expandEnvironmentVariables(valueToCheck));
         });

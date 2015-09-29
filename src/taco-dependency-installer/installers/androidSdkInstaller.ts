@@ -14,21 +14,21 @@
 
 "use strict";
 
-import admZip = require ("adm-zip");
-import childProcess = require ("child_process");
-import fs = require ("fs");
-import os = require ("os");
-import path = require ("path");
-import Q = require ("q");
-import request = require ("request");
-import wrench = require ("wrench");
+import admZip = require("adm-zip");
+import childProcess = require("child_process");
+import fs = require("fs");
+import os = require("os");
+import path = require("path");
+import Q = require("q");
+import request = require("request");
+import wrench = require("wrench");
 
-import InstallerBase = require ("./installerBase");
-import installerProtocol = require ("../elevatedInstallerProtocol");
-import installerUtils = require ("../utils/installerUtils");
-import installerUtilsWin32 = require ("../utils/win32/installerUtilsWin32");
-import resources = require ("../resources/resourceManager");
-import tacoUtils = require ("taco-utils");
+import InstallerBase = require("./installerBase");
+import installerProtocol = require("../elevatedInstallerProtocol");
+import installerUtils = require("../utils/installerUtils");
+import installerUtilsWin32 = require("../utils/win32/installerUtilsWin32");
+import resources = require("../resources/resourceManager");
+import tacoUtils = require("taco-utils");
 
 import ILogger = installerProtocol.ILogger;
 import utilHelper = tacoUtils.UtilHelper;
@@ -150,10 +150,8 @@ class AndroidSdkInstaller extends InstallerBase {
         // Check if we need to add an ANDROID_HOME value
         if (!process.env[AndroidSdkInstaller.AndroidHomeName]) {
             exportAndroidHomeLine = "\nexport " + AndroidSdkInstaller.AndroidHomeName + "=\"" + androidHomeValue + "\"";
-        }
-
-        // If a conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
-        if (path.resolve(utilHelper.expandEnvironmentVariables(process.env[AndroidSdkInstaller.AndroidHomeName])) !== androidHomeValue) {
+        } else if (path.resolve(utilHelper.expandEnvironmentVariables(process.env[AndroidSdkInstaller.AndroidHomeName])) !== androidHomeValue) {
+            // A conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
             this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.AndroidHomeName, this.androidHomeValue));
         }
 
@@ -162,7 +160,6 @@ class AndroidSdkInstaller extends InstallerBase {
         var mustChown: boolean = !fs.existsSync(bashProfilePath);
 
         if (exportAndroidHomeLine || exportPathLine) {
-
             updateCommand = "echo '# Android SDK" + exportAndroidHomeLine + exportPathLine + "' >> '" + bashProfilePath + "'";
         }
 
@@ -267,7 +264,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 .addError(error);
             deferred.reject(error);
         });
-            
+
         adbProcess.on("exit", function (code: number): void {
             deferred.resolve({});
         });
@@ -326,9 +323,9 @@ class AndroidSdkInstaller extends InstallerBase {
     private postInstallDefault(): Q.Promise<any> {
         var self = this;
         return this.installAndroidPackages()
-        .then(function (): Q.Promise<any> {
-            return self.killAdb();
-        });
+            .then(function (): Q.Promise<any> {
+                return self.killAdb();
+            });
     }
 }
 
