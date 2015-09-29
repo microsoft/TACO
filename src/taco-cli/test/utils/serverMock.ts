@@ -40,7 +40,7 @@ class ServerMock {
                             if (data.fileToSend) {
                                 var reader = fs.createReadStream(data.fileToSend);
                                 reader.pipe(response);
-                                reader.on('end', function () {
+                                reader.on("end", function () {
                                     response.end();
                                 });
                             }
