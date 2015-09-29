@@ -56,17 +56,15 @@ remotebuild --help
 ```
 
 ## Verify remotebuild configuration
-1. With the remote build agent running, open a second Terminal app window (choose Shell, New Window).
-
-1. From the second Terminal app window on your Mac, type:
+1. Run:
 ```
-remotebuild test [options as passed to first instance of remotebuild]
+remotebuild test [options]
 ```
 This command initiates a test build. The output from the command should show the build number and other information about the build, such as its progress.
 
 1. To verify that your signing identity is set up correctly for device builds, type:
 ```
-remotebuild test --device
+remotebuild test [options] --device
 ```
 
 ## Configure remote build with VS Tools for Apache Cordova

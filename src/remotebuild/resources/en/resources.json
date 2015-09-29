@@ -110,7 +110,7 @@
     "OSXResetServerCertPleaseYesNo": "Please answer [Y]es or [N]o.",
     "_OSXResetServerCertPleaseYesNo.comment": "Query after user enters an option which is not recognised",
 
-    "CommandTestDescription": "Run tests against another instance of remotebuild",
+    "CommandTestDescription": "Run tests against remotebuild",
     "_CommandTestDescription.comment": "Description for 'remotebuild test'",
     "CommandTestDevice": "Test that the machine is configured for device builds",
     "_CommandTestDevice.comment": "Description for the --device option to remotebuild test",
