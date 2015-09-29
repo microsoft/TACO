@@ -389,10 +389,10 @@ module BuildAndRunTelemetryTests {
                 "remoteBuild.android.wasIncremental": { isPii: false, value: "false" },
                 "remotebuild.android.gzipedProjectSizeInBytes": { isPii: false, value: "28379" },
                 "remotebuild.android.projectSizeInBytes": { isPii: false, value: "48128" },
-                "remoteBuild.ios.filesChangedCount": { isPii: false, value: 9 },
+                "remoteBuild.ios.filesChangedCount": { isPii: false, value: 8 },
                 "remoteBuild.ios.wasIncremental": { isPii: false, value: "false" },
-                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: "28427" },
-                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "49152" }
+                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: "28379" },
+                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "48128" }
             };
 
             configureRemoteServer(done, /* Not incremental test*/ false)
@@ -401,7 +401,7 @@ module BuildAndRunTelemetryTests {
                     testIosHttpServer.removeAllListeners("request");
                     testAndroidHttpServer.removeAllListeners("request")
                 })
-                .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected, 28427, 28379))
+                .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected, 28379, 28379))
                 .done(() => done(), done);
         });
 
