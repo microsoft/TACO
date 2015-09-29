@@ -388,7 +388,8 @@ describe("taco build", function (): void {
         var buildArguments = ["--remote", "test", "--device"];
         var configuration = "debug";
         var buildNumber = 12340;
-        
+        var testZipFile: string = path.resolve(__dirname, "resources", "empty.zip");
+
         // Mock out the server on the other side
         var sequence = [
             {
@@ -479,7 +480,7 @@ describe("taco build", function (): void {
                 statusCode: 200,
                 response: JSON.stringify({}),
                 waitForPayload: false,
-                sendMockFile: true
+                fileToSend: testZipFile
             },
         ];
         var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
