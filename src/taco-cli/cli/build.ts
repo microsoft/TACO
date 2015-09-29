@@ -181,8 +181,8 @@ class Build extends commands.TacoCommandBase {
         return Q.all([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
            .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
             buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-            return platforms.reduce<Q.Promise<any>>((soFar: Q.Promise<any>, platform: Settings.IPlatformWithLocation) => {
-                return soFar.then(() => {
+            return Q.all(platforms.map((platform: Settings.IPlatformWithLocation) => {
+                return Q({}).then(() => {
                     if (commandData.options["clean"]) {
                         return Build.cleanPlatform(platform, commandData);
                     } else {
@@ -200,7 +200,7 @@ class Build extends commands.TacoCommandBase {
                             return Q.reject(errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform));
                     }
                 });
-            }, Q({}));
+            }));
         }).then(() => Build.generateTelemetryProperties(telemetryProperties, commandData));
     }
 }
