@@ -16,6 +16,7 @@ import tacoUtils = require ("taco-utils");
 
 import CordovaWrapper = require ("../cli/utils/cordovaWrapper");
 import mockCordova = require ("./utils/mockCordova");
+import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 
 import Commands = tacoUtils.Commands;
 import TacoPackageLoader = tacoUtils.TacoPackageLoader;
@@ -80,5 +81,15 @@ describe("cordovaWrapper", () => {
         }, () => {
             should(functionsCalled["emulate"]).be.true;
         }).done(() => done(), done);
+    });
+
+    it("should handle problems launching cordova via the command line", (done: MochaDone): void => {
+        CordovaWrapper.cli(["fakeCommand"])
+            .then(() => {
+                throw new Error("Should have failed");
+            }, (err: TacoUtility.TacoError) => {
+                err.errorCode.should.be.equal(TacoErrorCodes.CordovaCommandFailed);
+            })
+            .done(() => done(), done);
     });
 });
