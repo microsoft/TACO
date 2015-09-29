@@ -184,7 +184,7 @@ class ProjectHelper {
      */
     public static getInstalledComponents(projectDir: string, componentDirName: string): Q.Promise<string[]> {
         var components: string[] = [];
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var componentDir = path.join(projectDir, componentDirName);
         if (!fs.existsSync(componentDir)) {
             return Q.resolve(components);
@@ -201,7 +201,7 @@ class ProjectHelper {
      *  public helper that gets the version of the installed platforms
      */
     public static getInstalledPlatformVersions(projectDir: string): Q.Promise<any> {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var onWindows = process.platform === "win32";
         var deferred = Q.defer<any>();
         var platformVersions: cordovaHelper.IDictionary<string> = {};
@@ -233,7 +233,7 @@ class ProjectHelper {
      *  public helper that gets the version of the installed plugins
      */
     public static getInstalledPluginVersions(projectDir: string): Q.Promise<any> {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var pluginVersions: cordovaHelper.IDictionary<string> = {};
         return ProjectHelper.getInstalledComponents(projectDir, "plugins")
         .then(function (pluginsInstalled: string[]): Q.Promise<any> {
@@ -255,7 +255,7 @@ class ProjectHelper {
      *  public helper that gets the list of plugins that are 1. installed from the local file system or a GIT repository 2. that are not top-level plugins
      */
     public static getNonUpdatablePlugins(projectDir: string): Q.Promise<string[]> {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var nonUpdatablePlugins: string[] = [];
         var fetchJsonPath: string = path.resolve(projectDir, "plugins", "fetch.json");
 

@@ -148,7 +148,7 @@ describe("taco run", function (): void {
                 statusCode: 200,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.INSTALLED,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: false
             },
@@ -160,7 +160,7 @@ describe("taco run", function (): void {
                 statusCode: 200,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.RUNNING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: false
             }
@@ -214,7 +214,7 @@ describe("taco run", function (): void {
                 statusCode: 200,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.EMULATED,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: false
             }

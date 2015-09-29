@@ -37,7 +37,7 @@ class Certs {
         country: "US",
         ca_cn: os.hostname().substring(0, 50) + ".RB.CA", // Note: these cn entries have a maximum length of 64 bytes. If a hostname contains unicode characters, then os.hostname will return an ascii mis-encoding which is still one byte per character.
         pfx_name: os.hostname().substring(0, 50) + ".RB.CC",
-        client_cn: os.hostname().substring(0, 50) + ".RB", // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
+        client_cn: os.hostname().substring(0, 50) + ".RB" // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
     };
 
     private static CertStore: HostSpecifics.ICertStore = null;

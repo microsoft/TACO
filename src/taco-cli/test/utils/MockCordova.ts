@@ -38,7 +38,10 @@ module MockCordova {
 
         throw new MethodNotImplementedException(caller, methodName, "The cordova method " + methodName +
             " was called during a test. You need to provide a custom implementation");
+        /* tslint:disable no-unreachable */
+        // Removing next line causes TS2355
         return <T>null;
+        /* tslint:enable no-unreachable */
     }
 
     export class MockCordova510 implements Cordova.ICordova510 {

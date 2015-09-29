@@ -32,11 +32,11 @@ module TacoUtility {
     };
 
     interface IDictionary<T> {
-        [key: string]: T
+        [key: string]: T;
     }
 
     interface IHasErrorCode {
-        errorCode: number
+        errorCode: number;
     }
 
     export class TelemetryGenerator {

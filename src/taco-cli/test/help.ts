@@ -24,6 +24,10 @@ import commands = tacoUtils.Commands.ICommandData;
 
 describe("help for a command", function (): void {
     var help = new Help();
+    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
+    var memoryStdout: ms.MemoryStream;
+    var previous: boolean;
+
     function helpRun(command: string): Q.Promise<any> {
         var data: commands = {
             options: {},
@@ -44,10 +48,6 @@ describe("help for a command", function (): void {
             done();
         }, done);
     }
-
-    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
-    var previous: boolean;
 
     before(() => {
         previous = process.env["TACO_UNIT_TEST"];

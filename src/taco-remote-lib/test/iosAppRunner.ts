@@ -46,10 +46,10 @@ describe("Device functionality", function (): void {
                 }
 
                 dataString[0].should.equal("$");
-
+                var expectedResponse: string = "";
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
-                        var expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
+                        expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
                         var checksum = 0;
                         for (var i = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
@@ -67,14 +67,14 @@ describe("Device functionality", function (): void {
                         client.write("$OK#9A");
                         break;
                     case 2:
-                        var expectedResponse = "$Hc0#DB";
+                        expectedResponse = "$Hc0#DB";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
                         client.write("$OK#9A");
                         break;
                     case 4:
-                        var expectedResponse = "$c#63";
+                        expectedResponse = "$c#63";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
@@ -121,9 +121,10 @@ describe("Device functionality", function (): void {
 
                 dataString[0].should.equal("$");
 
+                var expectedResponse:string = "";
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
-                        var expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
+                        expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
                         var checksum = 0;
                         for (var i = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
@@ -141,14 +142,14 @@ describe("Device functionality", function (): void {
                         client.write("$OK#9A");
                         break;
                     case 2:
-                        var expectedResponse = "$Hc0#DB";
+                        expectedResponse = "$Hc0#DB";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
                         client.write("$OK#9A");
                         break;
                     case 4:
-                        var expectedResponse = "$c#63";
+                        expectedResponse = "$c#63";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");

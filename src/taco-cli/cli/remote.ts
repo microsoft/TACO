@@ -40,7 +40,7 @@ import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;
-    close: () => void
+    close: () => void;
 };
 
 /**

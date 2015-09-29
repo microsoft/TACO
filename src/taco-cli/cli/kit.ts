@@ -461,8 +461,6 @@ class Kit extends commands.TacoCommandBase {
                 });
             }, Q({}));
         });
-
-        logger.logLine();
     }
 
     /**

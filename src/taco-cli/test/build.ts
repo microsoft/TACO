@@ -140,7 +140,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },
@@ -239,7 +239,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },
@@ -347,7 +347,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },

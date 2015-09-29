@@ -76,7 +76,7 @@ module TacoKits {
     export interface ITemplateMetadata {
         [kitId: string]: {
             [templateId: string]: ITemplateInfo;
-        }
+        };
     }
 
     export interface IKitInfo {
@@ -416,7 +416,6 @@ module TacoKits {
             return this.getDefaultKit().then(function (defaultKit: string): Q.Promise<string> {
                 return self.getCordovaCliForKit(defaultKit);
             });
-            return deferred.promise;
         }
 
         /**

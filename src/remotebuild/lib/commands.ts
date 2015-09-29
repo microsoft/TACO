@@ -29,7 +29,7 @@ class Commands {
         start: {
             execute: function (config: RemoteBuildConf, cliArguments?: string[]): Q.Promise<any> {
                 return server.start(config);
-            },
+            }
         },
         test: {
             execute: function (config: RemoteBuildConf, cliArguments: string[]): Q.Promise<any> {

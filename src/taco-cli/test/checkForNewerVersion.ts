@@ -54,6 +54,11 @@ describe("Check for newer version", function (): void {
     this.timeout(15000);
     var tacoCliLatestInformation: any;
 
+    var fakeServer = "http://localhost:8080";
+    var repositoryPath = "/taco-cli/latest";
+    var repositoryInFakeServerPath = fakeServer + repositoryPath;
+    var packageFilePath = path.join(utils.tacoHome, "package.json");
+
     before(() => {
         // Set up mocked out resources
         process.env["TACO_UNIT_TEST"] = true;
@@ -172,11 +177,6 @@ describe("Check for newer version", function (): void {
         process.removeListener("beforeExit", listeners[0]);
         listeners[0]();
     }
-
-    var fakeServer = "http://localhost:8080";
-    var repositoryPath = "/taco-cli/latest";
-    var repositoryInFakeServerPath = fakeServer + repositoryPath;
-    var packageFilePath = path.join(utils.tacoHome, "package.json");
 
     function launchFakeNPMServer(done: MochaDone): Q.Promise<http.Server> {
         var serverIsListening = Q.defer<http.Server>();

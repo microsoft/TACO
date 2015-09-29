@@ -172,7 +172,7 @@ class AndroidSdkInstaller extends InstallerBase {
         // Prepare download options
         var options: request.Options = {
             uri: this.installerInfo.installSource,
-            method: "GET",
+            method: "GET"
         };
 
         // Download the archive

@@ -120,7 +120,7 @@ describe("taco create", function (): void {
         9: util.format("%s 42", getProjectPath(failurePrefix, 9)),
         10: "",
         11: util.format("%s/invalid/project/path", getProjectPath(failurePrefix, 11)),
-        12: util.format("%s", getProjectPath(failurePrefix, 12)),
+        12: util.format("%s", getProjectPath(failurePrefix, 12))
     };
 
     function getProjectPath(suitePrefix: string, scenario: number): string {

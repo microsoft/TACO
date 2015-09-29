@@ -272,7 +272,6 @@ module TacoUtility {
                         expirationIntervalInHours: expirationIntervalInHours,
                         logLevel: logLevel
                     };
-                    break;
 
                 case PackageSpecType.Error:
                     throw errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageId.split("@")[1], packageName);
@@ -309,8 +308,8 @@ module TacoUtility {
                 args = args.concat(flags);
             }
 
-            var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-            var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
+            var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: "inherit" });
             npmProcess.on("error", function (error: Error): void {
                 deferred.reject(error);
             });

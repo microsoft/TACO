@@ -93,7 +93,7 @@ describe("Kit", function (): void {
 
             var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
 
-            tacoJsonKeyValues.should.be.eql(tacoJson)
+            tacoJsonKeyValues.should.be.eql(tacoJson);
             return telemetryParameters;
         });
     }
@@ -204,7 +204,7 @@ describe("Kit", function (): void {
                     };
                     telemetryParameters.should.be.eql(expected);
                 })
-                .done(() => done(), done)
+                .done(() => done(), done);
         });
     });
 

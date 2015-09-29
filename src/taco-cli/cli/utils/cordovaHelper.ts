@@ -310,7 +310,7 @@ class CordovaHelper {
 
 module CordovaHelper {
     export interface IDictionary<T> {
-        [key: string]: T
+        [key: string]: T;
     }
 }
 

@@ -47,7 +47,7 @@ module TacoDependencyInstaller {
         installed?: boolean;
         metadata?: {
             version?: string;
-        }
+        };
     }
 
     // This dictionary represents the collection of results returned by cordova.raw.requirements(). Each tested platform either contains a rejected reason, or an array of ICordovaRequirement objects.
@@ -147,7 +147,7 @@ module TacoDependencyInstaller {
                             version: versionToUse,
                             displayName: self.dependenciesDataWrapper.getDisplayName(value.id),
                             licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(value.id),
-                            installDestination: expandedInstallPath,
+                            installDestination: expandedInstallPath
                         };
 
                         self.missingDependencies.push(dependencyInfo);
@@ -559,10 +559,8 @@ module TacoDependencyInstaller {
                     break;
                 case installerExitCode.CouldNotConnect:
                     throw errorHelper.get(TacoErrorCodes.CouldNotConnect);
-                    break;
                 case installerExitCode.NoAdminRights:
                     throw errorHelper.get(TacoErrorCodes.NoAdminRights);
-                    break;
                 case installerExitCode.Success:
                     logger.log(resources.getString("InstallCompletedSuccessfully"));
                     break;
