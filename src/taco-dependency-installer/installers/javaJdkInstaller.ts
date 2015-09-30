@@ -179,7 +179,7 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     private downloadDefault(): Q.Promise<any> {
-        this.installerDownloadPath = path.join(InstallerBase.InstallerCache, "javaJdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
+        this.installerDownloadPath = path.join(InstallerBase.installerCache, "javaJdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
 
         // Prepare expected installer file properties
         var expectedProperties: installerUtils.IFileSignature = {

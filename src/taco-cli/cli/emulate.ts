@@ -54,15 +54,6 @@ class Emulate extends commands.TacoCommandBase {
 
     public name: string = "run";
     public info: commands.ICommandInfo;
-    public subcommands: commands.ICommand[] = [
-        {
-            name: "emulate",
-            run: Emulate.emulate,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return true;
-            }
-        }
-    ];
 
     private static generateTelemetryProperties(telemetryProperties: tacoUtility.ICommandTelemetryProperties,
         commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
@@ -149,6 +140,19 @@ class Emulate extends commands.TacoCommandBase {
                 }));
             }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
     }
+
+    /* tslint:disable:member-ordering */
+    // tslint doesn't handle this case and considers subcommands as member function
+    public subcommands: commands.ICommand[] = [
+        {
+            name: "emulate",
+            run: Emulate.emulate,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return true;
+            }
+        }
+    ];
+    /* tslint:enable:member-ordering */
 
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI

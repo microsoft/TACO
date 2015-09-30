@@ -278,7 +278,7 @@ class BuildManager {
         });
         tgzFile.on("error", function (err: Error): void {
             buildInfo.updateStatus(BuildInfo.ERROR, "ErrorSavingTgz", tgzFile, err.message);
-            console.error(resources.getString("ErrorSavingTgz", tgzFile, err));
+            Logger.logError(resources.getString("ErrorSavingTgz", tgzFile, err));
             self.buildMetrics.failed++;
             callback(err, buildInfo);
         });
@@ -295,14 +295,14 @@ class BuildManager {
             }
         } catch (e) {
             buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
-            console.error(resources.getString("FailedCreateDirectory", extractToDir, e.message));
+            Logger.logError(resources.getString("FailedCreateDirectory", extractToDir, e.message));
             self.buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
             buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
-            console.error(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
+            Logger.logError(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
             self.buildMetrics.failed++;
             return;
         }

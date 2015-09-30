@@ -147,9 +147,7 @@ class Server implements RemoteBuild.IServerModule {
         var buildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             res.set("Content-Type", "text/plain");
-            /* tslint:disable:no-bitwise */
-            this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
-            /* tslint:enable:no-bitwise */
+            this.buildManager.downloadBuildLog(req.params.id, parseInt(req.query.offset) || 0, res);
         } else {
             res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }

@@ -66,25 +66,6 @@ class Kit extends commands.TacoCommandBase {
     public name: string = "kit";
     public info: commands.ICommandInfo;
 
-    public subcommands: commands.ICommand[] = [
-        {
-            // List kits
-            name: "list",
-            run: Kit.list,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "list";
-            }
-        },
-        {
-            // Change kit or CLI
-            name: "select",
-            run: Kit.select,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "select";
-            }
-        },
-    ];
-
     /**
      * Prompts the user with the prompt string and returns the response
      */
@@ -756,6 +737,28 @@ class Kit extends commands.TacoCommandBase {
 
         return result.then(() => Kit.generateTelemetryProperties(commandData));
     }
+
+    /* tslint:disable:member-ordering */
+    // tslint doesn't handle this case and considers subcommands as member function
+    public subcommands: commands.ICommand[] = [
+        {
+            // List kits
+            name: "list",
+            run: Kit.list,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "list";
+            }
+        },
+        {
+            // Change kit or CLI
+            name: "select",
+            run: Kit.select,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "select";
+            }
+        },
+    ];
+    /* tslint:enable:member-ordering */
 
     public parseArgs(args: string[]): commands.ICommandData {
         var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Kit.KNOWN_OPTIONS, Kit.SHORT_HANDS, args, 0);

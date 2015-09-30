@@ -25,6 +25,7 @@ import RemoteBuildConf = require ("../remoteBuildConf");
 import resources = require ("../../resources/resourceManager");
 import utils = require ("taco-utils");
 
+import Logger = utils.Logger;
 import UtilHelper = utils.UtilHelper;
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
@@ -48,7 +49,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     public initialize(conf: RemoteBuildConf): Q.Promise<any> {
         DarwinSpecifics.config = conf;
         if (process.getuid() === 0) {
-            console.warn(resources.getString("RunningAsRootError"));
+            Logger.logWarning(resources.getString("RunningAsRootError"));
             process.exit(1);
         }
 
@@ -87,7 +88,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
         }).finally((): void => {
             certs.invalidatePIN(DarwinSpecifics.config, req.params.pin);
         }).catch(function (err: Error): void {
-            console.error(err);
+            Logger.logError(err.message);
         }).done();
     }
 

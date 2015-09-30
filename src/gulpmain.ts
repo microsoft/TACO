@@ -18,6 +18,9 @@ import Q = require ("q");
 
 import gulpUtils = require ("../tools/GulpUtils");
 
+/* tslint:disable:no-console */
+// Disable console rule for gulp file, since this is a build file
+// we don't want to take dependency on Logger here
 var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
 var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
@@ -121,5 +124,6 @@ gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
 gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> {
     return gulpUtils.prepareTemplates(buildConfig.templates, buildConfig.buildTemplates);
 });
+/* tslint:enable:no-console */
 
 module.exports = gulp;

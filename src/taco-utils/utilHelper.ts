@@ -27,6 +27,7 @@ import rimraf = require ("rimraf");
 
 import argsHelper = require ("./argsHelper");
 import commands = require ("./commands");
+import logger = require("./logger");
 import logLevel = require ("./logLevel");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -35,6 +36,7 @@ import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import ArgsHelper = argsHelper.ArgsHelper;
 import Commands = commands.Commands;
 import ICommandData = Commands.ICommandData;
+import Logger = logger.Logger;
 import LogLevel = logLevel.LogLevel;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
@@ -197,9 +199,9 @@ module TacoUtility {
         public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): child_process.ChildProcess {
             return child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {
-                    console.error(command);
-                    console.error(stdout);
-                    console.error(stderr);
+                    Logger.logError(command);
+                    Logger.logError(stdout.toString());
+                    Logger.logError(stderr.toString());
                 }
 
                 callback(error, stdout, stderr);

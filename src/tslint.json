@@ -26,6 +26,8 @@
       "info",
       "log",
       "time",
+      "error",
+      "warn",
       "timeEnd",
       "trace"
     ],

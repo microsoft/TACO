@@ -49,7 +49,10 @@ describe("taco meta command tests: ", function (): void {
     fs.existsSync(commandsJsonPath).should.be.true;
 
     var commands = require(commandsJsonPath);
+    /* tslint:disable:no-unused-expression */
+    // Mocha syntax with no easy workaround
     commands.should.not.be.empty;
+    /* tslint:enable:no-unused-expression */
 
     // Options we are interested in testing
     var tacoValidArgs: string[][] = [[], ["-v"], ["--help"], ["-----help"]];

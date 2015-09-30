@@ -75,7 +75,8 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
         cordova.on("before_prepare", beforePrepare);
         cordova.on("after_compile", afterCompile);
 
-        IOSBuildHelper.build(buildInfo, function (resultBuildInfo: BuildInfo): void {
+        var builder: IOSBuilder = new IOSBuilder(currentBuild);
+        builder.build(function (resultBuildInfo: BuildInfo): void {
             process.send(resultBuildInfo);
         });
     }, function (err: Error): void {
@@ -84,42 +85,10 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
         });
 });
 
-class IOSBuildHelper {
-    public static build(currentBuild: BuildInfo, callback: Function): void {
-        cfg = CordovaConfig.getCordovaConfig(currentBuild.appDir);
-
-        var noOp: () => void = function (): void { };
-        var isDeviceBuild = currentBuild.options.indexOf("--device") !== -1;
-
-        try {
-            Q.fcall(IOSBuildHelper.change_directory, currentBuild)
-                .then(IOSBuildHelper.update_plugins)
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform"); process.send(currentBuild); })
-                .then(IOSBuildHelper.addOrPrepareIOS)
-                .then(function (): void { IOSBuildHelper.applyPreferencesToBuildConfig(cfg); })
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(currentBuild); })
-                .then(IOSBuildHelper.prepareNativeOverrides)
-                .then(IOSBuildHelper.updateAppPlistBuildNumber)
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "CordovaCompiling"); process.send(currentBuild); })
-                .then(IOSBuildHelper.build_ios)
-                .then(IOSBuildHelper.rename_app)
-                .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(currentBuild); })
-                .then(isDeviceBuild ? IOSBuildHelper.package_ios : noOp)
-                .then(function (): void {
-                Logger.log(resources.getString("DoneBuilding", currentBuild.buildNumber));
-                currentBuild.updateStatus(BuildInfo.COMPLETE);
-            })
-                .catch(function (err: Error): void {
-                Logger.log(resources.getString("ErrorBuilding", currentBuild.buildNumber, err.message));
-                currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
-            })
-                .done(function (): void {
-                callback(currentBuild);
-            });
-        } catch (e) {
-            currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", e.message);
-            callback(currentBuild);
-        }
+class IOSBuilder {
+    private buildInfo: BuildInfo = null;
+    constructor(buildInfoArg: BuildInfo) {
+        this.buildInfo = buildInfoArg;
     }
 
     // Public for unit tests
@@ -141,30 +110,22 @@ class IOSBuildHelper {
         }
 
         promise = promise.then(function (): Q.Promise<any> {
-            return IOSBuildHelper.appendToBuildConfig("TARGETED_DEVICE_FAMILY = " + deviceToAdd);
+            return this.appendToBuildConfig("TARGETED_DEVICE_FAMILY = " + deviceToAdd);
         });
 
         var deploymentTarget = preferences["deployment-target"];
         if (deploymentTarget) {
             promise = promise.then(function (): Q.Promise<any> {
-                return IOSBuildHelper.appendToBuildConfig("IPHONEOS_DEPLOYMENT_TARGET = " + deploymentTarget);
+                return this.appendToBuildConfig("IPHONEOS_DEPLOYMENT_TARGET = " + deploymentTarget);
             });
         }
 
         // Ensure we end the line so the config file is in a good state if we try to append things later.
         promise = promise.then(function (): Q.Promise<any> {
-            return IOSBuildHelper.appendToBuildConfig("");
+            return this.appendToBuildConfig("");
         });
 
         return promise;
-    }
-
-    private static change_directory(currentBuild: BuildInfo): any {
-        process.chdir(currentBuild.appDir);
-        // Cordova checks process.env.PWD before process.cwd()
-        // so we need to update that as well.
-        process.env.PWD = currentBuild.appDir;
-        return {};
     }
 
     private static addOrPrepareIOS(): Q.Promise<any> {
@@ -177,11 +138,116 @@ class IOSBuildHelper {
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
             return cordova.raw.platform("add", "ios");
         } else {
-            return IOSBuildHelper.update_ios();
+            return this.update_ios();
         }
     }
 
-    private static update_plugins(): Q.Promise<any> {
+    private static update_ios(): Q.Promise<any> {
+        // This step is what will push updated files from www/ to platforms/ios/www
+        // It will also clobber any changes to some platform specific files such as platforms/ios/config.xml
+        return cordova.raw.prepare({ platforms: ["ios"] });
+    }
+
+    private static pluginRemovalErrorHandler(err: any): void {
+        Logger.log(err);
+    }
+
+    private static appendToBuildConfig(data: string): Q.Promise<any> {
+        var deferred = Q.defer();
+
+        var buildConfigDir = path.join("platforms", "ios", "cordova");
+        if (!fs.existsSync(buildConfigDir)) {
+            deferred.reject(new Error(resources.getString("ErrorXcconfigDirNotFound")));
+        } else {
+            fs.appendFile(path.join(buildConfigDir, "build.xcconfig"), "\n" + data, function (err: any): void {
+                if (err) {
+                    deferred.reject(new Error(err));
+                } else {
+                    deferred.resolve({});
+                }
+            });
+        }
+
+        return deferred.promise;
+    }
+
+    private static prepareNativeOverrides(): Q.Promise<any> {
+        var resFrom = path.join("res", "native", "ios");
+        if (!fs.existsSync(resFrom)) {
+            // If res -> native folder isn't here then it could be a project that was created when
+            // the res -> cert folder still existed, so check for that location as well.
+            resFrom = path.join("res", "cert", "ios");
+        }
+
+        if (fs.existsSync(resFrom)) {
+            var resTo = path.join("platforms", "ios");
+            return UtilHelper.copyRecursive(resFrom, resTo);
+        }
+
+        return Q({});
+    }
+
+    public build(callback: Function): void {
+        cfg = CordovaConfig.getCordovaConfig(this.buildInfo.appDir);
+
+        var noOp: () => void = function (): void { };
+        var isDeviceBuild = this.buildInfo.options.indexOf("--device") !== -1;
+        var self: IOSBuilder = this;
+
+        try {
+            Q.fcall(self.change_directory)
+                .then(self.update_plugins)
+                .then(function (): void {
+                    self.buildInfo.updateStatus(BuildInfo.BUILDING, "UpdatingIOSPlatform");
+                    process.send(self.buildInfo);
+                })
+                .then(IOSBuilder.addOrPrepareIOS)
+                .then(function (): void {
+                    IOSBuilder.applyPreferencesToBuildConfig(cfg);
+                })
+                .then(function (): void {
+                    self.buildInfo.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides");
+                    process.send(self.buildInfo);
+                })
+                .then(IOSBuilder.prepareNativeOverrides)
+                .then(self.updateAppPlistBuildNumber)
+                .then(function (): void {
+                    self.buildInfo.updateStatus(BuildInfo.BUILDING, "CordovaCompiling");
+                    process.send(self.buildInfo);
+                })
+                .then(self.build_ios)
+                .then(self.rename_app)
+                .then(function (): void {
+                    self.buildInfo.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp");
+                    process.send(self.buildInfo);
+                })
+                .then(isDeviceBuild ? self.package_ios : noOp)
+                .then(function (): void {
+                    Logger.log(resources.getString("DoneBuilding", self.buildInfo.buildNumber));
+                    self.buildInfo.updateStatus(BuildInfo.COMPLETE);
+                })
+                .catch(function (err: Error): void {
+                    Logger.log(resources.getString("ErrorBuilding", self.buildInfo.buildNumber, err.message));
+                    self.buildInfo.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
+                })
+                .done(function (): void {
+                    callback(self.buildInfo);
+            });
+        } catch (e) {
+            self.buildInfo.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", e.message);
+            callback(self.buildInfo);
+        }
+    }
+
+    private change_directory(): any {
+        process.chdir(this.buildInfo.appDir);
+        // Cordova checks process.env.PWD before process.cwd()
+        // so we need to update that as well.
+        process.env.PWD = this.buildInfo.appDir;
+        return {};
+    }
+
+    private update_plugins(): Q.Promise<any> {
         var remotePluginsPath = path.join("remote", "plugins");
         if (!fs.existsSync(remotePluginsPath)) {
             return Q.resolve({});
@@ -192,8 +258,8 @@ class IOSBuildHelper {
         });
         var pluginNameRegex = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
         var deletedPlugins: string[] = [];
-        if (currentBuild.changeList && currentBuild.changeList.deletedFiles) {
-            deletedPlugins = currentBuild.changeList.deletedFiles.map(function (file: string): string {
+        if (this.buildInfo.changeList && this.buildInfo.changeList.deletedFiles) {
+            deletedPlugins = this.buildInfo.changeList.deletedFiles.map(function (file: string): string {
                 // Normalize filenames to use this platform's slashes, when the client may have sent back-slashes
                 return path.normalize(path.join.apply(path, file.split("\\")));
             }).filter(function (file: string): boolean {
@@ -211,7 +277,7 @@ class IOSBuildHelper {
                         // In the case of an error, don't stop the whole thing; report the error to the log and attempt to continue.
                         // The plugin may have other plugins depending on it. If so, we are probably going to remove those later on,
                         // which will then also remove this plugin
-                        console.error(err);
+                        Logger.logError(err);
                     });
                 } else {
                     // If the file doesn't exist any more, it may have been a dependent plugin that was removed
@@ -263,70 +329,25 @@ class IOSBuildHelper {
         });
     }
 
-    private static update_ios(): Q.Promise<any> {
-        // This step is what will push updated files from www/ to platforms/ios/www
-        // It will also clobber any changes to some platform specific files such as platforms/ios/config.xml
-        return cordova.raw.prepare({ platforms: ["ios"] });
+    private updateAppPlistBuildNumber(): void {
+        var appPlistFile = path.join("platforms", "ios", this.buildInfo["appName"], this.buildInfo["appName"] + "-Info.plist");
+        plist.updateAppBundleVersion(appPlistFile, this.buildInfo.buildNumber);
     }
 
-    private static pluginRemovalErrorHandler(err: any): void {
-        Logger.log(err);
-    }
-
-    private static appendToBuildConfig(data: string): Q.Promise<any> {
-        var deferred = Q.defer();
-
-        var buildConfigDir = path.join("platforms", "ios", "cordova");
-        if (!fs.existsSync(buildConfigDir)) {
-            deferred.reject(new Error(resources.getString("ErrorXcconfigDirNotFound")));
-        } else {
-            fs.appendFile(path.join(buildConfigDir, "build.xcconfig"), "\n" + data, function (err: any): void {
-                if (err) {
-                    deferred.reject(new Error(err));
-                } else {
-                    deferred.resolve({});
-                }
-            });
-        }
-
-        return deferred.promise;
-    }
-
-    private static prepareNativeOverrides(): Q.Promise<any> {
-        var resFrom = path.join("res", "native", "ios");
-        if (!fs.existsSync(resFrom)) {
-            // If res -> native folder isn't here then it could be a project that was created when
-            // the res -> cert folder still existed, so check for that location as well.
-            resFrom = path.join("res", "cert", "ios");
-        }
-
-        if (fs.existsSync(resFrom)) {
-            var resTo = path.join("platforms", "ios");
-            return UtilHelper.copyRecursive(resFrom, resTo);
-        }
-
-        return Q({});
-    }
-
-    private static updateAppPlistBuildNumber(): void {
-        var appPlistFile = path.join("platforms", "ios", currentBuild["appName"], currentBuild["appName"] + "-Info.plist");
-        plist.updateAppBundleVersion(appPlistFile, currentBuild.buildNumber);
-    }
-
-    private static build_ios(): Q.Promise<any> {
+    private build_ios(): Q.Promise<any> {
         Logger.log("cordova compile ios");
-        var configuration = (currentBuild.configuration === "debug") ? "--debug" : "--release";
-        var opts = (currentBuild.options.length > 0) ? [currentBuild.options, configuration] : [configuration];
+        var configuration = (this.buildInfo.configuration === "debug") ? "--debug" : "--release";
+        var opts = (this.buildInfo.options.length > 0) ? [this.buildInfo.options, configuration] : [configuration];
         return cordova.raw.compile({ platforms: ["ios"], options: opts });
     }
 
-    private static rename_app(): Q.Promise<any> {
+    private rename_app(): Q.Promise<any> {
         // We want to make sure that the .app file is named according to the package Id
         // in order to avoid issues with unicode names and to allow us to identify which
         // application to attach to for debugging.
         var deferred = Q.defer();
-        var isDeviceBuild = currentBuild.options === "--device";
-        var oldName = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", currentBuild["appName"] + ".app");
+        var isDeviceBuild = this.buildInfo.options === "--device";
+        var oldName = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", this.buildInfo["appName"] + ".app");
         var newName = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", cfg.id() + ".app");
 
         if (oldName !== newName && fs.existsSync(oldName)) {
@@ -359,14 +380,16 @@ class IOSBuildHelper {
         return deferred.promise;
     }
 
-    private static package_ios(): Q.Promise<any> {
+    private package_ios(): Q.Promise<any> {
         var deferred = Q.defer();
 
         // need quotes around ipa paths for xcrun exec to work if spaces in path
         var appDirName = cfg.id() + ".app";
-        var ipaFileName = currentBuild["appName"] + ".ipa";
+        var ipaFileName = this.buildInfo["appName"] + ".ipa";
         var pathToCordovaApp = UtilHelper.quotesAroundIfNecessary(path.join("platforms", "ios", "build", "device", appDirName));
         var fullPathToIpaFile = UtilHelper.quotesAroundIfNecessary(path.join(process.cwd(), "platforms", "ios", "build", "device", ipaFileName));
+
+        var self: IOSBuilder = this;
 
         child_process.exec("xcrun -v -sdk iphoneos PackageApplication " + pathToCordovaApp + " -o " + fullPathToIpaFile, {},
             function (error: Error, stdout: Buffer, stderr: Buffer): void {
@@ -375,7 +398,7 @@ class IOSBuildHelper {
                 if (error) {
                     deferred.reject(error);
                 } else {
-                    var plistFileName = currentBuild["appName"] + ".plist";
+                    var plistFileName = self.buildInfo["appName"] + ".plist";
                     var fullPathToPlistFile = path.join(process.cwd(), "platforms", "ios", "build", "device", plistFileName);
                     plist.createEnterprisePlist(cfg, fullPathToPlistFile);
                     deferred.resolve({});

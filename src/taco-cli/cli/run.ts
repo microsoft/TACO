@@ -55,32 +55,6 @@ class Run extends commands.TacoCommandBase {
 
     public name: string = "run";
     public info: commands.ICommandInfo;
-    public subcommands: commands.ICommand[] = [
-        {
-            // Remote Run
-            name: "remote",
-            run: Run.remote,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !!commandData.options["remote"];
-            }
-        },
-        {
-            // Local Run
-            name: "local",
-            run: Run.local,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !!commandData.options["local"];
-            }
-        },
-        {
-            // Fallback
-            name: "fallback",
-            run: Run.fallback,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return true;
-            }
-        }
-    ];
 
     private static generateTelemetryProperties(telemetryProperties: tacoUtility.ICommandTelemetryProperties,
         commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
@@ -199,6 +173,36 @@ class Run extends commands.TacoCommandBase {
             }));
         }).then(() => Run.generateTelemetryProperties(telemetryProperties, commandData));
     }
+
+    /* tslint:disable:member-ordering */
+    // tslint doesn't handle this case and considers subcommands as member function
+    public subcommands: commands.ICommand[] = [
+        {
+            // Remote Run
+            name: "remote",
+            run: Run.remote,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return !!commandData.options["remote"];
+            }
+        },
+        {
+            // Local Run
+            name: "local",
+            run: Run.local,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return !!commandData.options["local"];
+            }
+        },
+        {
+            // Fallback
+            name: "fallback",
+            run: Run.fallback,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return true;
+            }
+        }
+    ];
+    /* tslint:enable:member-ordering */
 
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI

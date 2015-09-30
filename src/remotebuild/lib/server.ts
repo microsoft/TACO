@@ -189,7 +189,7 @@ class Server {
                 var requirePath = conf.moduleConfig(mod).requirePath || mod;
                 var modGen: RemoteBuild.IServerModuleFactory = require(requirePath);
             } catch (e) {
-                console.error(resources.getString("UnableToLoadModule", mod));
+                Logger.logError(resources.getString("UnableToLoadModule", mod));
                 return Q.reject(e);
             }
 

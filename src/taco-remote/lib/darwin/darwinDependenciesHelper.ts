@@ -45,11 +45,11 @@ class DarwinDependenciesHelper {
                             Logger.log(resources.getString("HomebrewInstallationSuccess"));
                             deferred2.resolve(true);
                         }, function (error: Error): void {
-                                console.error(resources.getString("HomebrewPackageVerificationFailed", error));
+                                Logger.logError(resources.getString("HomebrewPackageVerificationFailed", error));
                                 process.exit(1);
                             });
                     }, function (error: Error): void {
-                            console.error(resources.getString("HomebrewInstallationFailed", error));
+                            Logger.logError(resources.getString("HomebrewInstallationFailed", error));
                             process.exit(1);
                         });
                 } else {
@@ -90,13 +90,13 @@ class DarwinDependenciesHelper {
             Logger.log("" + data);
         });
         installHomebrew.stderr.on("data", function (data: any): void {
-            console.error("" + data);
+            Logger.logError("" + data);
         });
         installHomebrew.on("close", function (code: number): void {
             homebrewInstalled.resolve({});
         });
         installHomebrew.on("error", function (arg: any): void {
-            console.error("ERROR: " + JSON.stringify(arg));
+            Logger.logError("ERROR: " + JSON.stringify(arg));
             homebrewInstalled.reject(arg);
         });
 

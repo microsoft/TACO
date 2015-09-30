@@ -64,16 +64,6 @@ class Build extends commands.TacoCommandBase {
     public name: string = "build";
     public info: commands.ICommandInfo;
 
-    public subcommands: commands.ICommand[] = [
-        {
-            name: "build",
-            run: Build.build,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return true;
-            }
-        }
-    ];
-
     private static generateTelemetryProperties(telemetryProperties: tacoUtility.ICommandTelemetryProperties,
         commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Build.KNOWN_OPTIONS, commandData);
@@ -178,6 +168,19 @@ class Build extends commands.TacoCommandBase {
             }));
         }).then(() => Build.generateTelemetryProperties(telemetryProperties, commandData));
     }
+
+    /* tslint:disable:member-ordering */
+    // tslint doesn't handle this case and considers subcommands as member function
+    public subcommands: commands.ICommand[] = [
+        {
+            name: "build",
+            run: Build.build,
+            canHandleArgs(commandData: commands.ICommandData): boolean {
+                return true;
+            }
+        }
+    ];
+    /* tslint:enable:member-ordering */
 
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI

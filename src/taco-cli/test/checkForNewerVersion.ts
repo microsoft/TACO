@@ -210,7 +210,10 @@ describe("Check for newer version", function (): void {
             .then(() => {
                 // CheckForNewerVersion doesn't print anything synchronically. It prints it on the beforeExit event
                 var actual = memoryStdout.contentsAsText();
+                /* tslint:disable:no-unused-expression */
+                // Mocha syntax with no easy workaround
                 actual.should.be.empty;
+                /* tslint:enable:no-unused-expression */
 
                 if (messageExpectation === MessageExpectation.WillBeShown) {
                     simulateBeforeExit();
@@ -263,7 +266,10 @@ describe("Check for newer version", function (): void {
                 var listeners = process.listeners("beforeExit");
                 listeners.length.should.eql(0, "There should be no listeners for the beforeExit event");
                 var actual: string = memoryStdout.contentsAsText();
+                /* tslint:disable:no-unused-expression */
+                // Mocha syntax with no easy workaround
                 actual.should.be.empty;
+                /* tslint:enable:no-unused-expression */
                 return Settings.loadSettings().then(settings => {
                     settings.lastCheckForNewerVersionTimestamp.should.be.equal(lastCheckForNewerVersionTimestamp,
                         "The last checked time shouldn't had changed expected: " + lastCheckForNewerVersionTimestamp + "  actual: " + settings.lastCheckForNewerVersionTimestamp.should);

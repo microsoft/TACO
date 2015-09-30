@@ -161,7 +161,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     private downloadDefault(): Q.Promise<any> {
-        this.installerArchive = path.join(InstallerBase.InstallerCache, "androidSdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
+        this.installerArchive = path.join(InstallerBase.installerCache, "androidSdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
 
         // Prepare expected archive file properties
         var expectedProperties: installerUtils.IFileSignature = {
