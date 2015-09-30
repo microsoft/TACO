@@ -95,9 +95,7 @@ class BuildManager {
     public submitNewBuild(req: express.Request): Q.Promise<BuildInfo> {
         Logger.log(resources.getString("NewBuildSubmitted"));
         Logger.log(req.url);
-        /* tslint:disable:no-console */
-        console.log(req.headers);
-        /* tslint:enable:no-console */
+        Logger.log(JSON.stringify(req.headers));
 
         this.buildMetrics.submitted++;
 
