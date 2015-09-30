@@ -222,7 +222,7 @@ class AndroidSdkInstaller extends InstallerBase {
         // can result in a hang post installation
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
-        var adbProcess: childProcess.ChildProcess = childProcess.spawn("adb", ["kill-server"]);
+        var adbProcess: childProcess.ChildProcess = childProcess.spawn(path.join(this.androidHomeValue, "platform-tools", "adb"), ["kill-server"]);
         adbProcess.on("error", function (error: Error): void {
             this.telemetry
                 .add("error.description", "ErrorOnKillingAdb in killAdb", /*isPii*/ false)
