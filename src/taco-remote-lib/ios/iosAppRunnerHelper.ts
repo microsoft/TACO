@@ -210,9 +210,9 @@ class IosAppRunnerHelper {
         var versionInfo = promiseExec("ideviceinfo -s -k ProductVersion").spread<string>(function (stdout: string, stderr: string): string {
             return stdout.trim().substring(0, 3); // Versions for DeveloperDiskImage seem to be X.Y, while some device versions are X.Y.Z
             // NOTE: This will almost certainly be wrong in the next few years, once we hit version 10.0 
-        }, function (): void {
-                throw new Error("FailedGetDeviceInfo");
-            });
+        }, function (): string {
+            throw new Error("FailedGetDeviceInfo");
+        });
 
         // Attempt to find the path where developer resources exist.
         var pathInfo = promiseExec("xcrun -sdk iphoneos --show-sdk-platform-path").spread<string>(function (stdout: string, stderr: string): string {

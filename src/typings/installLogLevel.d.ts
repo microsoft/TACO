@@ -8,7 +8,8 @@
 /// <reference path="../typings/node.d.ts" />
 
 declare module TacoUtility {
-   enum InstallLogLevel {
+    enum InstallLogLevel {
+       undefined,
        silent,
        error,
        warn,

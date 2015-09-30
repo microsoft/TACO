@@ -35,6 +35,9 @@ class ProjectHelper {
     private static ConfigXmlFileName: string = "config.xml";
     private static ProjectScriptsDir: string = "scripts";
 
+    private static CachedProjectInfo: Q.Promise<ProjectHelper.IProjectInfo> = null;
+    private static CachedProjectFilePath: string = null;
+
     private static parseKitId(versionValue: string):  Q.Promise<string> {
         if (!versionValue) {
             return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
@@ -50,6 +53,8 @@ class ProjectHelper {
      *  the create command handler after the actual project creation  
      */
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
+        ProjectHelper.CachedProjectInfo = null;
+        ProjectHelper.CachedProjectFilePath = null;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TacoJsonFileName);
         var tacoJson: ProjectHelper.ITacoJsonMetadata = fs.existsSync(tacoJsonPath) ? require (tacoJsonPath) : {};
@@ -128,7 +133,7 @@ class ProjectHelper {
      *  An object of type IProjectInfo is returned to the caller.
      */
     public static getProjectInfo(): Q.Promise<ProjectHelper.IProjectInfo> {
-        var deferred: Q.Deferred<ProjectHelper.IProjectInfo> = Q.defer<ProjectHelper.IProjectInfo>();
+
         var projectInfo: ProjectHelper.IProjectInfo = {
             isTacoProject: false,
             cordovaCliVersion: "",
@@ -136,47 +141,57 @@ class ProjectHelper {
             tacoKitId: ""
         };
 
-        var projectPath = ProjectHelper.getProjectRoot();
-        try {
+        
+        return Q.fcall(ProjectHelper.getProjectRoot).then((projectPath: string): ProjectHelper.IProjectInfo | Q.Promise<ProjectHelper.IProjectInfo> => {
             if (!projectPath) {
-                deferred.resolve(projectInfo);
-                return deferred.promise;
+                return projectInfo;
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata;
             var tacoJsonFilePath = path.join(projectPath, ProjectHelper.TacoJsonFileName);
             var configFilePath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
 
+            if (ProjectHelper.CachedProjectInfo) {
+                if (tacoJsonFilePath === ProjectHelper.CachedProjectFilePath) {
+                    return ProjectHelper.CachedProjectInfo;
+                } else {
+                    ProjectHelper.CachedProjectInfo = null;
+                }
+            }
+
             if (fs.existsSync(configFilePath)) {
                 projectInfo.configXmlPath = configFilePath;
             }
 
             if (fs.existsSync(tacoJsonFilePath)) {
-                tacoJson = require(tacoJsonFilePath);
+                tacoJson = JSON.parse(<any>fs.readFileSync(tacoJsonFilePath));
+                ProjectHelper.CachedProjectFilePath = tacoJsonFilePath;
             } else {
-                deferred.resolve(projectInfo);
-                return deferred.promise;
+                return projectInfo;
             }
 
             if (tacoJson.kit) {
-                kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): void {
+                return kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): ProjectHelper.IProjectInfo {
                     projectInfo.isTacoProject = true;
                     projectInfo.tacoKitId = tacoJson.kit;
                     projectInfo.cordovaCliVersion = cordovaCli;
-                    deferred.resolve(projectInfo);
+                    return projectInfo;
                 });
             } else if (tacoJson["cordova-cli"]) {
                 projectInfo.isTacoProject = true;
                 projectInfo.cordovaCliVersion = tacoJson["cordova-cli"];
-                deferred.resolve(projectInfo);
+                return projectInfo;
             } else {
-                deferred.resolve(projectInfo);
+                return projectInfo;
             }
-        } catch (e) {
-            deferred.reject(errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed));
-        }
-
-        return deferred.promise;
+        }).then((projectInfo: ProjectHelper.IProjectInfo): ProjectHelper.IProjectInfo => {
+            if (projectInfo.isTacoProject) {
+                ProjectHelper.CachedProjectInfo = Q(projectInfo);
+            }
+            return projectInfo;
+        }).catch((e: Error): ProjectHelper.IProjectInfo => {
+            throw errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed);
+        });
     }
 
     /**
@@ -308,8 +323,8 @@ class ProjectHelper {
             return Q.resolve(<ICommandTelemetryProperties>{});
         }
 
-        return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
-        .spread<ICommandTelemetryProperties>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
+        return ProjectHelper.getProjectInfo().then(function (projectInfo: ProjectHelper.IProjectInfo): Q.Promise<ICommandTelemetryProperties> {
+            var isTsProject: boolean = ProjectHelper.isTypeScriptProject();
             var projectTelemetryProperties: ICommandTelemetryProperties = {};
             if (projectInfo.isTacoProject) {
                 projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true);

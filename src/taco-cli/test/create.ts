@@ -471,12 +471,12 @@ describe("taco create", function (): void {
                 actual = actual.replace(/ *\n +\(/gm, " ("); // We undo the word-wrapping
                 actual = actual.replace(/\n\n /gm, "\n "); // We undo the word-wrapping
                 actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
-                if (expected !== actual) {
-                    var expected = alternativeExpectedMessages.join("\n");
-                }
 
-                actual.should.be.equal(expected);
-                done();
+                if (expectedMessages.every((msg: string) => actual.indexOf(msg) >= 0) || alternativeExpectedMessages.every((msg: string) => actual.indexOf(msg) >= 0)) {
+                    done();
+                } else {
+                    done(new Error("Bad onboarding for " + createCommandLineArguments));
+                }
             }, (arg: any) => {
                 done(arg);
             });
