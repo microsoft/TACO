@@ -103,7 +103,7 @@ describe("taco create", function (): void {
         7: util.format("%s --template blank", getProjectPath(successPrefix, 7)),
         8: util.format("%s --template", getProjectPath(successPrefix, 8)),
         9: util.format("%s --copy-from %s", getProjectPath(successPrefix, 9), copyFromPath),
-        10: util.format("%s --cli 4.3.0", getProjectPath(successPrefix, 10)),
+        10: util.format("%s --cordova 4.3.0", getProjectPath(successPrefix, 10)),
         11: util.format("%s --unknownParameter", getProjectPath(successPrefix, 11)),
         12: util.format("%s --kit", getProjectPath(successPrefix, 12)),
         13: util.format("%s --template typescript", getProjectPath(successPrefix, 13))
@@ -112,11 +112,11 @@ describe("taco create", function (): void {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
         2: util.format("%s --template unknown", getProjectPath(failurePrefix, 2)),
         3: util.format("%s --kit 5.1.1-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 3), copyFromPath),
-        4: util.format("%s --kit 5.1.1-Kit --cli 4.2.0", getProjectPath(failurePrefix, 4)),
-        5: util.format("%s --cli 4.3.0 --template typescript", getProjectPath(failurePrefix, 5)),
+        4: util.format("%s --kit 5.1.1-Kit --cordova 4.2.0", getProjectPath(failurePrefix, 4)),
+        5: util.format("%s --cordova 4.3.0 --template typescript", getProjectPath(failurePrefix, 5)),
         6: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 6), testAppId, testAppName),
         7: util.format("%s --kit 5.1.1-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 7)),
-        8: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 8)),
+        8: util.format("%s --cordova unknownCliVersion", getProjectPath(failurePrefix, 8)),
         9: util.format("%s 42", getProjectPath(failurePrefix, 9)),
         10: "",
         11: util.format("%s/invalid/project/path", getProjectPath(failurePrefix, 11)),
@@ -307,7 +307,7 @@ describe("taco create", function (): void {
             var scenario: number = 10;
 
             // CLI 4.2.0 + default Cordova project
-            // taco-cli: adds 1 file
+            // TACO: adds 1 file
             var totalEntries = cordovaDefaultProjectFileCount + tacoFileCount;
 
             runScenarioWithExpectedFileCount(scenario, totalEntries, expectedCliTacoJsonKeyValues["4.3.0"]).then(done, done);
@@ -360,17 +360,17 @@ describe("taco create", function (): void {
         });
 
         it("Failure scenario 4 [path, kit, cli]", function (done: MochaDone): void {
-            // Create command should fail when both --kit and --cli are specified
+            // Create command should fail when both --kit and --cordova are specified
             var scenario: number = 4;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCliAndKit).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCordovaCliAndKit).then(done, done);
         });
 
         it("Failure scenario 5 [path, cli, template]", function (done: MochaDone): void {
-            // Create command should fail when both --cli and --template are specified
+            // Create command should fail when both --cordova and --template are specified
             var scenario: number = 5;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCli).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCordovaCli).then(done, done);
         });
 
         it("Failure scenario 6 [path (value is an existing project)]", function (done: MochaDone): void {
@@ -552,7 +552,7 @@ describe("taco create", function (): void {
                 "HowToUseCommandDocs",
                 ""];
 
-            testCreateForArguments([projectPath, "--cli", "5.1.1"],
+            testCreateForArguments([projectPath, "--cordova", "5.1.1"],
                 firstPart.concat(lastPart),
                 firstPart.concat(downloadingDependenciesOutput, lastPart),
                 done);
@@ -685,11 +685,11 @@ describe("taco create", function (): void {
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                         cliVersion: { isPii: false, value: cliVersion },
-                        cli: { isPii: false, value: "5.2.0" },
-                        "options.cli": { isPii: false, value: "5.2.0" }
+                        cordova: { isPii: false, value: "5.2.0" },
+                        "options.cordova": { isPii: false, value: "5.2.0" }
             };
 
-            createProjectAndVerifyTelemetryProps([projectPath, "--cli", "5.2.0"], expected, done);
+            createProjectAndVerifyTelemetryProps([projectPath, "--cordova", "5.2.0"], expected, done);
         });
     });
 });

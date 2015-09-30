@@ -107,7 +107,7 @@ module TacoUtility {
         }
 
         /**
-         * prints out specific usage, i.e. TACO help create
+         * prints out specific usage, i.e. taco help create
          * @param {string} command - TACO command being inquired
          */
         private printCommandUsage(command: string): void {

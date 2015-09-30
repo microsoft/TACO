@@ -24,7 +24,7 @@ import HelpCommandBase = tacoUtility.HelpCommandBase;
 import Logger = tacoUtility.Logger;
 
 /*
- * Help handles "Taco Help"
+ * Help handles "taco help"
  */
 class Help extends HelpCommandBase {
     private static CliName: string = "remotebuild";

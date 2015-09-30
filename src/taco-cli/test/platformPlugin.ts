@@ -259,7 +259,7 @@ describe("taco platform for kit", function (): void {
     }
 
     function createCliProject(cli: string): Q.Promise<any> {
-         return createProject(["cliProject", "--cli", cli], cliProjectDir);
+         return createProject(["cliProject", "--cordova", cli], cliProjectDir);
     }
 
     function createKitProject(kit: string): Q.Promise<any> {

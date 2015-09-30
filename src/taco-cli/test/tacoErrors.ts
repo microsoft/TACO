@@ -18,8 +18,8 @@ import testUtil = require ("../../taco-utils/testUtils/testHelper");
 
 import TestHelper = testUtil.TestHelper;
 
-describe("taco Errors in taco-cli", function (): void {
-    it("Verify taco Errors in taco-cli", function (): void {
+describe("Taco Errors in TACO", function (): void {
+    it("Verify TACO Errors in TACO", function (): void {
         TestHelper.verifyTacoErrors(path.join(__dirname, "../cli/tacoErrorCodes.js"), resources, 5000, 5999);
     });
 });

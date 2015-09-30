@@ -156,7 +156,7 @@ class Server implements RemoteBuild.IServerModule {
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
         var allBuildInfo = this.buildManager.getAllBuildInfo();
-        res.json(200, allBuildInfo);
+        res.status(200).json(allBuildInfo);
     }
 
     private checkBuildThenAction(func: (buildInfo: utils.BuildInfo, req: express.Request, res: express.Response) => void): (req: express.Request, res: express.Response) => void {
