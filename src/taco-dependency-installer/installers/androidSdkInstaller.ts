@@ -237,7 +237,7 @@ class AndroidSdkInstaller extends InstallerBase {
         return deferred.promise;
     }
 
-    private installANDROID_PACKAGES(): Q.Promise<any> {
+    private installAndroidPackages(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.androidCommand);
@@ -287,7 +287,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
     private postInstallDefault(): Q.Promise<any> {
         var self = this;
-        return this.installANDROID_PACKAGES()
+        return this.installAndroidPackages()
         .then(function (): Q.Promise<any> {
             return self.killAdb();
         });
