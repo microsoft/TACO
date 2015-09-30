@@ -122,37 +122,39 @@ class AndroidSdkInstaller extends InstallerBase {
 
         // Initialize values
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
-        var fullPathTools: string = path.join(androidHomeValue, "tools");
-        var fullPathPlatformTools: string = path.join(androidHomeValue, "platform-tools");
-        var addToPathTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/tools/";
-        var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
+        var fullPathTools: string = path.join(androidHomeValue, "tools/");
+        var fullPathPlatformTools: string = path.join(androidHomeValue, "platform-tools/");
+        var shortPathTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/tools/";
+        var shortPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
         var addToPath: string = "";
         var exportPathLine: string = "";
         var exportAndroidHomeLine: string = "";
         var updateCommand: string = "";
+        var useShortPaths: boolean = true;
 
         // Save Android home value
         this.androidHomeValue = androidHomeValue;
 
-        // Check if we need to update PATH
-        if (!installerUtils.pathContains(fullPathTools)) {
-            addToPath += path.delimiter + addToPathTools;
-        }
-
-        if (!installerUtils.pathContains(fullPathPlatformTools)) {
-            addToPath += path.delimiter + addToPathPlatformTools;
-        }
-
-        if (addToPath) {
-            exportPathLine = "\nexport PATH=\"$PATH" + addToPath + "\"";
-        }
-
         // Check if we need to add an ANDROID_HOME value
         if (!process.env[AndroidSdkInstaller.AndroidHomeName]) {
-            exportAndroidHomeLine = "\nexport " + AndroidSdkInstaller.AndroidHomeName + "=\"" + androidHomeValue + "\"";
+            exportAndroidHomeLine = os.EOL + "export " + AndroidSdkInstaller.AndroidHomeName + "=\"" + androidHomeValue + "\"";
         } else if (path.resolve(utilHelper.expandEnvironmentVariables(process.env[AndroidSdkInstaller.AndroidHomeName])) !== androidHomeValue) {
             // A conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
             this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.AndroidHomeName, this.androidHomeValue));
+            useShortPaths = false;
+        }
+
+        // Check if we need to update PATH
+        if (!installerUtils.pathContains(fullPathTools)) {
+            addToPath += path.delimiter + (useShortPaths ? shortPathTools : fullPathTools);
+        }
+
+        if (!installerUtils.pathContains(fullPathPlatformTools)) {
+            addToPath += path.delimiter + (useShortPaths ? shortPathPlatformTools : fullPathPlatformTools);
+        }
+
+        if (addToPath) {
+            exportPathLine = os.EOL + "export PATH=\"$PATH" + addToPath + "\"";
         }
 
         // Check if we need to update .bash_profile
@@ -160,9 +162,10 @@ class AndroidSdkInstaller extends InstallerBase {
         var mustChown: boolean = !fs.existsSync(bashProfilePath);
 
         if (exportAndroidHomeLine || exportPathLine) {
-            updateCommand = "echo '# Android SDK" + exportAndroidHomeLine + exportPathLine + "' >> '" + bashProfilePath + "'";
+            updateCommand = "echo '" + os.EOL + "# Android SDK" + exportAndroidHomeLine + exportPathLine + "' >> '" + bashProfilePath + "'";
         }
 
+        // Perform the update if necessary
         if (updateCommand) {
             childProcess.exec(updateCommand, function (error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {

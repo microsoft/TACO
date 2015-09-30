@@ -78,7 +78,7 @@
 
     "SystemVariableExists": "<warn>'{0}' environment variable already exists. Overwriting it may cause your current software to stop working correctly. Not overwriting it may result in your Cordova project not building correctly. Do you want to overwrite the existing '{0}'?</warn>",
     "_SystemVariableExists.comment": "Warning shown when we attempt to set an environment variable, but one with the same name already exists. {0} is the name of the variable.",
-    "SystemVariableExistsDarwin": "Cannot set '{0}' environment variable, because it already exists. To ensure Cordova can build Android projects, please update the '{0}' variable to point to the following location:<br/>{1}</warn>",
+    "SystemVariableExistsDarwin": "Cannot set '{0}' environment variable, because it already exists. To ensure Cordova can build Android projects, please update the '{0}' variable to point to the following location:<br/>{1}",
     "_SystemVariableExistsDarwin.comment": "Warning shown when we attempt to set an environment variable, but one with the same name already exists. {0} is the name of the variable.",
     "SkipOverwriteWarning": "<warn>To ensure your Cordova project builds correctly, please set the '{0}' environment variable to the following value: {1}</warn>",
     "_SkipOverwriteWarning.comment": "Warning shown when the user opts to skip overwriting an existing environment variable. {0} is the variable name, {1} is the value we wanted to set it to.",

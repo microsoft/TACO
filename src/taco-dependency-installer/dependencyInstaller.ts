@@ -532,7 +532,7 @@ module TacoDependencyInstaller {
                 args = [];
             } else {
                 command = "sudo";
-                args = ["node"];
+                args = ["-E", "node"];
             }
 
             args = args.concat([
