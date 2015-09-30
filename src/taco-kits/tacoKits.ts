@@ -111,34 +111,34 @@ module TacoKits {
         kits: IKitMetadata;
         templates: ITemplateMetadata;
     }
-    
+
     /**
      *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
      */
     export class KitHelper implements TacoKits.IKitHelper {
-        private static KitMetadata: ITacoKitMetadata;
-        private static DefaultKitId: string;
-        private static KitFileName: string = "TacoKitMetadata.json";
-        private static TestMetadataFilePath: string = path.resolve(__dirname, "test", "test-data", "test-kit-metadata.json");
-        private static KitDesciptionSuffix: string = "-desc";
-        private static DefaultTemplateKitOverride: string = "default";
-        private static TsTemplateId: string = "typescript";
+        private static kitMetadata: ITacoKitMetadata;
+        private static defaultKitId: string;
+        private static KIT_FILENAME: string = "TacoKitMetadata.json";
+        private static testMetadataFilePath: string = path.resolve(__dirname, "test", "test-data", "test-kit-metadata.json");
+        private static KIT_DESCRIPTION_SUFFIX: string = "-desc";
+        private static DEFAULT_TEMPLATE_KIT_OVERRIDE: string = "default";
+        private static TS_TEMPLATE_ID: string = "typescript";
 
         public testMode: boolean;
         /**
          *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
          *   or resolved with the parsed metadata
          */
-    
+
         public getKitMetadata(): Q.Promise<ITacoKitMetadata> {
-            var metadataFileName: string = path.resolve(__dirname, KitHelper.KitFileName);
-            
-            if (KitHelper.KitMetadata) {
-                return Q(KitHelper.KitMetadata);
+            var metadataFileName: string = path.resolve(__dirname, KitHelper.KIT_FILENAME);
+
+            if (KitHelper.kitMetadata) {
+                return Q(KitHelper.kitMetadata);
             }
-            
+
             if (process.env["TACO_UNIT_TEST"]) {
-                metadataFileName = KitHelper.TestMetadataFilePath;
+                metadataFileName = KitHelper.testMetadataFilePath;
             }
 
             try {
@@ -146,8 +146,8 @@ module TacoKits {
                     return Q.reject<ITacoKitMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileNotFound));
                 }
 
-                KitHelper.KitMetadata = require(metadataFileName);
-                return Q(KitHelper.KitMetadata);
+                KitHelper.kitMetadata = require(metadataFileName);
+                return Q(KitHelper.kitMetadata);
             } catch (e) {
                 return Q.reject<ITacoKitMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileMalformed));
             }
@@ -164,7 +164,7 @@ module TacoKits {
                 kits = metadata.kits;
                 if (kitId && kits && kits[kitId]) {
                     kits[kitId].name = resources.getString(kitId);
-                    kits[kitId].description = resources.getString(kitId + KitHelper.KitDesciptionSuffix);
+                    kits[kitId].description = resources.getString(kitId + KitHelper.KIT_DESCRIPTION_SUFFIX);
                     deferred.resolve(kits[kitId]);
                 } else {
                     // Error, empty kitId or no kit matching the kit id
@@ -194,7 +194,7 @@ module TacoKits {
         /**
          *   Returns a promise resolved with an IKitTemplatesOverrideInfo that contains all the templates for the specified kit (or default kit if none specified)
          */
-        public getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
+        public getTemplatesForKit(inputKitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
             var kit: string = null;
             var templates: ITemplateMetadata = null;
             var self = this;
@@ -203,7 +203,7 @@ module TacoKits {
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
                     templates = templateMetadata;
 
-                    return kitId ? Q.resolve(kitId) : self.getDefaultKit();
+                    return inputKitId ? Q.resolve(inputKitId) : self.getDefaultKit();
                 })
                 .then(function (kitId: string): Q.Promise<IKitInfo> {
                     kit = kitId;
@@ -217,7 +217,7 @@ module TacoKits {
                     var kitOverride: string = kit;
 
                     if (!templates[kitOverride]) {
-                        kitOverride = KitHelper.DefaultTemplateKitOverride;
+                        kitOverride = KitHelper.DEFAULT_TEMPLATE_KIT_OVERRIDE;
                     }
 
                     templatesForKit = templates[kitOverride];
@@ -280,7 +280,7 @@ module TacoKits {
          *   If there is an override for {kitId} -> returns the template override info for the {templateId}
          *   Else -> returns the default template information with id {templateId}
          */
-        public getTemplateOverrideInfo(kitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo> {
+        public getTemplateOverrideInfo(inputKitId: string, templateId: string): Q.Promise<ITemplateOverrideInfo> {
             var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
             var templates: ITemplateMetadata = null;
             var templateOverrideInfo: ITemplateOverrideInfo = null;
@@ -290,7 +290,7 @@ module TacoKits {
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
                     templates = templateMetadata;
 
-                    return kitId ? Q.resolve(kitId) : self.getDefaultKit();
+                    return inputKitId ? Q.resolve(inputKitId) : self.getDefaultKit();
                 })
                 .then(function (kitId: string): Q.Promise<ITemplateOverrideInfo> {
                     if (templates[kitId]) {
@@ -307,16 +307,16 @@ module TacoKits {
                             deferred.resolve(templateOverrideInfo);
                         } else {
                             // Error, the kit override does not define the specified template id
-                            if (templateId === KitHelper.TsTemplateId) {
+                            if (templateId === KitHelper.TS_TEMPLATE_ID) {
                                 // We have a special error message for typescript
                                 deferred.reject(errorHelper.get(TacoErrorCodes.TacoKitsExceptionTypescriptNotSupported));
                             } else {
                                 deferred.reject(errorHelper.get(TacoErrorCodes.TacoKitsExceptionInvalidTemplate, templateId));
                             }
                         }
-                    } else if (templates[KitHelper.DefaultTemplateKitOverride][templateId]) {
+                    } else if (templates[KitHelper.DEFAULT_TEMPLATE_KIT_OVERRIDE][templateId]) {
                         // Found a default template matching the specified template id
-                        templateOverrideInfo = self.createTemplateOverrideInfo(KitHelper.DefaultTemplateKitOverride, templates[KitHelper.DefaultTemplateKitOverride][templateId]);
+                        templateOverrideInfo = self.createTemplateOverrideInfo(KitHelper.DEFAULT_TEMPLATE_KIT_OVERRIDE, templates[KitHelper.DEFAULT_TEMPLATE_KIT_OVERRIDE][templateId]);
 
                         // Properly assign the localized template name
                         templateOverrideInfo.templateInfo.name = resources.getString(templateOverrideInfo.templateInfo.name);
@@ -369,8 +369,8 @@ module TacoKits {
          */
         public getDefaultKit(): Q.Promise<string> {
             var deferred: Q.Deferred<string> = Q.defer<string>();
-            if (KitHelper.DefaultKitId) {
-                deferred.resolve(KitHelper.DefaultKitId);
+            if (KitHelper.defaultKitId) {
+                deferred.resolve(KitHelper.defaultKitId);
                 return deferred.promise;
             } else {
                 return this.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<string> {
@@ -378,7 +378,7 @@ module TacoKits {
                     Object.keys(kits).some(function (kitId: string): boolean {
                         // Get the kit for which the default attribute is set to true
                         if (kits[kitId].default) {
-                            KitHelper.DefaultKitId = kitId;
+                            KitHelper.defaultKitId = kitId;
                             deferred.resolve(kitId);
                             return true;
                         }
@@ -462,7 +462,11 @@ module TacoKits {
 
     export var kitHelper: IKitHelper = new KitHelper();
 
+    /* tslint:disable:variable-name */
+    // taco-kits error codes need to be accessed by other packages as TacoErrorCode 
+    // more like an enum.
     export var TacoErrorCode = TacoErrorCodes;
+    /* tslint:enable:variable-name */
 }
 
 export = TacoKits;
