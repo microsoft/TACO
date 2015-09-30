@@ -112,6 +112,6 @@ describe("taco emulate", function (): void {
     };
 
     describe("telemetry", () => {
-        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, emulateRun, () => testHttpServer, Command.Emulate);
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, emulateRun, Command.Emulate);
     });
 });
