@@ -11,6 +11,7 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/expressExtensions.d.ts" />
+/// <reference path="../../typings/helmet.d.ts" />
 /// <reference path="../../typings/morgan.d.ts" />
 /// <reference path="../../typings/errorhandler.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
@@ -19,6 +20,7 @@
 import errorhandler = require ("errorhandler");
 import express = require ("express");
 import fs = require ("fs");
+import helmet = require ("helmet");
 import http = require ("http");
 import https = require ("https");
 import expressLogger = require ("morgan");
@@ -51,6 +53,13 @@ class Server {
         var app = express();
         app.use(expressLogger("dev"));
         app.use(errorhandler());
+        if (conf.secure) {
+            app.use(helmet.hsts({
+                maxAge: 1000 * 60 * 60 * 24 * 365, // one year in milliseconds
+                includeSubdomains: false,
+                force: true
+            }));
+        }
 
         var serverDir = conf.serverDir;
         UtilHelper.createDirectoryIfNecessary(serverDir);
@@ -265,6 +274,7 @@ class Server {
                     cert: certStore.getCert(),
                     ca: certStore.getCA(),
                     ciphers: cipherList.join(":"),
+                    honorCipherOrder: true,
                     secureProtocol: "TLSv1_2_server_method",
                     requestCert: true,
                     rejectUnauthorized: false
