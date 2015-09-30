@@ -518,14 +518,13 @@ describe("taco platform for kit", function(): void {
             // all those messages don't get printed, but if we only run the onboarding tests, they are the first
             // tests to run, so they do get printed. We accept both options and we validate we got one of them
             commandRun(platformCommandLineArguments).done(() => {
-                var expected = scenarioArguments.join("\n");
                 var actual = memoryStdout.contentsAsText();
-                if (expected !== actual) {
-                    expected = alternativeScenarioArguments.join("\n");
-                }
 
-                actual.should.be.equal(expected);
-                done();
+                if (scenarioArguments.every((msg: string) => actual.indexOf(msg) >= 0) || alternativeScenarioArguments.every((msg: string) => actual.indexOf(msg) >= 0)) {
+                    done();
+                } else {
+                    done(new Error("Bad onboarding for " + platformCommandLineArguments));
+                }
             }, (err: any) => {
                 done(err);
             });

@@ -48,7 +48,25 @@ module MockCordova {
     }
 
     export class MockCordova510 implements Cordova.ICordova510 {
+
         public raw = new MockCordovaRaw510();
+
+        private events: { [event: string]: any[] } = {};
+
+        public static get default(): MockCordova510 {
+            var t = new MockCordova510();
+            t.on = (event: string, func: Function) => {
+                t.events[event] = (t.events[event] || []);
+                t.events[event].push(func);
+            };
+            t.off = (event: string, func: Function) => {
+                var idx = t.events[event] && t.events[event].indexOf(func);
+                if (idx) {
+                    t.events[event].splice(idx);
+                };
+            };
+            return t;
+        }
 
         public on(event: string, ...args: any[]): void {
             notImplemented();

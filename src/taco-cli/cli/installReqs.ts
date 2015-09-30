@@ -40,7 +40,7 @@ class InstallReqs extends commands.TacoCommandBase {
     private static KNOWN_OPTIONS: Nopt.FlagTypeMap = { };
     private static PLATFORMS_FOLDER_NAME: string = "platforms";
     private static CHECK_REQS_PATH: string = path.join("cordova", "lib", "check_reqs.js");
-    private static minPlatformVersions: { [id: string]: string } = {
+    private static MIN_PLATFORM_VERSIONS: { [id: string]: string } = {
         ios: "3.9.0",
         android: "4.1.0",
         windows: "4.1.0"
@@ -89,8 +89,8 @@ class InstallReqs extends commands.TacoCommandBase {
             var name: string = resources.getString("CommandInstallPlatformBullet", platform);
             var desc: string = "";
 
-            if (printVersions && !!InstallReqs.minPlatformVersions[platform]) {
-                desc = resources.getString("CommandInstallPlatformVersion", platform, InstallReqs.minPlatformVersions[platform]);
+            if (printVersions && !!InstallReqs.MIN_PLATFORM_VERSIONS[platform]) {
+                desc = resources.getString("CommandInstallPlatformVersion", platform, InstallReqs.MIN_PLATFORM_VERSIONS[platform]);
             }
 
             return { name: name, description: desc };

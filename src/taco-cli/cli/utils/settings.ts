@@ -82,7 +82,7 @@ class Settings {
      *                 - If a platform exists in /platforms and does not have a remote configuration, then perform a local build
      */
     public static determinePlatform(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Q.all([
+        return Q.all<any>([
             CordovaHelper.getSupportedPlatforms(),
             Settings.determinePlatformsFromOptions(options)
         ]).spread<Settings.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {

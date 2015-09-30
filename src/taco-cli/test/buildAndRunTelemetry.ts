@@ -91,7 +91,7 @@ module BuildAndRunTelemetryTests {
         var iosPort = 3001;
         var androidPort = 3002;
 
-        var cordova: Cordova.ICordova = new mockCordova.MockCordova510();
+        var cordova: Cordova.ICordova = mockCordova.MockCordova510.default;
         var vcordova: string = "4.0.0";
         var buildNumber = 12341;
         var isNotEmulate = command !== Command.Emulate;
@@ -331,9 +331,9 @@ module BuildAndRunTelemetryTests {
                 expected["platforms.actuallyBuilt.local1"] = { isPii: false, value: "android" };
             }
 
-            runCommand(args)
-                .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected))
-                .done(() => done(), done);
+            runCommand(args).then(telemetryProperties => {
+                telemetryShouldEqual(telemetryProperties, expected);
+            }).done(() => done(), done);
         });
 
         function mockProjectWithIncrementalBuild(): void {

@@ -143,7 +143,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             }
         })
             .then(function (): Q.Promise<any> {
-            return cordovaWrapper.invokePlatformPluginCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams, data);
+            return cordovaWrapper.invokePlatformPluginCommand(self.name, self.cordovaCommandParams, data);
         })
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {

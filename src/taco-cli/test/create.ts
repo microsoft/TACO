@@ -14,7 +14,7 @@
 /// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
-var should = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
 import mocha = require ("mocha");
@@ -211,7 +211,7 @@ describe("taco create", function (): void {
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.kitPackagePromise = null;
+        kitHelper.KitPackagePromise = null;
 
         // Instantiate the persistent templateManager
         templateManager = new TemplateManager(kitHelper);
@@ -230,7 +230,7 @@ describe("taco create", function (): void {
 
     after(function (done: MochaDone): void {
         this.timeout(2 * createTimeout); // Cleaning up can take a long time if we have several projects
-        kitHelper.kitPackagePromise = null;
+        kitHelper.KitPackagePromise = null;
         rimraf(runFolder, done);
     });
 
@@ -471,12 +471,12 @@ describe("taco create", function (): void {
                 actual = actual.replace(/ *\n +\(/gm, " ("); // We undo the word-wrapping
                 actual = actual.replace(/\n\n /gm, "\n "); // We undo the word-wrapping
                 actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
-                if (expected !== actual) {
-                    expected = alternativeExpectedMessages.join("\n");
-                }
 
-                actual.should.be.equal(expected);
-                done();
+                if (expectedMessages.every((msg: string) => actual.indexOf(msg) >= 0) || alternativeExpectedMessages.every((msg: string) => actual.indexOf(msg) >= 0)) {
+                    done();
+                } else {
+                    done(new Error("Bad onboarding for " + createCommandLineArguments));
+                }
             }, (arg: any) => {
                 done(arg);
             });

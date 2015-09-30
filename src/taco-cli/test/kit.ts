@@ -13,7 +13,7 @@
 
 "use strict";
 
-var should = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should, but we need the require to occur since it modifies the prototype of Object.
 
 import del = require ("del");
 import fs = require ("fs");
@@ -108,7 +108,7 @@ describe("Kit", function (): void {
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.kitPackagePromise = null;
+        kitHelper.KitPackagePromise = null;
 
         this.timeout(30000);
         rimraf.sync(runFolder);
@@ -117,7 +117,7 @@ describe("Kit", function (): void {
     after((done: MochaDone) => {
         process.env["TACO_UNIT_TEST"] = previous;
         process.chdir(originalCwd);
-        kitHelper.kitPackagePromise = null;
+        kitHelper.KitPackagePromise = null;
         rimraf(runFolder, function (err: Error): void { done(); }); // ignore errors
     });
 
@@ -222,7 +222,7 @@ describe("Kit", function (): void {
             .done(function (): void {
                 process.chdir(cliProjectpath);
                 done();
-            });
+            }, done);
         });
 
         after(function (done: MochaDone): void {
