@@ -115,7 +115,7 @@ class Run extends commands.TacoCommandBase {
 
     private static remote(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
-        return Q.all([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
+        return Q.all<any>([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
                 return Q.all(platforms.map(function (platform: Settings.IPlatformWithLocation): Q.Promise<any> {
@@ -126,7 +126,7 @@ class Run extends commands.TacoCommandBase {
     }
 
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData, telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
-        return Q.all([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
+        return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
             var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
             var language = settings.language || "en";
@@ -210,7 +210,7 @@ class Run extends commands.TacoCommandBase {
 
     private static fallback(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
-        return Q.all([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
+        return Q.all<any>([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
             buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
             return Q.all(platforms.map((platform: Settings.IPlatformWithLocation): Q.Promise<any> => {

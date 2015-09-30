@@ -10,7 +10,8 @@
 "use strict";
 module TacoUtility {
     export enum InstallLogLevel {
-        silent,
+        undefined = 0, // undefined is falsy, others are truthy
+        silent = 1,
         error,
         warn,
         taco,
