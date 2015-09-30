@@ -10,12 +10,15 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should, but we need the require to occur since it modifies the prototype of Object.
 
 import net = require ("net");
 import Q = require ("q");
 
 import runner = require ("../ios/iosAppRunnerHelper");
+import utils = require ("taco-utils");
+
+import Logger = utils.Logger;
 
 interface IMockDebuggerProxy extends net.Server {
     protocolState?: number;
@@ -54,7 +57,10 @@ describe("Device functionality", function (): void {
                         for (var i = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
                         };
+                        /* tslint:disable:no-bitwise */
+                        // Some bitwise operations needed to calculate the checksum here
                         checksum = checksum & 0xFF;
+                        /* tslint:enable:no-bitwise */
                         var checkstring = checksum.toString(16).toUpperCase();
                         if (checkstring.length === 1) {
                             checkstring = "0" + checkstring;
@@ -88,7 +94,7 @@ describe("Device functionality", function (): void {
         mockDebuggerProxy.on("error", done);
 
         mockDebuggerProxy.listen(port, function (): void {
-            console.info("MockDebuggerProxy listening");
+            Logger.log("MockDebuggerProxy listening");
         });
 
         Q.timeout(runner.startAppViaDebugger(port, appPath), 1000)
@@ -121,7 +127,7 @@ describe("Device functionality", function (): void {
 
                 dataString[0].should.equal("$");
 
-                var expectedResponse:string = "";
+                var expectedResponse: string = "";
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
                         expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
@@ -129,7 +135,10 @@ describe("Device functionality", function (): void {
                         for (var i = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
                         };
+                        /* tslint:disable:no-bitwise */
+                        // Some bit operations needed to calculate checksum
                         checksum = checksum & 0xFF;
+                        /* tslint:enable:no-bitwise */
                         var checkstring = checksum.toString(16).toUpperCase();
                         if (checkstring.length === 1) {
                             checkstring = "0" + checkstring;
@@ -162,7 +171,7 @@ describe("Device functionality", function (): void {
         mockDebuggerProxy.on("error", done);
 
         mockDebuggerProxy.listen(port, function (): void {
-            console.info("MockDebuggerProxy listening");
+            Logger.log("MockDebuggerProxy listening");
         });
 
         Q.timeout(runner.startAppViaDebugger(port, appPath), 1000).done(function (): void {

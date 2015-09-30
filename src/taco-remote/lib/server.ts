@@ -133,7 +133,7 @@ class Server implements RemoteBuild.IServerModule {
             buildInfo.localize(req, this.resources);
             if (!buildInfo.message) {
                 // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
-                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib>buildInfo["pkg"]).locResources);
+                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib> buildInfo["pkg"]).locResources);
             }
 
             res.status(200).json(buildInfo);
@@ -147,7 +147,9 @@ class Server implements RemoteBuild.IServerModule {
         var buildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             res.set("Content-Type", "text/plain");
+            /* tslint:disable:no-bitwise */
             this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
+            /* tslint:enable:no-bitwise */
         } else {
             res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }

@@ -19,9 +19,9 @@
 
     "NoResourcesForLanguage": "No resources defined for language {0}",
     "_NoResourcesForLanguage.comment": "Message sent back in browser if user requests resources for a language that does not have specfic resources",
-    "BuildRetentionPreDelete": "Deleting eligible builds. Will delete %d builds.",
+    "BuildRetentionPreDelete": "Deleting eligible builds. Will delete {0} builds.",
     "_BuildRetentionPreDelete.comment": "Message printed to console just before we delete old builds. %d is the number of builds we will delete",
-    "BuildRetentionDelete": "Deleting build %d from %s",
+    "BuildRetentionDelete": "Deleting build {0} from {1}",
     "_BuildRetentionDelete.comment": "Message printed to console for each build deleted. %d is the build number, and %s is the build location",
     "BuildManagerDirInit": "Build will be executed under: {0}",
     "_BuildManagerDirInit.comment": "Message printed to console when a build request is recieved. {0} is the path where the build will exist.",

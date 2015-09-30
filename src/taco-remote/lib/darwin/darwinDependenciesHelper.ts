@@ -22,6 +22,7 @@ import readline = require ("readline");
 import resources = require ("../../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
+import Logger = tacoUtils.Logger;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class DarwinDependenciesHelper {
@@ -30,7 +31,7 @@ class DarwinDependenciesHelper {
         var isFirstRun = !fs.existsSync(firstRunPath);
         var deferred = Q.defer();
         if (isFirstRun) {
-            console.info(resources.getString("FirstRunDependencyConfiguration"));
+            Logger.log(resources.getString("FirstRunDependencyConfiguration"));
             var readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
             var deferred2 = Q.defer<boolean>();
             readlineInterface.question(resources.getString("HomebrewInstallationQuery"), function (response: string): void {
@@ -41,7 +42,7 @@ class DarwinDependenciesHelper {
                     DarwinDependenciesHelper.tryInstallHomebrew().then(DarwinDependenciesHelper.tryInstallPackages).then(function (): void {
                         DarwinDependenciesHelper.verifyPackagesInstalled()
                             .then(function (): void {
-                            console.info(resources.getString("HomebrewInstallationSuccess"));
+                            Logger.log(resources.getString("HomebrewInstallationSuccess"));
                             deferred2.resolve(true);
                         }, function (error: Error): void {
                                 console.error(resources.getString("HomebrewPackageVerificationFailed", error));
@@ -52,7 +53,7 @@ class DarwinDependenciesHelper {
                             process.exit(1);
                         });
                 } else {
-                    console.info(resources.getString("HomebrewInstallationDeclined"), firstRunPath);
+                    Logger.log(resources.getString("HomebrewInstallationDeclined", firstRunPath));
                     deferred2.resolve(false);
                 }
             });
@@ -86,7 +87,7 @@ class DarwinDependenciesHelper {
         });
 
         installHomebrew.stdout.on("data", function (data: any): void {
-            console.info("" + data);
+            Logger.log("" + data);
         });
         installHomebrew.stderr.on("data", function (data: any): void {
             console.error("" + data);

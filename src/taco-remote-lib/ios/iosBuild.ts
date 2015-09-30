@@ -27,6 +27,7 @@ import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
 import CordovaConfig = utils.CordovaConfig;
+import Logger = utils.Logger;
 import TacoGlobalConfig = utils.TacoGlobalConfig;
 import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
@@ -66,11 +67,11 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     TacoPackageLoader.lazyRequire<typeof Cordova>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: typeof Cordova): void {
         cordova = pkg;
 
-        cordova.on("results", console.info);
-        cordova.on("log", console.info);
+        cordova.on("results", Logger.log);
+        cordova.on("log", Logger.log);
         cordova.on("warn", console.warn);
         cordova.on("error", console.error);
-        cordova.on("verbose", console.info);
+        cordova.on("verbose", Logger.log);
         cordova.on("before_prepare", beforePrepare);
         cordova.on("after_compile", afterCompile);
 
@@ -105,11 +106,11 @@ class IOSBuildHelper {
                 .then(function (): void { currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(currentBuild); })
                 .then(isDeviceBuild ? IOSBuildHelper.package_ios : noOp)
                 .then(function (): void {
-                console.info(resources.getString("DoneBuilding", currentBuild.buildNumber));
+                Logger.log(resources.getString("DoneBuilding", currentBuild.buildNumber));
                 currentBuild.updateStatus(BuildInfo.COMPLETE);
             })
                 .catch(function (err: Error): void {
-                console.info(resources.getString("ErrorBuilding", currentBuild.buildNumber, err.message));
+                Logger.log(resources.getString("ErrorBuilding", currentBuild.buildNumber, err.message));
                 currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
             })
                 .done(function (): void {
@@ -172,7 +173,7 @@ class IOSBuildHelper {
         }
 
         if (!fs.existsSync(path.join("platforms", "ios"))) {
-            console.info("cordova platform add ios");
+            Logger.log("cordova platform add ios");
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
             return cordova.raw.platform("add", "ios");
         } else {
@@ -224,7 +225,7 @@ class IOSBuildHelper {
         var fetchJsonPath = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
-                fetchJson = JSON.parse(<any>fs.readFileSync(fetchJsonPath));
+                fetchJson = JSON.parse(<any> fs.readFileSync(fetchJsonPath));
             } catch (e) {
                 // fetch.json is malformed; act as though no plugins are installed
                 // If it turns out we do need variables from the fetch.json, then cordova will throw an error
@@ -244,16 +245,16 @@ class IOSBuildHelper {
                     return UtilHelper.copyRecursive(newFolder, installedFolder);
                 } else {
                     // The plugin is not installed; install it
-                    var cli_variables: Cordova.IKeyValueStore<string> = {};
+                    var cliVariables: Cordova.IKeyValueStore<string> = {};
 
                     // Check to see if the plugin is mentioned in fetch.json and has variables
                     if (plugin in fetchJson && fetchJson[plugin].variables) {
                         Object.keys(fetchJson[plugin].variables).forEach(function (key: string): void {
-                            cli_variables[key] = fetchJson[plugin].variables[key];
+                            cliVariables[key] = fetchJson[plugin].variables[key];
                         });
                     }
 
-                    return cordova.raw.plugin("add", newFolder, { cli_variables: cli_variables });
+                    return cordova.raw.plugin("add", newFolder, { cli_variables: cliVariables });
                 }
             });
         }, deleteOldPlugins).finally(function (): void {
@@ -269,7 +270,7 @@ class IOSBuildHelper {
     }
 
     private static pluginRemovalErrorHandler(err: any): void {
-        console.info(err);
+        Logger.log(err);
     }
 
     private static appendToBuildConfig(data: string): Q.Promise<any> {
@@ -313,7 +314,7 @@ class IOSBuildHelper {
     }
 
     private static build_ios(): Q.Promise<any> {
-        console.info("cordova compile ios");
+        Logger.log("cordova compile ios");
         var configuration = (currentBuild.configuration === "debug") ? "--debug" : "--release";
         var opts = (currentBuild.options.length > 0) ? [currentBuild.options, configuration] : [configuration];
         return cordova.raw.compile({ platforms: ["ios"], options: opts });
@@ -369,8 +370,8 @@ class IOSBuildHelper {
 
         child_process.exec("xcrun -v -sdk iphoneos PackageApplication " + pathToCordovaApp + " -o " + fullPathToIpaFile, {},
             function (error: Error, stdout: Buffer, stderr: Buffer): void {
-                console.info("xcrun.stdout: " + stdout);
-                console.info("xcrun.stderr: " + stderr);
+                Logger.log("xcrun.stdout: " + stdout);
+                Logger.log("xcrun.stderr: " + stderr);
                 if (error) {
                     deferred.reject(error);
                 } else {

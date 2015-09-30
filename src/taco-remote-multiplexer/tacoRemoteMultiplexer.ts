@@ -18,10 +18,10 @@ class TacoRemoteMultiplexer implements TacoRemoteMultiplexer.ITacoRemoteMultiple
         // Note: As new scenarios are added, place them at the top of the function and not the bottom.
         // This will ensure that if previous scenarios worked, they will continue to do so, and newer cases take precedence over older ones.
         if (semver.valid(query["vcordova"]) && semver.satisfies(query["vcordova"], ">=3.0.0 <6.0.0")) {
-            return <TacoRemoteMultiplexer.IPackageSpec>{ packageKey: "tacoRemoteLib@1.1.0", dependencyConfigPath: dependencyConfigPath };
+            return <TacoRemoteMultiplexer.IPackageSpec> { packageKey: "tacoRemoteLib@1.1.0", dependencyConfigPath: dependencyConfigPath };
         }
 
-        return <TacoRemoteMultiplexer.IPackageSpec>{ packageKey: "tacoRemoteLib@1.1.0", dependencyConfigPath: dependencyConfigPath };
+        return <TacoRemoteMultiplexer.IPackageSpec> { packageKey: "tacoRemoteLib@1.1.0", dependencyConfigPath: dependencyConfigPath };
     }
 };
 

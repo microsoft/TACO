@@ -27,6 +27,7 @@ import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
+import Logger = utils.Logger;
 import ProcessLogger = utils.ProcessLogger;
 import UtilHelper = utils.UtilHelper;
 
@@ -97,7 +98,7 @@ class IOSAgent implements ITargetPlatform {
         var pathToIpaFile = path.join(iosOutputDir, buildInfo["appName"] + ".ipa");
         if (!fs.existsSync(pathToPlistFile) || !fs.existsSync(pathToIpaFile)) {
             var msg = resources.getString("DownloadInvalid", pathToPlistFile, pathToIpaFile);
-            console.info(msg);
+            Logger.log(msg);
             res.status(404).send(resources.getStringForLanguage(req, "DownloadInvalid", pathToPlistFile, pathToIpaFile));
             callback(msg);
             return;
@@ -111,19 +112,21 @@ class IOSAgent implements ITargetPlatform {
         });
         res.set({ "Content-Type": "application/zip" });
         archive.pipe(res);
-        archive.entry(fs.createReadStream(pathToPlistFile), { name: buildInfo["appName"] + ".plist" }, function (err: Error, file: any): void {
-            if (err) {
-                console.error(resources.getString("ArchivePackError", err.message));
-                callback(err);
-                res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
+        archive.entry(fs.createReadStream(pathToPlistFile), { name: buildInfo["appName"] + ".plist" },
+            function (pListEntryError: Error, pListEntry: any): void {
+            if (pListEntryError) {
+                console.error(resources.getString("ArchivePackError", pListEntryError.message));
+                callback(pListEntryError);
+                res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", pListEntryError.message));
                 return;
             }
 
-            archive.entry(fs.createReadStream(pathToIpaFile), { name: buildInfo["appName"] + ".ipa" }, function (err: Error, file: any): void {
-                if (err) {
-                    console.error(resources.getString("ArchivePackError", err.message));
-                    callback(err);
-                    res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
+            archive.entry(fs.createReadStream(pathToIpaFile), { name: buildInfo["appName"] + ".ipa" },
+                function (ipaEntryError: Error, ipaEntry: any): void {
+                if (ipaEntryError) {
+                    console.error(resources.getString("ArchivePackError", ipaEntryError.message));
+                    callback(ipaEntryError);
+                    res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", ipaEntryError.message));
                     return;
                 }
 
