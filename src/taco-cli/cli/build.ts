@@ -44,7 +44,12 @@ import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
  * handles "taco build"
  */
 class Build extends commands.TacoCommandBase {
-    private static KnownOptions: Nopt.CommandData = {
+    /*
+     * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
+     */
+    public static remoteBuild = RemoteBuildClientHelper;
+
+    private static KNOWN_OPTIONS: Nopt.CommandData = {
         local: Boolean,
         remote: Boolean,
         clean: Boolean,
@@ -54,12 +59,11 @@ class Build extends commands.TacoCommandBase {
         emulator: Boolean,
         target: String
     };
-    private static ShortHands: Nopt.ShortFlags = {};
+    private static SHORT_HANDS: Nopt.ShortFlags = {};
 
-    /*
-     * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
-     */
-    public static RemoteBuild = RemoteBuildClientHelper;
+    public name: string = "build";
+    public info: commands.ICommandInfo;
+
     public subcommands: commands.ICommand[] = [
         {
             name: "build",
@@ -70,38 +74,9 @@ class Build extends commands.TacoCommandBase {
         }
     ];
 
-    public name: string = "build";
-    public info: commands.ICommandInfo;
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
-    }
-
-    public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Build.KnownOptions, Build.ShortHands, args, 0);
-
-        // Raise errors for invalid command line parameters
-        if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
-            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--remote", "--local");
-        }
-
-        if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
-            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--device", "--emulator");
-        }
-
-        if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
-            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
-        }
-
-        return parsedOptions;
-    }
-
     private static generateTelemetryProperties(telemetryProperties: tacoUtility.ICommandTelemetryProperties,
         commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
-        return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Build.KnownOptions, commandData);
+        return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Build.KNOWN_OPTIONS, commandData);
     }
 
     private static cleanPlatform(platform: Settings.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
@@ -125,11 +100,11 @@ class Build extends commands.TacoCommandBase {
                 // If neither --debug nor --release is specified, then clean both
                 commandData.options["release"] = commandData.options["debug"] = true;
             }
-            
+
             var remotePlatform = path.resolve(".", "remote", platform.platform);
             var configurations = ["release", "debug"];
-            promise = configurations.reduce(function (promise: Q.Promise<any>, configuration: string): Q.Promise<any> {
-                return promise.then(function (): void {
+            promise = configurations.reduce(function (soFar: Q.Promise<any>, configuration: string): Q.Promise<any> {
+                return soFar.then(function (): void {
                     if (commandData.options[configuration]) {
                         var remotePlatformConfig = path.join(remotePlatform, configuration);
                         if (fs.existsSync(remotePlatformConfig)) {
@@ -168,7 +143,7 @@ class Build extends commands.TacoCommandBase {
                 language: language,
                 cordovaVersion: cordovaVersion
             });
-            return Build.RemoteBuild.build(buildSettings, telemetryProperties);
+            return Build.remoteBuild.build(buildSettings, telemetryProperties);
         });
     }
 
@@ -203,6 +178,33 @@ class Build extends commands.TacoCommandBase {
             }));
         }).then(() => Build.generateTelemetryProperties(telemetryProperties, commandData));
     }
+
+    /**
+     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
+     */
+    public canHandleArgs(data: commands.ICommandData): boolean {
+        return true;
+    }
+
+    public parseArgs(args: string[]): commands.ICommandData {
+        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Build.KNOWN_OPTIONS, Build.SHORT_HANDS, args, 0);
+
+        // Raise errors for invalid command line parameters
+        if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--remote", "--local");
+        }
+
+        if (parsedOptions.options["device"] && parsedOptions.options["emulator"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--device", "--emulator");
+        }
+
+        if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
+        }
+
+        return parsedOptions;
+    }
+
 }
 
 export = Build;

@@ -10,7 +10,7 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import del = require ("del");
 import fs = require ("fs");
@@ -41,7 +41,7 @@ describe("taco settings", function (): void {
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         // Configure a dummy platform "test" to use the mocked out remote server
         RemoteMock.saveConfig("ios", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
             mocha();
@@ -53,7 +53,7 @@ describe("taco settings", function (): void {
     after(function (done: MochaDone): void {
         this.timeout(50000);
         process.chdir(originalCwd);
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         rimraf(tacoHome, done);
     });
 

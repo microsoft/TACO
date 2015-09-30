@@ -186,7 +186,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      * Parse the arguments and construct the command parameters.
      */
     private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KNOWN_OPTIONS, PlatformPluginCommandBase.ShortHands, args.original, 0);
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KNOWN_OPTIONS, PlatformPluginCommandBase.SHORT_HANDS, args.original, 0);
         var subCommand: string = commandData.remain[0];
         var targets: string[] = commandData.remain.slice(1);
 

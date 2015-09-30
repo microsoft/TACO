@@ -50,7 +50,7 @@ interface IParsedArgs {
  *
  * Main Taco class
  */
-class Taco { 
+class Taco {
     /**
      * Runs taco with command line args
      */
@@ -83,7 +83,7 @@ class Taco {
                     // Pretty print errors
                     if (reason) {
                         if (reason.isTacoError) {
-                            logger.logError((<tacoUtility.TacoError>reason).toString());
+                            logger.logError((<tacoUtility.TacoError> reason).toString());
                         } else {
                             var toPrint: string = reason.toString();
 
@@ -122,7 +122,7 @@ class Taco {
                     return parsedArgs.command.run(commandData);
                 } else {
                     logger.logWarning(resources.getString("TacoCommandPassthrough"));
-                    
+
                     var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
                     telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
                     return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
@@ -170,7 +170,7 @@ class Taco {
         var commandsFactory: CommandsFactory = new CommandsFactory(path.join(__dirname, "./commands.json"));
         var command: commands.TacoCommandBase = commandsFactory.getTask(commandName, commandArgs, __dirname);
 
-        return <IParsedArgs>{ command: command, args: command ? commandArgs : args, commandName: commandName || command.name };
+        return <IParsedArgs> { command: command, args: command ? commandArgs : args, commandName: commandName || command.name };
     }
 }
 

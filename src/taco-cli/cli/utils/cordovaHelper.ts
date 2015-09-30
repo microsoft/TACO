@@ -155,13 +155,13 @@ class CordovaHelper {
         return CordovaHelper.toCordovaArgumentsInternal(commandData, platform);
     }
 
-    public static editConfigXml(infoList: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
+    public static editConfigXml(projectInfo: projectHelper.IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
         return packageLoader.lazyRequire(CordovaHelper.CORDOVA_PACKAGE_NAME, CordovaHelper.CORDOVA_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
-            var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
-            editFunc(infoList, configParser, addSpec);
-            configParser.write();
-            return Q.resolve({});
+                var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
+                editFunc(configParser);
+                configParser.write();
+                return Q.resolve({});
         });
     }
 

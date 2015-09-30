@@ -52,23 +52,23 @@ interface ICreateParameters {
  * Handles "taco create"
  */
 class Create extends commands.TacoCommandBase {
-    private static KnownOptions: Nopt.FlagTypeMap = {
+    private static KNOWN_OPTIONS: Nopt.FlagTypeMap = {
         kit: String,
         template: String,
         cordova: String,
         "copy-from": String,
         "link-to": String
     };
-    private static ShortHands: Nopt.ShortFlags = {
+    private static SHORT_HANDS: Nopt.ShortFlags = {
         src: "--copy-from"
     };
-    private static DefaultAppId: string = "io.taco.hellotaco";
-    private static DefaultAppName: string = "HelloTaco";
-
-    private commandParameters: ICreateParameters;
+    private static DEFAULT_APP_ID: string = "io.taco.hellotaco";
+    private static DEFAULT_APP_NAME: string = "HelloTaco";
 
     public name: string = "create";
     public info: commands.ICommandInfo;
+
+    private commandParameters: ICreateParameters;
 
     public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         try {
@@ -121,16 +121,16 @@ class Create extends commands.TacoCommandBase {
                 telemetryProperties["cordova"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["cordova"]);
             }
 
-            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, Create.KnownOptions, self.commandParameters.data.options, ["cordova", "kit", "template"]));
+            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, Create.KNOWN_OPTIONS, self.commandParameters.data.options, ["cordova", "kit", "template"]));
         });
     }
 
     private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, Create.ShortHands, args.original, 0);
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KNOWN_OPTIONS, Create.SHORT_HANDS, args.original, 0);
         var cordovaParams: Cordova.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
-            appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
-            appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,
+            appId: commandData.remain[1] ? commandData.remain[1] : Create.DEFAULT_APP_ID,
+            appName: commandData.remain[2] ? commandData.remain[2] : Create.DEFAULT_APP_NAME,
             cordovaConfig: commandData.remain[3],
             copyFrom: commandData.options["copy-from"],
             linkTo: commandData.options["link-to"]
@@ -240,8 +240,8 @@ class Create extends commands.TacoCommandBase {
             self.printNewProjectTable("CommandCreateStatusTableCordovaCLIVersionDescription", this.commandParameters.data.options["cordova"]);
             return Q({});
         } else {
-            var kitId: string = this.commandParameters.data.options["kit"];
-            return (kitId ? Q(kitId) : kitHelper.getDefaultKit())
+            var kitIdArg: string = this.commandParameters.data.options["kit"];
+            return (kitIdArg ? Q(kitIdArg) : kitHelper.getDefaultKit())
                 .then((kitId: string) => kitHelper.getKitInfo(kitId)
                     .then(kitInfo => self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription",
                         kit.getKitTitle(kitId, kitInfo))));

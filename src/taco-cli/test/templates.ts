@@ -13,7 +13,7 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should, but we need the require to occur since it modifies the prototype of Object.
 
 import tacoUtils = require ("taco-utils");
 import Templates = require ("../cli/templates");

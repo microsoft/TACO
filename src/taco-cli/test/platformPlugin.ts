@@ -11,7 +11,7 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import child_process = require ("child_process");
 import del = require ("del");
@@ -25,9 +25,9 @@ import rimraf = require ("rimraf");
 import util = require ("util");
 import wrench = require ("wrench");
 
-import platformMod = require ("../cli/platform");
-import pluginMod = require ("../cli/plugin");
-import createMod = require ("../cli/create");
+import Platform = require ("../cli/platform");
+import Plugin = require ("../cli/plugin");
+import Create = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
@@ -35,9 +35,9 @@ import ms = require ("./utils/memoryStream");
 
 import utils = TacoUtility.UtilHelper;
 
-var platform = new platformMod();
-var plugin = new pluginMod();
-var create = new createMod();
+var platformCommand = new Platform();
+var pluginCommand = new Plugin();
+var createCommand = new Create();
 
 var testKitId: string = "5.1.1-Kit";
 
@@ -79,8 +79,8 @@ var kitPluginVersions: IComponentVersionMap = {
     "cordova-plugin-contacts": "1.0.0"
 };
 
-var kitPlatformOperations: ICommandAndResult[] = [ 
-            {   
+var kitPlatformOperations: ICommandAndResult[] = [
+            {
                 command: "add android ios",
                 expectedVersions: kitPlatformVersions,
                 expectedTelemetryProperties: {
@@ -93,9 +93,9 @@ var kitPlatformOperations: ICommandAndResult[] = [
                     target2: { isPii: false, value: "ios@3.8.0" }
                 }
             },
-            {   
-                command: "remove android ios", 
-                expectedVersions: {}, 
+            {
+                command: "remove android ios",
+                expectedVersions: {},
                 expectedTelemetryProperties: {
                         kit: { isPii: false, value: "5.1.1-Kit" },
                         cliVersion: { isPii: false, value: cliVersion },
@@ -106,9 +106,9 @@ var kitPlatformOperations: ICommandAndResult[] = [
                         target2: { isPii: false, value: "ios" }
                 }
             },
-            {   
-                command: "add android@4.0.1 ios@3.8.0", 
-                expectedVersions: userOverridePlatformVersions, 
+            {
+                command: "add android@4.0.1 ios@3.8.0",
+                expectedVersions: userOverridePlatformVersions,
                 expectedTelemetryProperties: {
                         kit: { isPii: false, value: "5.1.1-Kit" },
                         cliVersion: { isPii: false, value: cliVersion },
@@ -117,13 +117,13 @@ var kitPlatformOperations: ICommandAndResult[] = [
                         subCommand: { isPii: false, value: "add" },
                         target1: { isPii: false, value: "android@4.0.1" },
                         target2: { isPii: false, value: "ios@3.8.0" }
-            } 
+            }
         }
     ];
-        
-var cliPlatformOperations: ICommandAndResult[] = [ 
-        {   
-            command: "add android browser", 
+
+var cliPlatformOperations: ICommandAndResult[] = [
+        {
+            command: "add android browser",
             expectedVersions: cliPlatformVersions,
             expectedTelemetryProperties: {
                     cli: { isPii: false, value: "5.0.0" },
@@ -135,107 +135,107 @@ var cliPlatformOperations: ICommandAndResult[] = [
                     target2: { isPii: false, value: "browser" }
             }
         },
-        {   
-            command: "remove android browser", 
-            expectedVersions: {}, 
+        {
+            command: "remove android browser",
+            expectedVersions: {},
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" },        
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: false, value: "android" },
                 target2: { isPii: false, value: "browser" }
             }
         },
 
-        {   
-            command: "add android@4.0.1 browser@4.0.0", 
-            expectedVersions: userOverridePlatformVersions, 
+        {
+            command: "add android@4.0.1 browser@4.0.0",
+            expectedVersions: userOverridePlatformVersions,
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" },   
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "add" },
                 target1: { isPii: false, value: "android@4.0.1" },
-                target2: { isPii: false, value: "browser@4.0.0" } 
+                target2: { isPii: false, value: "browser@4.0.0" }
             }
         },
-        {   
-            command: "remove android browser", 
-            expectedVersions: {}, 
+        {
+            command: "remove android browser",
+            expectedVersions: {},
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" },   
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: false, value: "android" },
-                target2: { isPii: false, value: "browser" } 
+                target2: { isPii: false, value: "browser" }
             }
         }
     ];
 
-var kitPluginOperations: ICommandAndResult[] = [ 
-        { 
-            command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", 
-            expectedVersions: userOverridePluginVersions, 
+var kitPluginOperations: ICommandAndResult[] = [
+        {
+            command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0",
+            expectedVersions: userOverridePluginVersions,
             expectedTelemetryProperties: {
                 kit: { isPii: false, value: "5.1.1-Kit" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" }, 
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "add" },
                 target1: { isPii: false, value: "cordova-plugin-camera@1.0.0" },
-                target2: { isPii: false, value: "cordova-plugin-contacts@1.0.0" } 
-            } 
+                target2: { isPii: false, value: "cordova-plugin-contacts@1.0.0" }
+            }
         },
-        {   
-            command: "remove cordova-plugin-camera cordova-plugin-contacts", 
+        {
+            command: "remove cordova-plugin-camera cordova-plugin-contacts",
             expectedVersions: {},
             expectedTelemetryProperties: {
                 kit: { isPii: false, value: "5.1.1-Kit" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" },   
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: false, value: "cordova-plugin-camera" },
-                target2: { isPii: false, value: "cordova-plugin-contacts" } 
-            } 
+                target2: { isPii: false, value: "cordova-plugin-contacts" }
+            }
         }
     ];
 
-var cliPluginOperations: ICommandAndResult[] = [ 
-        {   
-            command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0", 
+var cliPluginOperations: ICommandAndResult[] = [
+        {
+            command: "add cordova-plugin-camera@1.0.0 cordova-plugin-contacts@1.0.0",
             expectedVersions: userOverridePluginVersions,
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" },   
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "add" },
                 target1: { isPii: false, value: "cordova-plugin-camera@1.0.0" },
-                target2: { isPii: false, value: "cordova-plugin-contacts@1.0.0" } 
-            } 
+                target2: { isPii: false, value: "cordova-plugin-contacts@1.0.0" }
+            }
         },
-        {   
-            command: "remove cordova-plugin-camera cordova-plugin-contacts", 
+        {
+            command: "remove cordova-plugin-camera cordova-plugin-contacts",
             expectedVersions: {},
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
-                projectType: { isPii: false, value: "JavaScript" },   
+                projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: false, value: "cordova-plugin-camera" },
-                target2: { isPii: false, value: "cordova-plugin-contacts" } 
-            } 
+                target2: { isPii: false, value: "cordova-plugin-contacts" }
+            }
         }
     ];
 
-describe("taco platform for kit", function (): void {
+describe("taco platform for kit", function(): void {
     var tacoHome = path.join(os.tmpdir(), "taco-cli", "platformPlugin");
     var cliProjectDir: string = "cliProject";
     var kitProjectDir: string = "kitProject";
@@ -246,20 +246,20 @@ describe("taco platform for kit", function (): void {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
-        return Q.denodeify(del)(projectDir).then(function (): Q.Promise<any> {
-            return create.run({
+        return Q.denodeify(del)(projectDir).then(function(): Q.Promise<any> {
+            return createCommand.run({
                 options: {},
                 original: args,
                 remain: args
             });
-        }).then(function (): void {
+        }).then(function(): void {
             var projectPath: string = path.join(tacoHome, projectDir);
             process.chdir(projectPath);
         });
     }
 
     function createCliProject(cli: string): Q.Promise<any> {
-         return createProject(["cliProject", "--cordova", cli], cliProjectDir);
+        return createProject(["cliProject", "--cordova", cli], cliProjectDir);
     }
 
     function createKitProject(kit: string): Q.Promise<any> {
@@ -268,7 +268,7 @@ describe("taco platform for kit", function (): void {
     }
 
     function platformRun(args: string[]): Q.Promise<any> {
-        return platform.run({
+        return platformCommand.run({
             options: {},
             original: args,
             remain: args
@@ -276,7 +276,7 @@ describe("taco platform for kit", function (): void {
     }
 
     function pluginRun(args: string[]): Q.Promise<any> {
-        return plugin.run({
+        return pluginCommand.run({
             options: {},
             original: args,
             remain: args
@@ -289,7 +289,7 @@ describe("taco platform for kit", function (): void {
             return [];
         }
 
-        return fs.readdirSync(platformsDir).filter(function (platform: string): boolean {
+        return fs.readdirSync(platformsDir).filter(function(platform: string): boolean {
             return Object.keys(platformsExpected).indexOf(platform) > -1;
         });
     }
@@ -298,15 +298,15 @@ describe("taco platform for kit", function (): void {
         var platformsInstalled: string[] = getInstalledPlatforms(platformsExpected, projectPath);
         var onWindows = process.platform === "win32";
         var deferred = Q.defer<any>();
-        return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
+        return Q.all(platformsInstalled.map(function(platform: string): Q.Promise<any> {
             var cmdName: string = "version";
-            if (onWindows) { 
+            if (onWindows) {
                 cmdName = cmdName + ".bat";
             }
 
             var cmdPath: string = path.join(projectPath, "platforms", platform, "cordova", cmdName);
             var versionProc = child_process.spawn(cmdPath);
-            versionProc.stdout.on("data", function (data: any): void {
+            versionProc.stdout.on("data", function(data: any): void {
                 var version: string = data.toString();
                 if (!path) {
                     deferred.reject("Verson string not found");
@@ -315,10 +315,10 @@ describe("taco platform for kit", function (): void {
                     deferred.resolve({});
                 }
             });
-            versionProc.on("close", function (code: number): void {
+            versionProc.on("close", function(code: number): void {
                 deferred.reject("Unable to find version string");
             });
-            versionProc.on("error", function (err: any): void {
+            versionProc.on("error", function(err: any): void {
                 deferred.reject(err);
             });
             return deferred.promise;
@@ -337,7 +337,7 @@ describe("taco platform for kit", function (): void {
 
     function checkPluginVersions(pluginsExpected: IComponentVersionMap, projectPath: string): void {
         var deferred = Q.defer<any>();
-        Object.keys(pluginsExpected).forEach(function (plugin: string): void {
+        Object.keys(pluginsExpected).forEach(function(plugin: string): void {
             var versionInstalled: string = getInstalledPluginVersion(plugin, projectPath);
             versionInstalled.trim().should.be.equal(pluginsExpected[plugin]);
         });
@@ -349,141 +349,141 @@ describe("taco platform for kit", function (): void {
         return deferred.promise;
     };
 
-    before(function (mocha: MochaDone): void {
+    before(function(mocha: MochaDone): void {
         originalCwd = process.cwd();
         process.env["TACO_UNIT_TEST"] = true;
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
 
         this.timeout(100000);
         rimraf.sync(tacoHome);
         createKitProject("5.1.1-Kit")
-        .done(function (): void {
-            mocha();
-        });          
+            .done(function(): void {
+                mocha();
+            });
     });
 
-    after(function (done: MochaDone): void {
+    after(function(done: MochaDone): void {
         this.timeout(30000);
         process.chdir(originalCwd);
-        kitHelper.KitPackagePromise = null;
-        rimraf(tacoHome, function (err: Error): void { done(); }); // ignore errors
+        kitHelper.kitPackagePromise = null;
+        rimraf(tacoHome, function(err: Error): void { done(); }); // ignore errors
     });
 
-    describe("taco platform/plugin operation for a kit project with platform/plugin overrides execute with no errors", function (): void {
+    describe("taco platform/plugin operation for a kit project with platform/plugin overrides execute with no errors", function(): void {
         var kitProjectpath: string;
         this.timeout(50000);
 
-        before(function (): void {
+        before(function(): void {
             kitProjectpath = path.join(tacoHome, kitProjectDir);
             process.chdir(kitProjectpath);
         });
 
-        after(function (done: MochaDone): void {
+        after(function(done: MochaDone): void {
             this.timeout(30000);
             process.chdir(tacoHome);
-            rimraf(kitProjectpath, function (err: Error): void { done(); }); // ignore errors
+            rimraf(kitProjectpath, function(err: Error): void { done(); }); // ignore errors
         });
 
-        kitPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
-            it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
+        kitPlatformOperations.forEach(function(scenario: ICommandAndResult): void {
+            it("taco platform " + scenario.command + " executes with no error", function(done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
-                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
-                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
-                    return sleep(5);
-                }).then(function (): void {
-                    if (args[0] === "add") {
-                        // Check the version of platform after addition
-                        checkPlatformVersions(scenario.expectedVersions, kitProjectpath);
-                    }
-                }).then(function (): void {
-                    done();
-                }, function (err: TacoUtility.TacoError): void {
-                    done(err);
-                });
+                    .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
+                        // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                        telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
+                        return sleep(5);
+                    }).then(function(): void {
+                        if (args[0] === "add") {
+                            // Check the version of platform after addition
+                            checkPlatformVersions(scenario.expectedVersions, kitProjectpath);
+                        }
+                    }).then(function(): void {
+                        done();
+                    }, function(err: TacoUtility.TacoError): void {
+                        done(err);
+                    });
             });
         });
-        kitPluginOperations.forEach(function (scenario: ICommandAndResult ): void {
-            it("taco plugin " + scenario.command + " executes with no error", function (done: MochaDone): void {
+        kitPluginOperations.forEach(function(scenario: ICommandAndResult): void {
+            it("taco plugin " + scenario.command + " executes with no error", function(done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
-                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
-                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
-                    return sleep(5);
-                }).then(function (): void {
-                    if (args[0] === "add") {
-                        // Check the version of plugin after addition
-                        checkPluginVersions(scenario.expectedVersions, kitProjectpath);
-                    }
-                }).then(function (): void {
-                    done();
-                }, function (err: TacoUtility.TacoError): void {
-                    done(err);
-                });
+                    .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
+                        // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                        telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
+                        return sleep(5);
+                    }).then(function(): void {
+                        if (args[0] === "add") {
+                            // Check the version of plugin after addition
+                            checkPluginVersions(scenario.expectedVersions, kitProjectpath);
+                        }
+                    }).then(function(): void {
+                        done();
+                    }, function(err: TacoUtility.TacoError): void {
+                        done(err);
+                    });
             });
         });
     });
 
-    describe("taco platform/plugin operation for a CLI project with no platform/plugin overrides execute with no errors", function (): void {
+    describe("taco platform/plugin operation for a CLI project with no platform/plugin overrides execute with no errors", function(): void {
         var cliProjectPath: string;
         this.timeout(70000);
-        before(function (mocha: MochaDone): void {
+        before(function(mocha: MochaDone): void {
             createCliProject("5.0.0")
-            .then(function (): void {
-                cliProjectPath = path.join(tacoHome, cliProjectDir);
-                process.chdir(cliProjectPath);
-                mocha();
-            });
+                .then(function(): void {
+                    cliProjectPath = path.join(tacoHome, cliProjectDir);
+                    process.chdir(cliProjectPath);
+                    mocha();
+                });
         });
 
-        after(function (done: MochaDone): void {
-            rimraf(cliProjectPath, function (err: Error): void { done(); }); // ignore errors
+        after(function(done: MochaDone): void {
+            rimraf(cliProjectPath, function(err: Error): void { done(); }); // ignore errors
         });
 
-        cliPlatformOperations.forEach(function (scenario: ICommandAndResult ): void {
-            it("taco platform " + scenario.command + " executes with no error", function (done: MochaDone): void {
+        cliPlatformOperations.forEach(function(scenario: ICommandAndResult): void {
+            it("taco platform " + scenario.command + " executes with no error", function(done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 platformRun(args)
-                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
-                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
-                    return sleep(5);
-                }).then(function (): void {
-                    if (args[0] === "add") {
-                        // Check the version of platform after addition
-                        checkPlatformVersions(scenario.expectedVersions, cliProjectPath);
-                    }
-                }).then(function (): void {
-                    done();
-                }, function (err: TacoUtility.TacoError): void {
-                    done(err);
-                });
+                    .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
+                        // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                        telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
+                        return sleep(5);
+                    }).then(function(): void {
+                        if (args[0] === "add") {
+                            // Check the version of platform after addition
+                            checkPlatformVersions(scenario.expectedVersions, cliProjectPath);
+                        }
+                    }).then(function(): void {
+                        done();
+                    }, function(err: TacoUtility.TacoError): void {
+                        done(err);
+                    });
             });
         });
-        cliPluginOperations.forEach(function (scenario: ICommandAndResult ): void {
-            it("taco plugin " + scenario.command + " executes with no error", function (done: MochaDone): void {
+        cliPluginOperations.forEach(function(scenario: ICommandAndResult): void {
+            it("taco plugin " + scenario.command + " executes with no error", function(done: MochaDone): void {
                 var args: string[] = scenario.command.split(" ");
                 pluginRun(args)
-                .then(function (telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
-                    // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
-                    telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
-                    return sleep(5);
-                }).then(function (): void {
-                    if (args[0] === "add") {
-                        // Check the version of plugin after addition
-                        checkPluginVersions(scenario.expectedVersions, cliProjectPath);
-                    }
-                }).then(function (): void {
-                    done();
-                }, function (err: TacoUtility.TacoError): void {
-                    done(err);
-                });
+                    .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
+                        // Wait for 5 seconds after the installation to avoid false negatives in version checking                  
+                        telemetryParameters.should.be.eql(scenario.expectedTelemetryProperties);
+                        return sleep(5);
+                    }).then(function(): void {
+                        if (args[0] === "add") {
+                            // Check the version of plugin after addition
+                            checkPluginVersions(scenario.expectedVersions, cliProjectPath);
+                        }
+                    }).then(function(): void {
+                        done();
+                    }, function(err: TacoUtility.TacoError): void {
+                        done(err);
+                    });
             });
         });
     });
@@ -492,7 +492,7 @@ describe("taco platform for kit", function (): void {
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
-        beforeEach(function (done: MochaDone): void {
+        beforeEach(function(done: MochaDone): void {
             this.timeout(60000); // Instaling the node packages during create can take a long time
 
             // We create a taco project outside of the test
@@ -501,7 +501,7 @@ describe("taco platform for kit", function (): void {
                 memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
                 process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
                 done();
-            }, function (err: any): void {
+            }, function(err: any): void {
                 done(err);
             });
         });
@@ -531,7 +531,7 @@ describe("taco platform for kit", function (): void {
             });
         }
 
-        it("prints the onboarding experience when adding a platform", function (done: MochaDone): void {
+        it("prints the onboarding experience when adding a platform", function(done: MochaDone): void {
             this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
 
             var firstPart = ["CommandPlatformStatusAdding"];
@@ -554,7 +554,7 @@ describe("taco platform for kit", function (): void {
                 done);
         });
 
-        it("prints the onboarding experience when adding a plugin", function (done: MochaDone): void {
+        it("prints the onboarding experience when adding a plugin", function(done: MochaDone): void {
             this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
 
             var firstPart = [
@@ -579,3 +579,4 @@ describe("taco platform for kit", function (): void {
         });
     });
 });
+

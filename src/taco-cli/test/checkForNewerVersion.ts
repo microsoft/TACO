@@ -12,7 +12,7 @@
 /// <reference path="../../typings/node.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should  = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import del = require ("del");
 import fs = require ("fs");
@@ -214,7 +214,7 @@ describe("Check for newer version", function (): void {
 
                 if (messageExpectation === MessageExpectation.WillBeShown) {
                     simulateBeforeExit();
-                    var actual = memoryStdout.contentsAsText();
+                    actual = memoryStdout.contentsAsText();
                     actual.should.be.equal("NewerTacoCLIVersionAvailable\n",
                         "The output of the console should match what we expected");
                     return Settings.loadSettings().then(settings => {
@@ -262,7 +262,7 @@ describe("Check for newer version", function (): void {
             .done(() => {
                 var listeners = process.listeners("beforeExit");
                 listeners.length.should.eql(0, "There should be no listeners for the beforeExit event");
-                var actual = memoryStdout.contentsAsText();
+                var actual: string = memoryStdout.contentsAsText();
                 actual.should.be.empty;
                 return Settings.loadSettings().then(settings => {
                     settings.lastCheckForNewerVersionTimestamp.should.be.equal(lastCheckForNewerVersionTimestamp,

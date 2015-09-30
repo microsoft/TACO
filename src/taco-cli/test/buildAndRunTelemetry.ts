@@ -131,7 +131,7 @@ module BuildAndRunTelemetryTests {
 
         function generateCompleteBuildSequence(platform: string, port: number, isIncrementalTest: boolean): any {
             var configuration = "debug";
-        
+
             // Mock out the server on the other side
             var queryOptions: { [key: string]: string } = {
                 command: "build",
@@ -272,14 +272,13 @@ module BuildAndRunTelemetryTests {
                 value.should.be.below(expectedGzipedSizeAbsoluteError + expectedGzippedSize);
                 telemetryProperties[keyName].value = String(expectedGzippedSize);
             } else {
-                var expected: boolean = (typeof telemetryProperties[keyName] === "undefined");
-                expected.should.be.true;
+                (typeof telemetryProperties[keyName] === "undefined").should.be.equal(true);
             }
         }
 
         function telemetryShouldEqual(telemetryProperties: TacoUtility.ICommandTelemetryProperties,
             expected: any, iosExpectedGzipedSize: number = -1, androidGzipSize: number = -1): void {
-            (typeof telemetryProperties === "undefined").should.be.false;
+            (typeof telemetryProperties === "undefined").should.be.equal(false);
             validateGzipedSize(telemetryProperties, "ios", iosExpectedGzipedSize);
             validateGzipedSize(telemetryProperties, "android", androidGzipSize);
             telemetryProperties.should.eql(expected); // We are comparing the objects, after overriding the sizes with the expected values
@@ -369,7 +368,7 @@ module BuildAndRunTelemetryTests {
                 .then(() => runCommand(args))
                 .finally(() => {
                     testIosHttpServer.removeAllListeners("request");
-                    testAndroidHttpServer.removeAllListeners("request")
+                    testAndroidHttpServer.removeAllListeners("request");
                 })
                 .then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28382);
@@ -457,7 +456,7 @@ module BuildAndRunTelemetryTests {
 
                 runCommand(args)
                     .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected))
-                    .then(() => done(), done)
+                    .then(() => done(), done);
             });
         }
     }

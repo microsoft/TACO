@@ -14,7 +14,7 @@
 /// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
 import mocha = require ("mocha");
@@ -75,7 +75,7 @@ describe("taco create", function (): void {
 
     // Persistent TemplateManager to count template entries
     var templateManager: TemplateManager;
-    
+
     // Project info
     var testAppId: string = "testId";
     var testAppName: string = "testAppName";
@@ -206,13 +206,13 @@ describe("taco create", function (): void {
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
-        
+
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
-        
+        kitHelper.kitPackagePromise = null;
+
         // Instantiate the persistent templateManager
         templateManager = new TemplateManager(kitHelper);
 
@@ -230,7 +230,7 @@ describe("taco create", function (): void {
 
     after(function (done: MochaDone): void {
         this.timeout(2 * createTimeout); // Cleaning up can take a long time if we have several projects
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         rimraf(runFolder, done);
     });
 
@@ -338,7 +338,7 @@ describe("taco create", function (): void {
     describe("Failure scenarios", function (): void {
         this.timeout(createTimeout);
 
-        it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {     
+        it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
@@ -472,7 +472,7 @@ describe("taco create", function (): void {
                 actual = actual.replace(/\n\n /gm, "\n "); // We undo the word-wrapping
                 actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
                 if (expected !== actual) {
-                    var expected = alternativeExpectedMessages.join("\n");
+                    expected = alternativeExpectedMessages.join("\n");
                 }
 
                 actual.should.be.equal(expected);
@@ -642,7 +642,7 @@ describe("taco create", function (): void {
             };
 
             // Create a dummy test project with no platforms added
-            create.run(commandData).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {                  
+            create.run(commandData).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                 telemetryParameters.should.be.eql(expectedProperties);
                 done();
             }, done);

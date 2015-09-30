@@ -37,10 +37,10 @@ import loggerHelper = tacoUtils.LoggerHelper;
  * Handles "taco install-dependencies"
  */
 class InstallReqs extends commands.TacoCommandBase {
-    private static KnownOptions: Nopt.FlagTypeMap = { };
-    private static PlatformsFolderName: string = "platforms";
-    private static PathToCheckReqs: string = path.join("cordova", "lib", "check_reqs.js");
-    private static MinPlatformVersions: { [id: string]: string } = {
+    private static KNOWN_OPTIONS: Nopt.FlagTypeMap = { };
+    private static PLATFORMS_FOLDER_NAME: string = "platforms";
+    private static CHECK_REQS_PATH: string = path.join("cordova", "lib", "check_reqs.js");
+    private static minPlatformVersions: { [id: string]: string } = {
         ios: "3.9.0",
         android: "4.1.0",
         windows: "4.1.0"
@@ -48,91 +48,16 @@ class InstallReqs extends commands.TacoCommandBase {
 
     public info: commands.ICommandInfo;
 
-    public run(data: commands.ICommandData): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        return tacoUtils.TelemetryHelper.generate("InstallReqs", telemetry => {
-            var self = this;
-            var parsed: commands.ICommandData = null;
-
-            try {
-                parsed = InstallReqs.parseArguments(data);
-            } catch (err) {
-                return Q.reject(err);
-            }
-
-            return Q({})
-                .then(function (): Q.Promise<any> {
-                    logger.logLine();
-
-                    // Get a list of the installed platforms
-                    var installedPlatforms: string[] = InstallReqs.getInstalledPlatforms();
-
-                    if (installedPlatforms.length === 0) {
-                        return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallNoPlatformsAdded));
-                    }
-
-                    telemetry
-                        .addWithPiiEvaluator("requestedPlatformsViaCommandLine", parsed.remain, buildTelemetryHelper.getIsPlatformPii())
-                        .addWithPiiEvaluator("installedPlatforms", installedPlatforms, buildTelemetryHelper.getIsPlatformPii());
-
-                    // Get a list of the requested platforms (either what is specified by the user, or all the installed platforms if nothing is specified)
-                    var requestedPlatforms: string[] = parsed.remain.length > 0 ? parsed.remain : installedPlatforms.slice();   // Using slice() to clone the array
-
-                    requestedPlatforms = InstallReqs.removeDuplicates(requestedPlatforms);
-
-                    // From the requested platforms, skip the ones where the current system isn't supported (for example, iOS on Windows machines)
-                    requestedPlatforms = InstallReqs.skipSystemPlatforms(requestedPlatforms);
-
-                    // From the remaining platforms, skip the ones that are not added to the project
-                    requestedPlatforms = InstallReqs.skipNotInstalled(requestedPlatforms, installedPlatforms, telemetry);
-
-                    // From the remaining platforms, skip the ones that don't support 'cordova check_reqs'
-                    requestedPlatforms = InstallReqs.skipNoReqsSupport(requestedPlatforms, telemetry);
-
-                    // If we don't have any remaining platforms, print message and return
-                    loggerHelper.logSeparatorLine();
-                    logger.logLine();
-
-                    telemetry.addWithPiiEvaluator("platformsToActuallyUse", requestedPlatforms, buildTelemetryHelper.getIsPlatformPii());
-                    if (requestedPlatforms.length === 0) {
-                        logger.log(resources.getString("CommandInstallNothingToInstall"));
-
-                        return Q({});
-                    }
-
-                    // Run the dependency installer on the remaining platforms
-                    logger.log(resources.getString("CommandInstallFinalPlatforms", requestedPlatforms.join(", ")));
-                    logger.logLine();
-
-                    return cordovaWrapper.requirements(requestedPlatforms)
-                        .then(function (result: any): Q.Promise<any> {
-                            var sessionId = tacoUtils.Telemetry.isOptedIn ?
-                                tacoUtils.Telemetry.getSessionId() : // Valid session ID to publish telemetry
-                                "null"; // Null session ID to not publish telemetry
-                            var installer: DependencyInstaller = new DependencyInstaller(sessionId);
-
-                            return installer.run(result);
-                        });
-                });
-        }).thenResolve(<TacoUtility.ICommandTelemetryProperties>{});
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
-    }
-
     private static getInstalledPlatforms(): string[] {
         // Assume we are at the project root
-        if (!fs.existsSync(InstallReqs.PlatformsFolderName)) {
+        if (!fs.existsSync(InstallReqs.PLATFORMS_FOLDER_NAME)) {
             throw errorHelper.get(TacoErrorCodes.CommandInstallNoPlatformsFolder);
         }
 
         var platforms: string[] = [];
 
-        fs.readdirSync(InstallReqs.PlatformsFolderName).forEach(function (file: string): void {
-            if (fs.statSync(path.join(InstallReqs.PlatformsFolderName, file)).isDirectory()) {
+        fs.readdirSync(InstallReqs.PLATFORMS_FOLDER_NAME).forEach(function (file: string): void {
+            if (fs.statSync(path.join(InstallReqs.PLATFORMS_FOLDER_NAME, file)).isDirectory()) {
                 // Assume that every folder under root/platforms is an installed platform
                 platforms.push(file);
             }
@@ -164,8 +89,8 @@ class InstallReqs extends commands.TacoCommandBase {
             var name: string = resources.getString("CommandInstallPlatformBullet", platform);
             var desc: string = "";
 
-            if (printVersions && !!InstallReqs.MinPlatformVersions[platform]) {
-                desc = resources.getString("CommandInstallPlatformVersion", platform, InstallReqs.MinPlatformVersions[platform]);
+            if (printVersions && !!InstallReqs.minPlatformVersions[platform]) {
+                desc = resources.getString("CommandInstallPlatformVersion", platform, InstallReqs.minPlatformVersions[platform]);
             }
 
             return { name: name, description: desc };
@@ -176,7 +101,7 @@ class InstallReqs extends commands.TacoCommandBase {
 
     private static supportsCheckReqs(platform: string): boolean {
         // For now, Cordova checks for a "check_all" method defined in <platform>/cordova/lib/check_reqs.js. Make sure to update this if Cordova changes that.
-        var checkReqsPath: string = path.resolve(InstallReqs.PlatformsFolderName, platform, InstallReqs.PathToCheckReqs);
+        var checkReqsPath: string = path.resolve(InstallReqs.PLATFORMS_FOLDER_NAME, platform, InstallReqs.CHECK_REQS_PATH);
         var reqsModule: any;
 
         try {
@@ -272,8 +197,83 @@ class InstallReqs extends commands.TacoCommandBase {
     }
 
     private static parseArguments(args: commands.ICommandData): commands.ICommandData {
-        return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KnownOptions, {}, args.original, 0);
+        return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KNOWN_OPTIONS, {}, args.original, 0);
+    }
+
+    public run(data: commands.ICommandData): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+        return tacoUtils.TelemetryHelper.generate("InstallReqs", telemetry => {
+            var self = this;
+            var parsed: commands.ICommandData = null;
+
+            try {
+                parsed = InstallReqs.parseArguments(data);
+            } catch (err) {
+                return Q.reject(err);
+            }
+
+            return Q({})
+                .then(function (): Q.Promise<any> {
+                    logger.logLine();
+
+                    // Get a list of the installed platforms
+                    var installedPlatforms: string[] = InstallReqs.getInstalledPlatforms();
+
+                    if (installedPlatforms.length === 0) {
+                        return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallNoPlatformsAdded));
+                    }
+
+                    telemetry
+                        .addWithPiiEvaluator("requestedPlatformsViaCommandLine", parsed.remain, buildTelemetryHelper.getIsPlatformPii())
+                        .addWithPiiEvaluator("installedPlatforms", installedPlatforms, buildTelemetryHelper.getIsPlatformPii());
+
+                    // Get a list of the requested platforms (either what is specified by the user, or all the installed platforms if nothing is specified)
+                    var requestedPlatforms: string[] = parsed.remain.length > 0 ? parsed.remain : installedPlatforms.slice();   // Using slice() to clone the array
+
+                    requestedPlatforms = InstallReqs.removeDuplicates(requestedPlatforms);
+
+                    // From the requested platforms, skip the ones where the current system isn't supported (for example, iOS on Windows machines)
+                    requestedPlatforms = InstallReqs.skipSystemPlatforms(requestedPlatforms);
+
+                    // From the remaining platforms, skip the ones that are not added to the project
+                    requestedPlatforms = InstallReqs.skipNotInstalled(requestedPlatforms, installedPlatforms, telemetry);
+
+                    // From the remaining platforms, skip the ones that don't support 'cordova check_reqs'
+                    requestedPlatforms = InstallReqs.skipNoReqsSupport(requestedPlatforms, telemetry);
+
+                    // If we don't have any remaining platforms, print message and return
+                    loggerHelper.logSeparatorLine();
+                    logger.logLine();
+
+                    telemetry.addWithPiiEvaluator("platformsToActuallyUse", requestedPlatforms, buildTelemetryHelper.getIsPlatformPii());
+                    if (requestedPlatforms.length === 0) {
+                        logger.log(resources.getString("CommandInstallNothingToInstall"));
+
+                        return Q({});
+                    }
+
+                    // Run the dependency installer on the remaining platforms
+                    logger.log(resources.getString("CommandInstallFinalPlatforms", requestedPlatforms.join(", ")));
+                    logger.logLine();
+
+                    return cordovaWrapper.requirements(requestedPlatforms)
+                        .then(function (result: any): Q.Promise<any> {
+                            var sessionId = tacoUtils.Telemetry.isOptedIn ?
+                                tacoUtils.Telemetry.getSessionId() : // Valid session ID to publish telemetry
+                                "null"; // Null session ID to not publish telemetry
+                            var installer: DependencyInstaller = new DependencyInstaller(sessionId);
+
+                            return installer.run(result);
+                        });
+                });
+        }).thenResolve(<TacoUtility.ICommandTelemetryProperties> {});
+    }
+
+    /**
+     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
+     */
+    public canHandleArgs(data: commands.ICommandData): boolean {
+        return true;
     }
 }
 
-export = InstallReqs;
+export = InstallReqs

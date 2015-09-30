@@ -57,7 +57,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
             // For each of the plugins specified at command-line, check for overrides in the current kit
             return self.cordovaCommandParams.targets.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, pluginName: string): Q.Promise<any> {
                 return earlierPromise.then(function (): Q.Promise<any> {
-                    var pluginInfo: Cordova.ICordovaPlatformPluginInfo = { name: pluginName, spec: "", pluginVariables: [] };          
+                    var pluginInfo: Cordova.ICordovaPlatformPluginInfo = { name: pluginName, spec: "", pluginVariables: [] };
                     // Proceed only if the version has not already been overridden on
                     // command line i.e, proceed only if user did not add plugin@<verion|src>
                     if (!self.cliParamHasVersionOverride(pluginName)) {
@@ -113,7 +113,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
      * Edits the version override info to config.xml of the cordova project
      */
     public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
-        return cordovaHelper.editConfigXml(specs, projectInfo, add, function (specs: Cordova.ICordovaPlatformPluginInfo[], parser: Cordova.cordova_lib.configparser, add: boolean): void {
+        return cordovaHelper.editConfigXml(projectInfo, function (parser: Cordova.cordova_lib.configparser): void {
             cordovaHelper.editPluginVersionSpecs(specs, parser, add);
         });
     }
@@ -141,13 +141,13 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         switch (status) {
             case CommandOperationStatus.InProgress: {
                 this.printInProgressMessage(plugins, operation);
-                break;
             }
+            break;
 
             case CommandOperationStatus.Success: {
                 this.printSuccessMessage(plugins, operation);
-                break;
             }
+            break;
         }
     }
 
@@ -158,19 +158,19 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         switch (operation) {
             case "add": {
                 logger.log(resources.getString("CommandPluginStatusAdding", plugins));
-                break;
             }
+            break;
 
             case "remove":
             case "rm": {
                 logger.log(resources.getString("CommandPluginStatusRemoving", plugins));
-                break;
             }
+            break;
 
             case "update": {
                 logger.log(resources.getString("CommandPluginStatusUpdating", plugins));
-                break;
             }
+            break;
         }
     }
 
@@ -193,19 +193,19 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                 ["",
                     "HowToUseCommandHelp",
                     "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
-                break;
             }
+            break;
 
             case "remove":
             case "rm": {
                 logger.log(resources.getString("CommandPluginStatusRemoved", plugins));
-                break;
             }
+            break;
 
             case "update": {
                 logger.log(resources.getString("CommandPluginStatusUpdated", plugins));
-                break;
             }
+            break;
         }
     }
 }

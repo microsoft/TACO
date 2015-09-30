@@ -24,7 +24,7 @@ class Feedback extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
     public name: string = "feedback";
-   
+
     public canHandleArgs(data: commands.ICommandData): boolean {
         return true;
     }
