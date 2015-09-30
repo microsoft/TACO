@@ -57,7 +57,7 @@ class JavaJdkInstaller extends InstallerBase {
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
                 this.telemetry.addError(err);
-                var code: number = (<any>err).code;
+                var code: number = (<any> err).code;
                 if (code) {
                     this.telemetry
                         .add("error.description", "InstallerError on installWin32", /*isPii*/ false)
@@ -139,7 +139,7 @@ class JavaJdkInstaller extends InstallerBase {
         childProcess.exec(commandLine, function (err: Error): void {
             if (err) {
                 this.telemetry.addError(err);
-                var code: number = (<any>err).code;
+                var code: number = (<any> err).code;
                 if (code) {
                     this.telemetry
                         .add("error.description", "InstallerError on installPkg", /*isPii*/ false)

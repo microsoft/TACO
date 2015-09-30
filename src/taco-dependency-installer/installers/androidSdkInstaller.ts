@@ -34,9 +34,9 @@ import ILogger = installerProtocol.ILogger;
 import utilHelper = tacoUtils.UtilHelper;
 
 class AndroidSdkInstaller extends InstallerBase {
-    private static AndroidHomeName: string = "ANDROID_HOME";
-    private static AndroidCommand = os.platform() === "win32" ? "android.bat" : "android";
-    private static AndroidPackages: string[] = [
+    private static ANDROID_HOME_NAME: string = "ANDROID_HOME";
+    private static androidCommand = os.platform() === "win32" ? "android.bat" : "android";
+    private static ANDROID_PACKAGES: string[] = [
         "tools",
         "platform-tools",
         "extra-android-support",
@@ -72,7 +72,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
         this.androidHomeValue = androidHomeValue;
 
-        return installerUtilsWin32.setEnvironmentVariableIfNeededWin32(AndroidSdkInstaller.AndroidHomeName, androidHomeValue, this.logger)
+        return installerUtilsWin32.setEnvironmentVariableIfNeededWin32(AndroidSdkInstaller.ANDROID_HOME_NAME, androidHomeValue, this.logger)
             .then(function (): Q.Promise<any> {
                 return installerUtilsWin32.addToPathIfNeededWin32([addToPathTools, addToPathPlatformTools]);
             });
@@ -122,8 +122,8 @@ class AndroidSdkInstaller extends InstallerBase {
 
         // Initialize values
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
-        var addToPathTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/tools/";
-        var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
+        var addToPathTools: string = "$" + AndroidSdkInstaller.ANDROID_HOME_NAME + "/tools/";
+        var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.ANDROID_HOME_NAME + "/platform-tools/";
         var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
         var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
         var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
@@ -229,7 +229,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 .addError(error);
             deferred.reject(error);
         });
-            
+
         adbProcess.on("exit", function (code: number): void {
             deferred.resolve({});
         });
@@ -237,17 +237,17 @@ class AndroidSdkInstaller extends InstallerBase {
         return deferred.promise;
     }
 
-    private installAndroidPackages(): Q.Promise<any> {
+    private installANDROID_PACKAGES(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.AndroidCommand);
+        var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.androidCommand);
         var args: string[] = [
             "update",
             "sdk",
             "-u",
             "-a",
             "--filter",
-            AndroidSdkInstaller.AndroidPackages.join(",")
+            AndroidSdkInstaller.ANDROID_PACKAGES.join(",")
         ];
         var errorOutput: string = "";
         var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) }) : childProcess.spawn(command, args);
@@ -287,7 +287,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
     private postInstallDefault(): Q.Promise<any> {
         var self = this;
-        return this.installAndroidPackages()
+        return this.installANDROID_PACKAGES()
         .then(function (): Q.Promise<any> {
             return self.killAdb();
         });
