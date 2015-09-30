@@ -399,7 +399,7 @@ module BuildAndRunTelemetryTests {
                 .then(() => runCommand(args))
                 .finally(() => {
                     testIosHttpServer.removeAllListeners("request");
-                    testAndroidHttpServer.removeAllListeners("request")
+                    testAndroidHttpServer.removeAllListeners("request");
                 })
                 .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected, 28379, 28379))
                 .done(() => done(), done);

@@ -72,15 +72,15 @@ class SelfTest {
 
             var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            tgzProducingStream.pipe(request.post(<request.Options> { url: buildUrl, agent: agent }, function (error: any, response: any, body: any): void {
-                if (error) {
-                    deferred.reject(error);
+            tgzProducingStream.pipe(request.post(<request.Options> { url: buildUrl, agent: agent }, function (submitError: any, submitResponse: any, submitBody: any): void {
+                if (submitError) {
+                    deferred.reject(submitError);
                     return;
                 }
 
-                var buildingUrl = response.headers["content-location"];
+                var buildingUrl = submitResponse.headers["content-location"];
                 if (!buildingUrl) {
-                    deferred.reject(new Error(body));
+                    deferred.reject(new Error(submitBody));
                     return;
                 }
 
@@ -89,16 +89,16 @@ class SelfTest {
                     i++;
                     Logger.log(util.format("%d...", i));
                     // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-                    request.get(<request.Options> { url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
-                        if (error) {
+                    request.get(<request.Options> { url: buildingUrl, agent: agent }, function (statusError: any, statusResponse: any, statusBody: any): void {
+                        if (statusError) {
                             clearInterval(ping);
-                            deferred.reject(error);
+                            deferred.reject(statusError);
                         }
 
-                        var build = JSON.parse(body);
+                        var build = JSON.parse(statusBody);
                         if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
                             clearInterval(ping);
-                            deferred.reject(new Error("Build Failed: " + body));
+                            deferred.reject(new Error("Build Failed: " + statusBody));
                         } else if (build["status"] === BuildInfo.COMPLETE) {
                             clearInterval(ping);
 
