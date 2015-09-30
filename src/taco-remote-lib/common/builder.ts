@@ -18,7 +18,6 @@ import fs = require("fs");
 import path = require("path");
 import Q = require("q");
 import rimraf = require("rimraf");
-import util = require("util");
 
 import resources = require("../resources/resourceManager");
 import utils = require("taco-utils");
@@ -30,6 +29,14 @@ import UtilHelper = utils.UtilHelper;
 class Builder {
     protected currentBuild: BuildInfo;
     protected cordova: Cordova.ICordova;
+
+    private static change_directory(appDir: string): void {
+        process.chdir(appDir);
+        // Cordova checks process.env.PWD before process.cwd()
+        // so we need to update that as well.
+        process.env.PWD = appDir;
+        return;
+    }
 
     constructor(currentBuild: BuildInfo, cordova: Cordova.ICordova) {
         this.currentBuild = currentBuild;
@@ -46,28 +53,20 @@ class Builder {
             // trigger the after_build in case users expect it
             cordova.emit("after_build", data);
         }
-        cordova.on("results", console.info);
-        cordova.on("log", console.info);
-        cordova.on("warn", console.warn);
-        cordova.on("error", console.error);
-        cordova.on("verbose", console.info);
+        cordova.on("results", Logger.log);
+        cordova.on("log", Logger.log);
+        cordova.on("warn", Logger.logWarning);
+        cordova.on("error", Logger.logError);
+        cordova.on("verbose", Logger.log);
         cordova.on("before_prepare", beforePrepare);
         cordova.on("after_compile", afterCompile);
-    }
-
-    private static change_directory(currentBuild: BuildInfo): void {
-        process.chdir(currentBuild.appDir);
-        // Cordova checks process.env.PWD before process.cwd()
-        // so we need to update that as well.
-        process.env.PWD = currentBuild.appDir;
-        return;
     }
 
     public build(): Q.Promise<BuildInfo> {
         var isDeviceBuild = this.currentBuild.options.indexOf("--device") !== -1;
         var self = this;
 
-        return Q.fcall(Builder.change_directory, self.currentBuild)
+        return Q.fcall(Builder.change_directory, self.currentBuild.appDir)
             .then(function (): Q.Promise<any> { return self.update_plugins(); })
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingPlatform", self.currentBuild.buildPlatform); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return self.beforePrepare(); })
@@ -119,7 +118,7 @@ class Builder {
         }
 
         if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
-            Logger.log(util.format("cordova platform add %s", this.currentBuild.buildPlatform));
+            Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
             return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
         } else {
@@ -233,7 +232,7 @@ class Builder {
     }
 
     private compile_platform(): Q.Promise<any> {
-        Logger.log(util.format("cordova compile %s", this.currentBuild.buildPlatform));
+        Logger.log("cordova compile " + this.currentBuild.buildPlatform);
         var configuration = (this.currentBuild.configuration === "debug") ? "--debug" : "--release";
         var opts = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
         return this.cordova.raw.compile({ platforms: [this.currentBuild.buildPlatform], options: opts });
