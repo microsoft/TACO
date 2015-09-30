@@ -14,21 +14,21 @@
 
 "use strict";
 
-import admZip = require("adm-zip");
-import childProcess = require("child_process");
-import fs = require("fs");
-import os = require("os");
-import path = require("path");
-import Q = require("q");
-import request = require("request");
-import wrench = require("wrench");
+import admZip = require ("adm-zip");
+import childProcess = require ("child_process");
+import fs = require ("fs");
+import os = require ("os");
+import path = require ("path");
+import Q = require ("q");
+import request = require ("request");
+import wrench = require ("wrench");
 
-import InstallerBase = require("./installerBase");
-import installerProtocol = require("../elevatedInstallerProtocol");
-import installerUtils = require("../utils/installerUtils");
-import installerUtilsWin32 = require("../utils/win32/installerUtilsWin32");
-import resources = require("../resources/resourceManager");
-import tacoUtils = require("taco-utils");
+import InstallerBase = require ("./installerBase");
+import installerProtocol = require ("../elevatedInstallerProtocol");
+import installerUtils = require ("../utils/installerUtils");
+import installerUtilsWin32 = require ("../utils/win32/installerUtilsWin32");
+import resources = require ("../resources/resourceManager");
+import tacoUtils = require ("taco-utils");
 
 import ILogger = installerProtocol.ILogger;
 import utilHelper = tacoUtils.UtilHelper;
