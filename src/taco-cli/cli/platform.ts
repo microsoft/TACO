@@ -113,7 +113,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         // Parse the target string for platform names and print success message
         var platforms: string = "";
 
-        if (!(targets.length === 1 && targets[0].indexOf("@") !== 0 && packageLoader.GitUriRegex.test(targets[0]) && packageLoader.FileUriRegex.test(targets[0]))) {
+        if (!(targets.length === 1 && targets[0].indexOf("@") !== 0 && packageLoader.GIT_URI_REGEX.test(targets[0]) && packageLoader.FILE_URI_REGEX.test(targets[0]))) {
             platforms = targets.join(", ");
         }
 

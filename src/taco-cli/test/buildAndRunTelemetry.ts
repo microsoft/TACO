@@ -286,14 +286,14 @@ module BuildAndRunTelemetryTests {
 
         beforeEach((done: MochaDone) => {
             // Warning: After this line, all cordova CLI commands will have to be mocked
-            TacoUtility.TacoPackageLoader.MockForTests = customLoader;
+            TacoUtility.TacoPackageLoader.mockForTests = customLoader;
 
             Settings.saveSettings({ remotePlatforms: {} })
                 .done(() => done(), done);
         });
 
         afterEach(() => {
-            TacoUtility.TacoPackageLoader.MockForTests = null;
+            TacoUtility.TacoPackageLoader.mockForTests = null;
         });
 
         function commandSwitch<T>(buildResult: T, runResult: T, emulateResult: T): T {

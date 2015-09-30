@@ -245,7 +245,7 @@ class Kit extends commands.TacoCommandBase {
                         name: platformName,
                         description: kitInfo.platforms[platformName].version || kitInfo.platforms[platformName].src
                     };
-                }), LoggerHelper.DefaultIndent, valuesIndent);
+                }), LoggerHelper.DEFAULT_INDENT, valuesIndent);
             logger.logLine();
         }
     }
@@ -263,7 +263,7 @@ class Kit extends commands.TacoCommandBase {
                         name: pluginId,
                         description: kitInfo.plugins[pluginId].version || kitInfo.plugins[pluginId].src
                     };
-                }), LoggerHelper.DefaultIndent, valuesIndent);
+                }), LoggerHelper.DEFAULT_INDENT, valuesIndent);
             logger.logLine();
         }
     }
@@ -526,7 +526,7 @@ class Kit extends commands.TacoCommandBase {
                         name: componentName,
                         description: installedComponentInfo[componentName] + " => " + componentUpdateInfo[componentName]
                     };
-            }), LoggerHelper.DefaultIndent, indent);
+            }), LoggerHelper.DEFAULT_INDENT, indent);
         } else { /* This was a CLI update and not a kit update */
             LoggerHelper.logNameDescriptionTable(
                 Object.keys(installedComponentInfo).map(function (componentName: string): INameDescription {
@@ -534,7 +534,7 @@ class Kit extends commands.TacoCommandBase {
                         name: componentName,
                         description: installedComponentInfo[componentName] + " => " + suffix
                     };
-            }), LoggerHelper.DefaultIndent, indent);
+            }), LoggerHelper.DEFAULT_INDENT, indent);
         }
 
         logger.logLine();
@@ -565,7 +565,7 @@ class Kit extends commands.TacoCommandBase {
             logger.log(resources.getString("CommandKitSelectNoUpdateListHeader"));
             logger.logLine();
             components.forEach(function (component: string): void {
-               logger.logWarning(LoggerHelper.repeat(" ", LoggerHelper.DefaultIndent) + component);
+               logger.logWarning(LoggerHelper.repeat(" ", LoggerHelper.DEFAULT_INDENT) + component);
             });
         }
     }

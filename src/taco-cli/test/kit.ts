@@ -108,7 +108,7 @@ describe("Kit", function (): void {
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
 
         this.timeout(30000);
         rimraf.sync(runFolder);
@@ -117,7 +117,7 @@ describe("Kit", function (): void {
     after((done: MochaDone) => {
         process.env["TACO_UNIT_TEST"] = previous;
         process.chdir(originalCwd);
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         rimraf(runFolder, function (err: Error): void { done(); }); // ignore errors
     });
 

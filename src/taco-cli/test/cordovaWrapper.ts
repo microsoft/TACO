@@ -48,7 +48,7 @@ describe("cordovaWrapper", () => {
             return deferred.promise;
         };
 
-        TacoPackageLoader.MockForTests = {
+        TacoPackageLoader.mockForTests = {
             lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel) => {
                 if (packageName !== "cordova") {
                     return Q.reject(new Error("Expected to load cordova package"));
@@ -59,7 +59,7 @@ describe("cordovaWrapper", () => {
     });
 
     after((): void => {
-        tacoUtils.TacoPackageLoader.MockForTests = null;
+        tacoUtils.TacoPackageLoader.mockForTests = null;
     });
 
     it("should catch synchronous exceptions thrown from cordova", (done: MochaDone): void => {

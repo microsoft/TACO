@@ -276,7 +276,7 @@ class ProjectHelper {
                 }
             });
         } catch (error) {
-            Log.log(error);
+            Logger.log(error);
         }
 
         return Q.resolve(nonUpdatablePlugins);

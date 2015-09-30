@@ -108,7 +108,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      */
     public cliParamHasVersionOverride(spec: string): boolean {
         var packageVersion: string = spec.indexOf("@") !== 0 ? spec.split("@")[1] : null;
-        return !!packageLoader.GitUriRegex.test(spec) || !!packageLoader.FileUriRegex.test(spec) || (packageVersion && !!semver.valid(packageVersion));
+        return !!packageLoader.GIT_URI_REGEX.test(spec) || !!packageLoader.FILE_URI_REGEX.test(spec) || (packageVersion && !!semver.valid(packageVersion));
     }
 
     /**

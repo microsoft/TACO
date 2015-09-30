@@ -3,10 +3,10 @@ declare module BuildConfig {
         src: string;
         templates: string;
         build: string;
-        buildSrc: string,
-        buildPackages: string,
-        buildTools: string,
-        buildTemplates: string,
-        tsCompileOptions: any
+        buildSrc: string;
+        buildPackages: string;
+        buildTools: string;
+        buildTemplates: string;
+        tsCompileOptions: any;
     }
 }

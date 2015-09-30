@@ -9,7 +9,7 @@
 declare module TacoUtility {
     class CordovaConfig {
         /** CordovaConfig is a class for parsing the config.xml file for Cordova projects */
-        private _doc;
+        private doc;
         constructor(configXmlPath: string);
         /**
          * Helper method to get a CordovaConfig object for a cordova project
