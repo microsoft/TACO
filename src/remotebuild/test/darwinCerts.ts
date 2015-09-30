@@ -14,7 +14,7 @@
 /// <reference path="../../typings/mkdirp.d.ts" />
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should  = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
 import nconf = require ("nconf");
@@ -43,14 +43,14 @@ macOnly("Certs", function (): void {
         nconf.overrides({});
         rmdir(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and we don't wait for it. 
     });
-    
+
     before(function (): void {
         nconf.use("memory");
     });
 
     // These tests can take a fair amount of time
     this.timeout(10000);
-    
+
     // Test that initializing server certificates creates new certificates
     it("InitializeServerCerts", function (done: MochaDone): void {
         rmdir.sync(certsDir);
@@ -63,7 +63,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Test that initializing server certificates does not re-create certificates if they already exist
     it("InitializeServerCertsWhenCertsAlreadyExist", function (done: MochaDone): void {
         rmdir.sync(certsDir);
@@ -81,7 +81,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Tests that generating a client certificate creates a certificate and returns a valid pin
     it("GenerateClientCert", function (done: MochaDone): void {
         certs.initializeServerCerts(conf({ serverDir: serverDir })).
@@ -95,7 +95,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Tests that generating a client certificate without appropriate server certificates fails
     it("GenerateClientCertWhenServerCertsDoNotExist", function (done: MochaDone): void {
         rmdir.sync(certsDir);
@@ -109,7 +109,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Tests that resetting server certificates queries the user and respects a "no" response
     it("ResetServerCertNo", function (done: MochaDone): void {
         var noHandler = {
@@ -138,7 +138,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Tests that resetting server certificates will create new certificates after a "yes" response
     it("ResetServerCertYes", function (done: MochaDone): void {
         var yesHandler = {
@@ -167,7 +167,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Test that client certificates are purged if they are older than the timeout, and are not purged if they are younger
     it("PurgeExpiredPinBasedClientCertsSync", function (done: MochaDone): void {
         var createdPin: number;
@@ -202,7 +202,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Test that we can make a self signing CA certificate
     it("MakeSelfSigningCACert", function (done: MochaDone): void {
         certs.makeSelfSigningCACert(caKeyPath, caCertPath).
@@ -213,7 +213,7 @@ macOnly("Certs", function (): void {
             done();
         }, done);
     });
-    
+
     // Test that we can make a self signed certificate from the CA certificate
     it("MakeSelfSignedCert", function (done: MochaDone): void {
         var outKeyPath = path.join(serverDir, "selfsigned-key.pem");

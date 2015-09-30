@@ -121,9 +121,9 @@ class ConnectionSecurityHelper {
                     }
 
                     var certFilePath: string = path.join(certPath, "cert.pfx");
-                    fs.writeFile(certFilePath, certificateData, function (err: NodeJS.ErrnoException): void {
-                        if (err) {
-                            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSaveToPath, err, certFilePath));
+                    fs.writeFile(certFilePath, certificateData, function (writeError: NodeJS.ErrnoException): void {
+                        if (writeError) {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSaveToPath, writeError, certFilePath));
                         }
 
                         deferred.resolve(host);

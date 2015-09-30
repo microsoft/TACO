@@ -23,9 +23,9 @@ import ConfigParser = Cordova.cordova_lib.configparser;
 import packageLoader = tacoUtility.TacoPackageLoader;
 
 class CordovaHelper {
-    private static CordovaPackageName: string = "cordova";
+    private static CORDOVA_PACKAGE_NAME: string = "cordova";
     // Cordova's known parameters
-    private static BooleanParameters =
+    private static CORDOVA_CREATE_BOOLEAN_PARAMETERS =
     {
         verbose: Boolean,
         version: Boolean,
@@ -44,7 +44,7 @@ class CordovaHelper {
         nobuild: Boolean,
         list: Boolean
     };
-    private static ValueParameters =
+    private static CORDOVA_CREATE_VALUE_PARAMETERS =
     {
         "copy-from": String,
         "link-to": path,
@@ -128,12 +128,12 @@ class CordovaHelper {
      */
     public static toCordovaCliArguments(commandData: commands.ICommandData, platform: string = null): string[] {
         var cordovaArgs: string[] = platform ? [platform] : commandData.remain;
-        Object.keys(CordovaHelper.BooleanParameters).forEach(function (key: string): void {
+        Object.keys(CordovaHelper.CORDOVA_CREATE_BOOLEAN_PARAMETERS).forEach(function (key: string): void {
             if (commandData.options[key]) {
                 cordovaArgs.push("--" + key);
             }
         });
-        Object.keys(CordovaHelper.ValueParameters).forEach(function (key: string): void {
+        Object.keys(CordovaHelper.CORDOVA_CREATE_VALUE_PARAMETERS).forEach(function (key: string): void {
             if (commandData.options[key]) {
                 cordovaArgs.push("--" + key);
                 cordovaArgs.push(commandData.options[key]);
@@ -156,7 +156,7 @@ class CordovaHelper {
     }
 
     public static editConfigXml(infoList: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, addSpec: boolean, editFunc: (infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean) => void): Q.Promise<void> {
-        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
+        return packageLoader.lazyRequire(CordovaHelper.CORDOVA_PACKAGE_NAME, CordovaHelper.CORDOVA_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
             editFunc(infoList, configParser, addSpec);
@@ -175,7 +175,7 @@ class CordovaHelper {
      * @return {Q.Promise<string>} A promise with the version specification as a string
      */
     public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
-        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
+        return packageLoader.lazyRequire(CordovaHelper.CORDOVA_PACKAGE_NAME, CordovaHelper.CORDOVA_PACKAGE_NAME + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             var pluginEntry: Cordova.ICordovaPlatformPluginInfo = configParser.getPlugin(pluginId);
@@ -212,7 +212,7 @@ class CordovaHelper {
          * @return {Q.Promise<string>} A promise with the version specification as a string
          */
     public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
-        return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + cordovaCliVersion)
+        return packageLoader.lazyRequire(CordovaHelper.CORDOVA_PACKAGE_NAME, CordovaHelper.CORDOVA_PACKAGE_NAME + "@" + cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
             var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
             var engineSpec: string = "";
@@ -253,7 +253,7 @@ class CordovaHelper {
     public static getSupportedPlatforms(): Q.Promise<CordovaHelper.IDictionary<any>> {
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<CordovaHelper.IDictionary<any>> {
             if (projectInfo.cordovaCliVersion) {
-                return packageLoader.lazyRequire(CordovaHelper.CordovaPackageName, CordovaHelper.CordovaPackageName + "@" + projectInfo.cordovaCliVersion)
+                return packageLoader.lazyRequire(CordovaHelper.CORDOVA_PACKAGE_NAME, CordovaHelper.CORDOVA_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion)
                     .then(function (cordova: typeof Cordova): CordovaHelper.IDictionary<any> {
                         if (!cordova.cordova_lib) {
                             // Older versions of cordova do not have a cordova_lib, so fall back to being permissive
@@ -267,7 +267,7 @@ class CordovaHelper {
             }
         });
     }
-   
+
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
      */

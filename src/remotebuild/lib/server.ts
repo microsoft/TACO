@@ -39,13 +39,13 @@ interface IDictionaryT<T> {
 }
 
 class Server {
-    private static Modules: RemoteBuild.IServerModule[] = [];
+    private static modules: RemoteBuild.IServerModule[] = [];
 
-    private static ServerInstance: { close(callback?: Function): void };
-    private static ServerConf: RemoteBuildConf;
+    private static serverInstance: { close(callback?: Function): void };
+    private static serverConf: RemoteBuildConf;
 
-    private static ErrorShutdown: (e: any) => void;
-    private static Shutdown: () => void;
+    private static errorShutdown: (e: any) => void;
+    private static shutdown: () => void;
 
     public static start(conf: RemoteBuildConf): Q.Promise<any> {
         var app = express();
@@ -67,12 +67,12 @@ class Server {
         }).then(function (): Q.Promise<any> {
             return Server.startupServer(conf, app);
         }).then(Server.registerShutdownHooks).then(function (): void {
-            console.info(resources.getString("CheckSettingsForInfo", conf.configFileLocation));
+            Logger.log(resources.getString("CheckSettingsForInfo", conf.configFileLocation));
         })
           .fail(function (err: any): void {
-            console.error(resources.getString("ServerStartFailed"), err);
+            Logger.logError(resources.getString("ServerStartFailed", err));
             if (err.stack) {
-                console.error(err.stack);
+                Logger.logError(err.stack);
             }
 
             throw err;
@@ -80,12 +80,12 @@ class Server {
     }
 
     public static stop(callback?: Function): void {
-        process.removeListener("uncaughtException", Server.ErrorShutdown);
-        process.removeListener("SIGTERM", Server.Shutdown);
-        process.removeListener("SIGINT", Server.Shutdown);
-        if (Server.ServerInstance) {
-            var tempInstance = Server.ServerInstance;
-            Server.ServerInstance = null;
+        process.removeListener("uncaughtException", Server.errorShutdown);
+        process.removeListener("SIGTERM", Server.shutdown);
+        process.removeListener("SIGINT", Server.shutdown);
+        if (Server.serverInstance) {
+            var tempInstance = Server.serverInstance;
+            Server.serverInstance = null;
             tempInstance.close(callback);
         } else if (callback) {
             callback(null);
@@ -99,10 +99,10 @@ class Server {
         return Server.initializeServerTestCapabilities(conf).then(function (serverTestCaps: RemoteBuild.IServerTestCapabilities): Q.Promise<any> {
             return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
                 return modGen.test(conf, moduleConfig, serverTestCaps, cliArguments).then(function (): void {
-                    console.log(resources.getString("TestPassed", mod));
+                    Logger.log(resources.getString("TestPassed", mod));
                 }, function (err: Error): void {
-                    console.error(resources.getString("TestFailed", mod));
-                    console.error(err);
+                    Logger.logError(resources.getString("TestFailed", mod));
+                    Logger.logError(err.message);
                     throw err;
                 });
             });
@@ -123,7 +123,7 @@ class Server {
             return Q({});
         }).then(function (): void {
             conf.save();
-        }); 
+        });
     }
 
     private static initializeServerCapabilities(conf: RemoteBuildConf): Q.Promise<RemoteBuild.IServerCapabilities> {
@@ -162,7 +162,7 @@ class Server {
         }
 
         var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
-            if (!(<any>req).client.authorized) {
+            if (!(<any> req).client.authorized) {
                 res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));
             } else {
                 next();
@@ -177,7 +177,7 @@ class Server {
                 }
 
                 app.use("/" + moduleConfig.mountPath, modRouter);
-                Server.Modules.push(serverMod);
+                Server.modules.push(serverMod);
             });
         });
     }
@@ -211,9 +211,9 @@ class Server {
                     deferred.reject(Server.friendlyServerListenError(err, conf));
                 });
                 svr.listen(conf.port, function (): void {
-                    Server.ServerInstance = svr;
-                    Server.ServerConf = conf;
-                    console.log(resources.getString("InsecureServerStarted"), conf.port);
+                    Server.serverInstance = svr;
+                    Server.serverConf = conf;
+                    Logger.log(resources.getString("InsecureServerStarted", conf.port));
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -257,9 +257,9 @@ class Server {
                     deferred.reject(Server.friendlyServerListenError(err, conf));
                 });
                 svr.listen(conf.port, function (): void {
-                    Server.ServerInstance = svr;
-                    Server.ServerConf = conf;
-                    console.log(resources.getString("SecureServerStarted"), conf.port);
+                    Server.serverInstance = svr;
+                    Server.serverConf = conf;
+                    Logger.log(resources.getString("SecureServerStarted", conf.port));
                     Server.writePid();
                     deferred.resolve(svr);
                 });
@@ -276,47 +276,49 @@ class Server {
     }
 
     private static writePid(): void {
-        if (utils.ArgsHelper.argToBool(Server.ServerConf.get("writePidToFile"))) {
-            fs.writeFile(path.join(Server.ServerConf.serverDir, "running_process_id"), process.pid);
+        if (utils.ArgsHelper.argToBool(Server.serverConf.get("writePidToFile"))) {
+            fs.writeFile(path.join(Server.serverConf.serverDir, "running_process_id"), process.pid);
         }
     }
 
     private static registerShutdownHooks(): void {
         // It is strongly recommended in a NodeJs server to kill the process off on uncaughtException.
-        Server.ErrorShutdown = function (err: Error): void {
-            console.error(resources.getString("UncaughtErrorShutdown"));
-            console.error(err);
-            console.error((<any>err).stack);
-            console.info(resources.getString("ServerShutdown"));
-            
-            Server.Modules.forEach(function (mod: RemoteBuild.IServerModule): void {
+        Server.errorShutdown = function (err: Error): void {
+            Logger.logError(resources.getString("UncaughtErrorShutdown"));
+            Logger.logError(err.message);
+            var stack: any = (<any> err).stack;
+            if (stack) {
+                Logger.logError(stack);
+            }
+            Logger.log(resources.getString("ServerShutdown"));
+            Server.modules.forEach(function (mod: RemoteBuild.IServerModule): void {
                 mod.shutdown();
             });
 
             process.exit(1);
         };
-        process.on("uncaughtException", Server.ErrorShutdown);
+        process.on("uncaughtException", Server.errorShutdown);
 
         // Opportunity to clean up builds on exit
-        Server.Shutdown = function (): void {
-            console.info(resources.getString("ServerShutdown"));
+        Server.shutdown = function (): void {
+            Logger.log(resources.getString("ServerShutdown"));
             // BUG: Currently if buildManager.shutdown() is called while a build log is being written, rimraf will throw an exception on windows
-            Server.Modules.forEach(function (mod: RemoteBuild.IServerModule): void {
+            Server.modules.forEach(function (mod: RemoteBuild.IServerModule): void {
                 mod.shutdown();
             });
-            Server.ServerInstance.close();
+            Server.serverInstance.close();
             process.exit(0);
         };
-        process.on("SIGTERM", Server.Shutdown);
-        process.on("SIGINT", Server.Shutdown);
+        process.on("SIGTERM", Server.shutdown);
+        process.on("SIGINT", Server.shutdown);
     }
 
     private static getModuleMount(req: express.Request, res: express.Response): void {
         var mod: string = req.params.module;
-        var modConfig = Server.ServerConf.moduleConfig(mod);
+        var modConfig = Server.serverConf.moduleConfig(mod);
         if (mod && modConfig && modConfig.mountPath ) {
             var mountLocation = modConfig.mountPath;
-            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.hostname, Server.ServerConf.port, mountLocation);
+            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.hostname, Server.serverConf.port, mountLocation);
             res.set({
                 "Content-Location": contentLocation
             });

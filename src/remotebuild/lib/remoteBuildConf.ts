@@ -18,10 +18,13 @@ import HostSpecifics = require ("./hostSpecifics");
 import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
+import logger = tacoUtils.Logger;
 import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
+
+    public usingDefaultModulesConfig: boolean = false;
     private remoteBuildConf: {
         lang: string;
         port: number;
@@ -35,10 +38,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
         [key: string]: any;
     };
-
     private conf: typeof nconf;
-
-    public usingDefaultModulesConfig: boolean = false;
 
     constructor(conf: typeof nconf, isUnitTest?: boolean) {
         this.conf = conf;
@@ -187,7 +187,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
         this.conf.merge(this.remoteBuildConf);
         this.conf.save(null);
-        console.info(resources.getString("SavedConfig", this.configFileLocation));
+        logger.log(resources.getString("SavedConfig", this.configFileLocation));
     }
 }
 

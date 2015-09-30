@@ -25,7 +25,7 @@ interface IRemoteBuildTask {
 }
 
 class Commands {
-    public static Tasks: { [key: string]: IRemoteBuildTask } = {
+    public static tasks: { [key: string]: IRemoteBuildTask } = {
         start: {
             execute: function (config: RemoteBuildConf, cliArguments?: string[]): Q.Promise<any> {
                 return server.start(config);

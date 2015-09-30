@@ -1,5 +1,5 @@
 ﻿/**
-﻿ * ******************************************************
+ ********************************************************
 ﻿ *                                                       *
 ﻿ *   Copyright (C) Microsoft. All rights reserved.       *
 ﻿ *                                                       *
@@ -11,7 +11,7 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var should = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import AdmZip = require ("adm-zip");
 import del = require ("del");
@@ -261,7 +261,8 @@ module BuildAndRunTelemetryTests {
                 value.should.be.below(expectedGzipedSizeAbsoluteError + expectedGzippedSize);
                 telemetryProperties[keyName].value = String(expectedGzippedSize);
             } else {
-                (typeof telemetryProperties[keyName] === "undefined").should.be.true;
+                var expected: boolean = (typeof telemetryProperties[keyName] === "undefined");
+                expected.should.be.true;
             }
         }
 

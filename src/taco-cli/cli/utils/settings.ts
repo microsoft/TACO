@@ -32,24 +32,24 @@ import utils = tacoUtils.UtilHelper;
  * A static class which is responsible for dealing with the TacoSettings.json file
  */
 class Settings {
-    private static Settings: Settings.ISettings = null;
-    private static SettingsFileName = "TacoSettings.json";
+    private static settings: Settings.ISettings = null;
+    private static SETTINGS_FILENAME = "TacoSettings.json";
 
     public static get settingsFile(): string {
-        return path.join(utils.tacoHome, Settings.SettingsFileName);
+        return path.join(utils.tacoHome, Settings.SETTINGS_FILENAME);
     }
 
     /*
      * Load data from TACO_HOME/TacoSettings.json
      */
     public static loadSettings(): Q.Promise<Settings.ISettings> {
-        if (Settings.Settings) {
-            return Q(Settings.Settings);
+        if (Settings.settings) {
+            return Q(Settings.settings);
         }
 
         try {
-            Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
-            return Q(Settings.Settings);
+            Settings.settings = JSON.parse(<any> fs.readFileSync(Settings.settingsFile));
+            return Q(Settings.settings);
         } catch (e) {
             if (e.code === "ENOENT") {
                 // File doesn't exist, no need for a stack trace.
@@ -64,11 +64,11 @@ class Settings {
 
     public static saveSettings(settings: Settings.ISettings): Q.Promise<Settings.ISettings> {
         // save to TACO_HOME/TacoSettings.json and store as the cached version
-        Settings.Settings = settings;
+        Settings.settings = settings;
         utils.createDirectoryIfNecessary(utils.tacoHome);
         fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
         return Q(settings);
-    }    
+    }
 
     /*
      * Given the command line options, determine which platforms we should operate on.
@@ -134,7 +134,7 @@ class Settings {
      * Remove cached settings object, for use in tests
      */
     public static forgetSettings(): void {
-        Settings.Settings = null;
+        Settings.settings = null;
     }
 
     public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): Settings.IPlatformWithLocation[] {
@@ -147,7 +147,7 @@ class Settings {
                 buildLocation = Settings.BuildLocationType.Remote;
             } else if (options.options["local"]) {
                 buildLocation = Settings.BuildLocationType.Local;
-            } else {                     
+            } else {
                 // we build remotely if either remote server is setup for the given platform or if the target platform cannot be built locally
                 buildLocation = (platform in (settings.remotePlatforms || {})) || !Settings.canBuildLocally(platform) ?
                     Settings.BuildLocationType.Remote : Settings.BuildLocationType.Local;

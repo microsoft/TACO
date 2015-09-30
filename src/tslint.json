@@ -1,6 +1,6 @@
 {
   "rules": {
-    "align": [true, "parameters", "arguments", "statements"],
+    "align": [false, "parameters", "arguments", "statements"],
     "class-name": true,
     "comment-format": [true, "check-space"],
     "curly": true,
@@ -8,6 +8,7 @@
     "forin": false,
     "indent": [true, "spaces"],
     "interface-name": true,
+    "jsdoc-format": false,
     "label-position": false,
     "label-undefined": false,
     "max-line-length": false,
@@ -35,7 +36,7 @@
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-shadowed-variable": true,
-    "no-empty": true,
+    "no-empty": false,
     "no-eval": true,
     "no-internal-module": false,
     "no-require-imports": false,

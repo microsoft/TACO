@@ -31,11 +31,11 @@ import IKitTemplatesOverrideInfo = TacoKits.IKitTemplatesOverrideInfo;
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
  */
 class KitHelper {
-    private static DynamicDependenciesLocation: string = path.join(__dirname, "../../dynamicDependencies.json");
-    private static TacoKits: string = "taco-kits";
-
     // Keeping the cached promise acessible to tests
-    public static KitPackagePromise: Q.Promise<ITacoKits> = null;
+    public static kitPackagePromise: Q.Promise<ITacoKits> = null;
+
+    private static dynamicDependenciesLocation: string = path.join(__dirname, "../../dynamicDependencies.json");
+    private static TACO_KITS_NPM_PACKAGE_NAME: string = "taco-kits";
 
     public static getTemplatesForKit(kitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
         return KitHelper.acquireKitPackage()
@@ -57,14 +57,14 @@ class KitHelper {
                 return tacoKits.kitHelper.getKitInfo(kitId);
             });
     }
-    
+
     public static getDefaultKit(): Q.Promise<string> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<string> {
                 return tacoKits.kitHelper.getDefaultKit();
             });
     }
-    
+
     public static getAllTemplates(): Q.Promise<ITemplateOverrideInfo[]> {
         return KitHelper.acquireKitPackage()
             .then(function (tacoKits: ITacoKits): Q.Promise<ITemplateOverrideInfo[]> {
@@ -101,12 +101,12 @@ class KitHelper {
     }
 
     private static acquireKitPackage(): Q.Promise<ITacoKits> {
-        if (!KitHelper.KitPackagePromise) {
-            KitHelper.KitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TacoKits, KitHelper.DynamicDependenciesLocation, tacoUtility.InstallLogLevel.taco);
+        if (!KitHelper.kitPackagePromise) {
+            KitHelper.kitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TACO_KITS_NPM_PACKAGE_NAME, KitHelper.dynamicDependenciesLocation, tacoUtility.InstallLogLevel.taco);
         }
 
-        return KitHelper.KitPackagePromise;
+        return KitHelper.kitPackagePromise;
     }
 }
 
-export = KitHelper;
+export = KitHelper
