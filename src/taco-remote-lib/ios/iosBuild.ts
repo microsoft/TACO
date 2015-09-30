@@ -27,6 +27,7 @@ import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
 import CordovaConfig = utils.CordovaConfig;
+import Logger = utils.Logger;
 import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
 
@@ -94,8 +95,8 @@ class IOSBuilder extends Builder {
 
         child_process.exec("xcrun -v -sdk iphoneos PackageApplication " + pathToCordovaApp + " -o " + fullPathToIpaFile, {},
             function (error: Error, stdout: Buffer, stderr: Buffer): void {
-                console.info("xcrun.stdout: " + stdout);
-                console.info("xcrun.stderr: " + stderr);
+                Logger.log("xcrun.stdout: " + stdout);
+                Logger.log("xcrun.stderr: " + stderr);
                 if (error) {
                     deferred.reject(error);
                 } else {
@@ -146,7 +147,6 @@ class IOSBuilder extends Builder {
 
         return promise;
     }
-
 
     private appendToBuildConfig(data: string): Q.Promise<any> {
         var deferred = Q.defer();

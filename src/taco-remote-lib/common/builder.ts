@@ -23,11 +23,20 @@ import resources = require("../resources/resourceManager");
 import utils = require("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
+import Logger = utils.Logger;
 import UtilHelper = utils.UtilHelper;
 
 class Builder {
     protected currentBuild: BuildInfo;
     protected cordova: Cordova.ICordova;
+
+    private static change_directory(appDir: string): void {
+        process.chdir(appDir);
+        // Cordova checks process.env.PWD before process.cwd()
+        // so we need to update that as well.
+        process.env.PWD = appDir;
+        return;
+    }
 
     constructor(currentBuild: BuildInfo, cordova: Cordova.ICordova) {
         this.currentBuild = currentBuild;
@@ -44,11 +53,11 @@ class Builder {
             // trigger the after_build in case users expect it
             cordova.emit("after_build", data);
         }
-        cordova.on("results", console.info);
-        cordova.on("log", console.info);
-        cordova.on("warn", console.warn);
-        cordova.on("error", console.error);
-        cordova.on("verbose", console.info);
+        cordova.on("results", Logger.log);
+        cordova.on("log", Logger.log);
+        cordova.on("warn", Logger.logWarning);
+        cordova.on("error", Logger.logError);
+        cordova.on("verbose", Logger.log);
         cordova.on("before_prepare", beforePrepare);
         cordova.on("after_compile", afterCompile);
     }
@@ -57,7 +66,7 @@ class Builder {
         var isDeviceBuild = this.currentBuild.options.indexOf("--device") !== -1;
         var self = this;
 
-        return Q.fcall(Builder.change_directory, self.currentBuild)
+        return Q.fcall(Builder.change_directory, self.currentBuild.appDir)
             .then(function (): Q.Promise<any> { return self.update_plugins(); })
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingPlatform", self.currentBuild.buildPlatform); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return self.beforePrepare(); })
@@ -72,11 +81,11 @@ class Builder {
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return isDeviceBuild ? self.package() : Q({}); })
             .then(function (): void {
-                console.info(resources.getString("DoneBuilding", self.currentBuild.buildNumber));
+                Logger.log(resources.getString("DoneBuilding", self.currentBuild.buildNumber));
                 self.currentBuild.updateStatus(BuildInfo.COMPLETE);
             })
             .catch(function (err: Error): void {
-                console.info(resources.getString("ErrorBuilding", self.currentBuild.buildNumber, err.message));
+                Logger.log(resources.getString("ErrorBuilding", self.currentBuild.buildNumber, err.message));
                 self.currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
             }).then(function (): BuildInfo {
                 return self.currentBuild;
@@ -103,21 +112,13 @@ class Builder {
         return Q({});
     }
 
-    private static change_directory(currentBuild: BuildInfo): void {
-        process.chdir(currentBuild.appDir);
-        // Cordova checks process.env.PWD before process.cwd()
-        // so we need to update that as well.
-        process.env.PWD = currentBuild.appDir;
-        return;
-    }
-
     private addOrPreparePlatform(): Q.Promise<any> {
         if (!fs.existsSync("platforms")) {
             fs.mkdirSync("platforms");
         }
 
         if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
-            console.info("cordova platform add %s", this.currentBuild.buildPlatform);
+            Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
             return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
         } else {
@@ -156,7 +157,7 @@ class Builder {
                         // In the case of an error, don't stop the whole thing; report the error to the log and attempt to continue.
                         // The plugin may have other plugins depending on it. If so, we are probably going to remove those later on,
                         // which will then also remove this plugin
-                        console.error(err);
+                        Logger.logError(err);
                     });
                 } else {
                     // If the file doesn't exist any more, it may have been a dependent plugin that was removed
@@ -170,7 +171,7 @@ class Builder {
         var fetchJsonPath = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
-                fetchJson = JSON.parse(<any>fs.readFileSync(fetchJsonPath));
+                fetchJson = JSON.parse(<any> fs.readFileSync(fetchJsonPath));
             } catch (e) {
                 // fetch.json is malformed; act as though no plugins are installed
                 // If it turns out we do need variables from the fetch.json, then cordova will throw an error
@@ -190,16 +191,16 @@ class Builder {
                     return UtilHelper.copyRecursive(newFolder, installedFolder);
                 } else {
                     // The plugin is not installed; install it
-                    var cli_variables: Cordova.IKeyValueStore<string> = {};
+                    var cliVariables: Cordova.IKeyValueStore<string> = {};
 
                     // Check to see if the plugin is mentioned in fetch.json and has variables
                     if (plugin in fetchJson && fetchJson[plugin].variables) {
                         Object.keys(fetchJson[plugin].variables).forEach(function (key: string): void {
-                            cli_variables[key] = fetchJson[plugin].variables[key];
+                            cliVariables[key] = fetchJson[plugin].variables[key];
                         });
                     }
 
-                    return self.cordova.raw.plugin("add", newFolder, { cli_variables: cli_variables });
+                    return self.cordova.raw.plugin("add", newFolder, { cli_variables: cliVariables });
                 }
             });
         }, deleteOldPlugins).finally(function (): void {
@@ -231,7 +232,7 @@ class Builder {
     }
 
     private compile_platform(): Q.Promise<any> {
-        console.info("cordova compile %s", this.currentBuild.buildPlatform);
+        Logger.log("cordova compile " + this.currentBuild.buildPlatform);
         var configuration = (this.currentBuild.configuration === "debug") ? "--debug" : "--release";
         var opts = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
         return this.cordova.raw.compile({ platforms: [this.currentBuild.buildPlatform], options: opts });
