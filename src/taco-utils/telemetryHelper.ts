@@ -61,9 +61,9 @@ module TacoUtility {
             //     * Object is a value, we add the element as baseName
             try {
                 if (Array.isArray(value)) {
-                    this.addArray(baseName, <any[]>value, piiEvaluator);
+                    this.addArray(baseName, <any[]> value, piiEvaluator);
                 } else if (_.isObject(value)) {
-                    this.addHash(baseName, <IDictionary<any>>value, piiEvaluator);
+                    this.addHash(baseName, <IDictionary<any>> value, piiEvaluator);
                 } else {
                     this.addString(baseName, String(value), piiEvaluator);
                 }
@@ -78,7 +78,7 @@ module TacoUtility {
 
         public addError(error: Error): TelemetryGenerator {
             this.add("error.message" + ++this.errorIndex, error, /*isPii*/ true);
-            var errorWithErrorCode = <IHasErrorCode><Object>error;
+            var errorWithErrorCode = <IHasErrorCode> <Object> error;
             if (errorWithErrorCode.errorCode) {
                 this.add("error.code" + this.errorIndex, errorWithErrorCode.errorCode, /*isPii*/ false);
             }
@@ -155,10 +155,10 @@ module TacoUtility {
     *    It also supports attaching a fail callback in case it's a promise
     */
     function executeAfter<T>(valueOrPromise: T, afterCallback: { (): void }, failCallback: { (reason: any): void } = (reason: any) => Q.reject(reason)): T {
-        var valueAsPromise = <Q.Promise<any>><Object>valueOrPromise;
+        var valueAsPromise = <Q.Promise<any>> <Object> valueOrPromise;
         if (_.isObject(valueAsPromise) && _.isFunction(valueAsPromise.finally)) {
             // valueOrPromise must be a promise. We'll add the callback as a finally handler
-            return <T><Object>valueAsPromise.finally(afterCallback).fail(failCallback);
+            return <T> <Object> valueAsPromise.finally(afterCallback).fail(failCallback);
         } else {
             // valueOrPromise is just a value. We'll execute the callback now
             afterCallback();
@@ -205,7 +205,8 @@ module TacoUtility {
 
         public static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo {
             var propertyInfo = { value: targetString, isPii: false };
-            if (packageLoader.TacoPackageLoader.GitUriRegex.test(targetString) || packageLoader.TacoPackageLoader.FileUriRegex.test(targetString)) {
+            if (packageLoader.TacoPackageLoader.GIT_URI_REGEX.test(targetString)
+                || packageLoader.TacoPackageLoader.FILE_URI_REGEX.test(targetString)) {
                 propertyInfo.isPii = true;
             } else {
                 propertyInfo.value = targetString;
@@ -250,7 +251,7 @@ module TacoUtility {
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {
             var commandEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/" + (commandName || "command"));
-            
+
             if (!commandName && args && args.length > 0) {
                 commandEvent.setPiiProperty("command", args[0]);
             }
@@ -261,19 +262,19 @@ module TacoUtility {
 
             return commandEvent;
         }
-        
+
         private static setTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             if (isPii) {
                 event.setPiiProperty(propertyName, String(propertyValue));
             } else {
                 event.properties[propertyName] = String(propertyValue);
-            }       
+            }
         }
 
         private static addMultiValuedTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: string, isPii: boolean): void {
             for (var i = 0; i < propertyValue.length; i++) {
                 TelemetryHelper.setTelemetryEventProperty(event, propertyName + i, propertyValue[i], isPii);
-            }            
+            }
         }
     };
 }

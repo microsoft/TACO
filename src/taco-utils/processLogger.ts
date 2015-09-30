@@ -18,10 +18,10 @@ import resources = require ("./resources/resourceManager");
 
 module TacoUtility {
     export class ProcessLogger {
-        private _stream: fs.WriteStream;
+        private stream: fs.WriteStream;
 
         constructor() {
-            this._stream = null;
+            this.stream = null;
         }
 
         /**
@@ -34,8 +34,8 @@ module TacoUtility {
          */
         public begin(logDir: string, logFileName: string, language: string, proc: child_process.ChildProcess): void {
             var pathToLog = path.join(logDir, logFileName);
-            this._stream = fs.createWriteStream(pathToLog);
-            this._stream.on("error", function (err: any): void {
+            this.stream = fs.createWriteStream(pathToLog);
+            this.stream.on("error", function (err: any): void {
                 console.error(resources.getStringForLanguage(language, "ProcessLogError"), pathToLog, err);
             });
             var me = this;
@@ -58,16 +58,16 @@ module TacoUtility {
          * Stop logging to a file
          */
         public end(): void {
-            if (this._stream) {
-                this._stream.end();
+            if (this.stream) {
+                this.stream.end();
             }
 
-            this._stream = null;
+            this.stream = null;
         }
 
         private log(message: string): void {
-            if (this._stream) {
-                this._stream.write(message);
+            if (this.stream) {
+                this.stream.write(message);
             }
         }
     }

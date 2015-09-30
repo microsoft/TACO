@@ -130,7 +130,7 @@ module TacoUtility {
                 this.listings = require(commandsInfoPath).commands;
                 this.aliases = require(commandsInfoPath).aliases;
             }
-            
+
             /**
              * get specific task object, given task name
              */
