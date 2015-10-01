@@ -15,8 +15,8 @@
 
 import mocha = require ("mocha");
 import path = require ("path");
-// Note not import: We don't want to refer to should, but we need the require to occur since it modifies the prototype of Object.
-var should = require("should");
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
 
 import resources = require ("../resources/resourceManager");
 import tacoErrorCodes = require ("../tacoErrorCodes");
