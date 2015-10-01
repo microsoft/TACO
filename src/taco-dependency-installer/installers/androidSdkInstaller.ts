@@ -198,9 +198,14 @@ class AndroidSdkInstaller extends InstallerBase {
     protected postInstallDarwin(): Q.Promise<any> {
         var self = this;
 
-        return this.addExecutePermission()
+        // We need to add execute permission to the android executable in order to run it
+        return this.addExecutePermission(path.join(this.androidHomeValue, "tools", "android"))
             .then(function (): Q.Promise<any> {
                 return self.postInstallDefault();
+            })
+            .then(function (): Q.Promise<any> {
+                // We need to add execute permissions for the Gradle wrapper
+                return self.addExecutePermission(path.join(self.androidHomeValue, "tools", "templates", "gradle", "wrapper", "gradlew"));
             });
     }
 
@@ -242,9 +247,9 @@ class AndroidSdkInstaller extends InstallerBase {
         return Q.resolve({});
     }
 
-    private addExecutePermission(): Q.Promise<any> {
+    private addExecutePermission(fileFullPath: string): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "chmod a+x " + path.join(this.androidHomeValue, "tools", "android");
+        var command: string = util.format("chmod a+x \"%s\"", fileFullPath);
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
