@@ -325,6 +325,7 @@ module TacoDependencyInstaller {
         private promptUserBeforeInstall(): Q.Promise<boolean> {
             this.buildInstallConfigFile();
 
+            var self = this;
             var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: IDependency): boolean {
                 // Return true if at least one of the missing dependencies has a license url, false if not
                 return !!value.licenseUrl;
@@ -344,6 +345,17 @@ module TacoDependencyInstaller {
 
                 if (value.licenseUrl) {
                     logger.log(resources.getString("DependencyLicense", value.licenseUrl));
+                }
+
+                // For download size and disk size, we need to fetch the underlying installer data
+                var installerData: DependencyInstallerInterfaces.IInstallerData = self.dependenciesDataWrapper.getInstallerInfo(value.id, value.version);
+
+                if (installerData.downloadSize) {
+                    logger.log(resources.getString("DownloadSize", installerData.downloadSize));
+                }
+
+                if (installerData.diskSize) {
+                    logger.log(resources.getString("DiskSize", installerData.diskSize));
                 }
             });
 
@@ -531,6 +543,9 @@ module TacoDependencyInstaller {
                 command = "node";
                 args = [];
             } else {
+                // If we launch the process with sudo, we need to use the -E switch, which preserves the environment. By default, sudo clears the environment and replaces it with safe values, which means
+                // the elevated process won't have access to variables such as ANDROID_HOME. We need to have access to those variables in the elevated installer, otherwise we will detect that the env
+                // variables are not set and we will set them again.
                 command = "sudo";
                 args = ["-E", "node"];
             }

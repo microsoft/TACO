@@ -19,6 +19,8 @@ declare module DependencyInstallerInterfaces {
         sha1: string;
         bytes: number;
         installDestination?: string;
+        downloadSize?: number;
+        diskSize?: number;
         steps?: IStepsDeclaration;
     }
 

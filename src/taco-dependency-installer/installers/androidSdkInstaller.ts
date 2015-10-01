@@ -21,6 +21,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
+import util = require ("util");
 import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");
@@ -36,11 +37,9 @@ import utilHelper = tacoUtils.UtilHelper;
 class AndroidSdkInstaller extends InstallerBase {
     private static AndroidHomeName: string = "ANDROID_HOME";
     private static AndroidCommand = os.platform() === "win32" ? "android.bat" : "android";
-    private static AndroidPackages: string[] = [
-        "tools",
+    private static AndroidPackages: string[] = [    // IDs of Android Packages to install. To get the list of available packages, run "android list sdk -u -a -e"
+        //"tools",  // Android SDK comes by default with the tools package, so there is no need to update it. In the future, if we feel we want dependency installer to always install the latest Tools package, then uncomment this.
         "platform-tools",
-        "extra-android-support",
-        "extra-android-m2repository",
         "build-tools-19.1.0",
         "build-tools-21.1.2",
         "build-tools-22.0.1",
@@ -124,8 +123,8 @@ class AndroidSdkInstaller extends InstallerBase {
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
         var fullPathTools: string = path.join(androidHomeValue, "tools/");
         var fullPathPlatformTools: string = path.join(androidHomeValue, "platform-tools/");
-        var shortPathTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/tools/";
-        var shortPathPlatformTools: string = "$" + AndroidSdkInstaller.AndroidHomeName + "/platform-tools/";
+        var shortPathTools: string = util.format("$%s%stools", AndroidSdkInstaller.AndroidHomeName, path.sep);
+        var shortPathPlatformTools: string = util.format("$%s%splatform-tools", AndroidSdkInstaller.AndroidHomeName, path.sep);
         var addToPath: string = "";
         var exportPathLine: string = "";
         var exportAndroidHomeLine: string = "";
@@ -137,11 +136,18 @@ class AndroidSdkInstaller extends InstallerBase {
 
         // Check if we need to add an ANDROID_HOME value
         if (!process.env[AndroidSdkInstaller.AndroidHomeName]) {
-            exportAndroidHomeLine = os.EOL + "export " + AndroidSdkInstaller.AndroidHomeName + "=\"" + androidHomeValue + "\"";
-        } else if (path.resolve(utilHelper.expandEnvironmentVariables(process.env[AndroidSdkInstaller.AndroidHomeName])) !== androidHomeValue) {
-            // A conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
-            this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.AndroidHomeName, this.androidHomeValue));
-            useShortPaths = false;
+            exportAndroidHomeLine = util.format("%sexport %s=\"%s\"", os.EOL, AndroidSdkInstaller.AndroidHomeName, androidHomeValue);
+        } else {
+            var existingSdkHome: string = process.env[AndroidSdkInstaller.AndroidHomeName];
+
+            // Process the existing ANDROID_HOME to resolve to an absolute path, including processing ~ notation and environment variables
+            existingSdkHome = path.resolve(utilHelper.expandEnvironmentVariables(existingSdkHome));
+
+            if (existingSdkHome !== androidHomeValue) {
+                // A conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
+                this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.AndroidHomeName, this.androidHomeValue));
+                useShortPaths = false;
+            }
         }
 
         // Check if we need to update PATH
@@ -154,7 +160,7 @@ class AndroidSdkInstaller extends InstallerBase {
         }
 
         if (addToPath) {
-            exportPathLine = os.EOL + "export PATH=\"$PATH" + addToPath + "\"";
+            exportPathLine = util.format("%sexport PATH=\"$PATH%s\"", os.EOL, addToPath);
         }
 
         // Check if we need to update .bash_profile
@@ -162,7 +168,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var mustChown: boolean = !fs.existsSync(bashProfilePath);
 
         if (exportAndroidHomeLine || exportPathLine) {
-            updateCommand = "echo '" + os.EOL + "# Android SDK" + exportAndroidHomeLine + exportPathLine + "' >> '" + bashProfilePath + "'";
+            updateCommand = util.format("echo '%s# Android SDK%s%s' >> '%s'", os.EOL, exportAndroidHomeLine, exportPathLine, bashProfilePath);
         }
 
         // Perform the update if necessary
