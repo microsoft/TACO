@@ -24,16 +24,16 @@ import HelpCommandBase = tacoUtility.HelpCommandBase;
 import Logger = tacoUtility.Logger;
 
 /*
- * Help handles "Taco Help"
+ * Help handles "taco help"
  */
 class Help extends HelpCommandBase {
-    private static CliName: string = "remotebuild";
-    private static DefaultCommandData: ICommandData = { options: {}, original: [], remain: [] };
+    private static cliName: string = "remotebuild";
+    private static defaultCommandData: ICommandData = { options: {}, original: [], remain: [] };
 
     private remotebuildConf: RemoteBuildConf;
 
     constructor(remotebuildConf: RemoteBuildConf) {
-        super(Help.CliName, path.join(__dirname, "./commands.json"), require("../resources/resourceManager"));
+        super(Help.cliName, path.join(__dirname, "./commands.json"), require("../resources/resourceManager"));
         this.remotebuildConf = remotebuildConf;
     }
 
@@ -57,11 +57,11 @@ class Help extends HelpCommandBase {
                         mod.printHelp(self.remotebuildConf, moduleConfig);
                     } catch (e) {
                         Logger.logError(resources.getString("UnableToFindModule", topic));
-                        return baseRun(Help.DefaultCommandData);
+                        return baseRun(Help.defaultCommandData);
                     }
                 } else {
                     Logger.logWarning(resources.getString("UnknownCommand", topic));
-                    return baseRun(Help.DefaultCommandData);
+                    return baseRun(Help.defaultCommandData);
                 }
 
                 return Q.resolve<void>(null);

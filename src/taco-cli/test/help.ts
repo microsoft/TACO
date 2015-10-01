@@ -12,7 +12,7 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import tacoUtils = require ("taco-utils");
 import Help = require ("../cli/help");
@@ -24,6 +24,10 @@ import commands = tacoUtils.Commands.ICommandData;
 
 describe("help for a command", function (): void {
     var help = new Help();
+    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
+    var memoryStdout: ms.MemoryStream;
+    var previous: boolean;
+
     function helpRun(command: string): Q.Promise<any> {
         var data: commands = {
             options: {},
@@ -44,10 +48,6 @@ describe("help for a command", function (): void {
             done();
         }, done);
     }
-
-    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
-    var previous: boolean;
 
     before(() => {
         previous = process.env["TACO_UNIT_TEST"];
@@ -80,7 +80,7 @@ describe("help for a command", function (): void {
             "CommandHelpUsageOptions",
             "      --kit [NAME] ................. CommandCreateOptionsKit",
             "      --template <NAME|GIT-URL> .... CommandCreateOptionsTemplate",
-            "      --cli <VERSION> .............. CommandCreateOptionsCli",
+            "      --cordova <VERSION> .......... CommandCreateOptionsCordova",
             "      --copy-from|src <PATH> ....... CommandCreateOptionsCopy",
             "      --link-to <PATH> ............. CommandCreateOptionsLinkto",
             ""], done);
@@ -173,12 +173,12 @@ describe("help for a command", function (): void {
             "   taco kit [COMMAND] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
-            "   list .................... CommandKitListSubcommandDescription",
-            "        --json <PATH> ...... CommandKitJsonOptionDescription",
-            "        --kit <KIT-ID> ..... CommandKitOptionKitDescription",
-            "   select .................. CommandKitSelectSubcommandDescription",
-            "        --kit <KIT-ID> ..... CommandKitSelectOptionKitDescription",
-            "        --cli <VERSION> .... CommandKitSelectOptionCliDescription",
+            "   list ........................ CommandKitListSubcommandDescription",
+            "        --json <PATH> .......... CommandKitJsonOptionDescription",
+            "        --kit <KIT-ID> ......... CommandKitOptionKitDescription",
+            "   select ...................... CommandKitSelectSubcommandDescription",
+            "        --kit <KIT-ID> ......... CommandKitSelectOptionKitDescription",
+            "        --cordova <VERSION> .... CommandKitSelectOptionCordovaDescription",
             "CommandHelpUsageExamples",
             "   * TacoKitListExample",
             "",
@@ -190,7 +190,7 @@ describe("help for a command", function (): void {
             "",
             "   * TacoKitSelectExample2",
             "",
-            "        taco kit select --cli 5.2.0",
+            "        taco kit select --cordova 5.2.0",
             "",
             "CommandHelpUsageNotes",
             "   * TacoKitNotes",

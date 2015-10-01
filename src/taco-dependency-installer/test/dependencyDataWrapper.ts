@@ -12,7 +12,7 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import path = require ("path");
 
@@ -29,7 +29,7 @@ describe("DependencyDataWrapper", function (): void {
 
     // Utility functions
     function assertDoesNotExist(obj: any): void {
-        (!!obj).should.be.false;
+        (!!obj).should.be.equal(false);
     }
 
     function assertArraysAreEqual(expected: string[], actual: string[]): void {

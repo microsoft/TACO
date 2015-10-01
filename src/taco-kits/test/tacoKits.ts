@@ -15,8 +15,8 @@
 
 import mocha = require ("mocha");
 import path = require ("path");
-// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
-var should_module = require("should");
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
 
 import resources = require ("../resources/resourceManager");
 import tacoErrorCodes = require ("../tacoErrorCodes");
@@ -184,7 +184,7 @@ describe("KitHelper", function (): void {
                 })
                 .catch(function (err: string): void {
                     done(new Error(err));
-                });          
+                });
         });
     });
 
@@ -346,7 +346,7 @@ describe("KitHelper", function (): void {
                             return expectedTemplateInfo.templateId === returnedTemplateInfo.templateId;
                         });
 
-                        foundExpectedResult.should.be.true;
+                        foundExpectedResult.should.be.equal(true);
                     });
 
                     done();

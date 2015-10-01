@@ -34,7 +34,7 @@
             }
             ,
             {
-                "name": "--cli <VERSION>", "description": "[CommandCreateOptionsCli]"
+                "name": "--cordova <VERSION>", "description": "[CommandCreateOptionsCordova]"
             }
             ,
             {
@@ -85,7 +85,7 @@
                 }
                 ,
                 {
-                    "name": "--cli <VERSION>", "description": "[CommandKitSelectOptionCliDescription]"
+                    "name": "--cordova <VERSION>", "description": "[CommandKitSelectOptionCordovaDescription]"
                 }
                 ]
             }
@@ -100,7 +100,7 @@
                 "description": "[TacoKitSelectExample1]" 
             },
             { 
-                "example": "taco kit select --cli 5.2.0", 
+                "example": "taco kit select --cordova 5.2.0", 
                 "description": "[TacoKitSelectExample2]" 
             }
             ],
@@ -492,7 +492,7 @@
         },
         "feedback":
         {
-            "synopsis": "<synopsis>[COMMAND]</synopsis>",
+            "synopsis": "<synopsis></synopsis>",
             "categoryTitle": "[GeneralCommandsTitle]",
             "modulePath": "./feedback",
             "description": "<helptitle>[CommandFeedbackDescription]</helptitle>"

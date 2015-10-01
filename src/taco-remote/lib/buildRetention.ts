@@ -17,11 +17,36 @@ import resources = require ("../resources/resourceManager");
 import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 
+import Logger = utils.Logger;
+
 class BuildRetention {
     private maxBuildsToKeep: number;
 
     constructor(baseBuildDir: string, config: TacoRemoteConfig) {
         this.maxBuildsToKeep = config.maxBuildsToKeep;
+    }
+
+    private static deleteBuilds(builds: { [idx: string]: utils.BuildInfo }, toDelete: string[], sync?: boolean): void {
+        for (var i = 0; i < toDelete.length; ++i) {
+            var idx = toDelete[i];
+            var buildInfo = builds[idx];
+            Logger.log(resources.getString("BuildRetentionDelete", buildInfo.buildNumber, buildInfo.buildDir));
+            if (sync) {
+                rimraf.sync(buildInfo.buildDir);
+            } else {
+                BuildRetention.deleteBuildDirectoryAsync(buildInfo.buildDir);
+            }
+
+            delete builds[idx];
+        }
+    }
+
+    private static deleteBuildDirectoryAsync(buildDir: string, callback?: Function): void {
+        rimraf(buildDir, function (err: Error): void {
+            if (callback) {
+                callback(err);
+            }
+        });
     }
 
     public purge(builds: { [idx: string]: utils.BuildInfo }): void {
@@ -43,7 +68,7 @@ class BuildRetention {
         };
         // sort eligible builds by oldest first, then delete required number
         eligibleBuilds.sort(function (b1: utils.BuildInfo, b2: utils.BuildInfo): number {
-            var diff = <any>b1.submissionTime - <any>b2.submissionTime;
+            var diff = <any> b1.submissionTime - <any> b2.submissionTime;
             return (diff === 0) ? 0 : (diff > 0 ? +1 : -1);
         });
         if (nBuildsToDelete > eligibleBuilds.length) {
@@ -53,36 +78,13 @@ class BuildRetention {
         var numbersToDelete = eligibleBuilds.slice(0, nBuildsToDelete).map(function (b: utils.BuildInfo): string {
             return b.buildNumber.toString();
         });
-        console.info(resources.getString("BuildRetentionPreDelete"), nBuildsToDelete);
+        Logger.log(resources.getString("BuildRetentionPreDelete", nBuildsToDelete));
         BuildRetention.deleteBuilds(builds, numbersToDelete, false);
     }
 
     public deleteAllSync(builds: { [idx: string]: utils.BuildInfo }): void {
         var buildNumbers = Object.keys(builds);
         BuildRetention.deleteBuilds(builds, buildNumbers, true);
-    }
-
-    private static deleteBuilds(builds: { [idx: string]: utils.BuildInfo }, toDelete: string[], sync?: boolean): void {
-        for (var i = 0; i < toDelete.length; ++i) {
-            var idx = toDelete[i];
-            var buildInfo = builds[idx];
-            console.info(resources.getString("BuildRetentionDelete"), buildInfo.buildNumber, buildInfo.buildDir);
-            if (sync) {
-                rimraf.sync(buildInfo.buildDir);
-            } else {
-                BuildRetention.deleteBuildDirectoryAsync(buildInfo.buildDir);
-            }
-
-            delete builds[idx];
-        }
-    }
-
-    private static deleteBuildDirectoryAsync(buildDir: string, callback?: Function): void {
-        rimraf(buildDir, function (err: Error): void {
-            if (callback) {
-                callback(err);
-            }
-        });
     }
 }
 

@@ -20,6 +20,7 @@ function logoColorFunction(s: string): string {
     return "\u001b[33m\u001b[1m" + s + "\u001b[22m\u001b[39m";
 }
 
+/* tslint:disable: no-console */
 console.log(logoColorFunction("  _____________________________"));
 console.log(logoColorFunction("  ___  __/_    |__  ____/_  __ \\"));
 console.log(logoColorFunction("  __  /  _  /| |_  /    _  / / /"));
@@ -37,3 +38,4 @@ console.log(logoColorFunction(line));
 console.log(logoColorFunction(new Array(spaces + 1).join(" ") + title));
 console.log(logoColorFunction(line));
 console.log();
+/* tslint:enable: no-console */

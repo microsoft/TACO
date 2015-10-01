@@ -31,18 +31,42 @@ module MockCordova {
     }
 
     function notImplemented<T>(): T {
+        /* tslint:disable no-arg */
+        // Very specific case to access caller for test purposes
         var caller = arguments.callee.caller;
+        /* tslint:enable no-arg */
 
         // Next line hacks, gets the name of the method that was called from the stack trace (e.g.: MockCordovaRaw510.build)
-        var methodName = (<IHasStack><Object>new Error()).stack.split("\n")[2].replace(/^ +at ([A-z0-9]+\.[A-z0-9]+) \(.*/, "$1");
+        var methodName = (<IHasStack> <Object> new Error()).stack.split("\n")[2].replace(/^ +at ([A-z0-9]+\.[A-z0-9]+) \(.*/, "$1");
 
         throw new MethodNotImplementedException(caller, methodName, "The cordova method " + methodName +
             " was called during a test. You need to provide a custom implementation");
+        /* tslint:disable no-unreachable */
+        // Removing next line causes TS2355
         return <T>null;
+        /* tslint:enable no-unreachable */
     }
 
     export class MockCordova510 implements Cordova.ICordova510 {
+
         public raw = new MockCordovaRaw510();
+
+        private events: { [event: string]: any[] } = {};
+
+        public static get default(): MockCordova510 {
+            var t = new MockCordova510();
+            t.on = (event: string, func: Function) => {
+                t.events[event] = (t.events[event] || []);
+                t.events[event].push(func);
+            };
+            t.off = (event: string, func: Function) => {
+                var idx = t.events[event] && t.events[event].indexOf(func);
+                if (idx) {
+                    t.events[event].splice(idx);
+                };
+            };
+            return t;
+        }
 
         public on(event: string, ...args: any[]): void {
             notImplemented();
@@ -129,6 +153,6 @@ module MockCordova {
             return notImplemented<Q.Promise<any>>();
         }
     }
-}
+};
 
 export = MockCordova;

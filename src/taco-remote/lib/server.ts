@@ -133,7 +133,7 @@ class Server implements RemoteBuild.IServerModule {
             buildInfo.localize(req, this.resources);
             if (!buildInfo.message) {
                 // We can't localize this in this package, we need to get whichever package serviced the request to localize the request
-                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib>buildInfo["pkg"]).locResources);
+                buildInfo.localize(req, (<TacoRemoteLib.IRemoteLib> buildInfo["pkg"]).locResources);
             }
 
             res.status(200).json(buildInfo);
@@ -147,7 +147,7 @@ class Server implements RemoteBuild.IServerModule {
         var buildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             res.set("Content-Type", "text/plain");
-            this.buildManager.downloadBuildLog(req.params.id, req.query.offset | 0, res);
+            this.buildManager.downloadBuildLog(req.params.id, parseInt(req.query.offset, 10) || 0, res);
         } else {
             res.status(404).send(this.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
         }
@@ -156,7 +156,7 @@ class Server implements RemoteBuild.IServerModule {
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
         var allBuildInfo = this.buildManager.getAllBuildInfo();
-        res.json(200, allBuildInfo);
+        res.status(200).json(allBuildInfo);
     }
 
     private checkBuildThenAction(func: (buildInfo: utils.BuildInfo, req: express.Request, res: express.Response) => void): (req: express.Request, res: express.Response) => void {

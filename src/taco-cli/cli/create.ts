@@ -52,23 +52,23 @@ interface ICreateParameters {
  * Handles "taco create"
  */
 class Create extends commands.TacoCommandBase {
-    private static KnownOptions: Nopt.FlagTypeMap = {
+    private static KNOWN_OPTIONS: Nopt.FlagTypeMap = {
         kit: String,
         template: String,
-        cli: String,
+        cordova: String,
         "copy-from": String,
         "link-to": String
     };
-    private static ShortHands: Nopt.ShortFlags = {
+    private static SHORT_HANDS: Nopt.ShortFlags = {
         src: "--copy-from"
     };
-    private static DefaultAppId: string = "io.taco.hellotaco";
-    private static DefaultAppName: string = "HelloTaco";
-
-    private commandParameters: ICreateParameters;
+    private static DEFAULT_APP_ID: string = "io.taco.hellotaco";
+    private static DEFAULT_APP_NAME: string = "HelloTaco";
 
     public name: string = "create";
     public info: commands.ICommandInfo;
+
+    private commandParameters: ICreateParameters;
 
     public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         try {
@@ -86,7 +86,7 @@ class Create extends commands.TacoCommandBase {
                 templateDisplayName = templateUsed;
 
                 var kitProject = self.isKitProject();
-                var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cli"];
+                var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cordova"];
 
                 return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
             })
@@ -118,19 +118,19 @@ class Create extends commands.TacoCommandBase {
                 telemetryProperties["kit"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["kit"] || defaultKitId);
                 telemetryProperties["template"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["template"] || "blank");
             } else {
-                telemetryProperties["cli"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["cli"]);
+                telemetryProperties["cordova"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["cordova"]);
             }
 
-            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, Create.KnownOptions, self.commandParameters.data.options, ["cli", "kit", "template"]));
+            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, Create.KNOWN_OPTIONS, self.commandParameters.data.options, ["cordova", "kit", "template"]));
         });
     }
 
     private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KnownOptions, Create.ShortHands, args.original, 0);
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KNOWN_OPTIONS, Create.SHORT_HANDS, args.original, 0);
         var cordovaParams: Cordova.ICordovaCreateParameters = {
             projectPath: commandData.remain[0],
-            appId: commandData.remain[1] ? commandData.remain[1] : Create.DefaultAppId,
-            appName: commandData.remain[2] ? commandData.remain[2] : Create.DefaultAppName,
+            appId: commandData.remain[1] ? commandData.remain[1] : Create.DEFAULT_APP_ID,
+            appName: commandData.remain[2] ? commandData.remain[2] : Create.DEFAULT_APP_NAME,
             cordovaConfig: commandData.remain[3],
             copyFrom: commandData.options["copy-from"],
             linkTo: commandData.options["link-to"]
@@ -151,12 +151,12 @@ class Create extends commands.TacoCommandBase {
             throw errorHelper.get(TacoErrorCodes.CommandCreateNotTemplateIfCustomWww);
         }
 
-        if (this.commandParameters.data.options.hasOwnProperty("cli") && this.commandParameters.data.options.hasOwnProperty("kit")) {
-            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothCliAndKit);
+        if (this.commandParameters.data.options.hasOwnProperty("cordova") && this.commandParameters.data.options.hasOwnProperty("kit")) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothCordovaCliAndKit);
         }
 
-        if (this.commandParameters.data.options.hasOwnProperty("cli") && this.commandParameters.data.options.hasOwnProperty("template")) {
-            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCli);
+        if (this.commandParameters.data.options.hasOwnProperty("cordova") && this.commandParameters.data.options.hasOwnProperty("template")) {
+            throw errorHelper.get(TacoErrorCodes.CommandCreateNotBothTemplateAndCordovaCli);
         }
 
         // Make sure a path was specified
@@ -182,7 +182,7 @@ class Create extends commands.TacoCommandBase {
      */
     private createProject(): Q.Promise<string> {
         var self = this;
-        var cordovaCli: string = this.commandParameters.data.options["cli"];
+        var cordovaCli: string = this.commandParameters.data.options["cordova"];
         var mustUseTemplate: boolean = this.isKitProject() && !this.commandParameters.cordovaParameters.copyFrom && !this.commandParameters.cordovaParameters.linkTo;
         var kitId: string = this.commandParameters.data.options["kit"];
         var templateId: string = this.commandParameters.data.options["template"];
@@ -237,11 +237,11 @@ class Create extends commands.TacoCommandBase {
         var projectPath: string = cordovaParameters.projectPath ? path.resolve(cordovaParameters.projectPath) : "''";
 
         if (!this.isKitProject()) {
-            self.printNewProjectTable("CommandCreateStatusTableCordovaCLIVersionDescription", this.commandParameters.data.options["cli"]);
+            self.printNewProjectTable("CommandCreateStatusTableCordovaCLIVersionDescription", this.commandParameters.data.options["cordova"]);
             return Q({});
         } else {
-            var kitId: string = this.commandParameters.data.options["kit"];
-            return (kitId ? Q(kitId) : kitHelper.getDefaultKit())
+            var kitIdArg: string = this.commandParameters.data.options["kit"];
+            return (kitIdArg ? Q(kitIdArg) : kitHelper.getDefaultKit())
                 .then((kitId: string) => kitHelper.getKitInfo(kitId)
                     .then(kitInfo => self.printNewProjectTable("CommandCreateStatusTableKitVersionDescription",
                         kit.getKitTitle(kitId, kitInfo))));
@@ -308,7 +308,7 @@ class Create extends commands.TacoCommandBase {
     }
 
     private isKitProject(): boolean {
-        return !this.commandParameters.data.options["cli"];
+        return !this.commandParameters.data.options["cordova"];
     }
 }
 

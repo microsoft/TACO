@@ -55,8 +55,8 @@ describe("logFormathelper", function (): void {
         var formatted: string = LogFormatHelper.toFormattedString(input);
         should(formatted).be.equal(os.EOL);
 
-        var input: string = null;
-        var formatted: string = LogFormatHelper.toFormattedString(input);
+        input = null;
+        formatted = LogFormatHelper.toFormattedString(input);
         should(formatted).be.equal(os.EOL);
     });
 

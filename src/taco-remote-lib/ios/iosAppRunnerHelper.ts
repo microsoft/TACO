@@ -210,9 +210,9 @@ class IosAppRunnerHelper {
         var versionInfo = promiseExec("ideviceinfo -s -k ProductVersion").spread<string>(function (stdout: string, stderr: string): string {
             return stdout.trim().substring(0, 3); // Versions for DeveloperDiskImage seem to be X.Y, while some device versions are X.Y.Z
             // NOTE: This will almost certainly be wrong in the next few years, once we hit version 10.0 
-        }, function (): void {
-                throw new Error("FailedGetDeviceInfo");
-            });
+        }, function (): string {
+            throw new Error("FailedGetDeviceInfo");
+        });
 
         // Attempt to find the path where developer resources exist.
         var pathInfo = promiseExec("xcrun -sdk iphoneos --show-sdk-platform-path").spread<string>(function (stdout: string, stderr: string): string {
@@ -245,7 +245,11 @@ class IosAppRunnerHelper {
     private static charToHex(char: string): string {
         var conversionTable = "0123456789ABCDEF";
         var charCode = char.charCodeAt(0);
+
+        /* tslint:disable:no-bitwise */
+        // We do need some bitwise operations to convert the char to Hex
         return conversionTable[(charCode & 0xF0) >> 4] + conversionTable[charCode & 0x0F];
+        /* tslint:enable:no-bitwise */
     }
 
     private static makeGdbCommand(command: string): string {
@@ -255,7 +259,10 @@ class IosAppRunnerHelper {
             stringSum += command.charCodeAt(i);
         }
 
+        /* tslint:disable:no-bitwise */
+        // We need some bitwise operations to calculate the checksum
         stringSum = stringSum & 0xFF;
+        /* tslint:enable:no-bitwise */
         var checksum = stringSum.toString(16).toUpperCase();
         if (checksum.length < 2) {
             checksum = "0" + checksum;

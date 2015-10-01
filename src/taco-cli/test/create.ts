@@ -14,7 +14,7 @@
 /// <reference path="../../typings/tacoKits.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
 import mocha = require ("mocha");
@@ -44,6 +44,10 @@ interface IScenarioList {
     [scenario: number]: string;
 }
 
+interface IKeyValuePair<T> {
+    [key: string]: T;
+}
+
 describe("taco create", function (): void {
     // Test constants
     var createTimeout: number = 60000;
@@ -58,9 +62,20 @@ describe("taco create", function (): void {
         "5.1.1-Kit": 4 // 1 file and 3 folders 
     };
 
+    var expectedKitTacoJsonKeyValues: { [kitId: string]: IKeyValuePair<string> } = {
+        "4.3.1-Kit" : { kit: "4.3.1-Kit", "cordova-cli": "4.3.1" },
+        "5.1.1-Kit" : { kit: "5.1.1-Kit", "cordova-cli": "5.1.1" }
+    };
+
+    var expectedCliTacoJsonKeyValues: { [kitId: string]: IKeyValuePair<string> } = {
+        "4.3.0" : { "cordova-cli": "4.3.0" },
+        "4.3.1" : { "cordova-cli": "4.3.1" },
+        "5.1.1" : { "cordova-cli": "5.1.1" }
+    };
+
     // Persistent TemplateManager to count template entries
     var templateManager: TemplateManager;
-    
+
     // Project info
     var testAppId: string = "testId";
     var testAppName: string = "testAppName";
@@ -88,7 +103,7 @@ describe("taco create", function (): void {
         7: util.format("%s --template blank", getProjectPath(successPrefix, 7)),
         8: util.format("%s --template", getProjectPath(successPrefix, 8)),
         9: util.format("%s --copy-from %s", getProjectPath(successPrefix, 9), copyFromPath),
-        10: util.format("%s --cli 4.3.0", getProjectPath(successPrefix, 10)),
+        10: util.format("%s --cordova 4.3.0", getProjectPath(successPrefix, 10)),
         11: util.format("%s --unknownParameter", getProjectPath(successPrefix, 11)),
         12: util.format("%s --kit", getProjectPath(successPrefix, 12)),
         13: util.format("%s --template typescript", getProjectPath(successPrefix, 13))
@@ -97,15 +112,15 @@ describe("taco create", function (): void {
         1: util.format("%s --kit unknown", getProjectPath(failurePrefix, 1)),
         2: util.format("%s --template unknown", getProjectPath(failurePrefix, 2)),
         3: util.format("%s --kit 5.1.1-Kit --template typescript --copy-from %s", getProjectPath(failurePrefix, 3), copyFromPath),
-        4: util.format("%s --kit 5.1.1-Kit --cli 4.2.0", getProjectPath(failurePrefix, 4)),
-        5: util.format("%s --cli 4.3.0 --template typescript", getProjectPath(failurePrefix, 5)),
+        4: util.format("%s --kit 5.1.1-Kit --cordova 4.2.0", getProjectPath(failurePrefix, 4)),
+        5: util.format("%s --cordova 4.3.0 --template typescript", getProjectPath(failurePrefix, 5)),
         6: util.format("%s --kit 4.3.1-Kit --template typescript %s %s {}", getProjectPath(failurePrefix, 6), testAppId, testAppName),
         7: util.format("%s --kit 5.1.1-Kit --copy-from unknownCopyFromPath", getProjectPath(failurePrefix, 7)),
-        8: util.format("%s --cli unknownCliVersion", getProjectPath(failurePrefix, 8)),
+        8: util.format("%s --cordova unknownCliVersion", getProjectPath(failurePrefix, 8)),
         9: util.format("%s 42", getProjectPath(failurePrefix, 9)),
         10: "",
         11: util.format("%s/invalid/project/path", getProjectPath(failurePrefix, 11)),
-        12: util.format("%s", getProjectPath(failurePrefix, 12)),
+        12: util.format("%s", getProjectPath(failurePrefix, 12))
     };
 
     function getProjectPath(suitePrefix: string, scenario: number): string {
@@ -134,19 +149,19 @@ describe("taco create", function (): void {
         return files.length;
     }
 
-    function verifyTacoJsonFileContents(projectPath: string, tacoJsonFileContents: string): void {
+    function verifyTacoJsonKeyValues(projectPath: string, keyValues: IKeyValuePair<string>): void {
         var tacoJsonPath: string = path.resolve(projectPath, "taco.json");
 
         if (!fs.existsSync(tacoJsonPath)) {
             throw new Error("Taco.json file not found");
         }
 
-        var fileContents: string = fs.readFileSync(tacoJsonPath).toString();
+        var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
 
-        fileContents.should.be.exactly(tacoJsonFileContents);
+        tacoJson.should.be.eql(tacoJson);
     }
 
-    function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: string): Q.Promise<any> {
+    function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {
         var create = new Create();
 
         return create.run(makeICommandData(scenario, successScenarios))
@@ -157,12 +172,12 @@ describe("taco create", function (): void {
                 fileCount.should.be.exactly(expectedFileCount);
 
                 if (tacoJsonFileContents) {
-                    verifyTacoJsonFileContents(projectPath, tacoJsonFileContents);
+                    verifyTacoJsonKeyValues(projectPath, tacoJsonFileContents);
                 }
             });
     }
 
-    function runScenario(scenario: number, kitUsed: string, templateUsed: string, tacoJsonFileContents?: string): Q.Promise<any> {
+    function runScenario(scenario: number, kitUsed: string, templateUsed: string, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {
         return templateManager.getTemplateEntriesCount(kitUsed, templateUsed)
             .then(function (templateEntries: number): Q.Promise<any> {
                 var totalEntries: number = templateEntries + tacoFileCount + cordovaFileCounts[kitUsed];
@@ -191,13 +206,13 @@ describe("taco create", function (): void {
 
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
-        
+
         // Set a temporary location for taco_home
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
-        
+        kitHelper.kitPackagePromise = null;
+
         // Instantiate the persistent templateManager
         templateManager = new TemplateManager(kitHelper);
 
@@ -215,7 +230,7 @@ describe("taco create", function (): void {
 
     after(function (done: MochaDone): void {
         this.timeout(2 * createTimeout); // Cleaning up can take a long time if we have several projects
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         rimraf(runFolder, done);
     });
 
@@ -226,56 +241,56 @@ describe("taco create", function (): void {
             var scenario: number = 1;
 
             // Should use kit 4.3.1-Kit and template typescript
-            runScenario(scenario, "4.3.1-Kit", "typescript", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "typescript", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
             var scenario: number = 2;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
             var scenario: number = 3;
 
             // Should use kit 4.3.1-Kit and template typescript
-            runScenario(scenario, "4.3.1-Kit", "typescript", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "typescript", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
             var scenario: number = 4;
 
             // Should use kit 4.3.1-Kit and template blank
-            runScenario(scenario, "4.3.1-Kit", "blank", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "blank", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 5 [path, kit, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 5;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
             var scenario: number = 6;
 
             // Should use kit 4.3.1-Kit and template blank
-            runScenario(scenario, "4.3.1-Kit", "blank", "{\"kit\":\"4.3.1-Kit\"}").then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "blank", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 7 [path, template]", function (done: MochaDone): void {
             var scenario: number = 7;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 8 [path, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 8;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 9 [path, copy-from]", function (done: MochaDone): void {
@@ -285,45 +300,45 @@ describe("taco create", function (): void {
             // Kit 5.1.1-Kit: Cordova adds 2 files and 4 folders
             var totalEntries = 9 + tacoFileCount;
 
-            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenarioWithExpectedFileCount(scenario, totalEntries, expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 10 [path, cli]", function (done: MochaDone): void {
             var scenario: number = 10;
 
             // CLI 4.2.0 + default Cordova project
-            // taco-cli: adds 1 file
+            // TACO: adds 1 file
             var totalEntries = cordovaDefaultProjectFileCount + tacoFileCount;
 
-            runScenarioWithExpectedFileCount(scenario, totalEntries, "{\"cli\":\"4.3.0\"}").then(done, done);
+            runScenarioWithExpectedFileCount(scenario, totalEntries, expectedCliTacoJsonKeyValues["4.3.0"]).then(done, done);
         });
 
         it("Success scenario 11 [path, extra unknown parameter]", function (done: MochaDone): void {
             var scenario: number = 11;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 12 [path, kit (empty)]", function (done: MochaDone): void {
             var scenario: number = 12;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
 
         it("Success scenario 13 [path, template (typescript)]", function (done: MochaDone): void {
             var scenario: number = 13;
 
             // Should use kit 5.1.1-Kit and template typescript
-            runScenario(scenario, "5.1.1-Kit", "typescript", "{\"kit\":\"5.1.1-Kit\"}").then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "typescript", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
         });
     });
 
     describe("Failure scenarios", function (): void {
         this.timeout(createTimeout);
 
-        it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {     
+        it("Failure scenario 1 [path, kit (unknown value)]", function (done: MochaDone): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
@@ -345,17 +360,17 @@ describe("taco create", function (): void {
         });
 
         it("Failure scenario 4 [path, kit, cli]", function (done: MochaDone): void {
-            // Create command should fail when both --kit and --cli are specified
+            // Create command should fail when both --kit and --cordova are specified
             var scenario: number = 4;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCliAndKit).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCordovaCliAndKit).then(done, done);
         });
 
         it("Failure scenario 5 [path, cli, template]", function (done: MochaDone): void {
-            // Create command should fail when both --cli and --template are specified
+            // Create command should fail when both --cordova and --template are specified
             var scenario: number = 5;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCli).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCordovaCli).then(done, done);
         });
 
         it("Failure scenario 6 [path (value is an existing project)]", function (done: MochaDone): void {
@@ -456,12 +471,12 @@ describe("taco create", function (): void {
                 actual = actual.replace(/ *\n +\(/gm, " ("); // We undo the word-wrapping
                 actual = actual.replace(/\n\n /gm, "\n "); // We undo the word-wrapping
                 actual = actual.replace(/ \.+ /gm, " ..... "); // We want all the points to always be 5 points .....
-                if (expected !== actual) {
-                    var expected = alternativeExpectedMessages.join("\n");
-                }
 
-                actual.should.be.equal(expected);
-                done();
+                if (expectedMessages.every((msg: string) => actual.indexOf(msg) >= 0) || alternativeExpectedMessages.every((msg: string) => actual.indexOf(msg) >= 0)) {
+                    done();
+                } else {
+                    done(new Error("Bad onboarding for " + createCommandLineArguments));
+                }
             }, (arg: any) => {
                 done(arg);
             });
@@ -537,7 +552,7 @@ describe("taco create", function (): void {
                 "HowToUseCommandDocs",
                 ""];
 
-            testCreateForArguments([projectPath, "--cli", "5.1.1"],
+            testCreateForArguments([projectPath, "--cordova", "5.1.1"],
                 firstPart.concat(lastPart),
                 firstPart.concat(downloadingDependenciesOutput, lastPart),
                 done);
@@ -627,7 +642,7 @@ describe("taco create", function (): void {
             };
 
             // Create a dummy test project with no platforms added
-            create.run(commandData).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {                  
+            create.run(commandData).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                 telemetryParameters.should.be.eql(expectedProperties);
                 done();
             }, done);
@@ -670,11 +685,11 @@ describe("taco create", function (): void {
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                         cliVersion: { isPii: false, value: cliVersion },
-                        cli: { isPii: false, value: "5.2.0" },
-                        "options.cli": { isPii: false, value: "5.2.0" }
+                        cordova: { isPii: false, value: "5.2.0" },
+                        "options.cordova": { isPii: false, value: "5.2.0" }
             };
 
-            createProjectAndVerifyTelemetryProps([projectPath, "--cli", "5.2.0"], expected, done);
+            createProjectAndVerifyTelemetryProps([projectPath, "--cordova", "5.2.0"], expected, done);
         });
     });
 });

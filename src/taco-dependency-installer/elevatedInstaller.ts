@@ -92,7 +92,7 @@ class DarwinLogger implements protocol.ILogger {
  * Note that this specific class only acts as the "entry point" of the elevated installer process, and is responsible for the communication with the dependency installer. The actual installation work
  * (parsing and validating the config file, instantiating specialized installers, running installers) is delegated to the InstallRunner class.
  */
-class ElevatedInstaller {    
+class ElevatedInstaller {
     private socketPath: string;
     private socketHandle: NodeJSNet.Socket;
     private configFile: string;
@@ -182,5 +182,4 @@ class ElevatedInstaller {
 }
 
 var elevatedInstaller: ElevatedInstaller = new ElevatedInstaller();
-
 elevatedInstaller.run();

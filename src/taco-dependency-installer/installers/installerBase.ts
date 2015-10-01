@@ -29,9 +29,7 @@ import ILogger = installerProtocol.ILogger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 class InstallerBase {
-    private id: string;
-
-    protected static InstallerCache: string = path.join(tacoUtils.UtilHelper.tacoHome, "third-party-installers");
+    protected static installerCache: string = path.join(tacoUtils.UtilHelper.tacoHome, "third-party-installers");
 
     protected installerInfo: DependencyInstallerInterfaces.IInstallerData;
     protected steps: DependencyInstallerInterfaces.IStepsDeclaration;
@@ -39,6 +37,8 @@ class InstallerBase {
     protected installDestination: string;
     protected logger: ILogger;
     protected telemetry: tacoUtils.TelemetryGenerator;
+
+    private id: string;
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string,
         logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration, id: string) {
@@ -88,7 +88,7 @@ class InstallerBase {
                     .then(function (): void {
                         // After we download something on Mac OS, we need to change the owner of the cached installer back to the current user, otherwise
                         // they won't be able to delete their taco_home folder without admin privileges
-                        wrench.chownSyncRecursive(InstallerBase.InstallerCache, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                        wrench.chownSyncRecursive(InstallerBase.installerCache, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
                     });
             default:
                 return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
