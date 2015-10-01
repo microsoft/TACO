@@ -43,8 +43,7 @@ class ServerMock {
                                 reader.on("end", function () {
                                     response.end();
                                 });
-                            }
-                            else {
+                            } else {
                                 response.write(data.response);
                                 response.end();
                             }
