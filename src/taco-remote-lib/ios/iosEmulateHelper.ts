@@ -31,7 +31,7 @@ process.on("message", function (emulateRequest: { appDir: string; appName: strin
 });
 
 class IOSEmulateHelper {
-    private static IOSSimTargets: { [id: string]: string } = {
+    private static IOS_SIMULATOR_TARGETS: { [id: string]: string } = {
         "iphone 4s": "--retina",
         "iphone 5": "--retina --tall",
         "iphone 5s": "--retina --tall --64bit",
@@ -83,7 +83,7 @@ class IOSEmulateHelper {
 
     private static iosSimTarget(emulateRequestTarget: string): string {
         emulateRequestTarget = emulateRequestTarget.toLowerCase();
-        var iosSimTarget = IOSEmulateHelper.IOSSimTargets[emulateRequestTarget] || "--family iphone --retina";
+        var iosSimTarget = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget] || "--family iphone --retina";
         return iosSimTarget;
     }
 }

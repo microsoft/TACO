@@ -32,24 +32,24 @@ import utils = tacoUtils.UtilHelper;
  * A static class which is responsible for dealing with the TacoSettings.json file
  */
 class Settings {
-    private static Settings: Settings.ISettings = null;
-    private static SettingsFileName = "TacoSettings.json";
+    private static settings: Settings.ISettings = null;
+    private static SETTINGS_FILENAME = "TacoSettings.json";
 
     public static get settingsFile(): string {
-        return path.join(utils.tacoHome, Settings.SettingsFileName);
+        return path.join(utils.tacoHome, Settings.SETTINGS_FILENAME);
     }
 
     /*
      * Load data from TACO_HOME/TacoSettings.json
      */
     public static loadSettings(): Q.Promise<Settings.ISettings> {
-        if (Settings.Settings) {
-            return Q(Settings.Settings);
+        if (Settings.settings) {
+            return Q(Settings.settings);
         }
 
         try {
-            Settings.Settings = JSON.parse(<any>fs.readFileSync(Settings.settingsFile));
-            return Q(Settings.Settings);
+            Settings.settings = JSON.parse(<any> fs.readFileSync(Settings.settingsFile));
+            return Q(Settings.settings);
         } catch (e) {
             if (e.code === "ENOENT") {
                 // File doesn't exist, no need for a stack trace.
@@ -64,11 +64,11 @@ class Settings {
 
     public static saveSettings(settings: Settings.ISettings): Q.Promise<Settings.ISettings> {
         // save to TACO_HOME/TacoSettings.json and store as the cached version
-        Settings.Settings = settings;
+        Settings.settings = settings;
         utils.createDirectoryIfNecessary(utils.tacoHome);
         fs.writeFileSync(Settings.settingsFile, JSON.stringify(settings));
         return Q(settings);
-    }    
+    }
 
     /*
      * Given the command line options, determine which platforms we should operate on.
@@ -82,7 +82,7 @@ class Settings {
      *                 - If a platform exists in /platforms and does not have a remote configuration, then perform a local build
      */
     public static determinePlatform(options: commands.ICommandData): Q.Promise<Settings.IPlatformWithLocation[]> {
-        return Q.all([
+        return Q.all<any>([
             CordovaHelper.getSupportedPlatforms(),
             Settings.determinePlatformsFromOptions(options)
         ]).spread<Settings.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
@@ -134,14 +134,14 @@ class Settings {
      * Remove cached settings object, for use in tests
      */
     public static forgetSettings(): void {
-        Settings.Settings = null;
+        Settings.settings = null;
     }
 
     public static loadSettingsOrReturnEmpty(): Q.Promise<Settings.ISettings> {
         return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; });
     }
 
-    public static parseRequestedPlatforms(options: commands.ICommandData): string[]{
+    public static parseRequestedPlatforms(options: commands.ICommandData): string[] {
         var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
         return options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
     }
@@ -185,7 +185,7 @@ class Settings {
             if (requestedPlatforms.length > 0) {
                 // Filter down to user-requested platforms if appropriate
                 return requestedPlatforms.map((platform: string): Settings.IPlatformWithLocation => {
-                    if (!options.options["local"] && platforms.some((p: Settings.IPlatformWithLocation): boolean => p.platform === platform && p.location == Settings.BuildLocationType.Remote)) {
+                    if (!options.options["local"] && platforms.some((p: Settings.IPlatformWithLocation): boolean => p.platform === platform && p.location === Settings.BuildLocationType.Remote)) {
                         // If we found a remote configuration for the platform default to using that
                         return { platform: platform, location: Settings.BuildLocationType.Remote };
                     } else {
@@ -194,7 +194,7 @@ class Settings {
                     }
                 });
             }
-            
+
             // Otherwise return all the platforms we found.
             return platforms;
         }).then((platforms: Settings.IPlatformWithLocation[]) => {

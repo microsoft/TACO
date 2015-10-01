@@ -65,9 +65,9 @@ class TemplateDescriptor implements TemplateManager.ITemplateDescriptor {
 }
 
 class TemplateManager {
-    private static DefaultTemplateId: string = "blank";
-    private static TemplatesFolderName: string = "templates";
-    private static GitFileList: string[] = [
+    private static DEFAULT_TEMPLATE_ID: string = "blank";
+    private static TEMPLATES_FOLDER_NAME: string = "templates";
+    private static GIT_FILE_LIST: string[] = [
         ".git",
         ".gitignore",
         ".gitattributes"
@@ -79,7 +79,31 @@ class TemplateManager {
 
     constructor(kits: TacoKits.IKitHelper, templateCache?: string) {
         this.kitHelper = kits;
-        this.templateCachePath = templateCache || path.join(utils.tacoHome, TemplateManager.TemplatesFolderName);
+        this.templateCachePath = templateCache || path.join(utils.tacoHome, TemplateManager.TEMPLATES_FOLDER_NAME);
+    }
+
+    private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
+        var replaceParams: Replace.IReplaceParameters = {
+            regex: "",
+            replacement: "",
+            paths: [path.resolve(projectPath)],
+            recursive: true,
+            silent: true
+        };
+
+        var tokens: { [token: string]: string } = {
+            "\\$appid\\$": appId,
+            "\\$projectname\\$": appName
+        };
+
+        for (var token in tokens) {
+            replaceParams.regex = token;
+            replaceParams.replacement = tokens[token];
+
+            replace(replaceParams);
+        }
+
+        return Q.resolve(null);
     }
 
     /**
@@ -96,7 +120,7 @@ class TemplateManager {
         var self = this;
         var templateSrcPath: string = null;
 
-        templateId = templateId ? templateId : TemplateManager.DefaultTemplateId;
+        templateId = templateId ? templateId : TemplateManager.DEFAULT_TEMPLATE_ID;
 
         return this.acquireTemplate(templateId, kitId)
             .then(function (templatePath: string): Q.Promise<any> {
@@ -135,7 +159,7 @@ class TemplateManager {
                 // If we reach this point, we are in case 1) (see above comment), so we need to perform a recursive copy
                 var filterFunc = function (itemPath: string): boolean {
                     // Return true if the item path is not in our list of git files to ignore
-                    return TemplateManager.GitFileList.indexOf(path.basename(itemPath)) === -1;
+                    return TemplateManager.GIT_FILE_LIST.indexOf(path.basename(itemPath)) === -1;
                 };
                 var options: any = { clobber: false, filter: filterFunc };
 
@@ -211,30 +235,6 @@ class TemplateManager {
 
                 return templateZip.getEntries().length - 1; // We substract 1, because the returned count includes the root folder of the template
             });
-    }
-
-    private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
-        var replaceParams: Replace.IReplaceParameters = {
-            regex: "",
-            replacement: "",
-            paths: [path.resolve(projectPath)],
-            recursive: true,
-            silent: true
-        };
-
-        var tokens: { [token: string]: string } = {
-            "\\$appid\\$": appId,
-            "\\$projectname\\$": appName
-        };
-
-        for (var token in tokens) {
-            replaceParams.regex = token;
-            replaceParams.replacement = tokens[token];
-
-            replace(replaceParams);
-        }
-
-        return Q.resolve(null);
     }
 
     private acquireTemplate(templateId: string, kitId: string): Q.Promise<string> {

@@ -21,10 +21,10 @@ declare module TacoUtility {
     }
 
     class TacoPackageLoader {
-        public static GitUriRegex: RegExp;
-        public static FileUriRegex: RegExp;
+        public static GIT_URI_REGEX: RegExp;
+        public static FILE_URI_REGEX: RegExp;
 
-        public static MockForTests: TacoUtility.ITacoPackageLoader;
+        public static mockForTests: TacoUtility.ITacoPackageLoader;
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,

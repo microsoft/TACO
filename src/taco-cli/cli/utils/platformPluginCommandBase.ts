@@ -47,7 +47,7 @@ export enum CommandOperationStatus {
  * Base handler for platform and plugin commands
  */
 export class PlatformPluginCommandBase extends commands.TacoCommandBase {
-    private static KnownOptions: Nopt.CommandData = {
+    private static KNOWN_OPTIONS: Nopt.CommandData = {
         searchpath: String,
         noregistry: String,
         usegit: String,
@@ -58,7 +58,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         shrinkwrap: Boolean
     };
 
-    private static ShortHands: Nopt.ShortFlags = {
+    private static SHORT_HANDS: Nopt.ShortFlags = {
         rm: "remove",
         ls: "list"
     };
@@ -68,7 +68,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     public cordovaCommandParams: Cordova.ICordovaCommandParameters;
     public downloadOptions: Cordova.ICordovaDownloadOptions;
     public info: commands.ICommandInfo;
-    
+
     /**
      * Abstract method to be implemented by the derived class.
      * Derived classes should override this method for kit override check functionality
@@ -108,9 +108,9 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      */
     public cliParamHasVersionOverride(spec: string): boolean {
         var packageVersion: string = spec.indexOf("@") !== 0 ? spec.split("@")[1] : null;
-        return !!packageLoader.GitUriRegex.test(spec) || !!packageLoader.FileUriRegex.test(spec) || (packageVersion && !!semver.valid(packageVersion));
+        return !!packageLoader.GIT_URI_REGEX.test(spec) || !!packageLoader.FILE_URI_REGEX.test(spec) || (packageVersion && !!semver.valid(packageVersion));
     }
-   
+
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
@@ -143,7 +143,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             }
         })
             .then(function (): Q.Promise<any> {
-            return cordovaWrapper.invokePlatformPluginCommand(self.name, projectInfo.cordovaCliVersion, self.cordovaCommandParams, data);
+            return cordovaWrapper.invokePlatformPluginCommand(self.name, self.cordovaCommandParams, data);
         })
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {
@@ -166,7 +166,6 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self = this;
-        var telemetryProperties: ICommandTelemetryProperties = {};
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand);
@@ -175,7 +174,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
                 numericSuffix++;
             });
 
-            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, PlatformPluginCommandBase.KnownOptions, self.data.options, ["link", "save", "browserify", "shrinkwrap"]));
+            return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, PlatformPluginCommandBase.KNOWN_OPTIONS, self.data.options, ["link", "save", "browserify", "shrinkwrap"]));
         });
     }
 
@@ -187,7 +186,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      * Parse the arguments and construct the command parameters.
      */
     private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KnownOptions, PlatformPluginCommandBase.ShortHands, args.original, 0);
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KNOWN_OPTIONS, PlatformPluginCommandBase.SHORT_HANDS, args.original, 0);
         var subCommand: string = commandData.remain[0];
         var targets: string[] = commandData.remain.slice(1);
 
@@ -211,7 +210,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         };
 
         var variables: string[] = commandData.options["variable"];
-        
+
         // Sanitize the --variable option flags
         if (variables) {
             var self = this;

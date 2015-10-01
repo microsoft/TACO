@@ -1,5 +1,5 @@
 ﻿/**
-﻿ * ******************************************************
+ ********************************************************
 ﻿ *                                                       *
 ﻿ *   Copyright (C) Microsoft. All rights reserved.       *
 ﻿ *                                                       *
@@ -11,7 +11,7 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import AdmZip = require ("adm-zip");
 import del = require ("del");
@@ -91,7 +91,7 @@ module BuildAndRunTelemetryTests {
         var iosPort = 3001;
         var androidPort = 3002;
 
-        var cordova: Cordova.ICordova = new mockCordova.MockCordova510();
+        var cordova: Cordova.ICordova = mockCordova.MockCordova510.default;
         var vcordova: string = "4.0.0";
         var buildNumber = 12341;
         var isNotEmulate = command !== Command.Emulate;
@@ -131,7 +131,7 @@ module BuildAndRunTelemetryTests {
 
         function generateCompleteBuildSequence(platform: string, port: number, isIncrementalTest: boolean): any {
             var configuration = "debug";
-        
+
             // Mock out the server on the other side
             var queryOptions: { [key: string]: string } = {
                 command: "build",
@@ -272,13 +272,13 @@ module BuildAndRunTelemetryTests {
                 value.should.be.below(expectedGzipedSizeAbsoluteError + expectedGzippedSize);
                 telemetryProperties[keyName].value = String(expectedGzippedSize);
             } else {
-                (typeof telemetryProperties[keyName] === "undefined").should.be.true;
+                (typeof telemetryProperties[keyName] === "undefined").should.be.equal(true);
             }
         }
 
         function telemetryShouldEqual(telemetryProperties: TacoUtility.ICommandTelemetryProperties,
             expected: any, iosExpectedGzipedSize: number = -1, androidGzipSize: number = -1): void {
-            (typeof telemetryProperties === "undefined").should.be.false;
+            (typeof telemetryProperties === "undefined").should.be.equal(false);
             validateGzipedSize(telemetryProperties, "ios", iosExpectedGzipedSize);
             validateGzipedSize(telemetryProperties, "android", androidGzipSize);
             telemetryProperties.should.eql(expected); // We are comparing the objects, after overriding the sizes with the expected values
@@ -286,14 +286,14 @@ module BuildAndRunTelemetryTests {
 
         beforeEach((done: MochaDone) => {
             // Warning: After this line, all cordova CLI commands will have to be mocked
-            TacoUtility.TacoPackageLoader.MockForTests = customLoader;
+            TacoUtility.TacoPackageLoader.mockForTests = customLoader;
 
             Settings.saveSettings({ remotePlatforms: {} })
                 .done(() => done(), done);
         });
 
         afterEach(() => {
-            TacoUtility.TacoPackageLoader.MockForTests = null;
+            TacoUtility.TacoPackageLoader.mockForTests = null;
         });
 
         function commandSwitch<T>(buildResult: T, runResult: T, emulateResult: T): T {
@@ -331,9 +331,9 @@ module BuildAndRunTelemetryTests {
                 expected["platforms.actuallyBuilt.local1"] = { isPii: false, value: "android" };
             }
 
-            runCommand(args)
-                .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected))
-                .done(() => done(), done);
+            runCommand(args).then(telemetryProperties => {
+                telemetryShouldEqual(telemetryProperties, expected);
+            }).done(() => done(), done);
         });
 
         function mockProjectWithIncrementalBuild(): void {
@@ -368,7 +368,7 @@ module BuildAndRunTelemetryTests {
                 .then(() => runCommand(args))
                 .finally(() => {
                     testIosHttpServer.removeAllListeners("request");
-                    testAndroidHttpServer.removeAllListeners("request")
+                    testAndroidHttpServer.removeAllListeners("request");
                 })
                 .then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28382);
@@ -399,7 +399,7 @@ module BuildAndRunTelemetryTests {
                 .then(() => runCommand(args))
                 .finally(() => {
                     testIosHttpServer.removeAllListeners("request");
-                    testAndroidHttpServer.removeAllListeners("request")
+                    testAndroidHttpServer.removeAllListeners("request");
                 })
                 .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected, 28379, 28379))
                 .done(() => done(), done);
@@ -456,7 +456,7 @@ module BuildAndRunTelemetryTests {
 
                 runCommand(args)
                     .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected))
-                    .then(() => done(), done)
+                    .then(() => done(), done);
             });
         }
     }

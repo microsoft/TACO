@@ -27,12 +27,12 @@ colors.setTheme({
     kitid: ["green", "bold"],
     deprecatedkit: ["red", "bold"],
     defaultkit: ["yellow", "bold"],
-    command: ["green", "bold"],
+    command: ["green", "bold"]
 });
 
 module TacoUtility {
     export class LogFormatHelper {
-        private static TagRegex: string = "<\/?([a-z]+)\/?>";
+        private static TAG_REGEX: string = "<\/?([a-z]+)\/?>";
 
         /**
          * msg can be any string with styles classes defined in xml tags
@@ -69,7 +69,7 @@ module TacoUtility {
                         }
                     }
                 });
- 
+
                 // print remaing string, outside any tags
                 if (startIndex < msg.length) {
                     formattedMessage += LogFormatHelper.colorize(msg.substring(startIndex, msg.length), stylesStack);
@@ -120,11 +120,11 @@ module TacoUtility {
         }
 
         public static getFormattedStringLength(msg: string): number {
-            return msg.replace(new RegExp(LogFormatHelper.TagRegex, "gm"), "").length;
+            return msg.replace(new RegExp(LogFormatHelper.TAG_REGEX, "gm"), "").length;
         }
 
         public static isFormattedString(msg: string): boolean {
-            var regex = new RegExp(LogFormatHelper.TagRegex, "gm");
+            var regex = new RegExp(LogFormatHelper.TAG_REGEX, "gm");
             return regex.test(msg);
         }
 
@@ -138,7 +138,7 @@ module TacoUtility {
 
         private static forEachTagMatch(msg: string, callback: (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number) => void): void {
             // regex to match again all start/end tags strictly without spaces
-            var regex = new RegExp(LogFormatHelper.TagRegex, "gm");
+            var regex = new RegExp(LogFormatHelper.TAG_REGEX, "gm");
             var match: RegExpExecArray;
 
             // iterate over all start/end tags <foo>, </foo> 

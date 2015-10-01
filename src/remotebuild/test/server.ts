@@ -11,7 +11,7 @@
 /// <reference path="../../typings/should.d.ts" />
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
 import nconf = require ("nconf");
@@ -59,7 +59,7 @@ describe("server", function (): void {
 
     it("should start correctly in insecure mode", function (done: MochaDone): void {
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
+        nconf.overrides(<nconf.IOptions> { serverDir: serverDir, port: 3000, secure: false, lang: "en" });
         server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
             fs.existsSync(serverDir).should.be.true;
@@ -86,7 +86,7 @@ describe("server", function (): void {
 
         deferred.promise.then(function (): Q.Promise<any> {
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: false, lang: "en" });
+            nconf.overrides(<nconf.IOptions> { serverDir: serverDir, port: 3000, secure: false, lang: "en" });
             return server.start(new RemoteBuildConf(nconf, true));
         }).then(function (): void {
             dummyServer.close(function (): void {
@@ -107,7 +107,7 @@ describe("server", function (): void {
     darwinOnlyTest("should start correctly in secure mode on mac", function (done: MochaDone): void {
         this.timeout(10000);
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: true, lang: "en" });
+        nconf.overrides(<nconf.IOptions> { serverDir: serverDir, port: 3000, secure: true, lang: "en" });
         server.start(new RemoteBuildConf(nconf, true))
             .then(function (): void {
             fs.existsSync(serverDir).should.be.ok;
@@ -131,7 +131,7 @@ describe("server", function (): void {
     darwinOnlyTest("should be able to download a certificate exactly once on mac", function (done: MochaDone): void {
         this.timeout(10000); // Certificates can take ages to generate apparently
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
+        nconf.overrides(<nconf.IOptions> { serverDir: serverDir, port: 3000, secure: true, lang: "en", pinTimeout: 10 });
         var config = new RemoteBuildConf(nconf, true);
         HostSpecifics.hostSpecifics.initialize(config).then(function (): Q.Promise<any> {
             return server.start(config);
@@ -176,9 +176,9 @@ describe("server", function (): void {
         testModules["testServerModuleFactory"] = { mountPath: "testRoute", requirePath: modPath };
 
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        nconf.overrides(<nconf.IOptions>{ serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
+        nconf.overrides(<nconf.IOptions> { serverDir: serverDir, port: 3000, secure: false, lang: "en", pinTimeout: 10, modules: testModules });
         server.start(new RemoteBuildConf(nconf, true)).then(function (): void {
-            testServerModuleFactory.TestServerModule.ModConfig.mountPath.should.equal("testRoute");
+            testServerModuleFactory.TestServerModule.modConfig.mountPath.should.equal("testRoute");
         }).then(function (): Q.Promise<any> {
             var deferred = Q.defer();
             request.get("http://localhost:3000/testRoute/foo", function (error: any, response: any, body: any): void {
@@ -187,7 +187,7 @@ describe("server", function (): void {
             });
             return deferred.promise;
             }).then(function (): void {
-            testServerModuleFactory.TestServerModule.LastReq.url.should.equal("/foo");
+            testServerModuleFactory.TestServerModule.lastReq.url.should.equal("/foo");
         }).done(function (): void {
             mocha();
         }, mocha);

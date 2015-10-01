@@ -3,26 +3,27 @@
 /// <reference path="typings/gulp.d.ts" />
 /// <reference path="typings/gulpExtensions.d.ts" />
 /// <reference path="typings/nopt.d.ts" />
-/// <reference path="typings/merge2.d.ts" />
 /// <reference path="typings/gulp-typescript.d.ts" />
 /// <reference path="typings/gulp-sourcemaps.d.ts" />
-/// <reference path="typings/replace.d.ts" />
+/// <reference path="typings/run-sequence.d.ts" />
+/// <reference path="typings/buildConfig.d.ts" />
 
-var runSequence = require("run-sequence");
+import runSequence = require ("run-sequence");
 import gulp = require ("gulp");
 import sourcemaps = require ("gulp-sourcemaps");
 import ts = require ("gulp-typescript");
-import merge = require ("merge2");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
-import replace = require ("replace");
 
 import gulpUtils = require ("../tools/GulpUtils");
- 
-var buildConfig = require("../../src/build_config.json");
-var tacoModules = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
-var allModules = tacoModules.concat(["taco-remote-multiplexer"]);
+
+/* tslint:disable:no-console */
+// Disable console rule for gulp file, since this is a build file
+// we don't want to take dependency on Logger here
+var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
+var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
+var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
 
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
@@ -35,7 +36,7 @@ if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
 gulp.task("default", ["install-build"]);
 
 /* Compiles the typescript files in the project, for fast iterative use */
-gulp.task("compile", function (callback: Function): Q.Promise<any> {
+gulp.task("compile", function (): Q.Promise<any> {
     return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
@@ -44,11 +45,11 @@ gulp.task("compile", function (callback: Function): Q.Promise<any> {
 });
 
 /* compile + copy */
-gulp.task("build", ["prepare-templates"], function (callback: Function): void {
+gulp.task("build", ["prepare-templates"], function (callback: gulp.TaskCallback): void {
     runSequence("compile", "copy", callback);
 });
 
-gulp.task("package", [], function (callback: Function): void {
+gulp.task("package", [], function (callback: gulp.TaskCallback): void {
     runSequence("build", "just-package", callback);
 });
 
@@ -66,7 +67,7 @@ gulp.task("just-package", [], function (): Q.Promise<any> {
 });
 
 /* full clean build */
-gulp.task("rebuild", function (callback: Function): void {
+gulp.task("rebuild", function (callback: gulp.TaskCallback): void {
     runSequence("clean", "build", callback);
 });
 
@@ -76,11 +77,7 @@ gulp.task("install-build", ["package"], function (): Q.Promise<any> {
 });
 
 /* Cleans up the build location, will have to call "gulp prep" again */
-gulp.task("clean", ["uninstall-build"], function (): void {
-});
-
-/* Task to install the compiled modules */
-gulp.task("uninstall-build", [], function (): Q.Promise<any> {
+gulp.task("clean", function (): Q.Promise<any> {
     return gulpUtils.uninstallModules(tacoModules, buildConfig.buildPackages);
 });
 
@@ -100,12 +97,22 @@ gulp.task("copy", function (): Q.Promise<any> {
         "/**/templates/**",
         "/**/examples/**",
         "!/**/dynamicDependencies.json"
-    ].map(val => val[0] === "!" ? "!" + path.join(buildConfig.src, val.substring(1)) : path.join(buildConfig.src, val));
+    ].map((val: string): string => val[0] === "!" ? "!" + path.join(buildConfig.src, val.substring(1)) : path.join(buildConfig.src, val));
 
     return Q.all([
         gulpUtils.copyFiles(filesToCopy, buildConfig.buildPackages),
         gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop && path.join(options.drop, "node_modules"))
     ]);
+});
+
+/* Task to run typescript linter on source code (excluding typings) */
+gulp.task("tslint", function(): Q.Promise<any> {
+    var tslint: any = require('gulp-tslint');
+    return gulpUtils.streamToPromise(
+        gulp.src([buildConfig.src + "/**/*.ts",
+            "!" + buildConfig.src + "/typings/**"])
+        .pipe(tslint())
+        .pipe(tslint.report('verbose')));
 });
 
 /* Task to run tests */
@@ -117,5 +124,6 @@ gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
 gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> {
     return gulpUtils.prepareTemplates(buildConfig.templates, buildConfig.buildTemplates);
 });
+/* tslint:enable:no-console */
 
 module.exports = gulp;

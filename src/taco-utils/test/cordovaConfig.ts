@@ -15,7 +15,7 @@ import should = require ("should");
 
 import util = require ("../tacoUtils");
 
-var CordovaConfig = util.CordovaConfig;
+import CordovaConfig = util.CordovaConfig;
 
 describe("CordovaConfig", function (): void {
     it("should correctly parse config files", function (): void {

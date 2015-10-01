@@ -42,7 +42,7 @@ module TacoUtility {
         public static logWarning(message: string): void {
             Logger.stderr(LogFormatHelper.toWarning(message));
         }
-        
+
         /**
          * Logs an empty line on console
          */
