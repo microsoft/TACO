@@ -41,6 +41,10 @@ module TacoUtility {
             this.maxRight = maxRight;
         }
 
+        private static stringifyKvp(key: string, value: string): string {
+            return util.format("%s: %s", JSON.stringify(key), value);
+        }
+
         /**
          * Given a json object returns an indented string
          * @param {object} object to stringify
@@ -49,16 +53,12 @@ module TacoUtility {
             return this.indentOffset + this.getIndentedJson(obj, this.indentOffset);
         }
 
-        private static stringifyKvp(key: string, value: string): string {
-            return util.format("%s: %s", JSON.stringify(key), value);
-        }
-
         /**
          * Returns indented json string for a given object
          */
         private getIndentedJson(obj: any, indent: string): string {
             if (util.isArray(obj)) {
-                var valuesJson: string = this.getIndentedJsonForArrayValues(<Array<any>>obj, indent + this.levelIndent);
+                var valuesJson: string = this.getIndentedJsonForArrayValues(<Array<any>> obj, indent + this.levelIndent);
                 return util.format("[\n%s\n%s]", valuesJson, indent);
             } else if (typeof obj === "object") {
                 var keyValuesJson: string = this.getMinifiedJsonForObjectKeys(obj, indent);
@@ -116,7 +116,7 @@ module TacoUtility {
 
             var keyValuePairs: string[] = [];
             var currentLength: number = indent.length + 4; // +4 for curly braces and spaces around "{ %s }"
-           for (var i = 0; i < keys.length; i++) {                
+           for (var i = 0; i < keys.length; i++) {
                 var valueType: string = typeof obj[keys[i]];
                 // Nested object, not minifiable
                 if (valueType === "object") {
@@ -125,7 +125,7 @@ module TacoUtility {
 
                 var itemJson: string = JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], ""));
                 keyValuePairs.push(itemJson);
-                currentLength += itemJson.length; 
+                currentLength += itemJson.length;
 
                 // +2, for ", " seperator
                 // minified version is too long to fit on the screen

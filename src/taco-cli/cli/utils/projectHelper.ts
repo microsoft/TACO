@@ -27,31 +27,28 @@ import telemetryHelper = tacoUtility.TelemetryHelper;
 import wrench = require ("wrench");
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
+import Logger = tacoUtility.Logger;
+
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
  */
 class ProjectHelper {
-    private static TacoJsonFileName: string = "taco.json";
-    private static ConfigXmlFileName: string = "config.xml";
-    private static ProjectScriptsDir: string = "scripts";
+    private static TACO_JSON_FILENAME: string = "taco.json";
+    private static CONFIG_XML_FILENAME: string = "config.xml";
+    private static PROJECTS_SCRIPTS_DIR: string = "scripts";
 
-    private static parseKitId(versionValue: string):  Q.Promise<string> {
-        if (!versionValue) {
-            return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
-                return Q.resolve(kitId);
-            });
-        } else {
-            return Q.resolve(versionValue);
-        }
-    }
+    private static cachedProjectInfo: Q.Promise<ProjectHelper.IProjectInfo> = null;
+    private static cachedProjectFilePath: string = null;
 
     /**
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
      */
     public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
+        ProjectHelper.cachedProjectInfo = null;
+        ProjectHelper.cachedProjectFilePath = null;
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TacoJsonFileName);
+        var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TACO_JSON_FILENAME);
         var tacoJson: ProjectHelper.ITacoJsonMetadata = fs.existsSync(tacoJsonPath) ? require (tacoJsonPath) : {};
 
         if (isKitProject) {
@@ -59,12 +56,12 @@ class ProjectHelper {
            .then(function (kitId: string): Q.Promise<any> {
                 tacoJson.kit = kitId;
                 return kitHelper.getValidCordovaCli(tacoJson.kit);
-            }).then(function (cordovaCli: string): Q.Promise<any> {                    
+            }).then(function (cordovaCli: string): Q.Promise<any> {
                 tacoJson["cordova-cli"] = cordovaCli;
                 return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
             });
         } else {
-            if(tacoJson.kit) {
+            if (tacoJson.kit) {
                 delete tacoJson.kit;
             }
 
@@ -87,7 +84,7 @@ class ProjectHelper {
         var projectPath: string = process.cwd();
         var parentPath: string;
         var atFsRoot: boolean = false;
-        while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, ProjectHelper.TacoJsonFileName)) && !fs.existsSync(path.join(projectPath, ProjectHelper.ConfigXmlFileName))) {
+        while (fs.existsSync(projectPath) && !fs.existsSync(path.join(projectPath, ProjectHelper.TACO_JSON_FILENAME)) && !fs.existsSync(path.join(projectPath, ProjectHelper.CONFIG_XML_FILENAME))) {
             // Navigate up one level until either taco.json is found or the parent path is invalid
             parentPath = path.resolve(projectPath, "..");
             if (parentPath !== projectPath) {
@@ -128,55 +125,63 @@ class ProjectHelper {
      *  An object of type IProjectInfo is returned to the caller.
      */
     public static getProjectInfo(): Q.Promise<ProjectHelper.IProjectInfo> {
-        var deferred: Q.Deferred<ProjectHelper.IProjectInfo> = Q.defer<ProjectHelper.IProjectInfo>();
-        var projectInfo: ProjectHelper.IProjectInfo = {
-            isTacoProject: false,
-            cordovaCliVersion: "",
-            configXmlPath: "",
-            tacoKitId: ""
-        };
 
-        var projectPath = ProjectHelper.getProjectRoot();
-        try {
+        return Q.fcall(ProjectHelper.getProjectRoot).then((projectPath: string): ProjectHelper.IProjectInfo | Q.Promise<ProjectHelper.IProjectInfo> => {
+            var projectInfo: ProjectHelper.IProjectInfo = {
+                isTacoProject: false,
+                cordovaCliVersion: "",
+                configXmlPath: "",
+                tacoKitId: ""
+            };
             if (!projectPath) {
-                deferred.resolve(projectInfo);
-                return deferred.promise;
+                return projectInfo;
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata;
-            var tacoJsonFilePath = path.join(projectPath, ProjectHelper.TacoJsonFileName);
-            var configFilePath = path.join(projectPath, ProjectHelper.ConfigXmlFileName);
+            var tacoJsonFilePath = path.join(projectPath, ProjectHelper.TACO_JSON_FILENAME);
+            var configFilePath = path.join(projectPath, ProjectHelper.CONFIG_XML_FILENAME);
+
+            if (ProjectHelper.cachedProjectInfo) {
+                if (tacoJsonFilePath === ProjectHelper.cachedProjectFilePath) {
+                    return ProjectHelper.cachedProjectInfo;
+                } else {
+                    ProjectHelper.cachedProjectInfo = null;
+                }
+            }
 
             if (fs.existsSync(configFilePath)) {
                 projectInfo.configXmlPath = configFilePath;
             }
 
             if (fs.existsSync(tacoJsonFilePath)) {
-                tacoJson = require(tacoJsonFilePath);
+                tacoJson = JSON.parse(<any> fs.readFileSync(tacoJsonFilePath));
+                ProjectHelper.cachedProjectFilePath = tacoJsonFilePath;
             } else {
-                deferred.resolve(projectInfo);
-                return deferred.promise;
+                return projectInfo;
             }
 
             if (tacoJson.kit) {
-                kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): void {
+                return kitHelper.getValidCordovaCli(tacoJson.kit).then(function (cordovaCli: string): ProjectHelper.IProjectInfo {
                     projectInfo.isTacoProject = true;
                     projectInfo.tacoKitId = tacoJson.kit;
                     projectInfo.cordovaCliVersion = cordovaCli;
-                    deferred.resolve(projectInfo);
+                    return projectInfo;
                 });
             } else if (tacoJson["cordova-cli"]) {
                 projectInfo.isTacoProject = true;
                 projectInfo.cordovaCliVersion = tacoJson["cordova-cli"];
-                deferred.resolve(projectInfo);
+                return projectInfo;
             } else {
-                deferred.resolve(projectInfo);
+                return projectInfo;
             }
-        } catch (e) {
-            deferred.reject(errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed));
-        }
-
-        return deferred.promise;
+        }).then((projectInfo: ProjectHelper.IProjectInfo): ProjectHelper.IProjectInfo => {
+            if (projectInfo.isTacoProject) {
+                ProjectHelper.cachedProjectInfo = Q(projectInfo);
+            }
+            return projectInfo;
+        }).catch((e: Error): ProjectHelper.IProjectInfo => {
+            throw errorHelper.get(TacoErrorCodes.ErrorTacoJsonMissingOrMalformed);
+        });
     }
 
     /**
@@ -184,7 +189,7 @@ class ProjectHelper {
      */
     public static getInstalledComponents(projectDir: string, componentDirName: string): Q.Promise<string[]> {
         var components: string[] = [];
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var componentDir = path.join(projectDir, componentDirName);
         if (!fs.existsSync(componentDir)) {
             return Q.resolve(components);
@@ -201,7 +206,7 @@ class ProjectHelper {
      *  public helper that gets the version of the installed platforms
      */
     public static getInstalledPlatformVersions(projectDir: string): Q.Promise<any> {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var onWindows = process.platform === "win32";
         var deferred = Q.defer<any>();
         var platformVersions: cordovaHelper.IDictionary<string> = {};
@@ -210,7 +215,7 @@ class ProjectHelper {
             return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
                 var deferredProcPromise = Q.defer<any>();
                 var cmdName: string = "version";
-                if (onWindows) { 
+                if (onWindows) {
                     cmdName = cmdName + ".bat";
                 }
 
@@ -224,7 +229,7 @@ class ProjectHelper {
                 return deferredProcPromise.promise;
             }));
         }).then(function (): Q.Promise<any> {
-            deferred.resolve(platformVersions);           
+            deferred.resolve(platformVersions);
             return deferred.promise;
         });
     }
@@ -233,7 +238,7 @@ class ProjectHelper {
      *  public helper that gets the version of the installed plugins
      */
     public static getInstalledPluginVersions(projectDir: string): Q.Promise<any> {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var pluginVersions: cordovaHelper.IDictionary<string> = {};
         return ProjectHelper.getInstalledComponents(projectDir, "plugins")
         .then(function (pluginsInstalled: string[]): Q.Promise<any> {
@@ -246,7 +251,7 @@ class ProjectHelper {
                         pluginVersions[plugin] = pluginInfo["version"];
                     }
                 }
-            });       
+            });
             return Q.resolve(pluginVersions);
         });
     }
@@ -255,7 +260,7 @@ class ProjectHelper {
      *  public helper that gets the list of plugins that are 1. installed from the local file system or a GIT repository 2. that are not top-level plugins
      */
     public static getNonUpdatablePlugins(projectDir: string): Q.Promise<string[]> {
-        var projectDir = projectDir || ProjectHelper.getProjectRoot();
+        projectDir = projectDir || ProjectHelper.getProjectRoot();
         var nonUpdatablePlugins: string[] = [];
         var fetchJsonPath: string = path.resolve(projectDir, "plugins", "fetch.json");
 
@@ -271,7 +276,7 @@ class ProjectHelper {
                 }
             });
         } catch (error) {
-            console.log(error);
+            Logger.log(error);
         }
 
         return Q.resolve(nonUpdatablePlugins);
@@ -282,13 +287,13 @@ class ProjectHelper {
      */
     public static createJsonFileWithContents(tacoJsonPath: string, jsonData: any): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        
+
         // Write the JSON data to the file in the standard JSON format.
         // JsonSerializer class in the taco-utils does the necessary formatting
         // This is important as VS expects the JSON file to be in the standard JSON format
         var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
         var formattedTacoJson = jsonSerializer.serialize(jsonData);
-        
+
         fs.writeFile(tacoJsonPath, formattedTacoJson, function (err: NodeJS.ErrnoException): void {
             if (err) {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.CommandCreateTacoJsonFileWriteError, err, tacoJsonPath));
@@ -305,11 +310,11 @@ class ProjectHelper {
      public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var projectRoot: string = ProjectHelper.getProjectRoot();
         if (!projectRoot) {
-            return Q.resolve(<ICommandTelemetryProperties>{});
+            return Q.resolve(<ICommandTelemetryProperties> {});
         }
 
-        return Q.all([ProjectHelper.getProjectInfo(), ProjectHelper.isTypeScriptProject()])
-        .spread<ICommandTelemetryProperties>(function (projectInfo: ProjectHelper.IProjectInfo, isTsProject: boolean): Q.Promise<ICommandTelemetryProperties> {
+        return ProjectHelper.getProjectInfo().then(function (projectInfo: ProjectHelper.IProjectInfo): Q.Promise<ICommandTelemetryProperties> {
+            var isTsProject: boolean = ProjectHelper.isTypeScriptProject();
             var projectTelemetryProperties: ICommandTelemetryProperties = {};
             if (projectInfo.isTacoProject) {
                 projectTelemetryProperties["isTacoProject"] = telemetryHelper.telemetryProperty(true);
@@ -323,7 +328,7 @@ class ProjectHelper {
             }
 
             projectTelemetryProperties["projectType"] = telemetryHelper.telemetryProperty(isTsProject ? "TypeScript" : "JavaScript");
-            projectTelemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../../package.json").version); 
+            projectTelemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../../package.json").version);
             return Q.resolve(projectTelemetryProperties);
         });
     }
@@ -337,7 +342,7 @@ class ProjectHelper {
             return false;
         }
 
-        var projectScriptsPath: string = path.resolve(projectRoot, ProjectHelper.ProjectScriptsDir);
+        var projectScriptsPath: string = path.resolve(projectRoot, ProjectHelper.PROJECTS_SCRIPTS_DIR);
         var tsFiles: string[] = [];
         if (fs.existsSync(projectScriptsPath)) {
             tsFiles = wrench.readdirSyncRecursive(projectScriptsPath).filter(function (file: string): boolean {
@@ -346,6 +351,16 @@ class ProjectHelper {
         }
 
         return tsFiles.length > 0;
+    }
+
+    private static parseKitId(versionValue: string):  Q.Promise<string> {
+        if (!versionValue) {
+            return kitHelper.getDefaultKit().then(function (kitId: string): Q.Promise<any> {
+                return Q.resolve(kitId);
+            });
+        } else {
+            return Q.resolve(versionValue);
+        }
     }
 }
 

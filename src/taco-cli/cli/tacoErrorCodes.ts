@@ -27,11 +27,11 @@ enum TacoErrorCode {
     CommandCreateTacoJsonFileCreationError = 5454,
     CommandCreateTacoJsonFileWriteError = 5455,
     CommandCreateTemplatesUnavailable = 5456,
-    
+
     // Invalid Arguments 5500 - 5599
     // General invalid arguments 5500 - 5509
     ErrorIncompatibleOptions = 5501,
-     
+
     // Invalid arguments for remote 5510 - 5529
     CommandRemotePlatformNotKnown = 5511,
     CommandRemoteDeleteNeedsPlatform = 5512,

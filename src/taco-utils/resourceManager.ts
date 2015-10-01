@@ -22,7 +22,7 @@ import ResourceSet = resourceSet.ResourceSet;
 
 module TacoUtility {
     export class ResourceManager {
-        private static DefaultLocale: string = "en";
+        private static DEFAULT_LOCALE: string = "en";
 
         private resourceDirectory: string = null;
         private resources: { [lang: string]: ResourceSet } = {};
@@ -56,12 +56,39 @@ module TacoUtility {
                 locale = ResourceManager.findMatchingLocale(availableLocales, [process.env.LANG]);
             }
 
-            // Finally fallback to DefaultLocale ("en")
+            // Finally fallback to DEFAULT_LOCALE ("en")
             if (!locale) {
-                locale = ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DefaultLocale]);
+                locale = ResourceManager.findMatchingLocale(availableLocales, [ResourceManager.DEFAULT_LOCALE]);
             }
 
             return locale;
+        }
+
+        /**
+         * Given availableLocales and inputLocales, find the best match
+         * preferring specific locales over parent locales ("fr-FR" over "fr")
+         */
+        private static findMatchingLocale(availableLocales: string[], inputLocales: string[]): string {
+            var bestLocale: string = null;
+
+            for (var i: number = 0; i < inputLocales.length; ++i) {
+                var locale: string = inputLocales[i].toLowerCase();
+                if (availableLocales.indexOf(locale) !== -1) {
+                    return locale;
+                }
+
+                var parentLocale = locale.split("-")[0];
+                if (availableLocales.indexOf(parentLocale) !== -1) {
+                    // Match on primary language (e.g. it from it-CH). We may find a better match later, so continue looking.
+                    bestLocale = parentLocale;
+                }
+            }
+
+            return bestLocale;
+        }
+
+        private static getResourceFilePath(resourcesDirectory: string, lang: string): string {
+            return path.join(resourcesDirectory, lang, "resources.json");
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
@@ -97,37 +124,10 @@ module TacoUtility {
         }
 
         /**
-         * Given availableLocales and inputLocales, find the best match
-         * preferring specific locales over parent locales ("fr-FR" over "fr")
-         */
-        private static findMatchingLocale(availableLocales: string[], inputLocales: string[]): string {
-            var bestLocale: string = null;
-
-            for (var i: number = 0; i < inputLocales.length; ++i) {
-                var locale: string = inputLocales[i].toLowerCase();
-                if (availableLocales.indexOf(locale) !== -1) {
-                    return locale;
-                }
-
-                var parentLocale = locale.split("-")[0];
-                if (availableLocales.indexOf(parentLocale) !== -1) {
-                    // Match on primary language (e.g. it from it-CH). We may find a better match later, so continue looking.
-                    bestLocale = parentLocale;
-                }
-            }
-
-            return bestLocale;
-        }
-
-        private static getResourceFilePath(resourcesDirectory: string, lang: string): string {
-            return path.join(resourcesDirectory, lang, "resources.json");
-        }
-
-        /**
          * self explanatory. Use LANG environment variable otherwise fall back to Default ("en")
          */
         private getCurrentLocale(): string {
-            return (this.initialLocale || TacoGlobalConfig.lang || process.env.LANG || ResourceManager.DefaultLocale).toLowerCase();
+            return (this.initialLocale || TacoGlobalConfig.lang || process.env.LANG || ResourceManager.DEFAULT_LOCALE).toLowerCase();
         }
 
         /**
@@ -187,12 +187,12 @@ module TacoUtility {
          */
         private bestLanguageMatch(requestOrAcceptLangs: any): string {
             if (Array.isArray(requestOrAcceptLangs)) {
-                return ResourceManager.getBestAvailableLocale(this.getAvailableLocales(), <string[]>requestOrAcceptLangs);
+                return ResourceManager.getBestAvailableLocale(this.getAvailableLocales(), <string[]> requestOrAcceptLangs);
             }
 
             var langString: string;
             if (!requestOrAcceptLangs) {
-                return ResourceManager.DefaultLocale;
+                return ResourceManager.DEFAULT_LOCALE;
             } else if (typeof requestOrAcceptLangs === "string") {
                 langString = requestOrAcceptLangs;
             } else if (requestOrAcceptLangs.headers) {

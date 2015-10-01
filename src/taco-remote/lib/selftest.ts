@@ -28,6 +28,7 @@ import tacoUtils = require ("taco-utils");
 import resources = require ("../resources/resourceManager");
 
 import BuildInfo = tacoUtils.BuildInfo;
+import Logger = tacoUtils.Logger;
 import TacoPackageLoader = tacoUtils.TacoPackageLoader;
 import utils = tacoUtils.UtilHelper;
 
@@ -53,10 +54,10 @@ class SelfTest {
         return TacoPackageLoader.lazyRequire<typeof Cordova>("cordova", "cordova@" + vcordova).then(function (cordova: typeof Cordova): Q.Promise<any> {
             return cordova.raw.create(cordovaApp);
         }, function (err: Error): any {
-                console.error(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));
+                Logger.logError(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));
                 throw err;
             }).then(function (): Q.Promise<any> {
-            var tping = 5000;
+            var pingInterval: number = 5000;
             var maxPings = 10;
             var vcli = require("../package.json").version;
             var cfg = "debug";
@@ -64,40 +65,40 @@ class SelfTest {
 
             var tgzProducingStream: NodeJS.ReadableStream = null;
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            var cordovaAppDirReader = new fstream.Reader(<fstream.IReaderProps>{ path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
+            var cordovaAppDirReader = new fstream.Reader(<fstream.IReaderProps> { path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
             tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
             var deferred = Q.defer();
 
             var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            tgzProducingStream.pipe(request.post(<request.Options>{ url: buildUrl, agent: agent }, function (error: any, response: any, body: any): void {
-                if (error) {
-                    deferred.reject(error);
+            tgzProducingStream.pipe(request.post(<request.Options> { url: buildUrl, agent: agent }, function (submitError: any, submitResponse: any, submitBody: any): void {
+                if (submitError) {
+                    deferred.reject(submitError);
                     return;
                 }
 
-                var buildingUrl = response.headers["content-location"];
+                var buildingUrl = submitResponse.headers["content-location"];
                 if (!buildingUrl) {
-                    deferred.reject(new Error(body));
+                    deferred.reject(new Error(submitBody));
                     return;
                 }
 
                 var i = 0;
                 var ping = setInterval(function (): void {
                     i++;
-                    console.log(util.format("%d...", i));
+                    Logger.log(util.format("%d...", i));
                     // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-                    request.get(<request.Options>{ url: buildingUrl, agent: agent }, function (error: any, response: any, body: any): void {
-                        if (error) {
+                    request.get(<request.Options> { url: buildingUrl, agent: agent }, function (statusError: any, statusResponse: any, statusBody: any): void {
+                        if (statusError) {
                             clearInterval(ping);
-                            deferred.reject(error);
+                            deferred.reject(statusError);
                         }
 
-                        var build = JSON.parse(body);
+                        var build = JSON.parse(statusBody);
                         if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
                             clearInterval(ping);
-                            deferred.reject(new Error("Build Failed: " + body));
+                            deferred.reject(new Error("Build Failed: " + statusBody));
                         } else if (build["status"] === BuildInfo.COMPLETE) {
                             clearInterval(ping);
 
@@ -110,7 +111,7 @@ class SelfTest {
                                     deferred.reject(err);
                                 });
                                 // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-                                request(<request.Options>{ url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
+                                request(<request.Options> { url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
                                     deferred.resolve({});
                                 }).on("error", function (err: Error): void {
                                     deferred.reject(err);
@@ -123,7 +124,7 @@ class SelfTest {
                             clearInterval(ping);
                         }
                     });
-                }, tping);
+                }, pingInterval);
             }));
 
             tgzProducingStream.on("error", function (err: Error): void {

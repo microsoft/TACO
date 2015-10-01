@@ -27,6 +27,7 @@ import rimraf = require ("rimraf");
 
 import argsHelper = require ("./argsHelper");
 import commands = require ("./commands");
+import logger = require("./logger");
 import logLevel = require ("./logLevel");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -35,13 +36,14 @@ import tacoGlobalConfig = require ("./tacoGlobalConfig");
 import ArgsHelper = argsHelper.ArgsHelper;
 import Commands = commands.Commands;
 import ICommandData = Commands.ICommandData;
+import Logger = logger.Logger;
 import LogLevel = logLevel.LogLevel;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 
 module TacoUtility {
     export class UtilHelper {
-        private static InvalidAppNameChars: { [key: string]: string } = {
+        private static INVALID_APP_NAME_CHARS: { [key: string]: string } = {
             34: "\"",
             36: "$",
             38: "&",
@@ -162,7 +164,7 @@ module TacoUtility {
         public static isValidCordovaAppName(str: string): boolean {
             for (var i = 0, n = str.length; i < n; i++) {
                 var code = str.charCodeAt(i);
-                if (code < 32 || UtilHelper.InvalidAppNameChars[code]) {
+                if (code < 32 || UtilHelper.INVALID_APP_NAME_CHARS[code]) {
                     return false;
                 }
             }
@@ -176,8 +178,8 @@ module TacoUtility {
          * @return {string[]} The forbidden characters
          */
         public static invalidAppNameCharacters(): string[] {
-            return Object.keys(UtilHelper.InvalidAppNameChars).map(function (c: string): string {
-                return UtilHelper.InvalidAppNameChars[c];
+            return Object.keys(UtilHelper.INVALID_APP_NAME_CHARS).map(function (c: string): string {
+                return UtilHelper.INVALID_APP_NAME_CHARS[c];
             });
         }
 
@@ -197,9 +199,9 @@ module TacoUtility {
         public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): child_process.ChildProcess {
             return child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {
-                    console.error(command);
-                    console.error(stdout);
-                    console.error(stderr);
+                    Logger.logError(command);
+                    Logger.logError(stdout.toString());
+                    Logger.logError(stderr.toString());
                 }
 
                 callback(error, stdout, stderr);
@@ -305,7 +307,7 @@ module TacoUtility {
             // for "taco cmd --help" scenarios, update commandArgs to reflect the first argument instead
             for (var i = 0; i < args.length; i++) {
                 if (/^(-*)(h|help)$/.test(args[i])) {
-                    return <ITacoHelpArgs>{ helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
+                    return <ITacoHelpArgs> { helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
                 }
             }
 
@@ -340,7 +342,7 @@ module TacoUtility {
 
                 // If we understand the provided log level value, convert the string value to the actual enum value and save it in the global settings
                 if (LogLevel.hasOwnProperty(logLevelString)) {
-                    TacoGlobalConfig.logLevel = (<any>LogLevel)[logLevelString];
+                    TacoGlobalConfig.logLevel = (<any> LogLevel)[logLevelString];
                 }
             } else {
                 // We don't have a log level value; set its index to -1

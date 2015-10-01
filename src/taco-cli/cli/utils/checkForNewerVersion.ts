@@ -116,4 +116,4 @@ class CheckForNewerVersion {
     }
 }
 
-export = CheckForNewerVersion;
+export = CheckForNewerVersion

@@ -9,7 +9,7 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import fs = require ("fs");
 import os = require ("os");
@@ -26,7 +26,7 @@ describe("plist", function (): void {
     before(function (): void {
         UtilHelper.createDirectoryIfNecessary(path.join(testDir, "plist"));
     });
-    
+
     after(function (): void {
         rimraf(testDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });

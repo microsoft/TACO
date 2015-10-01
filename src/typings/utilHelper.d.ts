@@ -14,7 +14,7 @@
 
 declare module TacoUtility {
     class UtilHelper {
-        private static InvalidAppNameChars;
+        private static INVALID_APP_NAME_CHARS;
 
         static tacoHome: string;
         /**

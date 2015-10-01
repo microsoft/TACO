@@ -22,8 +22,8 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
-// Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
-var should_module = require("should");
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
 import wrench = require ("wrench");
 import zlib = require ("zlib");
 
@@ -113,7 +113,7 @@ describe("TemplateManager", function (): void {
     before(function (done: MochaDone): void {
         // Set ResourcesManager to test mode
         process.env["TACO_UNIT_TEST"] = true;
-        
+
         // Delete existing run folder if necessary
         rimraf(runFolder, function (err: Error): void {
             if (err) {
@@ -128,8 +128,8 @@ describe("TemplateManager", function (): void {
                 var archive: any = archiver("zip");
                 var outputStream: NodeJS.WritableStream = fs.createWriteStream(testTemplateArchive);
 
-                archive.on("error", function (err: Error): void {
-                    done(err);
+                archive.on("error", function (archiveError: Error): void {
+                    done(archiveError);
                 });
 
                 outputStream.on("close", function (): void {
@@ -168,7 +168,7 @@ describe("TemplateManager", function (): void {
             utils.copyFile(copySrc, copyDest)
                 .then(function (): string {
                     // Call findTemplatePath()
-                    return (<any>templates).findTemplatePath(testTemplateId, testKitId, testTemplateOverrideInfo.templateInfo);
+                    return (<any> templates).findTemplatePath(testTemplateId, testKitId, testTemplateOverrideInfo.templateInfo);
                 })
                 .then(function (cachedTemplatePath: string): void {
                     // Verify the returned path is correct
@@ -192,7 +192,7 @@ describe("TemplateManager", function (): void {
             fs.existsSync(templateCache).should.equal(false, "Test template cache must be initially empty for this test");
 
             // Call findTemplatePath()
-            (<any>templates).findTemplatePath(testTemplateId, testKitId, testTemplateOverrideInfo.templateInfo)
+            (<any> templates).findTemplatePath(testTemplateId, testKitId, testTemplateOverrideInfo.templateInfo)
                 .then(function (cachedTemplatePath: string): void {
                     // Verify the returned path is correct
                     cachedTemplatePath.should.equal(cachedTestTemplate);
@@ -217,7 +217,7 @@ describe("TemplateManager", function (): void {
                 url: path.join(runFolder, "pathThatDoesntExist")
             };
 
-            (<any>templates).findTemplatePath(testTemplateId, testKitId, invalidTemplateInfo)
+            (<any> templates).findTemplatePath(testTemplateId, testKitId, invalidTemplateInfo)
                 .then(function (cachedTemplatePath: string): void {
                     // The promise was resolved, this is an error
                     done(new Error("The operation completed successfully when it should have returned an error"));
@@ -269,7 +269,7 @@ describe("TemplateManager", function (): void {
             utils.copyRecursive(testTemplateSrc, testProjectPath)
                 .then(function (): string {
                     // Call performTokenReplacement()
-                    return (<any>templateManager).performTokenReplacements(testProjectPath, testAppId, testAppName);
+                    return (<any> templateManager).performTokenReplacements(testProjectPath, testAppId, testAppName);
                 })
                 .then(function (): void {
                     // Read both text files in the project and ensure replacements were correctly made
