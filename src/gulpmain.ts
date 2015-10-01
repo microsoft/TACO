@@ -111,12 +111,12 @@ gulp.task("copy", function (): Q.Promise<any> {
 
 /* Task to run typescript linter on source code (excluding typings) */
 gulp.task("tslint", function(): Q.Promise<any> {
-    var tslint: any = require('gulp-tslint');
+    var tslint: any = require("gulp-tslint");
     return gulpUtils.streamToPromise(
         gulp.src([buildConfig.src + "/**/*.ts",
             "!" + buildConfig.src + "/typings/**"])
         .pipe(tslint())
-        .pipe(tslint.report('verbose')));
+        .pipe(tslint.report("verbose")));
 });
 
 /* Task to run tests */

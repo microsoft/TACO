@@ -34,11 +34,11 @@ export class TestHelper {
                     errorCode + " and " + errorCodes[numericErrorCode] + " have been assigned same error code");
 
                 // Verify that error code is within range
-                should(numericErrorCode).greaterThan(minErrorCode, "error code " + errorCode + " is less than min: " + minErrorCode);
-                should(numericErrorCode).lessThan(maxErrorCode, "error code " + errorCode + " is more than max: " + maxErrorCode);
+                shouldModule(numericErrorCode).greaterThan(minErrorCode, "error code " + errorCode + " is less than min: " + minErrorCode);
+                shouldModule(numericErrorCode).lessThan(maxErrorCode, "error code " + errorCode + " is more than max: " + maxErrorCode);
 
                 // Verify we have a resource string for the error code
-                should(resources.getString(errorCode)).not.equal(null, "no resources found for error code " + errorCode);
+                shouldModule(resources.getString(errorCode)).not.equal(null, "no resources found for error code " + errorCode);
             }
         });
     }

@@ -191,7 +191,7 @@ describe("taco remote", function(): void {
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
-        RemoteMod.cliSession = RemoteMock.makeCliMock(mocha, () => { }, desiredState);
+        RemoteMod.cliSession = RemoteMock.makeCliMock(mocha, utils.emptyMethod, desiredState);
         Q(["add", "ios"]).then(remoteRun).then(function(): Q.Promise<Settings.ISettings> {
             return Settings.loadSettings();
         }).then(function(data: Settings.ISettings): Q.Promise<void> {
@@ -268,7 +268,7 @@ describe("taco remote", function(): void {
             mockServer.listen(desiredState.port);
             mockServer.on("request", serverFunction);
 
-            RemoteMod.cliSession = RemoteMock.makeCliMock(done, () => { }, desiredState, () => { });
+            RemoteMod.cliSession = RemoteMock.makeCliMock(done, utils.emptyMethod, desiredState, utils.emptyMethod);
             remoteRun(["add", "ios"]).finally(function(): void {
                 mockServer.close();
             }).done(() => {

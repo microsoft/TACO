@@ -39,7 +39,7 @@
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-shadowed-variable": true,
-    "no-empty": false,
+    "no-empty": true,
     "no-eval": true,
     "no-internal-module": false,
     "no-require-imports": false,
@@ -59,7 +59,7 @@
       "check-else",
       "check-whitespace"
     ],
-    "quotemark": true,
+    "quotemark": [true, "double"],
     "radix": true,
     "semicolon": true,
     "sort-object-literal-keys": false,

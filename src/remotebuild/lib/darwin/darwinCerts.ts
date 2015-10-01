@@ -202,7 +202,7 @@ class Certs {
 
     public static invalidatePIN(conf: RemoteBuildConf, pinString: string): void {
         var pinDir = path.join(conf.serverDir, "certs", "client", "" + parseInt(pinString, 10));
-        rimraf(pinDir, function (): void { });
+        rimraf(pinDir, utils.emptyMethod);
     }
 
     public static purgeExpiredPinBasedClientCertsSync(conf: RemoteBuildConf): void {
