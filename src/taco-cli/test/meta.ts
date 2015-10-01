@@ -114,7 +114,7 @@ describe("taco meta command tests: ", function (): void {
                 Taco.runWithArgs(optionString).then(function (): void {
                     done(new Error("Passing Invalid options to \'taco\' should have failed"));
                 }, function (err: any): void {
-                    if (err.code = TacoErrorCodes.CordovaCommandFailed) {
+                    if (err.code === TacoErrorCodes.CordovaCommandFailed) {
                         done();
                     } else {
                         done(new Error("Unexpected error code"));

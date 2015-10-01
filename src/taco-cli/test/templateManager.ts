@@ -15,6 +15,12 @@
 
 "use strict";
 
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
+
 import archiver = require ("archiver");
 import fs = require ("fs");
 import mocha = require ("mocha");
@@ -22,8 +28,6 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
-// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
 import wrench = require ("wrench");
 import zlib = require ("zlib");
 

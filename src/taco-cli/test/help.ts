@@ -12,13 +12,20 @@
 
 "use strict";
 
-var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
+
+/* tslint:disable:no-var-requires */
+// Special case to allow using color package with index signature for style rules
+var colors = require("colors/safe");
+/* tslint:enable:no-var-requires */
 
 import tacoUtils = require ("taco-utils");
 import Help = require ("../cli/help");
 import ms = require ("./utils/memoryStream");
-
-var colors = require("colors/safe");
 
 import commands = tacoUtils.Commands.ICommandData;
 

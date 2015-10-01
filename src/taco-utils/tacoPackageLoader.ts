@@ -428,7 +428,7 @@ module TacoUtility {
         private static getLastCheckTimestamp(targetPath: string): Q.Promise<number> {
             return Q.denodeify(fs.readFile)(TacoPackageLoader.getTimestampFilePath(targetPath))
                 .then(function (data: Buffer): number {
-                    return parseInt(data.toString());
+                    return parseInt(data.toString(), 10);
                 })
                 .catch(function (error: any): number {
                     return -1;

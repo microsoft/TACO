@@ -88,7 +88,8 @@ class InstallerBase {
                     .then(function (): void {
                         // After we download something on Mac OS, we need to change the owner of the cached installer back to the current user, otherwise
                         // they won't be able to delete their taco_home folder without admin privileges
-                        wrench.chownSyncRecursive(InstallerBase.installerCache, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                        wrench.chownSyncRecursive(InstallerBase.installerCache,
+                            parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
                     });
             default:
                 return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));

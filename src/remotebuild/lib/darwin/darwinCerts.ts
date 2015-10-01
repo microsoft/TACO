@@ -186,7 +186,7 @@ class Certs {
         Certs.purgeExpiredPinBasedClientCertsSync(conf);
         var clientCertsDir = path.join(conf.serverDir, "certs", "client");
 
-        var pin = parseInt(pinString);
+        var pin = parseInt(pinString, 10);
         if (isNaN(pin)) {
             throw { code: 400, id: "InvalidPin" };
         }
@@ -201,7 +201,7 @@ class Certs {
     }
 
     public static invalidatePIN(conf: RemoteBuildConf, pinString: string): void {
-        var pinDir = path.join(conf.serverDir, "certs", "client", "" + parseInt(pinString));
+        var pinDir = path.join(conf.serverDir, "certs", "client", "" + parseInt(pinString, 10));
         rimraf(pinDir, function (): void { });
     }
 
@@ -298,14 +298,14 @@ class Certs {
         cnf += util.format("DNS.1 = %s\n", hostname);
 
         var ipCount = 1;
-        for (var key in net) {
+        Object.keys(net).forEach(function(key: string){
             for (var i = 0; i < net[key].length; i++) {
                 if (net[key][i].address && !net[key][i].internal) {
                     cnf += util.format("IP.%d = %s\n", ipCount, net[key][i].address);
                     ipCount++;
                 }
             }
-        }
+        });
 
         fs.writeFileSync(cnfPath, cnf);
     }

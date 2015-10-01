@@ -21,7 +21,11 @@ import gulpUtils = require ("../tools/GulpUtils");
 /* tslint:disable:no-console */
 // Disable console rule for gulp file, since this is a build file
 // we don't want to take dependency on Logger here
+
+/* tslint:disable:no-var-requires */
+// var require needed to require package json
 var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
+/* tslint:enable:no-var-requires */
 var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
 

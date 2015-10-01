@@ -220,7 +220,7 @@ class Remote extends commands.TacoCommandBase {
         });
         hostPromise.promise.done(function (host: { host: string }): void {
             cliSession.question(resources.getString("CommandRemoteQueryPort"), function (portAnswer: string): void {
-                var port: number = parseInt(portAnswer);
+                var port: number = parseInt(portAnswer, 10);
                 if (port > 0 && port < 65536) {
                     // Port looks valid
                     portPromise.resolve({ host: host.host, port: port });
@@ -233,7 +233,7 @@ class Remote extends commands.TacoCommandBase {
         });
         portPromise.promise.done(function (hostAndPort: { host: string; port: number }): void {
             cliSession.question(resources.getString("CommandRemoteQueryPin"), function (pinAnswer: string): void {
-                var pin: number = parseInt(pinAnswer);
+                var pin: number = parseInt(pinAnswer, 10);
                 if (pinAnswer && !Remote.pinIsValid(pin)) {
                     // A pin was provided but it is invalid
                     pinPromise.reject(errorHelper.get(TacoErrorCodes.CommandRemoteInvalidPin, pinAnswer));

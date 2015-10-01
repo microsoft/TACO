@@ -13,7 +13,10 @@
 import et = require ("elementtree");
 import fs = require ("fs");
 import path = require ("path");
-var unorm = require("unorm"); // Note no import: the compiler will remove the require since we don't use the unorm object, we just need it to add String.normalize
+
+/* tslint:disable:no-var-requires */
+var unorm = require ("unorm"); // Note no import: the compiler will remove the require since we don't use the unorm object, we just need it to add String.normalize
+/* tslint:enable:no-var-requires */
 
 import tacoUtility = require ("./utilHelper");
 import UtilHelper = tacoUtility.UtilHelper;

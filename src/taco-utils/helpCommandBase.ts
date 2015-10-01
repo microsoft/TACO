@@ -95,9 +95,10 @@ module TacoUtility {
             Logger.log(util.format("   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
 
             var nameDescriptionPairs: INameDescription[] = new Array();
-            for (var i in this.commandsFactory.listings) {
-                nameDescriptionPairs.push({ name: i, description: this.commandsFactory.listings[i].description, category: this.commandsFactory.listings[i].categoryTitle });
-            }
+            var listings: any = this.commandsFactory.listings;
+            Object.keys(this.commandsFactory.listings).forEach(function(i: string) {
+                nameDescriptionPairs.push({ name: i, description: listings[i].description, category: listings[i].categoryTitle });
+            });
 
             // we use first entry to conclude if command table has categories
             if (nameDescriptionPairs.length > 0 && !nameDescriptionPairs[0].category) {

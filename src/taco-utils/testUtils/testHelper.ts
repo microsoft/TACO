@@ -11,7 +11,11 @@
 
 "use strict";
 
-import should = require ("should");
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 export class TestHelper {
     public static verifyTacoErrors(fileName: string, resources: any, minErrorCode: number, maxErrorCode: number): void {
@@ -23,7 +27,7 @@ export class TestHelper {
 
         Object.keys(errorCodes).forEach(function (errorCode: string): void {
             // Loop over all error codes, filter out numeric values
-            if (isNaN(parseInt(errorCode))) {
+            if (isNaN(parseInt(errorCode, 10))) {
                 // Verify that we don't have 2 errors with same error code
                 var numericErrorCode: number = errorCodes[errorCode];
                 errorCode.should.be.equal(errorCodes[numericErrorCode],
