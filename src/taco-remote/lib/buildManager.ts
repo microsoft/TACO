@@ -319,13 +319,17 @@ class BuildManager {
             who.props.mode = 511; // "chmod 777"
 
             // Do not include the /plugins folder
-            return !who.props.path.match(/plugins/);
+            var localPath = path.relative(extractToDir, who.props.path);
+            return !(localPath.split(path.sep)[0] === 'plugins');
         };
 
         var pluginsOnlyFilter = function (who: Fstream.Writer): boolean {
             who.props.mode = 511; // "chmod 0777"
 
-            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || !!who.props.path.match(/plugins/);
+            // Here we want to exclusively extract the contents of the /plugins folder, and we will put it in a separate location
+            // Later in taco-remote-lib we will manually merge the plugins into the project to ensure they are added correctly.
+            var localPath = path.relative(extractToDir, who.props.path);
+            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || localPath.split(path.sep)[0] === 'plugins';
         };
 
         var extractDeferred = Q.defer();

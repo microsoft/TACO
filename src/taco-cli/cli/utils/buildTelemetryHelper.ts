@@ -47,11 +47,13 @@ class BuildTelemetryHelper {
     public static addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
         commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettingsOrReturnEmpty().then(settings => {
-            var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options,
-                this.buildAndRunNonPiiOptions);
-            var platforms = Settings.determineSpecificPlatformsFromOptions(commandData, settings);
-            this.storePlatforms(properties, "requestedViaCommandLine", platforms, settings);
-            return properties;
+            var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options, this.buildAndRunNonPiiOptions);
+            return Settings.determinePlatformsFromOptions(commandData).then((platforms: Settings.IPlatformWithLocation[]) => {
+                var requestedPlatforms = Settings.parseRequestedPlatforms(commandData);
+                var requestedUsedPlatforms = platforms.filter((platform: Settings.IPlatformWithLocation): boolean => requestedPlatforms.indexOf(platform.platform) !== -1);
+                this.storePlatforms(properties, "requestedViaCommandLine", requestedUsedPlatforms, settings);
+                return properties;
+            });
         });
     }
 
