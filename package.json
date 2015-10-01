@@ -7,6 +7,7 @@
     "description": "specifies dependencies needed for developing taco",
     "version": "0.0.1",
     "devDependencies": {
+        "cordova-simulate": "^0.1.8",
         "del": "^1.2.1",
         "gulp": "latest",
         "typescript": "1.5.3",

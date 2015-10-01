@@ -497,6 +497,24 @@
             "modulePath": "./feedback",
             "description": "<helptitle>[CommandFeedbackDescription]</helptitle>"
         }
+        ,
+        "simulate":
+        {
+            "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
+            "categoryTitle": "[ProjectCommandsTitle]",
+            "modulePath": "./simulate",
+            "description": "<helptitle>[CommandSimulateDescription]</helptitle>",
+            "args": [
+                {
+                    "name": "PLATFORM", "description": "[CommandSimulatePlatformDescription]"
+                }
+            ],
+            "options": [
+                {
+                    "name": "--target", "description": "[CommandSimulateTargetDescription]"
+                }
+            ]
+        }
     },
     "aliases":
     {
