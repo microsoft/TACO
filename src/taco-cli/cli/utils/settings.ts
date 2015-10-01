@@ -141,6 +141,14 @@ class Settings {
         return Settings.loadSettings().fail(function (): Settings.ISettings { return { remotePlatforms: {} }; });
     }
 
+    /**
+     * Parse the command line options to extract any platforms that are mentioned.
+     * Platforms are any non-flag arguments before a lone --
+     *
+     * e.g. taco build ios --device               ==> 'ios'
+     *      taco build windows android -- --phone ==> 'windows', 'android'
+     *      taco build --local browser -- ios     ==> 'browser'
+     */
     public static parseRequestedPlatforms(options: commands.ICommandData): string[] {
         var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
         return options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
@@ -185,7 +193,9 @@ class Settings {
             if (requestedPlatforms.length > 0) {
                 // Filter down to user-requested platforms if appropriate
                 return requestedPlatforms.map((platform: string): Settings.IPlatformWithLocation => {
-                    if (!options.options["local"] && platforms.some((p: Settings.IPlatformWithLocation): boolean => p.platform === platform && p.location === Settings.BuildLocationType.Remote)) {
+                    if (!options.options["local"] && platforms.some((p: Settings.IPlatformWithLocation): boolean => {
+                        return p.platform === platform && p.location === Settings.BuildLocationType.Remote
+                    })) {
                         // If we found a remote configuration for the platform default to using that
                         return { platform: platform, location: Settings.BuildLocationType.Remote };
                     } else {
