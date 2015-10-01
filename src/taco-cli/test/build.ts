@@ -383,7 +383,7 @@ describe("taco build", function (): void {
             mocha();
         });
     });
-    
+
     it("should make the correct sequence of calls for 'taco build --remote test --device'", function (mocha: MochaDone): void {
         var buildArguments = ["--remote", "test", "--device"];
         var configuration = "debug";
@@ -408,7 +408,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },
