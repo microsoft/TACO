@@ -14,7 +14,7 @@
 
 declare module TacoUtility {
     class UtilHelper {
-        private static InvalidAppNameChars;
+        private static INVALID_APP_NAME_CHARS;
 
         static tacoHome: string;
         /**
@@ -107,7 +107,7 @@ declare module TacoUtility {
         public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
 
         /**
-         * Sets the global LogLevel setting for Taco by specifically looking for the "--loglevel" string. If found, and the string after it is a valid loglevel value, the global config's loglevel
+         * Sets the global LogLevel setting for TACO by specifically looking for the "--loglevel" string. If found, and the string after it is a valid loglevel value, the global config's loglevel
          * is set. Finally, the "--loglevel" string (and the following value, if present, whether it is valid or not) are removed from the args so that they are not passed to the command.
          *
          * @param {string[]} args The command line args to parse in order to find the --loglevel parameter

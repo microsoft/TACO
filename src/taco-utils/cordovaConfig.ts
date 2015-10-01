@@ -21,11 +21,11 @@ import UtilHelper = tacoUtility.UtilHelper;
 module TacoUtility {
     export class CordovaConfig {
         /** CordovaConfig is a class for parsing the config.xml file for Cordova projects */
-        private _doc: et.ElementTree;
+        private doc: et.ElementTree;
 
         constructor(configXmlPath: string) {
             var contents = UtilHelper.readFileContentsSync(configXmlPath, "utf-8");
-            this._doc = new et.ElementTree(et.XML(contents));
+            this.doc = new et.ElementTree(et.XML(contents));
         }
 
         /**
@@ -41,7 +41,7 @@ module TacoUtility {
          * @returns {string} The packageID
          */
         public id(): string {
-            return this._doc.getroot().attrib["id"];
+            return this.doc.getroot().attrib["id"];
         }
 
         /**
@@ -50,7 +50,7 @@ module TacoUtility {
          * @returns {String} The display name, normalized to NFC
          */
         public name(): string {
-            var el = this._doc.find("name");
+            var el = this.doc.find("name");
             return el && el.text && el.text.trim().normalize();
         }
 
@@ -60,7 +60,7 @@ module TacoUtility {
          * @returns {string} The version
          */
         public version(): string {
-            var el = this._doc.getroot();
+            var el = this.doc.getroot();
             return el && el.attrib && el.attrib["version"];
         }
 
@@ -71,7 +71,7 @@ module TacoUtility {
          */
         public preferences(): { [key: string]: string } {
             var data: { [key: string]: string } = {};
-            var preferences = this._doc.findall("preference");
+            var preferences = this.doc.findall("preference");
             preferences.forEach(function (preference: et.XMLElement): void {
                 data[preference.attrib["name"]] = preference.attrib["value"];
             });

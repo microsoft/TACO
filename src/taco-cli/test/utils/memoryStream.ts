@@ -73,7 +73,7 @@ export class MemoryStream extends stream.Writable {
             if (typeof second === "string") {
                 return this.write(data, second, callback);
             } else {
-                return this.write(data, <Function>second);
+                return this.write(data, <Function> second);
             }
         };
     }

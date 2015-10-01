@@ -11,7 +11,7 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 
 import AdmZip = require ("adm-zip");
 import del = require ("del");
@@ -75,26 +75,23 @@ describe("taco build", function (): void {
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
         var port = 3000;
         testHttpServer.listen(port);
-        // Configure a dummy platform "test" to use the mocked out remote server
-        RemoteMock.saveConfig("test", remoteServerConfiguration).done(function (): void {
-            mocha();
-        }, function (err: any): void {
-            mocha(err);
-        });
 
         // Reduce the delay when polling for a change in status
-        buildMod.RemoteBuild.PingInterval = 10;
+        buildMod.remoteBuild.PING_INTERVAL = 10;
+
+        // Configure a dummy platform "test" to use the mocked out remote server
+        RemoteMock.saveConfig("test", remoteServerConfiguration).done(() => mocha(), mocha);
     });
 
     after(function (done: MochaDone): void {
         this.timeout(10000);
         process.chdir(originalCwd);
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void { done(); }); // ignore errors
     });
@@ -125,7 +122,7 @@ describe("taco build", function (): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
         var buildNumber = 12340;
-        
+
         // Mock out the server on the other side
         var sequence = [
             {
@@ -143,7 +140,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },
@@ -166,6 +163,15 @@ describe("taco build", function (): void {
                 },
                 statusCode: 200,
                 response: "1",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
                 waitForPayload: false
             },
             {
@@ -215,7 +221,7 @@ describe("taco build", function (): void {
         var buildArguments = ["--remote", "test"];
         var configuration = "debug";
         var buildNumber = 12341;
-        
+
         // Mock out the server on the other side
         var sequence = [
             {
@@ -233,7 +239,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },
@@ -255,6 +261,15 @@ describe("taco build", function (): void {
                 },
                 statusCode: 200,
                 response: "1",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
                 waitForPayload: false
             },
             {
@@ -301,7 +316,7 @@ describe("taco build", function (): void {
             status: BuildInfo.COMPLETE,
             buildNumber: buildNumber
         })));
-        
+
         // Mock out the server on the other side
         // Since this test is only whether we attempt incremental builds, we'll let the build fail to make the test shorter
         var sequence = [
@@ -332,7 +347,7 @@ describe("taco build", function (): void {
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.UPLOADING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: true
             },
@@ -368,8 +383,119 @@ describe("taco build", function (): void {
             mocha();
         });
     });
+    
+    it("should make the correct sequence of calls for 'taco build --remote test --device'", function (mocha: MochaDone): void {
+        var buildArguments = ["--remote", "test", "--device"];
+        var configuration = "debug";
+        var buildNumber = 12340;
+        var testZipFile: string = path.resolve(__dirname, "resources", "empty.zip");
+
+        // Mock out the server on the other side
+        var sequence = [
+            {
+                expectedUrl: "/cordova/build/tasks?" + querystring.stringify({
+                    command: "build",
+                    vcordova: vcordova,
+                    vcli: require(path.join(__dirname, "..", "package.json")).version,
+                    cfg: configuration,
+                    platform: "test",
+                    options: "--device"
+                }),
+                head: {
+                    "Content-Type": "application/json",
+                    "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
+                },
+                statusCode: 202,
+                response: JSON.stringify(new BuildInfo({
+                    status: BuildInfo.UPLOADING,
+                    buildNumber: buildNumber,
+                })),
+                waitForPayload: true
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber,
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify(new BuildInfo({
+                    status: BuildInfo.UPLOADED,
+                    buildNumber: buildNumber
+                })),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=0",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: "1",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber,
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify(new BuildInfo({
+                    status: BuildInfo.COMPLETE,
+                    buildNumber: buildNumber
+                })),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=1",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: "2",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: util.format("/cordova/files/%d/cordovaApp/plugins/%s.json", buildNumber, "test"),
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({}),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: util.format("/cordova/build/%d/download", buildNumber),
+                head: {
+                    "Content-Type": "application/zip"
+                },
+                statusCode: 200,
+                response: JSON.stringify({}),
+                waitForPayload: false,
+                fileToSend: testZipFile
+            },
+        ];
+        var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
+        testHttpServer.on("request", serverFunction);
+
+        Q(buildArguments).then(buildRun).finally(function (): void {
+            testHttpServer.removeListener("request", serverFunction);
+        }).done(function (): void {
+            mocha();
+        }, function (err: any): void {
+            mocha(err);
+        });
+    });
 
     describe("telemetry", () => {
-        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, buildRun, () => testHttpServer, Command.Build);
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, buildRun, Command.Build);
     });
 });

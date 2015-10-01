@@ -11,7 +11,7 @@
 /// <reference path="../typings/tacoUtils.d.ts" />
 declare module TacoUtility {
     class ProcessLogger {
-        private _stream;
+        private stream;
         constructor();
         /**
          * Begin logging stdout and stderr of a process to a log file

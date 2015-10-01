@@ -2,7 +2,7 @@
 import fs = require ("fs");
 import http = require ("http");
 import https = require ("https");
-import path = require ("path");
+import path = require("path");
 
 class ServerMock {
     /*
@@ -24,7 +24,7 @@ class ServerMock {
     /*
      * Create a simple state machine that expects a particular sequence of HTTP requests, and errors out if that expectation is not matched
      */
-    public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean, responseDelay?: number }[]):
+    public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean; responseDelay?: number; fileToSend?: string }[]):
         (request: http.ServerRequest, response: http.ServerResponse) => void {
         var sequenceIndex = 0;
         return function (request: http.ServerRequest, response: http.ServerResponse): void {
@@ -37,8 +37,17 @@ class ServerMock {
                     var sendResponse = function (): void {
                         setTimeout(() => {
                             response.writeHead(data.statusCode, data.head);
-                            response.write(data.response);
-                            response.end();
+                            if (data.fileToSend) {
+                                var reader = fs.createReadStream(data.fileToSend);
+                                reader.pipe(response);
+                                reader.on("end", function () {
+                                    response.end();
+                                });
+                            }
+                            else {
+                                response.write(data.response);
+                                response.end();
+                            }
                         }, data.responseDelay || 0);
                     };
 

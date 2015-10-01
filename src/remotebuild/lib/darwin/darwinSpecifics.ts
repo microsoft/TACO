@@ -25,15 +25,16 @@ import RemoteBuildConf = require ("../remoteBuildConf");
 import resources = require ("../../resources/resourceManager");
 import utils = require ("taco-utils");
 
+import Logger = utils.Logger;
 import UtilHelper = utils.UtilHelper;
 
 class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
-    private static Config: RemoteBuildConf;
+    private static config: RemoteBuildConf;
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var osxdefaults: { [key: string]: any } = {
             writePidToFile: false,
             lang: process.env.LANG && process.env.LANG.replace(/_/, "-").replace(/\..*/, "") || "en", // Convert "en_US.UTF8" to "en-US", similarly for other locales
-            suppressSetupMessage: false,
+            suppressSetupMessage: false
         };
         Object.keys(osxdefaults).forEach(function (key: string): void {
             if (!(key in base)) {
@@ -46,9 +47,9 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
 
     // Note: we acquire dependencies for deploying and debugging here rather than in taco-remote-lib because it may require user intervention, and taco-remote-lib may be acquired unattended in future.
     public initialize(conf: RemoteBuildConf): Q.Promise<any> {
-        DarwinSpecifics.Config = conf;
+        DarwinSpecifics.config = conf;
         if (process.getuid() === 0) {
-            console.warn(resources.getString("RunningAsRootError"));
+            Logger.logWarning(resources.getString("RunningAsRootError"));
             process.exit(1);
         }
 
@@ -76,7 +77,7 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
     }
 
     public downloadClientCerts(req: express.Request, res: express.Response): void {
-        Q.fcall<string>(certs.downloadClientCerts, DarwinSpecifics.Config, req.params.pin).then(function (pfxFile: string): void {
+        Q.fcall<string>(certs.downloadClientCerts, DarwinSpecifics.config, req.params.pin).then(function (pfxFile: string): void {
             res.sendFile(pfxFile);
         }).catch<void>(function (error: { code?: number; id: string}): void {
             if (error.code) {
@@ -85,9 +86,9 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
                 res.status(404).send(error);
             }
         }).finally((): void => {
-            certs.invalidatePIN(DarwinSpecifics.Config, req.params.pin);
+            certs.invalidatePIN(DarwinSpecifics.config, req.params.pin);
         }).catch(function (err: Error): void {
-            console.error(err);
+            Logger.logError(err.message);
         }).done();
     }
 
@@ -98,7 +99,8 @@ class DarwinSpecifics implements HostSpecifics.IHostSpecifics {
                 var pfxPath = path.join(conf.serverDir, "certs", "client", pin.toString(), "client.pfx");
                 var cert = fs.readFileSync(pfxPath);
                 fs.unlinkSync(pfxPath);
-                return new https.Agent({ strictSSL: true, pfx: cert });
+                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+                return new https.Agent(<https.RequestOptions> {strictSSL: true, pfx: cert });
             });
         } else {
             return Q.resolve<NodeJSHttp.Agent>(null);

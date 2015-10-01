@@ -20,22 +20,22 @@ import Q = require ("q");
 import RemoteBuildConf = require ("./remoteBuildConf");
 
 class HostSpecifics {
-    private static CachedSpecifics: HostSpecifics.IHostSpecifics;
+    private static cachedSpecifics: HostSpecifics.IHostSpecifics;
     public static get hostSpecifics(): HostSpecifics.IHostSpecifics {
-        if (!HostSpecifics.CachedSpecifics) {
+        if (!HostSpecifics.cachedSpecifics) {
             switch (os.platform()) {
                 case "darwin":
-                    HostSpecifics.CachedSpecifics = require("./darwin/darwinSpecifics");
+                    HostSpecifics.cachedSpecifics = require("./darwin/darwinSpecifics");
                     break;
                 case "win32":
-                    HostSpecifics.CachedSpecifics = require("./win32/win32Specifics");
+                    HostSpecifics.cachedSpecifics = require("./win32/win32Specifics");
                     break;
                 default:
                     throw new Error("UnsupportedPlatform");
             }
         }
 
-        return HostSpecifics.CachedSpecifics;
+        return HostSpecifics.cachedSpecifics;
     }
 }
 

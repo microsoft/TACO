@@ -46,7 +46,7 @@ class CliHelper {
             })
             .then(function (): Q.Promise<void> {
                 var command: string = nconf.get("_")[0] || "start";
-                var task = Commands.Tasks[command];
+                var task = Commands.tasks[command];
 
                 if (!task) {
                     Logger.logError(resources.getString("UnknownCommand", command));

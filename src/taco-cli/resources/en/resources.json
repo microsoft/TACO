@@ -59,7 +59,7 @@
     "CommandCreateWarningDeprecatedKit": "<br/><warn>Warning: Kit {0} has been deprecated.</warn><br/>Consider changing your project to use a more recent Kit. For deprecation information, see <link>http://go.microsoft.com/fwlink/?LinkId=618170</link>",
     "_CommandCreateWarningDeprecatedKit.comment": "Warning displayed when a deprecated kit is used for project creation. {0} is the name of deprecated kit",
 
-    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for taco-cli:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=624555</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
+    "NewerTacoCLIVersionAvailable": "<br/>------------------------------------\n<warn>A newer version is available for TACO:</warn>\n * Locally installed version: {0}\n * Latest version: {1}\n * <link>http://go.microsoft.com/fwlink/?LinkId=624555</link>\n * Run <command>npm install -g taco-cli</command> to update\n------------------------------------\n",
     "_NewerTacoCLIVersionAvailable.comment": "Message printed to notify the user that there is a newer version of taco cli available, compared to the one he has currently installed.",
 
     "CommandCreateSuccessProjectTemplate": "<br/><success>Success!</success> Your project using the {0} is ready for use at <highlight>{1}</highlight>",
@@ -448,6 +448,8 @@
 
     "ErrorNoPlatformsFound": "Unable to find any platforms. Please 'taco platform add <platform>' or 'taco remote add <platform>' and retry.",
     "_ErrorNoPlatformsFound.comment": "Error message printed when we try to run a command on a set of platforms, and the set is empty.",
+    "NoRemoteConfigurationFoundForPlatform": "Warning: No remote configuration found for {0}. Ignoring...",
+    "_NoRemoteConfigurationFoundForPlatform.comment": "Warning message printed when a build/run/emulate command specifies --remote and there is no remote configured. {0} is the platform with a missing configuration.",
 
     "ErrorUploadingRemoteBuild": "An error occurred uploading to the build server {0}",
     "_ErrorUploadingRemoteBuild.comment": "Message reported when we attempt to upload a build and the upload fails. {0} is the URL of the server",
@@ -461,6 +463,8 @@
     "_InvalidRemoteBuildClientCert.comment": "Error message reported when a build request fails due to a bad certificate",
     "CheckingRemoteBuildStatus": "------ {0} Checking on build status from {1} [Attempt {2}]",
     "_CheckingRemoteBuildStatus.comment": "Message printed when polling for a build result. {0} is the current time, {1} is the URL we are fetching, and {2} is the number of times we have tried so far",
+    "RemoteBuildQueued": "Your build is in the queue at position {0}.",
+    "_RemoteBuildQueued.comment": "Message printed when the remote build is in the queue. {0} is the number of builds to be done before this build",
     "RemoteBuildError": "Remote build error from the build server {0}",
     "_RemoteBuildError.comment": "Error message reported when a build errors out on the server. {0} is the error from the server",
     "RemoteBuildSslConnectionReset": "Secure connection to {0} could not be established. Verify that the build server is running in secure mode.",

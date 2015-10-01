@@ -10,7 +10,7 @@
 /// <reference path="../typings/colors.d.ts" />
 declare module TacoUtility {
     class LoggerHelper {
-        public static DefaultIndent: number;
+        public static DEFAULT_INDENT: number;
 
         /**
          * Helper method to log an array of name/value pairs with proper indentation and a table header

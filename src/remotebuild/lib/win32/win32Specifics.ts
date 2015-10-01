@@ -22,13 +22,14 @@ import HostSpecifics = require ("../hostSpecifics");
 import RemoteBuildConf = require ("../remoteBuildConf");
 import resources = require ("../../resources/resourceManager");
 import utils = require ("taco-utils");
+import logger = utils.Logger;
 
 class Win32Specifics implements HostSpecifics.IHostSpecifics {
     public defaults(base: { [key: string]: any }): { [key: string]: any } {
         var win32defaults: { [key: string]: any } = {
             writePidToFile: false,
             lang: "en", // TODO (Devdiv: 1160573), determine appropriate language on windows
-            suppressSetupMessage: false,
+            suppressSetupMessage: false
         };
         Object.keys(win32defaults).forEach(function (key: string): void {
             if (!(key in base)) {
@@ -45,7 +46,7 @@ class Win32Specifics implements HostSpecifics.IHostSpecifics {
     }
 
     public printUsage(language: string): void {
-        console.info(resources.getStringForLanguage(language, "UsageInformation"));
+        logger.log(resources.getStringForLanguage(language, "UsageInformation"));
     }
 
     public resetServerCert(conf: RemoteBuildConf): Q.Promise<any> {
