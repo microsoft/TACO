@@ -383,6 +383,117 @@ describe("taco build", function (): void {
             mocha();
         });
     });
+    
+    it("should make the correct sequence of calls for 'taco build --remote test --device'", function (mocha: MochaDone): void {
+        var buildArguments = ["--remote", "test", "--device"];
+        var configuration = "debug";
+        var buildNumber = 12340;
+        var testZipFile: string = path.resolve(__dirname, "resources", "empty.zip");
+
+        // Mock out the server on the other side
+        var sequence = [
+            {
+                expectedUrl: "/cordova/build/tasks?" + querystring.stringify({
+                    command: "build",
+                    vcordova: vcordova,
+                    vcli: require(path.join(__dirname, "..", "package.json")).version,
+                    cfg: configuration,
+                    platform: "test",
+                    options: "--device"
+                }),
+                head: {
+                    "Content-Type": "application/json",
+                    "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
+                },
+                statusCode: 202,
+                response: JSON.stringify(new BuildInfo({
+                    status: BuildInfo.UPLOADING,
+                    buildNumber: buildNumber,
+                })),
+                waitForPayload: true
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber,
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify(new BuildInfo({
+                    status: BuildInfo.UPLOADED,
+                    buildNumber: buildNumber
+                })),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=0",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: "1",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({ queued: 0, queuedBuilds: [] }),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber,
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify(new BuildInfo({
+                    status: BuildInfo.COMPLETE,
+                    buildNumber: buildNumber
+                })),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: "/cordova/build/tasks/" + buildNumber + "/log?offset=1",
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: "2",
+                waitForPayload: false
+            },
+            {
+                expectedUrl: util.format("/cordova/files/%d/cordovaApp/plugins/%s.json", buildNumber, "test"),
+                head: {
+                    "Content-Type": "application/json"
+                },
+                statusCode: 200,
+                response: JSON.stringify({}),
+                waitForPayload: false
+            },
+            {
+                expectedUrl: util.format("/cordova/build/%d/download", buildNumber),
+                head: {
+                    "Content-Type": "application/zip"
+                },
+                statusCode: 200,
+                response: JSON.stringify({}),
+                waitForPayload: false,
+                fileToSend: testZipFile
+            },
+        ];
+        var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
+        testHttpServer.on("request", serverFunction);
+
+        Q(buildArguments).then(buildRun).finally(function (): void {
+            testHttpServer.removeListener("request", serverFunction);
+        }).done(function (): void {
+            mocha();
+        }, function (err: any): void {
+            mocha(err);
+        });
+    });
 
     describe("telemetry", () => {
         buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, buildRun, Command.Build);
