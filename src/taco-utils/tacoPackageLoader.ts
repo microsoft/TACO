@@ -402,7 +402,9 @@ module TacoUtility {
         }
 
         private static requirePackage<T>(packageTargetPath: string): T {
-            return <T> require(packageTargetPath);
+            var pkg = require(packageTargetPath);
+            pkg["packageTargetPath"] = packageTargetPath;
+            return <T>pkg;
         }
 
         private static getStatusFilePath(targetPath: string): string {
