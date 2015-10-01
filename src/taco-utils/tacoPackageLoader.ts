@@ -403,8 +403,12 @@ module TacoUtility {
 
         private static requirePackage<T>(packageTargetPath: string): T {
             var pkg = require(packageTargetPath);
-            pkg["packageTargetPath"] = packageTargetPath;
-            return <T>pkg;
+            try {
+                pkg["packageTargetPath"] = packageTargetPath;
+            } catch (e) {
+                // Modules can export whatever they like, which might not be an object.
+            }
+            return <T> pkg;
         }
 
         private static getStatusFilePath(targetPath: string): string {

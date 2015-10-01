@@ -33,28 +33,6 @@ import commands = tacoUtility.Commands;
 class CordovaWrapper {
     private static cordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
-    
-    private static getLocalCordovaPackagePath(): Q.Promise<string> {
-        return CordovaHelper.tryInvokeCordova<string>((cordova: typeof Cordova): string => {
-            return (<{ packageTargetPath?: string }>cordova).packageTargetPath;
-        }, (): string => null)
-    }
-
-    /**
-     * Returns a path to the local Cordova command if ran from a taco project, otherwise it will return the 
-     * global Cordova command.
-     */
-    private static getCordovaCommand(): Q.Promise<string> {
-        return CordovaWrapper.getLocalCordovaPackagePath()
-            .then(function (packagePath: string) {
-                var commandToRun = CordovaWrapper.cordovaCommandName;
-                if (packagePath) {
-                    commandToRun = path.join(packagePath, "bin", CordovaWrapper.cordovaCommandName);
-                }
-
-                return commandToRun;
-            });
-    }
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<any> {
         return CordovaWrapper.getCordovaCommand()
@@ -66,7 +44,7 @@ class CordovaWrapper {
 
             var proc = child_process.spawn(commandToRun, args, options);
 
-            proc.on("error", function (err: any): void {  
+            proc.on("error", function (err: any): void {
                 // ENOENT error thrown if no Cordova.cmd is found
                 var tacoError = (err.code === "ENOENT") ?
                     errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
@@ -211,6 +189,24 @@ class CordovaWrapper {
     private static cordovaApiOrProcess<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, processArgs: () => string[],
         options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean, captureOutput?: boolean } = {}): Q.Promise<T | string> {
         return CordovaHelper.tryInvokeCordova<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
+    }
+
+    /**
+     * Returns a path to the local Cordova command if ran from a taco project, otherwise it will return the
+     * global Cordova command.
+     */
+    private static getCordovaCommand(): Q.Promise < string > {
+        return CordovaHelper.tryInvokeCordova<string>((cordova: typeof Cordova): string => {
+        return (<{ packageTargetPath?: string }> cordova).packageTargetPath;
+    }, (): string => null)
+        .then(function (packagePath: string) {
+            var commandToRun = CordovaWrapper.cordovaCommandName;
+            if (packagePath) {
+                commandToRun = path.join(packagePath, "bin", CordovaWrapper.cordovaCommandName);
+            }
+
+            return commandToRun;
+        });
     }
 }
 
