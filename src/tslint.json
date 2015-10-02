@@ -64,7 +64,7 @@
     "semicolon": true,
     "sort-object-literal-keys": false,
     "triple-equals": [true, "allow-null-check"],
-    "typedef": [false,
+    "typedef": [true,
       "call-signature",
       "parameter",
       "property-declaration",

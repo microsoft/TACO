@@ -46,6 +46,11 @@ declare module RemoteBuild {
         printHelp(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration): void;
         getConfig(remoteBuildConf: IRemoteBuildConfiguration, moduleConfig: IServerModuleConfiguration): IServerModuleConfiguration;
     }
+
+    interface IRemoteBuildTask {
+        execute(config: IRemoteBuildConfiguration , cliArguments?: string[]): Q.Promise<any>;
+    }
+
     interface IServerModule {
         getRouter(): Express.Router;
         shutdown(): void;

@@ -50,7 +50,7 @@ class Help extends HelpCommandBase {
                     return baseRun(data);
                 }
 
-                var moduleConfig = self.remotebuildConf.moduleConfig(topic);
+                var moduleConfig: RemoteBuild.IServerModuleConfiguration = self.remotebuildConf.moduleConfig(topic);
                 if (moduleConfig) {
                     try {
                         var mod: RemoteBuild.IServerModuleFactory = require(moduleConfig.requirePath || topic);

@@ -17,7 +17,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
@@ -33,15 +33,15 @@ import RemoteBuildConf = require ("../lib/remoteBuildConf");
 import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
 
-var serverDir = path.join(os.tmpdir(), "remotebuild", "certs");
-var certsDir = path.join(serverDir, "certs");
-var clientCertsDir = path.join(certsDir, "client");
-var caKeyPath = path.join(certsDir, "ca-key.pem");
-var caCertPath = path.join(certsDir, "ca-cert.pem");
+var serverDir: string = path.join(os.tmpdir(), "remotebuild", "certs");
+var certsDir: string = path.join(serverDir, "certs");
+var clientCertsDir: string = path.join(certsDir, "client");
+var caKeyPath: string = path.join(certsDir, "ca-key.pem");
+var caCertPath: string = path.join(certsDir, "ca-cert.pem");
 
 // Tests for lib/darwin/darwinCerts.js functionality
 // Since the certs use openSSL to work with certificates, we restrict these tests to the mac where openSSL should exist.
-var macOnly = os.platform() === "darwin" ? describe : describe.skip;
+var macOnly: (description: string, spec: () => void) => void = os.platform() === "darwin" ? describe : describe.skip;
 macOnly("Certs", function (): void {
     after(function (): void {
         nconf.overrides({});
@@ -116,7 +116,7 @@ macOnly("Certs", function (): void {
 
     // Tests that resetting server certificates queries the user and respects a "no" response
     it("ResetServerCertNo", function (done: MochaDone): void {
-        var noHandler = {
+        var noHandler: any = {
             closed: false,
             question: function (question: string, answerCallback: (answer: string) => void): void {
                 answerCallback("n");
@@ -145,7 +145,7 @@ macOnly("Certs", function (): void {
 
     // Tests that resetting server certificates will create new certificates after a "yes" response
     it("ResetServerCertYes", function (done: MochaDone): void {
-        var yesHandler = {
+        var yesHandler: any = {
             closed: false,
             question: function (question: string, answerCallback: (answer: string) => void): void {
                 answerCallback("y");
@@ -175,7 +175,7 @@ macOnly("Certs", function (): void {
     // Test that client certificates are purged if they are older than the timeout, and are not purged if they are younger
     it("PurgeExpiredPinBasedClientCertsSync", function (done: MochaDone): void {
         var createdPin: number;
-        var config = conf({ serverDir: serverDir });
+        var config: RemoteBuildConf = conf({ serverDir: serverDir });
         certs.initializeServerCerts(config).
             then(function (): Q.Promise<number> {
             return certs.generateClientCert(conf({ serverDir: serverDir, suppressSetupMessage: true }));
@@ -220,8 +220,8 @@ macOnly("Certs", function (): void {
 
     // Test that we can make a self signed certificate from the CA certificate
     it("MakeSelfSignedCert", function (done: MochaDone): void {
-        var outKeyPath = path.join(serverDir, "selfsigned-key.pem");
-        var outCertPath = path.join(serverDir, "selfsigned-cert.pem");
+        var outKeyPath: string = path.join(serverDir, "selfsigned-key.pem");
+        var outCertPath: string = path.join(serverDir, "selfsigned-cert.pem");
 
         certs.makeSelfSigningCACert(caKeyPath, caCertPath).
             then(function (): Q.Promise<void> {
@@ -240,9 +240,9 @@ macOnly("Certs", function (): void {
             then(function (): Q.Promise<void> {
             return certs.displayCert(outCertPath, ["dates"]).
                 then(function (output: { stdout: string }): void {
-                var notBefore = new Date(output.stdout.substring(output.stdout.indexOf("notBefore=") + 10, output.stdout.indexOf(os.EOL)));
-                var notAfter = new Date(output.stdout.substring(output.stdout.indexOf("notAfter=") + 9, output.stdout.length - 1));
-                var diffSeconds = (notAfter.getTime() - notBefore.getTime()) / 1000;
+                var notBefore: Date = new Date(output.stdout.substring(output.stdout.indexOf("notBefore=") + 10, output.stdout.indexOf(os.EOL)));
+                var notAfter: Date = new Date(output.stdout.substring(output.stdout.indexOf("notAfter=") + 9, output.stdout.length - 1));
+                var diffSeconds: number = (notAfter.getTime() - notBefore.getTime()) / 1000;
                 should.assert(diffSeconds === (60 * 60 * 24 * 365 * 5), "Cert should expire in 5 years");
             });
         }).done(function (): void {

@@ -58,7 +58,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
             // To support the simple case of "my home directory" I'm doing the replacement here
             // We only want to expand if the directory starts with ~/ not in cases such as /foo/~
             // Ideally we would also cope with the case of ~user/ but that is harder to find and probably less common
-            var serverDir = conf.get("serverDir");
+            var serverDir: string = conf.get("serverDir");
             conf.set("serverDir", serverDir.replace(/^~(?=\/|^)/, process.env.HOME));
         }
 
@@ -70,7 +70,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
             throw new Error(resources.getString("InvalidPortSpecified", this.port));
         }
 
-        var serverMods = this.remoteBuildConf.modules;
+        var serverMods: RemoteBuildConf.IModulesConf = this.remoteBuildConf.modules;
         if (typeof (serverMods) !== "object" || Object.keys(serverMods).length === 0) {
             this.usingDefaultModulesConfig = true;
             if (isUnitTest) {
