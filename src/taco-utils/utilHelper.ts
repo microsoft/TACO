@@ -284,7 +284,7 @@ module TacoUtility {
             });
 
             // Attempt to delete our test folders, but don't throw if it doesn't work
-            rimraf(currentPath, function (error: Error): void { });
+            rimraf(currentPath, UtilHelper.emptyMethod);
 
             // Return the result
             return !hasInvalidSegments;
@@ -354,6 +354,16 @@ module TacoUtility {
 
             return args;
         }
+
+        /* tslint:disable:no-empty */
+        /**
+         * An explicit helper empty method, which can be used in scenarios like
+         * silent callbacks, catch all exceptions do nothing etc.
+         */
+        public static emptyMethod(...args: any[]): void {
+        }
+        /* tslint:enable:no-empty */
+
     }
 }
 

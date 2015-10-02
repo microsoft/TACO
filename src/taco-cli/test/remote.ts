@@ -9,7 +9,12 @@
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
 "use strict";
-var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
 import http = require ("http");
@@ -186,7 +191,7 @@ describe("taco remote", function(): void {
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
-        RemoteMod.cliSession = RemoteMock.makeCliMock(mocha, () => { }, desiredState);
+        RemoteMod.cliSession = RemoteMock.makeCliMock(mocha, utils.emptyMethod, desiredState);
         Q(["add", "ios"]).then(remoteRun).then(function(): Q.Promise<Settings.ISettings> {
             return Settings.loadSettings();
         }).then(function(data: Settings.ISettings): Q.Promise<void> {
@@ -263,7 +268,7 @@ describe("taco remote", function(): void {
             mockServer.listen(desiredState.port);
             mockServer.on("request", serverFunction);
 
-            RemoteMod.cliSession = RemoteMock.makeCliMock(done, () => { }, desiredState, () => { });
+            RemoteMod.cliSession = RemoteMock.makeCliMock(done, utils.emptyMethod, desiredState, utils.emptyMethod);
             remoteRun(["add", "ios"]).finally(function(): void {
                 mockServer.close();
             }).done(() => {

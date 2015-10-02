@@ -112,7 +112,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 // If some segments of the path the SDK was extracted to didn't exist before, it means they were created as part of the install. They will have root as the owner, so we 
                 // must change the owner back to the current user.
                 if (firstNonExistentDir) {
-                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
                 }
             });
     }
@@ -141,7 +141,7 @@ class AndroidSdkInstaller extends InstallerBase {
             } else {
                 // If .bash_profile didn't exist before, make sure the owner is the current user, not root
                 if (mustChown) {
-                    fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                    fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
                 }
 
                 deferred.resolve({});
@@ -250,7 +250,16 @@ class AndroidSdkInstaller extends InstallerBase {
             AndroidSdkInstaller.ANDROID_PACKAGES.join(",")
         ];
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) }) : childProcess.spawn(command, args);
+        var cp: childProcess.ChildProcess = null;
+
+        if (os.platform() === "darwin") {
+            cp = childProcess.spawn(command, args, {
+                uid: parseInt(process.env.SUDO_UID, 10),
+                gid: parseInt(process.env.SUDO_GID, 10)
+            });
+        } else {
+            cp = childProcess.spawn(command, args);
+        }
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData = data.toString();

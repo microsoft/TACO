@@ -168,6 +168,7 @@ describe("Check for newer version", function (): void {
             // Not all tests create the file, so we ignore the exception
             fs.unlinkSync(Settings.settingsFile);
         } catch (exception) {
+            utils.emptyMethod();
         }
     });
 
@@ -206,7 +207,9 @@ describe("Check for newer version", function (): void {
         var fakeNPMServer: http.Server;
         launchFakeNPMServer(done)
             .then(server => fakeNPMServer = server)
-            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(error => { }))
+            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath)
+                .showOnExit()
+                .fail(error => TacoUtility.UtilHelper.emptyMethod(error)))
             .then(() => {
                 // CheckForNewerVersion doesn't print anything synchronically. It prints it on the beforeExit event
                 var actual = memoryStdout.contentsAsText();
@@ -258,7 +261,7 @@ describe("Check for newer version", function (): void {
         var lastCheckForNewerVersionTimestamp: number;
         setCheckedTimestampToHoursAgo(3)
             .then(storedNumber => lastCheckForNewerVersionTimestamp = storedNumber)
-            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(failure => { }))
+            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(utils.emptyMethod))
             .done(() => {
                 var listeners = process.listeners("beforeExit");
                 listeners.length.should.eql(0, "There should be no listeners for the beforeExit event");

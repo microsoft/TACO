@@ -114,5 +114,11 @@ declare module TacoUtility {
          * @return {string[]} The args where --loglevel and its value have been removed
          */
         public static initializeLogLevel(args: string[]): string[];
+
+        /**
+         * An explicit helper empty method, which can be used in scenarios like
+         * silent callbacks, catch all exceptions do nothing etc.
+         */
+        public static emptyMethod(args?: any): any;
     }
 }

@@ -10,7 +10,12 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 "use strict";
-var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import net = require ("net");
 import Q = require ("q");

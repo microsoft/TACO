@@ -13,10 +13,14 @@
 
 "use strict";
 
-import mocha = require ("mocha");
-import path = require ("path");
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
 var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
+
+import mocha = require ("mocha");
+import path = require ("path");
 
 import resources = require ("../resources/resourceManager");
 import tacoErrorCodes = require ("../tacoErrorCodes");

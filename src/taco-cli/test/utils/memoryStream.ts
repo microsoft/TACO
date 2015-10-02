@@ -44,6 +44,10 @@ import ms = require ("./utils/memoryStream");
 
 import stream = require ("stream");
 
+import tacoUtils = require("taco-utils");
+
+import utils = tacoUtils.UtilHelper;
+
 export class MemoryStream extends stream.Writable {
     private stdoutWrite: { (data: any, encoding: string, callback: Function): void };
     private shouldAlsoPrintToRealStdout = true; // We turn this on for debugging purposes, on the tests, possible on the build server
@@ -55,7 +59,7 @@ export class MemoryStream extends stream.Writable {
         var buffer = Buffer.isBuffer(data) ? data : new Buffer(data, encoding);
         this.fullBuffer = Buffer.concat([this.fullBuffer, buffer]);
         if (this.shouldAlsoPrintToRealStdout) {
-            this.stdoutWrite.call(process.stdout, data, encoding, () => { });
+            this.stdoutWrite.call(process.stdout, data, encoding, utils.emptyMethod);
             callback();
         } else {
             callback();

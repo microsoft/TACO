@@ -96,12 +96,11 @@ class TemplateManager {
             "\\$projectname\\$": appName
         };
 
-        for (var token in tokens) {
+        Object.keys(tokens).forEach(function(token: string){
             replaceParams.regex = token;
             replaceParams.replacement = tokens[token];
-
             replace(replaceParams);
-        }
+        });
 
         return Q.resolve(null);
     }

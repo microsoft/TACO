@@ -187,9 +187,9 @@ module TacoDependencyInstaller {
             */
             var dependencies: ICordovaRequirement[] = [];
             var re: RegExp = /(.+?): not installed/g;
-            var result: RegExpExecArray;
 
-            while (result = re.exec(output)) {
+            var result: RegExpExecArray = re.exec(output);
+            while (result) {
                 // The captured dependency name will be at index 1 of the result
                 var dependencyName: string = result[1];
 
@@ -200,6 +200,7 @@ module TacoDependencyInstaller {
                 };
 
                 dependencies.push(req);
+                result = re.exec(output);
             }
 
             return dependencies;

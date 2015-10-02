@@ -8,7 +8,11 @@
 // NOTE: This file is intended to run on-require, and print the logo, only once.
 // We avoid using logger.log and other package dependencies because this is required in
 // a couple of places including post-install, and we don't want to drag in all the infrastructure
+
+/* tslint:disable:no-var-requires */
+// var require needed to require package json
 var version = require("../package.json").version;
+/* tslint:enable:no-var-requires */
 
 function logoColorFunction(s: string): string {
     // https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes

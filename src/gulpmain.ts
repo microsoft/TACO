@@ -21,7 +21,11 @@ import gulpUtils = require ("../tools/GulpUtils");
 /* tslint:disable:no-console */
 // Disable console rule for gulp file, since this is a build file
 // we don't want to take dependency on Logger here
+
+/* tslint:disable:no-var-requires */
+// var require needed to require build_config.json
 var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
+/* tslint:enable:no-var-requires */
 var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
 var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
 
@@ -107,12 +111,12 @@ gulp.task("copy", function (): Q.Promise<any> {
 
 /* Task to run typescript linter on source code (excluding typings) */
 gulp.task("tslint", function(): Q.Promise<any> {
-    var tslint: any = require('gulp-tslint');
+    var tslint: any = require("gulp-tslint");
     return gulpUtils.streamToPromise(
         gulp.src([buildConfig.src + "/**/*.ts",
             "!" + buildConfig.src + "/typings/**"])
         .pipe(tslint())
-        .pipe(tslint.report('verbose')));
+        .pipe(tslint.report("verbose")));
 });
 
 /* Task to run tests */

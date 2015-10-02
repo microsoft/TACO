@@ -11,7 +11,12 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import child_process = require ("child_process");
 import del = require ("del");
@@ -41,7 +46,10 @@ var createCommand = new Create();
 
 var testKitId: string = "5.1.1-Kit";
 
+/* tslint:disable:no-var-requires */
+// var require needed to require package json
 var cliVersion = require("../package.json").version;
+/* tslint:enable:no-var-requires */
 
 interface IComponentVersionMap {
     [component: string]: string;
