@@ -320,7 +320,7 @@ class BuildManager {
 
             // Do not include the /plugins folder
             var localPath = path.relative(extractToDir, who.props.path);
-            return !(localPath.split(path.sep)[0] === 'plugins');
+            return !(localPath.split(path.sep)[0] === "plugins");
         };
 
         var pluginsOnlyFilter = function (who: Fstream.Writer): boolean {
@@ -329,7 +329,7 @@ class BuildManager {
             // Here we want to exclusively extract the contents of the /plugins folder, and we will put it in a separate location
             // Later in taco-remote-lib we will manually merge the plugins into the project to ensure they are added correctly.
             var localPath = path.relative(extractToDir, who.props.path);
-            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || localPath.split(path.sep)[0] === 'plugins';
+            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || localPath.split(path.sep)[0] === "plugins";
         };
 
         var extractDeferred = Q.defer();

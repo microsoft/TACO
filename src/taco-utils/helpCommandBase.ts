@@ -95,8 +95,9 @@ module TacoUtility {
             Logger.log(util.format("   <synopsis>%s %s</synopsis><br/>", this.cliName, "<COMMAND>"));
 
             var nameDescriptionPairs: INameDescription[] = new Array();
+
             var listings: any = this.commandsFactory.listings;
-            Object.keys(this.commandsFactory.listings).forEach(function(i: string) {
+            Object.keys(listings).forEach(function(i: string) {
                 nameDescriptionPairs.push({ name: i, description: listings[i].description, category: listings[i].categoryTitle });
             });
 
