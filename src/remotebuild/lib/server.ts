@@ -54,9 +54,9 @@ class Server {
         app.use(expressLogger("dev"));
         app.use(errorhandler());
         if (conf.secure) {
-            app.use(helmet.hsts({
+            app.use(helmet.hsts({ // Using recommended settings from https://certsimple.com/blog/a-plus-node-js-ssl
                 maxAge: 1000 * 60 * 60 * 24 * 365, // one year in milliseconds
-                includeSubdomains: false,
+                includeSubdomains: true,
                 force: true
             }));
         }
