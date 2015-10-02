@@ -35,10 +35,10 @@ import ILogger = installerProtocol.ILogger;
 import utilHelper = tacoUtils.UtilHelper;
 
 class AndroidSdkInstaller extends InstallerBase {
-    private static AndroidHomeName: string = "ANDROID_HOME";
-    private static AndroidCommand = os.platform() === "win32" ? "android.bat" : "android";
-    private static AndroidPackages: string[] = [    // IDs of Android Packages to install. To get the list of available packages, run "android list sdk -u -a -e"
-        //"tools",  // Android SDK comes by default with the tools package, so there is no need to update it. In the future, if we feel we want dependency installer to always install the latest Tools package, then uncomment this.
+    private static ANDROID_HOME_NAME: string = "ANDROID_HOME";
+    private static androidCommand = os.platform() === "win32" ? "android.bat" : "android";
+    private static ANDROID_PACKAGES: string[] = [    // IDs of Android Packages to install. To get the list of available packages, run "android list sdk -u -a -e"
+        // "tools",  // Android SDK comes by default with the tools package, so there is no need to update it. In the future, if we feel we want dependency installer to always install the latest Tools package, then uncomment this.
         "platform-tools",
         "build-tools-19.1.0",
         "build-tools-21.1.2",
@@ -71,7 +71,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
         this.androidHomeValue = androidHomeValue;
 
-        return installerUtilsWin32.setEnvironmentVariableIfNeededWin32(AndroidSdkInstaller.AndroidHomeName, androidHomeValue, this.logger)
+        return installerUtilsWin32.setEnvironmentVariableIfNeededWin32(AndroidSdkInstaller.ANDROID_HOME_NAME, androidHomeValue, this.logger)
             .then(function (): Q.Promise<any> {
                 return installerUtilsWin32.addToPathIfNeededWin32([addToPathTools, addToPathPlatformTools]);
             });
@@ -111,7 +111,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 // If some segments of the path the SDK was extracted to didn't exist before, it means they were created as part of the install. They will have root as the owner, so we 
                 // must change the owner back to the current user.
                 if (firstNonExistentDir) {
-                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
                 }
             });
     }
@@ -123,8 +123,8 @@ class AndroidSdkInstaller extends InstallerBase {
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
         var fullPathTools: string = path.join(androidHomeValue, "tools/");
         var fullPathPlatformTools: string = path.join(androidHomeValue, "platform-tools/");
-        var shortPathTools: string = util.format("$%s%stools", AndroidSdkInstaller.AndroidHomeName, path.sep);
-        var shortPathPlatformTools: string = util.format("$%s%splatform-tools", AndroidSdkInstaller.AndroidHomeName, path.sep);
+        var shortPathTools: string = util.format("$%s%stools", AndroidSdkInstaller.ANDROID_HOME_NAME, path.sep);
+        var shortPathPlatformTools: string = util.format("$%s%splatform-tools", AndroidSdkInstaller.ANDROID_HOME_NAME, path.sep);
         var addToPath: string = "";
         var exportPathLine: string = "";
         var exportAndroidHomeLine: string = "";
@@ -135,17 +135,17 @@ class AndroidSdkInstaller extends InstallerBase {
         this.androidHomeValue = androidHomeValue;
 
         // Check if we need to add an ANDROID_HOME value
-        if (!process.env[AndroidSdkInstaller.AndroidHomeName]) {
-            exportAndroidHomeLine = util.format("%sexport %s=\"%s\"", os.EOL, AndroidSdkInstaller.AndroidHomeName, androidHomeValue);
+        if (!process.env[AndroidSdkInstaller.ANDROID_HOME_NAME]) {
+            exportAndroidHomeLine = util.format("%sexport %s=\"%s\"", os.EOL, AndroidSdkInstaller.ANDROID_HOME_NAME, androidHomeValue);
         } else {
-            var existingSdkHome: string = process.env[AndroidSdkInstaller.AndroidHomeName];
+            var existingSdkHome: string = process.env[AndroidSdkInstaller.ANDROID_HOME_NAME];
 
             // Process the existing ANDROID_HOME to resolve to an absolute path, including processing ~ notation and environment variables
             existingSdkHome = path.resolve(utilHelper.expandEnvironmentVariables(existingSdkHome));
 
             if (existingSdkHome !== androidHomeValue) {
                 // A conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
-                this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.AndroidHomeName, this.androidHomeValue));
+                this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.ANDROID_HOME_NAME, this.androidHomeValue));
                 useShortPaths = false;
             }
         }
@@ -182,7 +182,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 } else {
                     // If .bash_profile didn't exist before, make sure the owner is the current user, not root
                     if (mustChown) {
-                        fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID), parseInt(process.env.SUDO_GID));
+                        fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
                     }
 
                     deferred.resolve({});
@@ -210,7 +210,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     private downloadDefault(): Q.Promise<any> {
-        this.installerArchive = path.join(InstallerBase.InstallerCache, "androidSdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
+        this.installerArchive = path.join(InstallerBase.installerCache, "androidSdk", os.platform(), this.softwareVersion, path.basename(this.installerInfo.installSource));
 
         // Prepare expected archive file properties
         var expectedProperties: installerUtils.IFileSignature = {
@@ -221,7 +221,7 @@ class AndroidSdkInstaller extends InstallerBase {
         // Prepare download options
         var options: request.Options = {
             uri: this.installerInfo.installSource,
-            method: "GET",
+            method: "GET"
         };
 
         // Download the archive
@@ -289,17 +289,17 @@ class AndroidSdkInstaller extends InstallerBase {
     private installAndroidPackages(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.AndroidCommand);
+        var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.androidCommand);
         var args: string[] = [
             "update",
             "sdk",
             "-u",
             "-a",
             "--filter",
-            AndroidSdkInstaller.AndroidPackages.join(",")
+            AndroidSdkInstaller.ANDROID_PACKAGES.join(",")
         ];
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID), gid: parseInt(process.env.SUDO_GID) }) : childProcess.spawn(command, args);
+        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID, 10), gid: parseInt(process.env.SUDO_GID, 10) }) : childProcess.spawn(command, args);
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData = data.toString();
