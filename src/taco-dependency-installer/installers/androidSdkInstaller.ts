@@ -132,7 +132,7 @@ class AndroidSdkInstaller extends InstallerBase {
 
         this.androidHomeValue = androidHomeValue;
 
-        childProcess.exec(updateCommand, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        childProcess.exec(updateCommand, (error: Error, stdout: Buffer, stderr: Buffer) => {
             if (error) {
                 this.telemetry
                     .add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", /*isPii*/ false)
@@ -202,7 +202,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command: string = "chmod a+x " + path.join(this.androidHomeValue, "tools", "android");
 
-        childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        childProcess.exec(command, (error: Error, stdout: Buffer, stderr: Buffer) => {
             if (error) {
                 this.telemetry
                     .add("error.description", "ErrorOnChildProcess on addExecutePermission", /*isPii*/ false)
@@ -223,7 +223,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
         var adbProcess: childProcess.ChildProcess = childProcess.spawn(path.join(this.androidHomeValue, "platform-tools", "adb"), ["kill-server"]);
-        adbProcess.on("error", function (error: Error): void {
+        adbProcess.on("error", (error: Error) => {
             this.telemetry
                 .add("error.description", "ErrorOnKillingAdb in killAdb", /*isPii*/ false)
                 .addError(error);
@@ -273,13 +273,13 @@ class AndroidSdkInstaller extends InstallerBase {
         cp.stderr.on("data", function (data: Buffer): void {
             errorOutput += data.toString();
         });
-        cp.on("error", function (err: Error): void {
+        cp.on("error", (err: Error) => {
             this.telemetry
                 .add("error.description", "ErrorOnChildProcess on postInstallDefault", /*isPii*/ false)
                 .addError(err);
             deferred.reject(err);
         });
-        cp.on("exit", function (code: number): void {
+        cp.on("exit", (code: number) => {
             if (errorOutput) {
                 this.telemetry
                     .add("error.description", "ErrorOnExitOfChildProcess on postInstallDefault", /*isPii*/ false)
