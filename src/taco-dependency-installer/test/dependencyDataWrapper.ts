@@ -12,7 +12,11 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import path = require ("path");
 
@@ -29,7 +33,7 @@ describe("DependencyDataWrapper", function (): void {
 
     // Utility functions
     function assertDoesNotExist(obj: any): void {
-        (!!obj).should.be.false;
+        (!!obj).should.be.equal(false);
     }
 
     function assertArraysAreEqual(expected: string[], actual: string[]): void {

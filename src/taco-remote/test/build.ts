@@ -17,14 +17,14 @@ import UtilHelper = TacoUtils.UtilHelper;
 
 var macOnlyIt = os.platform() === "darwin" ? it : it.skip;
 
-describe("taco-remote", function (): void {
+describe("taco-remote", function(): void {
     var server: http.Server;
     var serverMod: RemoteBuild.IServerModule;
     var serverDir = path.join(os.tmpdir(), "taco-remote", "build");
     var downloadDir = path.join(serverDir, "selftest");
     var modMountPoint = "Test";
 
-    before(function (mocha: MochaDone): void {
+    before(function(mocha: MochaDone): void {
         process.env["TACO_UNIT_TEST"] = true;
         process.env["TACO_HOME"] = serverDir;
         rimraf.sync(UtilHelper.tacoHome);
@@ -48,7 +48,7 @@ describe("taco-remote", function (): void {
             mountPath: modMountPoint
         };
 
-        TacoRemote.create(serverConfig, modConfig, {}).then(function (serverModule: RemoteBuild.IServerModule): void {
+        TacoRemote.create(serverConfig, modConfig, {}).then(function(serverModule: RemoteBuild.IServerModule): void {
             serverMod = serverModule;
 
             app.use("/" + modMountPoint, serverModule.getRouter());
@@ -58,30 +58,30 @@ describe("taco-remote", function (): void {
         }).fail(mocha);
     });
 
-    after(function (mocha: MochaDone): void {
+    after(function(mocha: MochaDone): void {
         if (serverMod) {
             serverMod.shutdown();
         }
 
         server.close(mocha);
-        rimraf(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+        rimraf(serverDir, function(err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
-    macOnlyIt("should successfully build the sample project", function (mocha: MochaDone): void {
+    macOnlyIt("should successfully build the sample project", function(mocha: MochaDone): void {
         // Building can take a while
         this.timeout(60000);
-        var server = "http://" + os.hostname() + ":3000";
-        selftest.test(server, modMountPoint, downloadDir, false, null).done(function (): void {
+        var serverUrl: string = "http://" + os.hostname() + ":3000";
+        selftest.test(serverUrl, modMountPoint, downloadDir, false, null).done(function(): void {
             mocha();
         }, mocha);
     });
 
     // Note: This test will fail unless it is run from a GUI login, or the user running the test has jumped through some hoops to allow the "codesign" program access to the keychain
-    it.skip("should successfully build the sample project for device", function (mocha: MochaDone): void {
+    it.skip("should successfully build the sample project for device", function(mocha: MochaDone): void {
         // Building can take a while
         this.timeout(60000);
-        var server = "http://" + os.hostname() + ":3000";
-        selftest.test(server, modMountPoint, downloadDir, true, null).done(function (): void {
+        var serverUrl: string = "http://" + os.hostname() + ":3000";
+        selftest.test(serverUrl, modMountPoint, downloadDir, true, null).done(function(): void {
             mocha();
         }, mocha);
     });

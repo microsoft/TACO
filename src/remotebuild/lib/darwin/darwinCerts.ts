@@ -27,20 +27,20 @@ import RemoteBuildConf = require ("../remoteBuildConf");
 import tacoUtils = require ("taco-utils");
 
 import utils = tacoUtils.UtilHelper;
-
+import logger = tacoUtils.Logger;
 var exec = child_process.exec;
 
 class Certs {
-    private static Debug = false;
+    private static debug = false;
     private static CERT_DEFAULTS = {
         days: 1825, // 5 years
         country: "US",
         ca_cn: os.hostname().substring(0, 50) + ".RB.CA", // Note: these cn entries have a maximum length of 64 bytes. If a hostname contains unicode characters, then os.hostname will return an ascii mis-encoding which is still one byte per character.
         pfx_name: os.hostname().substring(0, 50) + ".RB.CC",
-        client_cn: os.hostname().substring(0, 50) + ".RB", // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
+        client_cn: os.hostname().substring(0, 50) + ".RB" // Note: we need the client cert name to be a prefix of the CA cert so both are retrieved in the client. Otherwise it complains about self signed certificates
     };
 
-    private static CertStore: HostSpecifics.ICertStore = null;
+    private static certStore: HostSpecifics.ICertStore = null;
 
     public static resetServerCert(conf: RemoteBuildConf, yesOrNoHandler?: Certs.ICliHandler): Q.Promise<any> {
         var certsDir = path.join(conf.serverDir, "certs");
@@ -138,20 +138,20 @@ class Certs {
                     certPaths.newCerts = true;
                 });
         }).then(function (): HostSpecifics.ICertStore {
-            Certs.CertStore = {
+            Certs.certStore = {
                 newCerts: certPaths.newCerts,
                 getKey: function (): Buffer { return fs.readFileSync(certPaths.serverKeyPath); },
                 getCert: function (): Buffer { return fs.readFileSync(certPaths.serverCertPath); },
                 getCA: function (): Buffer { return fs.readFileSync(certPaths.caCertPath); }
             };
-            return Certs.CertStore;
+            return Certs.certStore;
             });
         return promise;
     }
 
     public static getServerCerts(): Q.Promise<HostSpecifics.ICertStore> {
-        if (Certs.CertStore) {
-            return Q(Certs.CertStore);
+        if (Certs.certStore) {
+            return Q(Certs.certStore);
         } else {
             return Q.reject<HostSpecifics.ICertStore>(new Error(resources.getString("CertificatesNotConfigured")));
         }
@@ -186,7 +186,7 @@ class Certs {
         Certs.purgeExpiredPinBasedClientCertsSync(conf);
         var clientCertsDir = path.join(conf.serverDir, "certs", "client");
 
-        var pin = parseInt(pinString);
+        var pin = parseInt(pinString, 10);
         if (isNaN(pin)) {
             throw { code: 400, id: "InvalidPin" };
         }
@@ -201,8 +201,8 @@ class Certs {
     }
 
     public static invalidatePIN(conf: RemoteBuildConf, pinString: string): void {
-        var pinDir = path.join(conf.serverDir, "certs", "client", "" + parseInt(pinString));
-        rimraf(pinDir, function (): void { });
+        var pinDir = path.join(conf.serverDir, "certs", "client", "" + parseInt(pinString, 10));
+        rimraf(pinDir, utils.emptyMethod);
     }
 
     public static purgeExpiredPinBasedClientCertsSync(conf: RemoteBuildConf): void {
@@ -263,10 +263,10 @@ class Certs {
         var deferred = Q.defer<{ stdout: string; stderr: string }>();
 
         exec("openssl " + args, function (error: Error, stdout: Buffer, stderr: Buffer): void {
-            if (Certs.Debug) {
-                console.info("exec openssl " + args);
-                console.info("stdout: %s", stdout);
-                console.info("stderr: %s", stderr);
+            if (Certs.debug) {
+                logger.log("exec openssl " + args);
+                logger.log(util.format("stdout: %s", stdout));
+                logger.log(util.format("stderr: %s", stderr));
             }
 
             if (error) {
@@ -282,7 +282,7 @@ class Certs {
     private static certOptionsFromConf(conf: RemoteBuildConf): Certs.ICertOptions {
         var options: Certs.ICertOptions = {};
         if (conf.certExpirationDays < 1) {
-            console.info(resources.getString("CertExpirationInvalid", conf.certExpirationDays, Certs.CERT_DEFAULTS.days));
+            logger.log(resources.getString("CertExpirationInvalid", conf.certExpirationDays, Certs.CERT_DEFAULTS.days));
             options.days = Certs.CERT_DEFAULTS.days;
         } else {
             options.days = conf.certExpirationDays;
@@ -294,19 +294,18 @@ class Certs {
     private static writeConfigFile(cnfPath: string, conf: RemoteBuildConf): void {
         var net = os.networkInterfaces();
         var cnf = "[req]\ndistinguished_name = req_distinguished_name\nreq_extensions = v3_req\n[req_distinguished_name]\nC_default = US\n[ v3_req ]\nbasicConstraints = CA:FALSE\nkeyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names\n[alt_names]\n";
-        
         var hostname: string = conf.hostname;
         cnf += util.format("DNS.1 = %s\n", hostname);
 
         var ipCount = 1;
-        for (var key in net) {
+        Object.keys(net).forEach(function(key: string){
             for (var i = 0; i < net[key].length; i++) {
                 if (net[key][i].address && !net[key][i].internal) {
                     cnf += util.format("IP.%d = %s\n", ipCount, net[key][i].address);
                     ipCount++;
                 }
             }
-        }
+        });
 
         fs.writeFileSync(cnfPath, cnf);
     }
@@ -346,15 +345,15 @@ class Certs {
         var host = conf.hostname;
         var port = conf.port;
         var pinTimeoutInMinutes = conf.pinTimeout;
-        console.info(resources.getString("OSXCertSetupInformation", host, port, pin));
+        logger.log(resources.getString("OSXCertSetupInformation", host, port, pin));
         if (pinTimeoutInMinutes) {
-            console.info(resources.getString("OSXCertSetupPinTimeout", pinTimeoutInMinutes));
+            logger.log(resources.getString("OSXCertSetupPinTimeout", pinTimeoutInMinutes));
         } else {
-            console.info(resources.getString("OSXCertSetupNoPinTimeout"));
+            logger.log(resources.getString("OSXCertSetupNoPinTimeout"));
         }
 
-        console.info("remotebuild certificates generate");
-        console.info("");
+        logger.log("remotebuild certificates generate");
+        logger.log("");
     }
 }
 

@@ -16,22 +16,22 @@ import LogLevel = logLevel.LogLevel;
 
 module TacoUtility {
     export class TacoGlobalConfig {
-        private static LangName: string = "TACO_LANG";
-        private static LogLevelName: string = "TACO_LOG_LEVEL";
+        private static LANG_NAME: string = "TACO_LANG";
+        private static LOG_LEVEL_NAME: string = "TACO_LOG_LEVEL";
 
         public static get lang(): string {
-            return process.env[TacoGlobalConfig.LangName];
+            return process.env[TacoGlobalConfig.LANG_NAME];
         }
 
         public static set lang(setLang: string) {
-            process.env[TacoGlobalConfig.LangName] = setLang;
+            process.env[TacoGlobalConfig.LANG_NAME] = setLang;
         }
 
         public static get logLevel(): LogLevel {
             // Restore the string name of the enum value to the actual enum value
-            var enumValueName: string = process.env[TacoGlobalConfig.LogLevelName];
+            var enumValueName: string = process.env[TacoGlobalConfig.LOG_LEVEL_NAME];
 
-            return (<any>LogLevel)[enumValueName];
+            return (<any> LogLevel)[enumValueName];
         }
 
         public static set logLevel(level: LogLevel) {
@@ -40,7 +40,7 @@ module TacoUtility {
             }
 
             // Save the string name of the enum value to process.env
-            process.env[TacoGlobalConfig.LogLevelName] = LogLevel[level];
+            process.env[TacoGlobalConfig.LOG_LEVEL_NAME] = LogLevel[level];
         }
     }
 }

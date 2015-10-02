@@ -11,7 +11,11 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import os = require ("os");
 import path = require ("path");
@@ -93,13 +97,13 @@ describe("InstallerUtils", function (): void {
 
     describe("calculateFileSha1()", function (): void {
         it("should calculate the correct hash", function (): void {
-            (<any>installerUtils).calculateFileSha1(testFile).should.be.exactly(testFileSha1);
+            (<any> installerUtils).calculateFileSha1(testFile).should.be.exactly(testFileSha1);
         });
     });
 
     describe("getFileBytes()", function (): void {
         it("should calculate the correct file size in bytes", function (): void {
-            (<any>installerUtils).getFileBytes(testFile).should.be.exactly(testFileBytes);
+            (<any> installerUtils).getFileBytes(testFile).should.be.exactly(testFileBytes);
         });
     });
 });

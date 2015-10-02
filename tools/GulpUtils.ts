@@ -199,6 +199,9 @@ class GulpUtils {
         stream.on("finish", function (): void {
             deferred.resolve({});
         });
+        stream.on("end", function (): void {
+            deferred.resolve({});
+        });
         stream.on("error", function (e: Error): void {
             deferred.reject(e);
         });

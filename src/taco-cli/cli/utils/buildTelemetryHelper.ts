@@ -18,11 +18,11 @@ var telemetryProperty = tacoUtility.TelemetryHelper.telemetryProperty;
 class BuildTelemetryHelper {
     // We don't use CordovaHelper.getSupportedPlatforms() because we need to validate this even if 
     // cordova is not installed, and the white list is a good enough solution, so we just use it for all cases
-    private static KnownPlatforms = ["android", "ios", "amazon-fireos", "blackberry10", "browser", "firefoxos",
+    private static knownPlatforms = ["android", "ios", "amazon-fireos", "blackberry10", "browser", "firefoxos",
         "windows", "windows8", "wp8", "www"];
 
-    private static BuildAndRunNonPiiOptions = ["clean", "local", "remote", "debuginfo", "nobuild", "device", "emulator", "target", "debug", "release"];
-    
+    private static buildAndRunNonPiiOptions = ["clean", "local", "remote", "debuginfo", "nobuild", "device", "emulator", "target", "debug", "release"];
+
     public static storePlatforms(telemetryProperties: ICommandTelemetryProperties, modifier: string,
         platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings): void {
         var baseName = "platforms." + modifier + ".";
@@ -47,16 +47,18 @@ class BuildTelemetryHelper {
     public static addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
         commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettingsOrReturnEmpty().then(settings => {
-            var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options,
-                this.BuildAndRunNonPiiOptions);
-            var platforms = Settings.determineSpecificPlatformsFromOptions(commandData, settings);
-            this.storePlatforms(properties, "requestedViaCommandLine", platforms, settings);
-            return properties;
+            var properties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options, this.buildAndRunNonPiiOptions);
+            return Settings.determinePlatformsFromOptions(commandData).then((platforms: Settings.IPlatformWithLocation[]) => {
+                var requestedPlatforms = Settings.parseRequestedPlatforms(commandData);
+                var requestedUsedPlatforms = platforms.filter((platform: Settings.IPlatformWithLocation): boolean => requestedPlatforms.indexOf(platform.platform) !== -1);
+                this.storePlatforms(properties, "requestedViaCommandLine", requestedUsedPlatforms, settings);
+                return properties;
+            });
         });
     }
 
     public static getIsPlatformPii(): { (platform: string): boolean } {
-        return platform => this.KnownPlatforms.indexOf(platform.toLocaleLowerCase()) < 0;
+        return platform => this.knownPlatforms.indexOf(platform.toLocaleLowerCase()) < 0;
     }
 
     /*

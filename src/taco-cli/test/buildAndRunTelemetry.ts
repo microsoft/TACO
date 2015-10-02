@@ -1,5 +1,5 @@
 ﻿/**
-﻿ * ******************************************************
+ ********************************************************
 ﻿ *                                                       *
 ﻿ *   Copyright (C) Microsoft. All rights reserved.       *
 ﻿ *                                                       *
@@ -11,7 +11,11 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import AdmZip = require ("adm-zip");
 import del = require ("del");
@@ -83,15 +87,16 @@ module BuildAndRunTelemetryTests {
         Emulate
     }
 
-    export function createBuildAndRunTelemetryTests(runCommand: { (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> },
-        getTestHttpServer: { (): http.Server }, command: Command): void {
+    export function createBuildAndRunTelemetryTests(runCommand: { (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> }, command: Command): void {
         var tacoHome = path.join(os.tmpdir(), "taco-cli", commandSwitch("build", "run", "emulate"));
         var projectPath = path.join(tacoHome, "example");
-        var testHttpServer: http.Server;
+        var testIosHttpServer: http.Server;
+        var testAndroidHttpServer: http.Server;
+        var iosPort = 3001;
+        var androidPort = 3002;
 
-        var cordova: Cordova.ICordova = new mockCordova.MockCordova510();
+        var cordova: Cordova.ICordova = mockCordova.MockCordova510.default;
         var vcordova: string = "4.0.0";
-        var remoteServerConfiguration = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
         var buildNumber = 12341;
         var isNotEmulate = command !== Command.Emulate;
 
@@ -102,7 +107,15 @@ module BuildAndRunTelemetryTests {
         };
 
         before(() => {
-            testHttpServer = getTestHttpServer();
+            testIosHttpServer = http.createServer();
+            testIosHttpServer.listen(iosPort);
+            testAndroidHttpServer = http.createServer();
+            testAndroidHttpServer.listen(androidPort);
+        });
+
+        after(() => {
+            testIosHttpServer.close();
+            testAndroidHttpServer.close();
         });
 
         // We mock cordova build
@@ -120,9 +133,9 @@ module BuildAndRunTelemetryTests {
             return Q({});
         };
 
-        function generateCompleteBuildSequence(platform: string, isIncrementalTest: boolean): any {
+        function generateCompleteBuildSequence(platform: string, port: number, isIncrementalTest: boolean): any {
             var configuration = "debug";
-        
+
             // Mock out the server on the other side
             var queryOptions: { [key: string]: string } = {
                 command: "build",
@@ -140,7 +153,7 @@ module BuildAndRunTelemetryTests {
                 expectedUrl: "/cordova/build/tasks?" + querystring.stringify(queryOptions),
                 head: {
                     "Content-Type": "application/json",
-                    "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
+                    "Content-Location": "http://localhost:" + port + "/cordova/build/tasks/" + buildNumber
                 },
                 statusCode: 202,
                 response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADING, buildNumber: buildNumber, buildLang: "en" })),
@@ -159,7 +172,7 @@ module BuildAndRunTelemetryTests {
                     expectedUrl: "/cordova/build/tasks?" + querystring.stringify(queryOptions),
                     head: {
                         "Content-Type": "application/json",
-                        "Content-Location": "http://localhost:3000/cordova/build/tasks/" + buildNumber
+                        "Content-Location": "http://localhost:" + port + "/cordova/build/tasks/" + buildNumber
                     },
                     statusCode: 202,
                     response: JSON.stringify(new BuildInfo({ status: BuildInfo.UPLOADING, buildNumber: buildNumber, buildLang: "en" })),
@@ -230,18 +243,20 @@ module BuildAndRunTelemetryTests {
         }
 
         function configureRemoteServer(done: MochaDone, isIncrementalTest: boolean): Q.Promise<any> {
-            var sequence = generateCompleteBuildSequence("ios", isIncrementalTest);
+            var iosSequence = generateCompleteBuildSequence("ios", iosPort, isIncrementalTest);
+            var androidSequence = generateCompleteBuildSequence("android", androidPort, isIncrementalTest);
+
+            var iosServerFunction = ServerMock.generateServerFunction(done, iosSequence);
+            var androidServerFunction = ServerMock.generateServerFunction(done, androidSequence);
+            testIosHttpServer.on("request", iosServerFunction);
+
             if (!isIncrementalTest) {
-                var androidSequence = generateCompleteBuildSequence("android", isIncrementalTest);
-                sequence = androidSequence.concat(sequence);
+                testAndroidHttpServer.on("request", androidServerFunction);
             }
 
-            var serverFunction = ServerMock.generateServerFunction(done, sequence);
-            testHttpServer.on("request", serverFunction);
-
-            var platforms: { [platform: string]: Settings.IRemoteConnectionInfo } = { ios: remoteServerConfiguration };
+            var platforms: { [platform: string]: Settings.IRemoteConnectionInfo } = { ios: { host: "localhost", port: iosPort, secure: false, mountPoint: "cordova" } };
             if (!isIncrementalTest) {
-                platforms["android"] = remoteServerConfiguration;
+                platforms["android"] = { host: "localhost", port: androidPort, secure: false, mountPoint: "cordova" };
             }
 
             return Settings.saveSettings({ remotePlatforms: platforms });
@@ -261,13 +276,13 @@ module BuildAndRunTelemetryTests {
                 value.should.be.below(expectedGzipedSizeAbsoluteError + expectedGzippedSize);
                 telemetryProperties[keyName].value = String(expectedGzippedSize);
             } else {
-                (typeof telemetryProperties[keyName] === "undefined").should.be.true;
+                (typeof telemetryProperties[keyName] === "undefined").should.be.equal(true);
             }
         }
 
         function telemetryShouldEqual(telemetryProperties: TacoUtility.ICommandTelemetryProperties,
             expected: any, iosExpectedGzipedSize: number = -1, androidGzipSize: number = -1): void {
-            (typeof telemetryProperties === "undefined").should.be.false;
+            (typeof telemetryProperties === "undefined").should.be.equal(false);
             validateGzipedSize(telemetryProperties, "ios", iosExpectedGzipedSize);
             validateGzipedSize(telemetryProperties, "android", androidGzipSize);
             telemetryProperties.should.eql(expected); // We are comparing the objects, after overriding the sizes with the expected values
@@ -275,14 +290,14 @@ module BuildAndRunTelemetryTests {
 
         beforeEach((done: MochaDone) => {
             // Warning: After this line, all cordova CLI commands will have to be mocked
-            TacoUtility.TacoPackageLoader.MockForTests = customLoader;
+            TacoUtility.TacoPackageLoader.mockForTests = customLoader;
 
             Settings.saveSettings({ remotePlatforms: {} })
                 .done(() => done(), done);
         });
 
         afterEach(() => {
-            TacoUtility.TacoPackageLoader.MockForTests = null;
+            TacoUtility.TacoPackageLoader.mockForTests = null;
         });
 
         function commandSwitch<T>(buildResult: T, runResult: T, emulateResult: T): T {
@@ -320,10 +335,9 @@ module BuildAndRunTelemetryTests {
                 expected["platforms.actuallyBuilt.local1"] = { isPii: false, value: "android" };
             }
 
-            runCommand(args).done(telemetryProperties => {
+            runCommand(args).then(telemetryProperties => {
                 telemetryShouldEqual(telemetryProperties, expected);
-                done();
-            });
+            }).done(() => done(), done);
         });
 
         function mockProjectWithIncrementalBuild(): void {
@@ -356,7 +370,10 @@ module BuildAndRunTelemetryTests {
             mockProjectWithIncrementalBuild();
             configureRemoteServer(done, /* Incremental test*/ true)
                 .then(() => runCommand(args))
-                .finally(() => testHttpServer.removeAllListeners("request"))
+                .finally(() => {
+                    testIosHttpServer.removeAllListeners("request");
+                    testAndroidHttpServer.removeAllListeners("request");
+                })
                 .then(telemetryProperties => {
                     telemetryShouldEqual(telemetryProperties, expected, 28382);
                 }).done(() => done(), done);
@@ -376,19 +393,20 @@ module BuildAndRunTelemetryTests {
                 "remoteBuild.android.wasIncremental": { isPii: false, value: "false" },
                 "remotebuild.android.gzipedProjectSizeInBytes": { isPii: false, value: "28379" },
                 "remotebuild.android.projectSizeInBytes": { isPii: false, value: "48128" },
-                "remoteBuild.ios.filesChangedCount": { isPii: false, value: 9 },
+                "remoteBuild.ios.filesChangedCount": { isPii: false, value: 8 },
                 "remoteBuild.ios.wasIncremental": { isPii: false, value: "false" },
-                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: "28427" },
-                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "49152" }
+                "remotebuild.ios.gzipedProjectSizeInBytes": { isPii: false, value: "28379" },
+                "remotebuild.ios.projectSizeInBytes": { isPii: false, value: "48128" }
             };
 
             configureRemoteServer(done, /* Not incremental test*/ false)
                 .then(() => runCommand(args))
-                .finally(() => testHttpServer.removeAllListeners("request"))
-                .done(telemetryProperties => {
-                    telemetryShouldEqual(telemetryProperties, expected, 28427, 28379);
-                    done();
-                });
+                .finally(() => {
+                    testIosHttpServer.removeAllListeners("request");
+                    testAndroidHttpServer.removeAllListeners("request");
+                })
+                .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected, 28379, 28379))
+                .done(() => done(), done);
         });
 
         it("4. no command line platforms, implicit windows wp8 device", (done: MochaDone) => {
@@ -408,10 +426,9 @@ module BuildAndRunTelemetryTests {
                 expected["options.device"] = { isPii: false, value: "true" };
             }
 
-            runCommand(args).done(telemetryProperties => {
-                telemetryShouldEqual(telemetryProperties, expected);
-                done();
-            });
+            runCommand(args)
+                .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected))
+                .then(() => done(), done);
         });
 
         it("5. --uknown_option unknown_platform", (done: MochaDone) => {
@@ -441,10 +458,9 @@ module BuildAndRunTelemetryTests {
                     subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
                 };
 
-                runCommand(args).done(telemetryProperties => {
-                    telemetryShouldEqual(telemetryProperties, expected);
-                    done();
-                });
+                runCommand(args)
+                    .then(telemetryProperties => telemetryShouldEqual(telemetryProperties, expected))
+                    .then(() => done(), done);
             });
         }
     }

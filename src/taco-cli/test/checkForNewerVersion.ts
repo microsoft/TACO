@@ -12,7 +12,6 @@
 /// <reference path="../../typings/node.d.ts"/>
 
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
 
 import del = require ("del");
 import fs = require ("fs");
@@ -20,6 +19,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
+import should = require ("should");
 
 import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
@@ -53,6 +53,11 @@ describe("Check for newer version", function (): void {
     // We should be able to remove the next line, after this fix gets released: https://github.com/mochajs/mocha/issues/779
     this.timeout(15000);
     var tacoCliLatestInformation: any;
+
+    var fakeServer = "http://localhost:8080";
+    var repositoryPath = "/taco-cli/latest";
+    var repositoryInFakeServerPath = fakeServer + repositoryPath;
+    var packageFilePath = path.join(utils.tacoHome, "package.json");
 
     before(() => {
         // Set up mocked out resources
@@ -163,6 +168,7 @@ describe("Check for newer version", function (): void {
             // Not all tests create the file, so we ignore the exception
             fs.unlinkSync(Settings.settingsFile);
         } catch (exception) {
+            utils.emptyMethod();
         }
     });
 
@@ -172,11 +178,6 @@ describe("Check for newer version", function (): void {
         process.removeListener("beforeExit", listeners[0]);
         listeners[0]();
     }
-
-    var fakeServer = "http://localhost:8080";
-    var repositoryPath = "/taco-cli/latest";
-    var repositoryInFakeServerPath = fakeServer + repositoryPath;
-    var packageFilePath = path.join(utils.tacoHome, "package.json");
 
     function launchFakeNPMServer(done: MochaDone): Q.Promise<http.Server> {
         var serverIsListening = Q.defer<http.Server>();
@@ -206,15 +207,17 @@ describe("Check for newer version", function (): void {
         var fakeNPMServer: http.Server;
         launchFakeNPMServer(done)
             .then(server => fakeNPMServer = server)
-            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(error => { }))
+            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath)
+                .showOnExit()
+                .fail(error => TacoUtility.UtilHelper.emptyMethod(error)))
             .then(() => {
                 // CheckForNewerVersion doesn't print anything synchronically. It prints it on the beforeExit event
                 var actual = memoryStdout.contentsAsText();
-                actual.should.be.empty;
+                should(actual).be.empty;
 
                 if (messageExpectation === MessageExpectation.WillBeShown) {
                     simulateBeforeExit();
-                    var actual = memoryStdout.contentsAsText();
+                    actual = memoryStdout.contentsAsText();
                     actual.should.be.equal("NewerTacoCLIVersionAvailable\n",
                         "The output of the console should match what we expected");
                     return Settings.loadSettings().then(settings => {
@@ -258,12 +261,12 @@ describe("Check for newer version", function (): void {
         var lastCheckForNewerVersionTimestamp: number;
         setCheckedTimestampToHoursAgo(3)
             .then(storedNumber => lastCheckForNewerVersionTimestamp = storedNumber)
-            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(failure => { }))
+            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(utils.emptyMethod))
             .done(() => {
                 var listeners = process.listeners("beforeExit");
                 listeners.length.should.eql(0, "There should be no listeners for the beforeExit event");
-                var actual = memoryStdout.contentsAsText();
-                actual.should.be.empty;
+                var actual: string = memoryStdout.contentsAsText();
+                should(actual).be.empty;
                 return Settings.loadSettings().then(settings => {
                     settings.lastCheckForNewerVersionTimestamp.should.be.equal(lastCheckForNewerVersionTimestamp,
                         "The last checked time shouldn't had changed expected: " + lastCheckForNewerVersionTimestamp + "  actual: " + settings.lastCheckForNewerVersionTimestamp.should);

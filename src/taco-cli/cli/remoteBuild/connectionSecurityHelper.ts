@@ -22,7 +22,7 @@ import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
-import logger = tacoUtils.Logger;
+import Logger = tacoUtils.Logger;
 import UtilHelper = tacoUtils.UtilHelper;
 
 class ConnectionSecurityHelper {
@@ -49,7 +49,7 @@ class ConnectionSecurityHelper {
                         if (code === 1) {
                             bufferDeferred.reject(errorHelper.get(TacoErrorCodes.NoCertificateFound, connectionInfo.certName));
                         } else {
-                            logger.logError(output);
+                            Logger.logError(output);
                             bufferDeferred.reject(errorHelper.get(TacoErrorCodes.GetCertificateFailed));
                         }
                     } else {
@@ -96,14 +96,14 @@ class ConnectionSecurityHelper {
                     output += data.toString().replace(/^CN=/, "");
                 });
                 certSaveProcess.stderr.on("data", function (data: any): void {
-                    console.error(data.toString());
+                    Logger.logError(data.toString());
                 });
                 certSaveProcess.on("error", function (err: Error): void {
                     deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSave, err));
                 });
                 certSaveProcess.on("close", function (code: number): void {
                     if (code) {
-                        logger.logError(output);
+                        Logger.logError(output);
                         deferred.reject(errorHelper.get(TacoErrorCodes.ErrorCertificateSaveWithErrorCode, code));
                     } else {
                         deferred.resolve(output);
@@ -121,9 +121,9 @@ class ConnectionSecurityHelper {
                     }
 
                     var certFilePath: string = path.join(certPath, "cert.pfx");
-                    fs.writeFile(certFilePath, certificateData, function (err: NodeJS.ErrnoException): void {
-                        if (err) {
-                            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSaveToPath, err, certFilePath));
+                    fs.writeFile(certFilePath, certificateData, function (writeError: NodeJS.ErrnoException): void {
+                        if (writeError) {
+                            deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorCertificateSaveToPath, writeError, certFilePath));
                         }
 
                         deferred.resolve(host);

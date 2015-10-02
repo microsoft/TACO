@@ -38,7 +38,10 @@ class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
             .catch(function (err: any): IRemoteLib {
                 err.code = 500;
                 throw err;
+                /* tslint:disable no-unreachable */
+                // Removing next line causes TS2355
                 return null;
+                /* tslint:enable no-unreachable */
             });
     }
 }

@@ -96,7 +96,7 @@ module TacoUtility {
                     this.logLevel = InstallLogLevel.taco;
                     break;
                 default:
-                    this.logLevel = -1;
+                    this.logLevel = InstallLogLevel.undefined;
             }
 
             this.submissionTime = new Date();

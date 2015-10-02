@@ -47,7 +47,7 @@ module TacoDependencyInstaller {
         installed?: boolean;
         metadata?: {
             version?: string;
-        }
+        };
     }
 
     // This dictionary represents the collection of results returned by cordova.raw.requirements(). Each tested platform either contains a rejected reason, or an array of ICordovaRequirement objects.
@@ -56,22 +56,22 @@ module TacoDependencyInstaller {
     }
 
     export class DependencyInstaller {
-        private static InstallConfigFileName: string = "installConfig.json";
-        private static SocketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
+        private static INSTALL_CONFIG_FILENAME: string = "installConfig.json";
+        private static socketPath: string = path.join("\\\\?\\pipe", utilHelper.tacoHome, "installer.sock");
 
         private parentSessionId: string;
         private installConfigFilePath: string;
         private dependenciesDataWrapper: DependencyDataWrapper;
         private unsupportedMissingDependencies: ICordovaRequirement[];
         private missingDependencies: IDependency[];
-        
+
         private socketHandle: NodeJSNet.Socket;
         private serverHandle: NodeJSNet.Server;
 
         constructor(parentSessionId: string, dependenciesMetadataFilePath?: string) {
             this.parentSessionId = parentSessionId;
             this.dependenciesDataWrapper = !!dependenciesMetadataFilePath ? new DependencyDataWrapper(dependenciesMetadataFilePath) : new DependencyDataWrapper();
-            this.installConfigFilePath = path.join(utilHelper.tacoHome, DependencyInstaller.InstallConfigFileName);
+            this.installConfigFilePath = path.join(utilHelper.tacoHome, DependencyInstaller.INSTALL_CONFIG_FILENAME);
         }
 
         public run(requirementsResult: any): Q.Promise<any> {
@@ -152,7 +152,7 @@ module TacoDependencyInstaller {
                             version: versionToUse,
                             displayName: self.dependenciesDataWrapper.getDisplayName(value.id),
                             licenseUrl: self.dependenciesDataWrapper.getLicenseUrl(value.id),
-                            installDestination: expandedInstallPath,
+                            installDestination: expandedInstallPath
                         };
 
                         self.missingDependencies.push(dependencyInfo);
@@ -192,9 +192,9 @@ module TacoDependencyInstaller {
             */
             var dependencies: ICordovaRequirement[] = [];
             var re: RegExp = /(.+?): not installed/g;
-            var result: RegExpExecArray;
 
-            while (result = re.exec(output)) {
+            var result: RegExpExecArray = re.exec(output);
+            while (result) {
                 // The captured dependency name will be at index 1 of the result
                 var dependencyName: string = result[1];
 
@@ -205,6 +205,7 @@ module TacoDependencyInstaller {
                 };
 
                 dependencies.push(req);
+                result = re.exec(output);
             }
 
             return dependencies;
@@ -474,7 +475,7 @@ module TacoDependencyInstaller {
         private connectServer(): Q.Promise<any> {
             var deferred = Q.defer();
 
-            this.serverHandle.listen(DependencyInstaller.SocketPath, function (): void {
+            this.serverHandle.listen(DependencyInstaller.socketPath, function (): void {
                 deferred.resolve({});
             });
 
@@ -510,7 +511,7 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         self.parentSessionId,
-                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.SocketPath)
+                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.socketPath)
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 
@@ -579,10 +580,8 @@ module TacoDependencyInstaller {
                     break;
                 case installerExitCode.CouldNotConnect:
                     throw errorHelper.get(TacoErrorCodes.CouldNotConnect);
-                    break;
                 case installerExitCode.NoAdminRights:
                     throw errorHelper.get(TacoErrorCodes.NoAdminRights);
-                    break;
                 case installerExitCode.Success:
                     logger.log(resources.getString("InstallCompletedSuccessfully"));
                     break;

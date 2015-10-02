@@ -12,7 +12,11 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
 import os = require ("os");
@@ -112,7 +116,7 @@ describe("DependencyInstaller", function (): void {
                 return missingDep.id === id;
             });
 
-            expectedDepFound.should.be.true;
+            expectedDepFound.should.be.equal(true);
         });
     }
 
@@ -124,7 +128,7 @@ describe("DependencyInstaller", function (): void {
                 return req.id === id;
             });
 
-            expectedDepFound.should.be.true;
+            expectedDepFound.should.be.equal(true);
         });
     }
 
@@ -157,8 +161,8 @@ describe("DependencyInstaller", function (): void {
 
     describe("parseMissingDependencies()", function (): void {
         beforeEach(function (): void {
-            (<any>dependencyInstaller).missingDependencies = [];
-            (<any>dependencyInstaller).unsupportedMissingDependencies = [];
+            (<any> dependencyInstaller).missingDependencies = [];
+            (<any> dependencyInstaller).unsupportedMissingDependencies = [];
         });
 
         it("should correctly parse missing and unsupported dependencies, in taco projects", function (): void {
@@ -172,10 +176,10 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            (<any>dependencyInstaller).parseMissingDependencies(mockCordovaReqsRaw);
+            (<any> dependencyInstaller).parseMissingDependencies(mockCordovaReqsRaw);
 
-            var missingDependencies: IDependency[] = (<any>dependencyInstaller).missingDependencies;
-            var unsupportedDependencies: ICordovaRequirement[] = (<any>dependencyInstaller).unsupportedMissingDependencies;
+            var missingDependencies: IDependency[] = (<any> dependencyInstaller).missingDependencies;
+            var unsupportedDependencies: ICordovaRequirement[] = (<any> dependencyInstaller).unsupportedMissingDependencies;
 
             verifyDependencyArray(expectedMissingDependencies, missingDependencies);
             verifyRequirementArray(expectedUnsupportedDependencies, unsupportedDependencies);
@@ -192,10 +196,10 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            (<any>dependencyInstaller).parseMissingDependencies(mockCordovaReqsOutput);
+            (<any> dependencyInstaller).parseMissingDependencies(mockCordovaReqsOutput);
 
-            var missingDependencies: IDependency[] = (<any>dependencyInstaller).missingDependencies;
-            var unsupportedDependencies: ICordovaRequirement[] = (<any>dependencyInstaller).unsupportedMissingDependencies;
+            var missingDependencies: IDependency[] = (<any> dependencyInstaller).missingDependencies;
+            var unsupportedDependencies: ICordovaRequirement[] = (<any> dependencyInstaller).unsupportedMissingDependencies;
 
             verifyDependencyArray(expectedMissingDependencies, missingDependencies);
             verifyRequirementArray(expectedUnsupportedDependencies, unsupportedDependencies);
@@ -214,7 +218,7 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            var parsedRequirements: ICordovaRequirement[] = (<any>dependencyInstaller).parseFromString(mockCordovaReqsOutput);
+            var parsedRequirements: ICordovaRequirement[] = (<any> dependencyInstaller).parseFromString(mockCordovaReqsOutput);
 
             verifyRequirementArray(expectedDependencies, parsedRequirements);
         });
@@ -232,7 +236,7 @@ describe("DependencyInstaller", function (): void {
                 "unknownDependency"
             ];
 
-            var parsedRequirements: ICordovaRequirement[] = (<any>dependencyInstaller).parseFromRawResult(mockCordovaReqsRaw);
+            var parsedRequirements: ICordovaRequirement[] = (<any> dependencyInstaller).parseFromRawResult(mockCordovaReqsRaw);
 
             verifyRequirementArray(expectedDependencies, parsedRequirements);
         });
@@ -246,7 +250,7 @@ describe("DependencyInstaller", function (): void {
                 "dependency1"
             ];
 
-            (<any>dependencyInstaller).missingDependencies = [
+            (<any> dependencyInstaller).missingDependencies = [
                 {
                     id: "dependency1",
                     version: "1.0",
@@ -267,8 +271,8 @@ describe("DependencyInstaller", function (): void {
                 }
             ];
 
-            (<any>dependencyInstaller).sortDependencies();
-            (<IDependency[]>(<any>dependencyInstaller).missingDependencies).forEach(function (value: IDependency, index: number): void {
+            (<any> dependencyInstaller).sortDependencies();
+            (<IDependency[]> (<any> dependencyInstaller).missingDependencies).forEach(function (value: IDependency, index: number): void {
                 value.id.should.be.exactly(expectedOrder[index]);
             });
         });
@@ -278,7 +282,7 @@ describe("DependencyInstaller", function (): void {
                 "dependency1"
             ];
 
-            (<any>dependencyInstaller).missingDependencies = [
+            (<any> dependencyInstaller).missingDependencies = [
                 {
                     id: "dependency1",
                     version: "1.0",
@@ -287,8 +291,8 @@ describe("DependencyInstaller", function (): void {
                 }
             ];
 
-            (<any>dependencyInstaller).sortDependencies();
-            (<IDependency[]>(<any>dependencyInstaller).missingDependencies).forEach(function (value: IDependency, index: number): void {
+            (<any> dependencyInstaller).sortDependencies();
+            (<IDependency[]> (<any> dependencyInstaller).missingDependencies).forEach(function (value: IDependency, index: number): void {
                 value.id.should.be.exactly(expectedOrder[index]);
             });
         });
@@ -305,9 +309,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.false;
+            canInstall.should.be.equal(false);
         });
 
         it("should return false for unknown id", function (): void {
@@ -320,9 +324,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.false;
+            canInstall.should.be.equal(false);
         });
 
         it("should return true for implicit dependencies", function (): void {
@@ -335,9 +339,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.true;
+            canInstall.should.be.equal(true);
         });
 
         it("should return false for a requested version that doesn't exist", function (): void {
@@ -350,9 +354,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.false;
+            canInstall.should.be.equal(false);
         });
 
         it("should return false if the requested version exists, but the user's system is not supported", function (): void {
@@ -365,9 +369,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.false;
+            canInstall.should.be.equal(false);
         });
 
         it("should return true if the requested version exists and the user's system is supported", function (): void {
@@ -380,9 +384,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.true;
+            canInstall.should.be.equal(true);
         });
 
         it("should return false if no version is requested, but the user's system is not supported", function (): void {
@@ -392,9 +396,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.false;
+            canInstall.should.be.equal(false);
         });
 
         it("should return true if no version is requested and the user's system is supported", function (): void {
@@ -404,9 +408,9 @@ describe("DependencyInstaller", function (): void {
                 name: "test_value"
             };
 
-            var canInstall: boolean = (<any>dependencyInstaller).canInstallDependency(dependency);
+            var canInstall: boolean = (<any> dependencyInstaller).canInstallDependency(dependency);
 
-            canInstall.should.be.true;
+            canInstall.should.be.equal(true);
         });
     });
 
@@ -441,12 +445,12 @@ describe("DependencyInstaller", function (): void {
                 fs.unlinkSync(installConfigFile);
             }
 
-            (<any>dependencyInstaller).missingDependencies = missingDependencies;
+            (<any> dependencyInstaller).missingDependencies = missingDependencies;
         });
-         
+
         it("should correctly generate the install config file", function (): void {
-            (<any>dependencyInstaller).buildInstallConfigFile();
-            
+            (<any> dependencyInstaller).buildInstallConfigFile();
+
             var content: any = require(installConfigFile);
 
             JSON.stringify(content).should.be.exactly(JSON.stringify(jsonWrapper));
@@ -462,7 +466,7 @@ describe("DependencyInstaller", function (): void {
             fs.writeFileSync(installConfigFile, JSON.stringify(dummyContent, null, 4));
 
             // Write the real installConfig file
-            (<any>dependencyInstaller).buildInstallConfigFile();
+            (<any> dependencyInstaller).buildInstallConfigFile();
 
             var content: any = require(installConfigFile);
 

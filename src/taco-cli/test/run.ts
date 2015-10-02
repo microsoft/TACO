@@ -11,7 +11,12 @@
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import del = require ("del");
 import fs = require ("fs");
@@ -68,7 +73,7 @@ describe("taco run", function (): void {
         // Use a dummy home location so we don't trash any real configurations
         process.env["TACO_HOME"] = tacoHome;
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
         var port = 3000;
@@ -84,7 +89,7 @@ describe("taco run", function (): void {
     after(function (done: MochaDone): void {
         this.timeout(30000);
         process.chdir(originalCwd);
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void { done(); }); // ignore errors
     });
@@ -116,7 +121,7 @@ describe("taco run", function (): void {
         var runArguments = ["--remote", "test", "--device", "--nobuild"];
         var configuration = "debug";
         var buildNumber = 12343;
-        
+
         var buildInfo = {
             buildNumber: buildNumber,
             status: BuildInfo.COMPLETE,
@@ -148,7 +153,7 @@ describe("taco run", function (): void {
                 statusCode: 200,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.INSTALLED,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: false
             },
@@ -160,7 +165,7 @@ describe("taco run", function (): void {
                 statusCode: 200,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.RUNNING,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: false
             }
@@ -182,7 +187,7 @@ describe("taco run", function (): void {
         var runArguments = ["--remote", "test", "--emulator", "--target", target, "--nobuild"];
         var configuration = "debug";
         var buildNumber = 12344;
-        
+
         var buildInfo = {
             buildNumber: buildNumber,
             status: BuildInfo.COMPLETE,
@@ -214,7 +219,7 @@ describe("taco run", function (): void {
                 statusCode: 200,
                 response: JSON.stringify(new BuildInfo({
                     status: BuildInfo.EMULATED,
-                    buildNumber: buildNumber,
+                    buildNumber: buildNumber
                 })),
                 waitForPayload: false
             }
@@ -245,6 +250,6 @@ describe("taco run", function (): void {
     });
 
     describe("telemetry", () => {
-        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, runRun, () => testHttpServer, Command.Run);
+        buildAndRunTelemetry.createBuildAndRunTelemetryTests.call(this, runRun, Command.Run);
     });
 });

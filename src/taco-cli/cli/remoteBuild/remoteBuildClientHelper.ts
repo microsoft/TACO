@@ -40,6 +40,7 @@ import tacoUtils = require ("taco-utils");
 import BuildInfo = tacoUtils.BuildInfo;
 import CountStream = tacoUtils.CountStream;
 import LogLevel = tacoUtils.LogLevel;
+import Logger = tacoUtils.Logger;
 import GlobalConfig = tacoUtils.TacoGlobalConfig;
 import NewlineNormalizerStream = tacoUtils.NewlineNormalizerStream;
 import UtilHelper = tacoUtils.UtilHelper;
@@ -49,7 +50,7 @@ import ICommandTelemetryProperties = tacoUtils.ICommandTelemetryProperties;
 var telemetryProperty = tacoUtils.TelemetryHelper.telemetryProperty;
 
 class RemoteBuildClientHelper {
-    public static PingInterval: number = 5000;
+    public static PING_INTERVAL: number = 5000;
 
     /**
      * Submit a build to a remote build server, poll for completion, print the build log when the build completes, and if building for a device then download the end result
@@ -69,7 +70,7 @@ class RemoteBuildClientHelper {
             .then(function (buildInfo: BuildInfo): void {
                 settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
 
-                console.info(resources.getString("IncrementalBuild", !!settings.incrementalBuild));
+                Logger.log(resources.getString("IncrementalBuild", !!settings.incrementalBuild));
                 if (!settings.incrementalBuild) {
                     try {
                         fs.unlinkSync(changeTimeFile);
@@ -88,11 +89,11 @@ class RemoteBuildClientHelper {
                 return RemoteBuildClientHelper.submitBuildRequestToServer(settings, tgz);
             })
             .then(function (buildingUrl: string): Q.Promise<BuildInfo> {
-                return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, RemoteBuildClientHelper.PingInterval, 0);
+                return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, RemoteBuildClientHelper.PING_INTERVAL, 0);
             })
             .then(function (result: BuildInfo): Q.Promise<BuildInfo> {
                 if (result.buildNumber) {
-                    console.info(resources.getString("RemoteBuildSuccessful"));
+                    Logger.log(resources.getString("RemoteBuildSuccessful"));
                     return RemoteBuildClientHelper.logBuildOutput(result, settings);
                 }
             }, function (err: any): Q.Promise<BuildInfo> {
@@ -218,7 +219,7 @@ class RemoteBuildClientHelper {
     private static httpOptions(url: string, settings: { language: string; agent: Q.Promise<https.Agent> }): Q.Promise<request.Options> {
         return settings.agent.then(function (agent: https.Agent): request.Options {
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            return <request.Options>{
+            return <request.Options> {
                 url: url,
                 headers: { "Accept-Language": settings.language },
                 agent: agent
@@ -248,7 +249,7 @@ class RemoteBuildClientHelper {
             return errorHelper.get(TacoErrorCodes.RemoteBuildNoConnection, serverUrl);
         }
 
-        return errorHelper.wrap(fallbackErrorCode, <Error>requestError, serverUrl);
+        return errorHelper.wrap(fallbackErrorCode, <Error> requestError, serverUrl);
     }
 
     /**
@@ -262,7 +263,7 @@ class RemoteBuildClientHelper {
         var newChangeTime: { [file: string]: number } = {};
         var isIncremental = false;
         try {
-            var json: { [file: string]: number } = JSON.parse(<any>fs.readFileSync(changeTimeFile));
+            var json: { [file: string]: number } = JSON.parse(<any> fs.readFileSync(changeTimeFile));
             Object.keys(json).forEach(function (file: string): void {
                 lastChangeTime[file] = json[file];
             });
@@ -311,7 +312,7 @@ class RemoteBuildClientHelper {
         var deferred = Q.defer();
 
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var firstPassReader = new fstream.Reader(<fstream.IReaderProps>{ path: projectSourceDir, type: "Directory", filter: filterForChanges });
+        var firstPassReader = new fstream.Reader(<fstream.IReaderProps> { path: projectSourceDir, type: "Directory", filter: filterForChanges });
         firstPassReader.on("close", function (): void {
             // We have now determined which files are new and which files are old. Construct changeList.json
             var previousFiles = Object.keys(lastChangeTime);
@@ -320,7 +321,7 @@ class RemoteBuildClientHelper {
                 deletedFiles: previousFiles.filter(function (file: string): boolean {
                     return !(file in newChangeTime) && upToDateFiles.indexOf(file) === -1;
                 })
-            };            
+            };
             // Save the changeList.json file
             fs.writeFileSync(changeListFile, JSON.stringify(changeList));
 
@@ -342,7 +343,7 @@ class RemoteBuildClientHelper {
 
         return deferred.promise.then(() => {
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            var projectSourceDirReader = new fstream.Reader(<fstream.IReaderProps>{ path: projectSourceDir, type: "Directory", filter: filterForTar });
+            var projectSourceDirReader = new fstream.Reader(<fstream.IReaderProps> { path: projectSourceDir, type: "Directory", filter: filterForTar });
             var tarProducingStream = CountStream.count(projectSourceDirReader.pipe(tar.Pack()),
                 (sz: number) => telemetryProperties["remotebuild." + platform + ".projectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
             var tgzProducingStream = CountStream.count(tarProducingStream.pipe(zlib.createGzip()),
@@ -445,7 +446,7 @@ class RemoteBuildClientHelper {
         }
 
         var buildUrl = serverUrl + "/build/tasks?" + querystring.stringify(params);
-        console.info(resources.getString("SubmittingRemoteBuild", buildUrl));
+        Logger.log(resources.getString("SubmittingRemoteBuild", buildUrl));
 
         appAsTgzStream.on("error", function (error: any): void {
             deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorUploadingRemoteBuild, error, serverUrl));
@@ -462,7 +463,7 @@ class RemoteBuildClientHelper {
                 } else if (response.statusCode === 202) {
                     // Expect http 202 for a valid submission which is "Accepted" with a content-location to the Url to check for build status
                     if (GlobalConfig.logLevel === LogLevel.Diagnostic) {
-                        console.info(resources.getString("NewRemoteBuildInfo", body));
+                        Logger.log(resources.getString("NewRemoteBuildInfo", body));
                     }
 
                     deferred.resolve(response.headers["content-location"]);
@@ -484,7 +485,7 @@ class RemoteBuildClientHelper {
      */
     private static pollForBuildComplete(settings: BuildSettings, buildingUrl: string, interval: number, attempts: number, logOffset?: number): Q.Promise<BuildInfo> {
         var thisAttempt = attempts + 1;
-        console.info(resources.getString("CheckingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
+        Logger.log(resources.getString("CheckingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
 
         return RemoteBuildClientHelper.httpOptions(buildingUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): Q.Promise<BuildInfo> {
@@ -493,7 +494,7 @@ class RemoteBuildClientHelper {
             }
 
             var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
-            console.info(buildInfo.status + " - " + buildInfo.message);
+            Logger.log(buildInfo.status + " - " + buildInfo.message);
             buildInfo["logOffset"] = logOffset || 0;
             if (buildInfo.status === BuildInfo.COMPLETE) {
                 return Q(buildInfo);
@@ -505,15 +506,15 @@ class RemoteBuildClientHelper {
                 throw err;
             }
 
-            return RemoteBuildClientHelper.logBuildOutput(buildInfo, settings).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
-                return Q.all([Q.delay(interval), RemoteBuildClientHelper.checkQueuePosition(settings, buildInfo)]).then(function (): Q.Promise<BuildInfo> {
-                    return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt, buildInfo["logOffset"]);
+            return RemoteBuildClientHelper.logBuildOutput(buildInfo, settings)
+            .then(function (loggedBuildInfo: BuildInfo): Q.Promise<BuildInfo> {
+                return Q.all([Q.delay(interval), RemoteBuildClientHelper.checkQueuePosition(settings, loggedBuildInfo)])
+                .then(function (): Q.Promise<BuildInfo> {
+                    return RemoteBuildClientHelper.pollForBuildComplete(settings, buildingUrl, interval, thisAttempt, loggedBuildInfo["logOffset"]);
                 });
             });
         });
     }
-
-    
 
     private static checkQueuePosition(settings: BuildSettings, buildInfo: BuildInfo): Q.Promise<any> {
         if (buildInfo.status === BuildInfo.BUILDING) {
@@ -528,10 +529,10 @@ class RemoteBuildClientHelper {
                     var queueIndex = serverInfo.queuedBuilds.map((bi: BuildInfo) => bi.buildNumber === buildInfo.buildNumber).indexOf(true);
 
                     if (queueIndex >= 0) {
-                        console.info(resources.getString("RemoteBuildQueued", queueIndex + 1));
+                        Logger.log(resources.getString("RemoteBuildQueued", queueIndex + 1));
                     }
                 } catch (e) {
-                    console.info(e);
+                    Logger.log(e);
                 }
                 return Q({});
             });
@@ -561,7 +562,7 @@ class RemoteBuildClientHelper {
             var countStream = new CountStream();
             var newlineNormalizerStream = new NewlineNormalizerStream();
             logStream.on("finish", function (): void {
-                console.info(resources.getString("BuildLogWrittenTo", logPath));
+                Logger.log(resources.getString("BuildLogWrittenTo", logPath));
             });
             req.on("end", function (): void {
                 buildInfo["logOffset"] = offset + countStream.count;
@@ -601,14 +602,14 @@ class RemoteBuildClientHelper {
         var buildNumber = buildInfo.buildNumber;
         var downloadUrl = serverUrl + "/build/" + buildNumber + "/download";
 
-        console.info(resources.getString("DownloadingRemoteBuild", downloadUrl, toDir));
+        Logger.log(resources.getString("DownloadingRemoteBuild", downloadUrl, toDir));
         var zipFile = path.join(toDir, buildNumber + ".zip");
         var outZip = fs.createWriteStream(zipFile);
         outZip.on("error", function (error: any): void {
             deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorDownloadingRemoteBuild, error, toDir));
         });
         outZip.on("finish", function (): void {
-            console.info(resources.getString("DownloadedRemoteBuild", toDir));
+            Logger.log(resources.getString("DownloadedRemoteBuild", toDir));
             deferred.resolve(zipFile);
         });
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).invoke("pipe", outZip).then(function (): Q.Promise<string> {
@@ -620,17 +621,17 @@ class RemoteBuildClientHelper {
      * Unzip the downloaded build
      */
     private static unzipBuildFiles(zipFile: string, toDir: string): Q.Promise<{}> {
-        console.info(resources.getString("ExtractingRemoteBuild", toDir));
+        Logger.log(resources.getString("ExtractingRemoteBuild", toDir));
         UtilHelper.createDirectoryIfNecessary(toDir);
         var deferred = Q.defer();
 
         try {
             var zip = new AdmZip(zipFile);
             zip.extractAllTo(toDir, true);
-            console.info(resources.getString("DoneExtractingRemoteBuild", toDir));
+            Logger.log(resources.getString("DoneExtractingRemoteBuild", toDir));
             fs.unlink(zipFile, function (err: NodeJS.ErrnoException): void {
                 if (err) {
-                    console.info(resources.getString("FailedToDeleteRemoteZip", zipFile));
+                    Logger.log(resources.getString("FailedToDeleteRemoteZip", zipFile));
                 }
 
                 deferred.resolve({});

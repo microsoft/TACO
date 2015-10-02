@@ -31,6 +31,7 @@ import TacoRemoteConfig = require ("./tacoRemoteConfig");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
+import Logger = utils.Logger;
 
 interface IBuildMetrics {
     submitted: number;
@@ -92,9 +93,9 @@ class BuildManager {
     }
 
     public submitNewBuild(req: express.Request): Q.Promise<BuildInfo> {
-        console.info(resources.getString("NewBuildSubmitted"));
-        console.info(req.url);
-        console.info(req.headers);
+        Logger.log(resources.getString("NewBuildSubmitted"));
+        Logger.log(req.url);
+        Logger.log(JSON.stringify(req.headers));
 
         this.buildMetrics.submitted++;
 
@@ -133,7 +134,7 @@ class BuildManager {
                 fs.mkdirSync(buildDir);
             }
 
-            console.info(resources.getString("BuildManagerDirInit", buildDir));
+            Logger.log(resources.getString("BuildManagerDirInit", buildDir));
 
             // Pass the build query to the buildInfo, for package-specific config options
             var params = req.query;
@@ -185,8 +186,8 @@ class BuildManager {
 
         var logStream = fs.createReadStream(buildLog, { start: offset });
         logStream.on("error", function (err: any): void {
-            console.info(resources.getString("LogFileReadError"));
-            console.info(err);
+            Logger.log(resources.getString("LogFileReadError"));
+            Logger.log(err);
         });
         logStream.pipe(res);
     }
@@ -264,18 +265,18 @@ class BuildManager {
 
     private saveUploadedTgzFile(buildInfo: BuildInfo, req: express.Request, callback: Function): void {
         var self = this;
-        console.info(resources.getString("UploadSaving", buildInfo.buildDir));
+        Logger.log(resources.getString("UploadSaving", buildInfo.buildDir));
         buildInfo.tgzFilePath = path.join(buildInfo.buildDir, "upload_" + buildInfo.buildNumber + ".tgz");
         var tgzFile = fs.createWriteStream(buildInfo.tgzFilePath);
         req.pipe(tgzFile);
         tgzFile.on("finish", function (): void {
             buildInfo.updateStatus(BuildInfo.UPLOADED);
-            console.info(resources.getString("UploadSavedSuccessfully", buildInfo.tgzFilePath));
+            Logger.log(resources.getString("UploadSavedSuccessfully", buildInfo.tgzFilePath));
             callback(null, buildInfo);
         });
         tgzFile.on("error", function (err: Error): void {
             buildInfo.updateStatus(BuildInfo.ERROR, "ErrorSavingTgz", tgzFile, err.message);
-            console.error(resources.getString("ErrorSavingTgz", tgzFile, err));
+            Logger.logError(resources.getString("ErrorSavingTgz", tgzFile, err));
             self.buildMetrics.failed++;
             callback(err, buildInfo);
         });
@@ -292,21 +293,21 @@ class BuildManager {
             }
         } catch (e) {
             buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "FailedCreateDirectory", extractToDir, e.message));
-            console.error(resources.getString("FailedCreateDirectory", extractToDir, e.message));
+            Logger.logError(resources.getString("FailedCreateDirectory", extractToDir, e.message));
             self.buildMetrics.failed++;
             return;
         }
 
         if (!fs.existsSync(buildInfo.tgzFilePath)) {
             buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "NoTgzFound", buildInfo.tgzFilePath));
-            console.error(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
+            Logger.logError(resources.getString("NoTgzFound", buildInfo.tgzFilePath));
             self.buildMetrics.failed++;
             return;
         }
 
         var onError = function (err: Error): void {
             buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
-            console.info(resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
+            Logger.log(resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
             self.buildMetrics.failed++;
         };
 
@@ -318,26 +319,30 @@ class BuildManager {
             who.props.mode = 511; // "chmod 777"
 
             // Do not include the /plugins folder
-            return !who.props.path.match(/plugins/);
+            var localPath = path.relative(extractToDir, who.props.path);
+            return !(localPath.split(path.sep)[0] === "plugins");
         };
 
         var pluginsOnlyFilter = function (who: Fstream.Writer): boolean {
             who.props.mode = 511; // "chmod 0777"
 
-            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || !!who.props.path.match(/plugins/);
+            // Here we want to exclusively extract the contents of the /plugins folder, and we will put it in a separate location
+            // Later in taco-remote-lib we will manually merge the plugins into the project to ensure they are added correctly.
+            var localPath = path.relative(extractToDir, who.props.path);
+            return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || localPath.split(path.sep)[0] === "plugins";
         };
 
         var extractDeferred = Q.defer();
         var extractPluginDeferred = Q.defer();
         // strip: 1 means take the top level directory name off when extracting (we want buildInfo.appDir to be the top level dir.)
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var tarExtractor = tar.Extract(<tar.ExtractOptions>{ path: extractToDir, strip: 1, filter: tarFilter });
+        var tarExtractor = tar.Extract(<tar.ExtractOptions> { path: extractToDir, strip: 1, filter: tarFilter });
         tarExtractor.on("end", function (): void {
             self.removeDeletedFiles(buildInfo);
             extractDeferred.resolve({});
         });
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var pluginExtractor = tar.Extract(<tar.ExtractOptions>{ path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
+        var pluginExtractor = tar.Extract(<tar.ExtractOptions> { path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
         pluginExtractor.on("end", function (): void {
             extractPluginDeferred.resolve({});
         });
@@ -354,7 +359,7 @@ class BuildManager {
 
         Q.all([extractDeferred.promise, extractPluginDeferred.promise]).then(function (): void {
             buildInfo.updateStatus(BuildInfo.EXTRACTED);
-            console.info(resources.getString("UploadExtractedSuccessfully", extractToDir));
+            Logger.log(resources.getString("UploadExtractedSuccessfully", extractToDir));
             self.build(buildInfo);
         });
     }
@@ -383,11 +388,11 @@ class BuildManager {
     private build(buildInfo: BuildInfo): void {
         var self = this;
         if (self.currentBuild) {
-            console.info(resources.getString("NewBuildQueued", buildInfo.buildNumber));
+            Logger.log(resources.getString("NewBuildQueued", buildInfo.buildNumber));
             self.queuedBuilds.push(buildInfo);
             return;
         } else {
-            console.info(resources.getString("NewBuildStarted", buildInfo.buildNumber));
+            Logger.log(resources.getString("NewBuildStarted", buildInfo.buildNumber));
             self.currentBuild = buildInfo;
         }
 
@@ -395,7 +400,7 @@ class BuildManager {
         this.buildRetention.purge(self.builds);
 
         if (!fs.existsSync(buildInfo.appDir)) {
-            console.info(resources.getString("BuildDirectoryNotFound", buildInfo.buildDir));
+            Logger.log(resources.getString("BuildDirectoryNotFound", buildInfo.buildDir));
             buildInfo.updateStatus(BuildInfo.ERROR, "BuildDirectoryNotFound", buildInfo.buildDir);
             self.buildMetrics.failed++;
             self.dequeueNextBuild();
@@ -423,7 +428,7 @@ class BuildManager {
     }
 
     private dequeueNextBuild(): void {
-        console.info(resources.getString("BuildMovingOn"));
+        Logger.log(resources.getString("BuildMovingOn"));
         this.currentBuild = null;
         var nextBuild = this.queuedBuilds.shift();
         if (nextBuild) {

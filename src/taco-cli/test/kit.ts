@@ -13,7 +13,11 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import del = require ("del");
 import fs = require ("fs");
@@ -93,7 +97,7 @@ describe("Kit", function (): void {
 
             var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
 
-            tacoJsonKeyValues.should.be.eql(tacoJson)
+            tacoJsonKeyValues.should.be.eql(tacoJson);
             return telemetryParameters;
         });
     }
@@ -108,7 +112,7 @@ describe("Kit", function (): void {
         process.env["TACO_HOME"] = tacoHome;
 
         // Force KitHelper to fetch the package fresh
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
 
         this.timeout(30000);
         rimraf.sync(runFolder);
@@ -117,7 +121,7 @@ describe("Kit", function (): void {
     after((done: MochaDone) => {
         process.env["TACO_UNIT_TEST"] = previous;
         process.chdir(originalCwd);
-        kitHelper.KitPackagePromise = null;
+        kitHelper.kitPackagePromise = null;
         rimraf(runFolder, function (err: Error): void { done(); }); // ignore errors
     });
 
@@ -176,7 +180,7 @@ describe("Kit", function (): void {
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
         var expectedCliTacoJsonKeyValues: IKeyValuePair<string> = {
-            "cordova-cli": "5.1.1" 
+            "cordova-cli": "5.1.1"
         };
 
         this.timeout(30000);
@@ -186,7 +190,7 @@ describe("Kit", function (): void {
             .done(function (): void {
                 process.chdir(kitProjectpath);
                 done();
-            });  
+            });
         });
 
         after(function (done: MochaDone): void {
@@ -204,7 +208,7 @@ describe("Kit", function (): void {
                     };
                     telemetryParameters.should.be.eql(expected);
                 })
-                .done(() => done(), done)
+                .done(() => done(), done);
         });
     });
 
@@ -212,9 +216,9 @@ describe("Kit", function (): void {
         var cliProjectpath: string = path.join(tacoHome, cliProjectDir);
         var tacoJsonPath: string = path.resolve(cliProjectpath, "taco.json");
         var expectedKitTacoJsonKeyValues: IKeyValuePair<string> = {
-            kit: "5.1.1-Kit", "cordova-cli": "5.1.1" 
+            kit: "5.1.1-Kit", "cordova-cli": "5.1.1"
         };
-        
+
         this.timeout(30000);
 
         before(function (done: MochaDone): void {
@@ -222,7 +226,7 @@ describe("Kit", function (): void {
             .done(function (): void {
                 process.chdir(cliProjectpath);
                 done();
-            });  
+            }, done);
         });
 
         after(function (done: MochaDone): void {
@@ -241,6 +245,6 @@ describe("Kit", function (): void {
                     telemetryParameters.should.be.eql(expected);
                 })
                 .done(() => done(), done);
-        });   
+        });
     });
 });

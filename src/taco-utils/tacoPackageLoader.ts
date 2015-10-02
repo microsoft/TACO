@@ -91,10 +91,10 @@ module TacoUtility {
     }
 
     export class TacoPackageLoader {
-        public static GitUriRegex: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
-        public static FileUriRegex: RegExp = /^file:\/\/.*/;
+        public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
+        public static FILE_URI_REGEX: RegExp = /^file:\/\/.*/;
 
-        public static MockForTests: TacoUtility.ITacoPackageLoader;
+        public static mockForTests: TacoUtility.ITacoPackageLoader;
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,
@@ -113,10 +113,10 @@ module TacoUtility {
          * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
          */
         public static lazyRequire<T>(packageName: string, packageId: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<T> {
-            if (!this.MockForTests) {
+            if (!this.mockForTests) {
                 return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
             } else {
-                return this.MockForTests.lazyRequire<T>(packageName, packageId, logLevel);
+                return this.mockForTests.lazyRequire<T>(packageName, packageId, logLevel);
             }
         }
 
@@ -235,9 +235,9 @@ module TacoUtility {
             var packageType: PackageSpecType = PackageSpecType.Error;
 
             // The packageId can either be a GIT url, a local file path or name@version (cordova@4.3)
-            if ((TacoPackageLoader.GitUriRegex.test(packageId))) {
+            if ((TacoPackageLoader.GIT_URI_REGEX.test(packageId))) {
                 packageType = PackageSpecType.Uri;
-            } else if (TacoPackageLoader.FileUriRegex.test(packageId)) {
+            } else if (TacoPackageLoader.FILE_URI_REGEX.test(packageId)) {
                 packageId = packageId.substring("file://".length);
                 packageType = PackageSpecType.FilePath;
             } else {
@@ -252,7 +252,7 @@ module TacoUtility {
             switch (packageType) {
                 case PackageSpecType.Registry:
                     var versionSubFolder: string = packageId.split("@")[1] || "latest";
-                    return <IPackageInstallRequest>{
+                    return <IPackageInstallRequest> {
                         packageName: packageName,
                         type: packageType,
                         packageId: packageId,
@@ -263,7 +263,7 @@ module TacoUtility {
 
                 case PackageSpecType.Uri:
                 case PackageSpecType.FilePath:
-                    return <IPackageInstallRequest>{
+                    return <IPackageInstallRequest> {
                         packageName: packageName,
                         type: packageType,
                         packageId: packageId,
@@ -272,7 +272,6 @@ module TacoUtility {
                         expirationIntervalInHours: expirationIntervalInHours,
                         logLevel: logLevel
                     };
-                    break;
 
                 case PackageSpecType.Error:
                     throw errorHelper.get(TacoErrorCodes.PackageLoaderInvalidPackageVersionSpecifier, packageId.split("@")[1], packageName);
@@ -309,8 +308,8 @@ module TacoUtility {
                 args = args.concat(flags);
             }
 
-            var npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-            var npmProcess = child_process.spawn(npmCommand, args, { cwd: cwd, stdio: "inherit" });
+            var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: "inherit" });
             npmProcess.on("error", function (error: Error): void {
                 deferred.reject(error);
             });
@@ -338,7 +337,7 @@ module TacoUtility {
                         logger.logLine();
                         logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId));
                     }
-                }).catch(function (err: any): Q.Promise<void> { 
+                }).catch(function (err: any): Q.Promise<void> {
                     var deferred: Q.Deferred<void> = Q.defer<void>();
                     rimraf(request.targetPath, function (): void {
                         if (request.logLevel >= InstallLogLevel.taco) {
@@ -403,7 +402,7 @@ module TacoUtility {
         }
 
         private static requirePackage<T>(packageTargetPath: string): T {
-            return <T>require(packageTargetPath);
+            return <T> require(packageTargetPath);
         }
 
         private static getStatusFilePath(targetPath: string): string {
@@ -429,7 +428,7 @@ module TacoUtility {
         private static getLastCheckTimestamp(targetPath: string): Q.Promise<number> {
             return Q.denodeify(fs.readFile)(TacoPackageLoader.getTimestampFilePath(targetPath))
                 .then(function (data: Buffer): number {
-                    return parseInt(data.toString());
+                    return parseInt(data.toString(), 10);
                 })
                 .catch(function (error: any): number {
                     return -1;

@@ -36,7 +36,7 @@ module ElevatedInstallerProtocol {
 
     export interface IElevatedInstallerMessage {
         dataType: DataType;
-        message: string
+        message: string;
     }
 
     export interface ILogger {

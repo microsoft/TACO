@@ -10,12 +10,20 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/Q.d.ts" />
 "use strict";
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import net = require ("net");
 import Q = require ("q");
 
 import runner = require ("../ios/iosAppRunnerHelper");
+import utils = require ("taco-utils");
+
+import Logger = utils.Logger;
 
 interface IMockDebuggerProxy extends net.Server {
     protocolState?: number;
@@ -46,15 +54,18 @@ describe("Device functionality", function (): void {
                 }
 
                 dataString[0].should.equal("$");
-
+                var expectedResponse: string = "";
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
-                        var expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
+                        expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
                         var checksum = 0;
                         for (var i = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
                         };
+                        /* tslint:disable:no-bitwise */
+                        // Some bitwise operations needed to calculate the checksum here
                         checksum = checksum & 0xFF;
+                        /* tslint:enable:no-bitwise */
                         var checkstring = checksum.toString(16).toUpperCase();
                         if (checkstring.length === 1) {
                             checkstring = "0" + checkstring;
@@ -67,14 +78,14 @@ describe("Device functionality", function (): void {
                         client.write("$OK#9A");
                         break;
                     case 2:
-                        var expectedResponse = "$Hc0#DB";
+                        expectedResponse = "$Hc0#DB";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
                         client.write("$OK#9A");
                         break;
                     case 4:
-                        var expectedResponse = "$c#63";
+                        expectedResponse = "$c#63";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
@@ -88,7 +99,7 @@ describe("Device functionality", function (): void {
         mockDebuggerProxy.on("error", done);
 
         mockDebuggerProxy.listen(port, function (): void {
-            console.info("MockDebuggerProxy listening");
+            Logger.log("MockDebuggerProxy listening");
         });
 
         Q.timeout(runner.startAppViaDebugger(port, appPath), 1000)
@@ -121,14 +132,18 @@ describe("Device functionality", function (): void {
 
                 dataString[0].should.equal("$");
 
+                var expectedResponse: string = "";
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
-                        var expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
+                        expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
                         var checksum = 0;
                         for (var i = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
                         };
+                        /* tslint:disable:no-bitwise */
+                        // Some bit operations needed to calculate checksum
                         checksum = checksum & 0xFF;
+                        /* tslint:enable:no-bitwise */
                         var checkstring = checksum.toString(16).toUpperCase();
                         if (checkstring.length === 1) {
                             checkstring = "0" + checkstring;
@@ -141,14 +156,14 @@ describe("Device functionality", function (): void {
                         client.write("$OK#9A");
                         break;
                     case 2:
-                        var expectedResponse = "$Hc0#DB";
+                        expectedResponse = "$Hc0#DB";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
                         client.write("$OK#9A");
                         break;
                     case 4:
-                        var expectedResponse = "$c#63";
+                        expectedResponse = "$c#63";
                         dataString.should.equal(expectedResponse);
                         mockDebuggerProxy.protocolState++;
                         client.write("+");
@@ -161,7 +176,7 @@ describe("Device functionality", function (): void {
         mockDebuggerProxy.on("error", done);
 
         mockDebuggerProxy.listen(port, function (): void {
-            console.info("MockDebuggerProxy listening");
+            Logger.log("MockDebuggerProxy listening");
         });
 
         Q.timeout(runner.startAppViaDebugger(port, appPath), 1000).done(function (): void {

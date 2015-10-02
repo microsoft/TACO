@@ -13,7 +13,11 @@
 
 "use strict";
 
-var should_module = require("should"); // Note not import: We don't want to refer to should_module, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule = require("should");
+/* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
 import os = require ("os");
@@ -109,12 +113,12 @@ describe("InstallerRunner", function (): void {
             ];
 
             createBuildConfig(missingDependencies);
-            (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+            (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
         });
 
         it("should report the correct error when installConfig does not exist", function (): void {
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("InstallConfigNotFound");
             }
@@ -127,7 +131,7 @@ describe("InstallerRunner", function (): void {
             fs.writeFileSync(installConfigFile, "{\"dependencies\":");
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("InstallConfigMalformed");
             }
@@ -136,7 +140,7 @@ describe("InstallerRunner", function (): void {
             fs.writeFileSync(installConfigFile, "{\"unknownObject\":\"unknownValue\"}");
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("InstallConfigMalformed");
             }
@@ -168,7 +172,7 @@ describe("InstallerRunner", function (): void {
             createBuildConfig(missingDependencies);
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("UnknownDependency");
             }
@@ -200,7 +204,7 @@ describe("InstallerRunner", function (): void {
             createBuildConfig(missingDependencies);
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("UnknownVersion");
             }
@@ -232,7 +236,7 @@ describe("InstallerRunner", function (): void {
             createBuildConfig(missingDependencies);
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("InvalidInstallPath");
             }
@@ -264,7 +268,7 @@ describe("InstallerRunner", function (): void {
             createBuildConfig(missingDependencies);
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("PathNotEmpty");
             }
@@ -296,7 +300,7 @@ describe("InstallerRunner", function (): void {
             createBuildConfig(missingDependencies);
 
             try {
-                (<any>installerRunner).parseInstallConfig(new TelemetryGenerator(""));
+                (<any> installerRunner).parseInstallConfig(new TelemetryGenerator(""));
             } catch (err) {
                 err.message.should.be.exactly("PathNotUnique");
             }
@@ -312,7 +316,7 @@ describe("InstallerRunner", function (): void {
                 installDestination: "test_value1"
             };
 
-            (<any>installerRunner).instantiateInstaller(dependency);
+            (<any> installerRunner).instantiateInstaller(dependency);
         });
     });
 });
