@@ -56,7 +56,7 @@ class CheckForNewerVersion {
 
     public showOnExitAndIgnoreFailures(): void {
         try {
-            this.showOnExit().catch(error => tacoUtility.UtilHelper.emptyMethod(error)).done();
+            this.showOnExit().catch(tacoUtility.UtilHelper.emptyMethod).done();
         } catch (e) {
             // We don't want to crash the app if there is a bug or error in this code
         }

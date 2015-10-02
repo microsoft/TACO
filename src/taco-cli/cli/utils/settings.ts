@@ -194,7 +194,7 @@ class Settings {
                 // Filter down to user-requested platforms if appropriate
                 return requestedPlatforms.map((platform: string): Settings.IPlatformWithLocation => {
                     if (!options.options["local"] && platforms.some((p: Settings.IPlatformWithLocation): boolean => {
-                        return p.platform === platform && p.location === Settings.BuildLocationType.Remote
+                        return p.platform === platform && p.location === Settings.BuildLocationType.Remote;
                     })) {
                         // If we found a remote configuration for the platform default to using that
                         return { platform: platform, location: Settings.BuildLocationType.Remote };

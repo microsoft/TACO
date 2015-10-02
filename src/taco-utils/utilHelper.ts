@@ -360,7 +360,7 @@ module TacoUtility {
          * An explicit helper empty method, which can be used in scenarios like
          * silent callbacks, catch all exceptions do nothing etc.
          */
-        public static emptyMethod(args?: any): any {
+        public static emptyMethod(...args: any[]): void {
         }
         /* tslint:enable:no-empty */
 
