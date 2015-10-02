@@ -102,6 +102,30 @@ class Settings {
         });
     }
 
+    /**
+     * Apply functions to all local and remote platforms.
+     * Local platforms are batched into one list because Cordova does not cope with multiple concurrent invocations
+     * Remote platforms are done individually (but concurrently with each other and local platforms) since they may
+     * go to completely different servers.
+     */
+    public static operateOnPlatforms(platforms: Settings.IPlatformWithLocation[],
+        localFunction: (platforms: string[]) => Q.Promise<any>,
+        remoteFunction: (platforms: string) => Q.Promise<any>): Q.Promise<any> {
+        var localPlatforms = platforms.filter((platform: Settings.IPlatformWithLocation) => {
+            return platform.location === Settings.BuildLocationType.Local;
+        }).map((platform: Settings.IPlatformWithLocation) => platform.platform);
+        var remotePlatforms = platforms.filter((platform: Settings.IPlatformWithLocation) => {
+            return platform.location === Settings.BuildLocationType.Remote;
+        }).map((platform: Settings.IPlatformWithLocation) => platform.platform);
+
+        // We batch all local platforms together so we make one cordova.raw.build(["foo", "bar", "baz"]) invocation,
+        // because these raw functions are not safe to invoke concurrently.
+        var buildLocalPlatforms = localPlatforms.length > 0 ? localFunction(localPlatforms) : Q({});
+        var buildRemotePlatforms = remotePlatforms.map(remoteFunction);
+
+        return Q.all([buildLocalPlatforms].concat(buildRemotePlatforms));
+    }
+
     /*
      * Construct the base URL for the given build server
      */

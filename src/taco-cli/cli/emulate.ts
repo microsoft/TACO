@@ -128,16 +128,11 @@ class Emulate extends commands.TacoCommandBase {
         return Q.all<any>([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-                return Q.all(platforms.map((platform: Settings.IPlatformWithLocation): Q.Promise<any> => {
-                    switch (platform.location) {
-                        case Settings.BuildLocationType.Local:
-                            // Just run local, and failures are failures
-                            return CordovaWrapper.emulate(commandData, platform.platform);
-                        case Settings.BuildLocationType.Remote:
-                            // Just run remote, and failures are failures
-                            return Emulate.runRemotePlatform(platform.platform, commandData, telemetryProperties);
-                    }
-                }));
+
+                return Settings.operateOnPlatforms(platforms,
+                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.emulate(commandData, localPlatforms),
+                    (remotePlatform: string): Q.Promise<any> => Emulate.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
+                    );
             }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
     }
 

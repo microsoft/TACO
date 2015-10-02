@@ -146,26 +146,19 @@ class Build extends commands.TacoCommandBase {
         return Q.all<any>([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
            .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
             buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-            return Q.all(platforms.map((platform: Settings.IPlatformWithLocation) => {
-                return Q({}).then(() => {
-                    if (commandData.options["clean"]) {
-                        return Build.cleanPlatform(platform, commandData);
-                    } else {
-                        return Q({});
-                    }
-                }).then(() => {
-                    switch (platform.location) {
-                        case Settings.BuildLocationType.Local:
-                            // Just build local, and failures are failures
-                            return CordovaWrapper.build(commandData, platform.platform);
-                        case Settings.BuildLocationType.Remote:
-                            // Just build remote, and failures are failures
-                            return Build.buildRemotePlatform(platform.platform, commandData, telemetryProperties);
-                        default:
-                            return Q.reject(errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform));
-                    }
-                });
-            }));
+            var cleanPromise = Q({});
+            if (commandData.options["clean"]) {
+                cleanPromise = Q.all(platforms.map((platform: Settings.IPlatformWithLocation) => {
+                    return Build.cleanPlatform(platform, commandData);
+                }));
+            }
+
+            return cleanPromise.then((): Q.Promise<any> => {
+                return Settings.operateOnPlatforms(platforms,
+                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.build(commandData, localPlatforms),
+                    (remotePlatform: string): Q.Promise<any> => Build.buildRemotePlatform(remotePlatform, commandData, telemetryProperties)
+                    );
+            });
         }).then(() => Build.generateTelemetryProperties(telemetryProperties, commandData));
     }
 
