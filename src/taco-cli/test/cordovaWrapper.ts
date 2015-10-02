@@ -86,6 +86,7 @@ describe("cordovaWrapper", () => {
         }).done(() => done(), done);
     });
 
+    // Note: this test assumes that a global install of Cordova exists.
     it("should handle problems launching cordova via the command line", (done: MochaDone): void => {
         CordovaWrapper.cli(["fakeCommand"])
             .then(() => {
