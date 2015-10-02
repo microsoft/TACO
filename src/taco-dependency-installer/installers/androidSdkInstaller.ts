@@ -21,6 +21,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
+import util = require ("util");
 import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");
@@ -37,7 +38,7 @@ class AndroidSdkInstaller extends InstallerBase {
     private static AndroidHomeName: string = "ANDROID_HOME";
     private static AndroidCommand = os.platform() === "win32" ? "android.bat" : "android";
     private static AndroidPackages: string[] = [
-        "tools",
+        // "tools",  // Android SDK comes by default with the tools package, so there is no need to update it. In the future, if we feel we want dependency installer to always install the latest Tools package, then uncomment this.
         "platform-tools",
         "extra-android-support",
         "extra-android-m2repository",
@@ -154,9 +155,14 @@ class AndroidSdkInstaller extends InstallerBase {
     protected postInstallDarwin(): Q.Promise<any> {
         var self = this;
 
-        return this.addExecutePermission()
+        // We need to add execute permission to the android executable in order to run it
+        return this.addExecutePermission(path.join(this.androidHomeValue, "tools", "android"))
             .then(function (): Q.Promise<any> {
                 return self.postInstallDefault();
+            })
+            .then(function (): Q.Promise<any> {
+                // We need to add execute permissions for the Gradle wrapper
+                return self.addExecutePermission(path.join(self.androidHomeValue, "tools", "templates", "gradle", "wrapper", "gradlew"));
             });
     }
 
@@ -198,9 +204,9 @@ class AndroidSdkInstaller extends InstallerBase {
         return Q.resolve({});
     }
 
-    private addExecutePermission(): Q.Promise<any> {
+    private addExecutePermission(fileFullPath: string): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "chmod a+x " + path.join(this.androidHomeValue, "tools", "android");
+        var command: string = util.format("chmod a+x \"%s\"", fileFullPath);
 
         childProcess.exec(command, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
