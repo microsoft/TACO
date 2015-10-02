@@ -26,7 +26,7 @@ import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
-import tacoUtility = require("taco-utils");
+import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 
@@ -35,7 +35,7 @@ class CordovaWrapper {
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<any> {
-        return CordovaWrapper.getCordovaCommand()
+        return CordovaWrapper.getCordovaExecutable()
             .then(function (commandToRun: string): Q.Promise<string> {
             var deferred = Q.defer<string>();
             var output: string = "";
@@ -195,7 +195,7 @@ class CordovaWrapper {
      * Returns a path to the local Cordova command if ran from a taco project, otherwise it will return the
      * global Cordova command.
      */
-    private static getCordovaCommand(): Q.Promise < string > {
+    private static getCordovaExecutable(): Q.Promise < string > {
         return CordovaHelper.tryInvokeCordova<string>((cordova: typeof Cordova): string => {
         return (<{ packageTargetPath?: string }> cordova).packageTargetPath;
     }, (): string => null)
