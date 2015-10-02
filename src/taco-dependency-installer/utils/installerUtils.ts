@@ -41,6 +41,7 @@ module InstallerUtils {
 }
 
 class InstallerUtils {
+    private static pathName = os.platform() === "win32" ? "Path" : "PATH";
     /**
      * Verifies if the specified file is valid by comparing its sha1 signature and its size in bytes with the provided expectedSha1 and expectedBytes.
      *
@@ -196,9 +197,7 @@ class InstallerUtils {
      *
      * @return {boolean} A boolean set to true if the Path system variable already contains the specified value in one of its segments
      */
-    public static pathContains(valueToCheck: string, pathValue: string = null): boolean {
-        pathValue = pathValue || os.platform() === "win32" ? process.env["Path"] : process.env["PATH"];
-
+    public static pathContains(valueToCheck: string, pathValue: string = process.env[InstallerUtils.pathName]): boolean {
         if (!pathValue) {
             return false;
         }
