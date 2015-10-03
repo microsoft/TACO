@@ -311,7 +311,7 @@ module TacoUtility {
             var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
 
             var stdio: any = logLevel === InstallLogLevel.error // On the default error message level, we don't want to show npm output messages
-                ? [/*stdin*/ "ignore", /*stdin*/ "ignore", /*stderr*/ process.stderr] // So we inherit stderr but we ignore stdin and stdout
+                ? [/*stdin*/ "ignore", /*stdout*/ "ignore", /*stderr*/ process.stderr] // So we inherit stderr but we ignore stdin and stdout
                 : "inherit"; // For silent everything is ignored, so it doesn't matter, for everything else we just let npm inherit all our streams
 
             var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: stdio });
