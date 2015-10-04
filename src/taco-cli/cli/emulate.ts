@@ -17,7 +17,8 @@ import Q = require ("q");
 
 import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
-import CordovaWrapper = require ("./utils/CordovaWrapper");
+import CordovaWrapper = require ("./utils/cordovaWrapper");
+import PlatformHelper = require ("./utils/platformHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -125,11 +126,10 @@ class Emulate extends commands.TacoCommandBase {
 
     private static emulate(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
-        return Q.all<any>([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
-            .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
+        return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
+            .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-
-                return Settings.operateOnPlatforms(platforms,
+                return PlatformHelper.operateOnPlatforms(platforms,
                     (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.emulate(commandData, localPlatforms),
                     (remotePlatform: string): Q.Promise<any> => Emulate.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
                     );
