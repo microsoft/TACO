@@ -49,8 +49,8 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
             deleteBuildsOnShutdown: true,
             allowsEmulate: true
         };
-        var hostDefaults = HostSpecifics.hostSpecifics.defaults(defaults);
-        var self = this;
+        var hostDefaults: { [key: string]: any } = HostSpecifics.hostSpecifics.defaults(defaults);
+        var self: TacoRemoteConfig = this;
         Object.keys(hostDefaults).forEach(function (key: string): void {
             if (typeof (self.tacoRemoteConf[key]) === "undefined") {
                 self.tacoRemoteConf[key] = hostDefaults[key];
@@ -140,7 +140,7 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
     }
 
     public serialize(): RemoteBuild.IServerModuleConfiguration {
-        var confCopy = JSON.parse(JSON.stringify(this.tacoRemoteConf));
+        var confCopy: any = JSON.parse(JSON.stringify(this.tacoRemoteConf));
         // These three properties are taken from the root config, and are not individually configurable. Remove them when saving.
         delete confCopy.lang;
         delete confCopy.port;

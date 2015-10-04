@@ -32,7 +32,7 @@ import TacoPackageLoader = utils.TacoPackageLoader;
 import UtilHelper = utils.UtilHelper;
 
 process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: string }): void {
-    var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(buildRequest.buildInfo);
+    var buildInfo: BuildInfo = BuildInfo.createNewBuildInfoFromDataObject(buildRequest.buildInfo);
     process.env.TACO_LANG = buildRequest.language;
     if (IOSBuilder.running) {
         buildInfo.updateStatus(BuildInfo.ERROR, "BuildInvokedTwice");
@@ -46,7 +46,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
     process.send(buildInfo);
     TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
-        var iosBuilder = new IOSBuilder(buildInfo, pkg);
+        var iosBuilder: IOSBuilder = new IOSBuilder(buildInfo, pkg);
 
         iosBuilder.build().done(function (resultBuildInfo: BuildInfo): void {
             process.send(resultBuildInfo);
@@ -84,14 +84,14 @@ class IOSBuilder extends Builder {
     }
 
     protected package(): Q.Promise<any> {
-        var deferred = Q.defer();
-        var self = this;
+        var deferred: Q.Deferred<any> = Q.defer();
+        var self: IOSBuilder = this;
 
         // need quotes around ipa paths for xcrun exec to work if spaces in path
-        var appDirName = this.cfg.id() + ".app";
-        var ipaFileName = this.currentBuild["appName"] + ".ipa";
-        var pathToCordovaApp = UtilHelper.quotesAroundIfNecessary(path.join("platforms", "ios", "build", "device", appDirName));
-        var fullPathToIpaFile = UtilHelper.quotesAroundIfNecessary(path.join(process.cwd(), "platforms", "ios", "build", "device", ipaFileName));
+        var appDirName: string = this.cfg.id() + ".app";
+        var ipaFileName: string = this.currentBuild["appName"] + ".ipa";
+        var pathToCordovaApp: string = UtilHelper.quotesAroundIfNecessary(path.join("platforms", "ios", "build", "device", appDirName));
+        var fullPathToIpaFile: string = UtilHelper.quotesAroundIfNecessary(path.join(process.cwd(), "platforms", "ios", "build", "device", ipaFileName));
 
         child_process.exec("xcrun -v -sdk iphoneos PackageApplication " + pathToCordovaApp + " -o " + fullPathToIpaFile, {},
             function (error: Error, stdout: Buffer, stderr: Buffer): void {
@@ -100,8 +100,8 @@ class IOSBuilder extends Builder {
                 if (error) {
                     deferred.reject(error);
                 } else {
-                    var plistFileName = self.currentBuild["appName"] + ".plist";
-                    var fullPathToPlistFile = path.join(process.cwd(), "platforms", "ios", "build", "device", plistFileName);
+                    var plistFileName: string = self.currentBuild["appName"] + ".plist";
+                    var fullPathToPlistFile: string = path.join(process.cwd(), "platforms", "ios", "build", "device", plistFileName);
                     plist.createEnterprisePlist(self.cfg, fullPathToPlistFile);
                     deferred.resolve({});
                 }
@@ -112,19 +112,19 @@ class IOSBuilder extends Builder {
 
     // Public for unit tests
     public applyPreferencesToBuildConfig(config: CordovaConfig): Q.Promise<any> {
-        var promise = Q({});
-        var self = this;
+        var promise: Q.Promise<any> = Q({});
+        var self: IOSBuilder = this;
 
-        var preferences = config.preferences();
+        var preferences: { [key: string]: string } = config.preferences();
 
         // Always put the targeted device into the build config.
         // If a valid overriding device is not given, use 'universal'
-        var deviceToAdd = "1,2";
+        var deviceToAdd: string = "1,2";
         var validOverridingTargetDevices: any = {};
         validOverridingTargetDevices["handset"] = "1";
         validOverridingTargetDevices["tablet"] = "2";
 
-        var targetDevice = preferences["target-device"];
+        var targetDevice: string = preferences["target-device"];
         if (targetDevice && validOverridingTargetDevices[targetDevice]) {
             deviceToAdd = validOverridingTargetDevices[targetDevice];
         }
@@ -133,7 +133,7 @@ class IOSBuilder extends Builder {
             return self.appendToBuildConfig("TARGETED_DEVICE_FAMILY = " + deviceToAdd);
         });
 
-        var deploymentTarget = preferences["deployment-target"];
+        var deploymentTarget: string = preferences["deployment-target"];
         if (deploymentTarget) {
             promise = promise.then(function (): Q.Promise<any> {
                 return self.appendToBuildConfig("IPHONEOS_DEPLOYMENT_TARGET = " + deploymentTarget);
@@ -149,9 +149,9 @@ class IOSBuilder extends Builder {
     }
 
     private appendToBuildConfig(data: string): Q.Promise<any> {
-        var deferred = Q.defer();
+        var deferred: Q.Deferred<any> = Q.defer();
 
-        var buildConfigDir = path.join("platforms", "ios", "cordova");
+        var buildConfigDir: string = path.join("platforms", "ios", "cordova");
         if (!fs.existsSync(buildConfigDir)) {
             deferred.reject(new Error(resources.getString("ErrorXcconfigDirNotFound")));
         } else {
@@ -168,7 +168,7 @@ class IOSBuilder extends Builder {
     }
 
     private updateAppPlistBuildNumber(): Q.Promise<any> {
-        var appPlistFile = path.join("platforms", "ios", this.currentBuild["appName"], this.currentBuild["appName"] + "-Info.plist");
+        var appPlistFile: string = path.join("platforms", "ios", this.currentBuild["appName"], this.currentBuild["appName"] + "-Info.plist");
         plist.updateAppBundleVersion(appPlistFile, this.currentBuild.buildNumber);
         return Q({});
     }
@@ -177,13 +177,13 @@ class IOSBuilder extends Builder {
         // We want to make sure that the .app file is named according to the package Id
         // in order to avoid issues with unicode names and to allow us to identify which
         // application to attach to for debugging.
-        var deferred = Q.defer();
-        var isDeviceBuild = this.currentBuild.options === "--device";
-        var oldName = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", this.currentBuild["appName"] + ".app");
-        var newName = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", this.cfg.id() + ".app");
+        var deferred: Q.Deferred<any> = Q.defer();
+        var isDeviceBuild: boolean = this.currentBuild.options === "--device";
+        var oldName: string = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", this.currentBuild["appName"] + ".app");
+        var newName: string = path.join("platforms", "ios", "build", isDeviceBuild ? "device" : "emulator", this.cfg.id() + ".app");
 
         if (oldName !== newName && fs.existsSync(oldName)) {
-            var clearOldData = Q.defer();
+            var clearOldData: Q.Deferred<any> = Q.defer();
             if (fs.existsSync(newName)) {
                 rimraf(newName, function (error: Error): void {
                     if (error) {

@@ -173,8 +173,8 @@ module TacoUtility {
                     var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
 
                     if (updateRequested) {
-                        var targetPath = request.targetPath;
-                        var backupPath = request.targetPath + "_backup";
+                        var targetPath: string = request.targetPath;
+                        var backupPath: string = request.targetPath + "_backup";
                         try {
                             if (fs.existsSync(backupPath)) {
                                 rimraf.sync(backupPath);
@@ -248,7 +248,7 @@ module TacoUtility {
                 }
             }
 
-            var homePackageModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
+            var homePackageModulesPath: string = path.join(utils.tacoHome, "node_modules", packageName);
             switch (packageType) {
                 case PackageSpecType.Registry:
                     var versionSubFolder: string = packageId.split("@")[1] || "latest";
@@ -308,8 +308,8 @@ module TacoUtility {
                 args = args.concat(flags);
             }
 
-            var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
-            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: "inherit" });
+            var npmExecutable: string = process.platform === "win32" ? "npm.cmd" : "npm";
+            var npmProcess: child_process.ChildProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: "inherit" });
             npmProcess.on("error", function (error: Error): void {
                 deferred.reject(error);
             });
@@ -351,7 +351,7 @@ module TacoUtility {
                             }
 
                             // 243 is the error code reported when npm fails due to EACCES
-                            var errorCode = (err === 243) ? TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess : TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode;
+                            var errorCode: TacoErrorCodes = (err === 243) ? TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess : TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode;
                             deferred.reject(errorHelper.get(errorCode, request.packageName, err));
                         } else {
                             deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallErrorMessage, err, request.packageName));
@@ -370,7 +370,7 @@ module TacoUtility {
                     rimraf(targetPath, function (): void {
                         if (isFinite(err)) {
                             // error code reported when npm fails due to EACCES
-                            var errorCode = (err === 243) ? TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess : TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode;
+                            var errorCode: TacoErrorCodes = (err === 243) ? TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess : TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode;
                             deferred.reject(errorHelper.get(errorCode, packageName, err));
                         } else {
                             deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName));
@@ -410,12 +410,12 @@ module TacoUtility {
         }
 
         private static removeStatusFile(targetPath: string): Q.Promise<any> {
-            var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
+            var statusFilePath: string = TacoPackageLoader.getStatusFilePath(targetPath);
             return Q.denodeify(fs.unlink)(statusFilePath);
         }
 
         private static packageNeedsInstall(targetPath: string): boolean {
-            var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
+            var statusFilePath: string = TacoPackageLoader.getStatusFilePath(targetPath);
             // if package.json doesn't exist or status file is still lingering around
             // it is an invalid installation
             return !fs.existsSync(path.join(targetPath, "package.json")) || fs.existsSync(statusFilePath);

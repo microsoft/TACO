@@ -25,8 +25,8 @@ import TacoErrorCode = tacoUtility.TacoErrorCode;
 import TacoPackageLoader = tacoUtility.TacoPackageLoader;
 import ITacoRemoteMultiplexer = TacoRemoteMultiplexer.ITacoRemoteMultiplexer;
 
-var dynamicDependenciesLocation = path.join(__dirname, "../dynamicDependencies.json");
-var tacoRemoteMux = "taco-remote-multiplexer";
+var dynamicDependenciesLocation: string = path.join(__dirname, "../dynamicDependencies.json");
+var tacoRemoteMux: string = "taco-remote-multiplexer";
 
 class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
     public getPackageToServeRequest(req: Express.Request): Q.Promise<IRemoteLib> {

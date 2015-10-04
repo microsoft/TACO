@@ -14,7 +14,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import net = require ("net");
@@ -33,16 +33,16 @@ interface IMockDebuggerProxy extends net.Server {
 describe("Device functionality", function (): void {
     // Check that when the debugger behaves nicely, we do as well
     it("should complete the startup sequence when the debugger is well behaved", function (done: MochaDone): void {
-        var port = 12345;
-        var appPath = "/private/var/mobile/Applications/042F57CA-9717-4655-8349-532093FFCF44/BlankCordovaApp1.app";
+        var port: number = 12345;
+        var appPath: string = "/private/var/mobile/Applications/042F57CA-9717-4655-8349-532093FFCF44/BlankCordovaApp1.app";
 
-        var encodedAppPath = "2F707269766174652F7661722F6D6F62696C652F4170706C69636174696F6E732F30343246353743412D393731372D343635352D383334392D3533323039334646434634342F426C616E6B436F72646F7661417070312E617070";
+        var encodedAppPath: string = "2F707269766174652F7661722F6D6F62696C652F4170706C69636174696F6E732F30343246353743412D393731372D343635352D383334392D3533323039334646434634342F426C616E6B436F72646F7661417070312E617070";
         encodedAppPath.should.equal(runner.encodePath(appPath));
 
         var mockDebuggerProxy: IMockDebuggerProxy = net.createServer(function (client: net.Socket): void {
             mockDebuggerProxy.close();
             client.on("data", function (data: Buffer): void {
-                var dataString = data.toString();
+                var dataString: string = data.toString();
                 if (mockDebuggerProxy.protocolState % 2 === 1) {
                     // Every second message should be an acknowledgement of a send of ours
                     dataString[0].should.equal("+");
@@ -58,15 +58,15 @@ describe("Device functionality", function (): void {
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
                         expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
-                        var checksum = 0;
-                        for (var i = 0; i < expectedResponse.length; ++i) {
+                        var checksum: number = 0;
+                        for (var i: number = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
                         };
                         /* tslint:disable:no-bitwise */
                         // Some bitwise operations needed to calculate the checksum here
                         checksum = checksum & 0xFF;
                         /* tslint:enable:no-bitwise */
-                        var checkstring = checksum.toString(16).toUpperCase();
+                        var checkstring: string = checksum.toString(16).toUpperCase();
                         if (checkstring.length === 1) {
                             checkstring = "0" + checkstring;
                         }
@@ -110,16 +110,16 @@ describe("Device functionality", function (): void {
 
     // Check that when the debugger reports an error, we notice it
     it("should report an error if the debugger fails for some reason", function (done: MochaDone): void {
-        var port = 12345;
-        var appPath = "/private/var/mobile/Applications/042F57CA-9717-4655-8349-532093FFCF44/BlankCordovaApp1.app";
+        var port: number = 12345;
+        var appPath: string = "/private/var/mobile/Applications/042F57CA-9717-4655-8349-532093FFCF44/BlankCordovaApp1.app";
 
-        var encodedAppPath = "2F707269766174652F7661722F6D6F62696C652F4170706C69636174696F6E732F30343246353743412D393731372D343635352D383334392D3533323039334646434634342F426C616E6B436F72646F7661417070312E617070";
+        var encodedAppPath: string = "2F707269766174652F7661722F6D6F62696C652F4170706C69636174696F6E732F30343246353743412D393731372D343635352D383334392D3533323039334646434634342F426C616E6B436F72646F7661417070312E617070";
         encodedAppPath.should.equal(runner.encodePath(appPath));
 
         var mockDebuggerProxy: IMockDebuggerProxy = net.createServer(function (client: net.Socket): void {
             mockDebuggerProxy.close();
             client.on("data", function (data: Buffer): void {
-                var dataString = data.toString();
+                var dataString: string = data.toString();
                 if (mockDebuggerProxy.protocolState % 2 === 1) {
                     // Every second message should be an acknowledgement of a send of ours
                     dataString[0].should.equal("+");
@@ -136,15 +136,15 @@ describe("Device functionality", function (): void {
                 switch (mockDebuggerProxy.protocolState) {
                     case 0:
                         expectedResponse = "A" + encodedAppPath.length + ",0," + encodedAppPath;
-                        var checksum = 0;
-                        for (var i = 0; i < expectedResponse.length; ++i) {
+                        var checksum: number = 0;
+                        for (var i: number = 0; i < expectedResponse.length; ++i) {
                             checksum += expectedResponse.charCodeAt(i);
                         };
                         /* tslint:disable:no-bitwise */
                         // Some bit operations needed to calculate checksum
                         checksum = checksum & 0xFF;
                         /* tslint:enable:no-bitwise */
-                        var checkstring = checksum.toString(16).toUpperCase();
+                        var checkstring: string = checksum.toString(16).toUpperCase();
                         if (checkstring.length === 1) {
                             checkstring = "0" + checkstring;
                         }

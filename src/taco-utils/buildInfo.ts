@@ -15,18 +15,18 @@ import InstallLogLevel = installLogLevel.InstallLogLevel;
 
 module TacoUtility {
     export class BuildInfo {
-        public static UPLOADING = "Uploading";
-        public static UPLOADED = "Uploaded";
-        public static EXTRACTED = "Extracted";
-        public static INVALID = "Invalid";
-        public static BUILDING = "Building";
-        public static COMPLETE = "Complete";
-        public static EMULATED = "Emulated";
-        public static RUNNING = "Running";
-        public static INSTALLED = "Installed";
-        public static DEBUGGING = "Debugging";
-        public static DOWNLOADED = "Downloaded";
-        public static ERROR = "Error";
+        public static UPLOADING: string = "Uploading";
+        public static UPLOADED: string = "Uploaded";
+        public static EXTRACTED: string = "Extracted";
+        public static INVALID: string = "Invalid";
+        public static BUILDING: string = "Building";
+        public static COMPLETE: string = "Complete";
+        public static EMULATED: string = "Emulated";
+        public static RUNNING: string = "Running";
+        public static INSTALLED: string = "Installed";
+        public static DEBUGGING: string = "Debugging";
+        public static DOWNLOADED: string = "Downloaded";
+        public static ERROR: string = "Error";
 
         public status: string;
         /**
@@ -63,7 +63,7 @@ module TacoUtility {
         public logLevel: InstallLogLevel;
 
         constructor(params: { buildNumber?: number; status?: string; buildCommand?: string; configuration?: string; options?: any; buildDir?: string; buildLang?: string; buildPlatform?: string; logLevel?: string; [index: string]: any }) {
-            var self = this;
+            var self: BuildInfo = this;
             Object.keys(params).forEach(function (key: string): void {
                 self[key] = params[key];
             });

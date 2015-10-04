@@ -34,29 +34,29 @@ module TacoUtility {
     /* tslint:disable:variable-name */
     // We mostly export classes here from taco-utils and we prefer keeping them pascal cased
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
-    export var ArgsHelper = argsHelper.ArgsHelper;
-    export var BuildInfo = buildInfo.BuildInfo;
-    export var Commands = commands.Commands;
-    export var CordovaConfig = cordovaConfig.CordovaConfig;
-    export var CountStream = countStream.CountStream;
-    export var Logger = logger.Logger;
-    export var LoggerHelper = loggerHelper.LoggerHelper;
-    export var LogLevel = logLevel.LogLevel;
-    export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
-    export var HelpCommandBase = helpCommandBase.HelpCommandBase;
-    export var InstallLogLevel = installLogLevel.InstallLogLevel;
-    export var JsonSerializer = jsonSerializer.JsonSerializer;
-    export var ProcessLogger = processLogger.ProcessLogger;
-    export var ResourceManager = resourceManager.ResourceManager;
-    export var TacoError = tacoError.TacoError;
-    export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
-    export var TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
-    export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
-    export var TelemetryGenerator = telemetryHelper.TelemetryGenerator;
-    export var Telemetry = telemetry.Telemetry;
-    export var TelemetryHelper = telemetryHelper.TelemetryHelper;
-    export var UtilHelper = utilHelper.UtilHelper;
-    export var LogFormatHelper = logFormatHelper.LogFormatHelper;
+    export var ArgsHelper: any = argsHelper.ArgsHelper;
+    export var BuildInfo: any = buildInfo.BuildInfo;
+    export var Commands: any = commands.Commands;
+    export var CordovaConfig: any = cordovaConfig.CordovaConfig;
+    export var CountStream: any = countStream.CountStream;
+    export var Logger: any = logger.Logger;
+    export var LoggerHelper: any = loggerHelper.LoggerHelper;
+    export var LogLevel: any = logLevel.LogLevel;
+    export var NewlineNormalizerStream: any = newlineNormalizerStream.NewlineNormalizerStream;
+    export var HelpCommandBase: any = helpCommandBase.HelpCommandBase;
+    export var InstallLogLevel: any = installLogLevel.InstallLogLevel;
+    export var JsonSerializer: any = jsonSerializer.JsonSerializer;
+    export var ProcessLogger: any = processLogger.ProcessLogger;
+    export var ResourceManager: any = resourceManager.ResourceManager;
+    export var TacoError: any = tacoError.TacoError;
+    export var TacoErrorCode: any = tacoErrorCodes.TacoErrorCode;
+    export var TacoGlobalConfig: any = tacoGlobalConfig.TacoGlobalConfig;
+    export var TacoPackageLoader: any = tacoPackageLoader.TacoPackageLoader;
+    export var TelemetryGenerator: any = telemetryHelper.TelemetryGenerator;
+    export var Telemetry: any = telemetry.Telemetry;
+    export var TelemetryHelper: any = telemetryHelper.TelemetryHelper;
+    export var UtilHelper: any = utilHelper.UtilHelper;
+    export var LogFormatHelper: any = logFormatHelper.LogFormatHelper;
     /* tslint:enable:variable-name */
 }
 

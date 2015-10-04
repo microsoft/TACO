@@ -19,23 +19,23 @@ module TacoUtility {
         private resources: { [key: string]: any; } = {};
 
         constructor(resourceFileName: string) {
-            var self = this;
-            var res = require(resourceFileName);
+            var self: ResourceSet = this;
+            var res: any = require(resourceFileName);
             Object.keys(res).forEach(function (key: string): void {
                 self.resources[key] = res[key];
             });
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
-            var s = this.resources[id];
+            var s: any = this.resources[id];
             if (!s) {
                 return s;
             } else if (Array.isArray(s)) {
                 // Allow longer resources strings to be specified as a list of strings, which represent multiple lines
-                s = s.join("\n");
+                s = (<string[]> s).join("\n");
             }
 
-            var result: string = s;
+            var result: string = <string> s;
             /*All args passed to current function:
             you can call getString('foo', 'bar', 'baz') or getString('foo',['bar', 'baz']) 
             and the utility function will extract ['bar', 'baz'] as args in both cases*/

@@ -15,7 +15,7 @@ import fs = require ("fs");
 import path = require ("path");
 
 /* tslint:disable:no-var-requires */
-var unorm = require ("unorm"); // Note no import: the compiler will remove the require since we don't use the unorm object, we just need it to add String.normalize
+var unorm: any = require ("unorm"); // Note no import: the compiler will remove the require since we don't use the unorm object, we just need it to add String.normalize
 /* tslint:enable:no-var-requires */
 
 import tacoUtility = require ("./utilHelper");
@@ -27,7 +27,7 @@ module TacoUtility {
         private doc: et.ElementTree;
 
         constructor(configXmlPath: string) {
-            var contents = UtilHelper.readFileContentsSync(configXmlPath, "utf-8");
+            var contents: string = UtilHelper.readFileContentsSync(configXmlPath, "utf-8");
             this.doc = new et.ElementTree(et.XML(contents));
         }
 
@@ -53,7 +53,7 @@ module TacoUtility {
          * @returns {String} The display name, normalized to NFC
          */
         public name(): string {
-            var el = this.doc.find("name");
+            var el: et.XMLElement = this.doc.find("name");
             return el && el.text && el.text.trim().normalize();
         }
 
@@ -63,7 +63,7 @@ module TacoUtility {
          * @returns {string} The version
          */
         public version(): string {
-            var el = this.doc.getroot();
+            var el: et.XMLElement = this.doc.getroot();
             return el && el.attrib && el.attrib["version"];
         }
 
@@ -74,7 +74,7 @@ module TacoUtility {
          */
         public preferences(): { [key: string]: string } {
             var data: { [key: string]: string } = {};
-            var preferences = this.doc.findall("preference");
+            var preferences: et.XMLElement[] = this.doc.findall("preference");
             preferences.forEach(function (preference: et.XMLElement): void {
                 data[preference.attrib["name"]] = preference.attrib["value"];
             });

@@ -76,7 +76,7 @@ module TacoUtility {
          * @return {string} The contents of the file, excluding byte order markers.
          */
         public static readFileContentsSync(filename: string, encoding?: string): string {
-            var contents = fs.readFileSync(filename, (encoding || "utf-8"));
+            var contents: string = fs.readFileSync(filename, (encoding || "utf-8"));
             if (contents) {
                 contents = contents.replace(/^\uFEFF/, ""); // Windows is the BOM
             }
@@ -93,9 +93,9 @@ module TacoUtility {
          * @returns {Q.Promise} A promise which is fulfilled when the file finishes copying, and is rejected on any error condition.
          */
         public static copyFile(from: string, to: string, encoding?: string): Q.Promise<any> {
-            var deferred = Q.defer();
-            var newFile = fs.createWriteStream(to, { encoding: encoding });
-            var oldFile = fs.createReadStream(from, { encoding: encoding });
+            var deferred: Q.Deferred<any> = Q.defer();
+            var newFile: fs.WriteStream = fs.createWriteStream(to, { encoding: encoding });
+            var oldFile: fs.ReadStream = fs.createReadStream(from, { encoding: encoding });
             newFile.on("finish", function (): void {
                 deferred.resolve({});
             });
@@ -117,7 +117,7 @@ module TacoUtility {
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
         public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any> {
-            var deferred = Q.defer();
+            var deferred: Q.Deferred<any> = Q.defer();
 
             options = options ? options : {};
 
@@ -162,8 +162,8 @@ module TacoUtility {
          * @return {boolean} true if the display name is acceptable, false otherwise
          */
         public static isValidCordovaAppName(str: string): boolean {
-            for (var i = 0, n = str.length; i < n; i++) {
-                var code = str.charCodeAt(i);
+            for (var i: number = 0, n: number = str.length; i < n; i++) {
+                var code: number = str.charCodeAt(i);
                 if (code < 32 || UtilHelper.INVALID_APP_NAME_CHARS[code]) {
                     return false;
                 }
@@ -305,7 +305,7 @@ module TacoUtility {
             // if help flag is specified, use that
             // for "taco --help cmd" scenarios, update commandArgs to reflect the next argument or make it [] if it is not present
             // for "taco cmd --help" scenarios, update commandArgs to reflect the first argument instead
-            for (var i = 0; i < args.length; i++) {
+            for (var i: number = 0; i < args.length; i++) {
                 if (/^(-*)(h|help)$/.test(args[i])) {
                     return <ITacoHelpArgs> { helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
                 }
@@ -328,7 +328,7 @@ module TacoUtility {
 
             // Note: Not using nopt to look for "--loglevel", because the autocmplete feature would catch things like "-l", when these may be intended for the command itself (not for taco loglevel).
             var logLevelTag: string = "--loglevel";
-            var logLevelTagIndex = args.indexOf(logLevelTag);
+            var logLevelTagIndex: number = args.indexOf(logLevelTag);
 
             if (logLevelTagIndex === -1) {
                 return args;

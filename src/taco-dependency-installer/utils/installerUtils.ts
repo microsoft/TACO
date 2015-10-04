@@ -117,7 +117,7 @@ class InstallerUtils {
      */
     public static promptUser(message: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var rl = readline.createInterface({
+        var rl: readline.ReadLine = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
@@ -174,8 +174,8 @@ class InstallerUtils {
     public static promptForEnvVariableOverwrite(name: string, socket: NodeJSNet.Socket): Q.Promise<string> {
         var deferred: Q.Deferred<string> = Q.defer<string>();
 
-        var dataListener = function (data: Buffer): void {
-            var stringData = data.toString();
+        var dataListener: (data: Buffer) => void = function (data: Buffer): void {
+            var stringData: string = data.toString();
 
             socket.removeListener("data", dataListener);
             deferred.resolve(stringData);
@@ -267,7 +267,7 @@ class InstallerUtils {
                     deferred.reject(new Error(resources.getString("FileNotFound")));
                 }
 
-                var fws = fs.createWriteStream(filePath);
+                var fws: fs.WriteStream = fs.createWriteStream(filePath);
 
                 response.pipe(fws);
                 fws.on("finish", function (): void {
