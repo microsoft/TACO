@@ -201,8 +201,8 @@ class InstallReqs extends commands.TacoCommandBase {
     }
 
     public run(data: commands.ICommandData): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        return tacoUtils.TelemetryHelper.generate("InstallReqs", telemetry => {
-            var self = this;
+        return tacoUtils.TelemetryHelper.generate("InstallReqs", (telemetry: tacoUtils.TelemetryGenerator): Q.Promise<any> => {
+            var self: InstallReqs = this;
             var parsed: commands.ICommandData = null;
 
             try {
@@ -257,7 +257,7 @@ class InstallReqs extends commands.TacoCommandBase {
 
                     return cordovaWrapper.requirements(requestedPlatforms)
                         .then(function (result: any): Q.Promise<any> {
-                            var sessionId = tacoUtils.Telemetry.isOptedIn ?
+                            var sessionId: string = tacoUtils.Telemetry.isOptedIn ?
                                 tacoUtils.Telemetry.getSessionId() : // Valid session ID to publish telemetry
                                 "null"; // Null session ID to not publish telemetry
                             var installer: DependencyInstaller = new DependencyInstaller(sessionId);

@@ -63,17 +63,17 @@ class Emulate extends commands.TacoCommandBase {
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData,
         telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
         return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
-            var configuration = commandData.options["release"] ? "release" : "debug";
-            var buildTarget = commandData.options["target"] || "";
-            var language = settings.language || "en";
-            var remoteConfig = settings.remotePlatforms && settings.remotePlatforms[platform];
+            var configuration: string = commandData.options["release"] ? "release" : "debug";
+            var buildTarget: string = commandData.options["target"] || "";
+            var language: string = settings.language || "en";
+            var remoteConfig: Settings.IRemoteConnectionInfo = settings.remotePlatforms && settings.remotePlatforms[platform];
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
-            var buildInfoPath = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
+            var buildInfoPath: string = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
-            var buildSettings = new RemoteBuildSettings({
+            var buildSettings: RemoteBuildSettings = new RemoteBuildSettings({
                 projectSourceDir: path.resolve("."),
                 buildServerInfo: remoteConfig,
                 buildCommand: "build",
@@ -89,7 +89,7 @@ class Emulate extends commands.TacoCommandBase {
                 buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): BuildInfo {
                     if (!buildInfo) {
                         // No info for the remote build: User must build first
-                        var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
+                        var buildCommandToRun: string = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
                         throw errorHelper.get(TacoErrorCodes.NoRemoteBuildIdFound, buildCommandToRun);
                     } else {
                         return buildInfo;
@@ -162,7 +162,7 @@ class Emulate extends commands.TacoCommandBase {
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Emulate.KNOWN_OPTIONS, Emulate.SHORT_HANDS, args, 0);
+        var parsedOptions: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Emulate.KNOWN_OPTIONS, Emulate.SHORT_HANDS, args, 0);
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {

@@ -109,7 +109,7 @@ class ProjectHelper {
      * If we can't find a taco.json then it will not change directory
      */
     public static cdToProjectRoot(): void {
-        var tacoRoot = ProjectHelper.getProjectRoot();
+        var tacoRoot: string = ProjectHelper.getProjectRoot();
         if (tacoRoot) {
             process.chdir(tacoRoot);
             // Cordova checks for process.env.PWD before checkign process.cwd, and process.env.PWD is not changed by process.chdir()
@@ -138,8 +138,8 @@ class ProjectHelper {
             }
 
             var tacoJson: ProjectHelper.ITacoJsonMetadata;
-            var tacoJsonFilePath = path.join(projectPath, ProjectHelper.TACO_JSON_FILENAME);
-            var configFilePath = path.join(projectPath, ProjectHelper.CONFIG_XML_FILENAME);
+            var tacoJsonFilePath: string = path.join(projectPath, ProjectHelper.TACO_JSON_FILENAME);
+            var configFilePath: string = path.join(projectPath, ProjectHelper.CONFIG_XML_FILENAME);
 
             if (ProjectHelper.cachedProjectInfo) {
                 if (tacoJsonFilePath === ProjectHelper.cachedProjectFilePath) {
@@ -190,7 +190,7 @@ class ProjectHelper {
     public static getInstalledComponents(projectDir: string, componentDirName: string): Q.Promise<string[]> {
         var components: string[] = [];
         projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var componentDir = path.join(projectDir, componentDirName);
+        var componentDir: string = path.join(projectDir, componentDirName);
         if (!fs.existsSync(componentDir)) {
             return Q.resolve(components);
         }
@@ -207,20 +207,20 @@ class ProjectHelper {
      */
     public static getInstalledPlatformVersions(projectDir: string): Q.Promise<any> {
         projectDir = projectDir || ProjectHelper.getProjectRoot();
-        var onWindows = process.platform === "win32";
-        var deferred = Q.defer<any>();
+        var onWindows: boolean = process.platform === "win32";
+        var deferred: Q.Deferred<any> = Q.defer<any>();
         var platformVersions: cordovaHelper.IDictionary<string> = {};
         return ProjectHelper.getInstalledComponents(projectDir, "platforms")
         .then(function (platformsInstalled: string[]): Q.Promise<any> {
             return Q.all(platformsInstalled.map(function (platform: string): Q.Promise<any> {
-                var deferredProcPromise = Q.defer<any>();
+                var deferredProcPromise: Q.Deferred<any> = Q.defer<any>();
                 var cmdName: string = "version";
                 if (onWindows) {
                     cmdName = cmdName + ".bat";
                 }
 
                 var cmdPath: string = path.join(projectDir, "platforms", platform, "cordova", cmdName);
-                var versionProc = child_process.spawn(cmdPath);
+                var versionProc: child_process.ChildProcess = child_process.spawn(cmdPath);
                 versionProc.stdout.on("data", function (data: any): void {
                     var version: string = data.toString();
                     platformVersions[platform] = version.trim();
@@ -244,9 +244,9 @@ class ProjectHelper {
         .then(function (pluginsInstalled: string[]): Q.Promise<any> {
             pluginsInstalled.forEach(function (plugin: string): void {
                 // Ignore plugins without a package.json
-                var pluginPackgeJson = path.join(projectDir, "plugins", plugin, "package.json");
+                var pluginPackgeJson: string = path.join(projectDir, "plugins", plugin, "package.json");
                 if (fs.existsSync(pluginPackgeJson)) {
-                    var pluginInfo = require(pluginPackgeJson);
+                    var pluginInfo: any = require(pluginPackgeJson);
                     if (pluginInfo) {
                         pluginVersions[plugin] = pluginInfo["version"];
                     }
@@ -292,7 +292,7 @@ class ProjectHelper {
         // JsonSerializer class in the taco-utils does the necessary formatting
         // This is important as VS expects the JSON file to be in the standard JSON format
         var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
-        var formattedTacoJson = jsonSerializer.serialize(jsonData);
+        var formattedTacoJson: any = jsonSerializer.serialize(jsonData);
 
         fs.writeFile(tacoJsonPath, formattedTacoJson, function (err: NodeJS.ErrnoException): void {
             if (err) {

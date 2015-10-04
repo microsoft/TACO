@@ -9,7 +9,7 @@ class ServerMock {
      * Create a https server using the certificates in test/resources/certs/
      */
     public static createSecureTestServer(): https.Server {
-        var testCertsFolder = path.resolve(__dirname, "..", "resources", "certs");
+        var testCertsFolder: string = path.resolve(__dirname, "..", "resources", "certs");
         var sslSettings: https.ServerOptions = {
             key: fs.readFileSync(path.join(testCertsFolder, "server-key.pem")),
             cert: fs.readFileSync(path.join(testCertsFolder, "server-cert.pem")),
@@ -26,21 +26,21 @@ class ServerMock {
      */
     public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean; responseDelay?: number; fileToSend?: string }[]):
         (request: http.ServerRequest, response: http.ServerResponse) => void {
-        var sequenceIndex = 0;
+        var sequenceIndex: number = 0;
         return function (request: http.ServerRequest, response: http.ServerResponse): void {
             if (sequenceIndex < sequence.length) {
-                var data = sequence[sequenceIndex];
+                var data: any = sequence[sequenceIndex];
                 ++sequenceIndex;
                 if (request.url !== data.expectedUrl) {
                     onErr(new Error("Expected request to " + data.expectedUrl + " got " + request.url));
                 } else {
-                    var sendResponse = function (): void {
+                    var sendResponse: () => void = function (): void {
                         setTimeout(() => {
                             response.writeHead(data.statusCode, data.head);
                             if (data.fileToSend) {
-                                var reader = fs.createReadStream(data.fileToSend);
+                                var reader: fs.ReadStream = fs.createReadStream(data.fileToSend);
                                 reader.pipe(response);
-                                reader.on("end", function () {
+                                reader.on("end", function (): void {
                                     response.end();
                                 });
                             } else {

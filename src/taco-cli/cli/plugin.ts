@@ -44,10 +44,10 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
       */
     public checkForKitOverrides(projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
         var targets: string[] = [];
-        var self = this;
+        var self: Plugin = this;
         var pluginInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
 
-        var subCommand = this.cordovaCommandParams.subCommand;
+        var subCommand: string = this.cordovaCommandParams.subCommand;
         if (subCommand !== "add") {
             return Q({});
         }
@@ -102,7 +102,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
      * Checks if the plugin has a version specification in config.xml of the cordova project
      */
     public configXmlHasVersionOverride(pluginName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
-        var deferred = Q.defer<boolean>();
+        var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
         cordovaHelper.getPluginVersionSpec(pluginName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion).then(function (versionSpec: string): void {
             deferred.resolve(versionSpec !== "");
         });
@@ -188,11 +188,11 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                     "HowToUseCommandSetupRemote",
                     "HowToUseCommandBuildPlatform",
                     "HowToUseCommandEmulatePlatform",
-                    "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
+                    "HowToUseCommandRunPlatform"].map((msg: string) => resources.getString(msg)));
 
                 ["",
                     "HowToUseCommandHelp",
-                    "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
+                    "HowToUseCommandDocs"].forEach((msg: string) => logger.log(resources.getString(msg)));
             }
             break;
 

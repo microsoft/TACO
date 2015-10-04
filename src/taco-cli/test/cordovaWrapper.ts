@@ -26,7 +26,7 @@ describe("cordovaWrapper", () => {
     var functionsCalled: { [index: string]: boolean } = {};
     before((): void => {
         // Set up tests with mocked out Cordova implementation
-        var cordova = mockCordova.MockCordova510.default;
+        var cordova: mockCordova.MockCordova510 = mockCordova.MockCordova510.default;
         cordova.raw.build = (): Q.Promise<any> => {
             functionsCalled["build"] = true;
             throw new Error("Build Error thrown synchronously");
@@ -41,7 +41,7 @@ describe("cordovaWrapper", () => {
         };
         cordova.raw.emulate = (): Q.Promise<any> => {
             functionsCalled["emulate"] = true;
-            var deferred = Q.defer();
+            var deferred: Q.Deferred<any> = Q.defer();
             setTimeout(() => {
                 throw new Error("Emulate Error thrown asynchronously");
             }, 1);
@@ -49,7 +49,7 @@ describe("cordovaWrapper", () => {
         };
 
         TacoPackageLoader.mockForTests = {
-            lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel) => {
+            lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel): any => {
                 if (packageName !== "cordova") {
                     return Q.reject(new Error("Expected to load cordova package"));
                 }

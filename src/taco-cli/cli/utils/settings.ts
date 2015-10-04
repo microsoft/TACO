@@ -33,7 +33,7 @@ import utils = tacoUtils.UtilHelper;
  */
 class Settings {
     private static settings: Settings.ISettings = null;
-    private static SETTINGS_FILENAME = "TacoSettings.json";
+    private static SETTINGS_FILENAME: string = "TacoSettings.json";
 
     public static get settingsFile(): string {
         return path.join(utils.tacoHome, Settings.SETTINGS_FILENAME);
@@ -86,8 +86,8 @@ class Settings {
             CordovaHelper.getSupportedPlatforms(),
             Settings.determinePlatformsFromOptions(options)
         ]).spread<Settings.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>, platforms: Settings.IPlatformWithLocation[]): Settings.IPlatformWithLocation[] {
-            var filteredPlatforms = platforms.filter(function (platform: Settings.IPlatformWithLocation): boolean {
-                var supported = !supportedPlatforms || platform.platform in supportedPlatforms || platform.location === Settings.BuildLocationType.Remote;
+            var filteredPlatforms: Settings.IPlatformWithLocation [] = platforms.filter(function (platform: Settings.IPlatformWithLocation): boolean {
+                var supported: boolean = !supportedPlatforms || platform.platform in supportedPlatforms || platform.location === Settings.BuildLocationType.Remote;
                 if (!supported) {
                     logger.logWarning(resources.getString("CommandUnsupportedPlatformIgnored", platform.platform));
                 }
@@ -124,7 +124,7 @@ class Settings {
                     throw error;
                 }
             })
-            .then(settings => {
+            .then((settings: Settings.ISettings) => {
                 updateFunction(settings);
                 return this.saveSettings(settings);
             });
@@ -150,7 +150,7 @@ class Settings {
      *      taco build --local browser -- ios     ==> 'browser'
      */
     public static parseRequestedPlatforms(options: commands.ICommandData): string[] {
-        var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
+        var optionsToIgnore: string[] = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
         return options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
     }
 
@@ -188,7 +188,7 @@ class Settings {
                 return { location: Settings.BuildLocationType.Local, platform: platform };
             }));
         }).then((platforms: Settings.IPlatformWithLocation[]) => {
-            var requestedPlatforms = Settings.parseRequestedPlatforms(options);
+            var requestedPlatforms: string[] = Settings.parseRequestedPlatforms(options);
 
             if (requestedPlatforms.length > 0) {
                 // Filter down to user-requested platforms if appropriate
