@@ -34,7 +34,7 @@ import utilHelper = tacoUtils.UtilHelper;
 describe("KitHelper", function (): void {
     // Important paths
     var testMetadataPath: string = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
-    var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetaData.json");
+    var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetadata.json");
 
     // Test Kit Info
     var testDefaultKitId: string = "5.1.1-Kit";
@@ -361,7 +361,7 @@ describe("KitHelper", function (): void {
         });
     });
 
-    describe("TacoKitMetaData.json", function (): void {
+    describe("TacoKitMetadata.json", function (): void {
         it("should only have kit ids that are suitable for directory names", function (): void {
             var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
 
