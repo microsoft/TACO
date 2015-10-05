@@ -103,7 +103,7 @@
     "_CertificatesNotConfigured.comment": "Error returned when certificates are accessed before initialization.",
     "OSXResetServerCertQuery": "Warning: This command deletes all current client certificates. You will need to generate and configure a new security PIN. Do you want to continue? [Y]es or [N]o",
     "_OSXResetServerCertQuery.comment": "Message printed when user invokes resetServerCert command asking if they are sure",
-    "OSXNoteAfterResetServerCert": "Note: You need to restart any running remote build servers for this change to take effect, and have the certificates be actually reseted",
+    "OSXNoteAfterResetServerCert": "Note: You need to restart any running remotebuild servers before the new certificates will be used.",
     "_OSXNoteAfterResetServerCert.comment": "Message printed after the user invokes resetServerCert command to inform them that they need to reset the certificates for this change to be picked up",
     "OSXResetServerCertResponseYes": [ "y", "yes" ],
     "_OSXResetServerCertResponseYes.comment": "List of responses that are considered affirmative. User input will be converted to lower case before consulting this list",
