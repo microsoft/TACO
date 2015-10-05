@@ -58,7 +58,7 @@ interface IKeyValuePair<T> {
 
 describe("taco create", function (): void {
     // Test constants
-    var createTimeout: number = 60000;
+    var createTimeout: number = 180000;
     var tacoFileCount: number = 1;
     var cordovaDefaultProjectFileCount: number = 13; // 6 files and 7 folders
 
