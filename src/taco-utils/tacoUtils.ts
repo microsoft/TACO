@@ -21,6 +21,7 @@ import loggerHelper = require ("./loggerHelper");
 import logLevel = require ("./logLevel");
 import newlineNormalizerStream = require ("./newlineNormalizerStream");
 import processLogger = require ("./processLogger");
+import promisesUtils = require ("./promisesUtils");
 import tacoError = require ("./tacoError");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
@@ -57,6 +58,7 @@ module TacoUtility {
     export var TelemetryHelper: typeof telemetryHelper.TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper: typeof utilHelper.UtilHelper = utilHelper.UtilHelper;
     export var LogFormatHelper: typeof logFormatHelper.LogFormatHelper = logFormatHelper.LogFormatHelper;
+    export var PromisesUtils: typeof promisesUtils.PromisesUtils = promisesUtils.PromisesUtils;
     /* tslint:enable:variable-name */
 }
 

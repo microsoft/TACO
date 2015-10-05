@@ -29,6 +29,10 @@ declare module TacoUtility {
         public addError(error: Error): TelemetryGenerator;
     }
 
+    interface TelemetryGeneratorFactory {
+        generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TelemetryGenerator): T }): T;
+    }
+
     class TelemetryHelper {
         static telemetryProperty(propertyValue: any, isPii?: boolean): ITelemetryPropertyInfo;
         public static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
