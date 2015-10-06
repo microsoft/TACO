@@ -147,7 +147,7 @@ class Build extends commands.TacoCommandBase {
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
            .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
             buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-            var cleanPromise = Q({});
+            var cleanPromise: Q.Promise<any> = Q({});
             if (commandData.options["clean"]) {
                 cleanPromise = Q.all(platforms.map((platform: PlatformHelper.IPlatformWithLocation) => {
                     return Build.cleanPlatform(platform, commandData);
