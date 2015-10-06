@@ -46,6 +46,11 @@ enum ProjectComponentType {
         Plugin = 1
 }
 
+interface IKitInfo {
+    kitId: string;
+    cordovaCliVersion: string;
+}
+
 /**
  * kit
  *
@@ -158,10 +163,19 @@ class Kit extends commands.TacoCommandBase {
         var availableKits: INameDescription[] = [];
         var currentKitId: string = "";
 
-        return Kit.getCurrentKitInfo().then(function (kitId: string): Q.Promise<any> {
-            currentKitId = kitId;
-            if (kitId) {
-                logger.log(resources.getString("CommandKitListCurrentKit", kitId));
+        return Kit.getCurrentKitInfo().then(function (kitInfo: IKitInfo): Q.Promise<any> {
+            currentKitId = kitInfo.kitId;
+            var logLine = false;
+            if (kitInfo.kitId) {
+                logger.log(resources.getString("CommandKitListCurrentKit", kitInfo.kitId));
+                logLine = true;
+            }
+            if (kitInfo.cordovaCliVersion) {
+                logger.log(resources.getString("CommandKitListCurrentCordovaCLI", kitInfo.cordovaCliVersion));
+                logLine = true;
+            }
+
+            if (logLine) {
                 logger.logLine();
             }
 
@@ -368,10 +382,10 @@ class Kit extends commands.TacoCommandBase {
     /**
      * Pretty prints the current Kit/Cordova CLI info
      */
-    private static getCurrentKitInfo(): Q.Promise<string> {
-        var deferred = Q.defer<string>();
-        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
-            deferred.resolve(projectInfo.tacoKitId);
+    private static getCurrentKitInfo(): Q.Promise<IKitInfo> {
+        var deferred = Q.defer<IKitInfo>();
+        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<IKitInfo> {
+            deferred.resolve(<IKitInfo> { kitId: projectInfo.tacoKitId, cordovaCliVersion: projectInfo.cordovaCliVersion });
             return deferred.promise;
         });
     }
