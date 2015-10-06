@@ -31,8 +31,8 @@ describe("cordovaWrapper", () => {
     var dummyData: Commands.ICommandData = { options: {}, original: [], remain: [] };
     var originalDir: string;
     before((done: MochaDone): void => {
-        var tacoHome = path.join(os.tmpdir(), "taco-cli", "cordovaWrapper");
-        var projectHome = path.join(tacoHome, "example");
+        var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "cordovaWrapper");
+        var projectHome: string = path.join(tacoHome, "example");
         utils.createDirectoryIfNecessary(tacoHome);
         utils.createDirectoryIfNecessary(projectHome);
         originalDir = process.cwd();
@@ -46,7 +46,7 @@ describe("cordovaWrapper", () => {
             return Q.reject(new Error("Run Rejected Promise"));
         };
         cordova.raw.emulate = (): Q.Promise<any> => {
-            var deferred = Q.defer();
+            var deferred: Q.Deferred<any> = Q.defer();
             setTimeout(() => {
                 throw new Error("Emulate Error thrown asynchronously");
             }, 1);
