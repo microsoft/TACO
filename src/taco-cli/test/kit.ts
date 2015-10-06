@@ -114,7 +114,7 @@ describe("Kit", function (): void {
         // Force KitHelper to fetch the package fresh
         kitHelper.kitPackagePromise = null;
 
-        this.timeout(30000);
+        this.timeout(60000);
         rimraf.sync(runFolder);
     });
 
@@ -186,6 +186,7 @@ describe("Kit", function (): void {
         this.timeout(30000);
 
         before(function (done: MochaDone): void {
+            this.timeout(60000);
             createKitProject("5.1.1-Kit")
             .done(function (): void {
                 process.chdir(kitProjectpath);
@@ -194,7 +195,6 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(30000);
             process.chdir(tacoHome);
             rimraf(kitProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
@@ -222,6 +222,7 @@ describe("Kit", function (): void {
         this.timeout(30000);
 
         before(function (done: MochaDone): void {
+            this.timeout(60000);
             createCliProject("5.1.1")
             .done(function (): void {
                 process.chdir(cliProjectpath);

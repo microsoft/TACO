@@ -48,7 +48,12 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         var pluginInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
 
         var subCommand = this.cordovaCommandParams.subCommand;
-        if (subCommand !== "add") {
+
+        if (subCommand === "rm") {
+            subCommand = "remove";
+        }
+
+        if (subCommand !== "add" && subCommand !== "remove") {
             return Q({});
         }
 
@@ -79,6 +84,8 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                                 if (pluginOverrideData["supported-platforms"]) {
                                     self.printSupportedPlatformsMessage(target, pluginOverrideData["supported-platforms"], self.cordovaCommandParams.subCommand);
                                 }
+                            } else if (versionOverridden && subCommand === "remove") {
+                                pluginInfoToPersist.push(pluginInfo);
                             }
 
                             targets.push(target);
