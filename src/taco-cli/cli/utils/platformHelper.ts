@@ -65,8 +65,7 @@ class PlatformHelper {
     }
 
     public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): PlatformHelper.IPlatformWithLocation[] {
-        var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
-        var platforms = options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
+        var platforms = PlatformHelper.parseRequestedPlatforms(options);
         // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
         return platforms.map(function (platform: string): PlatformHelper.IPlatformWithLocation {
             var buildLocation: PlatformHelper.BuildLocationType;
