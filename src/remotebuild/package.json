@@ -33,6 +33,7 @@
         "nconf": "0.6.9",
         "q": "1.0.1",
         "rimraf": "2.2.6",
+        "semver": "^4.3.6",
         "taco-utils": "file:../taco-utils"
     },
     "optionalDependencies": { 
