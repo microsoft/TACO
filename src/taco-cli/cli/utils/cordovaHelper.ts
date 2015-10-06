@@ -126,8 +126,8 @@ class CordovaHelper {
      * Note that this assumes that all arguments after a "--" are not for this command, but something else and so should be passed on.
      * With a command like "taco build --debug --remote -- ios android" this assumption isn't quite true
      */
-    public static toCordovaCliArguments(commandData: commands.ICommandData, platform: string = null): string[] {
-        var cordovaArgs: string[] = platform ? [platform] : commandData.remain;
+    public static toCordovaCliArguments(commandData: commands.ICommandData, platforms: string[] = null): string[] {
+        var cordovaArgs: string[] = platforms ? platforms : commandData.remain;
         Object.keys(CordovaHelper.CORDOVA_BOOLEAN_PARAMETERS).forEach(function (key: string): void {
             if (commandData.options[key]) {
                 cordovaArgs.push("--" + key);
@@ -145,14 +145,14 @@ class CordovaHelper {
         return cordovaArgs.concat(additionalArguments);
     }
 
-    public static toCordovaRunArguments(commandData: commands.ICommandData, platform: string = null): Cordova.ICordovaRawOptions {
+    public static toCordovaRunArguments(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
         // Run, build, emulate, prepare and compile all use the same format at the moment
-        return CordovaHelper.toCordovaArgumentsInternal(commandData, platform);
+        return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
     }
 
-    public static toCordovaBuildArguments(commandData: commands.ICommandData, platform: string = null): Cordova.ICordovaRawOptions {
+    public static toCordovaBuildArguments(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
         // Run, build, emulate, prepare and compile all use the same format at the moment
-        return CordovaHelper.toCordovaArgumentsInternal(commandData, platform);
+        return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
     }
 
     public static editConfigXml(projectInfo: projectHelper.IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
@@ -318,9 +318,9 @@ class CordovaHelper {
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
      */
-    private static toCordovaArgumentsInternal(commandData: commands.ICommandData, platform: string = null): Cordova.ICordovaRawOptions {
+    private static toCordovaArgumentsInternal(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
         var opts: Cordova.ICordovaRawOptions = {
-            platforms: platform ? [platform] : commandData.remain,
+            platforms: platforms ? platforms : commandData.remain,
             options: [],
             verbose: commandData.options["verbose"] || false,
             silent: commandData.options["silent"] || false,
