@@ -109,7 +109,7 @@ class PlatformHelper {
      * use the remote, unless an override is specified.
      */
     public static determinePlatformsFromOptions(options: commands.ICommandData): Q.Promise<PlatformHelper.IPlatformWithLocation[]> {
-        return Settings.loadSettingsOrReturnEmpty().then((settings: Settings.ISettings) => {
+        return Settings.loadSettingsOrReturnEmpty().then((settings: Settings.ISettings): PlatformHelper.IPlatformWithLocation[] => {
             // Enumerate all installed/configured platforms
             var remotePlatforms: string[] = [];
             if (!options.options["local"]) {
@@ -129,8 +129,8 @@ class PlatformHelper {
                 return { location: PlatformHelper.BuildLocationType.Remote, platform: platform };
             }).concat(localPlatforms.map(function (platform: string): PlatformHelper.IPlatformWithLocation {
                 return { location: PlatformHelper.BuildLocationType.Local, platform: platform };
-            }));
-        }).then((platforms: PlatformHelper.IPlatformWithLocation[]) => {
+                }));
+        }).then((platforms: PlatformHelper.IPlatformWithLocation[]): PlatformHelper.IPlatformWithLocation[] => {
             var requestedPlatforms = PlatformHelper.parseRequestedPlatforms(options);
 
             if (requestedPlatforms.length > 0) {
@@ -150,8 +150,8 @@ class PlatformHelper {
 
             // Otherwise return all the platforms we found.
             return platforms;
-        }).then((platforms: PlatformHelper.IPlatformWithLocation[]) => {
-            return platforms.filter((platform: PlatformHelper.IPlatformWithLocation) => {
+        }).then((platforms: PlatformHelper.IPlatformWithLocation[]): PlatformHelper.IPlatformWithLocation[] => {
+            return platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
                 // If the user specified --remote, then any local platforms at this point
                 // Must be user-specified and non-configured, so warn about them.
                 if (options.options["remote"] && platform.location === PlatformHelper.BuildLocationType.Local) {
@@ -172,10 +172,10 @@ class PlatformHelper {
     public static operateOnPlatforms(platforms: PlatformHelper.IPlatformWithLocation[],
         localFunction: (platforms: string[]) => Q.Promise<any>,
         remoteFunction: (platforms: string) => Q.Promise<any>): Q.Promise<any> {
-        var localPlatforms = platforms.filter((platform: PlatformHelper.IPlatformWithLocation) => {
+        var localPlatforms = platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
             return platform.location === PlatformHelper.BuildLocationType.Local;
         }).map((platform: PlatformHelper.IPlatformWithLocation) => platform.platform);
-        var remotePlatforms = platforms.filter((platform: PlatformHelper.IPlatformWithLocation) => {
+        var remotePlatforms = platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
             return platform.location === PlatformHelper.BuildLocationType.Remote;
         }).map((platform: PlatformHelper.IPlatformWithLocation) => platform.platform);
 

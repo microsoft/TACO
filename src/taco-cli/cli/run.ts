@@ -160,7 +160,7 @@ class Run extends commands.TacoCommandBase {
     private static fallback(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
-            .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
+            .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
 
                 return PlatformHelper.operateOnPlatforms(platforms,

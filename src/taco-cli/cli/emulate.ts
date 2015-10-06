@@ -127,7 +127,7 @@ class Emulate extends commands.TacoCommandBase {
     private static emulate(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
-            .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
+            .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
                 return PlatformHelper.operateOnPlatforms(platforms,
                     (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.emulate(commandData, localPlatforms),
