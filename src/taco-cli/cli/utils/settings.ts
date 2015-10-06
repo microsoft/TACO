@@ -13,19 +13,15 @@
 "use strict";
 
 import fs = require ("fs");
-import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
-import CordovaHelper = require ("./cordovaHelper");
-import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
-import logger = tacoUtils.Logger;
 import utils = tacoUtils.UtilHelper;
 
 /*
