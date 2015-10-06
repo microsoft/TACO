@@ -165,7 +165,7 @@ class Kit extends commands.TacoCommandBase {
 
         return Kit.getCurrentKitInfo().then(function (kitInfo: IKitInfo): Q.Promise<any> {
             currentKitId = kitInfo.kitId;
-            var logLine = false;
+            var logLine: boolean = false;
             if (kitInfo.kitId) {
                 logger.log(resources.getString("CommandKitListCurrentKit", kitInfo.kitId));
                 logLine = true;
@@ -383,7 +383,7 @@ class Kit extends commands.TacoCommandBase {
      * Pretty prints the current Kit/Cordova CLI info
      */
     private static getCurrentKitInfo(): Q.Promise<IKitInfo> {
-        var deferred = Q.defer<IKitInfo>();
+        var deferred: Q.Deferred<IKitInfo> = Q.defer<IKitInfo>();
         return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<IKitInfo> {
             deferred.resolve(<IKitInfo> { kitId: projectInfo.tacoKitId, cordovaCliVersion: projectInfo.cordovaCliVersion });
             return deferred.promise;
