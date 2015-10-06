@@ -113,7 +113,7 @@ module TacoKits {
     }
 
     /**
-     *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetaData.json)
+     *   KitHelper class exports methods for parsing the kit metadata file (TacoKitMetadata.json)
      */
     export class KitHelper implements TacoKits.IKitHelper {
         private static kitMetadata: ITacoKitMetadata;
