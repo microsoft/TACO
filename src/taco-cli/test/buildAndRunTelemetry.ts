@@ -99,7 +99,8 @@ module BuildAndRunTelemetryTests {
         var customLoader: TacoUtility.ITacoPackageLoader = {
             lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel) => {
                 return Q(cordova);
-            }
+            },
+            lazyRun: (packageName: string, packageId: string, commandName: string) => Q("")
         };
 
         before(() => {

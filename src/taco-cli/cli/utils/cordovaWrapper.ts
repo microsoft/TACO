@@ -15,7 +15,6 @@
 
 import assert = require ("assert");
 import child_process = require ("child_process");
-import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import semver = require ("semver");
@@ -31,58 +30,59 @@ import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 
 class CordovaWrapper {
-    private static cordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<any> {
-        return CordovaWrapper.getCordovaExecutable()
-            .then(function (commandToRun: string): Q.Promise<string> {
-            var deferred = Q.defer<string>();
-            var output: string = "";
-            var errorOutput: string = "";
-            var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
 
-            var proc = child_process.spawn(commandToRun, args, options);
+        return CordovaHelper.getCordovaExecutable()
+            .then(function (executablePath: string): Q.Promise<string> {
+                var deferred = Q.defer<string>();
+                var output: string = "";
+                var errorOutput: string = "";
+                var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
 
-            proc.on("error", function (err: any): void {
-                // ENOENT error thrown if no Cordova.cmd is found
-                var tacoError = (err.code === "ENOENT") ?
-                    errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
-                    errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" "));
-                deferred.reject(tacoError);
-            });
+                var proc = child_process.spawn(executablePath, args, options);
 
-            if (captureOutput) {
-                proc.stdout.on("data", function (data: Buffer): void {
-                    output += data.toString();
+                proc.on("error", function (err: any): void {
+                    // ENOENT error thrown if no Cordova.cmd is found
+                    var tacoError = (err.code === "ENOENT") ?
+                        errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
+                        errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" "));
+                    deferred.reject(tacoError);
                 });
-                proc.stderr.on("data", function (data: Buffer): void {
-                    errorOutput += data.toString();
-                });
-            }
 
-            proc.on("close", function (code: number): void {
-                if (code) {
-                    // Special handling for 'cordova requirements': this Cordova command returns an error when some requirements are not installed, when technically this is not really an error (the command executes
-                    // correctly and reports that some requirements are missing). In that case, if the captureOutput flag is set, we don't want to report an error. To detect this case, we have to parse the returned
-                    // error output because there is no specific error code for this case. For now, we just look for the "Some of requirements check failed" sentence.
-                    if (captureOutput && output && args[0] === "requirements" && code === 1 && errorOutput && errorOutput.indexOf("Some of requirements check failed") !== -1) {
-                        deferred.resolve(output);
-                    } else {
-                        var tacoError = errorOutput ?
-                            errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, new Error(errorOutput), args.join(" ")) :
-                            errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" "));
-                        deferred.reject(tacoError);
-                    }
-                } else {
-                    if (captureOutput && output) {
-                        deferred.resolve(output);
-                    } else {
-                        deferred.resolve("");
-                    }
+                if (captureOutput) {
+                    proc.stdout.on("data", function (data: Buffer): void {
+                        output += data.toString();
+                    });
+                    proc.stderr.on("data", function (data: Buffer): void {
+                        errorOutput += data.toString();
+                    });
                 }
-            });
-            return deferred.promise;
+
+                proc.on("close", function (code: number): void {
+                    if (code) {
+                        // Special handling for 'cordova requirements': this Cordova command returns an error when some requirements are not installed, when technically this is not really an error (the command executes
+                        // correctly and reports that some requirements are missing). In that case, if the captureOutput flag is set, we don't want to report an error. To detect this case, we have to parse the returned
+                        // error output because there is no specific error code for this case. For now, we just look for the "Some of requirements check failed" sentence.
+                        if (captureOutput && output && args[0] === "requirements" && code === 1 && errorOutput && errorOutput.indexOf("Some of requirements check failed") !== -1) {
+                            deferred.resolve(output);
+                        } else {
+                            var tacoError = errorOutput ?
+                                errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, new Error(errorOutput), args.join(" ")) :
+                                errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" "));
+                            deferred.reject(tacoError);
+                        }
+                    } else {
+                        if (captureOutput && output) {
+                            deferred.resolve(output);
+                        } else {
+                            deferred.resolve("");
+                        }
+                    }
+                });
+
+                return deferred.promise;
         });
     }
 
@@ -189,24 +189,6 @@ class CordovaWrapper {
     private static cordovaApiOrProcess<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, processArgs: () => string[],
         options: { logLevel?: tacoUtility.InstallLogLevel, isSilent?: boolean, captureOutput?: boolean } = {}): Q.Promise<T | string> {
         return CordovaHelper.tryInvokeCordova<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
-    }
-
-    /**
-     * Returns a path to the local Cordova command if ran from a taco project, otherwise it will return the
-     * global Cordova command.
-     */
-    private static getCordovaExecutable(): Q.Promise < string > {
-        return CordovaHelper.tryInvokeCordova<string>((cordova: typeof Cordova): string => {
-        return (<{ packageTargetPath?: string }> cordova).packageTargetPath;
-    }, (): string => null)
-        .then(function (packagePath: string) {
-            var commandToRun = CordovaWrapper.cordovaCommandName;
-            if (packagePath) {
-                commandToRun = path.join(packagePath, "bin", CordovaWrapper.cordovaCommandName);
-            }
-
-            return commandToRun;
-        });
     }
 }
 

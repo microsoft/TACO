@@ -9,6 +9,7 @@
 "use strict";
 
 import domain = require("domain");
+import os = require("os");
 import path = require ("path");
 import Q = require ("q");
 
@@ -53,6 +54,8 @@ class CordovaHelper {
         archs: String,
         target: String
     };
+
+    private static globalCordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
 
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
@@ -312,6 +315,23 @@ class CordovaHelper {
                         cordova.off("log", console.log);
                     }
                 });
+            });
+    }
+
+    public static getCordovaExecutable(): Q.Promise<string> {
+        return projectHelper.getProjectInfo()
+            .then(function (projectInfo: projectHelper.IProjectInfo): any {
+                if (projectInfo.cordovaCliVersion) {
+                    return packageLoader.lazyRun(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion, "cordova")
+                        .then(function (cordovaExecutablePath: string) {
+                            return cordovaExecutablePath;
+                        });
+                } else {
+                    return CordovaHelper.globalCordovaCommandName;
+                }
+            })
+            .catch(function (err: string): string{
+                return CordovaHelper.globalCordovaCommandName;
             });
     }
 

@@ -54,7 +54,8 @@ describe("cordovaWrapper", () => {
                     return Q.reject(new Error("Expected to load cordova package"));
                 }
                 return Q(cordova);
-            }
+            },
+            lazyRun: (packageName: string, packageId: string, commandName: string) => Q("")
         };
     });
 

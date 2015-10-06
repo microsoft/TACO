@@ -18,6 +18,9 @@ module TacoUtility {
         PackageLoaderNpmUpdateFailedEaccess = 206,
         PackageLoaderNpmUpdateFailedWithCode = 207,
         PackageLoaderUpdateUnableToRecover = 208,
+        PackageLoaderRunPackageDoesntExportBinary = 209,
+        PackageLoaderRunPackageDoesntHaveRequestedBinary = 210,
+        PackageLoaderRunPackageBadBinaryFilePath = 211,
 
         // Misc Errors: 700+
         AbstractMethod = 701,

@@ -16,7 +16,8 @@
 import assert = require ("assert");
 import child_process = require ("child_process");
 import fs = require ("fs");
-import mkdirp = require ("mkdirp");
+import mkdirp = require("mkdirp");
+import os = require("os");
 import path = require ("path");
 import rimraf = require ("rimraf");
 import semver = require ("semver");
@@ -88,6 +89,7 @@ module TacoUtility {
 
     export interface ITacoPackageLoader {
         lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
+        lazyRun(packageName: string, packageId: string, commandName: string): Q.Promise<string>;
     }
 
     export class TacoPackageLoader {
@@ -95,6 +97,38 @@ module TacoUtility {
         public static FILE_URI_REGEX: RegExp = /^file:\/\/.*/;
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
+
+        public static lazyRun(packageName: string, packageId: string, commandName: string): Q.Promise<string> {
+            var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, InstallLogLevel.warn);
+
+            return Q({})
+                .then(function (): void {
+                    TacoPackageLoader.installPackageIfNeeded(request);
+                })
+                .then(function (): Q.Promise<string> {
+                    var packageJsonFilePath = path.join(request.targetPath, "package.json");
+                    var packageJson = JSON.parse(<any> fs.readFileSync(packageJsonFilePath));
+
+                    if (!packageJson.bin) {
+                        return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntExportBinary, packageName));
+                    }
+
+                    if (!packageJson.bin[commandName]) {
+                        return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
+                    }
+
+                    var commandFilePath = path.join(request.targetPath, packageJson.bin[commandName]);
+                    if (os.platform() === "win32") {
+                        commandFilePath += ".cmd";
+                    }
+
+                    if (!fs.existsSync(commandFilePath)) {
+                        return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageBadBinaryFilePath, commandFilePath));
+                    }
+
+                    return Q.resolve(commandFilePath);
+                });
+        }
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,
@@ -402,13 +436,7 @@ module TacoUtility {
         }
 
         private static requirePackage<T>(packageTargetPath: string): T {
-            var pkg = require(packageTargetPath);
-            try {
-                pkg["packageTargetPath"] = packageTargetPath;
-            } catch (e) {
-                // Modules can export whatever they like, which might not be an object.
-            }
-            return <T> pkg;
+            return <T> require(packageTargetPath);
         }
 
         private static getStatusFilePath(targetPath: string): string {
