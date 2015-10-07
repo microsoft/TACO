@@ -151,7 +151,7 @@ class CordovaWrapper {
         CordovaHelper.prepareCordovaConfig(cordovaParameters);
         return CordovaHelper.wrapCordovaInvocation<any>(cordovaCliVersion, (cordova: Cordova.ICordova) => {
             return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
-        }, tacoUtility.InstallLogLevel.taco);
+        }, tacoUtility.InstallLogLevel.error);
     }
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {
