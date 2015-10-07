@@ -41,7 +41,6 @@ module TemplateManager {
     export interface ITemplateDescriptor {
         id: string;
         name: string;
-        getDescription(): string;
     }
 
     export interface ITemplateList {

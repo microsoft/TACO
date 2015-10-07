@@ -301,18 +301,15 @@ describe("TemplateManager", function (): void {
                 templates: [
                     {
                         id: testTemplateOverrideInfo.templateId,
-                        name: testTemplateOverrideInfo.templateInfo.name,
-                        getDescription: null
+                        name: testTemplateOverrideInfo.templateInfo.name
                     },
                     {
                         id: testTemplateOverrideInfo2.templateId,
-                        name: testTemplateOverrideInfo2.templateInfo.name,
-                        getDescription: null
+                        name: testTemplateOverrideInfo2.templateInfo.name
                     },
                     {
                         id: testTemplateOverrideInfo3.templateId,
-                        name: testTemplateOverrideInfo3.templateInfo.name,
-                        getDescription: null
+                        name: testTemplateOverrideInfo3.templateInfo.name
                     }
                 ]
             };
@@ -341,21 +338,19 @@ describe("TemplateManager", function (): void {
                 templates: [
                     {
                         id: testTemplateOverrideInfo.templateId,
-                        name: testTemplateOverrideInfo.templateInfo.name,
-                        getDescription: null
+                        name: testTemplateOverrideInfo.templateInfo.name
                     },
                     {
                         id: testTemplateOverrideInfo2.templateId,
-                        name: testTemplateOverrideInfo2.templateInfo.name,
-                        getDescription: null
+                        name: testTemplateOverrideInfo2.templateInfo.name
                     },
                     {
                         id: testTemplateOverrideInfo3.templateId,
-                        name: testTemplateOverrideInfo3.templateInfo.name,
-                        getDescription: null
+                        name: testTemplateOverrideInfo3.templateInfo.name
                     }
                 ]
             };
+
             var expectedResultStringified: string = JSON.stringify(expectedResult);
 
             templates.getAllTemplates()
