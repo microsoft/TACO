@@ -7,6 +7,7 @@
 ﻿ */
 
 import tacoUtility = require ("taco-utils");
+import PlatformHelper = require ("./platformHelper");
 import Settings = require ("./settings");
 import Q = require ("q");
 
@@ -24,15 +25,15 @@ class BuildTelemetryHelper {
     private static buildAndRunNonPiiOptions: string[] = ["clean", "local", "remote", "debuginfo", "nobuild", "device", "emulator", "target", "debug", "release"];
 
     public static storePlatforms(telemetryProperties: ICommandTelemetryProperties, modifier: string,
-        platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings): void {
+        platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): void {
         var baseName: string = "platforms." + modifier + ".";
         var remoteBaseName: string = baseName + "remote";
 
         if (platforms.length > 0) {
-            this.encodePlatforms(telemetryProperties, baseName + "local", this.extractPlatformsList(platforms, Settings.BuildLocationType.Local));
+            this.encodePlatforms(telemetryProperties, baseName + "local", this.extractPlatformsList(platforms, PlatformHelper.BuildLocationType.Local));
         }
 
-        var remotePlatforms: string[] = this.extractPlatformsList(platforms, Settings.BuildLocationType.Remote);
+        var remotePlatforms: string[] = this.extractPlatformsList(platforms, PlatformHelper.BuildLocationType.Remote);
         if (remotePlatforms.length > 0) {
             this.encodePlatforms(telemetryProperties, remoteBaseName, remotePlatforms);
         }
@@ -47,10 +48,15 @@ class BuildTelemetryHelper {
     public static addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
         commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettingsOrReturnEmpty().then((settings: Settings.ISettings) => {
-            var properties: tacoUtility.ICommandTelemetryProperties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties, knownOptions, commandData.options, this.buildAndRunNonPiiOptions);
-            return Settings.determinePlatformsFromOptions(commandData).then((platforms: Settings.IPlatformWithLocation[]) => {
-                var requestedPlatforms: string[] = Settings.parseRequestedPlatforms(commandData);
-                var requestedUsedPlatforms: Settings.IPlatformWithLocation[] = platforms.filter((platform: Settings.IPlatformWithLocation): boolean => requestedPlatforms.indexOf(platform.platform) !== -1);
+
+            var properties: ICommandTelemetryProperties = tacoUtility.TelemetryHelper.addPropertiesFromOptions(telemetryProperties,
+                knownOptions, commandData.options, this.buildAndRunNonPiiOptions);
+
+            return PlatformHelper.determinePlatformsFromOptions(commandData).then((platforms: PlatformHelper.IPlatformWithLocation[]) => {
+                var requestedPlatforms: string[] = PlatformHelper.parseRequestedPlatforms(commandData);
+                var requestedUsedPlatforms: PlatformHelper.IPlatformWithLocation[] = platforms
+                    .filter((platform: PlatformHelper.IPlatformWithLocation): boolean => requestedPlatforms.indexOf(platform.platform) !== -1);
+
                 this.storePlatforms(properties, "requestedViaCommandLine", requestedUsedPlatforms, settings);
                 return properties;
             });
@@ -71,10 +77,10 @@ class BuildTelemetryHelper {
         });
     }
 
-    private static extractPlatformsList(platforms: Settings.IPlatformWithLocation[], buildLocationType: Settings.BuildLocationType): string[] {
+    private static extractPlatformsList(platforms: PlatformHelper.IPlatformWithLocation[], buildLocationType: PlatformHelper.BuildLocationType): string[] {
         return platforms
-        .filter((platform: Settings.IPlatformWithLocation) => platform.location === buildLocationType)
-        .map((platform: Settings.IPlatformWithLocation) => platform.platform);
+        .filter((platform: PlatformHelper.IPlatformWithLocation) => platform.location === buildLocationType)
+        .map((platform: PlatformHelper.IPlatformWithLocation) => platform.platform);
     }
 }
 

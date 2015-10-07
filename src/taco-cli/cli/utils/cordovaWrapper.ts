@@ -84,10 +84,10 @@ class CordovaWrapper {
         return deferred.promise;
     }
 
-    public static build(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    public static build(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.build(CordovaHelper.toCordovaBuildArguments(commandData, platform));
-        }, () => ["build"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
+            return cordova.raw.build(CordovaHelper.toCordovaBuildArguments(commandData, platforms));
+        }, () => ["build"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     /**
@@ -114,10 +114,10 @@ class CordovaWrapper {
         }, { logLevel: tacoUtility.InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
     }
 
-    public static emulate(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    public static emulate(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platform));
-        }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
+            return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+        }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     public static requirements(platforms: string[]): Q.Promise<any> {
@@ -170,10 +170,10 @@ class CordovaWrapper {
         });
     }
 
-    public static run(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platform));
-        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
+            return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     /**
