@@ -238,7 +238,7 @@ class Server {
                 return Q(certStore);
             }).
             then(function (certStore: HostSpecifics.ICertStore): https.Server {
-                var sslSettings: any = {
+                var sslSettings: https.ServerOptions = {
                     key: certStore.getKey(),
                     cert: certStore.getCert(),
                     ca: certStore.getCA(),

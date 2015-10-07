@@ -10,6 +10,7 @@
 /// <reference path="../../../typings/request.d.ts" />
 /// <reference path="../../../typings/fstream.d.ts" />
 /// <reference path="../../../typings/tar.d.ts" />
+/// <reference path="../../../typings/remoteBuild.d.ts" />
 /// <reference path="../../../typings/tacoRemote.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/adm-zip.d.ts" />
@@ -137,7 +138,7 @@ class RemoteBuildClientHelper {
 
     public static run(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
         var buildUrlBase: string = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings: { language: string; agent: Q.Promise<https.Agent> } = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        var httpSettings: RemoteBuild.IHttpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
 
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/deploy", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (): Q.Promise<{ response: any; body: string }> {
@@ -149,7 +150,7 @@ class RemoteBuildClientHelper {
 
     public static emulate(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo, target: string): Q.Promise<BuildInfo> {
         var buildUrlBase: string = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings: { language: string; agent: Q.Promise<https.Agent> } = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        var httpSettings: RemoteBuild.IHttpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/emulate?" + querystring.stringify({ target: target }), httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): BuildInfo {
                 return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
@@ -158,7 +159,7 @@ class RemoteBuildClientHelper {
 
     public static debug(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
         var buildUrlBase: string = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings: { language: string; agent: Q.Promise<https.Agent> } = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        var httpSettings: RemoteBuild.IHttpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/debug", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
             return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
         });
@@ -216,7 +217,7 @@ class RemoteBuildClientHelper {
         return (serverUrl.indexOf("http://") === 0 || serverUrl.indexOf("https://") === 0);
     }
 
-    private static httpOptions(url: string, settings: { language: string; agent: Q.Promise<https.Agent> }): Q.Promise<request.Options> {
+    private static httpOptions(url: string, settings: RemoteBuild.IHttpSettings): Q.Promise<request.Options> {
         return settings.agent.then(function (agent: https.Agent): request.Options {
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             return <request.Options> {

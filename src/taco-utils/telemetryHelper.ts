@@ -204,7 +204,7 @@ module TacoUtility {
         }
 
         public static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo {
-            var propertyInfo: any = { value: targetString, isPii: false };
+            var propertyInfo: ITelemetryPropertyInfo = { value: targetString, isPii: false };
             if (packageLoader.TacoPackageLoader.GIT_URI_REGEX.test(targetString)
                 || packageLoader.TacoPackageLoader.FILE_URI_REGEX.test(targetString)) {
                 propertyInfo.isPii = true;

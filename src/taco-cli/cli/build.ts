@@ -46,7 +46,7 @@ class Build extends commands.TacoCommandBase {
     /*
      * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
      */
-    public static remoteBuild: any = RemoteBuildClientHelper;
+    public static remoteBuild: typeof RemoteBuildClientHelper = RemoteBuildClientHelper;
 
     private static KNOWN_OPTIONS: Nopt.CommandData = {
         local: Boolean,

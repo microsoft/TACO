@@ -30,9 +30,11 @@ import util = require ("util");
 
 import buildMod = require ("../cli/build");
 import createMod = require ("../cli/create");
+import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
 import mockCordova = require ("./utils/mockCordova");
 import Platform = require ("../cli/platform");
+import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
@@ -133,7 +135,7 @@ module BuildAndRunTelemetryTests {
             return Q({});
         };
 
-        function generateCompleteBuildSequence(platform: string, port: number, isIncrementalTest: boolean): any {
+        function generateCompleteBuildSequence(platform: string, port: number, isIncrementalTest: boolean): IRemoteServerSequence[] {
             var configuration: string = "debug";
 
             // Mock out the server on the other side
@@ -225,11 +227,11 @@ module BuildAndRunTelemetryTests {
                 }
             ];
 
-            var buildSequence: any = (isIncrementalTest ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
+            var buildSequence: IRemoteServerSequence[] = (isIncrementalTest ? incrementalBuildStart : nonIncrementalBuildStart).concat(remainingBuildSequence);
 
             if (command !== Command.Build) {
                 var target: string = isIncrementalTest ? "ipad 2" : "";
-                var runSequence: any = [{
+                var runSequence: IRemoteServerSequence[] = [{
                     expectedUrl: "/cordova/build/" + buildNumber + "/emulate?" + querystring.stringify({ target: target }),
                     head: { "Content-Type": "application/json" },
                     statusCode: 200,
@@ -243,11 +245,11 @@ module BuildAndRunTelemetryTests {
         }
 
         function configureRemoteServer(done: MochaDone, isIncrementalTest: boolean): Q.Promise<any> {
-            var iosSequence: any = generateCompleteBuildSequence("ios", iosPort, isIncrementalTest);
-            var androidSequence: any = generateCompleteBuildSequence("android", androidPort, isIncrementalTest);
+            var iosSequence: IRemoteServerSequence[] = generateCompleteBuildSequence("ios", iosPort, isIncrementalTest);
+            var androidSequence: IRemoteServerSequence[] = generateCompleteBuildSequence("android", androidPort, isIncrementalTest);
 
-            var iosServerFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(done, iosSequence);
-            var androidServerFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(done, androidSequence);
+            var iosServerFunction: IHttpServerFunction = ServerMock.generateServerFunction(done, iosSequence);
+            var androidServerFunction: IHttpServerFunction = ServerMock.generateServerFunction(done, androidSequence);
             testIosHttpServer.on("request", iosServerFunction);
 
             if (!isIncrementalTest) {

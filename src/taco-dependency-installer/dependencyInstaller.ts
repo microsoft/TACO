@@ -379,7 +379,7 @@ module TacoDependencyInstaller {
 
             try {
                 // Create a JSON object wrapper around our array of missing dependencies
-                var jsonWrapper: any = {
+                var jsonWrapper: DependencyInstallerInterfaces.IInstallerConfig = {
                     dependencies: this.missingDependencies
                 };
 

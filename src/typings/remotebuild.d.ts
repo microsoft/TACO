@@ -15,7 +15,7 @@ declare module RemoteBuild {
         get(prop: string): any;
     }
     interface IDictionary extends IReadOnlyDictionary {
-        set(prop: string, value: any): void
+        set(prop: string, value: any): void;
     }
     interface IRemoteBuildConfiguration {
         lang: string;
@@ -55,4 +55,10 @@ declare module RemoteBuild {
         getRouter(): Express.Router;
         shutdown(): void;
     }
+
+    interface IHttpSettings {
+        language: string;
+        agent: Q.Promise<NodeJSHttp.Agent>;
+    }
 }
+

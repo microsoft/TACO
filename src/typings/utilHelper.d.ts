@@ -41,7 +41,7 @@ declare module TacoUtility {
          * @param {string} target Location to copy to
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
-        public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any>;
+        public static copyRecursive(source: string, target: string, options?: ICopyOptions): Q.Promise<any>;
         /**
          * Synchronously create a directory if it does not exist
          *
@@ -120,5 +120,10 @@ declare module TacoUtility {
          * silent callbacks, catch all exceptions do nothing etc.
          */
         public static emptyMethod(args?: any): any;
+    }
+
+    interface ICopyOptions {
+        clobber: boolean;
+        filter: (itemPath: string) => boolean;
     }
 }

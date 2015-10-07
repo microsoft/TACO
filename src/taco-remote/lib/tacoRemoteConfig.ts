@@ -43,7 +43,7 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
         this.tacoRemoteConf.port = serverConf.port;
         this.tacoRemoteConf.serverDir = serverConf.serverDir;
 
-        var defaults: any = {
+        var defaults: { [key: string]: any } = {
             maxBuildsInQueue: 10,
             maxBuildsToKeep: 20,
             deleteBuildsOnShutdown: true,

@@ -10,6 +10,8 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
+/// <reference path="../../typings/remoteBuild.d.ts" />
+
 "use strict";
 
 /* tslint:disable:no-var-requires */
@@ -32,12 +34,14 @@ import util = require ("util");
 import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import buildMod = require ("../cli/build");
 import createMod = require ("../cli/create");
+import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
 import mockCordova = require ("./utils/mockCordova");
 import Platform = require ("../cli/platform");
 import RemoteBuildClientHelper = require ("../cli/remoteBuild/remoteBuildClientHelper");
 import RemoteMock = require ("./utils/remoteMock");
 import resources = require ("../resources/resourceManager");
+import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
 import TacoUtility = require ("taco-utils");
@@ -72,7 +76,7 @@ describe("taco build", function (): void {
         });
     }
 
-    var remoteServerConfiguration: any = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
+    var remoteServerConfiguration: Settings.IRemoteConnectionInfo = { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" };
     before(function (mocha: MochaDone): void {
         originalCwd = process.cwd();
         // Set up mocked out resources
@@ -129,7 +133,7 @@ describe("taco build", function (): void {
         var buildNumber: number = 12340;
 
         // Mock out the server on the other side
-        var sequence: any = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/tasks?" + querystring.stringify({
                     command: "build",
@@ -210,7 +214,8 @@ describe("taco build", function (): void {
                 waitForPayload: false
             },
         ];
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, sequence);
+
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(buildArguments).then(buildRun).finally(function (): void {
@@ -228,7 +233,7 @@ describe("taco build", function (): void {
         var buildNumber: number = 12341;
 
         // Mock out the server on the other side
-        var sequence: any = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/tasks?" + querystring.stringify({
                     command: "build",
@@ -298,7 +303,7 @@ describe("taco build", function (): void {
             }
         ];
 
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(buildArguments).then(buildRun).finally(function (): void {
@@ -324,7 +329,7 @@ describe("taco build", function (): void {
 
         // Mock out the server on the other side
         // Since this test is only whether we attempt incremental builds, we'll let the build fail to make the test shorter
-        var sequence: any = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,
                 head: {
@@ -377,7 +382,7 @@ describe("taco build", function (): void {
             }
         ];
 
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(buildArguments).then(buildRun).finally(function (): void {
@@ -396,7 +401,7 @@ describe("taco build", function (): void {
         var testZipFile: string = path.resolve(__dirname, "resources", "empty.zip");
 
         // Mock out the server on the other side
-        var sequence: any = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/tasks?" + querystring.stringify({
                     command: "build",
@@ -488,7 +493,7 @@ describe("taco build", function (): void {
                 fileToSend: testZipFile
             },
         ];
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(buildArguments).then(buildRun).finally(function (): void {

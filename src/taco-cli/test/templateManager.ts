@@ -296,23 +296,27 @@ describe("TemplateManager", function (): void {
             var templates: templateManager = new templateManager(mockKitHelper, templateCache);
 
             // Build the expected result
-            var expectedResult: any = {
+            var expectedResult: templateManager.ITemplateList = {
                 kitId: testKitId,
                 templates: [
                     {
                         id: testTemplateOverrideInfo.templateId,
-                        name: testTemplateOverrideInfo.templateInfo.name
+                        name: testTemplateOverrideInfo.templateInfo.name,
+                        getDescription: null
                     },
                     {
                         id: testTemplateOverrideInfo2.templateId,
-                        name: testTemplateOverrideInfo2.templateInfo.name
+                        name: testTemplateOverrideInfo2.templateInfo.name,
+                        getDescription: null
                     },
                     {
                         id: testTemplateOverrideInfo3.templateId,
-                        name: testTemplateOverrideInfo3.templateInfo.name
+                        name: testTemplateOverrideInfo3.templateInfo.name,
+                        getDescription: null
                     }
                 ]
             };
+
             var expectedResultStringified: string = JSON.stringify(expectedResult);
 
             templates.getTemplatesForKit(testKitId)
@@ -332,20 +336,23 @@ describe("TemplateManager", function (): void {
             var templates: templateManager = new templateManager(mockKitHelper, templateCache);
 
             // Build the expected result
-            var expectedResult: any = {
+            var expectedResult: templateManager.ITemplateList = {
                 kitId: "",
                 templates: [
                     {
                         id: testTemplateOverrideInfo.templateId,
-                        name: testTemplateOverrideInfo.templateInfo.name
+                        name: testTemplateOverrideInfo.templateInfo.name,
+                        getDescription: null
                     },
                     {
                         id: testTemplateOverrideInfo2.templateId,
-                        name: testTemplateOverrideInfo2.templateInfo.name
+                        name: testTemplateOverrideInfo2.templateInfo.name,
+                        getDescription: null
                     },
                     {
                         id: testTemplateOverrideInfo3.templateId,
-                        name: testTemplateOverrideInfo3.templateInfo.name
+                        name: testTemplateOverrideInfo3.templateInfo.name,
+                        getDescription: null
                     }
                 ]
             };

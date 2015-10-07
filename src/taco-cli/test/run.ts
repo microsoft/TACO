@@ -29,7 +29,9 @@ import rimraf = require ("rimraf");
 
 import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import createMod = require ("../cli/create");
+import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
+import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
 import ServerMock = require ("./utils/serverMock");
@@ -133,7 +135,7 @@ describe("taco run", function (): void {
         fs.writeFileSync(path.join(buildInfoPath, "buildInfo.json"), JSON.stringify(buildInfo));
 
         // Mock out the server on the other side
-        var sequence: any = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,
                 head: {
@@ -170,7 +172,7 @@ describe("taco run", function (): void {
                 waitForPayload: false
             }
         ];
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(runArguments).then(runRun).finally(function (): void {
@@ -199,7 +201,7 @@ describe("taco run", function (): void {
         fs.writeFileSync(path.join(buildInfoPath, "buildInfo.json"), JSON.stringify(buildInfo));
 
         // Mock out the server on the other side
-        var sequence: any = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,
                 head: {
@@ -225,7 +227,7 @@ describe("taco run", function (): void {
             }
         ];
 
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(runArguments).then(runRun).finally(function (): void {

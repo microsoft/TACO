@@ -26,11 +26,13 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 
 import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
+import IHttpServerFunction = require ("./utils/httpServerFunction");
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
 import RemoteMod = require ("../cli/remote");
 import RemoteMock = require ("./utils/remoteMock");
+import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import TacoUtility = require ("taco-utils");
 import ms = require ("./utils/memoryStream");
 
@@ -80,24 +82,24 @@ describe("taco remote", function(): void {
     it("should save in the expected format", function(mocha: MochaDone): void {
         var questionsAsked: number = 0;
         var sessionClosed: boolean = false;
-        var desiredState: any = {
+        var desiredState: { host: string; port: number; pin: string } = {
             host: "localhost",
             port: 3000,
-            pin: "",
-            mountPoint: "testMountPoint"
+            pin: ""
         };
-        var expectedSequence: any = [
+        var desiredMountPoint: string = "testMountPoint";
+        var expectedSequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/modules/taco-remote",
                 head: {
                     "Content-Type": "text/plain"
                 },
                 statusCode: 200,
-                response: desiredState.mountPoint
+                response: desiredMountPoint
             }
         ];
         var mockServer: http.Server = http.createServer();
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, expectedSequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
 
         var cliVersion: string = require("../package.json").version;
         var expectedTelemetryProperties: TacoUtility.ICommandTelemetryProperties = {
@@ -126,7 +128,7 @@ describe("taco remote", function(): void {
                     host: desiredState.host,
                     port: desiredState.port,
                     secure: desiredState.pin !== "",
-                    mountPoint: desiredState.mountPoint
+                    mountPoint: desiredMountPoint
                 });
         }).finally(function(): void {
             mockServer.close();
@@ -161,7 +163,7 @@ describe("taco remote", function(): void {
             pin: "123456",
             mountPoint: "cordova"
         };
-        var expectedSequence: any = [
+        var expectedSequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/certs/" + desiredState.pin,
                 head: {
@@ -188,7 +190,7 @@ describe("taco remote", function(): void {
             }
         ];
 
-        var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(mocha, expectedSequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
@@ -255,7 +257,7 @@ describe("taco remote", function(): void {
                 pin: "",
                 mountPoint: "testMountPoint"
             };
-            var expectedSequence: any = [
+            var expectedSequence: IRemoteServerSequence[] = [
                 {
                     expectedUrl: "/modules/taco-remote",
                     head: {
@@ -267,7 +269,7 @@ describe("taco remote", function(): void {
             ];
 
             var mockServer: http.Server = http.createServer();
-            var serverFunction: (request: http.ServerRequest, response: http.ServerResponse) => void = ServerMock.generateServerFunction(done, expectedSequence);
+            var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(done, expectedSequence);
             mockServer.listen(desiredState.port);
             mockServer.on("request", serverFunction);
 

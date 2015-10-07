@@ -120,7 +120,7 @@ class IOSBuilder extends Builder {
         // Always put the targeted device into the build config.
         // If a valid overriding device is not given, use 'universal'
         var deviceToAdd: string = "1,2";
-        var validOverridingTargetDevices: any = {};
+        var validOverridingTargetDevices: { [device: string]: string } = {};
         validOverridingTargetDevices["handset"] = "1";
         validOverridingTargetDevices["tablet"] = "2";
 

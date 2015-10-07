@@ -246,7 +246,7 @@ class ProjectHelper {
                 // Ignore plugins without a package.json
                 var pluginPackgeJson: string = path.join(projectDir, "plugins", plugin, "package.json");
                 if (fs.existsSync(pluginPackgeJson)) {
-                    var pluginInfo: any = require(pluginPackgeJson);
+                    var pluginInfo: cordovaHelper.IDictionary<string> = require(pluginPackgeJson);
                     if (pluginInfo) {
                         pluginVersions[plugin] = pluginInfo["version"];
                     }
@@ -292,7 +292,7 @@ class ProjectHelper {
         // JsonSerializer class in the taco-utils does the necessary formatting
         // This is important as VS expects the JSON file to be in the standard JSON format
         var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
-        var formattedTacoJson: any = jsonSerializer.serialize(jsonData);
+        var formattedTacoJson: string = jsonSerializer.serialize(jsonData);
 
         fs.writeFile(tacoJsonPath, formattedTacoJson, function (err: NodeJS.ErrnoException): void {
             if (err) {

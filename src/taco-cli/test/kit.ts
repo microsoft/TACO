@@ -114,7 +114,7 @@ describe("Kit", function (): void {
         // Force KitHelper to fetch the package fresh
         kitHelper.kitPackagePromise = null;
 
-        this.timeout(30000);
+        this.timeout(60000);
         rimraf.sync(runFolder);
     });
 
@@ -128,7 +128,7 @@ describe("Kit", function (): void {
     it("'taco kit' should not throw any error", function (done: MochaDone): void {
         kitRun()
             .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                var expected: any = { subCommand: { isPii: false, value: "list" } };
+                var expected: TacoUtility.ICommandTelemetryProperties = { subCommand: { isPii: false, value: "list" } };
                 telemetryParameters.should.be.eql(expected);
                 done();
             }, function (err: tacoUtils.TacoError): void {
@@ -139,7 +139,7 @@ describe("Kit", function (): void {
     it("'taco kit list' should not throw any error", function (done: MochaDone): void {
         kitRun(["list"])
             .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                var expected: any = { subCommand: { isPii: false, value: "list" } };
+                var expected: TacoUtility.ICommandTelemetryProperties = { subCommand: { isPii: false, value: "list" } };
                 telemetryParameters.should.be.eql(expected);
                 done();
             }, function (err: tacoUtils.TacoError): void {
@@ -150,7 +150,7 @@ describe("Kit", function (): void {
     it("'taco kit list --kit {kit-ID}' should not throw any error", function (done: MochaDone): void {
         kitRun(["list", "--kit", "5.1.1-Kit"])
             .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                var expected: any = {
+                var expected: TacoUtility.ICommandTelemetryProperties = {
                     subCommand: { isPii: false, value: "list" },
                     "options.kit": { isPii: false, value: "5.1.1-Kit" }
                 };
@@ -165,7 +165,7 @@ describe("Kit", function (): void {
         kitRun(["list", "--json", tempJson])
             .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                 fs.existsSync(tempJson).should.be.true;
-                var expected: any = {
+                var expected: TacoUtility.ICommandTelemetryProperties = {
                     subCommand: { isPii: false, value: "list" },
                     "options.json": { isPii: true, value: tempJson }
                 };
@@ -186,6 +186,7 @@ describe("Kit", function (): void {
         this.timeout(30000);
 
         before(function (done: MochaDone): void {
+            this.timeout(60000);
             createKitProject("5.1.1-Kit")
             .done(function (): void {
                 process.chdir(kitProjectpath);
@@ -194,7 +195,6 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(30000);
             process.chdir(tacoHome);
             rimraf(kitProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
@@ -202,7 +202,7 @@ describe("Kit", function (): void {
         it("'taco kit select --cordova {CLI-VERSION}' should execute with no errors", function (done: MochaDone): void {
             runKitCommandAndVerifyTacoJsonContents(["select", "--cordova", "5.1.1"], tacoJsonPath, expectedCliTacoJsonKeyValues)
                 .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                    var expected: any = {
+                    var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "select" },
                         "options.cordova": { isPii: false, value: "5.1.1" }
                     };
@@ -222,6 +222,7 @@ describe("Kit", function (): void {
         this.timeout(30000);
 
         before(function (done: MochaDone): void {
+            this.timeout(60000);
             createCliProject("5.1.1")
             .done(function (): void {
                 process.chdir(cliProjectpath);
@@ -238,7 +239,7 @@ describe("Kit", function (): void {
         it("'taco kit select --kit {kit-ID}' should execute with no errors", function (done: MochaDone): void {
             runKitCommandAndVerifyTacoJsonContents(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
                 .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                    var expected: any = {
+                    var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "select" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
                     };

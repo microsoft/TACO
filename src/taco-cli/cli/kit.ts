@@ -436,7 +436,7 @@ class Kit extends commands.TacoCommandBase {
         assert(componentType === ProjectComponentType.Platform || componentType === ProjectComponentType.Plugin);
         var componentUpdates: IDictionary<string> = {};
         return kitHelper.getKitInfo(kitId).then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<any> {
-            var componentOverrides: any = (componentType === ProjectComponentType.Platform) ? kitInfo.platforms : kitInfo.plugins;
+            var componentOverrides: TacoKits.IPluginOverrideMetadata | TacoKits.IPlatformOverrideMetadata = (componentType === ProjectComponentType.Platform) ? kitInfo.platforms : kitInfo.plugins;
             if (!installedComponentInfo) {
                 return Q.resolve({});
             }

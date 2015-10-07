@@ -47,7 +47,7 @@ describe("InstallerRunner", function (): void {
             fs.unlinkSync(installConfigFile);
         }
 
-        var jsonWrapper: any = {
+        var jsonWrapper: DependencyInstallerInterfaces.IInstallerConfig = {
             dependencies: dependencies
         };
 

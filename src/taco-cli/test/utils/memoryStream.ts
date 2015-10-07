@@ -59,7 +59,7 @@ export class MemoryStream extends stream.Writable {
         var buffer: Buffer = Buffer.isBuffer(data) ? data : new Buffer(data, encoding);
         this.fullBuffer = Buffer.concat([this.fullBuffer, buffer]);
         if (this.shouldAlsoPrintToRealStdout) {
-            this.stdoutWrite.call(process.stdout, data, encoding, utils.emptyMethod);
+            this.stdoutWrite.call(process.stdout, buffer);
             callback();
         } else {
             callback();

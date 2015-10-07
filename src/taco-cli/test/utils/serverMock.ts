@@ -4,7 +4,11 @@ import http = require ("http");
 import https = require ("https");
 import path = require("path");
 
+import IRemoteServerSequence = require ("./remoteServerSequence");
+import IHttpServerFunction = require ("./httpServerFunction");
+
 class ServerMock {
+
     /*
      * Create a https server using the certificates in test/resources/certs/
      */
@@ -24,8 +28,7 @@ class ServerMock {
     /*
      * Create a simple state machine that expects a particular sequence of HTTP requests, and errors out if that expectation is not matched
      */
-    public static generateServerFunction(onErr: (err: Error) => void, sequence: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean; responseDelay?: number; fileToSend?: string }[]):
-        (request: http.ServerRequest, response: http.ServerResponse) => void {
+    public static generateServerFunction(onErr: (err: Error) => void, sequence: IRemoteServerSequence[]): IHttpServerFunction {
         var sequenceIndex: number = 0;
         return function (request: http.ServerRequest, response: http.ServerResponse): void {
             if (sequenceIndex < sequence.length) {

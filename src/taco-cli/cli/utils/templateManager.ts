@@ -160,8 +160,8 @@ class TemplateManager {
                     // Return true if the item path is not in our list of git files to ignore
                     return TemplateManager.GIT_FILE_LIST.indexOf(path.basename(itemPath)) === -1;
                 };
-                var options: any = { clobber: false, filter: filterFunc };
 
+                var options: tacoUtility.ICopyOptions = { clobber: false, filter: filterFunc };
                 return utils.copyRecursive(templateSrcPath, cordovaParameters.projectPath, options);
             })
             .then(function (): Q.Promise<any> {

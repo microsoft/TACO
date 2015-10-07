@@ -42,7 +42,7 @@ class RemoteBuildConf implements RemoteBuild.IRemoteBuildConfiguration {
 
     constructor(conf: typeof nconf, isUnitTest?: boolean) {
         this.conf = conf;
-        var defaults: any = {
+        var defaults: { [key: string]: any } = {
             serverDir: path.join(UtilHelper.tacoHome, "remote-builds"),
             port: 3000,
             secure: true,

@@ -58,7 +58,7 @@ interface IKeyValuePair<T> {
 
 describe("taco create", function (): void {
     // Test constants
-    var createTimeout: number = 60000;
+    var createTimeout: number = 180000;
     var tacoFileCount: number = 1;
     var cordovaDefaultProjectFileCount: number = 13; // 6 files and 7 folders
 
@@ -249,56 +249,56 @@ describe("taco create", function (): void {
             var scenario: number = 1;
 
             // Should use kit 4.3.1-Kit and template typescript
-            runScenario(scenario, "4.3.1-Kit", "typescript", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "typescript", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 2 [path, id, name, kit, template]", function (done: MochaDone): void {
             var scenario: number = 2;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 3 [path, id, kit, template]", function (done: MochaDone): void {
             var scenario: number = 3;
 
             // Should use kit 4.3.1-Kit and template typescript
-            runScenario(scenario, "4.3.1-Kit", "typescript", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "typescript", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 4 [path, kit, template]", function (done: MochaDone): void {
             var scenario: number = 4;
 
             // Should use kit 4.3.1-Kit and template blank
-            runScenario(scenario, "4.3.1-Kit", "blank", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "blank", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 5 [path, kit, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 5;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 6 [path, kit]", function (done: MochaDone): void {
             var scenario: number = 6;
 
             // Should use kit 4.3.1-Kit and template blank
-            runScenario(scenario, "4.3.1-Kit", "blank", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).then(done, done);
+            runScenario(scenario, "4.3.1-Kit", "blank", expectedKitTacoJsonKeyValues["4.3.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 7 [path, template]", function (done: MochaDone): void {
             var scenario: number = 7;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 8 [path, template (no value)]", function (done: MochaDone): void {
             var scenario: number = 8;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 9 [path, copy-from]", function (done: MochaDone): void {
@@ -308,7 +308,7 @@ describe("taco create", function (): void {
             // Kit 5.1.1-Kit: Cordova adds 2 files and 4 folders
             var totalEntries: number = 9 + tacoFileCount;
 
-            runScenarioWithExpectedFileCount(scenario, totalEntries, expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenarioWithExpectedFileCount(scenario, totalEntries, expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 10 [path, cli]", function (done: MochaDone): void {
@@ -318,28 +318,28 @@ describe("taco create", function (): void {
             // TACO: adds 1 file
             var totalEntries: number = cordovaDefaultProjectFileCount + tacoFileCount;
 
-            runScenarioWithExpectedFileCount(scenario, totalEntries, expectedCliTacoJsonKeyValues["4.3.0"]).then(done, done);
+            runScenarioWithExpectedFileCount(scenario, totalEntries, expectedCliTacoJsonKeyValues["4.3.0"]).done(() => done(), done);
         });
 
         it("Success scenario 11 [path, extra unknown parameter]", function (done: MochaDone): void {
             var scenario: number = 11;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 12 [path, kit (empty)]", function (done: MochaDone): void {
             var scenario: number = 12;
 
             // Should use kit 5.1.1-Kit and template blank
-            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "blank", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
 
         it("Success scenario 13 [path, template (typescript)]", function (done: MochaDone): void {
             var scenario: number = 13;
 
             // Should use kit 5.1.1-Kit and template typescript
-            runScenario(scenario, "5.1.1-Kit", "typescript", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).then(done, done);
+            runScenario(scenario, "5.1.1-Kit", "typescript", expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
     });
 
@@ -350,35 +350,35 @@ describe("taco create", function (): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit).then(done, done);
+            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit).done(() => done(), done);
         });
 
         it("Failure scenario 2 [path, template (unknown value)]", function (done: MochaDone): void {
             // If a template is not found, create command should fail with an appropriate message
             var scenario: number = 2;
 
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidTemplate).then(done, done);
+            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidTemplate).done(() => done(), done);
         });
 
         it("Failure scenario 3 [path, kit, template, copy-from]", function (done: MochaDone): void {
             // Create command should fail when both --template and --copy-from are specified
             var scenario: number = 3;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotTemplateIfCustomWww).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotTemplateIfCustomWww).done(() => done(), done);
         });
 
         it("Failure scenario 4 [path, kit, cli]", function (done: MochaDone): void {
             // Create command should fail when both --kit and --cordova are specified
             var scenario: number = 4;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCordovaCliAndKit).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothCordovaCliAndKit).done(() => done(), done);
         });
 
         it("Failure scenario 5 [path, cli, template]", function (done: MochaDone): void {
             // Create command should fail when both --cordova and --template are specified
             var scenario: number = 5;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCordovaCli).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNotBothTemplateAndCordovaCli).done(() => done(), done);
         });
 
         it("Failure scenario 6 [path (value is an existing project)]", function (done: MochaDone): void {
@@ -391,42 +391,42 @@ describe("taco create", function (): void {
                 .then(function (): Q.Promise<any> {
                     return runFailureScenario(scenario);
                 })
-                .then(done, done);
+                .done(() => done(), done);
         });
 
         it("Failure scenario 7 [path, copy-from (unknown path)]", function (done: MochaDone): void {
             // Create command should fail when --copy-from is specified with a path that doesn't exist (Cordova error)
             var scenario: number = 7;
 
-            runFailureScenario(scenario).then(done, done);
+            runFailureScenario(scenario).done(() => done(), done);
         });
 
         it("Failure scenario 8 [path, cli (unknown value)]", function (done: MochaDone): void {
             // Create command should fail when specified cli version doesn't exist
             var scenario: number = 8;
 
-            runFailureScenario<TacoUtilsErrorCodes>(scenario, TacoUtilsErrorCodes.PackageLoaderInvalidPackageVersionSpecifier).then(done, done);
+            runFailureScenario<TacoUtilsErrorCodes>(scenario, TacoUtilsErrorCodes.PackageLoaderInvalidPackageVersionSpecifier).done(() => done(), done);
         });
 
         it("Failure scenario 9[path, appId (invalid value)]", function (done: MochaDone): void {
             // Create command should fail when an invalid app ID is specified (Cordova error)
             var scenario: number = 9;
 
-            runFailureScenario(scenario).then(done, done);
+            runFailureScenario(scenario).done(() => done(), done);
         });
 
         it("Failure scenario 10 [(NO path)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user doesn't provide a path to 'taco create'
             var scenario: number = 10;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNoPath).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateNoPath).done(() => done(), done);
         });
 
         it("Failure scenario 11 [path (invalid)]", function (done: MochaDone): void {
             // Create command should fail gracefully when the user provides an invalid path to 'taco create'
             var scenario: number = 11;
 
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateInvalidPath).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreateInvalidPath).done(() => done(), done);
         });
 
         it("Failure scenario 12 [path (existing)]", function (done: MochaDone): void {
@@ -435,7 +435,7 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath(failurePrefix, scenario);
 
             wrench.mkdirSyncRecursive(path.join(projectPath, "some", "nested", "folders"), 511); // 511 decimal is 0777 octal
-            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreatePathNotEmpty).then(done, done);
+            runFailureScenario<TacoErrorCodes>(scenario, TacoErrorCodes.CommandCreatePathNotEmpty).done(() => done(), done);
         });
     });
 

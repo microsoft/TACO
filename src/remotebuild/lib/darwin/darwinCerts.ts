@@ -10,6 +10,8 @@
 /// <reference path="../../../typings/Q.d.ts" />
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/rimraf.d.ts" />
+/// <reference path="../../../typings/certOptions.d.ts" />
+
 "use strict";
 
 import child_process = require ("child_process");
@@ -31,7 +33,7 @@ import logger = tacoUtils.Logger;
 
 class Certs {
     private static debug: boolean = false;
-    private static CERT_DEFAULTS: any = {
+    private static CERT_DEFAULTS: Certs.ICertOptions = {
         days: 1825, // 5 years
         country: "US",
         ca_cn: os.hostname().substring(0, 50) + ".RB.CA", // Note: these cn entries have a maximum length of 64 bytes. If a hostname contains unicode characters, then os.hostname will return an ascii mis-encoding which is still one byte per character.
@@ -96,7 +98,7 @@ class Certs {
 
     public static initializeServerCerts(conf: RemoteBuildConf): Q.Promise<HostSpecifics.ICertStore> {
         var certsDir: string = path.join(conf.serverDir, "certs");
-        var certPaths: any = {
+        var certPaths: Certs.ICertPaths = {
             certsDir: certsDir,
             caKeyPath: path.join(certsDir, "ca-key.pem"),
             caCertPath: path.join(certsDir, "ca-cert.pem"),
@@ -223,7 +225,7 @@ class Certs {
     // Makes a CA cert that will be used for self-signing our server and client certs.
     // Exported for tests
     public static makeSelfSigningCACert(caKeyPath: string, caCertPath: string, options?: Certs.ICertOptions): Q.Promise<{ stdout: string; stderr: string }> {
-        options = options || {};
+        options = options || <Certs.ICertOptions> {};
         var days: number = options.days || Certs.CERT_DEFAULTS.days;
         var country: string = options.country || Certs.CERT_DEFAULTS.country;
         var cn: string = Certs.CERT_DEFAULTS.ca_cn;
@@ -233,7 +235,7 @@ class Certs {
     // Makes a new private key and certificate signed with the CA.
     // Exported for tests
     public static makeSelfSignedCert(caKeyPath: string, caCertPath: string, outKeyPath: string, outCertPath: string, options: Certs.ICertOptions, conf: RemoteBuildConf): Q.Promise<void> {
-        options = options || {};
+        options = options || <Certs.ICertOptions> {};
         var csrPath: string = path.join(path.dirname(outCertPath), "CSR-" + path.basename(outCertPath));
         var days: number = options.days || Certs.CERT_DEFAULTS.days;
         var cn: string = options.cn || Certs.CERT_DEFAULTS.client_cn;
@@ -279,7 +281,7 @@ class Certs {
     }
 
     private static certOptionsFromConf(conf: RemoteBuildConf): Certs.ICertOptions {
-        var options: Certs.ICertOptions = {};
+        var options: Certs.ICertOptions = <Certs.ICertOptions> {};
         if (conf.certExpirationDays < 1) {
             logger.log(resources.getString("CertExpirationInvalid", conf.certExpirationDays, Certs.CERT_DEFAULTS.days));
             options.days = Certs.CERT_DEFAULTS.days;
@@ -310,7 +312,7 @@ class Certs {
     }
 
     private static makeClientPinAndSslCert(caKeyPath: string, caCertPath: string, certsDir: string, options: Certs.ICertOptions, conf: RemoteBuildConf): Q.Promise<number> {
-        options = options || {};
+        options = options || <Certs.ICertOptions> {};
         options.cn = Certs.CERT_DEFAULTS.client_cn;
         var clientCertsPath: string = path.join(certsDir, "client");
         utils.createDirectoryIfNecessary(clientCertsPath);
@@ -334,7 +336,7 @@ class Certs {
     }
 
     private static makePfx(caCertPath: string, keyPath: string, certPath: string, outPfxPath: string, options?: Certs.ICertOptions): Q.Promise<{ stdout: string; stderr: string }> {
-        options = options || {};
+        options = options || <Certs.ICertOptions> {};
         var name: string = Certs.CERT_DEFAULTS.pfx_name;
         return Certs.openSslPromise("pkcs12 -export -in " + certPath + " -inkey " + keyPath + " -certfile " + caCertPath + " -out " + outPfxPath +
             " -name \'" + name + "\' -password pass:");
@@ -353,19 +355,6 @@ class Certs {
 
         logger.log("remotebuild certificates generate");
         logger.log("");
-    }
-}
-
-module Certs {
-    export interface ICertOptions {
-        days?: number;
-        cn?: string;
-        country?: string;
-    };
-
-    export interface ICliHandler {
-        question: (question: string, answerCallback: (answer: string) => void) => void;
-        close: () => void;
     }
 }
 

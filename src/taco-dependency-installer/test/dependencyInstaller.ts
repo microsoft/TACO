@@ -436,7 +436,7 @@ describe("DependencyInstaller", function (): void {
             }
         ];
 
-        var jsonWrapper: any = {
+        var jsonWrapper: DependencyInstallerInterfaces.IInstallerConfig = {
             dependencies: missingDependencies
         };
 

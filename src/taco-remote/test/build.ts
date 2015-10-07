@@ -36,7 +36,7 @@ describe("taco-remote", function(): void {
         app.use(expressLogger("dev"));
         UtilHelper.createDirectoryIfNecessary(serverDir);
         UtilHelper.createDirectoryIfNecessary(downloadDir);
-        var serverConfig: any = {
+        var serverConfig: RemoteBuild.IRemoteBuildConfiguration = {
             serverDir: serverDir,
             port: 3000,
             secure: false,

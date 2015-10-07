@@ -12,6 +12,8 @@
 /// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/rimraf.d.ts" />
 /// <reference path="../../typings/mkdirp.d.ts" />
+/// <reference path="../../typings/certOptions.d.ts" />
+
 "use strict";
 
 /* tslint:disable:no-var-requires */
@@ -42,13 +44,13 @@ var caCertPath: string = path.join(certsDir, "ca-cert.pem");
 // Tests for lib/darwin/darwinCerts.js functionality
 // Since the certs use openSSL to work with certificates, we restrict these tests to the mac where openSSL should exist.
 var macOnly: (description: string, spec: () => void) => void = os.platform() === "darwin" ? describe : describe.skip;
-macOnly("Certs", function (): void {
-    after(function (): void {
+macOnly("Certs", function(): void {
+    after(function(): void {
         nconf.overrides({});
-        rmdir(serverDir, function (err: Error): void {/* ignored */ }); // Not sync, and we don't wait for it. 
+        rmdir(serverDir, function(err: Error): void {/* ignored */ }); // Not sync, and we don't wait for it. 
     });
 
-    before(function (): void {
+    before(function(): void {
         nconf.use("memory");
     });
 
@@ -56,67 +58,67 @@ macOnly("Certs", function (): void {
     this.timeout(10000);
 
     // Test that initializing server certificates creates new certificates
-    it("InitializeServerCerts", function (done: MochaDone): void {
+    it("InitializeServerCerts", function(done: MochaDone): void {
         rmdir.sync(certsDir);
         mkdirp.sync(certsDir);
         certs.initializeServerCerts(conf({ serverDir: serverDir })).
-            then(function (certPaths: HostSpecifics.ICertStore): void {
-            certPaths.newCerts.should.equal(true, "Expect newCerts true from initializeServerCerts");
-            testServerCertsExist();
-        }).done(function (): void {
-            done();
-        }, done);
+            then(function(certPaths: HostSpecifics.ICertStore): void {
+                certPaths.newCerts.should.equal(true, "Expect newCerts true from initializeServerCerts");
+                testServerCertsExist();
+            }).done(function(): void {
+                done();
+            }, done);
     });
 
     // Test that initializing server certificates does not re-create certificates if they already exist
-    it("InitializeServerCertsWhenCertsAlreadyExist", function (done: MochaDone): void {
+    it("InitializeServerCertsWhenCertsAlreadyExist", function(done: MochaDone): void {
         rmdir.sync(certsDir);
         mkdirp.sync(certsDir);
         certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true })).
-            then(function (certPaths: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
-            certPaths.newCerts.should.equal(true, "Expect newCerts true from first initializeServerCerts");
-            testServerCertsExist();
-            return certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true }));
-        }).
-            then(function (certPaths: HostSpecifics.ICertStore): void {
-            certPaths.newCerts.should.equal(false, "Expect newCerts false from second initializeServerCerts");
-            testServerCertsExist();
-        }).done(function (): void {
-            done();
-        }, done);
+            then(function(certPaths: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
+                certPaths.newCerts.should.equal(true, "Expect newCerts true from first initializeServerCerts");
+                testServerCertsExist();
+                return certs.initializeServerCerts(conf({ serverDir: serverDir, suppressSetupMessage: true }));
+            }).
+            then(function(certPaths: HostSpecifics.ICertStore): void {
+                certPaths.newCerts.should.equal(false, "Expect newCerts false from second initializeServerCerts");
+                testServerCertsExist();
+            }).done(function(): void {
+                done();
+            }, done);
     });
 
     // Tests that generating a client certificate creates a certificate and returns a valid pin
-    it("GenerateClientCert", function (done: MochaDone): void {
+    it("GenerateClientCert", function(done: MochaDone): void {
         certs.initializeServerCerts(conf({ serverDir: serverDir })).
-            then(function (certPaths: HostSpecifics.ICertStore): Q.Promise<number> {
-            return certs.generateClientCert(conf({ serverDir: serverDir }));
-        }).
-            then(function (pin: number): void {
-            should.assert(pin && pin >= 100000 && pin <= 999999, "pin should be a 6 digit number when client cert created");
-            should.assert(fs.existsSync(path.join(clientCertsDir, "" + pin, "client.pfx")), "client.pfx should exist in pin directory after client cert created");
-        }).done(function (): void {
-            done();
-        }, done);
+            then(function(certPaths: HostSpecifics.ICertStore): Q.Promise<number> {
+                return certs.generateClientCert(conf({ serverDir: serverDir }));
+            }).
+            then(function(pin: number): void {
+                should.assert(pin && pin >= 100000 && pin <= 999999, "pin should be a 6 digit number when client cert created");
+                should.assert(fs.existsSync(path.join(clientCertsDir, "" + pin, "client.pfx")), "client.pfx should exist in pin directory after client cert created");
+            }).done(function(): void {
+                done();
+            }, done);
     });
 
     // Tests that generating a client certificate without appropriate server certificates fails
-    it("GenerateClientCertWhenServerCertsDoNotExist", function (done: MochaDone): void {
+    it("GenerateClientCertWhenServerCertsDoNotExist", function(done: MochaDone): void {
         rmdir.sync(certsDir);
         mkdirp.sync(certsDir);
         certs.generateClientCert(conf({ serverDir: serverDir })).
-        then(function (pin: number): void {
-            throw "PIN should not be returned";
-        }, function (error: any): void {
-            // We should get an error if we try to create client certificates when there is no server certificate
-        }).done(function (): void {
-            done();
-        }, done);
+            then(function(pin: number): void {
+                throw "PIN should not be returned";
+            }, function(error: any): void {
+                // We should get an error if we try to create client certificates when there is no server certificate
+            }).done(function(): void {
+                done();
+            }, done);
     });
 
     // Tests that resetting server certificates queries the user and respects a "no" response
     it("ResetServerCertNo", function (done: MochaDone): void {
-        var noHandler: any = {
+        var noHandler: ITestCliHandler = {
             closed: false,
             question: function (question: string, answerCallback: (answer: string) => void): void {
                 answerCallback("n");
@@ -145,7 +147,7 @@ macOnly("Certs", function (): void {
 
     // Tests that resetting server certificates will create new certificates after a "yes" response
     it("ResetServerCertYes", function (done: MochaDone): void {
-        var yesHandler: any = {
+        var yesHandler: ITestCliHandler = {
             closed: false,
             question: function (question: string, answerCallback: (answer: string) => void): void {
                 answerCallback("y");
@@ -225,7 +227,7 @@ macOnly("Certs", function (): void {
 
         certs.makeSelfSigningCACert(caKeyPath, caCertPath).
             then(function (): Q.Promise<void> {
-            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, {}, conf({ serverDir: serverDir }));
+            return certs.makeSelfSignedCert(caKeyPath, caCertPath, outKeyPath, outCertPath, <Certs.ICertOptions> {}, conf({ serverDir: serverDir }));
         }).
             then(function (): void {
             should.assert(fs.existsSync(outKeyPath), "key should exist after makeSelfSignedCert completes");
@@ -266,3 +268,8 @@ function conf(data: any): RemoteBuildConf {
     nconf.overrides(data);
     return new RemoteBuildConf(nconf);
 }
+
+interface ITestCliHandler extends Certs.ICliHandler {
+    closed: boolean;
+};
+
