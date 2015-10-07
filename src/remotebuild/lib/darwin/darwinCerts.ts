@@ -69,7 +69,7 @@ class Certs {
                 if (shouldProceed) {
                     rimraf.sync(certsDir);
                     return Certs.initializeServerCerts(conf)
-                        .then(result => {
+                        .then((result: HostSpecifics.ICertStore): HostSpecifics.ICertStore => {
                             logger.log(resources.getString("OSXNoteAfterResetServerCert"));
                             return result;
                         });
