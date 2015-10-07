@@ -54,10 +54,10 @@ describe("TemplateManager", function (): void {
     // Important paths
     var runFolder: string = path.resolve(os.tmpdir(), "taco_cli_templates_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
-    var templateCache: string = path.join(tacoHome, "templates");
-    var cachedTestTemplate: string = path.join(templateCache, testKitId, testTemplateId);
     var testTemplateKitSrc: string = path.resolve(__dirname, "resources", "templates", testKitId);
     var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);
+    var testTemplate2Src: string = path.join(testTemplateKitSrc, testTemplateId2);
+    var testTemplate3Src: string = path.join(testTemplateKitSrc, testTemplateId3);
     var testTemplateArchiveFolder: string = path.join(runFolder, "template-archives", testKitId);
     var testTemplateArchive: string = path.join(testTemplateArchiveFolder, testTemplateId + ".zip");
 
@@ -151,82 +151,25 @@ describe("TemplateManager", function (): void {
         rimraf(runFolder, done);
     });
 
-    describe("findTemplatePath()", function (): void {
-        afterEach(function (done: MochaDone): void {
-            // Clear the template cache
-            rimraf(templateCache, done);
-        });
-
-        it("should correctly find a template that is already cached", function (done: MochaDone): void {
+    describe("acquireFromTacoKits()", function (): void {
+        it("should correctly extract a template to a temporary directory", function (done: MochaDone): void {
             // Create a test TemplateManager
-            var templates: templateManager = new templateManager(mockKitHelper, templateCache);
+            var templates: templateManager = new templateManager(mockKitHelper);
 
-            // Make sure the template cache is empty
-            fs.existsSync(templateCache).should.be.exactly(false, "Test template cache must be initially empty for this test");
+            // Call acquireFromTacoKits()
+            (<any> templates).acquireFromTacoKits(testTemplateId, testKitId, runFolder)
+                .then(function (tempTemplatePath: string): void {
+                    // Verify the returned path is under the right folder
+                    tempTemplatePath.indexOf(runFolder).should.equal(0);
 
-            // Manually create a template in the cache, which has the same name as the test template but only contains a single file
-            var copySrc: string = path.join(testTemplateSrc, "a.txt");
-            var copyDest: string = path.join(cachedTestTemplate, "a.txt");
+                    // Verify the parent directory starts with the proper prefix
+                    var parentDirectoryName: string = path.basename(path.dirname(tempTemplatePath));
 
-            wrench.mkdirSyncRecursive(cachedTestTemplate, 511); // 511 decimal is 0777 octal
-            utils.copyFile(copySrc, copyDest)
-                .then(function (): string {
-                    // Call findTemplatePath()
-                    return (<any> templates).findTemplatePath(testTemplateId, testKitId, testTemplateOverrideInfo.templateInfo);
-                })
-                .then(function (cachedTemplatePath: string): void {
-                    // Verify the returned path is correct
-                    cachedTemplatePath.should.equal(cachedTestTemplate);
+                    parentDirectoryName.indexOf("taco_template_").should.be.equal(0);
 
-                    // Verify the TemplateManager didn't re-extract the template to the cache: the cached template should only contain the single file we placed there
-                    // at the start of this test, "a.txt", otherwise it means the TemplateManager re-extracted the template even though it was already cached
-                    fs.existsSync(path.join(cachedTestTemplate, "folder1")).should.be.exactly(false, "The template archive should not have been re-extracted to the cache");
-                    done();
-                })
-                .catch(function (err: string): void {
-                    done(new Error(err));
-                });
-        });
-
-        it("should correctly find and cache a template that is not already cached", function (done: MochaDone): void {
-            // Create a test TemplateManager
-            var templates: templateManager = new templateManager(mockKitHelper, templateCache);
-
-            // Make sure the template cache is empty
-            fs.existsSync(templateCache).should.equal(false, "Test template cache must be initially empty for this test");
-
-            // Call findTemplatePath()
-            (<any> templates).findTemplatePath(testTemplateId, testKitId, testTemplateOverrideInfo.templateInfo)
-                .then(function (cachedTemplatePath: string): void {
-                    // Verify the returned path is correct
-                    cachedTemplatePath.should.equal(cachedTestTemplate);
-
-                    // Verify the TemplateManager correctly extracted the template archive to the cache
-                    fs.existsSync(path.join(cachedTestTemplate, "a.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
-                    fs.existsSync(path.join(cachedTestTemplate, "folder1", "b.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
-                    done();
-                })
-                .catch(function (err: string): void {
-                    done(new Error(err));
-                });
-        });
-
-        it("should return the appropriate error when templates are not available", function (done: MochaDone): void {
-            // Create a test TemplateManager
-            var templates: templateManager = new templateManager(mockKitHelper, templateCache);
-
-            // Call findTemplatePath() with an ITemplateInfo that contains an archive path pointing to a location that doesn't exist
-            var invalidTemplateInfo: TacoKits.ITemplateInfo = {
-                name: testDisplayName,
-                url: path.join(runFolder, "pathThatDoesntExist")
-            };
-
-            (<any> templates).findTemplatePath(testTemplateId, testKitId, invalidTemplateInfo)
-                .then(function (cachedTemplatePath: string): void {
-                    // The promise was resolved, this is an error
-                    done(new Error("The operation completed successfully when it should have returned an error"));
-                }, function (error: TacoUtility.TacoError): void {
-                    error.errorCode.should.equal(TacoErrorCodes.CommandCreateTemplatesUnavailable);
+                    // Verify the TemplateManager correctly extracted the template archive to the temporary location
+                    fs.existsSync(path.join(tempTemplatePath, "a.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
+                    fs.existsSync(path.join(tempTemplatePath, "folder1", "b.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
                     done();
                 })
                 .catch(function (err: string): void {
@@ -293,7 +236,7 @@ describe("TemplateManager", function (): void {
     describe("getTemplatesForKit()", function (): void {
         it("should return the correct list of templates", function (done: MochaDone): void {
             // Create a test TemplateManager
-            var templates: templateManager = new templateManager(mockKitHelper, templateCache);
+            var templates: templateManager = new templateManager(mockKitHelper);
 
             // Build the expected result
             var expectedResult = {
@@ -329,7 +272,7 @@ describe("TemplateManager", function (): void {
     describe("getAllTemplates()", function (): void {
         it("should return all available templates", function (done: MochaDone): void {
             // Create a test TemplateManager
-            var templates: templateManager = new templateManager(mockKitHelper, templateCache);
+            var templates: templateManager = new templateManager(mockKitHelper);
 
             // Build the expected result
             var expectedResult = {
@@ -358,6 +301,87 @@ describe("TemplateManager", function (): void {
                 })
                 .catch(function (err: string): void {
                     done(new Error(err));
+                });
+        });
+    });
+
+    describe("copyTemplateItemsToProject()", function (): void {
+        var testProjectPath: string = path.join(runFolder, "testProject");
+
+        beforeEach(function (): void {
+            rimraf.sync(testProjectPath);
+            wrench.mkdirSyncRecursive(testProjectPath, 511); // 511 decimal is 0777 octal
+        });
+
+        it("should copy items to the project when the template has a www folder", function (done: MochaDone): void {
+            var templates: templateManager = new templateManager(mockKitHelper);
+            var cordovaParameters: Cordova.ICordovaCreateParameters = {
+                appId: "test",
+                appName: "test",
+                cordovaConfig: {},
+                projectPath: testProjectPath,
+                copyFrom: testTemplate2Src
+            };
+
+            (<any> templates).copyTemplateItemsToProject(cordovaParameters)
+                .then(function (): void {
+                    // Since the template has a www folder, a copy should happen; there should be 4 items in the project: "www", "a.txt", "folder1", "b.txt"
+                    try {
+                        wrench.readdirSyncRecursive(testProjectPath).length.should.equal(4);
+                    } catch (assertException) {
+                        done(assertException);
+
+                        return;
+                    }
+                    done();
+                });
+        });
+
+        it("should skip the copy step when the template doesn't have a www folder", function (done: MochaDone): void {
+            var templates: templateManager = new templateManager(mockKitHelper);
+            var cordovaParameters: Cordova.ICordovaCreateParameters = {
+                appId: "test",
+                appName: "test",
+                cordovaConfig: {},
+                projectPath: testProjectPath,
+                copyFrom: testTemplateSrc
+            };
+
+            (<any> templates).copyTemplateItemsToProject(cordovaParameters)
+                .then(function (): void {
+                    // Template doesn't have a "www" folder, so the copy step should be skipped and resulting project should be empty
+                    try {
+                        wrench.readdirSyncRecursive(testProjectPath).length.should.equal(0);
+                    } catch (assertException) {
+                        done(assertException);
+
+                        return;
+                    }
+                    done();
+                });
+        });
+
+        it("should ignore git-specific files", function (done: MochaDone): void {
+            var templates: templateManager = new templateManager(mockKitHelper);
+            var cordovaParameters: Cordova.ICordovaCreateParameters = {
+                appId: "test",
+                appName: "test",
+                cordovaConfig: {},
+                projectPath: testProjectPath,
+                copyFrom: testTemplate3Src
+            };
+
+            (<any> templates).copyTemplateItemsToProject(cordovaParameters)
+                .then(function (): void {
+                    // Since the template has a www folder, a copy should happen; the 3 git files should be ignored, so there should be 4 items in the project: "www", "a.txt", "folder1", "b.txt"
+                    try {
+                        wrench.readdirSyncRecursive(testProjectPath).length.should.equal(4);
+                    } catch (assertException) {
+                        done(assertException);
+
+                        return;
+                    }
+                    done();
                 });
         });
     });
