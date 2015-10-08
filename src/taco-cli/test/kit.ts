@@ -183,10 +183,9 @@ describe("Kit", function (): void {
             "cordova-cli": "5.1.1"
         };
 
-        this.timeout(30000);
+        this.timeout(60000);
 
         before(function (done: MochaDone): void {
-            this.timeout(60000);
             createKitProject("5.1.1-Kit")
             .done(function (): void {
                 process.chdir(kitProjectpath);
@@ -219,10 +218,9 @@ describe("Kit", function (): void {
             kit: "5.1.1-Kit", "cordova-cli": "5.1.1"
         };
 
-        this.timeout(30000);
+        this.timeout(60000);
 
         before(function (done: MochaDone): void {
-            this.timeout(60000);
             createCliProject("5.1.1")
             .done(function (): void {
                 process.chdir(cliProjectpath);
@@ -231,7 +229,6 @@ describe("Kit", function (): void {
         });
 
         after(function (done: MochaDone): void {
-            this.timeout(30000);
             process.chdir(tacoHome);
             rimraf(cliProjectpath, function (err: Error): void { done(); }); // ignore errors
         });

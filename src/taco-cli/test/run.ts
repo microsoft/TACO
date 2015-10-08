@@ -45,7 +45,7 @@ import utils = TacoUtility.UtilHelper;
 var create: createMod = new createMod();
 
 describe("taco run", function (): void {
-    this.timeout(20000); // The remote tests sometimes take some time to run
+    this.timeout(60000); // The remote tests sometimes take some time to run
     var testHttpServer: http.Server;
     var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;
@@ -89,7 +89,6 @@ describe("taco run", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(30000);
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         testHttpServer.close();
@@ -97,7 +96,6 @@ describe("taco run", function (): void {
     });
 
     beforeEach(function (mocha: MochaDone): void {
-        this.timeout(50000);
         Q.fcall(createCleanProject).done(function (): void {
             mocha();
         }, function (err: any): void {
