@@ -102,7 +102,8 @@ class KitHelper {
 
     private static acquireKitPackage(): Q.Promise<ITacoKits> {
         if (!KitHelper.kitPackagePromise) {
-            KitHelper.kitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TACO_KITS_NPM_PACKAGE_NAME, KitHelper.dynamicDependenciesLocation, tacoUtility.InstallLogLevel.taco);
+            KitHelper.kitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TACO_KITS_NPM_PACKAGE_NAME,
+                KitHelper.dynamicDependenciesLocation, tacoUtility.InstallLogLevel.error);
         }
 
         return KitHelper.kitPackagePromise;

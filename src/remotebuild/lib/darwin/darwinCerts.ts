@@ -69,7 +69,11 @@ class Certs {
             then(function (shouldProceed: boolean): Q.Promise<any> {
                 if (shouldProceed) {
                     rimraf.sync(certsDir);
-                    return Certs.initializeServerCerts(conf);
+                    return Certs.initializeServerCerts(conf)
+                        .then((result: HostSpecifics.ICertStore): HostSpecifics.ICertStore => {
+                            logger.log(resources.getString("OSXNoteAfterResetServerCert"));
+                            return result;
+                        });
                 }
 
                 return Q({});
