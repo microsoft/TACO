@@ -38,7 +38,7 @@ import UtilHelper = tacoUtility.UtilHelper;
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
-interface IcliSession {
+interface ICliSession {
     question: (question: string, callback: (answer: string) => void) => void;
     close: () => void;
 };
@@ -52,7 +52,7 @@ class Remote extends commands.TacoCommandBase {
     /**
      * Mockable CLI for test purposes
      */
-    public static cliSession: IcliSession = null;
+    public static cliSession: ICliSession = null;
 
     private static HTTP_TIMEOUT_IN_MS: number = 20000;
     private static KNOWN_OPTIONS: Nopt.CommandData = {};
@@ -212,7 +212,7 @@ class Remote extends commands.TacoCommandBase {
         var portPromise: Q.Deferred<{ host: string; port: number }> = Q.defer<{ host: string; port: number }>();
         var pinPromise: Q.Deferred<{ host: string; port: number; pin: number }> = Q.defer<{ host: string; port: number; pin: number }>();
 
-        var cliSession: IcliSession = Remote.cliSession ? Remote.cliSession : readline.createInterface({ input: process.stdin, output: process.stdout });
+        var cliSession: ICliSession = Remote.cliSession ? Remote.cliSession : readline.createInterface({ input: process.stdin, output: process.stdout });
 
         // Query the user for the host, port, and PIN, but don't keep asking questions if they input a known-invalid argument
         cliSession.question(resources.getString("CommandRemoteQueryHost"), function (hostAnswer: string): void {

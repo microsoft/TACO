@@ -82,7 +82,7 @@ class Create extends commands.TacoCommandBase {
         var templateDisplayName: string;
 
         return this.createProject()
-            .then(function(templateUsed: string): Q.Promise<any> {
+            .then(function (templateUsed: string): Q.Promise<any> {
                 templateDisplayName = templateUsed;
 
                 var kitProject: boolean = self.isKitProject();
@@ -90,11 +90,11 @@ class Create extends commands.TacoCommandBase {
 
                 return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
             })
-            .then(function(): Q.Promise<any> {
+            .then(function (): Q.Promise<any> {
                 self.finalize(templateDisplayName);
 
                 return Q.resolve({});
-            }).then(function(): Q.Promise<ICommandTelemetryProperties> {
+            }).then(function (): Q.Promise<ICommandTelemetryProperties> {
                 return self.generateTelemetryProperties();
             });
     }
@@ -113,7 +113,7 @@ class Create extends commands.TacoCommandBase {
         var telemetryProperties: ICommandTelemetryProperties = {};
         telemetryProperties["cliVersion"] = telemetryHelper.telemetryProperty(require("../package.json").version);
         var self: Create = this;
-        return kitHelper.getDefaultKit().then(function(defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
+        return kitHelper.getDefaultKit().then(function (defaultKitId: string): Q.Promise<ICommandTelemetryProperties> {
             if (self.isKitProject()) {
                 telemetryProperties["kit"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["kit"] || defaultKitId);
                 telemetryProperties["template"] = telemetryHelper.telemetryProperty(self.commandParameters.data.options["template"] || "blank");
@@ -190,25 +190,25 @@ class Create extends commands.TacoCommandBase {
         // Create the project 
         if (!this.isKitProject()) {
             return this.printStatusMessage()
-                .then(function(): Q.Promise<any> {
+                .then(function (): Q.Promise<any> {
                     // Use the CLI version specified as an argument to create the project "command.create.status.cliProject
                     return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
                 });
         } else {
-            return kitHelper.getValidCordovaCli(kitId).then(function(cordovaCliToUse: string): void {
+            return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCliToUse: string): void {
                 cordovaCli = cordovaCliToUse;
             })
-                .then(function(): Q.Promise<any> {
+                .then(function (): Q.Promise<any> {
                     return self.printStatusMessage();
                 })
-                .then(function(): Q.Promise<any> {
+                .then(function (): Q.Promise<any> {
                     if (kitId) {
                         return kitHelper.getKitInfo(kitId);
                     } else {
                         return Q.resolve(null);
                     }
                 })
-                .then(function(kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
+                .then(function (kitInfo: TacoKits.IKitInfo): Q.Promise<string> {
                     if (kitInfo && !!kitInfo.deprecated) {
                         // Warn the user
                         logger.log(resources.getString("CommandCreateWarningDeprecatedKit", kitId));
@@ -218,7 +218,7 @@ class Create extends commands.TacoCommandBase {
                         var templates: templateManager = new templateManager(kitHelper);
 
                         return templates.createKitProjectWithTemplate(kitId, templateId, cordovaCli, self.commandParameters.cordovaParameters)
-                            .then(function(templateDisplayName: string): Q.Promise<string> {
+                            .then(function (templateDisplayName: string): Q.Promise<string> {
                                 return Q.resolve(templateDisplayName);
                             });
                     } else {
