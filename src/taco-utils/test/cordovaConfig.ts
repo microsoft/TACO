@@ -8,6 +8,8 @@
 "use strict";
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
+/// <reference path="../../typings/cordovaConfig.d.ts"/>
+
 import fs = require ("fs");
 import mocha = require ("mocha");
 import path = require ("path");

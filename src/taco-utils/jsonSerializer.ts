@@ -78,7 +78,7 @@ module TacoUtility {
          */
         private getIndentedJsonForArrayValues(arr: Array<any>, indent: string): string {
             var items: string[] = [];
-            for (var i = 0; i < arr.length; i++) {
+            for (var i: number = 0; i < arr.length; i++) {
                 items.push(this.getIndentedJson(arr[i], indent));
             }
 
@@ -92,7 +92,7 @@ module TacoUtility {
             var keyValuePairs: string[] = [];
 
             var keys: string[] = Object.keys(obj);
-            for (var i = 0; i < keys.length; i++) {
+            for (var i: number = 0; i < keys.length; i++) {
                 keyValuePairs.push(JsonSerializer.stringifyKvp(keys[i], this.getIndentedJson(obj[keys[i]], indent)));
             }
 
@@ -116,7 +116,7 @@ module TacoUtility {
 
             var keyValuePairs: string[] = [];
             var currentLength: number = indent.length + 4; // +4 for curly braces and spaces around "{ %s }"
-           for (var i = 0; i < keys.length; i++) {
+           for (var i: number = 0; i < keys.length; i++) {
                 var valueType: string = typeof obj[keys[i]];
                 // Nested object, not minifiable
                 if (valueType === "object") {

@@ -10,6 +10,7 @@
 /// <reference path="../../../typings/request.d.ts" />
 /// <reference path="../../../typings/fstream.d.ts" />
 /// <reference path="../../../typings/tar.d.ts" />
+/// <reference path="../../../typings/remoteBuild.d.ts" />
 /// <reference path="../../../typings/tacoRemote.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
 /// <reference path="../../../typings/adm-zip.d.ts" />
@@ -44,10 +45,10 @@ import Logger = tacoUtils.Logger;
 import GlobalConfig = tacoUtils.TacoGlobalConfig;
 import NewlineNormalizerStream = tacoUtils.NewlineNormalizerStream;
 import UtilHelper = tacoUtils.UtilHelper;
-
 import ICommandTelemetryProperties = tacoUtils.ICommandTelemetryProperties;
+import ITelemetryPropertyInfo = tacoUtils.ITelemetryPropertyInfo;
 
-var telemetryProperty = tacoUtils.TelemetryHelper.telemetryProperty;
+var telemetryProperty: (propertyValue: any, isPii?: boolean) => ITelemetryPropertyInfo = tacoUtils.TelemetryHelper.telemetryProperty;
 
 class RemoteBuildClientHelper {
     public static PING_INTERVAL: number = 5000;
@@ -57,13 +58,13 @@ class RemoteBuildClientHelper {
      */
     public static build(settings: BuildSettings, telemetryProperties: ICommandTelemetryProperties): Q.Promise<BuildInfo> {
         var outputBuildDir: string = settings.platformConfigurationBldDir;
-        var buildInfoFilePath = settings.buildInfoFilePath;
+        var buildInfoFilePath: string = settings.buildInfoFilePath;
 
         if (!RemoteBuildClientHelper.isValidBuildServerUrl(settings.buildServerUrl)) {
             throw errorHelper.get(TacoErrorCodes.InvalidRemoteBuildUrl, settings.buildServerUrl);
         }
 
-        var changeTimeFile = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
+        var changeTimeFile: string = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
         var lastChangeTime: { [file: string]: number } = {};
 
         var promise: Q.Promise<any> = RemoteBuildClientHelper.checkForBuildOnServer(settings, buildInfoFilePath)
@@ -79,7 +80,7 @@ class RemoteBuildClientHelper {
                     }
                 }
 
-                var platformJsonFile = path.join(settings.projectSourceDir, "plugins", util.format("remote_%s.json", settings.platform));
+                var platformJsonFile: string = path.join(settings.projectSourceDir, "plugins", util.format("remote_%s.json", settings.platform));
                 if (fs.existsSync(platformJsonFile)) {
                     fs.unlinkSync(platformJsonFile);
                 }
@@ -136,8 +137,8 @@ class RemoteBuildClientHelper {
     }
 
     public static run(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
-        var buildUrlBase = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        var buildUrlBase: string = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
+        var httpSettings: RemoteBuild.IHttpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
 
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/deploy", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (): Q.Promise<{ response: any; body: string }> {
@@ -148,8 +149,8 @@ class RemoteBuildClientHelper {
     }
 
     public static emulate(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo, target: string): Q.Promise<BuildInfo> {
-        var buildUrlBase = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        var buildUrlBase: string = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
+        var httpSettings: RemoteBuild.IHttpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/emulate?" + querystring.stringify({ target: target }), httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): BuildInfo {
                 return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
@@ -157,8 +158,8 @@ class RemoteBuildClientHelper {
     }
 
     public static debug(buildInfo: BuildInfo, serverSettings: Settings.IRemoteConnectionInfo): Q.Promise<BuildInfo> {
-        var buildUrlBase = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
-        var httpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
+        var buildUrlBase: string = Settings.getRemoteServerUrl(serverSettings) + "/build/" + buildInfo.buildNumber;
+        var httpSettings: RemoteBuild.IHttpSettings = { language: buildInfo.buildLang, agent: ConnectionSecurityHelper.getAgent(serverSettings) };
         return RemoteBuildClientHelper.httpOptions(buildUrlBase + "/debug", httpSettings).then(RemoteBuildClientHelper.promiseForHttpGet).then(function (responseAndBody: { response: any; body: string }): BuildInfo {
             return BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
         });
@@ -168,7 +169,7 @@ class RemoteBuildClientHelper {
      * Try to find whether the server has a previous build of this project
      */
     public static checkForBuildOnServer(settings: BuildSettings, buildInfoFilePath: string): Q.Promise<BuildInfo> {
-        var deferred = Q.defer<BuildInfo>();
+        var deferred: Q.Deferred<BuildInfo> = Q.defer<BuildInfo>();
 
         // If we don't have a buildInfo.json file then we cannot query the server.
         if (!fs.existsSync(buildInfoFilePath)) {
@@ -187,8 +188,8 @@ class RemoteBuildClientHelper {
 
         var buildNumber: number = buildInfo.buildNumber;
 
-        var serverUrl = settings.buildServerUrl;
-        var buildUrl = serverUrl + "/build/" + buildNumber;
+        var serverUrl: string = settings.buildServerUrl;
+        var buildUrl: string = serverUrl + "/build/" + buildNumber;
 
         // If we do have a buildInfo.json, check whether the server still has that build number around
         return RemoteBuildClientHelper.httpOptions(buildUrl, settings).then(function (requestOptions: request.Options): Q.Promise<BuildInfo> {
@@ -216,7 +217,7 @@ class RemoteBuildClientHelper {
         return (serverUrl.indexOf("http://") === 0 || serverUrl.indexOf("https://") === 0);
     }
 
-    private static httpOptions(url: string, settings: { language: string; agent: Q.Promise<https.Agent> }): Q.Promise<request.Options> {
+    private static httpOptions(url: string, settings: RemoteBuild.IHttpSettings): Q.Promise<request.Options> {
         return settings.agent.then(function (agent: https.Agent): request.Options {
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             return <request.Options> {
@@ -257,11 +258,11 @@ class RemoteBuildClientHelper {
      */
     private static appAsTgzStream(settings: BuildSettings, lastChangeTime: { [file: string]: number }, changeTimeFile: string,
         telemetryProperties: ICommandTelemetryProperties): Q.Promise<NodeJS.ReadableStream> {
-        var platform = settings.platform;
-        var projectSourceDir = settings.projectSourceDir;
-        var changeListFile = path.join(projectSourceDir, "changeList.json");
+        var platform: string = settings.platform;
+        var projectSourceDir: string = settings.projectSourceDir;
+        var changeListFile: string = path.join(projectSourceDir, "changeList.json");
         var newChangeTime: { [file: string]: number } = {};
-        var isIncremental = false;
+        var isIncremental: boolean = false;
         try {
             var json: { [file: string]: number } = JSON.parse(<any> fs.readFileSync(changeTimeFile));
             Object.keys(json).forEach(function (file: string): void {
@@ -276,11 +277,11 @@ class RemoteBuildClientHelper {
 
         var upToDateFiles: string[] = [];
 
-        var filterForChanges = function (reader: fstream.Reader, props: any): boolean {
-            var shouldInclude = RemoteBuildClientHelper.filterForRemote(settings, reader, lastChangeTime);
-            var appRelPath = path.relative(settings.projectSourceDir, reader.path);
+        var filterForChanges: (reader: fstream.Reader, props: any) => boolean = function (reader: fstream.Reader, props: any): boolean {
+            var shouldInclude: boolean = RemoteBuildClientHelper.filterForRemote(settings, reader, lastChangeTime);
+            var appRelPath: string = path.relative(settings.projectSourceDir, reader.path);
             if (shouldInclude) {
-                var newmtime = reader.props.mtime.getTime();
+                var newmtime: number = reader.props.mtime.getTime();
                 if (reader.props.type === "Directory" || !lastChangeTime[appRelPath] || lastChangeTime[appRelPath] !== newmtime) {
                     // If this is a directory, or a new file, or a file that has changed since we last looked, then include it
                     newChangeTime[appRelPath] = newmtime;
@@ -297,11 +298,11 @@ class RemoteBuildClientHelper {
             return false;
         };
 
-        var property = telemetryProperty(0, /*isPii*/ false);
+        var property: ITelemetryPropertyInfo = telemetryProperty(0, /*isPii*/ false);
         telemetryProperties["remoteBuild." + platform + ".filesChangedCount"] = property;
-        var filterForTar = (reader: fstream.Reader, props: any) => {
-            var appRelPath = path.relative(settings.projectSourceDir, reader.path);
-            var wasModifiedRecently = appRelPath === "changeList.json" || appRelPath in newChangeTime;
+        var filterForTar: (reader: fstream.Reader, props: any) => void = (reader: fstream.Reader, props: any) => {
+            var appRelPath: string = path.relative(settings.projectSourceDir, reader.path);
+            var wasModifiedRecently: boolean = appRelPath === "changeList.json" || appRelPath in newChangeTime;
             if (wasModifiedRecently && reader.props.type !== "Directory") {
                 property.value++; // We found another file that was modified
             }
@@ -309,13 +310,13 @@ class RemoteBuildClientHelper {
             return wasModifiedRecently;
         };
 
-        var deferred = Q.defer();
+        var deferred: Q.Deferred<any> = Q.defer();
 
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var firstPassReader = new fstream.Reader(<fstream.IReaderProps> { path: projectSourceDir, type: "Directory", filter: filterForChanges });
+        var firstPassReader: fstream.Reader = new fstream.Reader(<fstream.IReaderProps> { path: projectSourceDir, type: "Directory", filter: filterForChanges });
         firstPassReader.on("close", function (): void {
             // We have now determined which files are new and which files are old. Construct changeList.json
-            var previousFiles = Object.keys(lastChangeTime);
+            var previousFiles: string[] = Object.keys(lastChangeTime);
 
             var changeList: { deletedFiles: string[] } = {
                 deletedFiles: previousFiles.filter(function (file: string): boolean {
@@ -343,10 +344,10 @@ class RemoteBuildClientHelper {
 
         return deferred.promise.then(() => {
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            var projectSourceDirReader = new fstream.Reader(<fstream.IReaderProps> { path: projectSourceDir, type: "Directory", filter: filterForTar });
-            var tarProducingStream = CountStream.count(projectSourceDirReader.pipe(tar.Pack()),
+            var projectSourceDirReader: fstream.Reader = new fstream.Reader(<fstream.IReaderProps> { path: projectSourceDir, type: "Directory", filter: filterForTar });
+            var tarProducingStream: NodeJS.ReadableStream = CountStream.count(projectSourceDirReader.pipe(tar.Pack()),
                 (sz: number) => telemetryProperties["remotebuild." + platform + ".projectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
-            var tgzProducingStream = CountStream.count(tarProducingStream.pipe(zlib.createGzip()),
+            var tgzProducingStream: NodeJS.ReadableStream = CountStream.count(tarProducingStream.pipe(zlib.createGzip()),
                 (sz: number) => telemetryProperties["remotebuild." + platform + ".gzipedProjectSizeInBytes"] = telemetryProperty(sz, /*isPii*/ false));
             return tgzProducingStream;
         });
@@ -357,9 +358,9 @@ class RemoteBuildClientHelper {
      * We want to include all changed user data, and exclude all irrelevant metadata or data for different platforms
      */
     private static filterForRemote(settings: BuildSettings, reader: fstream.Reader, lastChangeTime: { [file: string]: number }): boolean {
-        var appRelPath = path.relative(settings.projectSourceDir, reader.path);
+        var appRelPath: string = path.relative(settings.projectSourceDir, reader.path);
 
-        var exclusions = [
+        var exclusions: string[] = [
             "remote", // the /remote folder is for local tracking of remote builds, no need to send it to the remote server
             "platforms" // The /platforms folder is for locally installed platforms, and thus irrelevant to remote builds
         ];
@@ -370,7 +371,7 @@ class RemoteBuildClientHelper {
 
         // We want to exclude /merges/<x> if x is not the current platform
         // Similarly for the others here
-        var otherPlatformExclusions = [
+        var otherPlatformExclusions: string[] = [
             "merges",
             path.join("res", "screens"),
             path.join("res", "icons"),
@@ -378,9 +379,9 @@ class RemoteBuildClientHelper {
             path.join("res", "native")
         ];
 
-        var shouldBeExcluded = function (exclusion: string): boolean {
+        var shouldBeExcluded: (exclusion: string) => boolean = function (exclusion: string): boolean {
             // If we are looking at <exclusion>\<basename> and basename is not the platform, then it should be excluded
-            var checkFullPath = path.join(exclusion, reader.basename);
+            var checkFullPath: string = path.join(exclusion, reader.basename);
             return reader.basename !== settings.platform && !!appRelPath.match(new RegExp("^" + checkFullPath + "$"));
         };
 
@@ -389,7 +390,7 @@ class RemoteBuildClientHelper {
         }
 
         if (settings.incrementalBuild && appRelPath) {
-            var stat = fs.statSync(reader.path);
+            var stat: fs.Stats = fs.statSync(reader.path);
             if (stat.isDirectory()) {
                 // Consider all directories, since their contents may be modified
                 return true;
@@ -418,7 +419,7 @@ class RemoteBuildClientHelper {
         var cfg: string = settings.configuration ? settings.configuration.toLowerCase() : "release";
         var cliVersion: string = require("../../package.json").version;
 
-        var deferred = Q.defer<string>();
+        var deferred: Q.Deferred<string> = Q.defer<string>();
         var params: { [idx: string]: string } = {
             command: "build",
             vcordova: vcordova,
@@ -445,7 +446,7 @@ class RemoteBuildClientHelper {
             params["buildNumber"] = settings.incrementalBuild.toString();
         }
 
-        var buildUrl = serverUrl + "/build/tasks?" + querystring.stringify(params);
+        var buildUrl: string = serverUrl + "/build/tasks?" + querystring.stringify(params);
         Logger.log(resources.getString("SubmittingRemoteBuild", buildUrl));
 
         appAsTgzStream.on("error", function (error: any): void {
@@ -484,7 +485,7 @@ class RemoteBuildClientHelper {
      * Status progression: uploaded -> extracted -> building -> [complete|invalid|error] -> downloaded [if a device targeted build]
      */
     private static pollForBuildComplete(settings: BuildSettings, buildingUrl: string, interval: number, attempts: number, logOffset?: number): Q.Promise<BuildInfo> {
-        var thisAttempt = attempts + 1;
+        var thisAttempt: number = attempts + 1;
         Logger.log(resources.getString("CheckingRemoteBuildStatus", (new Date()).toLocaleTimeString(), buildingUrl, thisAttempt));
 
         return RemoteBuildClientHelper.httpOptions(buildingUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
@@ -493,7 +494,7 @@ class RemoteBuildClientHelper {
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildStatusPollFailed, responseAndBody.response.statusCode, responseAndBody.body);
             }
 
-            var buildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
+            var buildInfo: BuildInfo = BuildInfo.createNewBuildInfoFromDataObject(JSON.parse(responseAndBody.body));
             Logger.log(buildInfo.status + " - " + buildInfo.message);
             buildInfo["logOffset"] = logOffset || 0;
             if (buildInfo.status === BuildInfo.COMPLETE) {
@@ -521,12 +522,12 @@ class RemoteBuildClientHelper {
             return Q({});
         }
 
-        var queueUrl = settings.buildServerUrl + "/build/tasks";
+        var queueUrl: string = settings.buildServerUrl + "/build/tasks";
         return RemoteBuildClientHelper.httpOptions(queueUrl, settings).then(RemoteBuildClientHelper.promiseForHttpGet)
             .then(function (responseAndBody: { response: any; body: string }): Q.Promise<any> {
                 try {
                     var serverInfo: TacoRemote.IServerInfo = JSON.parse(responseAndBody.body);
-                    var queueIndex = serverInfo.queuedBuilds.map((bi: BuildInfo) => bi.buildNumber === buildInfo.buildNumber).indexOf(true);
+                    var queueIndex: number = serverInfo.queuedBuilds.map((bi: BuildInfo) => bi.buildNumber === buildInfo.buildNumber).indexOf(true);
 
                     if (queueIndex >= 0) {
                         Logger.log(resources.getString("RemoteBuildQueued", queueIndex + 1));
@@ -542,25 +543,25 @@ class RemoteBuildClientHelper {
      * Download the finished log of a build, regardless of whether it succeeded or failed
      */
     private static logBuildOutput(buildInfo: BuildInfo, settings: BuildSettings): Q.Promise<BuildInfo> {
-        var serverUrl = settings.buildServerUrl;
-        var deferred = Q.defer<BuildInfo>();
+        var serverUrl: string = settings.buildServerUrl;
+        var deferred: Q.Deferred<BuildInfo> = Q.defer<BuildInfo>();
         var offset: number = buildInfo["logOffset"] || 0;
-        var logFlags = offset > 0 ? "r+" : "w";
-        var buildNumber = buildInfo.buildNumber;
-        var downloadUrl = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);
+        var logFlags: string = offset > 0 ? "r+" : "w";
+        var buildNumber: number = buildInfo.buildNumber;
+        var downloadUrl: string = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
-            var logPath = path.join(settings.platformConfigurationBldDir, "build.log");
+            var logPath: string = path.join(settings.platformConfigurationBldDir, "build.log");
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
-            var endOfFile = 0;
+            var endOfFile: number = 0;
             if (offset > 0 && fs.existsSync(logPath)) {
-                var logFileStat = fs.statSync(logPath);
+                var logFileStat: fs.Stats = fs.statSync(logPath);
                 endOfFile = logFileStat.size;
             }
 
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            var logStream = fs.createWriteStream(logPath, { start: endOfFile, flags: logFlags });
-            var countStream = new CountStream();
-            var newlineNormalizerStream = new NewlineNormalizerStream();
+            var logStream: fs.WriteStream = fs.createWriteStream(logPath, { start: endOfFile, flags: logFlags });
+            var countStream: CountStream = new CountStream();
+            var newlineNormalizerStream: NewlineNormalizerStream = new NewlineNormalizerStream();
             logStream.on("finish", function (): void {
                 Logger.log(resources.getString("BuildLogWrittenTo", logPath));
             });
@@ -577,12 +578,12 @@ class RemoteBuildClientHelper {
      * This file is used by vs-mda/vs-tac, but it is also good for checking what plugins are actually installed remotely.
      */
     private static downloadRemotePluginFile(buildInfo: BuildInfo, settings: BuildSettings, toDir: string): Q.Promise<BuildInfo> {
-        var serverUrl = settings.buildServerUrl;
-        var deferred = Q.defer<BuildInfo>();
-        var buildNumber = buildInfo.buildNumber;
-        var downloadUrl = util.format("%s/files/%d/cordovaApp/plugins/%s.json", serverUrl, buildNumber, settings.platform);
+        var serverUrl: string = settings.buildServerUrl;
+        var deferred: Q.Deferred<BuildInfo> = Q.defer<BuildInfo>();
+        var buildNumber: number = buildInfo.buildNumber;
+        var downloadUrl: string = util.format("%s/files/%d/cordovaApp/plugins/%s.json", serverUrl, buildNumber, settings.platform);
         UtilHelper.createDirectoryIfNecessary(toDir);
-        var remotePluginStream = fs.createWriteStream(path.join(toDir, util.format("remote_%s.json", settings.platform)));
+        var remotePluginStream: fs.WriteStream = fs.createWriteStream(path.join(toDir, util.format("remote_%s.json", settings.platform)));
         remotePluginStream.on("finish", function (): void {
             deferred.resolve(buildInfo);
         });
@@ -595,16 +596,16 @@ class RemoteBuildClientHelper {
      * Download a completed build from the remote server as a zip
      */
     private static downloadBuild(buildInfo: BuildInfo, settings: BuildSettings, toDir: string): Q.Promise<string> {
-        var serverUrl = settings.buildServerUrl;
+        var serverUrl: string = settings.buildServerUrl;
         UtilHelper.createDirectoryIfNecessary(toDir);
-        var deferred = Q.defer<string>();
+        var deferred: Q.Deferred<string> = Q.defer<string>();
 
-        var buildNumber = buildInfo.buildNumber;
-        var downloadUrl = serverUrl + "/build/" + buildNumber + "/download";
+        var buildNumber: number = buildInfo.buildNumber;
+        var downloadUrl: string = serverUrl + "/build/" + buildNumber + "/download";
 
         Logger.log(resources.getString("DownloadingRemoteBuild", downloadUrl, toDir));
-        var zipFile = path.join(toDir, buildNumber + ".zip");
-        var outZip = fs.createWriteStream(zipFile);
+        var zipFile: string = path.join(toDir, buildNumber + ".zip");
+        var outZip: fs.WriteStream = fs.createWriteStream(zipFile);
         outZip.on("error", function (error: any): void {
             deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorDownloadingRemoteBuild, error, toDir));
         });
@@ -623,10 +624,10 @@ class RemoteBuildClientHelper {
     private static unzipBuildFiles(zipFile: string, toDir: string): Q.Promise<{}> {
         Logger.log(resources.getString("ExtractingRemoteBuild", toDir));
         UtilHelper.createDirectoryIfNecessary(toDir);
-        var deferred = Q.defer();
+        var deferred: Q.Deferred<any> = Q.defer();
 
         try {
-            var zip = new AdmZip(zipFile);
+            var zip: AdmZip = new AdmZip(zipFile);
             zip.extractAllTo(toDir, true);
             Logger.log(resources.getString("DoneExtractingRemoteBuild", toDir));
             fs.unlink(zipFile, function (err: NodeJS.ErrnoException): void {
@@ -647,7 +648,7 @@ class RemoteBuildClientHelper {
      * perform a HTTP GET request and return a promise which is resolved with the response or rejected with an error
      */
     private static promiseForHttpGet(urlOptions: request.Options): Q.Promise<{ response: any; body: string }> {
-        var deferred = Q.defer<{ response: any; body: string }>();
+        var deferred: Q.Deferred<{ response: any; body: string }> = Q.defer<{ response: any; body: string }>();
         request.get(urlOptions, function (error: any, response: any, body: any): void {
             if (error) {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.ErrorHttpGet, error, urlOptions.url));
@@ -655,7 +656,7 @@ class RemoteBuildClientHelper {
                 if (response.statusCode !== 200 && response.statusCode !== 202) {
                     // see if the response is JSON with a message
                     try {
-                        var bodyJson = JSON.parse(response.body);
+                        var bodyJson: any = JSON.parse(response.body);
                         if (bodyJson.message) {
                             deferred.reject(errorHelper.get(TacoErrorCodes.HttpGetFailed, response.statusCode, bodyJson.message));
                             return;

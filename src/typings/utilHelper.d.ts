@@ -41,7 +41,7 @@ declare module TacoUtility {
          * @param {string} target Location to copy to
          * @returns {Q.Promise} A promise which is fulfilled when the copy completes, and is rejected on error
          */
-        public static copyRecursive(source: string, target: string, options?: any): Q.Promise<any>;
+        public static copyRecursive(source: string, target: string, options?: ICopyOptions): Q.Promise<any>;
         /**
          * Synchronously create a directory if it does not exist
          *
@@ -114,5 +114,16 @@ declare module TacoUtility {
          * @return {string[]} The args where --loglevel and its value have been removed
          */
         public static initializeLogLevel(args: string[]): string[];
+
+        /**
+         * An explicit helper empty method, which can be used in scenarios like
+         * silent callbacks, catch all exceptions do nothing etc.
+         */
+        public static emptyMethod(args?: any): any;
+    }
+
+    interface ICopyOptions {
+        clobber: boolean;
+        filter: (itemPath: string) => boolean;
     }
 }

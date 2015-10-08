@@ -10,7 +10,12 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 "use strict";
-var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule: any = require("should");
+/* tslint:enable:no-var-requires */
 
 import del = require ("del");
 import fs = require ("fs");
@@ -22,16 +27,15 @@ import rimraf = require ("rimraf");
 import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import Settings = require ("../cli/utils/settings");
+import PlatformHelper = require ("../cli/utils/platformHelper");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
 
-var create = new createMod();
-
-describe("taco settings", function (): void {
-    var tacoHome = path.join(os.tmpdir(), "taco-cli", "settings");
+var create: createMod = new createMod();
+describe("taco PlatformHelper", function (): void {
+    var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "PlatformHelper");
     var originalCwd: string;
 
     before(function (mocha: MochaDone): void {
@@ -65,9 +69,9 @@ describe("taco settings", function (): void {
             original: ["android", "ios", "--local"],
             remain: ["android", "ios"]
         };
-        Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
-            platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
-                platform.location.should.equal(Settings.BuildLocationType.Local);
+        PlatformHelper.determinePlatform(data).then(function (platforms: PlatformHelper.IPlatformWithLocation[]): void {
+            platforms.forEach(function (platform: PlatformHelper.IPlatformWithLocation): void {
+                platform.location.should.equal(PlatformHelper.BuildLocationType.Local);
             });
         }).done(function (): void {
             mocha();
@@ -82,9 +86,9 @@ describe("taco settings", function (): void {
             original: ["android", "ios", "--remote"],
             remain: ["android", "ios"]
         };
-        Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
-            platforms.forEach(function (platform: Settings.IPlatformWithLocation): void {
-                platform.location.should.equal(Settings.BuildLocationType.Remote);
+        PlatformHelper.determinePlatform(data).then(function (platforms: PlatformHelper.IPlatformWithLocation[]): void {
+            platforms.forEach(function (platform: PlatformHelper.IPlatformWithLocation): void {
+                platform.location.should.equal(PlatformHelper.BuildLocationType.Remote);
             });
         }).done(function (): void {
             mocha();
@@ -98,10 +102,10 @@ describe("taco settings", function (): void {
             original: ["android", "ios"],
             remain: ["android", "ios"]
         };
-        Settings.determinePlatform(data).then(function (platforms: Settings.IPlatformWithLocation[]): void {
+        PlatformHelper.determinePlatform(data).then(function (platforms: PlatformHelper.IPlatformWithLocation[]): void {
             platforms.length.should.equal(2);
-            platforms[0].should.eql({ location: Settings.BuildLocationType.Local, platform: "android" });
-            platforms[1].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
+            platforms[0].should.eql({ location: PlatformHelper.BuildLocationType.Local, platform: "android" });
+            platforms[1].should.eql({ location: PlatformHelper.BuildLocationType.Remote, platform: "ios" });
         }).done(function (): void {
             mocha();
         }, mocha);
@@ -127,11 +131,11 @@ describe("taco settings", function (): void {
             process.chdir(path.join(tacoHome, "example"));
             fs.mkdirSync(path.join("platforms", "android"));
         }).then(function (): Q.Promise<any> {
-            return Settings.determinePlatform(data);
-        }).then(function (platforms: Settings.IPlatformWithLocation[]): void {
+            return PlatformHelper.determinePlatform(data);
+        }).then(function (platforms: PlatformHelper.IPlatformWithLocation[]): void {
             platforms.length.should.equal(2);
-            platforms[0].should.eql({ location: Settings.BuildLocationType.Remote, platform: "ios" });
-            platforms[1].should.eql({ location: Settings.BuildLocationType.Local, platform: "android" });
+            platforms[0].should.eql({ location: PlatformHelper.BuildLocationType.Remote, platform: "ios" });
+            platforms[1].should.eql({ location: PlatformHelper.BuildLocationType.Local, platform: "android" });
         }).done(function (): void {
             mocha();
         }, mocha);

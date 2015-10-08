@@ -37,15 +37,15 @@ class CordovaWrapper {
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
-        var deferred = Q.defer<string>();
+        var deferred: Q.Deferred<string> = Q.defer<string>();
         var output: string = "";
         var errorOutput: string = "";
         var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
-        var proc = child_process.spawn(CordovaWrapper.cordovaCommandName, args, options);
+        var proc: child_process.ChildProcess = child_process.spawn(CordovaWrapper.cordovaCommandName, args, options);
 
         proc.on("error", function (err: any): void {
             // ENOENT error thrown if no Cordova.cmd is found
-            var tacoError = (err.code === "ENOENT") ?
+            var tacoError: tacoUtility.TacoError = (err.code === "ENOENT") ?
                 errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
                 errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" "));
             deferred.reject(tacoError);
@@ -68,7 +68,7 @@ class CordovaWrapper {
                 if (captureOutput && output && args[0] === "requirements" && code === 1 && errorOutput && errorOutput.indexOf("Some of requirements check failed") !== -1) {
                     deferred.resolve(output);
                 } else {
-                    var tacoError = errorOutput ?
+                    var tacoError: tacoUtility.TacoError = errorOutput ?
                         errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, new Error(errorOutput), args.join(" ")) :
                         errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" "));
                     deferred.reject(tacoError);
@@ -84,10 +84,10 @@ class CordovaWrapper {
         return deferred.promise;
     }
 
-    public static build(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    public static build(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.build(CordovaHelper.toCordovaBuildArguments(commandData, platform));
-        }, () => ["build"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
+            return cordova.raw.build(CordovaHelper.toCordovaBuildArguments(commandData, platforms));
+        }, () => ["build"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     /**
@@ -114,10 +114,10 @@ class CordovaWrapper {
         }, { logLevel: tacoUtility.InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
     }
 
-    public static emulate(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    public static emulate(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platform));
-        }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
+            return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+        }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     public static requirements(platforms: string[]): Q.Promise<any> {
@@ -151,7 +151,7 @@ class CordovaWrapper {
         CordovaHelper.prepareCordovaConfig(cordovaParameters);
         return CordovaHelper.wrapCordovaInvocation<any>(cordovaCliVersion, (cordova: Cordova.ICordova) => {
             return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
-        }, tacoUtility.InstallLogLevel.taco);
+        }, tacoUtility.InstallLogLevel.error);
     }
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {
@@ -170,10 +170,10 @@ class CordovaWrapper {
         });
     }
 
-    public static run(commandData: commands.ICommandData, platform: string = null): Q.Promise<any> {
+    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platform));
-        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platform)));
+            return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     /**

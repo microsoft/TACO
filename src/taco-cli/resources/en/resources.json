@@ -448,6 +448,8 @@
 
     "ErrorNoPlatformsFound": "Unable to find any platforms. Please 'taco platform add <platform>' or 'taco remote add <platform>' and retry.",
     "_ErrorNoPlatformsFound.comment": "Error message printed when we try to run a command on a set of platforms, and the set is empty.",
+    "NoRemoteConfigurationFoundForPlatform": "Warning: No remote configuration found for {0}. Ignoring...",
+    "_NoRemoteConfigurationFoundForPlatform.comment": "Warning message printed when a build/run/emulate command specifies --remote and there is no remote configured. {0} is the platform with a missing configuration.",
 
     "ErrorUploadingRemoteBuild": "An error occurred uploading to the build server {0}",
     "_ErrorUploadingRemoteBuild.comment": "Message reported when we attempt to upload a build and the upload fails. {0} is the URL of the server",

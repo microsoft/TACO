@@ -51,7 +51,7 @@ class Server {
     private static shutdown: () => void;
 
     public static start(conf: RemoteBuildConf): Q.Promise<any> {
-        var app = express();
+        var app: Express.Express = express();
         app.use(expressLogger("dev"));
         app.use(errorhandler());
         if (conf.secure) {
@@ -62,7 +62,7 @@ class Server {
             }));
         }
 
-        var serverDir = conf.serverDir;
+        var serverDir: string = conf.serverDir;
         UtilHelper.createDirectoryIfNecessary(serverDir);
 
         app.get("/", function (req: express.Request, res: express.Response): void {
@@ -94,7 +94,7 @@ class Server {
         process.removeListener("SIGTERM", Server.shutdown);
         process.removeListener("SIGINT", Server.shutdown);
         if (Server.serverInstance) {
-            var tempInstance = Server.serverInstance;
+            var tempInstance: { close(callback?: Function): void } = Server.serverInstance;
             Server.serverInstance = null;
             tempInstance.close(callback);
         } else if (callback) {
@@ -171,7 +171,7 @@ class Server {
             Logger.logWarning(resources.getString("NoServerModulesSelected"));
         }
 
-        var onlyAuthorizedClientRequest = function (req: express.Request, res: express.Response, next: Function): void {
+        var onlyAuthorizedClientRequest: (req: express.Request, res: express.Response, next: Function) => void = function (req: express.Request, res: express.Response, next: Function): void {
             if (!(<any> req).client.authorized) {
                 res.status(401).send(resources.getStringForLanguage(req, "UnauthorizedClientRequest"));
             } else {
@@ -180,7 +180,7 @@ class Server {
         };
         return Server.eachServerModule(conf, function (modGen: RemoteBuild.IServerModuleFactory, mod: string, moduleConfig: RemoteBuild.IServerModuleConfiguration): Q.Promise<any> {
             return modGen.create(conf, moduleConfig, serverCapabilities).then(function (serverMod: RemoteBuild.IServerModule): void {
-                var modRouter = serverMod.getRouter();
+                var modRouter: Express.Router = serverMod.getRouter();
                 // These routes are fully secured through client cert verification:
                 if (conf.secure) {
                     app.all("/" + moduleConfig.mountPath, onlyAuthorizedClientRequest);
@@ -193,10 +193,10 @@ class Server {
     }
 
     private static eachServerModule(conf: RemoteBuildConf, eachFunc: (modGen: RemoteBuild.IServerModuleFactory, mod: string, modConfig: { mountPath: string }) => Q.Promise<any>): Q.Promise<any> {
-        var serverMods = conf.modules;
+        var serverMods: string[] = conf.modules;
         return serverMods.reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
             try {
-                var requirePath = conf.moduleConfig(mod).requirePath || mod;
+                var requirePath: string = conf.moduleConfig(mod).requirePath || mod;
                 var modGen: RemoteBuild.IServerModuleFactory = require(requirePath);
             } catch (e) {
                 Logger.logError(resources.getString("UnableToLoadModule", mod));
@@ -216,7 +216,7 @@ class Server {
     private static startupPlainHttpServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<http.Server> {
         return Q(http.createServer(app)).
             then(function (svr: http.Server): Q.Promise<http.Server> {
-                var deferred = Q.defer<http.Server>();
+                var deferred: Q.Deferred<http.Server> = Q.defer<http.Server>();
                 svr.on("error", function (err: any): void {
                     deferred.reject(Server.friendlyServerListenError(err, conf));
                 });
@@ -232,7 +232,7 @@ class Server {
     }
 
     private static startupHttpsServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<https.Server> {
-        var generatedNewCerts = false;
+        var generatedNewCerts: boolean = false;
         var generatedClientPin: number;
         return HostSpecifics.hostSpecifics.getServerCerts().
             then(function (certStore: HostSpecifics.ICertStore): Q.Promise<HostSpecifics.ICertStore> {
@@ -248,7 +248,7 @@ class Server {
                 return Q(certStore);
             }).
             then(function (certStore: HostSpecifics.ICertStore): https.Server {
-                var cipherList = ["ECDHE-ECDSA-AES256-GCM-SHA384",
+                var cipherList: string[] = ["ECDHE-ECDSA-AES256-GCM-SHA384",
                     "ECDHE-ECDSA-AES128-GCM-SHA256",
                     "ECDHE-RSA-AES256-SHA384",
                     "ECDHE-RSA-AES128-SHA256",
@@ -274,8 +274,8 @@ class Server {
                 // Prior to 0.10.0 the option is not exposed, and we do not support that.
                 // See https://github.com/nodejs/node/blob/0439a28d519fb6efe228074b0588a59452fc1677/ src / node_crypto.cc#L295 for an example
                 // of where these protocol strings come from / are used.
-                var protocol = semver.gte(process.versions.node, "0.12.0") ? "TLSv1_2_server_method" : "TLSv1_server_method";
-                var sslSettings = {
+                var protocol: string = semver.gte(process.versions.node, "0.12.0") ? "TLSv1_2_server_method" : "TLSv1_server_method";
+                var sslSettings: https.ServerOptions = {
                     key: certStore.getKey(),
                     cert: certStore.getCert(),
                     ca: certStore.getCA(),
@@ -288,7 +288,7 @@ class Server {
                 return https.createServer(sslSettings, app);
             }).
             then(function (svr: https.Server): Q.Promise<https.Server> {
-                var deferred = Q.defer<https.Server>();
+                var deferred: Q.Deferred<https.Server> = Q.defer<https.Server>();
                 svr.on("error", function (err: any): void {
                     if (generatedNewCerts) {
                         HostSpecifics.hostSpecifics.removeAllCertsSync(conf);
@@ -355,10 +355,10 @@ class Server {
 
     private static getModuleMount(req: express.Request, res: express.Response): void {
         var mod: string = req.params.module;
-        var modConfig = Server.serverConf.moduleConfig(mod);
+        var modConfig: RemoteBuild.IServerModuleConfiguration = Server.serverConf.moduleConfig(mod);
         if (mod && modConfig && modConfig.mountPath ) {
-            var mountLocation = modConfig.mountPath;
-            var contentLocation = util.format("%s://%s:%d/%s", req.protocol, req.hostname, Server.serverConf.port, mountLocation);
+            var mountLocation: string = modConfig.mountPath;
+            var contentLocation: string = util.format("%s://%s:%d/%s", req.protocol, req.hostname, Server.serverConf.port, mountLocation);
             res.set({
                 "Content-Location": contentLocation
             });
