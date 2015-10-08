@@ -46,7 +46,7 @@ describe("Check for newer version", function (): void {
     process.env["TACO_HOME"] = tacoHome;
     // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
     // stdoutWrite just doesn't work
-    var stdoutWrite: any = process.stdout.write; // We save the original implementation, so we can restore it later
+    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
     var memoryStdout: ms.MemoryStream;
 
     var expectedRequestAndResponse: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean, responseDelay?: number };

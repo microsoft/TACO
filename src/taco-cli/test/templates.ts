@@ -61,7 +61,7 @@ describe("templates", function (): void {
     describe("Onboarding experience", function (): void {
         // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
         // stdoutWrite just doesn't work
-        var stdoutWrite: any = process.stdout.write; // We save the original implementation, so we can restore it later
+        var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
         beforeEach(() => {
@@ -76,7 +76,7 @@ describe("templates", function (): void {
 
         it("templates prints the onboarding experience", function (done: MochaDone): void {
             templatesRun().done(() => {
-                var expected: any = [
+                var expected = [
                     "CommandTemplatesHeader",
                     "",
                     "   blank ............... BlankTemplateName",

@@ -109,7 +109,7 @@ macOnly("Certs", function(): void {
         certs.generateClientCert(conf({ serverDir: serverDir })).
             then(function(pin: number): void {
                 throw "PIN should not be returned";
-            }, function(error: any): void {
+            }, function(error: Error): void {
                 // We should get an error if we try to create client certificates when there is no server certificate
             }).done(function(): void {
                 done();

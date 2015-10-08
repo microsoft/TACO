@@ -32,7 +32,7 @@ class ServerMock {
         var sequenceIndex: number = 0;
         return function (request: http.ServerRequest, response: http.ServerResponse): void {
             if (sequenceIndex < sequence.length) {
-                var data: any = sequence[sequenceIndex];
+                var data: IRemoteServerSequence = sequence[sequenceIndex];
                 ++sequenceIndex;
                 if (request.url !== data.expectedUrl) {
                     onErr(new Error("Expected request to " + data.expectedUrl + " got " + request.url));

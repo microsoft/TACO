@@ -157,7 +157,7 @@ describe("taco remote", function(): void {
     it("should be able to configure secure connections", function(mocha: MochaDone): void {
         this.timeout(20000);
         var mockServer: https.Server = ServerMock.createSecureTestServer();
-        var desiredState: any = {
+        var desiredState = {
             host: "localhost",
             port: 3000,
             pin: "123456",
@@ -234,7 +234,7 @@ describe("taco remote", function(): void {
     describe("Onboarding experience", function(): void {
         // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
         // stdoutWrite just doesn't work
-        var stdoutWrite: any = process.stdout.write; // We save the original implementation, so we can restore it later
+        var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
         beforeEach(() => {
@@ -251,7 +251,7 @@ describe("taco remote", function(): void {
         //    retrieve the contents from the memory stream
         it("prints the onboarding experience when adding a new remote", function(done: MochaDone): void {
             this.timeout(5000);
-            var desiredState: any = {
+            var desiredState = {
                 host: "localhost",
                 port: 3000,
                 pin: "",

@@ -442,7 +442,7 @@ describe("taco create", function (): void {
     describe("Onboarding experience", () => {
         // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
         // stdoutWrite just doesn't work
-        var stdoutWrite: any = process.stdout.write; // We save the original implementation, so we can restore it later
+        var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
         beforeEach(() => {

@@ -124,7 +124,7 @@ describe("taco run", function (): void {
         var configuration: string = "debug";
         var buildNumber: number = 12343;
 
-        var buildInfo: any = {
+        var buildInfo = {
             buildNumber: buildNumber,
             status: BuildInfo.COMPLETE,
             buildLang: "en"
@@ -190,7 +190,7 @@ describe("taco run", function (): void {
         var configuration: string = "debug";
         var buildNumber: number = 12344;
 
-        var buildInfo: any = {
+        var buildInfo = {
             buildNumber: buildNumber,
             status: BuildInfo.COMPLETE,
             buildLang: "en"

@@ -33,7 +33,7 @@ describe("help for a command", function (): void {
     var help: Help = new Help();
     // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
     // stdoutWrite just doesn't work
-    var stdoutWrite: any = process.stdout.write; // We save the original implementation, so we can restore it later
+    var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
     var memoryStdout: ms.MemoryStream;
     var previous: boolean;
 
