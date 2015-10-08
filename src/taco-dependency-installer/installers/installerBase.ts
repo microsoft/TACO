@@ -51,9 +51,9 @@ class InstallerBase {
     }
 
     public run(): Q.Promise<any> {
-        var self = this;
+        var self: InstallerBase = this;
         return tacoUtils.TelemetryHelper.generate("Installer:" + this.id,
-            telemetry => {
+            (telemetry: tacoUtils.TelemetryGenerator) => {
                 this.telemetry = telemetry; // So any method can access it
                 return this.download()
                     .then(function (): Q.Promise<any> {

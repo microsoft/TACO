@@ -46,7 +46,7 @@ class CliHelper {
             })
             .then(function (): Q.Promise<void> {
                 var command: string = nconf.get("_")[0] || "start";
-                var task = Commands.tasks[command];
+                var task: RemoteBuild.IRemoteBuildTask = Commands.tasks[command];
 
                 if (!task) {
                     Logger.logError(resources.getString("UnknownCommand", command));
@@ -102,5 +102,5 @@ class CliHelper {
     }
 }
 
-var cli = CliHelper.cli;
+var cli: () => void = CliHelper.cli;
 export = cli;

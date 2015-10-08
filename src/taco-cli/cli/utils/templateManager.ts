@@ -15,7 +15,7 @@
 
 "use strict";
 
-import admZip = require ("adm-zip");
+import AdmZip = require ("adm-zip");
 import childProcess = require ("child_process");
 import crypto = require ("crypto");
 import fs = require ("fs");
@@ -41,7 +41,6 @@ module TemplateManager {
     export interface ITemplateDescriptor {
         id: string;
         name: string;
-        getDescription(): string;
     }
 
     export interface ITemplateList {
@@ -96,7 +95,7 @@ class TemplateManager {
             "\\$projectname\\$": appName
         };
 
-        Object.keys(tokens).forEach(function(token: string){
+        Object.keys(tokens).forEach(function(token: string): void {
             replaceParams.regex = token;
             replaceParams.replacement = tokens[token];
             replace(replaceParams);
@@ -116,7 +115,7 @@ class TemplateManager {
      * @return {Q.Promise<string>} A Q promise that is resolved with the template's display name if there are no errors
      */
     public createKitProjectWithTemplate(kitId: string, templateId: string, cordovaCliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<string> {
-        var self = this;
+        var self: TemplateManager = this;
         var templateSrcPath: string = null;
 
         templateId = templateId ? templateId : TemplateManager.DEFAULT_TEMPLATE_ID;
@@ -156,12 +155,12 @@ class TemplateManager {
                 }
 
                 // If we reach this point, we are in case 1) (see above comment), so we need to perform a recursive copy
-                var filterFunc = function (itemPath: string): boolean {
+                var filterFunc: (itemPath: string) => boolean = function (itemPath: string): boolean {
                     // Return true if the item path is not in our list of git files to ignore
                     return TemplateManager.GIT_FILE_LIST.indexOf(path.basename(itemPath)) === -1;
                 };
-                var options: any = { clobber: false, filter: filterFunc };
 
+                var options: tacoUtility.ICopyOptions = { clobber: false, filter: filterFunc };
                 return utils.copyRecursive(templateSrcPath, cordovaParameters.projectPath, options);
             })
             .then(function (): Q.Promise<any> {
@@ -199,7 +198,7 @@ class TemplateManager {
             .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): Q.Promise<TemplateManager.ITemplateList> {
                 return Q.resolve({
                     kitId: kitOverride.kitId,
-                    templates: kitOverride.templates.map(t => new TemplateDescriptor(t))
+                    templates: kitOverride.templates.map((t: TacoKits.ITemplateOverrideInfo) => new TemplateDescriptor(t))
             });
         });
     }
@@ -214,7 +213,7 @@ class TemplateManager {
             .then(function (results: TacoKits.ITemplateOverrideInfo[]): Q.Promise<TemplateManager.ITemplateList> {
                 return Q.resolve({
                     kitId: "",
-                    templates: results.map(templateInfo => new TemplateDescriptor(templateInfo))
+                    templates: results.map((templateInfo: TacoKits.ITemplateOverrideInfo) => new TemplateDescriptor(templateInfo))
                 });
             });
     }
@@ -230,7 +229,7 @@ class TemplateManager {
     public getTemplateEntriesCount(kitId: string, templateId: string): Q.Promise<number> {
         return this.kitHelper.getTemplateOverrideInfo(kitId, templateId)
             .then(function (templateOverrideInfo: TacoKits.ITemplateOverrideInfo): number {
-                var templateZip = new admZip(templateOverrideInfo.templateInfo.url);
+                var templateZip: AdmZip = new AdmZip(templateOverrideInfo.templateInfo.url);
 
                 return templateZip.getEntries().length - 1; // We substract 1, because the returned count includes the root folder of the template
             });
@@ -301,11 +300,11 @@ class TemplateManager {
     }
 
     private acquireFromTacoKits(templateId: string, kitId: string): Q.Promise<string> {
-        var self = this;
+        var self: TemplateManager = this;
 
         return this.kitHelper.getTemplateOverrideInfo(kitId, templateId)
             .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
-                var templateInfo = templateOverrideForKit.templateInfo;
+                var templateInfo: TacoKits.ITemplateInfo = templateOverrideForKit.templateInfo;
 
                 self.templateName = templateInfo.name;
 
@@ -327,7 +326,7 @@ class TemplateManager {
             wrench.mkdirSyncRecursive(cachedTemplateKitPath, 511); // 511 decimal is 0777 octal
 
             // Extract the template archive to the cache
-            var templateZip = new admZip(templateInfo.url);
+            var templateZip: AdmZip = new AdmZip(templateInfo.url);
 
             templateZip.extractAllTo(cachedTemplateKitPath);
         }

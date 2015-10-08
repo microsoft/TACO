@@ -6,15 +6,10 @@
  *******************************************************
  */
 
-declare module BuildConfig {
-    export interface IBuildConfig {
-        src: string;
-        templates: string;
-        build: string;
-        buildSrc: string;
-        buildPackages: string;
-        buildTools: string;
-        buildTemplates: string;
-        tsCompileOptions: any;
-    }
-}
+/// <reference path="../../../typings/node.d.ts" />
+
+interface IHttpServerFunction {
+    (request: NodeJSHttp.ServerRequest, response: NodeJSHttp.ServerResponse): void;
+};
+
+export = IHttpServerFunction;

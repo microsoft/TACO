@@ -50,13 +50,13 @@ import utils = tacoUtils.UtilHelper;
 
 export class MemoryStream extends stream.Writable {
     private stdoutWrite: { (data: any, encoding: string, callback: Function): void };
-    private shouldAlsoPrintToRealStdout = true; // We turn this on for debugging purposes, on the tests, possible on the build server
+    private shouldAlsoPrintToRealStdout: boolean = true; // We turn this on for debugging purposes, on the tests, possible on the build server
 
     private fullBuffer: Buffer = new Buffer("");
     public _write(data: Buffer, encoding: string, callback: Function): void;
     public _write(data: string, encoding: string, callback: Function): void;
     public _write(data: any, encoding: string, callback: Function): void {
-        var buffer = Buffer.isBuffer(data) ? data : new Buffer(data, encoding);
+        var buffer: Buffer = Buffer.isBuffer(data) ? data : new Buffer(data, encoding);
         this.fullBuffer = Buffer.concat([this.fullBuffer, buffer]);
         if (this.shouldAlsoPrintToRealStdout) {
             this.stdoutWrite.call(process.stdout, buffer);
@@ -67,7 +67,7 @@ export class MemoryStream extends stream.Writable {
     }
 
     public contentsAsText(): string {
-        var rawContents = this.fullBuffer.toString("utf-8");
+        var rawContents: string = this.fullBuffer.toString("utf-8");
         return rawContents.replace(/\r\n/g, "\n"); // We normalize the line endings
     }
 

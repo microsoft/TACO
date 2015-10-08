@@ -197,7 +197,7 @@ module TacoKits {
         public getTemplatesForKit(inputKitId: string): Q.Promise<IKitTemplatesOverrideInfo> {
             var kit: string = null;
             var templates: ITemplateMetadata = null;
-            var self = this;
+            var self: KitHelper = this;
 
             return this.getTemplateMetadata()
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
@@ -284,7 +284,7 @@ module TacoKits {
             var deferred: Q.Deferred<ITemplateOverrideInfo> = Q.defer<ITemplateOverrideInfo>();
             var templates: ITemplateMetadata = null;
             var templateOverrideInfo: ITemplateOverrideInfo = null;
-            var self = this;
+            var self: KitHelper = this;
 
             return this.getTemplateMetadata()
                 .then(function (templateMetadata: ITemplateMetadata): Q.Promise<string> {
@@ -394,7 +394,7 @@ module TacoKits {
         public getTemplateMetadata(): Q.Promise<ITemplateMetadata> {
             var deferred: Q.Deferred<ITemplateMetadata> = Q.defer<ITemplateMetadata>();
             return this.getKitMetadata().then(function (metadata: ITacoKitMetadata): Q.Promise<ITemplateMetadata> {
-                var templates = metadata.templates;
+                var templates: ITemplateMetadata = metadata.templates;
                 if (templates) {
                     deferred.resolve(templates);
                 } else {
@@ -412,7 +412,7 @@ module TacoKits {
          */
         public getCordovaCliForDefaultKit(): Q.Promise<string> {
             var deferred: Q.Deferred<string> = Q.defer<string>();
-            var self = this;
+            var self: KitHelper = this;
             return this.getDefaultKit().then(function (defaultKit: string): Q.Promise<string> {
                 return self.getCordovaCliForKit(defaultKit);
             });
@@ -465,7 +465,7 @@ module TacoKits {
     /* tslint:disable:variable-name */
     // taco-kits error codes need to be accessed by other packages as TacoErrorCode 
     // more like an enum.
-    export var TacoErrorCode = TacoErrorCodes;
+    export var TacoErrorCode: any = TacoErrorCodes;
     /* tslint:enable:variable-name */
 }
 

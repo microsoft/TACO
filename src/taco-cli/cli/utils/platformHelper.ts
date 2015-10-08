@@ -48,8 +48,8 @@ class PlatformHelper {
             PlatformHelper.determinePlatformsFromOptions(options)
         ]).spread<PlatformHelper.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>,
             platforms: PlatformHelper.IPlatformWithLocation[]): PlatformHelper.IPlatformWithLocation[] {
-            var filteredPlatforms = platforms.filter(function (platform: PlatformHelper.IPlatformWithLocation): boolean {
-                var supported = !supportedPlatforms || platform.platform in supportedPlatforms || platform.location === PlatformHelper.BuildLocationType.Remote;
+            var filteredPlatforms: PlatformHelper.IPlatformWithLocation[] = platforms.filter(function (platform: PlatformHelper.IPlatformWithLocation): boolean {
+                var supported: boolean = !supportedPlatforms || platform.platform in supportedPlatforms || platform.location === PlatformHelper.BuildLocationType.Remote;
                 if (!supported) {
                     logger.logWarning(resources.getString("CommandUnsupportedPlatformIgnored", platform.platform));
                 }
@@ -65,7 +65,7 @@ class PlatformHelper {
     }
 
     public static determineSpecificPlatformsFromOptions(options: commands.ICommandData, settings: Settings.ISettings): PlatformHelper.IPlatformWithLocation[] {
-        var platforms = PlatformHelper.parseRequestedPlatforms(options);
+        var platforms: string[] = PlatformHelper.parseRequestedPlatforms(options);
         // one or more specific platforms are specified. Determine whether they should be built locally, remotely, or local falling back to remote
         return platforms.map(function (platform: string): PlatformHelper.IPlatformWithLocation {
             var buildLocation: PlatformHelper.BuildLocationType;
@@ -92,7 +92,7 @@ class PlatformHelper {
      *      taco build --local browser -- ios     ==> 'browser'
      */
     public static parseRequestedPlatforms(options: commands.ICommandData): string[] {
-        var optionsToIgnore = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
+        var optionsToIgnore: string[] = options.original.indexOf("--") === -1 ? [] : options.original.slice(options.original.indexOf("--"));
         return options.remain.filter(function (platform: string): boolean { return optionsToIgnore.indexOf(platform) === -1; });
     }
 
@@ -130,7 +130,7 @@ class PlatformHelper {
                 return { location: PlatformHelper.BuildLocationType.Local, platform: platform };
                 }));
         }).then((platforms: PlatformHelper.IPlatformWithLocation[]): PlatformHelper.IPlatformWithLocation[] => {
-            var requestedPlatforms = PlatformHelper.parseRequestedPlatforms(options);
+            var requestedPlatforms: string[] = PlatformHelper.parseRequestedPlatforms(options);
 
             if (requestedPlatforms.length > 0) {
                 // Filter down to user-requested platforms if appropriate
@@ -171,17 +171,19 @@ class PlatformHelper {
     public static operateOnPlatforms(platforms: PlatformHelper.IPlatformWithLocation[],
         localFunction: (platforms: string[]) => Q.Promise<any>,
         remoteFunction: (platforms: string) => Q.Promise<any>): Q.Promise<any> {
-        var localPlatforms = platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
+
+        var localPlatforms: string[] = platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
             return platform.location === PlatformHelper.BuildLocationType.Local;
         }).map((platform: PlatformHelper.IPlatformWithLocation) => platform.platform);
-        var remotePlatforms = platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
+
+        var remotePlatforms: string[] = platforms.filter((platform: PlatformHelper.IPlatformWithLocation): boolean => {
             return platform.location === PlatformHelper.BuildLocationType.Remote;
         }).map((platform: PlatformHelper.IPlatformWithLocation) => platform.platform);
 
         // We batch all local platforms together so we make one cordova.raw.build(["foo", "bar", "baz"]) invocation,
         // because these raw functions are not safe to invoke concurrently.
-        var buildLocalPlatforms = localPlatforms.length > 0 ? localFunction(localPlatforms) : Q({});
-        var buildRemotePlatforms = remotePlatforms.map(remoteFunction);
+        var buildLocalPlatforms: Q.Promise<any> = localPlatforms.length > 0 ? localFunction(localPlatforms) : Q({});
+        var buildRemotePlatforms: Q.Promise<any>[] = remotePlatforms.map(remoteFunction);
 
         return Q.all([buildLocalPlatforms].concat(buildRemotePlatforms));
     }

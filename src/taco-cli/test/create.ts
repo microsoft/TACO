@@ -18,12 +18,12 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 /* tslint:disable:no-var-requires */
 // Special case to allow using color package with index signature for style rules
-var colors = require("colors/safe");
+var colors: any = require("colors/safe");
 /* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
@@ -170,7 +170,7 @@ describe("taco create", function (): void {
     }
 
     function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {
-        var create = new Create();
+        var create: Create = new Create();
 
         return create.run(makeICommandData(scenario, successScenarios))
             .then(function (): void {
@@ -195,7 +195,7 @@ describe("taco create", function (): void {
     }
 
     function runFailureScenario<T>(scenario: number, expectedErrorCode?: T): Q.Promise<any> {
-        var create = new Create();
+        var create: Create = new Create();
 
         return create.run(makeICommandData(scenario, failureScenarios))
             .then(function (): Q.Promise<any> {
@@ -306,7 +306,7 @@ describe("taco create", function (): void {
 
             // copy-from custom assets: 2 files and 1 folder
             // Kit 5.1.1-Kit: Cordova adds 2 files and 4 folders
-            var totalEntries = 9 + tacoFileCount;
+            var totalEntries: number = 9 + tacoFileCount;
 
             runScenarioWithExpectedFileCount(scenario, totalEntries, expectedKitTacoJsonKeyValues["5.1.1-Kit"]).done(() => done(), done);
         });
@@ -316,7 +316,7 @@ describe("taco create", function (): void {
 
             // CLI 4.2.0 + default Cordova project
             // TACO: adds 1 file
-            var totalEntries = cordovaDefaultProjectFileCount + tacoFileCount;
+            var totalEntries: number = cordovaDefaultProjectFileCount + tacoFileCount;
 
             runScenarioWithExpectedFileCount(scenario, totalEntries, expectedCliTacoJsonKeyValues["4.3.0"]).done(() => done(), done);
         });
@@ -440,6 +440,8 @@ describe("taco create", function (): void {
     });
 
     describe("Onboarding experience", () => {
+        // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
+        // stdoutWrite just doesn't work
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
@@ -453,8 +455,8 @@ describe("taco create", function (): void {
             process.stdout.write = stdoutWrite;
         });
 
-        var tenSpaces = "          ";
-        var tenMinuses = "----------";
+        var tenSpaces: string  = "          ";
+        var tenMinuses: string = "----------";
         function testCreateForArguments(createCommandLineArguments: string[],
             expectedMessages: string[],
             alternativeExpectedMessages: string[],
@@ -467,11 +469,11 @@ describe("taco create", function (): void {
                 original: createCommandLineArguments,
                 remain: createCommandLineArguments.slice()
             };
-            var create = new Create();
+            var create: Create = new Create();
             create.run(commandData).done(() => {
-                var expected = expectedMessages.join("\n");
+                var expected : string = expectedMessages.join("\n");
 
-                var actual = colors.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
+                var actual: string = colors.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
                 actual = actual.replace(/ {10,}/g, tenSpaces); // We don't want to count spaces when we have a lot of them, so we replace it with 10
                 actual = actual.replace(/-{10,}/g, tenMinuses); // We don't want to count -----s when we have a lot of them, so we replace it with 10 (They also depend dynamically on the path length)
                 actual = actual.replace(/ +$/gm, ""); // We also don't want trailing spaces
@@ -490,7 +492,7 @@ describe("taco create", function (): void {
             });
         }
 
-        var downloadingDependenciesOutput = ["",
+        var downloadingDependenciesOutput: string[] = ["",
             "PackageLoaderDownloadingMessage",
             "",
             "PackageLoaderDownloadCompletedMessage"];
@@ -498,9 +500,9 @@ describe("taco create", function (): void {
         it("prints the onboarding experience when using a kit", function (done: MochaDone): void {
             this.timeout(60000); // installing the node packages during create can take a long time
 
-            var projectPath = getProjectPath("onboarding-experience", 1);
+            var projectPath: string = getProjectPath("onboarding-experience", 1);
 
-            var firstPart = [
+            var firstPart: string[] = [
                 "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
@@ -509,7 +511,7 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableKitVersionDescription ..... 4.3.1-Kit",
                 "      ----------"];
 
-            var lastPart = [
+            var lastPart: string[] = [
                 "CommandCreateSuccessProjectTemplate",
                 "OnboardingExperienceTitle",
                 " * HowToUseChangeToProjectFolder",
@@ -533,9 +535,9 @@ describe("taco create", function (): void {
         it("prints the onboarding experience when not using a kit", function (done: MochaDone): void {
             this.timeout(60000); // installing the node packages during create can take a long time
 
-            var projectPath = getProjectPath("onboarding-experience", 2);
+            var projectPath: string = getProjectPath("onboarding-experience", 2);
 
-            var firstPart = [
+            var firstPart: string[] = [
                 "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
@@ -544,7 +546,7 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableCordovaCLIVersionDescription ..... 5.1.1",
                 "      ----------"];
 
-            var lastPart = [
+            var lastPart: string[] = [
                 "CommandCreateSuccessProjectCLI",
                 "OnboardingExperienceTitle",
                 " * HowToUseChangeToProjectFolder",
@@ -569,9 +571,9 @@ describe("taco create", function (): void {
         it("it adds (Deprecated) to a deprecated kit", function (done: MochaDone): void {
             this.timeout(60000); // installing the node packages during create can take a long time
 
-            var projectPath = getProjectPath("onboarding-experience", 3);
+            var projectPath: string = getProjectPath("onboarding-experience", 3);
 
-            var firstPart = [
+            var firstPart: string[] = [
                 "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
@@ -580,7 +582,7 @@ describe("taco create", function (): void {
                 "      CommandCreateStatusTableKitVersionDescription ..... 4.3.0-Kit (CommandKitListDeprecatedKit)",
                 "      ----------"];
 
-            var lastPart = [
+            var lastPart: string[] = [
                 "CommandCreateWarningDeprecatedKit",
                 "CommandCreateSuccessProjectTemplate",
                 "OnboardingExperienceTitle",
@@ -603,10 +605,10 @@ describe("taco create", function (): void {
         });
 
         it("it adds (Default) to a default kit", function (done: MochaDone): void {
-            var projectPath = getProjectPath("onboarding-experience", 4);
+            var projectPath: string = getProjectPath("onboarding-experience", 4);
             this.timeout(60000); // installing the node packages during create can take a long time
-            kitHelper.getDefaultKit().done(defaultKitId => {
-                var firstPart = [
+            kitHelper.getDefaultKit().done((defaultKitId: string) => {
+                var firstPart: string[] = [
                     "CommandCreateStatusCreatingNewProject",
                     "      ----------",
                     "      CommandCreateStatusTableNameDescription ..... HelloTaco",
@@ -615,7 +617,7 @@ describe("taco create", function (): void {
                     "      CommandCreateStatusTableKitVersionDescription ..... " + defaultKitId + " (CommandKitListDefaultKit)",
                     "      ----------"];
 
-                var lastPart = [
+                var lastPart: string[] = [
                     "CommandCreateSuccessProjectTemplate",
                     "OnboardingExperienceTitle",
                     " * HowToUseChangeToProjectFolder",
@@ -639,10 +641,10 @@ describe("taco create", function (): void {
     });
 
     describe("Telemetry properties", () => {
-        var cliVersion = require("../package.json").version;
+        var cliVersion: string = require("../package.json").version;
 
         function createProjectAndVerifyTelemetryProps(args: string[], expectedProperties: TacoUtility.ICommandTelemetryProperties, done: MochaDone): void {
-            var create = new Create();
+            var create: Create = new Create();
             var commandData: tacoUtils.Commands.ICommandData = {
                 options: {},
                 original: args,
@@ -659,7 +661,7 @@ describe("taco create", function (): void {
         it("Returns the expected telemetry properties for a kit project created with the Blank template", function (done: MochaDone): void {
             this.timeout(60000); // installing the node packages during create can take a long time
 
-            var projectPath = getProjectPath("Telemetry properties for Create command", 1);
+            var projectPath: string = getProjectPath("Telemetry properties for Create command", 1);
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                         cliVersion: { isPii: false, value: cliVersion },
@@ -673,7 +675,7 @@ describe("taco create", function (): void {
         it("Returns the expected telemetry properties for a kit project created with TypeScript template", function (done: MochaDone): void {
             this.timeout(60000); // installing the node packages during create can take a long time
 
-            var projectPath = getProjectPath("Telemetry properties for Create command", 2);
+            var projectPath: string = getProjectPath("Telemetry properties for Create command", 2);
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                         cliVersion: { isPii: false, value: cliVersion },
@@ -689,7 +691,7 @@ describe("taco create", function (): void {
         it("Returns the expected telemetry properties for a CLI project", function (done: MochaDone): void {
             this.timeout(60000); // installing the node packages during create can take a long time
 
-            var projectPath = getProjectPath("Telemetry properties for Create command", 3);
+            var projectPath: string = getProjectPath("Telemetry properties for Create command", 3);
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                         cliVersion: { isPii: false, value: cliVersion },

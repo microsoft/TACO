@@ -21,11 +21,11 @@ import semver = require ("semver");
 import logger = tacoUtility.Logger;
 
 class CheckForNewerVersion {
-    private millisecondsInAnHour = 60 * 60 * 1000;
-    private maximumCheckIntervalInHours = 4;
+    private millisecondsInAnHour: number = 60 * 60 * 1000;
+    private maximumCheckIntervalInHours: number = 4;
     private tacoCliNpmRepositoryUrl: string;
     private packageFilePath: string;
-    private millisecondsUntilTimeout = 5 * 1000; /* We want this to be high, as to have time to get the response back,
+    private millisecondsUntilTimeout: number = 5 * 1000; /* We want this to be high, as to have time to get the response back,
         but not very high, because we'll be blocking the user console if this takes too long */
 
     constructor(tacoCliNpmRepositoryUrl: string = "http://registry.npmjs.org/taco-cli/latest", packageFilePath: string = "../../package.json") {
@@ -43,10 +43,10 @@ class CheckForNewerVersion {
         */
 
         return this.isCheckForUpdateNeeded() // 1.
-            .then(isCheckForUpdateNeeded => {
+            .then((isCheckForUpdateNeeded: boolean) => {
                 if (isCheckForUpdateNeeded) { // 2.
                     return this.getLatestVersion() // 3.
-                        .then(latestVersion => this.printVersionWarningIfNeccesary(latestVersion)) // 4.
+                        .then((latestVersion: string) => this.printVersionWarningIfNeccesary(latestVersion)) // 4.
                         .then(() => this.updateLastTimeCheckWasDone()); // 5.
                 } else {
                     return Q.resolve<boolean>(isCheckForUpdateNeeded);
@@ -63,12 +63,12 @@ class CheckForNewerVersion {
     }
 
     private isCheckForUpdateNeeded(): Q.Promise<boolean> {
-        var self = this;
-        return settingsManager.loadSettings().then(settings => {
-            var currentDate = new Date();
+        var self: CheckForNewerVersion = this;
+        return settingsManager.loadSettings().then((settings: settingsManager.ISettings) => {
+            var currentDate: Date = new Date();
             if (settings.lastCheckForNewerVersionTimestamp) {
-                var millisecondSinceLastCheck = currentDate.getTime() - new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
-                var isCheckForUpdateNeeded = millisecondSinceLastCheck > self.maximumCheckIntervalInHours * self.millisecondsInAnHour;
+                var millisecondSinceLastCheck: number = currentDate.getTime() - new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
+                var isCheckForUpdateNeeded: boolean = millisecondSinceLastCheck > self.maximumCheckIntervalInHours * self.millisecondsInAnHour;
                 // FOR DEBUGGING: The next line is only used while debugging this feature
                 // logger.log("Last Check Time" + lastCheckTime + "Current date = " + currentDate + ", Last checked date = " + settings.lastCheckForNewerVersionTimestamp);
                 return isCheckForUpdateNeeded;
@@ -80,12 +80,12 @@ class CheckForNewerVersion {
     }
 
     private getLatestVersion(): Q.Promise<string> {
-        var deferredLatestVersion = Q.defer<string>();
-        var proxy = process.env.PROXY || process.env.http_proxy || null;
+        var deferredLatestVersion: Q.Deferred<string>  = Q.defer<string>();
+        var proxy: string = process.env.PROXY || process.env.http_proxy || null;
         request({ url: this.tacoCliNpmRepositoryUrl, json: true, proxy: proxy, timeout: this.millisecondsUntilTimeout }, (error: any, response: any, body: any) => {
             try {
                 if (!error && response.statusCode === 200 && body.version) { // 200 is the 200 OK HTTP Code. See http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-                    var latestVersion = body.version;
+                    var latestVersion: string = body.version;
                     deferredLatestVersion.resolve(latestVersion);
                 } else {
                     deferredLatestVersion.reject("error = " + error + ", status code = " + (response ? response.statusCode : "none") + ", body = " + body);
@@ -112,7 +112,7 @@ class CheckForNewerVersion {
     }
 
     private updateLastTimeCheckWasDone(): Q.Promise<any> {
-        return settingsManager.updateSettings(settings => settings.lastCheckForNewerVersionTimestamp = Date.now());
+        return settingsManager.updateSettings((settings: settingsManager.ISettings) => settings.lastCheckForNewerVersionTimestamp = Date.now());
     }
 }
 

@@ -27,16 +27,16 @@ import UtilHelper = tacoUtils.UtilHelper;
 
 class DarwinDependenciesHelper {
     public static askInstallHomebrew(): Q.Promise<any> {
-        var firstRunPath = path.join(UtilHelper.tacoHome, ".taco-remote");
-        var isFirstRun = !fs.existsSync(firstRunPath);
-        var deferred = Q.defer();
+        var firstRunPath: string = path.join(UtilHelper.tacoHome, ".taco-remote");
+        var isFirstRun: boolean = !fs.existsSync(firstRunPath);
+        var deferred: Q.Deferred<any> = Q.defer();
         if (isFirstRun) {
             Logger.log(resources.getString("FirstRunDependencyConfiguration"));
-            var readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
-            var deferred2 = Q.defer<boolean>();
+            var readlineInterface: readline.ReadLine = readline.createInterface({ input: process.stdin, output: process.stdout });
+            var deferred2: Q.Deferred<boolean> = Q.defer<boolean>();
             readlineInterface.question(resources.getString("HomebrewInstallationQuery"), function (response: string): void {
                 readlineInterface.close();
-                var shouldInstall = response === "" || response.trim().toLowerCase().indexOf(resources.getString("HomebrewInstallationQueryResponse")) === 0;
+                var shouldInstall: boolean = response === "" || response.trim().toLowerCase().indexOf(resources.getString("HomebrewInstallationQueryResponse")) === 0;
 
                 if (shouldInstall) {
                     DarwinDependenciesHelper.tryInstallHomebrew().then(DarwinDependenciesHelper.tryInstallPackages).then(function (): void {
@@ -74,10 +74,10 @@ class DarwinDependenciesHelper {
     }
 
     private static tryInstallHomebrew(): Q.Promise<any> {
-        var homebrewInstalled = Q.defer();
+        var homebrewInstalled: Q.Deferred<any> = Q.defer();
         // We use spawn here rather than exec primarily so we can allow for user-interaction
-        var curlInstaller = child_process.spawn("curl", ["-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"]);
-        var installHomebrew = child_process.spawn("ruby", ["-"]);
+        var curlInstaller: child_process.ChildProcess = child_process.spawn("curl", ["-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"]);
+        var installHomebrew: child_process.ChildProcess = child_process.spawn("ruby", ["-"]);
 
         curlInstaller.stdout.on("data", function (data: any): void {
             installHomebrew.stdin.write(data);

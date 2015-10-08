@@ -23,7 +23,7 @@ import utils = require ("../tacoPackageLoader");
 import TacoPackageLoader = utils.TacoPackageLoader;
 
 describe("TacoPackageLoader", function (): void {
-    var testHome = path.join(os.tmpdir(), "taco-utils", "packageLoader");
+    var testHome: string = path.join(os.tmpdir(), "taco-utils", "packageLoader");
     before(function (): void {
         process.env["TACO_HOME"] = testHome;
         rimraf.sync(testHome);
@@ -39,7 +39,7 @@ describe("TacoPackageLoader", function (): void {
 
     it("should load packages from npm", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
-        var packageJsonFile = path.join(testHome, "node_modules", "is-empty", "0.0.1", "node_modules", "is-empty", "package.json");
+        var packageJsonFile: string = path.join(testHome, "node_modules", "is-empty", "0.0.1", "node_modules", "is-empty", "package.json");
         fs.existsSync(packageJsonFile).should.be.false;
         TacoPackageLoader.lazyRequire<any>("is-empty", "is-empty@0.0.1").then(function (pkg: any): void {
             should(typeof pkg).not.equal("undefined");
@@ -53,8 +53,8 @@ describe("TacoPackageLoader", function (): void {
 
     it("should load packages from git", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
-        var gitUrl = "https://github.com/ianstormtaylor/is-empty.git";
-        var packageJsonFile = path.join(testHome, "node_modules", "is-empty", encodeURIComponent(gitUrl), "node_modules", "is-empty", "package.json");
+        var gitUrl: string = "https://github.com/ianstormtaylor/is-empty.git";
+        var packageJsonFile: string = path.join(testHome, "node_modules", "is-empty", encodeURIComponent(gitUrl), "node_modules", "is-empty", "package.json");
         fs.existsSync(packageJsonFile).should.be.false;
         TacoPackageLoader.lazyRequire<any>("is-empty", gitUrl).then(function (pkg: any): void {
             should(typeof pkg).not.equal("undefined");
@@ -141,7 +141,7 @@ describe("TacoPackageLoader", function (): void {
     });
 
     function delay(ms: number): Q.Promise<any> {
-        var deferred = Q.defer();
+        var deferred: Q.Deferred<any> = Q.defer();
         setTimeout(deferred.resolve, ms);
         return deferred.promise;
     };

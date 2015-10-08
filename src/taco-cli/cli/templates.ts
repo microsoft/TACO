@@ -34,7 +34,7 @@ class Templates extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
     public run(data: commands.ICommandData): Q.Promise<any> {
-        var self = this;
+        var self: Templates = this;
 
         return this.getTemplatesToPrint()
             .then(function (templateList: templateManager.ITemplateList): void {

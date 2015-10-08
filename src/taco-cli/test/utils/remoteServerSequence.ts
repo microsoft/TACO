@@ -6,15 +6,14 @@
  *******************************************************
  */
 
-declare module BuildConfig {
-    export interface IBuildConfig {
-        src: string;
-        templates: string;
-        build: string;
-        buildSrc: string;
-        buildPackages: string;
-        buildTools: string;
-        buildTemplates: string;
-        tsCompileOptions: any;
-    }
-}
+interface IRemoteServerSequence {
+    expectedUrl: string;
+    statusCode: number;
+    head: any;
+    response: any;
+    waitForPayload?: boolean;
+    responseDelay?: number;
+    fileToSend?: string;
+};
+
+export = IRemoteServerSequence;

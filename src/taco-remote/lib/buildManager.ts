@@ -61,7 +61,7 @@ class BuildManager {
         utils.UtilHelper.createDirectoryIfNecessary(this.baseBuildDir);
         this.maxBuildsInQueue = conf.maxBuildsInQueue;
         this.deleteBuildsOnShutdown = conf.deleteBuildsOnShutdown;
-        var allowsEmulate = conf.allowsEmulate;
+        var allowsEmulate: boolean = conf.allowsEmulate;
 
         try {
             this.requestRedirector = require(conf.get("redirector"));
@@ -100,7 +100,7 @@ class BuildManager {
         this.buildMetrics.submitted++;
 
         if (this.queuedBuilds.length === this.maxBuildsInQueue) {
-            var message = resources.getString("BuildQueueFull", this.maxBuildsInQueue);
+            var message: string = resources.getString("BuildQueueFull", this.maxBuildsInQueue);
             var error: any = new Error(message);
             error.code = 503;
             throw error;
@@ -114,7 +114,7 @@ class BuildManager {
         var buildPlatform: string = req.query.platform || "ios";
         var logLevel: string = req.query.logLevel || null;
 
-        var self = this;
+        var self: BuildManager = this;
         return this.requestRedirector.getPackageToServeRequest(req).then(function (pkg: TacoRemoteLib.IRemoteLib): Q.Promise<BuildInfo> {
             pkg.init(self.serverConf);
             var errors: string[] = [];
@@ -129,7 +129,7 @@ class BuildManager {
                 buildNumber = ++self.nextBuildNumber;
             }
 
-            var buildDir = path.join(self.baseBuildDir, "" + buildNumber);
+            var buildDir: string = path.join(self.baseBuildDir, "" + buildNumber);
             if (!fs.existsSync(buildDir)) {
                 fs.mkdirSync(buildDir);
             }
@@ -137,7 +137,7 @@ class BuildManager {
             Logger.log(resources.getString("BuildManagerDirInit", buildDir));
 
             // Pass the build query to the buildInfo, for package-specific config options
-            var params = req.query;
+            var params: any = req.query;
             params.status = BuildInfo.UPLOADING;
             params.buildCommand = buildCommand;
             params.buildPlatform = buildPlatform;
@@ -147,14 +147,14 @@ class BuildManager {
             params.buildNumber = buildNumber;
             params.options = options;
             params.logLevel = logLevel;
-            var buildInfo = new BuildInfo(params);
+            var buildInfo: BuildInfo = new BuildInfo(params);
             // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
             Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
             buildInfo["pkg"] = pkg;
 
             self.builds[buildNumber] = buildInfo;
 
-            var deferred = Q.defer<BuildInfo>();
+            var deferred: Q.Deferred<BuildInfo> = Q.defer<BuildInfo>();
             self.saveUploadedTgzFile(buildInfo, req, function (err: any, result: any): void {
                 if (err) {
                     deferred.reject(err);
@@ -172,19 +172,19 @@ class BuildManager {
     }
 
     public downloadBuildLog(id: number, offset: number, res: express.Response): void {
-        var buildInfo = this.builds[id];
+        var buildInfo: BuildInfo = this.builds[id];
         if (!buildInfo) {
             res.end();
             return;
         }
 
-        var buildLog = path.join(buildInfo.buildDir, "build.log");
+        var buildLog: string = path.join(buildInfo.buildDir, "build.log");
         if (!fs.existsSync(buildLog)) {
             res.end();
             return;
         }
 
-        var logStream = fs.createReadStream(buildLog, { start: offset });
+        var logStream: fs.ReadStream = fs.createReadStream(buildLog, { start: offset });
         logStream.on("error", function (err: any): void {
             Logger.log(resources.getString("LogFileReadError"));
             Logger.log(err);
@@ -204,7 +204,7 @@ class BuildManager {
 
     // Downloads the requested build.
     public downloadBuild(buildInfo: BuildInfo, req: express.Request, res: express.Response): void {
-        var self = this;
+        var self: BuildManager = this;
         if (!buildInfo["pkg"]) {
             res.status(404).send(resources.getStringForLanguage(req, "MalformedBuildInfo"));
             return;
@@ -264,10 +264,10 @@ class BuildManager {
     }
 
     private saveUploadedTgzFile(buildInfo: BuildInfo, req: express.Request, callback: Function): void {
-        var self = this;
+        var self: BuildManager = this;
         Logger.log(resources.getString("UploadSaving", buildInfo.buildDir));
         buildInfo.tgzFilePath = path.join(buildInfo.buildDir, "upload_" + buildInfo.buildNumber + ".tgz");
-        var tgzFile = fs.createWriteStream(buildInfo.tgzFilePath);
+        var tgzFile: fs.WriteStream = fs.createWriteStream(buildInfo.tgzFilePath);
         req.pipe(tgzFile);
         tgzFile.on("finish", function (): void {
             buildInfo.updateStatus(BuildInfo.UPLOADED);
@@ -283,8 +283,8 @@ class BuildManager {
     }
 
     private beginBuild(req: express.Request, buildInfo: BuildInfo): void {
-        var self = this;
-        var extractToDir = path.join(buildInfo.buildDir, "cordovaApp");
+        var self: BuildManager = this;
+        var extractToDir: string = path.join(buildInfo.buildDir, "cordovaApp");
         buildInfo.buildSuccessful = false;
         buildInfo.appDir = extractToDir;
         try {
@@ -305,7 +305,7 @@ class BuildManager {
             return;
         }
 
-        var onError = function (err: Error): void {
+        var onError: (err: Error) => void = function (err: Error): void {
             buildInfo.updateStatus(BuildInfo.ERROR, resources.getStringForLanguage(req, "TgzExtractError", buildInfo.tgzFilePath, err.message));
             Logger.log(resources.getString("TgzExtractError", buildInfo.tgzFilePath, err.message));
             self.buildMetrics.failed++;
@@ -315,40 +315,40 @@ class BuildManager {
         // extracting to unix, causing the extract to fail because the directory cannot be navigated. 
         // Also, the tar module does not handle an 'error' event from it's underlying stream, so we have no way of catching errors like an unwritable
         // directory in the tar gracefully- they cause an uncaughtException and server shutdown. For safety sake we force 'rwx' for all on everything.
-        var tarFilter = function (who: Fstream.Writer): boolean {
+        var tarFilter: (who: Fstream.Writer) => boolean = function (who: Fstream.Writer): boolean {
             who.props.mode = 511; // "chmod 777"
 
             // Do not include the /plugins folder
-            var localPath = path.relative(extractToDir, who.props.path);
+            var localPath: string = path.relative(extractToDir, who.props.path);
             return !(localPath.split(path.sep)[0] === "plugins");
         };
 
-        var pluginsOnlyFilter = function (who: Fstream.Writer): boolean {
+        var pluginsOnlyFilter: (who: Fstream.Writer) => boolean = function (who: Fstream.Writer): boolean {
             who.props.mode = 511; // "chmod 0777"
 
             // Here we want to exclusively extract the contents of the /plugins folder, and we will put it in a separate location
             // Later in taco-remote-lib we will manually merge the plugins into the project to ensure they are added correctly.
-            var localPath = path.relative(extractToDir, who.props.path);
+            var localPath: string = path.relative(extractToDir, who.props.path);
             return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || localPath.split(path.sep)[0] === "plugins";
         };
 
-        var extractDeferred = Q.defer();
-        var extractPluginDeferred = Q.defer();
+        var extractDeferred: Q.Deferred<any> = Q.defer();
+        var extractPluginDeferred: Q.Deferred<any> = Q.defer();
         // strip: 1 means take the top level directory name off when extracting (we want buildInfo.appDir to be the top level dir.)
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var tarExtractor = tar.Extract(<tar.ExtractOptions> { path: extractToDir, strip: 1, filter: tarFilter });
+        var tarExtractor: tar.ExtractStream = tar.Extract(<tar.ExtractOptions> { path: extractToDir, strip: 1, filter: tarFilter });
         tarExtractor.on("end", function (): void {
             self.removeDeletedFiles(buildInfo);
             extractDeferred.resolve({});
         });
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var pluginExtractor = tar.Extract(<tar.ExtractOptions> { path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
+        var pluginExtractor: tar.ExtractStream = tar.Extract(<tar.ExtractOptions> { path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
         pluginExtractor.on("end", function (): void {
             extractPluginDeferred.resolve({});
         });
 
-        var unzip = zlib.createGunzip();
-        var tgzStream = fs.createReadStream(buildInfo.tgzFilePath);
+        var unzip: zlib.Gunzip  = zlib.createGunzip();
+        var tgzStream: fs.ReadStream = fs.createReadStream(buildInfo.tgzFilePath);
         tarExtractor.on("error", onError);
         pluginExtractor.on("error", onError);
         unzip.on("error", onError);
@@ -365,7 +365,7 @@ class BuildManager {
     }
 
     private removeDeletedFiles(buildInfo: BuildInfo): void {
-        var changeListFile = path.join(buildInfo.appDir, "changeList.json");
+        var changeListFile: string = path.join(buildInfo.appDir, "changeList.json");
         if (fs.existsSync(changeListFile)) {
             buildInfo.changeList = JSON.parse(fs.readFileSync(changeListFile, { encoding: "utf-8" }));
             if (buildInfo.changeList) {
@@ -386,7 +386,7 @@ class BuildManager {
     // build may change the current working directory to the app dir. To build multiple builds in parallel we will
     // need to fork out child processes. For now, limiting to one build at a time, and queuing up new builds that come in while a current build is in progress.
     private build(buildInfo: BuildInfo): void {
-        var self = this;
+        var self: BuildManager = this;
         if (self.currentBuild) {
             Logger.log(resources.getString("NewBuildQueued", buildInfo.buildNumber));
             self.queuedBuilds.push(buildInfo);
@@ -430,7 +430,7 @@ class BuildManager {
     private dequeueNextBuild(): void {
         Logger.log(resources.getString("BuildMovingOn"));
         this.currentBuild = null;
-        var nextBuild = this.queuedBuilds.shift();
+        var nextBuild: BuildInfo = this.queuedBuilds.shift();
         if (nextBuild) {
             this.build(nextBuild);
         }
