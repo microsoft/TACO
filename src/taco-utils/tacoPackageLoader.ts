@@ -89,7 +89,7 @@ module TacoUtility {
 
     export interface ITacoPackageLoader {
         lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
-        lazyRun(packageName: string, packageId: string, commandName: string): Q.Promise<string>;
+        lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;
     }
 
     export class TacoPackageLoader {
@@ -98,8 +98,8 @@ module TacoUtility {
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
 
-        public static lazyRun(packageName: string, packageId: string, commandName: string): Q.Promise<string> {
-            var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, InstallLogLevel.warn);
+        public static lazyRun(packageName: string, packageId: string, commandName: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<string> {
+            var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel);
 
             return Q({})
                 .then(function (): void {
@@ -117,7 +117,7 @@ module TacoUtility {
                         return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
                     }
 
-                    var commandFilePath = path.join(request.targetPath, packageJson.bin[commandName]);
+                    var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
                     if (os.platform() === "win32") {
                         commandFilePath += ".cmd";
                     }

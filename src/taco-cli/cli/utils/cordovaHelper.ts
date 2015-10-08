@@ -320,12 +320,9 @@ class CordovaHelper {
 
     public static getCordovaExecutable(): Q.Promise<string> {
         return projectHelper.getProjectInfo()
-            .then(function (projectInfo: projectHelper.IProjectInfo): any {
+            .then(function (projectInfo: projectHelper.IProjectInfo): string | Q.Promise<string> {
                 if (projectInfo.cordovaCliVersion) {
-                    return packageLoader.lazyRun(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion, "cordova")
-                        .then(function (cordovaExecutablePath: string) {
-                            return cordovaExecutablePath;
-                        });
+                    return packageLoader.lazyRun(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion, "cordova");
                 } else {
                     return CordovaHelper.globalCordovaCommandName;
                 }

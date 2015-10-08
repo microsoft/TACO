@@ -18,7 +18,7 @@ declare module TacoUtility {
 
     interface ITacoPackageLoader {
         lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
-        lazyRun(packageName: string, packageId: string, commandName: string): Q.Promise<string>;
+        lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;
     }
 
     class TacoPackageLoader {
@@ -36,7 +36,7 @@ declare module TacoUtility {
          * @param {string} commandName The name of the binary to find
          * @returns {Q.Promise<string>} A promise which is either rejected with a failure to find the local the binary or resolved with a path to the binary
          */
-        public static lazyRun(packageName: string, packageId: string, commandName: string): Q.Promise<string>;
+        public static lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,
