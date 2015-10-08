@@ -15,7 +15,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import del = require ("del");
@@ -29,7 +29,9 @@ import rimraf = require ("rimraf");
 
 import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import createMod = require ("../cli/create");
+import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
+import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import resources = require ("../resources/resourceManager");
 import runMod = require ("../cli/run");
 import ServerMock = require ("./utils/serverMock");
@@ -40,21 +42,21 @@ import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
-var create = new createMod();
+var create: createMod = new createMod();
 
 describe("taco run", function (): void {
     this.timeout(20000); // The remote tests sometimes take some time to run
     var testHttpServer: http.Server;
-    var tacoHome = path.join(os.tmpdir(), "taco-cli", "run");
+    var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;
-    var vcordova = "4.0.0";
+    var vcordova: string = "4.0.0";
 
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
-            var args = ["example", "--cordova", vcordova];
+            var args: string[] = ["example", "--cordova", vcordova];
             return create.run({
                 options: {},
                 original: args,
@@ -76,7 +78,7 @@ describe("taco run", function (): void {
         kitHelper.kitPackagePromise = null;
         // Create a mocked out remote server so we can specify how it reacts
         testHttpServer = http.createServer();
-        var port = 3000;
+        var port: number = 3000;
         testHttpServer.listen(port);
         // Configure a dummy platform "test" to use the mocked out remote server in insecure mode
         RemoteMock.saveConfig("test", { host: "localhost", port: 3000, secure: false, mountPoint: "cordova" }).done(function (): void {
@@ -108,8 +110,8 @@ describe("taco run", function (): void {
         del("example", mocha);
     });
 
-    var runRun = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var run = new runMod();
+    var runRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+        var run: runMod = new runMod();
         return run.run({
             options: {},
             original: args,
@@ -118,9 +120,9 @@ describe("taco run", function (): void {
     };
 
     it("should make the correct sequence of calls for 'taco run --remote test --device'", function (mocha: MochaDone): void {
-        var runArguments = ["--remote", "test", "--device", "--nobuild"];
-        var configuration = "debug";
-        var buildNumber = 12343;
+        var runArguments: string[] = ["--remote", "test", "--device", "--nobuild"];
+        var configuration: string = "debug";
+        var buildNumber: number = 12343;
 
         var buildInfo = {
             buildNumber: buildNumber,
@@ -128,12 +130,12 @@ describe("taco run", function (): void {
             buildLang: "en"
         };
 
-        var buildInfoPath = path.resolve(".", "remote", "test", configuration);
+        var buildInfoPath: string = path.resolve(".", "remote", "test", configuration);
         utils.createDirectoryIfNecessary(buildInfoPath);
         fs.writeFileSync(path.join(buildInfoPath, "buildInfo.json"), JSON.stringify(buildInfo));
 
         // Mock out the server on the other side
-        var sequence = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,
                 head: {
@@ -170,7 +172,7 @@ describe("taco run", function (): void {
                 waitForPayload: false
             }
         ];
-        var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(runArguments).then(runRun).finally(function (): void {
@@ -183,10 +185,10 @@ describe("taco run", function (): void {
     });
 
     it("should make the correct sequence of calls for 'taco run --remote test --emulator", function (mocha: MochaDone): void {
-        var target = "iphone 5";
-        var runArguments = ["--remote", "test", "--emulator", "--target", target, "--nobuild"];
-        var configuration = "debug";
-        var buildNumber = 12344;
+        var target: string = "iphone 5";
+        var runArguments: string[] = ["--remote", "test", "--emulator", "--target", target, "--nobuild"];
+        var configuration: string = "debug";
+        var buildNumber: number = 12344;
 
         var buildInfo = {
             buildNumber: buildNumber,
@@ -194,12 +196,12 @@ describe("taco run", function (): void {
             buildLang: "en"
         };
 
-        var buildInfoPath = path.resolve(".", "remote", "test", configuration);
+        var buildInfoPath: string = path.resolve(".", "remote", "test", configuration);
         utils.createDirectoryIfNecessary(buildInfoPath);
         fs.writeFileSync(path.join(buildInfoPath, "buildInfo.json"), JSON.stringify(buildInfo));
 
         // Mock out the server on the other side
-        var sequence = [
+        var sequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/cordova/build/" + buildNumber,
                 head: {
@@ -225,7 +227,7 @@ describe("taco run", function (): void {
             }
         ];
 
-        var serverFunction = ServerMock.generateServerFunction(mocha, sequence);
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, sequence);
         testHttpServer.on("request", serverFunction);
 
         Q(runArguments).then(runRun).finally(function (): void {

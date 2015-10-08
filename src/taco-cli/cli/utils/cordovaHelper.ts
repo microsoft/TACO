@@ -25,7 +25,7 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 class CordovaHelper {
     private static CORDOVA_NPM_PACKAGE_NAME: string = "cordova";
     // Cordova's known parameters
-    private static CORDOVA_BOOLEAN_PARAMETERS =
+    private static CORDOVA_BOOLEAN_PARAMETERS: any =
     {
         verbose: Boolean,
         version: Boolean,
@@ -44,7 +44,7 @@ class CordovaHelper {
         nobuild: Boolean,
         list: Boolean
     };
-    private static CORDOVA_VALUE_PARAMETERS =
+    private static CORDOVA_VALUE_PARAMETERS: any =
     {
         "copy-from": String,
         "link-to": path,
@@ -94,7 +94,7 @@ class CordovaHelper {
         }
 
         // If the user specified custom www assets, adjust the cordovaConfig
-        var customWww = parameters.copyFrom || parameters.linkTo;
+        var customWww: string = parameters.copyFrom || parameters.linkTo;
 
         if (customWww) {
             if (customWww.indexOf("http") === 0) {
@@ -292,8 +292,8 @@ class CordovaHelper {
                     cordova.on("log", console.log);
                 }
 
-                var dom = domain.create();
-                var deferred = Q.defer<T>();
+                var dom: domain.Domain = domain.create();
+                var deferred: Q.Deferred<T> = Q.defer<T>();
 
                 dom.on("error", function (err: any): void {
                     deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandUnhandledException, err));
@@ -332,7 +332,7 @@ class CordovaHelper {
         // calling into platform code should be dealing with this based
         // on the parsed args object.
         var downstreamArgs: string[] = [];
-        var argNames = ["debug", "release", "device", "emulator", "nobuild", "list"];
+        var argNames: string[] = ["debug", "release", "device", "emulator", "nobuild", "list"];
         argNames.forEach(function (flag: string): void {
             if (commandData.options[flag]) {
                 downstreamArgs.push("--" + flag);

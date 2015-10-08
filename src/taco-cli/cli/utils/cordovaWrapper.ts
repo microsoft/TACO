@@ -37,15 +37,15 @@ class CordovaWrapper {
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
-        var deferred = Q.defer<string>();
+        var deferred: Q.Deferred<string> = Q.defer<string>();
         var output: string = "";
         var errorOutput: string = "";
         var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
-        var proc = child_process.spawn(CordovaWrapper.cordovaCommandName, args, options);
+        var proc: child_process.ChildProcess = child_process.spawn(CordovaWrapper.cordovaCommandName, args, options);
 
         proc.on("error", function (err: any): void {
             // ENOENT error thrown if no Cordova.cmd is found
-            var tacoError = (err.code === "ENOENT") ?
+            var tacoError: tacoUtility.TacoError = (err.code === "ENOENT") ?
                 errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
                 errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, err, args.join(" "));
             deferred.reject(tacoError);
@@ -68,7 +68,7 @@ class CordovaWrapper {
                 if (captureOutput && output && args[0] === "requirements" && code === 1 && errorOutput && errorOutput.indexOf("Some of requirements check failed") !== -1) {
                     deferred.resolve(output);
                 } else {
-                    var tacoError = errorOutput ?
+                    var tacoError: tacoUtility.TacoError = errorOutput ?
                         errorHelper.wrap(TacoErrorCodes.CordovaCommandFailedWithError, new Error(errorOutput), args.join(" ")) :
                         errorHelper.get(TacoErrorCodes.CordovaCommandFailed, code, args.join(" "));
                     deferred.reject(tacoError);
@@ -151,7 +151,7 @@ class CordovaWrapper {
         CordovaHelper.prepareCordovaConfig(cordovaParameters);
         return CordovaHelper.wrapCordovaInvocation<any>(cordovaCliVersion, (cordova: Cordova.ICordova) => {
             return cordova.raw.create(cordovaParameters.projectPath, cordovaParameters.appId, cordovaParameters.appName, cordovaParameters.cordovaConfig);
-        }, tacoUtility.InstallLogLevel.taco);
+        }, tacoUtility.InstallLogLevel.error);
     }
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {

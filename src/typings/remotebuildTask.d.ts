@@ -6,15 +6,9 @@
  *******************************************************
  */
 
-declare module BuildConfig {
-    export interface IBuildConfig {
-        src: string;
-        templates: string;
-        build: string;
-        buildSrc: string;
-        buildPackages: string;
-        buildTools: string;
-        buildTemplates: string;
-        tsCompileOptions: any;
-    }
+/// <reference path="./Q.d.ts" />
+/// <reference path="./remotebuild.d.ts" />
+
+interface IRemoteBuildTask {
+    execute(config: RemoteBuild.IRemoteBuildConfiguration, cliArguments?: string[]): Q.Promise<any>;
 }

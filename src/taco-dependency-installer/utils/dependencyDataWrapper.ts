@@ -126,7 +126,7 @@ class DependencyDataWrapper {
      * platform if no platform is specified) or the "default" platform. Returns null if no such version ID exists.
      */
     public getFirstValidVersion(id: string, platform: string = process.platform, architecture: string = os.arch()): string {
-        var self = this;
+        var self: DependencyDataWrapper = this;
         var validVersion: string;
 
         if (this.dependencyExists(id) && !!this.dependencies[id].versions) {

@@ -13,7 +13,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
@@ -26,21 +26,23 @@ import request = require ("request");
 import rimraf = require ("rimraf");
 
 import ConnectionSecurityHelper = require ("../cli/remoteBuild/connectionSecurityHelper");
+import IHttpServerFunction = require ("./utils/httpServerFunction");
 import resources = require ("../resources/resourceManager");
 import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
 import RemoteMod = require ("../cli/remote");
 import RemoteMock = require ("./utils/remoteMock");
+import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import TacoUtility = require ("taco-utils");
 import ms = require ("./utils/memoryStream");
 
 import utils = TacoUtility.UtilHelper;
 
-var remote = new RemoteMod();
+var remote: RemoteMod = new RemoteMod();
 
 describe("taco remote", function(): void {
-    var testHome = path.join(os.tmpdir(), "taco-cli", "setup");
-    var tacoSettingsFile = path.join(testHome, "TacoSettings.json");
+    var testHome: string = path.join(os.tmpdir(), "taco-cli", "setup");
+    var tacoSettingsFile: string = path.join(testHome, "TacoSettings.json");
     before(function(): void {
         utils.createDirectoryIfNecessary(testHome);
         process.env["TACO_HOME"] = testHome;
@@ -73,33 +75,33 @@ describe("taco remote", function(): void {
         remote.canHandleArgs(makeICommandData([])).should.be.true;
     });
 
-    var remoteRun = function(args: string[]): Q.Promise<any> {
+    var remoteRun: (args: string[]) => Q.Promise<any> = function(args: string[]): Q.Promise<any> {
         return remote.run(makeICommandData(args));
     };
 
     it("should save in the expected format", function(mocha: MochaDone): void {
-        var questionsAsked = 0;
-        var sessionClosed = false;
-        var desiredState = {
+        var questionsAsked: number = 0;
+        var sessionClosed: boolean = false;
+        var desiredState: { host: string; port: number; pin: string } = {
             host: "localhost",
             port: 3000,
-            pin: "",
-            mountPoint: "testMountPoint"
+            pin: ""
         };
-        var expectedSequence = [
+        var desiredMountPoint: string = "testMountPoint";
+        var expectedSequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/modules/taco-remote",
                 head: {
                     "Content-Type": "text/plain"
                 },
                 statusCode: 200,
-                response: desiredState.mountPoint
+                response: desiredMountPoint
             }
         ];
-        var mockServer = http.createServer();
-        var serverFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
+        var mockServer: http.Server = http.createServer();
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
 
-        var cliVersion = require("../package.json").version;
+        var cliVersion: string = require("../package.json").version;
         var expectedTelemetryProperties: TacoUtility.ICommandTelemetryProperties = {
             subCommand: { isPii: false, value: "add" },
             platform: { isPii: false, value: "ios" },
@@ -126,7 +128,7 @@ describe("taco remote", function(): void {
                     host: desiredState.host,
                     port: desiredState.port,
                     secure: desiredState.pin !== "",
-                    mountPoint: desiredState.mountPoint
+                    mountPoint: desiredMountPoint
                 });
         }).finally(function(): void {
             mockServer.close();
@@ -154,14 +156,14 @@ describe("taco remote", function(): void {
 
     it("should be able to configure secure connections", function(mocha: MochaDone): void {
         this.timeout(20000);
-        var mockServer = ServerMock.createSecureTestServer();
+        var mockServer: https.Server = ServerMock.createSecureTestServer();
         var desiredState = {
             host: "localhost",
             port: 3000,
             pin: "123456",
             mountPoint: "cordova"
         };
-        var expectedSequence = [
+        var expectedSequence: IRemoteServerSequence[] = [
             {
                 expectedUrl: "/certs/" + desiredState.pin,
                 head: {
@@ -187,7 +189,8 @@ describe("taco remote", function(): void {
                 response: "success"
             }
         ];
-        var serverFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
+
+        var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(mocha, expectedSequence);
         mockServer.listen(desiredState.port);
         mockServer.on("request", serverFunction);
 
@@ -211,7 +214,7 @@ describe("taco remote", function(): void {
                     agent: agent
                 };
 
-                var deferred = Q.defer<any>();
+                var deferred: Q.Deferred<any> = Q.defer<any>();
                 request.get(options, function(err: any, response: any, body: any): void {
                     if (err) {
                         mocha(err);
@@ -229,6 +232,8 @@ describe("taco remote", function(): void {
     });
 
     describe("Onboarding experience", function(): void {
+        // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
+        // stdoutWrite just doesn't work
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
@@ -252,7 +257,7 @@ describe("taco remote", function(): void {
                 pin: "",
                 mountPoint: "testMountPoint"
             };
-            var expectedSequence = [
+            var expectedSequence: IRemoteServerSequence[] = [
                 {
                     expectedUrl: "/modules/taco-remote",
                     head: {
@@ -263,8 +268,8 @@ describe("taco remote", function(): void {
                 }
             ];
 
-            var mockServer = http.createServer();
-            var serverFunction = ServerMock.generateServerFunction(done, expectedSequence);
+            var mockServer: http.Server = http.createServer();
+            var serverFunction: IHttpServerFunction = ServerMock.generateServerFunction(done, expectedSequence);
             mockServer.listen(desiredState.port);
             mockServer.on("request", serverFunction);
 
@@ -272,7 +277,7 @@ describe("taco remote", function(): void {
             remoteRun(["add", "ios"]).finally(function(): void {
                 mockServer.close();
             }).done(() => {
-                var messages = ["CommandRemoteHeader",
+                var messages: string[] = ["CommandRemoteHeader",
                     "CommandRemoteSettingsStored",
                     "OnboardingExperienceTitle",
                     " * HowToUseCommandBuildPlatform",
@@ -282,8 +287,8 @@ describe("taco remote", function(): void {
                     "HowToUseCommandHelp",
                     "HowToUseCommandDocs",
                     ""]; // Get the expected console output
-                var expected = messages.join("\n");
-                var actual = memoryStdout.contentsAsText();
+                var expected: string = messages.join("\n");
+                var actual: string = memoryStdout.contentsAsText();
                 actual.should.be.equal(expected);
                 done();
             }, done);

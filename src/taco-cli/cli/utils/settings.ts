@@ -29,7 +29,7 @@ import utils = tacoUtils.UtilHelper;
  */
 class Settings {
     private static settings: Settings.ISettings = null;
-    private static SETTINGS_FILENAME = "TacoSettings.json";
+    private static SETTINGS_FILENAME: string = "TacoSettings.json";
 
     public static get settingsFile(): string {
         return path.join(utils.tacoHome, Settings.SETTINGS_FILENAME);
@@ -88,7 +88,7 @@ class Settings {
                     throw error;
                 }
             })
-            .then(settings => {
+            .then((settings: Settings.ISettings) => {
                 updateFunction(settings);
                 return this.saveSettings(settings);
             });

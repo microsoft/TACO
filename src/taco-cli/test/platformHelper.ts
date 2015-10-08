@@ -14,7 +14,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import del = require ("del");
@@ -33,10 +33,9 @@ import TacoUtility = require ("taco-utils");
 
 import utils = TacoUtility.UtilHelper;
 
-var create = new createMod();
-
+var create: createMod = new createMod();
 describe("taco PlatformHelper", function (): void {
-    var tacoHome = path.join(os.tmpdir(), "taco-cli", "PlatformHelper");
+    var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "PlatformHelper");
     var originalCwd: string;
 
     before(function (mocha: MochaDone): void {
