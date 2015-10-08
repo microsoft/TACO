@@ -36,7 +36,7 @@ import util = require ("util");
 import wrench = require ("wrench");
 
 import Create = require ("../cli/create");
-import kitHelper = require ("../cli/utils/KitHelper");
+import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
