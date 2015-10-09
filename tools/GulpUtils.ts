@@ -19,14 +19,58 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
-import zlib = require ("zlib")
+import zlib = require("zlib");
 
 class GulpUtils {
     private static TestCommand: string = "test";
 
+    public static runCoverage(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
+        var buildConfig = require("../../src/build_config.json");
+        var coverageResultsPath: string = path.resolve(buildConfig.build, "coverage");
+        var istanbul: any = require("gulp-istanbul");
+        var mocha: any = require("gulp-mocha");
+        var remapIstanbul = require("remap-istanbul/lib/gulpRemapIstanbul");
+        var print = require("gulp-print");
+
+        return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
+
+                var moduleCoverageResultsPath: string = path.resolve(coverageResultsPath, val);
+                var modulePath = path.resolve(modulesRoot, val);
+                var srcglob: string[] = [modulePath + "/**/*.js", "!" + modulePath + "/node_modules/**", "!" + modulePath + "/test/**"];
+                var testglob: string[] = [modulePath + "/test/**/*.js"];
+
+                return GulpUtils.streamToPromise(gulp.src(srcglob)
+                    .pipe(istanbul({ includeUntested: true }))
+                    .pipe(istanbul.hookRequire()))
+                    .then(function(): Q.Promise<any> {
+                        return GulpUtils.streamToPromise(gulp.src(testglob)
+                            .pipe(mocha({ reporter: "spec" }))
+                            .pipe(istanbul.writeReports({
+                                dir: moduleCoverageResultsPath,
+                                reporters: ["json"],
+                                reportOpts: {
+                                    json: { dir: moduleCoverageResultsPath, file: "coverage.json" }
+                                }
+                            })));
+                    });
+            });
+        }, Q({}))
+            .then(function(): Q.Promise<any> {
+                return GulpUtils.streamToPromise(gulp.src([coverageResultsPath + "/**/coverage.json"])
+                    .pipe(print())
+                    .pipe(remapIstanbul({
+                        basePath: "./",
+                        reports: {
+                            "html": coverageResultsPath
+                        }
+                    })));
+            });
+    }
+
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToTest.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
+        return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
 
                 var modulePath = path.resolve(modulesRoot, val);
                 // check if package has any tests
@@ -38,7 +82,7 @@ class GulpUtils {
                 var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
                 var testProcess = child_process.spawn(npmCommand, [GulpUtils.TestCommand], { cwd: modulePath, stdio: "inherit" });
                 var deferred = Q.defer();
-                testProcess.on("close", function (code: number): void {
+                testProcess.on("close", function(code: number): void {
                     if (code) {
                         deferred.reject("Test failed for " + modulePath);
                     } else {
@@ -47,23 +91,23 @@ class GulpUtils {
                 });
                 return deferred.promise;
             });
-        }, Q({}))
+        }, Q({}));
     }
 
     public static installModules(modulesToInstall: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToInstall.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
+        return modulesToInstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
                 return GulpUtils.installModule(path.resolve(modulesRoot, val));
             });
-        }, Q({}))
+        }, Q({}));
     }
 
     public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
-        return modulesToUninstall.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
+        return modulesToUninstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
                 return GulpUtils.uninstallModule(val, installRoot);
             });
-        }, Q({}))
+        }, Q({}));
     }
 
     public static copyFiles(pathsToCopy: string[], destPath: string): Q.Promise<any> {
