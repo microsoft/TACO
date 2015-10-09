@@ -26,7 +26,8 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
-import rimraf = require ("rimraf");
+import rimraf = require("rimraf");
+import tacoUtility = require("taco-utils");
 import util = require ("util");
 import wrench = require ("wrench");
 
@@ -36,12 +37,17 @@ import Create = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
-import ms = require ("./utils/memoryStream");
+import ms = require("./utils/memoryStream");
+import commands = tacoUtility.Commands;
 
 import utils = TacoUtility.UtilHelper;
 
 var platformCommand: Platform = new Platform();
+platformCommand.info = <commands.ICommandInfo>{};
+platformCommand.info.aliases = {"rm": "remove", "ls": "list"};
 var pluginCommand: Plugin = new Plugin();
+pluginCommand.info = <commands.ICommandInfo>{};
+pluginCommand.info.aliases = { "rm": "remove", "ls": "list" };
 var createCommand: Create = new Create();
 
 var testKitId: string = "5.1.1-Kit";
@@ -109,7 +115,7 @@ var kitPlatformOperations: ICommandAndResult[] = [
                         cliVersion: { isPii: false, value: cliVersion },
                         isTacoProject: { isPii: false, value: "true" },
                         projectType: { isPii: false, value: "JavaScript" },
-                        subCommand: { isPii: false, value: "remove" },
+                        subCommand: { isPii: false, value: "rm" },
                         target1: { isPii: false, value: "android" },
                         target2: { isPii: false, value: "ios" }
                 }
@@ -236,7 +242,7 @@ var cliPluginOperations: ICommandAndResult[] = [
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
-                subCommand: { isPii: false, value: "remove" },
+                subCommand: { isPii: false, value: "rm" },
                 target1: { isPii: false, value: "cordova-plugin-camera" },
                 target2: { isPii: false, value: "cordova-plugin-contacts" }
             }
