@@ -25,5 +25,5 @@ class TacoRemoteMultiplexer implements TacoRemoteMultiplexer.ITacoRemoteMultiple
     }
 };
 
-var tacoRemoteMultiplexer = new TacoRemoteMultiplexer();
+var tacoRemoteMultiplexer: TacoRemoteMultiplexer = new TacoRemoteMultiplexer();
 export = tacoRemoteMultiplexer;

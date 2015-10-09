@@ -12,7 +12,6 @@
 
 "use strict";
 
-import admZip = require ("adm-zip");
 import childProcess = require ("child_process");
 import os = require ("os");
 import path = require ("path");
@@ -42,7 +41,7 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected installWin32(): Q.Promise<any> {
-        var self = this;
+        var self: JavaJdkInstaller = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
         // Make sure we have an install location
@@ -94,7 +93,7 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     protected installDarwin(): Q.Promise<any> {
-        var self = this;
+        var self: JavaJdkInstaller = this;
 
         return this.attachDmg()
             .then(function (): Q.Promise<any> {
@@ -106,7 +105,7 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     private attachDmg(): Q.Promise<any> {
-        var self = this;
+        var self: JavaJdkInstaller = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command: string = "hdiutil attach " + this.installerDownloadPath;
 
@@ -131,7 +130,7 @@ class JavaJdkInstaller extends InstallerBase {
     }
 
     private installPkg(): Q.Promise<any> {
-        var self = this;
+        var self: JavaJdkInstaller = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var pkgPath: string = path.join("/", "Volumes", this.darwinMountpointName, this.darwinMountpointName + ".pkg");
         var commandLine: string = "installer -pkg \"" + pkgPath + "\" -target \"/\"";

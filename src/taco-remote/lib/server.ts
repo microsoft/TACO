@@ -36,33 +36,33 @@ import Logger = utils.Logger;
 
 class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
     public create(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<RemoteBuild.IServerModule> {
-        var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
+        var tacoRemoteConf: TacoRemoteConfig = new TacoRemoteConfig(conf, modConfig);
         return HostSpecifics.hostSpecifics.initialize(tacoRemoteConf).then(function (): RemoteBuild.IServerModule {
             return new Server(tacoRemoteConf, modConfig.mountPath);
         });
     }
 
     public test(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration, serverTestCapabilities: RemoteBuild.IServerTestCapabilities, cliArguments: string[]): Q.Promise<any> {
-        var host = util.format("http%s://%s:%d", utils.ArgsHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
-        var downloadDir = path.join(conf.serverDir, "selftest", "taco-remote");
+        var host: string = util.format("http%s://%s:%d", utils.ArgsHelper.argToBool(conf.secure) ? "s" : "", conf.hostname || os.hostname, conf.port);
+        var downloadDir: string = path.join(conf.serverDir, "selftest", "taco-remote");
         utils.UtilHelper.createDirectoryIfNecessary(downloadDir);
         return selftest.test(host, modConfig.mountPath, downloadDir, cliArguments.indexOf("--device") !== -1, serverTestCapabilities.agent);
     }
 
     public printHelp(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): void {
-        var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
-        var resources = new utils.ResourceManager(path.join(__dirname, "..", "resources"), conf.lang);
+        var tacoRemoteConf: TacoRemoteConfig = new TacoRemoteConfig(conf, modConfig);
+        var resources: utils.ResourceManager = new utils.ResourceManager(path.join(__dirname, "..", "resources"), conf.lang);
         var help: Help = new Help();
         help.run({ options: {}, original: ["taco-remote"], remain: ["taco-remote"] }).done();
     }
 
     public getConfig(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): RemoteBuild.IServerModuleConfiguration {
-        var tacoRemoteConf = new TacoRemoteConfig(conf, modConfig);
+        var tacoRemoteConf: TacoRemoteConfig = new TacoRemoteConfig(conf, modConfig);
         return tacoRemoteConf.serialize();
     }
 }
 
-var serverModuleFactory = new ServerModuleFactory();
+var serverModuleFactory: ServerModuleFactory = new ServerModuleFactory();
 export = serverModuleFactory;
 
 class Server implements RemoteBuild.IServerModule {
@@ -81,7 +81,7 @@ class Server implements RemoteBuild.IServerModule {
     }
 
     public getRouter(): express.Router {
-        var router = express.Router();
+        var router: express.Router = express.Router();
         router.post("/build/tasks", this.submitNewBuild.bind(this));
         router.get("/build/tasks/:id", this.getBuildStatus.bind(this));
         router.get("/build/tasks/:id/log", this.getBuildLog.bind(this));
@@ -106,11 +106,11 @@ class Server implements RemoteBuild.IServerModule {
 
     // Submits a new build task
     private submitNewBuild(req: express.Request, res: express.Response): void {
-        var port = this.serverConf.port;
-        var modPath = this.modPath;
-        var self = this;
+        var port: number = this.serverConf.port;
+        var modPath: string = this.modPath;
+        var self: Server = this;
         this.buildManager.submitNewBuild(req).then(function (buildInfo: utils.BuildInfo): void {
-            var contentLocation = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.hostname, port, modPath, buildInfo.buildNumber);
+            var contentLocation: string = util.format("%s://%s:%d/%s/build/tasks/%d", req.protocol, req.hostname, port, modPath, buildInfo.buildNumber);
             res.set({
                 "Content-Type": "application/json",
                 "Content-Location": contentLocation
@@ -128,7 +128,7 @@ class Server implements RemoteBuild.IServerModule {
 
     // Queries on the status of a build task, used by a client to poll
     private getBuildStatus(req: express.Request, res: express.Response): void {
-        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
+        var buildInfo: utils.BuildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             buildInfo.localize(req, this.resources);
             if (!buildInfo.message) {
@@ -144,7 +144,7 @@ class Server implements RemoteBuild.IServerModule {
 
     // Retrieves log file for a build task, can be used by a client when build failed
     private getBuildLog(req: express.Request, res: express.Response): void {
-        var buildInfo = this.buildManager.getBuildInfo(req.params.id);
+        var buildInfo: utils.BuildInfo = this.buildManager.getBuildInfo(req.params.id);
         if (buildInfo) {
             res.set("Content-Type", "text/plain");
             this.buildManager.downloadBuildLog(req.params.id, parseInt(req.query.offset, 10) || 0, res);
@@ -155,14 +155,14 @@ class Server implements RemoteBuild.IServerModule {
 
     // Queries on the status of all build tasks
     private getAllBuildStatus(req: express.Request, res: express.Response): void {
-        var allBuildInfo = this.buildManager.getAllBuildInfo();
+        var allBuildInfo: TacoRemote.IServerInfo = this.buildManager.getAllBuildInfo();
         res.status(200).json(allBuildInfo);
     }
 
     private checkBuildThenAction(func: (buildInfo: utils.BuildInfo, req: express.Request, res: express.Response) => void): (req: express.Request, res: express.Response) => void {
-        var self = this;
+        var self: Server = this;
         return function (req: express.Request, res: express.Response): void {
-            var buildInfo = self.buildManager.getBuildInfo(req.params.id);
+            var buildInfo: utils.BuildInfo = self.buildManager.getBuildInfo(req.params.id);
             if (!buildInfo) {
                 res.status(404).send(self.resources.getStringForLanguage(req, "BuildNotFound", req.params.id));
                 return;

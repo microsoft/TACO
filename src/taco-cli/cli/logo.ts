@@ -11,7 +11,7 @@
 
 /* tslint:disable:no-var-requires */
 // var require needed to require package json
-var version = require("../package.json").version;
+var version: string = require("../package.json").version;
 /* tslint:enable:no-var-requires */
 
 function logoColorFunction(s: string): string {
@@ -29,14 +29,14 @@ console.log(logoColorFunction("  _____________________________"));
 console.log(logoColorFunction("  ___  __/_    |__  ____/_  __ \\"));
 console.log(logoColorFunction("  __  /  _  /| |_  /    _  / / /"));
 console.log(logoColorFunction("  _  /  _  ___ |/ /___  / /_/ /"));
-var lastLine = /*  align   */ "  /_/   /_/  |_|\\____/  \\____/   CLI v" + version;
+var lastLine: string = /*  */ "  /_/   /_/  |_|\\____/  \\____/   CLI v" + version;
 console.log(logoColorFunction(lastLine));
 console.log();
 
-var len = lastLine.length;
-var line = new Array(len + 1).join("-");
-var title = "Tools for Apache Cordova";
-var spaces = Math.floor((len - title.length) / 2);
+var len: number = lastLine.length;
+var line: string = new Array(len + 1).join("-");
+var title: string = "Tools for Apache Cordova";
+var spaces: number = Math.floor((len - title.length) / 2);
 
 console.log(logoColorFunction(line));
 console.log(logoColorFunction(new Array(spaces + 1).join(" ") + title));

@@ -123,7 +123,7 @@ class Taco {
                 } else {
                     logger.logWarning(resources.getString("TacoCommandPassthrough"));
 
-                    var routeToCordovaEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
+                    var routeToCordovaEvent: telemetry.TelemetryEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
                     telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
                     return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
                         routeToCordovaEvent.properties["success"] = "true";

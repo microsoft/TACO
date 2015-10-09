@@ -40,11 +40,12 @@ enum MessageExpectation {
 }
 
 describe("Check for newer version", function (): void {
-    var tacoHome = path.join(os.tmpdir(), "taco-cli", "check-for-new-version");
+    var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "check-for-new-version");
 
     // Use a dummy home location so we don't trash any real configurations
     process.env["TACO_HOME"] = tacoHome;
-
+    // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
+    // stdoutWrite just doesn't work
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
     var memoryStdout: ms.MemoryStream;
 
@@ -54,10 +55,10 @@ describe("Check for newer version", function (): void {
     this.timeout(15000);
     var tacoCliLatestInformation: any;
 
-    var fakeServer = "http://localhost:8080";
-    var repositoryPath = "/taco-cli/latest";
-    var repositoryInFakeServerPath = fakeServer + repositoryPath;
-    var packageFilePath = path.join(utils.tacoHome, "package.json");
+    var fakeServer: string = "http://localhost:8080";
+    var repositoryPath: string = "/taco-cli/latest";
+    var repositoryInFakeServerPath: string = fakeServer + repositoryPath;
+    var packageFilePath: string = path.join(utils.tacoHome, "package.json");
 
     before(() => {
         // Set up mocked out resources
@@ -173,20 +174,20 @@ describe("Check for newer version", function (): void {
     });
 
     function simulateBeforeExit(): void {
-        var listeners = process.listeners("beforeExit");
+        var listeners: Function[] = process.listeners("beforeExit");
         listeners.length.should.eql(1, "There should be only a single listener for the beforeExit event");
         process.removeListener("beforeExit", listeners[0]);
         listeners[0]();
     }
 
     function launchFakeNPMServer(done: MochaDone): Q.Promise<http.Server> {
-        var serverIsListening = Q.defer<http.Server>();
+        var serverIsListening: Q.Deferred<http.Server> = Q.defer<http.Server>();
 
         // Port for the web server
-        const PORT = 8080;
+        const PORT: number = 8080;
 
         // Create the server
-        var server = http.createServer(ServerMock.generateServerFunction(done, [expectedRequestAndResponse]));
+        var server: http.Server = http.createServer(ServerMock.generateServerFunction(done, [expectedRequestAndResponse]));
         server.listen(PORT);
 
         // If there is any error, we reject the promise
@@ -203,16 +204,16 @@ describe("Check for newer version", function (): void {
     }
 
     function testCheckForNewerVersion(messageExpectation: MessageExpectation, done: MochaDone): void {
-        var timeBeforeTest = Date.now();
+        var timeBeforeTest: number  = Date.now();
         var fakeNPMServer: http.Server;
         launchFakeNPMServer(done)
-            .then(server => fakeNPMServer = server)
+            .then((server: http.Server) => fakeNPMServer = server)
             .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath)
                 .showOnExit()
-                .fail(error => TacoUtility.UtilHelper.emptyMethod(error)))
+                .fail((error: Error) => TacoUtility.UtilHelper.emptyMethod(error)))
             .then(() => {
                 // CheckForNewerVersion doesn't print anything synchronically. It prints it on the beforeExit event
-                var actual = memoryStdout.contentsAsText();
+                var actual: string = memoryStdout.contentsAsText();
                 should(actual).be.empty;
 
                 if (messageExpectation === MessageExpectation.WillBeShown) {
@@ -220,8 +221,8 @@ describe("Check for newer version", function (): void {
                     actual = memoryStdout.contentsAsText();
                     actual.should.be.equal("NewerTacoCLIVersionAvailable\n",
                         "The output of the console should match what we expected");
-                    return Settings.loadSettings().then(settings => {
-                        var lastCheck = new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
+                    return Settings.loadSettings().then((settings: Settings.ISettings) => {
+                        var lastCheck: number = new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
                         lastCheck.should.be.greaterThan(timeBeforeTest,
                             "The last check for newer version timestamp: " + lastCheck + " should be updated after each attempt to check for a newer version and thus be greater than " + timeBeforeTest);
                         done();
@@ -238,10 +239,10 @@ describe("Check for newer version", function (): void {
     }
 
     function setCheckedTimestampToHoursAgo(howManyHoursAgo: number): Q.Promise<number> {
-        var someHoursAgo = new Date();
+        var someHoursAgo: Date = new Date();
         someHoursAgo.setHours(someHoursAgo.getHours() - howManyHoursAgo);
-        var lastCheckForNewerVersionTimestamp = someHoursAgo.getTime();
-        return Settings.updateSettings(settings => settings.lastCheckForNewerVersionTimestamp = lastCheckForNewerVersionTimestamp).then(() => lastCheckForNewerVersionTimestamp);
+        var lastCheckForNewerVersionTimestamp: number = someHoursAgo.getTime();
+        return Settings.updateSettings((settings: Settings.ISettings) => settings.lastCheckForNewerVersionTimestamp = lastCheckForNewerVersionTimestamp).then(() => lastCheckForNewerVersionTimestamp);
     }
 
     function setLatestReleasedVersion(version: string): void {
@@ -249,25 +250,25 @@ describe("Check for newer version", function (): void {
         expectedRequestAndResponse.response = JSON.stringify(tacoCliLatestInformation);
     }
 
-    it("shows message when there is an update available and it's the first time we've ever checked", done => {
+    it("shows message when there is an update available and it's the first time we've ever checked", (done: MochaDone) => {
         this.timeout(10000);
 
         testCheckForNewerVersion(MessageExpectation.WillBeShown, done);
     });
 
-    it("doesn't run the check if we've checked 3 hours ago", done => {
+    it("doesn't run the check if we've checked 3 hours ago", (done: MochaDone) => {
         this.timeout(10000);
 
         var lastCheckForNewerVersionTimestamp: number;
         setCheckedTimestampToHoursAgo(3)
-            .then(storedNumber => lastCheckForNewerVersionTimestamp = storedNumber)
+            .then((storedNumber: number) => lastCheckForNewerVersionTimestamp = storedNumber)
             .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath).showOnExit().fail(utils.emptyMethod))
             .done(() => {
-                var listeners = process.listeners("beforeExit");
+                var listeners: Function[] = process.listeners("beforeExit");
                 listeners.length.should.eql(0, "There should be no listeners for the beforeExit event");
                 var actual: string = memoryStdout.contentsAsText();
                 should(actual).be.empty;
-                return Settings.loadSettings().then(settings => {
+                return Settings.loadSettings().then((settings: Settings.ISettings) => {
                     settings.lastCheckForNewerVersionTimestamp.should.be.equal(lastCheckForNewerVersionTimestamp,
                         "The last checked time shouldn't had changed expected: " + lastCheckForNewerVersionTimestamp + "  actual: " + settings.lastCheckForNewerVersionTimestamp.should);
                     done();
@@ -275,35 +276,35 @@ describe("Check for newer version", function (): void {
             });
     });
 
-    it("does run the check if we've checked 5 hours ago", done => {
+    it("does run the check if we've checked 5 hours ago", (done: MochaDone) => {
         this.timeout(10000);
 
         setCheckedTimestampToHoursAgo(5)
             .done(() => testCheckForNewerVersion(MessageExpectation.WillBeShown, done));
     });
 
-    it("doesn't show a message when there is not an update available", done => {
+    it("doesn't show a message when there is not an update available", (done: MochaDone) => {
         this.timeout(10000);
         setLatestReleasedVersion("1.0.0");
 
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
-    it("doesn't show any errors if the http request times out", done => {
+    it("doesn't show any errors if the http request times out", (done: MochaDone) => {
         this.timeout(15000);
 
         expectedRequestAndResponse.responseDelay = 10 * 1000; // 10 seconds
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
-    it("doesn't show any errors if the http request fails with 4xx", done => {
+    it("doesn't show any errors if the http request fails with 4xx", (done: MochaDone) => {
         this.timeout(10000);
 
         expectedRequestAndResponse.statusCode = 401;
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
-    it("doesn't show any errors if the http request fails", done => {
+    it("doesn't show any errors if the http request fails", (done: MochaDone) => {
         this.timeout(10000);
 
         expectedRequestAndResponse.statusCode = 500;
@@ -311,7 +312,7 @@ describe("Check for newer version", function (): void {
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
     });
 
-    it("works if the settings file is empty", done => {
+    it("works if the settings file is empty", (done: MochaDone) => {
         this.timeout(10000);
 
         // Create an empty settings file

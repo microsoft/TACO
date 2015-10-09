@@ -77,7 +77,7 @@ module TacoUtility {
                     return locale;
                 }
 
-                var parentLocale = locale.split("-")[0];
+                var parentLocale: string = locale.split("-")[0];
                 if (availableLocales.indexOf(parentLocale) !== -1) {
                     // Match on primary language (e.g. it from it-CH). We may find a better match later, so continue looking.
                     bestLocale = parentLocale;
@@ -92,8 +92,8 @@ module TacoUtility {
         }
 
         public getString(id: string, ...optionalArgs: any[]): string {
-            var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            var result = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
+            var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            var result: string = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
 
             if (result && process.env["TACO_UNIT_TEST"]) {
                 // Mock out resources for consistency in unit tests, but only if they exist
@@ -104,8 +104,8 @@ module TacoUtility {
         }
 
         public getStringForLanguage(requestOrAcceptLangs: any, id: string, ...optionalArgs: any[]): string {
-            var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
-            var result = this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
+            var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var result: string = this.getStringForLocale(this.bestLanguageMatch(requestOrAcceptLangs), id, args);
 
             if (result && process.env["TACO_UNIT_TEST"]) {
                 // Mock out resources for consistency in unit tests, but only if they exist
@@ -119,7 +119,7 @@ module TacoUtility {
             var resourceSet: ResourceSet = this.getOrCreateResourceSet(locale);
             assert.notEqual(resourceSet, null, "We should get a non-null resource set");
 
-            var args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
+            var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 2);
             return resourceSet.getString(id, args);
         }
 
@@ -160,7 +160,7 @@ module TacoUtility {
         private getAvailableLocales(): string[] {
             if (!this.availableLocales) {
                 this.availableLocales = [];
-                var self = this;
+                var self: ResourceManager = this;
                 fs.readdirSync(this.resourceDirectory).forEach(function (filename: string): void {
                     try {
                         if (fs.existsSync(ResourceManager.getResourceFilePath(self.resourceDirectory, filename))) {

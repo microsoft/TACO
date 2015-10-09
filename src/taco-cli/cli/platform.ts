@@ -44,9 +44,9 @@ class Platform extends commandBase.PlatformPluginCommandBase {
     public checkForKitOverrides(projectInfo: projectHelper.IProjectInfo): Q.Promise<any> {
         var targets: string[] = [];
         var platformInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
-        var self = this;
+        var self: Platform = this;
 
-        var subCommand = this.cordovaCommandParams.subCommand;
+        var subCommand: string = this.cordovaCommandParams.subCommand;
         if (subCommand !== "add") {
             return Q({});
         }
@@ -68,7 +68,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                                 platformInfoToPersist.push(platformInfo);
                             }
 
-                            var target = platformInfo.spec.length > 0 ? platformName + "@" + platformInfo.spec : platformName;
+                            var target: string = platformInfo.spec.length > 0 ? platformName + "@" + platformInfo.spec : platformName;
                             targets.push(target);
                         });
                     } else {
@@ -90,7 +90,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
      * Checks if the platform has a version specification in config.xml of the cordova project
      */
     public configXmlHasVersionOverride(platformName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
-        var deferred = Q.defer<boolean>();
+        var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
         cordovaHelper.getEngineVersionSpec(platformName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion).then(function (versionSpec: string): void {
             deferred.resolve(versionSpec !== "");
         });
@@ -168,11 +168,11 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                     "HowToUseCommandSetupRemote",
                     "HowToUseCommandBuildPlatform",
                     "HowToUseCommandEmulatePlatform",
-                    "HowToUseCommandRunPlatform"].map(msg => resources.getString(msg)));
+                    "HowToUseCommandRunPlatform"].map((msg: string) => resources.getString(msg)));
 
                 ["",
                     "HowToUseCommandHelp",
-                    "HowToUseCommandDocs"].forEach(msg => logger.log(resources.getString(msg)));
+                    "HowToUseCommandDocs"].forEach((msg: string) => logger.log(resources.getString(msg)));
             }
            break;
 

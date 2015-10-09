@@ -61,9 +61,9 @@ class IOSEmulateHelper {
     }
 
     private static cordovaEmulate(emulateRequest: { appDir: string; appName: string; target: string }): Q.Promise<{}> {
-        var deferred = Q.defer();
-        var emulatorAppPath = utils.quotesAroundIfNecessary(path.join(emulateRequest.appDir, "platforms", "ios", "build", "emulator", emulateRequest.appName + ".app"));
-        var emulatorProcess = utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        var deferred: Q.Deferred<any> = Q.defer();
+        var emulatorAppPath: string = utils.quotesAroundIfNecessary(path.join(emulateRequest.appDir, "platforms", "ios", "build", "emulator", emulateRequest.appName + ".app"));
+        var emulatorProcess: child_process.ChildProcess = utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
                 deferred.reject(error);
             } else {
@@ -71,7 +71,7 @@ class IOSEmulateHelper {
             }
         });
         // When run via SSH / without a GUI, ios-sim can hang indefinitely. A cold launch can take on the order of 5 seconds.
-        var emulatorTimeout = setTimeout(function (): void {
+        var emulatorTimeout: NodeJS.Timer = setTimeout(function (): void {
             emulatorProcess.kill();
             deferred.reject({ status: "error", messageId: "EmulateFailedTimeout" });
         }, 10000);
@@ -83,7 +83,7 @@ class IOSEmulateHelper {
 
     private static iosSimTarget(emulateRequestTarget: string): string {
         emulateRequestTarget = emulateRequestTarget.toLowerCase();
-        var iosSimTarget = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget] || "--family iphone --retina";
+        var iosSimTarget: string = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget] || "--family iphone --retina";
         return iosSimTarget;
     }
 }

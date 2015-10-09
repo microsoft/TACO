@@ -82,13 +82,13 @@ module TacoUtility {
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
             public run(data: ICommandData): Q.Promise<any> {
-                var deferred = Q.defer();
+                var deferred: Q.Deferred<any> = Q.defer();
                 this.data = this.parseArgs(data.original);
 
                 // Determine which subcommand we are executing
                 this.executedSubcommand = this.getSubCommand(this.data);
                 if (this.executedSubcommand) {
-                    return this.executedSubcommand.run(this.data).then(telemetryProperties => {
+                    return this.executedSubcommand.run(this.data).then((telemetryProperties: telemetryHelper.ICommandTelemetryProperties) => {
                         telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(this.executedSubcommand.name, /*isPii*/ false);
                         return telemetryProperties;
                     });
@@ -100,8 +100,8 @@ module TacoUtility {
             }
 
             private getSubCommand(options: ICommandData): ICommand {
-                for (var i = 0; i < this.subcommands.length; ++i) {
-                    var subCommand = this.subcommands[i];
+                for (var i: number = 0; i < this.subcommands.length; ++i) {
+                    var subCommand: ICommand = this.subcommands[i];
                     if (subCommand.canHandleArgs(options)) {
                         return subCommand;
                     }
@@ -142,7 +142,7 @@ module TacoUtility {
                 var moduleInfo: ICommandInfo = this.listings[name];
                 if (!moduleInfo) {
                     // Check if {name} is a command alias
-                    var commandForAlias = this.aliases ? this.aliases[name] : null;
+                    var commandForAlias: string = this.aliases ? this.aliases[name] : null;
                     if (commandForAlias) {
                         moduleInfo = this.listings[commandForAlias];
                     } else {
@@ -150,7 +150,7 @@ module TacoUtility {
                     }
                 }
 
-                var modulePath = path.join(commandsModulePath, moduleInfo.modulePath);
+                var modulePath: string = path.join(commandsModulePath, moduleInfo.modulePath);
                 if (!fs.existsSync(modulePath + ".js")) {
                     throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionMissingcommand, name);
                 }

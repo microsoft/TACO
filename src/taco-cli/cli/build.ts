@@ -24,8 +24,9 @@ import rimraf = require ("rimraf");
 import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
 import CordovaWrapper = require ("./utils/cordovaWrapper");
 import errorHelper = require ("./tacoErrorHelper");
+import PlatformHelper = require ("./utils/platformHelper");
 import projectHelper = require ("./utils/projectHelper");
-import RemoteBuildClientHelper = require ("./remoteBuild/remotebuildClientHelper");
+import RemoteBuildClientHelper = require ("./remoteBuild/remoteBuildClientHelper");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
@@ -35,7 +36,6 @@ import tacoUtility = require ("taco-utils");
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import UtilHelper = tacoUtility.UtilHelper;
-
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 /**
@@ -47,7 +47,7 @@ class Build extends commands.TacoCommandBase {
     /*
      * Exposed for testing purposes: when we talk to a mocked server we don't want 5s delays between pings
      */
-    public static remoteBuild = RemoteBuildClientHelper;
+    public static remoteBuild: typeof RemoteBuildClientHelper = RemoteBuildClientHelper;
 
     private static KNOWN_OPTIONS: Nopt.CommandData = {
         local: Boolean,
@@ -69,12 +69,12 @@ class Build extends commands.TacoCommandBase {
         return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Build.KNOWN_OPTIONS, commandData);
     }
 
-    private static cleanPlatform(platform: Settings.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
-        var promise = Q({});
+    private static cleanPlatform(platform: PlatformHelper.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
+        var promise: Q.Promise<any> = Q({});
         switch (platform.location) {
-        case Settings.BuildLocationType.Local:
+        case PlatformHelper.BuildLocationType.Local:
             // To clean locally, try and run the clean script
-            var cleanScriptPath = path.join("platforms", platform.platform, "cordova", "clean");
+            var cleanScriptPath: string = path.join("platforms", platform.platform, "cordova", "clean");
             if (fs.existsSync(cleanScriptPath)) {
                 promise = promise.then(function (): Q.Promise<any> {
                     return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any): void {
@@ -85,18 +85,18 @@ class Build extends commands.TacoCommandBase {
             }
 
             break;
-        case Settings.BuildLocationType.Remote:
+        case PlatformHelper.BuildLocationType.Remote:
             if (!(commandData.options["release"] || commandData.options["debug"])) {
                 // If neither --debug nor --release is specified, then clean both
                 commandData.options["release"] = commandData.options["debug"] = true;
             }
 
-            var remotePlatform = path.resolve(".", "remote", platform.platform);
-            var configurations = ["release", "debug"];
+            var remotePlatform: string = path.resolve(".", "remote", platform.platform);
+            var configurations: string[] = ["release", "debug"];
             promise = configurations.reduce(function (soFar: Q.Promise<any>, configuration: string): Q.Promise<any> {
                 return soFar.then(function (): void {
                     if (commandData.options[configuration]) {
-                        var remotePlatformConfig = path.join(remotePlatform, configuration);
+                        var remotePlatformConfig: string = path.join(remotePlatform, configuration);
                         if (fs.existsSync(remotePlatformConfig)) {
                             logger.log(resources.getString("CleaningRemoteResources", platform.platform, configuration));
                             rimraf.sync(remotePlatformConfig);
@@ -114,16 +114,16 @@ class Build extends commands.TacoCommandBase {
     }
 
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData, telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
-        var configuration = commandData.options["release"] ? "release" : "debug";
-        var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
+        var configuration: string = commandData.options["release"] ? "release" : "debug";
+        var buildTarget: string  = commandData.options["target"] || (commandData.options["device"] ? "device" : commandData.options["emulator"] ? "emulator" : "");
         return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>((settings: Settings.ISettings, cordovaVersion: string) => {
-            var language = settings.language || "en";
-            var remoteConfig = settings.remotePlatforms && settings.remotePlatforms[platform];
+            var language: string = settings.language || "en";
+            var remoteConfig: Settings.IRemoteConnectionInfo = settings.remotePlatforms && settings.remotePlatforms[platform];
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 
-            var buildSettings = new RemoteBuildSettings({
+            var buildSettings: RemoteBuildSettings = new RemoteBuildSettings({
                 projectSourceDir: path.resolve("."),
                 buildServerInfo: remoteConfig,
                 buildCommand: "build",
@@ -143,29 +143,22 @@ class Build extends commands.TacoCommandBase {
         }
 
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
-        return Q.all<any>([Settings.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
-           .spread((platforms: Settings.IPlatformWithLocation[], settings: Settings.ISettings) => {
+        return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
+           .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
             buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-            return Q.all(platforms.map((platform: Settings.IPlatformWithLocation) => {
-                return Q({}).then(() => {
-                    if (commandData.options["clean"]) {
-                        return Build.cleanPlatform(platform, commandData);
-                    } else {
-                        return Q({});
-                    }
-                }).then(() => {
-                    switch (platform.location) {
-                        case Settings.BuildLocationType.Local:
-                            // Just build local, and failures are failures
-                            return CordovaWrapper.build(commandData, platform.platform);
-                        case Settings.BuildLocationType.Remote:
-                            // Just build remote, and failures are failures
-                            return Build.buildRemotePlatform(platform.platform, commandData, telemetryProperties);
-                        default:
-                            return Q.reject(errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform));
-                    }
-                });
-            }));
+            var cleanPromise: Q.Promise<any> = Q({});
+            if (commandData.options["clean"]) {
+                cleanPromise = Q.all(platforms.map((platform: PlatformHelper.IPlatformWithLocation): Q.Promise<any> => {
+                    return Build.cleanPlatform(platform, commandData);
+                }));
+            }
+
+            return cleanPromise.then((): Q.Promise<any> => {
+                return PlatformHelper.operateOnPlatforms(platforms,
+                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.build(commandData, localPlatforms),
+                    (remotePlatform: string): Q.Promise<any> => Build.buildRemotePlatform(remotePlatform, commandData, telemetryProperties)
+                    );
+            });
         }).then(() => Build.generateTelemetryProperties(telemetryProperties, commandData));
     }
 
@@ -190,7 +183,7 @@ class Build extends commands.TacoCommandBase {
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions = tacoUtility.ArgsHelper.parseArguments(Build.KNOWN_OPTIONS, Build.SHORT_HANDS, args, 0);
+        var parsedOptions: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Build.KNOWN_OPTIONS, Build.SHORT_HANDS, args, 0);
 
         // Raise errors for invalid command line parameters
         if (parsedOptions.options["remote"] && parsedOptions.options["local"]) {

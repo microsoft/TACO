@@ -1,5 +1,6 @@
 ﻿/// <reference path="../../typings/remotebuild.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
+/// <reference path="../../typings/node.d.ts" />
 
 import express = require ("express");
 import Q = require ("q");
@@ -18,7 +19,7 @@ module TestServerModuleFactory {
         public static modConfig: RemoteBuild.IServerModuleConfiguration = null;
 
         public getRouter(): Express.Router {
-            var router = express.Router();
+            var router: Express.Router = express.Router();
             router.all("*", function (req: Express.Request, res: Express.Response): void {
                 TestServerModule.lastReq = req;
                 res.sendStatus(200);
