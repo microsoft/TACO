@@ -264,7 +264,7 @@ module TacoUtility {
          */
         private commandExists(command: string): boolean {
             for (var i in this.commandsFactory.listings) {
-                if (i === command || (this.commandsFactory.listings[i].aliases && (i === this.commandsFactory.listings[i].aliases[command]))) {
+                if (i === command || (i === this.commandsFactory.aliases[command])) {
                     return true;
                 }
             }

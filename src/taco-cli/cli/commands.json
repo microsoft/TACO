@@ -52,10 +52,7 @@
             "synopsis": "<synopsis></synopsis>",
             "categoryTitle": "[ProjectCommandsTitle]",
             "modulePath": "./templates",
-            "description": "<helptitle>[CommandTemplatesDescription]</helptitle>",
-            "aliases": {
-                "template": "templates"
-            }
+            "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
         }
         ,
         "kit":
@@ -203,7 +200,6 @@
             }
             ],
             "aliases": {
-                "platforms": "platform",
                 "rm": "remove",
                 "ls": "list"
             }
@@ -261,7 +257,6 @@
             }
             ],
             "aliases": {
-                "plugins": "plugin",
                 "rm": "remove",
                 "ls": "list"
             }

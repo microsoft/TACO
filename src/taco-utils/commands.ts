@@ -99,8 +99,8 @@ module TacoUtility {
                 return deferred.promise;
             }
 
-            public resolveAlias(command: string): string {
-                return (this.info.aliases && this.info.aliases[command]) ? this.info.aliases[command] : command;
+            public resolveAlias(subCommand: string): string {
+                return (this.info.aliases && this.info.aliases[subCommand]) ? this.info.aliases[subCommand] : subCommand;
             }
 
             private getSubCommand(options: ICommandData): ICommand {

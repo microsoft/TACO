@@ -102,7 +102,7 @@ var kitPlatformOperations: ICommandAndResult[] = [
                 }
             },
             {
-                command: "remove android ios",
+                command: "rm android ios",
                 expectedVersions: {},
                 expectedTelemetryProperties: {
                         kit: { isPii: false, value: "5.1.1-Kit" },
@@ -229,7 +229,7 @@ var cliPluginOperations: ICommandAndResult[] = [
             }
         },
         {
-            command: "remove cordova-plugin-camera cordova-plugin-contacts",
+            command: "rm cordova-plugin-camera cordova-plugin-contacts",
             expectedVersions: {},
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },

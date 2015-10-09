@@ -77,7 +77,7 @@ declare module TacoUtility {
              */
             public run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
 
-            public resolveAlias(command: string): string;
+            public resolveAlias(subCommand: string): string;
         }
     }
 }
