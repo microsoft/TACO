@@ -54,8 +54,7 @@
             "modulePath": "./templates",
             "description": "<helptitle>[CommandTemplatesDescription]</helptitle>",
             "aliases": {
-                "template": "templates",
-                "templates":  "templates"
+                "template": "templates"
             }
         }
         ,
@@ -204,11 +203,8 @@
             }
             ],
             "aliases": {
-                "platform": "platform",
                 "platforms": "platform",
-                "remove": "remove",
                 "rm": "remove",
-                "list": "list",
                 "ls": "list"
             }
         }
@@ -266,10 +262,7 @@
             ],
             "aliases": {
                 "plugins": "plugin",
-                "plugin": "plugin",
-                "remove": "remove",
                 "rm": "remove",
-                "list": "list",
                 "ls": "list"
             }
         }
@@ -314,9 +307,7 @@
             }
             ],
             "aliases": {
-                "remove": "remove",
-                "rm": "rm",
-                "list": "list",
+                "rm": "remove",
                 "ls": "ls"
             }
         }
