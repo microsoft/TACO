@@ -52,7 +52,11 @@
             "synopsis": "<synopsis></synopsis>",
             "categoryTitle": "[ProjectCommandsTitle]",
             "modulePath": "./templates",
-            "description": "<helptitle>[CommandTemplatesDescription]</helptitle>"
+            "description": "<helptitle>[CommandTemplatesDescription]</helptitle>",
+            "aliases": {
+                "template": "templates",
+                "templates":  "templates"
+            }
         }
         ,
         "kit":
@@ -199,19 +203,14 @@
                 "name": "branch", "description": "[CommandPlatformOptBranchDescription]"
             }
             ],
-            "aliases": [
-            {
-                "alias": "platforms", "command": "platform"
+            "aliases": {
+                "platform": "platform",
+                "platforms": "platform",
+                "remove": "remove",
+                "rm": "remove",
+                "list": "list",
+                "ls": "list"
             }
-            ,
-            {
-                "alias": "rm", "command": "remove"
-            }
-            ,
-            {
-                "alias": "ls", "command": "list"
-            }
-            ]
         }
         ,
         "plugin":
@@ -265,19 +264,14 @@
                 "name": "search", "description": "[CommandPluginSearchSubcommandDescription]"
             }
             ],
-            "aliases": [
-            {
-                "alias": "plugins", "command": "plugin"
+            "aliases": {
+                "plugins": "plugin",
+                "plugin": "plugin",
+                "remove": "remove",
+                "rm": "remove",
+                "list": "list",
+                "ls": "list"
             }
-            ,
-            {
-                "alias": "rm", "command": "remove"
-            }
-            ,
-            {
-                "alias": "ls", "command": "list"
-            }
-            ]
         }
         ,
         "install-reqs":
@@ -319,15 +313,12 @@
                 "description": "[CommandRemoteListSubcommandDescription]"
             }
             ],
-            "aliases": [
-            {
-                "alias": "rm", "command": "remove"
+            "aliases": {
+                "remove": "remove",
+                "rm": "rm",
+                "list": "list",
+                "ls": "ls"
             }
-            ,
-            {
-                "alias": "ls", "command": "list"
-            }
-            ]
         }
         ,
         "build":
@@ -501,6 +492,7 @@
     "aliases":
     {
         "platforms": "platform",
-        "plugins": "plugin"
+        "plugins": "plugin",
+        "template":  "templates"
     }
 }
