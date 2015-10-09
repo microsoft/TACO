@@ -308,7 +308,7 @@
             ],
             "aliases": {
                 "rm": "remove",
-                "ls": "ls"
+                "ls": "list"
             }
         }
         ,
