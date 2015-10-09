@@ -109,24 +109,17 @@ module TacoUtility {
                     var packageJsonFilePath = path.join(request.targetPath, "package.json");
                     var packageJson = JSON.parse(<any> fs.readFileSync(packageJsonFilePath));
 
-                    if (!packageJson.bin) {
-                        return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntExportBinary, packageName));
+                    if (packageJson.bin && packageJson.bin[commandName]) {
+                        var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
+                        if (os.platform() === "win32") {
+                            commandFilePath += ".cmd";
+                        }
+                        if (fs.existsSync(commandFilePath)) {
+                            return Q.resolve(commandFilePath);
+                        }
                     }
 
-                    if (!packageJson.bin[commandName]) {
-                        return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
-                    }
-
-                    var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
-                    if (os.platform() === "win32") {
-                        commandFilePath += ".cmd";
-                    }
-
-                    if (!fs.existsSync(commandFilePath)) {
-                        return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageBadBinaryFilePath, commandFilePath));
-                    }
-
-                    return Q.resolve(commandFilePath);
+                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
                 });
         }
 
