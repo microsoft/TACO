@@ -203,15 +203,19 @@ describe("Check for newer version", function (): void {
         return serverIsListening.promise;
     }
 
-    function testCheckForNewerVersion(messageExpectation: MessageExpectation, done: MochaDone): void {
+    function testCheckForNewerVersion(messageExpectation: MessageExpectation, done: MochaDone): Q.Promise<any> {
         var timeBeforeTest: number  = Date.now();
         var fakeNPMServer: http.Server;
-        launchFakeNPMServer(done)
-            .then((server: http.Server) => fakeNPMServer = server)
-            .then(() => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath)
+        return launchFakeNPMServer(done)
+            .then((server: http.Server): void => {
+                fakeNPMServer = server;
+                should(fakeNPMServer).have.property("close");
+            })
+            .then((): Q.Promise<any> => new CheckForNewerVersion(repositoryInFakeServerPath, packageFilePath)
                 .showOnExit()
+                // Ignoring errors from showOnExit since they are deliberately injected
                 .fail((error: Error) => TacoUtility.UtilHelper.emptyMethod(error)))
-            .then(() => {
+            .then((): Q.Promise<any> => {
                 // CheckForNewerVersion doesn't print anything synchronically. It prints it on the beforeExit event
                 var actual: string = memoryStdout.contentsAsText();
                 should(actual).be.empty;
@@ -225,17 +229,14 @@ describe("Check for newer version", function (): void {
                         var lastCheck: number = new Date(settings.lastCheckForNewerVersionTimestamp).getTime();
                         lastCheck.should.be.greaterThan(timeBeforeTest,
                             "The last check for newer version timestamp: " + lastCheck + " should be updated after each attempt to check for a newer version and thus be greater than " + timeBeforeTest);
-                        done();
                     });
                 } else {
                     process.listeners("beforeExit").should.be.empty; // We shouldn't have any listeners if no message is expected
-                    done();
                 }
             })
-            .finally(() => {
+            .finally((): void => {
                 fakeNPMServer.close();
-            })
-            .done();
+            });
     }
 
     function setCheckedTimestampToHoursAgo(howManyHoursAgo: number): Q.Promise<number> {
@@ -253,7 +254,7 @@ describe("Check for newer version", function (): void {
     it("shows message when there is an update available and it's the first time we've ever checked", (done: MochaDone) => {
         this.timeout(10000);
 
-        testCheckForNewerVersion(MessageExpectation.WillBeShown, done);
+        testCheckForNewerVersion(MessageExpectation.WillBeShown, done).done(() => done(), done);
     });
 
     it("doesn't run the check if we've checked 3 hours ago", (done: MochaDone) => {
@@ -280,28 +281,29 @@ describe("Check for newer version", function (): void {
         this.timeout(10000);
 
         setCheckedTimestampToHoursAgo(5)
-            .done(() => testCheckForNewerVersion(MessageExpectation.WillBeShown, done));
+            .then(() => testCheckForNewerVersion(MessageExpectation.WillBeShown, done))
+            .done(() => done(), done);
     });
 
     it("doesn't show a message when there is not an update available", (done: MochaDone) => {
         this.timeout(10000);
         setLatestReleasedVersion("1.0.0");
 
-        testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
+        testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("doesn't show any errors if the http request times out", (done: MochaDone) => {
         this.timeout(15000);
 
         expectedRequestAndResponse.responseDelay = 10 * 1000; // 10 seconds
-        testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
+        testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("doesn't show any errors if the http request fails with 4xx", (done: MochaDone) => {
         this.timeout(10000);
 
         expectedRequestAndResponse.statusCode = 401;
-        testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
+        testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("doesn't show any errors if the http request fails", (done: MochaDone) => {
@@ -309,7 +311,7 @@ describe("Check for newer version", function (): void {
 
         expectedRequestAndResponse.statusCode = 500;
         expectedRequestAndResponse.response = "There was a fake internal error"; // The body.version property doesn't exist with this response. It's also not JSON
-        testCheckForNewerVersion(MessageExpectation.WontBeShown, done);
+        testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("works if the settings file is empty", (done: MochaDone) => {
@@ -318,6 +320,6 @@ describe("Check for newer version", function (): void {
         // Create an empty settings file
         Settings.saveSettings({});
 
-        testCheckForNewerVersion(MessageExpectation.WillBeShown, done);
+        testCheckForNewerVersion(MessageExpectation.WillBeShown, done).done(() => done(), done);
     });
 });
