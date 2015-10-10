@@ -263,12 +263,7 @@ module TacoUtility {
          * @param {string} id - command to query
          */
         private commandExists(command: string): boolean {
-            for (var i in this.commandsFactory.listings) {
-                if (i === command || (i === this.commandsFactory.aliases[command])) {
-                    return true;
-                }
-            }
-            return false;
+            return command in this.commandsFactory.listings || command in this.commandsFactory.aliases;
         }
     }
 }
