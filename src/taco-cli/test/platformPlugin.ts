@@ -43,10 +43,10 @@ import commands = tacoUtility.Commands;
 import utils = TacoUtility.UtilHelper;
 
 var platformCommand: Platform = new Platform();
-platformCommand.info = <commands.ICommandInfo>{};
+platformCommand.info = <commands.ICommandInfo> {};
 platformCommand.info.aliases = {"rm": "remove", "ls": "list"};
 var pluginCommand: Plugin = new Plugin();
-pluginCommand.info = <commands.ICommandInfo>{};
+pluginCommand.info = <commands.ICommandInfo> {};
 pluginCommand.info.aliases = { "rm": "remove", "ls": "list" };
 var createCommand: Create = new Create();
 
