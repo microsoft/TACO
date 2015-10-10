@@ -20,7 +20,7 @@ declare module TacoUtility {
             args: INameDescription[];
             options: INameDescription[];
             syntax: INameDescription[];
-            aliases: ICommandAlias[];
+            aliases: ICommandAlias;
         }
         interface ICommandData {
             options: {
@@ -76,6 +76,8 @@ declare module TacoUtility {
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
             public run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+
+            public resolveAlias(subCommand: string): string;
         }
     }
 }

@@ -114,6 +114,10 @@ module TacoUtility {
          * @param {string} command - TACO command being inquired
          */
         private printCommandUsage(command: string): void {
+            if (this.commandsFactory.aliases[command]) {
+                command = this.commandsFactory.aliases[command];
+            }
+
             if (!this.commandsFactory.listings || !this.commandsFactory.listings[command]) {
                 Logger.logError(resources.getString("CommandHelpBadcomand", "'" + command + "'"));
                 this.printGeneralUsage();
@@ -230,10 +234,13 @@ module TacoUtility {
             }
         }
 
-        private printAliasTable(commandAliases: ICommandAlias[]): void {
+        private printAliasTable(commandAliases: ICommandAlias): void {
             var leftIndent: string = LoggerHelper.repeat(" ", LoggerHelper.DEFAULT_INDENT);
-            commandAliases.forEach((cmdAliasPair: ICommandAlias) => {
-                Logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdAliasPair.alias, "->", cmdAliasPair.command));
+            Object.keys(commandAliases).forEach((cmdKey: string) => {
+                var value: string = commandAliases[cmdKey];
+                if (value && value !== cmdKey) {
+                    Logger.log(util.format("%s<key>%s</key> %s <key>%s</key>", leftIndent, cmdKey, "->", value));
+                }
             });
         }
 
@@ -256,13 +263,7 @@ module TacoUtility {
          * @param {string} id - command to query
          */
         private commandExists(command: string): boolean {
-            for (var i in this.commandsFactory.listings) {
-                if (i === command) {
-                    return true;
-                }
-            }
-
-            return false;
+            return command in this.commandsFactory.listings || command in this.commandsFactory.aliases;
         }
     }
 }

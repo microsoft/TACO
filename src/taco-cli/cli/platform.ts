@@ -134,14 +134,13 @@ class Platform extends commandBase.PlatformPluginCommandBase {
      * Prints the platform addition/removal operation progress message
      */
     private printInProgressMessage(platforms: string, operation: string): void {
-       switch (operation) {
+       switch (this.resolveAlias(operation)) {
             case "add": {
                logger.log(resources.getString("CommandPlatformStatusAdding", platforms));
             }
            break;
 
-            case "remove":
-            case "rm": {
+            case "remove": {
                 logger.log(resources.getString("CommandPlatformStatusRemoving", platforms));
             }
             break;
@@ -157,7 +156,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
      * Prints the platform addition/removal operation success message
      */
     private printSuccessMessage(platforms: string, operation: string): void {
-        switch (operation) {
+        switch (this.resolveAlias(operation)) {
             case "add": {
                 logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
 
@@ -176,8 +175,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
             }
            break;
 
-            case "remove":
-            case "rm": {
+            case "remove": {
                 logger.log(resources.getString("CommandPlatformStatusRemoved", platforms));
             }
             break;
