@@ -66,6 +66,10 @@ describe("Check for newer version", function (): void {
 
         process.listeners("beforeExit").should.be.empty; // We can't run the tests if we have unexpected beforeExit listeners
     });
+    after(() => {
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
+    });
 
     beforeEach(() => {
         memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console

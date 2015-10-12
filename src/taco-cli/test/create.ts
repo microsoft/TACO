@@ -240,6 +240,8 @@ describe("taco create", function (): void {
         this.timeout(2 * createTimeout); // Cleaning up can take a long time if we have several projects
         kitHelper.kitPackagePromise = null;
         rimraf(runFolder, done);
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     describe("Success scenarios", function (): void { // Downloading packages from the internet can take a while.
