@@ -385,6 +385,8 @@ describe("taco platform for kit", function(): void {
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         rimraf(tacoHome, function(err: Error): void { done(); }); // ignore errors
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     describe("taco platform/plugin operation for a kit project with platform/plugin overrides execute with no errors", function(): void {

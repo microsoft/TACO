@@ -93,6 +93,8 @@ describe("taco run", function (): void {
         kitHelper.kitPackagePromise = null;
         testHttpServer.close();
         rimraf(tacoHome, function (err: Error): void { done(); }); // ignore errors
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     beforeEach(function (mocha: MochaDone): void {

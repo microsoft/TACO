@@ -80,6 +80,8 @@ describe("InstallerRunner", function (): void {
     after(function (done: MochaDone): void {
         // Clean up run folder
         rimraf(runFolder, done);
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     describe("parseInstallConfig()", function (): void {

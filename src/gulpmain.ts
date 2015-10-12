@@ -126,9 +126,7 @@ gulp.task("run-tests", ["install-build", "tslint"], function (): Q.Promise<any> 
 
 /* Task to run tests */
 gulp.task("coverage", [], function(): Q.Promise<any> {
-    var tacoModules2: string[] = ["taco-utils", "taco-kits"];
-    // , "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
-    return gulpUtils.runCoverage(tacoModules2, buildConfig.buildPackages);
+    return gulpUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage);
 });
 
 /* Task to archive template folders */

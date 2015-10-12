@@ -44,14 +44,13 @@ describe("templates", function (): void {
         return templates.run(data);
     }
 
-    var previous: boolean;
     before(() => {
-        previous = process.env["TACO_UNIT_TEST"];
         process.env["TACO_UNIT_TEST"] = true;
     });
 
     after(() => {
-        process.env["TACO_UNIT_TEST"] = previous;
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     it("'taco templates' should not throw any error", function (done: MochaDone): void {

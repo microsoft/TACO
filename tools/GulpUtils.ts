@@ -24,72 +24,35 @@ import zlib = require("zlib");
 class GulpUtils {
     private static TestCommand: string = "test";
 
-    public static runCoverage(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
-        var buildConfig = require("../../src/build_config.json");
-        var coverageResultsPath: string = path.resolve(buildConfig.build, "coverage");
-        var istanbul: any = require("gulp-istanbul");
-        var mocha: any = require("gulp-mocha");
-        var remapIstanbul = require("remap-istanbul/lib/gulpRemapIstanbul");
-        var print = require("gulp-print");
+    public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageResultsPath: string): Q.Promise<any> {
+
+        coverageResultsPath = path.resolve(coverageResultsPath);
 
         return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function(): Q.Promise<any> {
 
                 var moduleCoverageResultsPath: string = path.resolve(coverageResultsPath, val);
                 var modulePath = path.resolve(modulesRoot, val);
-                var srcglob: string[] = [modulePath + "/**/*.js", "!" + modulePath + "/node_modules/**", "!" + modulePath + "/test/**"];
-                var testglob: string[] = [modulePath + "/test/**/*.js"];
+                return GulpUtils.runModuleCoverage(modulePath, moduleCoverageResultsPath);
 
-                return GulpUtils.streamToPromise(gulp.src(srcglob)
-                    .pipe(istanbul({ includeUntested: true }))
-                    .pipe(istanbul.hookRequire()))
-                    .then(function(): Q.Promise<any> {
-                        return GulpUtils.streamToPromise(gulp.src(testglob)
-                            .pipe(mocha({ reporter: "spec" }))
-                            .pipe(istanbul.writeReports({
-                                dir: moduleCoverageResultsPath,
-                                reporters: ["json"],
-                                reportOpts: {
-                                    json: { dir: moduleCoverageResultsPath, file: "coverage.json" }
-                                }
-                            })));
-                    });
             });
         }, Q({}))
             .then(function(): Q.Promise<any> {
-                return GulpUtils.streamToPromise(gulp.src([coverageResultsPath + "/**/coverage.json"])
-                    .pipe(print())
-                    .pipe(remapIstanbul({
-                        basePath: "./",
-                        reports: {
-                            "html": coverageResultsPath
-                        }
-                    })));
+                var remapIstanbul = require("remap-istanbul/lib/gulpRemapIstanbul");
+                return GulpUtils.streamToPromise(
+                    gulp.src([coverageResultsPath + "/**/coverage.json"])
+                        .pipe(remapIstanbul({ basePath: "./", reports: { "html": coverageResultsPath } })));
             });
     }
 
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
         return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function(): Q.Promise<any> {
-
                 var modulePath = path.resolve(modulesRoot, val);
-                // check if package has any tests
-                var pkg = require(path.join(modulePath, "package.json"));
-                if (!pkg.scripts || !(GulpUtils.TestCommand in pkg.scripts)) {
-                    return Q({});
-                }
+                var mocha: any = require("gulp-mocha");
 
-                var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                var testProcess = child_process.spawn(npmCommand, [GulpUtils.TestCommand], { cwd: modulePath, stdio: "inherit" });
-                var deferred = Q.defer();
-                testProcess.on("close", function(code: number): void {
-                    if (code) {
-                        deferred.reject("Test failed for " + modulePath);
-                    } else {
-                        deferred.resolve({});
-                    }
-                });
-                return deferred.promise;
+                return GulpUtils.streamToPromise(gulp.src(GulpUtils.getTestPathsGlob(modulePath))
+                    .pipe(mocha()));
             });
         }, Q({}));
     }
@@ -252,6 +215,31 @@ class GulpUtils {
         return deferred.promise;
     }
 
+    private static runModuleCoverage(modulePath: string, moduleCoverageResultsPath: string): Q.Promise<any> {
+
+        var istanbul: any = require("gulp-istanbul");
+        var mocha: any = require("gulp-mocha");
+
+        var srcglob: string[] = [modulePath + "/**/*.js", "!" + modulePath + "/node_modules/**", "!" + modulePath + "/test/**"];
+        var coverageVariable = "$$cov_" + new Date().getTime() + "$$";
+
+        return GulpUtils.streamToPromise(gulp.src(srcglob)
+            .pipe(istanbul({ includeUntested: true, coverageVariable: coverageVariable }))
+            .pipe(istanbul.hookRequire()))
+            .then(function(): Q.Promise<any> {
+                return GulpUtils.streamToPromise(gulp.src(GulpUtils.getTestPathsGlob(modulePath))
+                    .pipe(require("gulp-print")())
+                    .pipe(mocha())
+                    .pipe(istanbul.writeReports({
+                        dir: moduleCoverageResultsPath,
+                        reporters: ["json"],
+                        reportOpts: {
+                            json: { dir: moduleCoverageResultsPath, file: "coverage.json" }
+                        }
+                    })));
+            });
+    }
+
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
@@ -289,6 +277,10 @@ class GulpUtils {
             }
             return folder;
         }, start + path.sep);
+    }
+
+    private static getTestPathsGlob(modulePath: string): string[] {
+        return [modulePath + "/test/**/*.js"];
     }
 }
 
