@@ -1,39 +1,41 @@
 {
-    "name": "taco-dependency-installer",
-    "description": "Install platform-specific third-party dependencies for Cordova development",
-    "version": "1.0.0",
-    "author": {
-        "name": "Microsoft Corporation",
-        "email": "vscordovatools-admin@microsoft.com"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Microsoft/TACO"
-    },
-    "bugs": {
-        "url" : "https://github.com/Microsoft/TACO/issues", 
-        "email" : "vscordovatools-admin@microsoft.com"
-    },
-    "homepage": "http://taco.tools",
-    "main": "dependencyInstaller.js",
-    "scripts": {
-        "test": "mocha"
-    },
-    "dependencies": {
-        "adm-zip": "0.4.4",
-        "hash-files": "^1.0.0",
-        "q": "^1.1.2",
-        "request": "2.36.0",
-        "taco-utils": "file:../taco-utils",
-        "toposort": "^0.2.10",
-        "wrench": "^1.5.8"
-    },
-    "devDependencies": {
-        "mocha": "2.0.1",
-        "rimraf": "2.2.6",
-        "should": "4.3.0",
-        "typescript": "~1.6.2",
-        "mockery": "~1.4.0"
-    },
+  "name": "taco-dependency-installer",
+  "description": "Install platform-specific third-party dependencies for Cordova development",
+  "version": "1.0.0",
+  "author": {
+    "name": "Microsoft Corporation",
+    "email": "vscordovatools-admin@microsoft.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/TACO"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/TACO/issues",
+    "email": "vscordovatools-admin@microsoft.com"
+  },
+  "homepage": "http://taco.tools",
+  "main": "dependencyInstaller.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "adm-zip": "0.4.4",
+    "hash-files": "^1.0.0",
+    "q": "^1.1.2",
+    "request": "2.36.0",
+    "taco-utils": "file:../taco-utils",
+    "toposort": "^0.2.10",
+    "wrench": "^1.5.8"
+  },
+  "devDependencies": {
+    "lodash": "~3.10.1",
+    "mocha": "2.0.1",
+    "rimraf": "2.2.6",
+    "should": "4.3.0",
+    "taco-tests-utils": "file:../taco-tests-utils",
+    "typescript": "~1.6.2",
+    "mockery": "~1.4.0"
+  },
     "license": "MIT"
 }

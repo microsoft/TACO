@@ -17,12 +17,12 @@
 
 import _ = require("lodash");
 
-module NodeFakes {
-    interface IEnvironmentVariables {
+export module NodeFakes {
+    export interface IEnvironmentVariables {
         HOME?: string;
     }
 
-    export type ChildProcess = NodeJSChildProcess.ChildProcess;
+    export type IChildProcess = NodeJSChildProcess.ChildProcess;
 
     export type IExecOptions = NodeJSChildProcess.IExecOptions;
 
@@ -60,7 +60,7 @@ module NodeFakes {
 
     export type SpawnOptions = { cwd?: string; stdio?: any; custom?: any; env?: any; detached?: boolean; uid?: Number; gid?: Number; }
 
-    export class FakeProcess {
+    export class Process {
         public env: IEnvironmentVariables;
 
         constructor() {
@@ -73,7 +73,7 @@ module NodeFakes {
 
         /** Methods to configure the fake process **/
         // We simulate that 1 second passes between each call to hrtime 
-        public fakeDeterministicHrtime(): FakeProcess {
+        public fakeDeterministicHrtime(): Process {
             var lastHrTimeSeconds = 0;
 
             this.asProcess().hrtime = (time?: number[]): number[] => {
@@ -89,7 +89,7 @@ module NodeFakes {
         }
 
         // We simulate this is a Mac OS
-        public fakeMacOS(): FakeProcess {
+        public fakeMacOS(): Process {
             var username = "my_username";
             this.asProcess().platform = "darwin";
             this.asProcess().env.HOME = "/Users/" + username;
@@ -97,7 +97,7 @@ module NodeFakes {
         }
 
         // We simulate this is a Windows
-        public fakeWindows(): FakeProcess {
+        public fakeWindows(): Process {
             var username = "my_username";
             this.asProcess().platform = "win32";
             // this.asProcess().env.HOME = "C:\\Users\\" + username;
@@ -105,7 +105,7 @@ module NodeFakes {
         }
     }
 
-    export abstract class FakeEventEmitter implements NodeJS.EventEmitter {
+    export abstract class EventEmitter implements NodeJS.EventEmitter {
         protected abstract notImplementedError(): Error;
 
         // Methods from EventEmitter
@@ -142,7 +142,7 @@ module NodeFakes {
         }
     }
 
-    export class FakeChildProcess extends FakeEventEmitter implements NodeJSChildProcess.ChildProcess {
+    export class ChildProcess extends EventEmitter implements IChildProcess {
         public stdin: NodeJSStream.Writable;
         public stdout: NodeJSStream.Readable;
         public stderr: NodeJSStream.Readable;
@@ -165,12 +165,12 @@ module NodeFakes {
         }
     }
 
-    export class FakeChildProcessModule /* implements typeof NodeJSChildProcess*/ {
+    export class ChildProcessModule /* implements typeof NodeJSChildProcess*/ {
         /** Methods to configure the fake process **/
 
         // We simulate that all calls to exect end with an error
-        public fakeAllExecCallsEndingWithErrors(): FakeChildProcessModule {
-            this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback?: Callback): ChildProcess => {
+        public fakeAllExecCallsEndingWithErrors(): ChildProcessModule {
+            this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback?: Callback): IChildProcess => {
                 var realCallback = <Callback> (callback || optionsOrCallback);
 
                 // We call the callback in an async way
@@ -178,31 +178,31 @@ module NodeFakes {
                     realCallback(new Error("Error while executing " + command), /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
                 }, 0);
 
-                return new FakeChildProcess();
+                return new ChildProcess();
             };
             return this;
         }
 
-        public spawn(command: string, args?: string[], options?: SpawnOptions): ChildProcess {
+        public spawn(command: string, args?: string[], options?: SpawnOptions): IChildProcess {
             /* TODO: We should consider integrating this method with this library https://www.npmjs.com/package/mock-spawn 
                if we need to mock spawn */
             throw this.notImplementedError();
         }
 
-        public exec(command: string, options: IExecOptions, callback: Callback): ChildProcess;
-        public exec(command: string, callback: Callback): ChildProcess;
-        public exec(command: string, optionsOrCallback: IExecOptions | Callback, callback?: Callback): ChildProcess {
+        public exec(command: string, options: IExecOptions, callback: Callback): IChildProcess;
+        public exec(command: string, callback: Callback): IChildProcess;
+        public exec(command: string, optionsOrCallback: IExecOptions | Callback, callback?: Callback): IChildProcess {
             throw this.notImplementedError();
         }
 
-        public execFile(file: string, callback?: Callback): ChildProcess;
-        public execFile(file: string, args?: string[], callback?: Callback): ChildProcess;
-        public execFile(file: string, args?: string[], options?: ExecFileOptions, callback?: Callback): ChildProcess;
-        public execFile(file: string, argsOrCallback?: string[] | Callback, optionsOrCallback?: ExecFileOptions, callback?: Callback): ChildProcess {
+        public execFile(file: string, callback?: Callback): IChildProcess;
+        public execFile(file: string, args?: string[], callback?: Callback): IChildProcess;
+        public execFile(file: string, args?: string[], options?: ExecFileOptions, callback?: Callback): IChildProcess;
+        public execFile(file: string, argsOrCallback?: string[] | Callback, optionsOrCallback?: ExecFileOptions, callback?: Callback): IChildProcess {
             throw this.notImplementedError();
         }
 
-        public fork(modulePath: string, args?: string[], options?: ForkOptions): ChildProcess {
+        public fork(modulePath: string, args?: string[], options?: ForkOptions): IChildProcess {
             throw this.notImplementedError();
         }
 
@@ -211,5 +211,3 @@ module NodeFakes {
         }
     }
 }
-
-export = NodeFakes;

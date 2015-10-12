@@ -30,8 +30,8 @@ import InstallerRunner = require ("../installerRunner");
 
 import IDependency = DependencyInstallerInterfaces.IDependency;
 
-import telemetryTestsHelper = require("../../taco-tests-utils/telemetryTestsHelper");
-import FakeTelemetryGenerator = telemetryTestsHelper.FakeTelemetryGenerator;
+import tacoTestsUtils = require("taco-tests-utils");
+import FakeTelemetryGenerator = tacoTestsUtils.TelemetryFakes.Generator;
 
 describe("InstallerRunner", function (): void {
     // Important paths

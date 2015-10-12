@@ -22,9 +22,12 @@ var shouldModule = require("should");
 import installerProtocol = require("../elevatedInstallerProtocol");
 import ILogger = installerProtocol.ILogger;
 import mockery = require("mockery");
-import nodeFakes = require("../../taco-tests-utils/nodeFakes");
 import Q = require("q");
+import tacoTestsUtils = require("taco-tests-utils");
+import tacoUtils = require("taco-utils");
 import _ = require("lodash");
+
+import nodeFakes = tacoTestsUtils.NodeFakes;
 
 class FakeLogger implements ILogger {
     public log(message: string): void {
@@ -45,6 +48,8 @@ class FakeLogger implements ILogger {
 }
 
 describe("AndroidSdkInstaller telemetry", () => {
+    tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
+
     var originalProcess = process;
 
     before(() => {
@@ -61,21 +66,19 @@ describe("AndroidSdkInstaller telemetry", () => {
 
     describe("updateVariablesDarwin", () => {
         it("generates telemetry if there is an error on the update command", (done: MochaDone) => {
-            // We register our mocks. 1st process mocks, and then taco utils modules that require the process mocks
-            mockery.registerMock("child_process", new nodeFakes.FakeChildProcessModule().fakeAllExecCallsEndingWithErrors());
+            // Register mocks. child_process and taco-utils mocks needs to be register before 
+            // AndroidSdkInstaller is required for the mock to work
+            mockery.registerMock("child_process", new nodeFakes.ChildProcessModule().fakeAllExecCallsEndingWithErrors());
 
-            var tacoUtils = require("taco-utils"); // This needs to be required after mocking process
-            tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
-
-            var telemetryTestsHelper = require("../../taco-tests-utils/telemetryTestsHelper");
-            var fakeTelemetryHelper = new telemetryTestsHelper.FakeTelemetryHelper();
+            var fakeTelemetryHelper = new tacoTestsUtils.TelemetryFakes.Helper();
             var tacoUtilsWithFakeTelemetry = _.extend({}, tacoUtils, { TelemetryHelper: fakeTelemetryHelper, HasFakes: true });
             mockery.registerMock("taco-utils", tacoUtilsWithFakeTelemetry);
 
             // We require the AndroidSdkInstaller file, which will use all the mocked dependencies
             var androidSdkInstallerClass = require("../installers/androidSdkInstaller");
 
-            var fakeProcess = new nodeFakes.FakeProcess().fakeMacOS().fakeDeterministicHrtime().asProcess();
+            // Mocking process messes with node.js, so we do it after requiring all the files
+            var fakeProcess = new nodeFakes.Process().fakeMacOS().fakeDeterministicHrtime().asProcess();
             // TODO: Try to find a nicer way of doing this. Maybe setting process as protoype of FakeProcess?
             process = <any> _.extend({}, process, fakeProcess);
 
