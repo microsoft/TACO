@@ -171,6 +171,8 @@
     "_CommandKitSelectStatusUpdatingPlugins.comment": "Status message on updating plugins",
     "CommandKitSelectStatusSuccess": "<success>Success!</success>",
     "_CommandKitSelectStatusSuccess.comment": "Status message on successfully updating platforms and plugins",
+    "CommandKitListCurrentCordovaCLI": "<bold>Current Cordova CLI</bold>: {0}",
+    "_CommandKitListCurrentCordovaCLI.comment": "Title for the Currently used Cordova version displayed on executing the 'taco kit list' command",
 
     "CommandRemoteDescription": "Configure remote builds (currently supports iOS build only)",
     "_CommandRemoteDescription.comment": "Description for 'taco remote'",

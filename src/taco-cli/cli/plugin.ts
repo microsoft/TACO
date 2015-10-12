@@ -47,11 +47,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         var self: Plugin = this;
         var pluginInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
 
-        var subCommand: string = this.cordovaCommandParams.subCommand;
-
-        if (subCommand === "rm") {
-            subCommand = "remove";
-        }
+        var subCommand: string = this.resolveAlias(this.cordovaCommandParams.subCommand);
 
         if (subCommand !== "add" && subCommand !== "remove") {
             return Q({});
@@ -162,14 +158,13 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
      * Prints the plugin addition/removal operation progress message
      */
     private printInProgressMessage(plugins: string, operation: string): void {
-        switch (operation) {
+        switch (this.resolveAlias(operation)) {
             case "add": {
                 logger.log(resources.getString("CommandPluginStatusAdding", plugins));
             }
             break;
 
-            case "remove":
-            case "rm": {
+            case "remove": {
                 logger.log(resources.getString("CommandPluginStatusRemoving", plugins));
             }
             break;
@@ -185,7 +180,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
      * Prints the plugin addition/removal operation success message
      */
     private printSuccessMessage(plugins: string, operation: string): void {
-        switch (operation) {
+        switch (this.resolveAlias(operation)) {
             case "add": {
                 logger.log(resources.getString("CommandPluginWithIdStatusAdded", plugins));
 
@@ -203,8 +198,7 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
             }
             break;
 
-            case "remove":
-            case "rm": {
+            case "remove": {
                 logger.log(resources.getString("CommandPluginStatusRemoved", plugins));
             }
             break;

@@ -199,19 +199,10 @@
                 "name": "branch", "description": "[CommandPlatformOptBranchDescription]"
             }
             ],
-            "aliases": [
-            {
-                "alias": "platforms", "command": "platform"
+            "aliases": {
+                "rm": "remove",
+                "ls": "list"
             }
-            ,
-            {
-                "alias": "rm", "command": "remove"
-            }
-            ,
-            {
-                "alias": "ls", "command": "list"
-            }
-            ]
         }
         ,
         "plugin":
@@ -265,19 +256,10 @@
                 "name": "search", "description": "[CommandPluginSearchSubcommandDescription]"
             }
             ],
-            "aliases": [
-            {
-                "alias": "plugins", "command": "plugin"
+            "aliases": {
+                "rm": "remove",
+                "ls": "list"
             }
-            ,
-            {
-                "alias": "rm", "command": "remove"
-            }
-            ,
-            {
-                "alias": "ls", "command": "list"
-            }
-            ]
         }
         ,
         "install-reqs":
@@ -319,15 +301,10 @@
                 "description": "[CommandRemoteListSubcommandDescription]"
             }
             ],
-            "aliases": [
-            {
-                "alias": "rm", "command": "remove"
+            "aliases": {
+                "rm": "remove",
+                "ls": "list"
             }
-            ,
-            {
-                "alias": "ls", "command": "list"
-            }
-            ]
         }
         ,
         "build":
@@ -501,6 +478,7 @@
     "aliases":
     {
         "platforms": "platform",
-        "plugins": "plugin"
+        "plugins": "plugin",
+        "template":  "templates"
     }
 }

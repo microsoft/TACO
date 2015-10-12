@@ -34,7 +34,7 @@ module TacoUtility {
             options: INameDescription[];
             examples: ICommandExample[];
             notes: string[];
-            aliases: ICommandAlias[];
+            aliases: ICommandAlias;
         }
 
         export interface ICommandData {
@@ -97,6 +97,10 @@ module TacoUtility {
                 }
 
                 return deferred.promise;
+            }
+
+            public resolveAlias(subCommand: string): string {
+                return (this.info.aliases && this.info.aliases[subCommand]) ? this.info.aliases[subCommand] : subCommand;
             }
 
             private getSubCommand(options: ICommandData): ICommand {
