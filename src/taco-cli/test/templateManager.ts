@@ -18,7 +18,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import archiver = require ("archiver");
@@ -213,12 +213,12 @@ describe("TemplateManager", function (): void {
         ];
 
         function verifyFileContent(filePath: string): void {
-            var lr = new wrench.LineReader(filePath);
-            var lineNumber = 0;
+            var lr: wrench.LineReader = new wrench.LineReader(filePath);
+            var lineNumber: number = 0;
 
             while (lr.hasNextLine()) {
                 var currentLine: string = lr.getNextLine().trim();
-                var correctLine = replacedLines[lineNumber];
+                var correctLine: string = replacedLines[lineNumber];
 
                 if (currentLine !== correctLine) {
                     fs.closeSync(lr.fd);
@@ -233,7 +233,7 @@ describe("TemplateManager", function (): void {
 
         it("should correctly replace all tokens in all files, recursively", function (done: MochaDone): void {
             // Copy template items to a new folder
-            var testProjectPath = path.join(runFolder, "testProject");
+            var testProjectPath: string = path.join(runFolder, "testProject");
 
             wrench.mkdirSyncRecursive(testProjectPath, 511); // 511 decimal is 0777 octal
             utils.copyRecursive(testTemplateNoWwwPath, testProjectPath)
@@ -262,7 +262,7 @@ describe("TemplateManager", function (): void {
             var templates: templateManager = new templateManager(mockKitHelper);
 
             // Build the expected result
-            var expectedResult = {
+            var expectedResult: templateManager.ITemplateList = {
                 kitId: testKitId,
                 templates: [
                     {
@@ -279,6 +279,7 @@ describe("TemplateManager", function (): void {
                     }
                 ]
             };
+
             var expectedResultStringified: string = JSON.stringify(expectedResult);
 
             templates.getTemplatesForKit(testKitId)
@@ -298,7 +299,7 @@ describe("TemplateManager", function (): void {
             var templates: templateManager = new templateManager(mockKitHelper);
 
             // Build the expected result
-            var expectedResult = {
+            var expectedResult: templateManager.ITemplateList = {
                 kitId: "",
                 templates: [
                     {
@@ -315,6 +316,7 @@ describe("TemplateManager", function (): void {
                     }
                 ]
             };
+
             var expectedResultStringified: string = JSON.stringify(expectedResult);
 
             templates.getAllTemplates()

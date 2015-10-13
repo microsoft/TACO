@@ -22,9 +22,9 @@ module TacoUtility {
     export class NewlineNormalizerStream extends Transform {
         public _transform(chunk: any, encoding: string, callback: (err: Error, buf: string) => void): void {
             // Standardize all line endings first
-            var scrubbedInput = chunk.toString().replace(/\r\n/g, "\n");
+            var scrubbedInput: string = chunk.toString().replace(/\r\n/g, "\n");
             // Then convert to the OS dependent newline
-            var output = scrubbedInput.replace(/\n/g, os.EOL);
+            var output: string = scrubbedInput.replace(/\n/g, os.EOL);
 
             callback(null, output);
         }

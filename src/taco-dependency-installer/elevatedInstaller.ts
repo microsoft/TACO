@@ -108,8 +108,8 @@ class ElevatedInstaller {
     public run(): void {
         tacoUtils.Telemetry.init("TACO/dependencyInstaller", require("./package.json").version, this.parentSessionId !== "null");
         tacoUtils.Telemetry.setSessionId(this.parentSessionId);
-        tacoUtils.TelemetryHelper.generate("ElevatedInstaller", telemetry => {
-            var self = this;
+        tacoUtils.TelemetryHelper.generate("ElevatedInstaller", (telemetry: tacoUtils.TelemetryGenerator) => {
+            var self: ElevatedInstaller = this;
 
             telemetry.step("prepareCommunications");
             this.prepareCommunications()
@@ -133,7 +133,7 @@ class ElevatedInstaller {
     }
 
     private prepareCommunications(): Q.Promise<any> {
-        var self = this;
+        var self: ElevatedInstaller = this;
 
         switch (process.platform) {
             case "win32":

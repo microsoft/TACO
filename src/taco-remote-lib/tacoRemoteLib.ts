@@ -27,10 +27,10 @@ import resources = require ("./resources/resourceManager");
 module TacoRemoteLib {
     var language: string;
     var platforms: ITargetPlatform[];
-    var initialized = false;
+    var initialized: boolean = false;
 
-    var supportedBuildConfigurations = ["debug", "release"];
-    var finalStatuses = [BuildInfo.COMPLETE, BuildInfo.ERROR];
+    var supportedBuildConfigurations: string[] = ["debug", "release"];
+    var finalStatuses: string[] = [BuildInfo.COMPLETE, BuildInfo.ERROR];
 
     export var locResources: utils.ResourceManager = resources;
 
@@ -182,14 +182,14 @@ module TacoRemoteLib {
             return;
         }
 
-        var cordovaAppError = validateCordovaApp(buildInfo, buildInfo.appDir);
+        var cordovaAppError: { id: string, args?: any[] } = validateCordovaApp(buildInfo, buildInfo.appDir);
         if (cordovaAppError) {
             buildInfo.updateStatus(BuildInfo.INVALID, cordovaAppError.id, cordovaAppError.args);
             callback(buildInfo);
             return;
         }
 
-        var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
+        var cfg: utils.CordovaConfig = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
         buildInfo["appName"] = cfg.name();
 
         buildInfo.updateStatus(BuildInfo.BUILDING);
@@ -198,7 +198,7 @@ module TacoRemoteLib {
         // have multiple builds in parallel by forking multiple child processes (with some max limit.)
         var buildProcess: child_process.ChildProcess;
         buildProcess = platform.createBuildProcess();
-        var buildLogger = new ProcessLogger();
+        var buildLogger: ProcessLogger = new ProcessLogger();
         buildLogger.begin(buildInfo.buildDir, "build.log", buildInfo.buildLang, buildProcess);
 
         buildProcess.on("message", function (resultBuildInfo: BuildInfo): void {
@@ -226,8 +226,8 @@ module TacoRemoteLib {
         }
 
         try {
-            var cfg = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
-            var appName = cfg.name();
+            var cfg: utils.CordovaConfig = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
+            var appName: string = cfg.name();
             if (!utils.UtilHelper.isValidCordovaAppName(appName)) {
                 return { id: "InvalidCordovaAppUnsupportedAppName", args: [appName, utils.UtilHelper.invalidAppNameCharacters()] };
             }
@@ -243,7 +243,7 @@ module TacoRemoteLib {
     }
 
     function getPlatform(buildInfo: BuildInfo): ITargetPlatform {
-        for (var i = 0; i < platforms.length; ++i) {
+        for (var i: number = 0; i < platforms.length; ++i) {
             var platform: ITargetPlatform = platforms[i];
             if (platform.canServiceRequest(buildInfo)) {
                 return platform;

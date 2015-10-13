@@ -6,8 +6,9 @@
  *******************************************************
  */
 
-/// <reference path="../typings/node.d.ts" />
+/// <reference path="./Q.d.ts" />
+/// <reference path="./remotebuild.d.ts" />
 
-interface ICommandAlias {
-    [alias:string]: string;
+interface IRemoteBuildTask {
+    execute(config: RemoteBuild.IRemoteBuildConfiguration, cliArguments?: string[]): Q.Promise<any>;
 }

@@ -51,7 +51,7 @@ module TacoUtility {
          * TelemetryEvent represents a basic telemetry data point
          */
         export class TelemetryEvent {
-            private static PII_HASH_KEY = "959069c9-9e93-4fa1-bf16-3f8120d7db0c";
+            private static PII_HASH_KEY: string = "959069c9-9e93-4fa1-bf16-3f8120d7db0c";
             public name: string;
             public properties: ITelemetryProperties;
             private eventId: string;
@@ -64,8 +64,8 @@ module TacoUtility {
             }
 
             public setPiiProperty(name: string, value: string): void {
-                var hmac = crypto.createHmac("sha256", new Buffer(TelemetryEvent.PII_HASH_KEY, "utf8"));
-                var hashedValue = hmac.update(value).digest("hex");
+                var hmac: any = crypto.createHmac("sha256", new Buffer(TelemetryEvent.PII_HASH_KEY, "utf8"));
+                var hashedValue: any = hmac.update(value).digest("hex");
 
                 this.properties[name] = hashedValue;
 
@@ -135,7 +135,7 @@ module TacoUtility {
         }
 
         export function sendPendingData(): Q.Promise<string> {
-            var defer = Q.defer<string>();
+            var defer: Q.Deferred<string> = Q.defer<string>();
             appInsights.client.sendPendingData((result: string) => defer.resolve(result));
             return defer.promise;
         }
@@ -157,7 +157,7 @@ module TacoUtility {
             logger.logLine();
             logger.log(utilResources.getString(currentOptIn ? "TelemetryOptInYes" : "TelemetryOptInNo", Telemetry.appName));
 
-            var promptStringId = currentOptIn ? "TelemetryCurrentlyOptedInPrompt" : "TelemetryCurrentlyOptedOutPrompt";
+            var promptStringId: string = currentOptIn ? "TelemetryCurrentlyOptedInPrompt" : "TelemetryCurrentlyOptedOutPrompt";
 
             newOptIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString(promptStringId, Telemetry.appName));
 
@@ -183,8 +183,8 @@ module TacoUtility {
         }
 
         class TelemetryUtils {
-            public static USERTYPE_INTERNAL = "Internal";
-            public static USERTYPE_EXTERNAL = "External";
+            public static USERTYPE_INTERNAL: string = "Internal";
+            public static USERTYPE_EXTERNAL: string = "External";
             public static userType: string;
             public static sessionId: string;
             public static optInCollectedForCurrentSession: boolean;
@@ -192,14 +192,14 @@ module TacoUtility {
             private static userId: string;
             private static machineId: string;
             private static telemetrySettings: ITelemetrySettings = null;
-            private static TELEMETRY_SETTINGS_FILENAME = "TelemetrySettings.json";
-            private static APPINSIGHTS_INSTRUMENTATIONKEY = "10baf391-c2e3-4651-a726-e9b25d8470fd";
-            private static REGISTRY_USERID_KEY = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
-            private static REGISTRY_USERID_VALUE = "UserId";
-            private static REGISTRY_MACHINEID_KEY = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
-            private static REGISTRY_MACHINEID_VALUE = "MachineId";
-            private static INTERNAL_DOMAIN_SUFFIX = "microsoft.com";
-            private static INTERNAL_USER_ENV_VAR = "TACOINTERNAL";
+            private static TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
+            private static APPINSIGHTS_INSTRUMENTATIONKEY: string = "10baf391-c2e3-4651-a726-e9b25d8470fd";
+            private static REGISTRY_USERID_KEY: string = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
+            private static REGISTRY_USERID_VALUE: string = "UserId";
+            private static REGISTRY_MACHINEID_KEY: string = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
+            private static REGISTRY_MACHINEID_VALUE: string = "MachineId";
+            private static INTERNAL_DOMAIN_SUFFIX: string = "microsoft.com";
+            private static INTERNAL_USER_ENV_VAR: string = "TACOINTERNAL";
 
             private static get telemetrySettingsFile(): string {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TELEMETRY_SETTINGS_FILENAME);
@@ -249,18 +249,18 @@ module TacoUtility {
             }
 
             public static generateGuid(): string {
-                var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
+                var hexValues: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"];
                 // c.f. rfc4122 (UUID version 4 = xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx)
-                var oct = "";
+                var oct: string = "";
                 var tmp: number;
                 /* tslint:disable:no-bitwise */
-                for (var a = 0; a < 4; a++) {
+                for (var a: number = 0; a < 4; a++) {
                     tmp = (4294967296 * Math.random()) | 0;
                     oct += hexValues[tmp & 0xF] + hexValues[tmp >> 4 & 0xF] + hexValues[tmp >> 8 & 0xF] + hexValues[tmp >> 12 & 0xF] + hexValues[tmp >> 16 & 0xF] + hexValues[tmp >> 20 & 0xF] + hexValues[tmp >> 24 & 0xF] + hexValues[tmp >> 28 & 0xF];
                 }
 
                 // "Set the two most significant bits (bits 6 and 7) of the clock_seq_hi_and_reserved to zero and one, respectively"
-                var clockSequenceHi = hexValues[8 + (Math.random() * 4) | 0];
+                var clockSequenceHi: string = hexValues[8 + (Math.random() * 4) | 0];
                 return oct.substr(0, 8) + "-" + oct.substr(9, 4) + "-4" + oct.substr(13, 3) + "-" + clockSequenceHi + oct.substr(16, 3) + "-" + oct.substr(19, 12);
                 /* tslint:enable:no-bitwise */
             }
@@ -282,7 +282,7 @@ module TacoUtility {
 
             public static getUserConsentForTelemetry(optinMessage: string = ""): boolean {
                 logger.logLine();
-                var readlineSync = require("readline-sync");
+                var readlineSync: any = require("readline-sync");
                 return !!readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
             }
 
@@ -321,9 +321,9 @@ module TacoUtility {
 
             private static getRegistryValue(key: string, value: string): string {
                 // TODO: Task 1186340:TACO cli telemetry: Update to use winreg package instead of windows-no-runnable
-                var windows = require("windows-no-runnable");
+                var windows: any = require("windows-no-runnable");
                 try {
-                    var regKey = windows.registry(key);
+                    var regKey: {[key: string]: {value: string}} = windows.registry(key);
                     if (regKey && regKey[value] && regKey[value].value) {
                         return regKey[value].value;
                     }
@@ -367,9 +367,9 @@ module TacoUtility {
 
             private static getMacAddress(): string {
                 var macAddress: string = "";
-                var interfaces = os.networkInterfaces();
+                var interfaces: any = os.networkInterfaces();
                 Object.keys(interfaces).some((key: string) => {
-                    var mac = interfaces[key][0]["mac"];
+                    var mac: string = interfaces[key][0]["mac"];
 
                     if (mac && mac !== "00:00:00:00:00:00") {
                         macAddress = mac;

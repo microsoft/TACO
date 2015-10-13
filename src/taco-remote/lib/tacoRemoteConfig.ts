@@ -43,14 +43,14 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
         this.tacoRemoteConf.port = serverConf.port;
         this.tacoRemoteConf.serverDir = serverConf.serverDir;
 
-        var defaults: any = {
+        var defaults: { [key: string]: any } = {
             maxBuildsInQueue: 10,
             maxBuildsToKeep: 20,
             deleteBuildsOnShutdown: true,
             allowsEmulate: true
         };
-        var hostDefaults = HostSpecifics.hostSpecifics.defaults(defaults);
-        var self = this;
+        var hostDefaults: { [key: string]: any } = HostSpecifics.hostSpecifics.defaults(defaults);
+        var self: TacoRemoteConfig = this;
         Object.keys(hostDefaults).forEach(function (key: string): void {
             if (typeof (self.tacoRemoteConf[key]) === "undefined") {
                 self.tacoRemoteConf[key] = hostDefaults[key];

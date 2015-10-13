@@ -6,8 +6,14 @@
  *******************************************************
  */
 
-/// <reference path="../typings/node.d.ts" />
+interface IRemoteServerSequence {
+    expectedUrl: string;
+    statusCode: number;
+    head: any;
+    response: any;
+    waitForPayload?: boolean;
+    responseDelay?: number;
+    fileToSend?: string;
+};
 
-interface ICommandAlias {
-    [alias:string]: string;
-}
+export = IRemoteServerSequence;

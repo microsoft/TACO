@@ -6,8 +6,10 @@
  *******************************************************
  */
 
-/// <reference path="../typings/node.d.ts" />
+/// <reference path="../../../typings/node.d.ts" />
 
-interface ICommandAlias {
-    [alias:string]: string;
-}
+interface IHttpServerFunction {
+    (request: NodeJSHttp.ServerRequest, response: NodeJSHttp.ServerResponse): void;
+};
+
+export = IHttpServerFunction;
