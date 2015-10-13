@@ -102,8 +102,8 @@ module TacoUtility {
             var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel);
 
             return Q({})
-                .then(function (): void {
-                    TacoPackageLoader.installPackageIfNeeded(request);
+                .then(function (): Q.Promise<void> {
+                    return TacoPackageLoader.installPackageIfNeeded(request);
                 })
                 .then(function (): Q.Promise<string> {
                     var packageJsonFilePath = path.join(request.targetPath, "package.json");
