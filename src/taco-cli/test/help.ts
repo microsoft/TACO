@@ -105,6 +105,16 @@ describe("help for a command", function (): void {
             ""], done);
     });
 
+    it("prints the help for templates using the template alias", function (done: MochaDone): void {
+        testHelpForCommand("template", [
+            "",
+            "CommandTemplatesDescription",
+            "",
+            "   taco templates",
+            "",
+            ""], done);
+    });
+
     it("prints the help for remote", function (done: MochaDone): void {
         testHelpForCommand("remote", [
             "",
@@ -148,8 +158,57 @@ describe("help for a command", function (): void {
             ""], done);
     });
 
+    it("prints the help for platform using the platforms alias", function (done: MochaDone): void {
+        testHelpForCommand("platforms", [
+            "",
+            "CommandPlatformDescription",
+            "",
+            "   taco platform [COMMAND] [--OPTIONS]",
+            "",
+            "CommandHelpUsageParameters",
+            "   add <PLAT-SPEC> ....... CommandPlatformAddSubcommandDescription",
+            "        --usegit ......... CommandPlatformUsegitDescription",
+            "        --save ........... CommandPlatformSaveAddDescription",
+            "        --link ........... CommandPlatformLinkDescription",
+            "   remove <PLATFORM> ..... CommandPlatformRemoveSubcommandDescription",
+            "        --save ........... CommandPlatformSaveRemoveDescription",
+            "   list .................. CommandPlatformListSubcommandDescription",
+            "   update <PLAT-SPEC> .... CommandPlatformUpdateSubcommandDescription",
+            "        --usegit ......... CommandPlatformUsegitDescription",
+            "        --save ........... CommandPlatformSaveUpdateDescription",
+            "   check ................. CommandPlatformCheckSubcommandDescription",
+            "CommandHelpUsageAliases",
+            "   rm -> remove",
+            "   ls -> list",
+            ""], done);
+    });
+
     it("prints the help for plugin", function (done: MochaDone): void {
         testHelpForCommand("plugin", [
+            "",
+            "CommandPluginDescription",
+            "",
+            "   taco plugin [COMMAND] [--OPTIONS]",
+            "",
+            "CommandHelpUsageParameters",
+            "   add <PLAT-SPEC> .................... CommandPluginAddSubcommandDescription",
+            "        [--searchpath <DIRECTORY>] .... CommandPluginSearchPathDescription",
+            "        [--noregistry] ................ CommandPluginNoRegistryDescription",
+            "        [--link] ...................... CommandPluginLinkDescription",
+            "        [--save] ...................... CommandPluginSaveAddDescription",
+            "        [--shrinkwrap] ................ CommandPluginShrinkwrapDescription",
+            "   remove <PLUGINID> [...] ............ CommandPluginRemoveSubcommandDescription",
+            "        [--save] ...................... CommandPluginSaveRemoveDescription",
+            "   list ............................... CommandPluginListSubcommandDescription",
+            "   search ............................. CommandPluginSearchSubcommandDescription",
+            "CommandHelpUsageAliases",
+            "   rm -> remove",
+            "   ls -> list",
+            ""], done);
+    });
+
+    it("prints the help for plugin using the plugins alias", function (done: MochaDone): void {
+        testHelpForCommand("plugins", [
             "",
             "CommandPluginDescription",
             "",
