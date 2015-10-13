@@ -105,7 +105,8 @@ module BuildAndRunTelemetryTests {
         var customLoader: TacoUtility.ITacoPackageLoader = {
             lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel): any => {
                 return Q(cordova);
-            }
+            },
+            lazyRun: (packageName: string, packageId: string, commandName: string): Q.Promise<string> => Q("cordova")
         };
 
         before(() => {
@@ -434,7 +435,8 @@ module BuildAndRunTelemetryTests {
                 .then(() => done(), done);
         });
 
-        it("5. --uknown_option unknown_platform", (done: MochaDone) => {
+        it("5. --uknown_option unknown_platform", function (done: MochaDone): void {
+            this.timeout(120000); // Installing Cordova for the passthrough can take some time
             var args: string[] = ["--uknown_option=unknown_value", "unknown_platform"];
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.requestedViaCommandLine.local1": { isPii: true, value: "unknown_platform" },
