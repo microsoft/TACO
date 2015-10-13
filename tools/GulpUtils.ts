@@ -26,7 +26,6 @@ class GulpUtils {
     private static CoverageJsonFileName: string = "coverage.json";
 
     public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageResultsPath: string): Q.Promise<any> {
-
         coverageResultsPath = path.resolve(coverageResultsPath);
         var coverageJsonFiles: string[] = [];
 
@@ -231,7 +230,6 @@ class GulpUtils {
         var mocha: any = require("gulp-mocha");
 
         var srcglob: string[] = [modulePath + "/**/*.js", "!" + modulePath + "/node_modules/**", "!" + modulePath + "/test/**"];
-
         return GulpUtils.streamToPromise(gulp.src(srcglob)
             .pipe(istanbul({ includeUntested: true}))
             .pipe(istanbul.hookRequire()))
