@@ -152,7 +152,6 @@ describe("help for a command", function (): void {
             "        --save ........... CommandPlatformSaveUpdateDescription",
             "   check ................. CommandPlatformCheckSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   platforms -> platform",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
@@ -178,7 +177,6 @@ describe("help for a command", function (): void {
             "        --save ........... CommandPlatformSaveUpdateDescription",
             "   check ................. CommandPlatformCheckSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   platforms -> platform",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
@@ -203,7 +201,6 @@ describe("help for a command", function (): void {
             "   list ............................... CommandPluginListSubcommandDescription",
             "   search ............................. CommandPluginSearchSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   plugins -> plugin",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
@@ -228,7 +225,6 @@ describe("help for a command", function (): void {
             "   list ............................... CommandPluginListSubcommandDescription",
             "   search ............................. CommandPluginSearchSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   plugins -> plugin",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
