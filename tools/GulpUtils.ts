@@ -23,25 +23,35 @@ import zlib = require("zlib");
 
 class GulpUtils {
     private static TestCommand: string = "test";
+    private static CoverageJsonFileName: string = "coverage.json";
 
     public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageResultsPath: string): Q.Promise<any> {
 
         coverageResultsPath = path.resolve(coverageResultsPath);
+        var coverageJsonFiles: string[] = [];
 
+        // for each module, sequentially run tests with coverage (with json reporting)  
         return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
             return soFar.then(function(): Q.Promise<any> {
 
                 var moduleCoverageResultsPath: string = path.resolve(coverageResultsPath, val);
                 var modulePath = path.resolve(modulesRoot, val);
-                return GulpUtils.runModuleCoverage(modulePath, moduleCoverageResultsPath);
-
+                return GulpUtils.runModuleCoverage(modulePath, moduleCoverageResultsPath)
+                    .then(function(): void {
+                        coverageJsonFiles.push(path.join(moduleCoverageResultsPath, GulpUtils.CoverageJsonFileName));
+                    });
             });
         }, Q({}))
+            // collect all generated coverage.json and use them to remap to typescript sources
             .then(function(): Q.Promise<any> {
-                var remapIstanbul = require("remap-istanbul/lib/gulpRemapIstanbul");
-                return GulpUtils.streamToPromise(
-                    gulp.src([coverageResultsPath + "/**/coverage.json"])
-                        .pipe(remapIstanbul({ basePath: "./", reports: { "html": coverageResultsPath } })));
+
+                var loadCoverage: any = require("remap-istanbul/lib/loadCoverage");
+                var remap: any = require("remap-istanbul/lib/remap");
+                var writeReport: any = require("remap-istanbul/lib/writeReport");
+
+                var coverage = loadCoverage(coverageJsonFiles);
+                var collector = remap(coverage, {basePath: "./"});
+                return writeReport(collector, "html", coverageResultsPath);
             });
     }
 
@@ -221,20 +231,18 @@ class GulpUtils {
         var mocha: any = require("gulp-mocha");
 
         var srcglob: string[] = [modulePath + "/**/*.js", "!" + modulePath + "/node_modules/**", "!" + modulePath + "/test/**"];
-        var coverageVariable = "$$cov_" + new Date().getTime() + "$$";
 
         return GulpUtils.streamToPromise(gulp.src(srcglob)
-            .pipe(istanbul({ includeUntested: true, coverageVariable: coverageVariable }))
+            .pipe(istanbul({ includeUntested: true}))
             .pipe(istanbul.hookRequire()))
             .then(function(): Q.Promise<any> {
                 return GulpUtils.streamToPromise(gulp.src(GulpUtils.getTestPathsGlob(modulePath))
-                    .pipe(require("gulp-print")())
                     .pipe(mocha())
                     .pipe(istanbul.writeReports({
                         dir: moduleCoverageResultsPath,
                         reporters: ["json"],
                         reportOpts: {
-                            json: { dir: moduleCoverageResultsPath, file: "coverage.json" }
+                            json: { dir: moduleCoverageResultsPath, file: GulpUtils.CoverageJsonFileName }
                         }
                     })));
             });
