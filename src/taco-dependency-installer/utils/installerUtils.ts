@@ -41,7 +41,7 @@ module InstallerUtils {
 }
 
 class InstallerUtils {
-    private static pathName = os.platform() === "win32" ? "Path" : "PATH";
+    private static pathName: string = os.platform() === "win32" ? "Path" : "PATH";
     /**
      * Verifies if the specified file is valid by comparing its sha1 signature and its size in bytes with the provided expectedSha1 and expectedBytes.
      *
