@@ -265,10 +265,15 @@ describe("Kit", function (): void {
             rimraf(cliProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
 
+        it("'taco kit select --kit {Invalid-kit-ID}' should execute with expected error", function (done: MochaDone): void {
+            runKitCommandFailureCaseAndVerifyTacoJson<TacoKitsErrorCodes>(["select", "--kit", "InvalidKit"], tacoJsonPath, expectedCliTacoJsonKeyValues, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit)
+            .done(() => done(), done);
+        });
+
         it("'taco kit select --kit {kit-ID}' should execute with no errors", function (done: MochaDone): void {
-            runKitCommandAndVerifyTacoJsonContents(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
+            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
                 .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
-                    var expected: TacoUtility.ICommandTelemetryProperties = {
+                    var expected = {
                         subCommand: { isPii: false, value: "select" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
                     };
