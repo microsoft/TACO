@@ -55,9 +55,9 @@ describe("TemplateManager", function (): void {
     var runFolder: string = path.resolve(os.tmpdir(), "taco_cli_templates_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
     var testTemplateKitSrc: string = path.resolve(__dirname, "resources", "templates", testKitId);
-    var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);
-    var testTemplate2Src: string = path.join(testTemplateKitSrc, testTemplateId2);
-    var testTemplate3Src: string = path.join(testTemplateKitSrc, testTemplateId3);
+    var testTemplateNoWwwPath: string = path.join(testTemplateKitSrc, testTemplateId);
+    var testTemplateWithWwwPath: string = path.join(testTemplateKitSrc, testTemplateId2);
+    var testTemplateWithGitFilesPath: string = path.join(testTemplateKitSrc, testTemplateId3);
     var testTemplateArchiveFolder: string = path.join(runFolder, "template-archives", testKitId);
     var testTemplateArchive: string = path.join(testTemplateArchiveFolder, testTemplateId + ".zip");
 
@@ -76,7 +76,7 @@ describe("TemplateManager", function (): void {
         templateId: testTemplateId2,
         templateInfo: {
             name: testDisplayName2,
-            url: testTemplateArchive
+            url: path.join(runFolder, "pathThatDoesntExist")
         }
     };
 
@@ -85,16 +85,21 @@ describe("TemplateManager", function (): void {
         templateId: testTemplateId3,
         templateInfo: {
             name: testDisplayName3,
-            url: testTemplateArchive
+            url: path.join(runFolder, "pathThatDoesntExist")
         }
     };
 
     // Mock for the KitHelper
     var mockKitHelper: TacoKits.IKitHelper = {
         getTemplateOverrideInfo: function (kitId: string, templateId: string): Q.Promise<TacoKits.ITemplateOverrideInfo> {
-            // As this test suite is strictly testing the TemplateManager, we ignore the provided kitId and templateId parameters; we are only interested in
-            // testing what the templateManager does with the returned testTemplateOverrideInfo, so we return a hard-coded one
-            return Q.resolve(testTemplateOverrideInfo);
+            switch (templateId) {
+                case testTemplateId2:
+                    return Q.resolve(testTemplateOverrideInfo2);
+                case testTemplateId3:
+                    return Q.resolve(testTemplateOverrideInfo3);
+                default:
+                    return Q.resolve(testTemplateOverrideInfo);
+            }
         },
 
         getTemplatesForKit: function (kitId: string): Q.Promise<TacoKits.IKitTemplatesOverrideInfo> {
@@ -141,7 +146,7 @@ describe("TemplateManager", function (): void {
                 });
 
                 archive.pipe(outputStream);
-                archive.directory(testTemplateSrc, testTemplateId).finalize();
+                archive.directory(testTemplateNoWwwPath, testTemplateId).finalize();
             }
         });
     });
@@ -170,6 +175,24 @@ describe("TemplateManager", function (): void {
                     // Verify the TemplateManager correctly extracted the template archive to the temporary location
                     fs.existsSync(path.join(tempTemplatePath, "a.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
                     fs.existsSync(path.join(tempTemplatePath, "folder1", "b.txt")).should.be.exactly(true, "The template was not correctly cached (missing some files)");
+                    done();
+                })
+                .catch(function (err: string): void {
+                    done(new Error(err));
+                });
+        });
+
+        it("should return the appropriate error when templates are not available", function (done: MochaDone): void {
+            // Create a test TemplateManager
+            var templates: templateManager = new templateManager(mockKitHelper);
+
+            // Call acquireFromTacoKits() with a template ID that has an archive path pointing to a location that doesn't exist
+            (<any> templates).acquireFromTacoKits(testTemplateId3, testKitId, runFolder)
+                .then(function (tempTemplatePath: string): void {
+                    // The promise was resolved, this is an error
+                    done(new Error("The operation completed successfully when it should have returned an error"));
+                }, function (error: TacoUtility.TacoError): void {
+                    error.errorCode.should.equal(TacoErrorCodes.CommandCreateTemplatesUnavailable);
                     done();
                 })
                 .catch(function (err: string): void {
@@ -213,7 +236,7 @@ describe("TemplateManager", function (): void {
             var testProjectPath = path.join(runFolder, "testProject");
 
             wrench.mkdirSyncRecursive(testProjectPath, 511); // 511 decimal is 0777 octal
-            utils.copyRecursive(testTemplateSrc, testProjectPath)
+            utils.copyRecursive(testTemplateNoWwwPath, testProjectPath)
                 .then(function (): string {
                     // Call performTokenReplacement()
                     return (<any> templateManager).performTokenReplacements(testProjectPath, testAppId, testAppName);
@@ -320,10 +343,10 @@ describe("TemplateManager", function (): void {
                 appName: "test",
                 cordovaConfig: {},
                 projectPath: testProjectPath,
-                copyFrom: testTemplate2Src
+                copyFrom: testTemplateWithWwwPath
             };
 
-            (<any> templates).copyTemplateItemsToProject(cordovaParameters)
+            (<any> templateManager).copyTemplateItemsToProject(cordovaParameters)
                 .then(function (): void {
                     // Since the template has a www folder, a copy should happen; there should be 4 items in the project: "www", "a.txt", "folder1", "b.txt"
                     try {
@@ -344,10 +367,10 @@ describe("TemplateManager", function (): void {
                 appName: "test",
                 cordovaConfig: {},
                 projectPath: testProjectPath,
-                copyFrom: testTemplateSrc
+                copyFrom: testTemplateNoWwwPath
             };
 
-            (<any> templates).copyTemplateItemsToProject(cordovaParameters)
+            (<any> templateManager).copyTemplateItemsToProject(cordovaParameters)
                 .then(function (): void {
                     // Template doesn't have a "www" folder, so the copy step should be skipped and resulting project should be empty
                     try {
@@ -368,10 +391,10 @@ describe("TemplateManager", function (): void {
                 appName: "test",
                 cordovaConfig: {},
                 projectPath: testProjectPath,
-                copyFrom: testTemplate3Src
+                copyFrom: testTemplateWithGitFilesPath
             };
 
-            (<any> templates).copyTemplateItemsToProject(cordovaParameters)
+            (<any> templateManager).copyTemplateItemsToProject(cordovaParameters)
                 .then(function (): void {
                     // Since the template has a www folder, a copy should happen; the 3 git files should be ignored, so there should be 4 items in the project: "www", "a.txt", "folder1", "b.txt"
                     try {
