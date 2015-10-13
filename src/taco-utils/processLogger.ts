@@ -36,12 +36,12 @@ module TacoUtility {
          * @param {ChildProcess} proc The process to log
          */
         public begin(logDir: string, logFileName: string, language: string, proc: child_process.ChildProcess): void {
-            var pathToLog = path.join(logDir, logFileName);
+            var pathToLog: string = path.join(logDir, logFileName);
             this.stream = fs.createWriteStream(pathToLog);
             this.stream.on("error", function (err: any): void {
                 Logger.logError(resources.getStringForLanguage(language, "ProcessLogError", pathToLog, err));
             });
-            var me = this;
+            var me: ProcessLogger = this;
             proc.stdout.on("data", function (data: any): void {
                 me.log(data);
             });

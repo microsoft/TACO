@@ -10,7 +10,7 @@
 /// <reference path="../typings/commands.d.ts" />
 
 declare module TacoUtility {
-	interface ITelemetryPropertyInfo {
+    interface ITelemetryPropertyInfo {
         value: any;
         isPii: boolean;
     }

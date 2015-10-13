@@ -34,29 +34,29 @@ module TacoUtility {
     /* tslint:disable:variable-name */
     // We mostly export classes here from taco-utils and we prefer keeping them pascal cased
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files    
-    export var ArgsHelper = argsHelper.ArgsHelper;
-    export var BuildInfo = buildInfo.BuildInfo;
-    export var Commands = commands.Commands;
-    export var CordovaConfig = cordovaConfig.CordovaConfig;
-    export var CountStream = countStream.CountStream;
-    export var Logger = logger.Logger;
-    export var LoggerHelper = loggerHelper.LoggerHelper;
-    export var LogLevel = logLevel.LogLevel;
-    export var NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
-    export var HelpCommandBase = helpCommandBase.HelpCommandBase;
-    export var InstallLogLevel = installLogLevel.InstallLogLevel;
-    export var JsonSerializer = jsonSerializer.JsonSerializer;
-    export var ProcessLogger = processLogger.ProcessLogger;
-    export var ResourceManager = resourceManager.ResourceManager;
-    export var TacoError = tacoError.TacoError;
-    export var TacoErrorCode = tacoErrorCodes.TacoErrorCode;
-    export var TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
-    export var TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
-    export var TelemetryGenerator = telemetryHelper.TelemetryGenerator;
-    export var Telemetry = telemetry.Telemetry;
-    export var TelemetryHelper = telemetryHelper.TelemetryHelper;
-    export var UtilHelper = utilHelper.UtilHelper;
-    export var LogFormatHelper = logFormatHelper.LogFormatHelper;
+    export var ArgsHelper: typeof argsHelper.ArgsHelper = argsHelper.ArgsHelper;
+    export var BuildInfo: typeof buildInfo.BuildInfo = buildInfo.BuildInfo;
+    export var Commands: typeof commands.Commands = commands.Commands;
+    export var CordovaConfig: typeof cordovaConfig.CordovaConfig = cordovaConfig.CordovaConfig;
+    export var CountStream: typeof countStream.CountStream = countStream.CountStream;
+    export var Logger: typeof logger.Logger = logger.Logger;
+    export var LoggerHelper: typeof loggerHelper.LoggerHelper = loggerHelper.LoggerHelper;
+    export var LogLevel: typeof logLevel.LogLevel = logLevel.LogLevel;
+    export var NewlineNormalizerStream: typeof newlineNormalizerStream.NewlineNormalizerStream = newlineNormalizerStream.NewlineNormalizerStream;
+    export var HelpCommandBase: typeof helpCommandBase.HelpCommandBase = helpCommandBase.HelpCommandBase;
+    export var InstallLogLevel: typeof installLogLevel.InstallLogLevel = installLogLevel.InstallLogLevel;
+    export var JsonSerializer: typeof jsonSerializer.JsonSerializer = jsonSerializer.JsonSerializer;
+    export var ProcessLogger: typeof processLogger.ProcessLogger = processLogger.ProcessLogger;
+    export var ResourceManager: typeof resourceManager.ResourceManager = resourceManager.ResourceManager;
+    export var TacoError: typeof tacoError.TacoError = tacoError.TacoError;
+    export var TacoErrorCode: typeof tacoErrorCodes.TacoErrorCode = tacoErrorCodes.TacoErrorCode;
+    export var TacoGlobalConfig: typeof tacoGlobalConfig.TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
+    export var TacoPackageLoader: typeof tacoPackageLoader.TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
+    export var TelemetryGenerator: typeof telemetryHelper.TelemetryGenerator = telemetryHelper.TelemetryGenerator;
+    export var Telemetry: typeof telemetry.Telemetry = telemetry.Telemetry;
+    export var TelemetryHelper: typeof telemetryHelper.TelemetryHelper = telemetryHelper.TelemetryHelper;
+    export var UtilHelper: typeof utilHelper.UtilHelper = utilHelper.UtilHelper;
+    export var LogFormatHelper: typeof logFormatHelper.LogFormatHelper = logFormatHelper.LogFormatHelper;
     /* tslint:enable:variable-name */
 }
 

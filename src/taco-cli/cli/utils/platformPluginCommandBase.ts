@@ -125,7 +125,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             return Q.reject<ICommandTelemetryProperties>(err);
         }
 
-        var self = this;
+        var self: PlatformPluginCommandBase = this;
         var projectInfo: projectHelper.IProjectInfo;
         var specsToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
         return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): Q.Promise<any> {
@@ -165,7 +165,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      * Generates the telemetry properties for the platform/plugin operation
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
-        var self = this;
+        var self: PlatformPluginCommandBase = this;
         return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand);
@@ -213,7 +213,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
 
         // Sanitize the --variable option flags
         if (variables) {
-            var self = this;
+            var self: PlatformPluginCommandBase = this;
             variables.forEach(function (variable: string): void {
                 var keyval: any[] = variable.split("=");
                 var key: string = keyval[0].toUpperCase();

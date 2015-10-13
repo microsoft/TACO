@@ -13,10 +13,14 @@
 
 "use strict";
 
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule: any = require("should");
+/* tslint:enable:no-var-requires */
+
 import mocha = require ("mocha");
 import path = require ("path");
-// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
 
 import resources = require ("../resources/resourceManager");
 import tacoErrorCodes = require ("../tacoErrorCodes");
@@ -30,7 +34,7 @@ import utilHelper = tacoUtils.UtilHelper;
 describe("KitHelper", function (): void {
     // Important paths
     var testMetadataPath: string = path.resolve(__dirname, "test-data", "test-kit-metadata.json");
-    var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetaData.json");
+    var realMetadataPath: string = path.resolve(__dirname, "..", "TacoKitMetadata.json");
 
     // Test Kit Info
     var testDefaultKitId: string = "5.1.1-Kit";
@@ -54,7 +58,7 @@ describe("KitHelper", function (): void {
         }
     };
 
-    var templateSrcPath = path.resolve(__dirname, "..", "templates", "default", "blank.zip");
+    var templateSrcPath: string = path.resolve(__dirname, "..", "templates", "default", "blank.zip");
     var testTemplateOverrideInfo: tacoKits.ITemplateOverrideInfo = {
         kitId: "default",
         templateInfo: {
@@ -130,7 +134,7 @@ describe("KitHelper", function (): void {
             kitHelper.getKitInfo(testDeprecatedKitId)
                 .then(function (kitInfo: TacoKits.IKitInfo): void {
                     // Verify the returned kitInfo is correct
-                    var stringifiedInfo = JSON.stringify(kitInfo);
+                    var stringifiedInfo: string = JSON.stringify(kitInfo);
 
                     stringifiedInfo.should.equal(JSON.stringify(testDeprecatedKitInfo));
                     done();
@@ -144,7 +148,7 @@ describe("KitHelper", function (): void {
             kitHelper.getKitInfo(testDefaultKitId)
                 .then(function (kitInfo: TacoKits.IKitInfo): void {
                     // Verify the returned kitInfo is correct
-                    var stringifiedInfo = JSON.stringify(kitInfo);
+                    var stringifiedInfo: string = JSON.stringify(kitInfo);
 
                     stringifiedInfo.should.equal(JSON.stringify(testDefaultKitInfo));
                     done();
@@ -211,7 +215,7 @@ describe("KitHelper", function (): void {
             kitHelper.getTemplateOverrideInfo(testDefaultKitId, testDefaultTemplateId)
                 .then(function (templateOverrideInfo: TacoKits.ITemplateOverrideInfo): void {
                     // Verify the returned override info is correct
-                    var stringifiedInfo = JSON.stringify(templateOverrideInfo);
+                    var stringifiedInfo: string = JSON.stringify(templateOverrideInfo);
 
                     stringifiedInfo.should.equal(JSON.stringify(testTemplateOverrideInfo));
                     done();
@@ -250,7 +254,7 @@ describe("KitHelper", function (): void {
             kitHelper.getTemplatesForKit(kitId)
                 .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
                     // Verify the returned override info is correct
-                    var stringifiedInfo = JSON.stringify(kitOverride);
+                    var stringifiedInfo: string = JSON.stringify(kitOverride);
 
                     stringifiedInfo.should.equal(JSON.stringify(expectedResult));
                     done();
@@ -287,7 +291,7 @@ describe("KitHelper", function (): void {
             kitHelper.getTemplatesForKit(kitId)
                 .then(function (kitOverride: TacoKits.IKitTemplatesOverrideInfo): void {
                     // Verify the returned override info is correct
-                    var stringifiedInfo = JSON.stringify(kitOverride);
+                    var stringifiedInfo: string = JSON.stringify(kitOverride);
 
                     stringifiedInfo.should.equal(JSON.stringify(expectedResult));
                     done();
@@ -357,7 +361,7 @@ describe("KitHelper", function (): void {
         });
     });
 
-    describe("TacoKitMetaData.json", function (): void {
+    describe("TacoKitMetadata.json", function (): void {
         it("should only have kit ids that are suitable for directory names", function (): void {
             var metadata: TacoKits.ITacoKitMetadata = require(realMetadataPath);
 

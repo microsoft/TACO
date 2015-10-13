@@ -1,7 +1,7 @@
 /// <reference path="../typings/node.d.ts" />
 
 import assert = require ("assert");
-var os = require("os");
+import os = require("os");
 import util = require ("util");
 
 import argsHelper = require ("./argsHelper");

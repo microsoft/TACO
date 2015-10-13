@@ -13,7 +13,11 @@
 
 "use strict";
 
-var shouldModule = require("should"); // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+/* tslint:disable:no-var-requires */
+// var require needed for should module to work correctly
+// Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
+var shouldModule: any = require("should");
+/* tslint:enable:no-var-requires */
 
 import fs = require ("fs");
 import os = require ("os");
@@ -43,7 +47,7 @@ describe("InstallerRunner", function (): void {
             fs.unlinkSync(installConfigFile);
         }
 
-        var jsonWrapper: any = {
+        var jsonWrapper: DependencyInstallerInterfaces.IInstallerConfig = {
             dependencies: dependencies
         };
 
