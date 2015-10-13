@@ -63,8 +63,8 @@ class Builder {
     }
 
     public build(): Q.Promise<BuildInfo> {
-        var isDeviceBuild = this.currentBuild.options.indexOf("--device") !== -1;
-        var self = this;
+        var isDeviceBuild: boolean = this.currentBuild.options.indexOf("--device") !== -1;
+        var self: Builder = this;
 
         return Q.fcall(Builder.change_directory, self.currentBuild.appDir)
             .then(function (): Q.Promise<any> { return self.update_plugins(); })
@@ -127,16 +127,16 @@ class Builder {
     }
 
     private update_plugins(): Q.Promise<any> {
-        var remotePluginsPath = path.join("remote", "plugins");
-        var self = this;
+        var remotePluginsPath: string = path.join("remote", "plugins");
+        var self: Builder = this;
         if (!fs.existsSync(remotePluginsPath)) {
             return Q.resolve({});
         }
 
-        var newAndModifiedPlugins = fs.readdirSync(remotePluginsPath).filter(function (entry: string): boolean {
+        var newAndModifiedPlugins: string[] = fs.readdirSync(remotePluginsPath).filter(function (entry: string): boolean {
             return fs.statSync(path.join(remotePluginsPath, entry)).isDirectory();
         });
-        var pluginNameRegex = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
+        var pluginNameRegex: RegExp = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
         var deletedPlugins: string[] = [];
         if (this.currentBuild.changeList && this.currentBuild.changeList.deletedFiles) {
             deletedPlugins = this.currentBuild.changeList.deletedFiles.map(function (file: string): string {
@@ -150,7 +150,7 @@ class Builder {
             });
         }
 
-        var deleteOldPlugins = deletedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
+        var deleteOldPlugins: Q.Promise<any> = deletedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
                 if (fs.existsSync(path.join("plugins", plugin))) {
                     return self.cordova.raw.plugin("remove", plugin).catch(function (err: any): void {
@@ -168,7 +168,7 @@ class Builder {
         }, Q({}));
 
         var fetchJson: Cordova.IFetchJson = {};
-        var fetchJsonPath = path.join(remotePluginsPath, "fetch.json");
+        var fetchJsonPath: string = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
                 fetchJson = JSON.parse(<any> fs.readFileSync(fetchJsonPath));
@@ -181,8 +181,8 @@ class Builder {
 
         return newAndModifiedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
             return soFar.then(function (): Q.Promise<any> {
-                var newFolder = path.join(remotePluginsPath, plugin);
-                var installedFolder = path.join("plugins", plugin);
+                var newFolder: string = path.join(remotePluginsPath, plugin);
+                var installedFolder: string = path.join("plugins", plugin);
                 if (fs.existsSync(installedFolder)) {
                     // The plugin is already installed; overwrite it
                     // Note that the plugin may have been installed by another plugin that depended on it;
@@ -216,7 +216,7 @@ class Builder {
     }
 
     private prepareNativeOverrides(): Q.Promise<any> {
-        var resFrom = path.join("res", "native", this.currentBuild.buildPlatform);
+        var resFrom: string = path.join("res", "native", this.currentBuild.buildPlatform);
         if (!fs.existsSync(resFrom)) {
             // If res -> native folder isn't here then it could be a project that was created when
             // the res -> cert folder still existed, so check for that location as well.
@@ -224,7 +224,7 @@ class Builder {
         }
 
         if (fs.existsSync(resFrom)) {
-            var resTo = path.join("platforms", this.currentBuild.buildPlatform);
+            var resTo: string = path.join("platforms", this.currentBuild.buildPlatform);
             return UtilHelper.copyRecursive(resFrom, resTo);
         }
 
@@ -233,8 +233,8 @@ class Builder {
 
     private compile_platform(): Q.Promise<any> {
         Logger.log("cordova compile " + this.currentBuild.buildPlatform);
-        var configuration = (this.currentBuild.configuration === "debug") ? "--debug" : "--release";
-        var opts = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
+        var configuration: string = (this.currentBuild.configuration === "debug") ? "--debug" : "--release";
+        var opts: string [] = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
         return this.cordova.raw.compile({ platforms: [this.currentBuild.buildPlatform], options: opts });
     }
 }

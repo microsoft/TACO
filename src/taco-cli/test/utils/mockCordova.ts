@@ -37,7 +37,7 @@ module MockCordova {
         /* tslint:enable no-arg */
 
         // Next line hacks, gets the name of the method that was called from the stack trace (e.g.: MockCordovaRaw510.build)
-        var methodName = (<IHasStack> <Object> new Error()).stack.split("\n")[2].replace(/^ +at ([A-z0-9]+\.[A-z0-9]+) \(.*/, "$1");
+        var methodName: string = (<IHasStack> <Object> new Error()).stack.split("\n")[2].replace(/^ +at ([A-z0-9]+\.[A-z0-9]+) \(.*/, "$1");
 
         throw new MethodNotImplementedException(caller, methodName, "The cordova method " + methodName +
             " was called during a test. You need to provide a custom implementation");
@@ -49,18 +49,18 @@ module MockCordova {
 
     export class MockCordova510 implements Cordova.ICordova510 {
 
-        public raw = new MockCordovaRaw510();
+        public raw: MockCordovaRaw510 = new MockCordovaRaw510();
 
         private events: { [event: string]: any[] } = {};
 
         public static get default(): MockCordova510 {
-            var t = new MockCordova510();
+            var t: MockCordova510 = new MockCordova510();
             t.on = (event: string, func: Function) => {
                 t.events[event] = (t.events[event] || []);
                 t.events[event].push(func);
             };
             t.off = (event: string, func: Function) => {
-                var idx = t.events[event] && t.events[event].indexOf(func);
+                var idx: number = t.events[event] && t.events[event].indexOf(func);
                 if (idx) {
                     t.events[event].splice(idx);
                 };

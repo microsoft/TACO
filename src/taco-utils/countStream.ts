@@ -32,7 +32,7 @@ module TacoUtility {
         }
 
         public static count(originalStream: NodeJS.ReadableStream, callback: { (length: number): void }): NodeJS.ReadableStream {
-            var countedStream = originalStream.pipe(new CountStream());
+            var countedStream: CountStream = originalStream.pipe(new CountStream());
             countedStream.on("end", () => callback(countedStream.count));
             return countedStream;
         }

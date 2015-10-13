@@ -125,11 +125,11 @@ module TacoUtility {
                 indent1 = indent1 || LoggerHelper.DEFAULT_INDENT;
             }
 
-            var indentationString = this.repeat(" ", indent1);
-            var longestNameLength = this.longestValueLength(nameDescriptionPairs, e => e.name);
-            var longestDescriptionLength = this.longestValueLength(nameDescriptionPairs, e => e.description);
-            var totalSeparatorLength = LoggerHelper.getDescriptionColumnIndent(longestNameLength, indent1) + longestDescriptionLength - indent1; // ("\t\t" + Name + ....) + Description - "\t\t"
-            var sectionsSeparator = indentationString + LoggerHelper.repeat("-", totalSeparatorLength);
+            var indentationString: string = this.repeat(" ", indent1);
+            var longestNameLength: number = this.longestValueLength(nameDescriptionPairs, (e: INameDescription) => e.name);
+            var longestDescriptionLength: number = this.longestValueLength(nameDescriptionPairs, (e: INameDescription) => e.description);
+            var totalSeparatorLength: number = LoggerHelper.getDescriptionColumnIndent(longestNameLength, indent1) + longestDescriptionLength - indent1; // ("\t\t" + Name + ....) + Description - "\t\t"
+            var sectionsSeparator: string = indentationString + LoggerHelper.repeat("-", totalSeparatorLength);
             Logger.log(sectionsSeparator);
             LoggerHelper.logNameDescriptionTable(nameDescriptionPairs, indent1);
             Logger.log(sectionsSeparator);
@@ -148,7 +148,7 @@ module TacoUtility {
             indent2 = indent2 || LoggerHelper.MINIMUM_RIGHT_INDENT;
 
             var leftIndent: string = LogFormatHelper.repeat(" ", indent1);
-            var keyLength = LogFormatHelper.getFormattedStringLength(key);
+            var keyLength: number = LogFormatHelper.getFormattedStringLength(key);
             var dots: string = LogFormatHelper.repeat(dotsCharacter, indent2 - indent1 - keyLength - 2); // -2, for spaces around "..."
             value = LoggerHelper.wordWrapString(value, indent2, LoggerHelper.maxRight);
 
@@ -219,7 +219,7 @@ module TacoUtility {
          * Logs an array of strings with proper indentation and a fixed bullet (*) (This is a list, in the sense of an HTML <ul><li></li></ul> list)
          */
         public static logList(listElements: string[]): void {
-            listElements.forEach(element => Logger.log(" * " + element));
+            listElements.forEach((element: string) => Logger.log(" * " + element));
         }
 
         /**
@@ -228,7 +228,7 @@ module TacoUtility {
          * @param {propertyGetter} lambda function to extract the property we want to measure the length, from each element
          */
         private static longestValueLength<T>(list: T[], propertyGetter: { (element: T): string }): number {
-            var propertyValuesLength = list.map(propertyGetter).map(str => LogFormatHelper.getFormattedStringLength(str));
+            var propertyValuesLength: number[] = list.map(propertyGetter).map((str: string) => LogFormatHelper.getFormattedStringLength(str));
             return Math.max.apply(null, propertyValuesLength);
         }
 

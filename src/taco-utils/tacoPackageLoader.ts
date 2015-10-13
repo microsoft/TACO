@@ -16,7 +16,8 @@
 import assert = require ("assert");
 import child_process = require ("child_process");
 import fs = require ("fs");
-import mkdirp = require ("mkdirp");
+import mkdirp = require("mkdirp");
+import os = require("os");
 import path = require ("path");
 import rimraf = require ("rimraf");
 import semver = require ("semver");
@@ -88,6 +89,7 @@ module TacoUtility {
 
     export interface ITacoPackageLoader {
         lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
+        lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;
     }
 
     export class TacoPackageLoader {
@@ -95,6 +97,43 @@ module TacoUtility {
         public static FILE_URI_REGEX: RegExp = /^file:\/\/.*/;
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
+
+        /**
+         * Returns a path to the specified command exported from the specified package. If the package is not already downloaded,
+         * then first download and cache it locally.
+         *
+         * @param {string} packageName The name of the package to load
+         * @param {string} packageId The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} commandName The name of the binary to find
+         * @param {LogLevel} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
+         * @returns {Q.Promise<string>} A promise which is either rejected with a failure to find the local the binary or resolved with a path to the binary
+         */
+        public static lazyRun(packageName: string, packageId: string, commandName: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<string> {
+            var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel);
+
+            return Q({})
+                .then(function (): Q.Promise<void> {
+                    return TacoPackageLoader.installPackageIfNeeded(request);
+                })
+                .then(function (): Q.Promise<string> {
+                    var packageJsonFilePath = path.join(request.targetPath, "package.json");
+                    var packageJson = JSON.parse(<any> fs.readFileSync(packageJsonFilePath));
+
+                    if (packageJson.bin && packageJson.bin[commandName]) {
+                        var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
+                        if (os.platform() === "win32") {
+                            commandFilePath += ".cmd";
+                        }
+                        if (fs.existsSync(commandFilePath)) {
+                            return Q.resolve(commandFilePath);
+                        }
+                    }
+
+                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
+                });
+        }
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,
@@ -173,8 +212,8 @@ module TacoUtility {
                     var updateRequested: boolean = (Date.now() - lastCheckTimestamp) > request.expirationIntervalInHours * 60 * 60 * 1000;
 
                     if (updateRequested) {
-                        var targetPath = request.targetPath;
-                        var backupPath = request.targetPath + "_backup";
+                        var targetPath: string = request.targetPath;
+                        var backupPath: string = request.targetPath + "_backup";
                         try {
                             if (fs.existsSync(backupPath)) {
                                 rimraf.sync(backupPath);
@@ -248,7 +287,7 @@ module TacoUtility {
                 }
             }
 
-            var homePackageModulesPath = path.join(utils.tacoHome, "node_modules", packageName);
+            var homePackageModulesPath: string = path.join(utils.tacoHome, "node_modules", packageName);
             switch (packageType) {
                 case PackageSpecType.Registry:
                     var versionSubFolder: string = packageId.split("@")[1] || "latest";
@@ -307,9 +346,13 @@ module TacoUtility {
             if (flags) {
                 args = args.concat(flags);
             }
-
             var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
-            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: "inherit" });
+
+            var stdio: any = logLevel === InstallLogLevel.error // On the default error message level, we don't want to show npm output messages
+                ? [/*stdin*/ "ignore", /*stdout*/ "ignore", /*stderr*/ process.stderr] // So we inherit stderr but we ignore stdin and stdout
+                : "inherit"; // For silent everything is ignored, so it doesn't matter, for everything else we just let npm inherit all our streams
+
+            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: stdio });
             npmProcess.on("error", function (error: Error): void {
                 deferred.reject(error);
             });
@@ -351,7 +394,7 @@ module TacoUtility {
                             }
 
                             // 243 is the error code reported when npm fails due to EACCES
-                            var errorCode = (err === 243) ? TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess : TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode;
+                            var errorCode: TacoErrorCodes = (err === 243) ? TacoErrorCodes.PackageLoaderNpmInstallFailedEaccess : TacoErrorCodes.PackageLoaderNpmInstallFailedWithCode;
                             deferred.reject(errorHelper.get(errorCode, request.packageName, err));
                         } else {
                             deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmInstallErrorMessage, err, request.packageName));
@@ -370,7 +413,7 @@ module TacoUtility {
                     rimraf(targetPath, function (): void {
                         if (isFinite(err)) {
                             // error code reported when npm fails due to EACCES
-                            var errorCode = (err === 243) ? TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess : TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode;
+                            var errorCode: TacoErrorCodes = (err === 243) ? TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess : TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode;
                             deferred.reject(errorHelper.get(errorCode, packageName, err));
                         } else {
                             deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName));
@@ -410,12 +453,12 @@ module TacoUtility {
         }
 
         private static removeStatusFile(targetPath: string): Q.Promise<any> {
-            var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
+            var statusFilePath: string = TacoPackageLoader.getStatusFilePath(targetPath);
             return Q.denodeify(fs.unlink)(statusFilePath);
         }
 
         private static packageNeedsInstall(targetPath: string): boolean {
-            var statusFilePath = TacoPackageLoader.getStatusFilePath(targetPath);
+            var statusFilePath: string = TacoPackageLoader.getStatusFilePath(targetPath);
             // if package.json doesn't exist or status file is still lingering around
             // it is an invalid installation
             return !fs.existsSync(path.join(targetPath, "package.json")) || fs.existsSync(statusFilePath);

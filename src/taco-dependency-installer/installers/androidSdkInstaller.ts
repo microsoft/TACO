@@ -14,7 +14,7 @@
 
 "use strict";
 
-import admZip = require ("adm-zip");
+import AdmZip = require ("adm-zip");
 import childProcess = require ("child_process");
 import fs = require ("fs");
 import os = require ("os");
@@ -36,7 +36,6 @@ import utilHelper = tacoUtils.UtilHelper;
 
 class AndroidSdkInstaller extends InstallerBase {
     private static ANDROID_HOME_NAME: string = "ANDROID_HOME";
-    private static androidCommand = os.platform() === "win32" ? "android.bat" : "android";
     private static ANDROID_PACKAGES: string[] = [    // IDs of Android Packages to install. To get the list of available packages, run "android list sdk -u -a -e"
         // "tools",  // Android SDK comes by default with the tools package, so there is no need to update it. In the future, if we feel we want dependency installer to always install the latest Tools package, then uncomment this.
         "platform-tools",
@@ -48,6 +47,7 @@ class AndroidSdkInstaller extends InstallerBase {
         "android-22"
     ];
 
+    private static androidCommand: string = os.platform() === "win32" ? "android.bat" : "android";
     private installerArchive: string;
     private androidHomeValue: string;
 
@@ -86,7 +86,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected installDarwin(): Q.Promise<any> {
-        var self = this;
+        var self: AndroidSdkInstaller = this;
 
         // Before we extract Android SDK, we need to save the first directory under the specified install path that doesn't exist. This directory and all those under it will be created
         // with root as the owner, so we will need to change the owner back to the current user after the extraction is complete.
@@ -196,7 +196,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     protected postInstallDarwin(): Q.Promise<any> {
-        var self = this;
+        var self: AndroidSdkInstaller = this;
 
         // We need to add execute permission to the android executable in order to run it
         return this.addExecutePermission(path.join(this.androidHomeValue, "tools", "android"))
@@ -236,7 +236,7 @@ class AndroidSdkInstaller extends InstallerBase {
         }
 
         // Extract the archive
-        var templateZip = new admZip(this.installerArchive);
+        var templateZip: AdmZip = new AdmZip(this.installerArchive);
 
         if (!fs.existsSync(this.installDestination)) {
             wrench.mkdirSyncRecursive(this.installDestination, 511); // 511 decimal is 0777 octal
@@ -289,7 +289,7 @@ class AndroidSdkInstaller extends InstallerBase {
     private installAndroidPackages(): Q.Promise<any> {
         // Install Android packages
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.androidCommand);
+        var command: string = path.join(this.androidHomeValue, "tools", AndroidSdkInstaller.androidCommand);
         var args: string[] = [
             "update",
             "sdk",
@@ -302,7 +302,7 @@ class AndroidSdkInstaller extends InstallerBase {
         var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID, 10), gid: parseInt(process.env.SUDO_GID, 10) }) : childProcess.spawn(command, args);
 
         cp.stdout.on("data", function (data: Buffer): void {
-            var stringData = data.toString();
+            var stringData: string = data.toString();
 
             if (/\[y\/n\]:/.test(stringData)) {
                 // Accept license terms
@@ -335,7 +335,7 @@ class AndroidSdkInstaller extends InstallerBase {
     }
 
     private postInstallDefault(): Q.Promise<any> {
-        var self = this;
+        var self: AndroidSdkInstaller = this;
         return this.installAndroidPackages()
             .then(function (): Q.Promise<any> {
                 return self.killAdb();

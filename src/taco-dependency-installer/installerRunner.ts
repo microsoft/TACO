@@ -49,8 +49,8 @@ class InstallerRunner {
     }
 
     public run(): Q.Promise<number> {
-        return tacoUtils.TelemetryHelper.generate("InstallerRunner", telemetry => {
-            var self = this;
+        return tacoUtils.TelemetryHelper.generate("InstallerRunner", (telemetry: tacoUtils.TelemetryGenerator) => {
+            var self: InstallerRunner = this;
             return Q({})
                 .then(function (): void {
                     telemetry.step("parseInstallConfig");
@@ -80,7 +80,7 @@ class InstallerRunner {
     }
 
     private parseInstallConfig(telemetry: tacoUtils.TelemetryGenerator): void {
-        var self = this;
+        var self: InstallerRunner = this;
         var parsedData: DependencyInstallerInterfaces.IInstallerConfig = null;
 
         if (!fs.existsSync(this.configFile)) {
@@ -161,11 +161,11 @@ class InstallerRunner {
             };
 
             // We want to know if the users like to change the default installation directory, or not, to improve the experience if neccesary
-            var defaultInstallDirectory = self.dependenciesDataWrapper.getInstallDirectory(value.id, value.version);
+            var defaultInstallDirectory: string = self.dependenciesDataWrapper.getInstallDirectory(value.id, value.version);
             if (defaultInstallDirectory && value.installDestination) {
-                var normalizedDefaultInstallDirectory = path.normalize(utilHelper.expandEnvironmentVariables(defaultInstallDirectory));
-                var normalizedInstallDestination = path.normalize(value.installDestination);
-                var isDefault = normalizedDefaultInstallDirectory === normalizedInstallDestination;
+                var normalizedDefaultInstallDirectory: string = path.normalize(utilHelper.expandEnvironmentVariables(defaultInstallDirectory));
+                var normalizedInstallDestination: string = path.normalize(value.installDestination);
+                var isDefault: boolean = normalizedDefaultInstallDirectory === normalizedInstallDestination;
                 telemetry.add("installDestination.isDefault", isDefault, /*isPii*/ false);
                 telemetry.add("installDestination.path", normalizedInstallDestination, /*isPii*/ true);
             } else {
@@ -188,7 +188,7 @@ class InstallerRunner {
     }
 
     private runInstallers(): Q.Promise<any> {
-        var self = this;
+        var self: InstallerRunner = this;
 
         return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyWrapper, currentIndex: number): Q.Promise<any> {
             return previous

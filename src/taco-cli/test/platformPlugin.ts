@@ -15,7 +15,7 @@
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule = require("should");
+var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 
 import child_process = require ("child_process");
@@ -26,7 +26,8 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import querystring = require ("querystring");
-import rimraf = require ("rimraf");
+import rimraf = require("rimraf");
+import tacoUtility = require("taco-utils");
 import util = require ("util");
 import wrench = require ("wrench");
 
@@ -36,19 +37,24 @@ import Create = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
-import ms = require ("./utils/memoryStream");
+import ms = require("./utils/memoryStream");
+import commands = tacoUtility.Commands;
 
 import utils = TacoUtility.UtilHelper;
 
-var platformCommand = new Platform();
-var pluginCommand = new Plugin();
-var createCommand = new Create();
+var platformCommand: Platform = new Platform();
+platformCommand.info = <commands.ICommandInfo> {};
+platformCommand.info.aliases = {"rm": "remove", "ls": "list"};
+var pluginCommand: Plugin = new Plugin();
+pluginCommand.info = <commands.ICommandInfo> {};
+pluginCommand.info.aliases = { "rm": "remove", "ls": "list" };
+var createCommand: Create = new Create();
 
 var testKitId: string = "5.1.1-Kit";
 
 /* tslint:disable:no-var-requires */
 // var require needed to require package json
-var cliVersion = require("../package.json").version;
+var cliVersion: string = require("../package.json").version;
 /* tslint:enable:no-var-requires */
 
 interface IComponentVersionMap {
@@ -102,14 +108,14 @@ var kitPlatformOperations: ICommandAndResult[] = [
                 }
             },
             {
-                command: "remove android ios",
+                command: "rm android ios",
                 expectedVersions: {},
                 expectedTelemetryProperties: {
                         kit: { isPii: false, value: "5.1.1-Kit" },
                         cliVersion: { isPii: false, value: cliVersion },
                         isTacoProject: { isPii: false, value: "true" },
                         projectType: { isPii: false, value: "JavaScript" },
-                        subCommand: { isPii: false, value: "remove" },
+                        subCommand: { isPii: false, value: "rm" },
                         target1: { isPii: false, value: "android" },
                         target2: { isPii: false, value: "ios" }
                 }
@@ -229,14 +235,14 @@ var cliPluginOperations: ICommandAndResult[] = [
             }
         },
         {
-            command: "remove cordova-plugin-camera cordova-plugin-contacts",
+            command: "rm cordova-plugin-camera cordova-plugin-contacts",
             expectedVersions: {},
             expectedTelemetryProperties: {
                 cli: { isPii: false, value: "5.0.0" },
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
-                subCommand: { isPii: false, value: "remove" },
+                subCommand: { isPii: false, value: "rm" },
                 target1: { isPii: false, value: "cordova-plugin-camera" },
                 target2: { isPii: false, value: "cordova-plugin-contacts" }
             }
@@ -244,7 +250,7 @@ var cliPluginOperations: ICommandAndResult[] = [
     ];
 
 describe("taco platform for kit", function(): void {
-    var tacoHome = path.join(os.tmpdir(), "taco-cli", "platformPlugin");
+    var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "platformPlugin");
     var cliProjectDir: string = "cliProject";
     var kitProjectDir: string = "kitProject";
     var originalCwd: string;
@@ -292,7 +298,7 @@ describe("taco platform for kit", function(): void {
     }
 
     function getInstalledPlatforms(platformsExpected: IComponentVersionMap, projectPath: string): string[] {
-        var platformsDir = path.join(projectPath, "platforms");
+        var platformsDir: string = path.join(projectPath, "platforms");
         if (!fs.existsSync(platformsDir)) {
             return [];
         }
@@ -304,8 +310,8 @@ describe("taco platform for kit", function(): void {
 
     function checkPlatformVersions(platformsExpected: IComponentVersionMap, projectPath: string): Q.Promise<any> {
         var platformsInstalled: string[] = getInstalledPlatforms(platformsExpected, projectPath);
-        var onWindows = process.platform === "win32";
-        var deferred = Q.defer<any>();
+        var onWindows: boolean = process.platform === "win32";
+        var deferred: Q.Deferred<any> = Q.defer<any>();
         return Q.all(platformsInstalled.map(function(platform: string): Q.Promise<any> {
             var cmdName: string = "version";
             if (onWindows) {
@@ -313,7 +319,7 @@ describe("taco platform for kit", function(): void {
             }
 
             var cmdPath: string = path.join(projectPath, "platforms", platform, "cordova", cmdName);
-            var versionProc = child_process.spawn(cmdPath);
+            var versionProc: child_process.ChildProcess = child_process.spawn(cmdPath);
             versionProc.stdout.on("data", function(data: any): void {
                 var version: string = data.toString();
                 if (!path) {
@@ -334,8 +340,8 @@ describe("taco platform for kit", function(): void {
     }
 
     function getInstalledPluginVersion(plugin: string, projectPath: string): string {
-        var pluginPackgeJson = path.join(projectPath, "plugins", plugin, "package.json");
-        var pluginInfo = require(pluginPackgeJson);
+        var pluginPackgeJson: string = path.join(projectPath, "plugins", plugin, "package.json");
+        var pluginInfo: any = require(pluginPackgeJson);
         if (pluginInfo) {
             return pluginInfo["version"];
         }
@@ -344,7 +350,7 @@ describe("taco platform for kit", function(): void {
     }
 
     function checkPluginVersions(pluginsExpected: IComponentVersionMap, projectPath: string): void {
-        var deferred = Q.defer<any>();
+        var deferred: Q.Deferred<any> = Q.defer<any>();
         Object.keys(pluginsExpected).forEach(function(plugin: string): void {
             var versionInstalled: string = getInstalledPluginVersion(plugin, projectPath);
             versionInstalled.trim().should.be.equal(pluginsExpected[plugin]);
@@ -352,7 +358,7 @@ describe("taco platform for kit", function(): void {
     }
 
     function sleep(milliseconds: number): Q.Promise<any> {
-        var deferred = Q.defer();
+        var deferred: Q.Deferred<any> = Q.defer();
         setTimeout(deferred.resolve, milliseconds);
         return deferred.promise;
     };
@@ -497,6 +503,8 @@ describe("taco platform for kit", function(): void {
     });
 
     describe("Onboarding experience", () => {
+        // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
+        // stdoutWrite just doesn't work
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
         var memoryStdout: ms.MemoryStream;
 
@@ -526,7 +534,7 @@ describe("taco platform for kit", function(): void {
             // all those messages don't get printed, but if we only run the onboarding tests, they are the first
             // tests to run, so they do get printed. We accept both options and we validate we got one of them
             commandRun(platformCommandLineArguments).done(() => {
-                var actual = memoryStdout.contentsAsText();
+                var actual: string = memoryStdout.contentsAsText();
 
                 if (scenarioArguments.every((msg: string) => actual.indexOf(msg) >= 0) || alternativeScenarioArguments.every((msg: string) => actual.indexOf(msg) >= 0)) {
                     done();
@@ -541,8 +549,8 @@ describe("taco platform for kit", function(): void {
         it("prints the onboarding experience when adding a platform", function(done: MochaDone): void {
             this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
 
-            var firstPart = ["CommandPlatformStatusAdding"];
-            var lastPart = [
+            var firstPart: string[] = ["CommandPlatformStatusAdding"];
+            var lastPart: string[] = [
                 "CommandPlatformStatusAdded",
                 "OnboardingExperienceTitle",
                 " * HowToUseCommandInstallReqsPlugin",
@@ -564,10 +572,10 @@ describe("taco platform for kit", function(): void {
         it("prints the onboarding experience when adding a plugin", function(done: MochaDone): void {
             this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
 
-            var firstPart = [
+            var firstPart: string[] = [
                 "CommandPluginTestedPlatforms",
                 "CommandPluginStatusAdding"];
-            var lastPart = [
+            var lastPart: string[] = [
                 "CommandPluginWithIdStatusAdded",
                 "OnboardingExperienceTitle",
                 " * HowToUseCommandInstallReqsPlugin",

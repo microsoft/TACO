@@ -45,11 +45,11 @@ class SelfTest {
      * @return a promise which is resolved if the build succeeded, or rejected if the build failed.
      */
     public static test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
-        var vcordova = "4.3.0";
-        var tempFolder = path.join(os.tmpdir(), "taco-remote", "selftest");
+        var vcordova: string = "4.3.0";
+        var tempFolder: string = path.join(os.tmpdir(), "taco-remote", "selftest");
         rimraf.sync(tempFolder);
         utils.createDirectoryIfNecessary(tempFolder);
-        var cordovaApp = path.join(tempFolder, "helloCordova");
+        var cordovaApp: string = path.join(tempFolder, "helloCordova");
 
         return TacoPackageLoader.lazyRequire<typeof Cordova>("cordova", "cordova@" + vcordova).then(function (cordova: typeof Cordova): Q.Promise<any> {
             return cordova.raw.create(cordovaApp);
@@ -58,19 +58,19 @@ class SelfTest {
                 throw err;
             }).then(function (): Q.Promise<any> {
             var pingInterval: number = 5000;
-            var maxPings = 10;
-            var vcli = require("../package.json").version;
-            var cfg = "debug";
-            var buildOptions = deviceBuild ? "--device" : "--emulator";
+            var maxPings: number = 10;
+            var vcli: string = require("../package.json").version;
+            var cfg: string = "debug";
+            var buildOptions: string = deviceBuild ? "--device" : "--emulator";
 
             var tgzProducingStream: NodeJS.ReadableStream = null;
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-            var cordovaAppDirReader = new fstream.Reader(<fstream.IReaderProps> { path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
+            var cordovaAppDirReader: fstream.Reader = new fstream.Reader(<fstream.IReaderProps> { path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
             tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
-            var deferred = Q.defer();
+            var deferred: Q.Deferred<any> = Q.defer();
 
-            var buildUrl = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
+            var buildUrl: string = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             tgzProducingStream.pipe(request.post(<request.Options> { url: buildUrl, agent: agent }, function (submitError: any, submitResponse: any, submitBody: any): void {
                 if (submitError) {
@@ -78,14 +78,14 @@ class SelfTest {
                     return;
                 }
 
-                var buildingUrl = submitResponse.headers["content-location"];
+                var buildingUrl: string = submitResponse.headers["content-location"];
                 if (!buildingUrl) {
                     deferred.reject(new Error(submitBody));
                     return;
                 }
 
-                var i = 0;
-                var ping = setInterval(function (): void {
+                var i: number = 0;
+                var ping: NodeJS.Timer = setInterval(function (): void {
                     i++;
                     Logger.log(util.format("%d...", i));
                     // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
@@ -95,7 +95,7 @@ class SelfTest {
                             deferred.reject(statusError);
                         }
 
-                        var build = JSON.parse(statusBody);
+                        var build: any = JSON.parse(statusBody);
                         if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
                             clearInterval(ping);
                             deferred.reject(new Error("Build Failed: " + statusBody));
@@ -103,10 +103,10 @@ class SelfTest {
                             clearInterval(ping);
 
                             if (deviceBuild) {
-                                var downloadUrl = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
-                                var buildNumber = build["buildNumber"];
-                                var downloadFile = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
-                                var writeStream = fs.createWriteStream(downloadFile);
+                                var downloadUrl: string = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
+                                var buildNumber: any = build["buildNumber"];
+                                var downloadFile: string = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
+                                var writeStream: fs.WriteStream = fs.createWriteStream(downloadFile);
                                 writeStream.on("error", function (err: Error): void {
                                     deferred.reject(err);
                                 });

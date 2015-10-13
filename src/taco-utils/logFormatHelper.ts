@@ -12,7 +12,7 @@
 import assert = require ("assert");
 /* tslint:disable:no-var-requires */
 // Special case to allow using color package with index signature for style rules
-var colors = require("colors/safe");
+var colors: any = require("colors/safe");
 /* tslint:enable:no-var-requires */
 import os = require ("os");
 import util = require ("util");
@@ -127,7 +127,7 @@ module TacoUtility {
         }
 
         public static isFormattedString(msg: string): boolean {
-            var regex = new RegExp(LogFormatHelper.TAG_REGEX, "gm");
+            var regex: RegExp = new RegExp(LogFormatHelper.TAG_REGEX, "gm");
             return regex.test(msg);
         }
 
@@ -141,7 +141,7 @@ module TacoUtility {
 
         private static forEachTagMatch(msg: string, callback: (tag: string, isStartTag: boolean, tagStartIndex: number, tagEndIndex: number) => void): void {
             // regex to match again all start/end tags strictly without spaces
-            var regex = new RegExp(LogFormatHelper.TAG_REGEX, "gm");
+            var regex: RegExp = new RegExp(LogFormatHelper.TAG_REGEX, "gm");
 
             // iterate over all start/end tags <foo>, </foo> 
             // push start tags on stack and remove start tags when end tags are encountered

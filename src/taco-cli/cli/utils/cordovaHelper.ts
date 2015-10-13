@@ -9,6 +9,7 @@
 "use strict";
 
 import domain = require("domain");
+import os = require("os");
 import path = require ("path");
 import Q = require ("q");
 
@@ -25,7 +26,7 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 class CordovaHelper {
     private static CORDOVA_NPM_PACKAGE_NAME: string = "cordova";
     // Cordova's known parameters
-    private static CORDOVA_BOOLEAN_PARAMETERS =
+    private static CORDOVA_BOOLEAN_PARAMETERS: any =
     {
         verbose: Boolean,
         version: Boolean,
@@ -44,7 +45,7 @@ class CordovaHelper {
         nobuild: Boolean,
         list: Boolean
     };
-    private static CORDOVA_VALUE_PARAMETERS =
+    private static CORDOVA_VALUE_PARAMETERS: any =
     {
         "copy-from": String,
         "link-to": path,
@@ -53,6 +54,8 @@ class CordovaHelper {
         archs: String,
         target: String
     };
+
+    private static globalCordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
 
     /**
      * Prepare the cordovaConfig parameter. This logic is taken directly from cordova and adapted to our CLI.
@@ -94,7 +97,7 @@ class CordovaHelper {
         }
 
         // If the user specified custom www assets, adjust the cordovaConfig
-        var customWww = parameters.copyFrom || parameters.linkTo;
+        var customWww: string = parameters.copyFrom || parameters.linkTo;
 
         if (customWww) {
             if (customWww.indexOf("http") === 0) {
@@ -126,8 +129,8 @@ class CordovaHelper {
      * Note that this assumes that all arguments after a "--" are not for this command, but something else and so should be passed on.
      * With a command like "taco build --debug --remote -- ios android" this assumption isn't quite true
      */
-    public static toCordovaCliArguments(commandData: commands.ICommandData, platform: string = null): string[] {
-        var cordovaArgs: string[] = platform ? [platform] : commandData.remain;
+    public static toCordovaCliArguments(commandData: commands.ICommandData, platforms: string[] = null): string[] {
+        var cordovaArgs: string[] = platforms ? platforms : commandData.remain;
         Object.keys(CordovaHelper.CORDOVA_BOOLEAN_PARAMETERS).forEach(function (key: string): void {
             if (commandData.options[key]) {
                 cordovaArgs.push("--" + key);
@@ -145,14 +148,14 @@ class CordovaHelper {
         return cordovaArgs.concat(additionalArguments);
     }
 
-    public static toCordovaRunArguments(commandData: commands.ICommandData, platform: string = null): Cordova.ICordovaRawOptions {
+    public static toCordovaRunArguments(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
         // Run, build, emulate, prepare and compile all use the same format at the moment
-        return CordovaHelper.toCordovaArgumentsInternal(commandData, platform);
+        return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
     }
 
-    public static toCordovaBuildArguments(commandData: commands.ICommandData, platform: string = null): Cordova.ICordovaRawOptions {
+    public static toCordovaBuildArguments(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
         // Run, build, emulate, prepare and compile all use the same format at the moment
-        return CordovaHelper.toCordovaArgumentsInternal(commandData, platform);
+        return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
     }
 
     public static editConfigXml(projectInfo: projectHelper.IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
@@ -292,8 +295,8 @@ class CordovaHelper {
                     cordova.on("log", console.log);
                 }
 
-                var dom = domain.create();
-                var deferred = Q.defer<T>();
+                var dom: domain.Domain = domain.create();
+                var deferred: Q.Deferred<T> = Q.defer<T>();
 
                 dom.on("error", function (err: any): void {
                     deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandUnhandledException, err));
@@ -315,12 +318,26 @@ class CordovaHelper {
             });
     }
 
+    public static getCordovaExecutable(): Q.Promise<string> {
+        return projectHelper.getProjectInfo()
+            .then(function (projectInfo: projectHelper.IProjectInfo): string | Q.Promise<string> {
+                if (projectInfo.cordovaCliVersion) {
+                    return packageLoader.lazyRun(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion, "cordova");
+                } else {
+                    return CordovaHelper.globalCordovaCommandName;
+                }
+            })
+            .catch(function (err: string): string{
+                return CordovaHelper.globalCordovaCommandName;
+            });
+    }
+
     /**
      * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
      */
-    private static toCordovaArgumentsInternal(commandData: commands.ICommandData, platform: string = null): Cordova.ICordovaRawOptions {
+    private static toCordovaArgumentsInternal(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
         var opts: Cordova.ICordovaRawOptions = {
-            platforms: platform ? [platform] : commandData.remain,
+            platforms: platforms ? platforms : commandData.remain,
             options: [],
             verbose: commandData.options["verbose"] || false,
             silent: commandData.options["silent"] || false,
@@ -332,7 +349,7 @@ class CordovaHelper {
         // calling into platform code should be dealing with this based
         // on the parsed args object.
         var downstreamArgs: string[] = [];
-        var argNames = ["debug", "release", "device", "emulator", "nobuild", "list"];
+        var argNames: string[] = ["debug", "release", "device", "emulator", "nobuild", "list"];
         argNames.forEach(function (flag: string): void {
             if (commandData.options[flag]) {
                 downstreamArgs.push("--" + flag);

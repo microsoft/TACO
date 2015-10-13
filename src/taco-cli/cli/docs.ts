@@ -29,7 +29,7 @@ class Documentation extends commands.TacoCommandBase {
 
     public run(data: commands.ICommandData): Q.Promise<any> {
         // This implementation is based on "npm docs": https://github.com/npm/npm/blob/master/lib/docs.js
-        var link = resources.getString("TacoDocumentationLink");
+        var link: string = resources.getString("TacoDocumentationLink");
         opener(link);
         return Q.resolve({});
     }

@@ -120,7 +120,7 @@ gulp.task("tslint", function(): Q.Promise<any> {
 });
 
 /* Task to run tests */
-gulp.task("run-tests", ["install-build"], function (): Q.Promise<any> {
+gulp.task("run-tests", ["install-build", "tslint"], function (): Q.Promise<any> {
     return gulpUtils.runAllTests(tacoModules, buildConfig.buildPackages);
 });
 
