@@ -41,6 +41,7 @@ module InstallerUtils {
 }
 
 class InstallerUtils {
+    private static pathName = os.platform() === "win32" ? "Path" : "PATH";
     /**
      * Verifies if the specified file is valid by comparing its sha1 signature and its size in bytes with the provided expectedSha1 and expectedBytes.
      *
@@ -144,7 +145,7 @@ class InstallerUtils {
     public static mustSetSystemVariable(name: string, value: string, logger: ILogger): Q.Promise<boolean> {
         if (!process.env[name]) {
             return Q.resolve(true);
-        } else if (path.resolve(process.env[name]) === path.resolve(value)) {
+        } else if (path.resolve(utils.expandEnvironmentVariables(process.env[name])) === path.resolve(utils.expandEnvironmentVariables(value))) {
             // If this environment variable is already defined, but it is already set to what we need, we don't need to set it again
             return Q.resolve(false);
         }
@@ -196,9 +197,13 @@ class InstallerUtils {
      *
      * @return {boolean} A boolean set to true if the Path system variable already contains the specified value in one of its segments
      */
-    public static pathContains(valueToCheck: string, pathValue: string = process.env["Path"]): boolean {
+    public static pathContains(valueToCheck: string, pathValue: string = process.env[InstallerUtils.pathName]): boolean {
+        if (!pathValue) {
+            return false;
+        }
+
         return pathValue.split(path.delimiter).some(function (segment: string): boolean {
-            return path.resolve(segment) === path.resolve(valueToCheck);
+            return path.resolve(utils.expandEnvironmentVariables(segment)) === path.resolve(utils.expandEnvironmentVariables(valueToCheck));
         });
     }
 

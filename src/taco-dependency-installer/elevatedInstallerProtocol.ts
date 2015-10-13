@@ -17,12 +17,16 @@ module ElevatedInstallerProtocol {
      * codes, as well as the possible outcomes of our child-process tree that has 3 levels of depth.
      *
      * Note: on Unix, return codes are limited to 1 byte, so these codes need to stay below 256.
+     *
+     * Powershell exit codes (just 0 and 1): http://blogs.msdn.com/b/powershell/archive/2006/10/14/windows-powershell-exit-codes.aspx (article is old, but I couldn't find evidence that it has changed)
+     * Node.js exit codes (0 through 10, 12 and 128): https://github.com/nodejs/node-v0.x-archive/blob/master/doc/api/process.markdown#exit-codes
      */
     export enum ExitCode {
         Success = 0,
         CompletedWithErrors = 12,
         NoAdminRights = 33,
         CouldNotConnect = 37,
+        RefusedPrompt = 42,
         FatalError = 108
     }
 

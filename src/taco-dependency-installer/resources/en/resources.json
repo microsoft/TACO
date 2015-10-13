@@ -11,6 +11,10 @@
     "_InstallDestination.comment": "Label and value for the installation directory of a dependency. {0} is the path where the dependency will be installed.",
     "DependencyLicense": "License terms: <link>{0}</link>",
     "_DependencyLicense.comment": "Label and value for the url to the license terms of a dependency. {0} is the url.",
+    "DownloadSize": "Download size: {0} MB (approximately)",
+    "_DownloadSize.comment": "Label and value for the estimated download size of the dependency. {0} is the size in MB.",
+    "DiskSize": "Disk size: {0} MB (approximately)",
+    "_DiskSize.comment": "Label and value for the estimated disk size of the dependency. {0} is the size in MB.",
     "InstallingDependenciesHeader": "<title>The following dependencies will be installed on your system:</title>",
     "_InstallingDependenciesHeader.comment": "Message displayed at the top of the list of dependencies that are going to be installed by TACO",
     "ModifyInstallPaths": "Before proceeding with the installation, you can modify the install location of the dependencies by editing the configuration file located at: {0}",
@@ -26,9 +30,9 @@
     "RestartCommandPrompt": "<br/><warn>Please restart the command prompt to ensure that any newly installed software can be used correctly.</warn>",
     "_RestartCommandPrompt.comment": "Message shown after running the dependency installer if at least 1 dependency was successfully installed.",
 
-    "YesExampleString": "[yes]: ",
+    "YesExampleString": "[y/n]: ",
     "_YesExampleString.comment": "When the user gets prompted to type 'yes' to accept a prompt, this will be shown as an example of what the user has to type. This must be localized to exactly the localized YesString string in this file, surrounded with square brackets.",
-    "YesString": "yes",
+    "YesString": "y",
     "_YesString.comment": "The string that the user needs to type to confirm various prompts during the installation. This string is not shown to the user; this string is what we use internally to compare with the user's input during prompts. So, even though it is not user facing, it still needs to be localized.",
 
     "InstallCompletedWithErrors": "There were some errors while installing the third-party dependencies. Please see above for details.",
@@ -44,8 +48,8 @@
     "_UnsupportedPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform.",
     "InstallationErrors": "There were some errors in the isntallation process. Please see above for details.",
     "_InstallationErrors.comment": "Message shown after all dependencies have been installed and there were errors.",
-    "LicenseAgreementError": "Error: User refused to proceed with the installation.",
-    "_LicenseAgreementError.comment": "Error shown when the user doesn't type the correct acceptance string.",
+    "LicenseAgreementRefused": "You have chosen not to proceed. Nothing has been installed on your system.",
+    "_LicenseAgreementRefused.comment": "Message shown when the user doesn't type the correct acceptance string when prompted to proceed with the installation.",
     "FileCorruptError": "Error: There is a problem with the downloaded installer file. Please try again later.",
     "_FileCorruptError.comment": "Error shown when the downloaded installer is corrupt or invalid.",
     "ErrorDeletingInstallConfig": "Error: Unable to delete the existing installation configuration file located at {0}.",
@@ -78,6 +82,8 @@
 
     "SystemVariableExists": "<warn>'{0}' environment variable already exists. Overwriting it may cause your current software to stop working correctly. Not overwriting it may result in your Cordova project not building correctly. Do you want to overwrite the existing '{0}'?</warn>",
     "_SystemVariableExists.comment": "Warning shown when we attempt to set an environment variable, but one with the same name already exists. {0} is the name of the variable.",
+    "SystemVariableExistsDarwin": "Cannot set '{0}' environment variable, because it already exists. To ensure Cordova can correctly build your project, please update the '{0}' variable to point to the following location:<br/>{1}",
+    "_SystemVariableExistsDarwin.comment": "Warning shown when we attempt to set an environment variable, but one with the same name already exists. {0} is the name of the variable.",
     "SkipOverwriteWarning": "<warn>To ensure your Cordova project builds correctly, please set the '{0}' environment variable to the following value: {1}</warn>",
     "_SkipOverwriteWarning.comment": "Warning shown when the user opts to skip overwriting an existing environment variable. {0} is the variable name, {1} is the value we wanted to set it to.",
 

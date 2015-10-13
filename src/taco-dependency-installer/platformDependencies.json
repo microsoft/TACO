@@ -15,6 +15,8 @@
                             "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
                             "bytes": 187480692,
                             "installDestination": "%programfiles%/Android",
+                            "downloadSize": 493,
+                            "diskSize": 811,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -27,6 +29,8 @@
                             "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
                             "bytes": 187480692,
                             "installDestination": "%programfiles(x86)%/Android",
+                            "downloadSize": 493,
+                            "diskSize": 811,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -41,6 +45,8 @@
                             "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
                             "bytes": 98330824,
                             "installDestination": "$HOME/Library/Android",
+                            "downloadSize": 391,
+                            "diskSize": 689,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -53,6 +59,8 @@
                             "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
                             "bytes": 98330824,
                             "installDestination": "$HOME/Library/Android",
+                            "downloadSize": 391,
+                            "diskSize": 689,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -79,6 +87,8 @@
                     "darwin": {
                         "ia32": {
                             "installSource": "ios-deploy",
+                            "downloadSize": 0.262,
+                            "diskSize": 0.262,
                             "steps": {
                                 "download": false,
                                 "install": true,
@@ -88,6 +98,8 @@
                         },
                         "x64": {
                             "installSource": "ios-deploy",
+                            "downloadSize": 0.262,
+                            "diskSize": 0.262,
                             "steps": {
                                 "download": false,
                                 "install": true,
@@ -108,6 +120,8 @@
                     "darwin": {
                         "ia32": {
                             "installSource": "ios-sim",
+                            "downloadSize": 0.216,
+                            "diskSize": 0.216,
                             "steps": {
                                 "download": false,
                                 "install": true,
@@ -117,6 +131,8 @@
                         },
                         "x64": {
                             "installSource": "ios-sim",
+                            "downloadSize": 0.216,
+                            "diskSize": 0.216,
                             "steps": {
                                 "download": false,
                                 "install": true,
@@ -141,6 +157,8 @@
                             "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
                             "bytes": 129674656,
                             "installDestination": "%programfiles%/Java/jdk1.7.0_55",
+                            "downloadSize": 130,
+                            "diskSize": 218,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -153,6 +171,8 @@
                             "sha1": "bb244a96e58724415380877230d2f6b466e9e581",
                             "bytes": 129674656,
                             "installDestination": "%programfiles(x86)%/Java/jdk1.7.0_55",
+                            "downloadSize": 130,
+                            "diskSize": 218,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -168,6 +188,8 @@
                             "installSource": "http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-macosx-x64.dmg",
                             "sha1": "586012489bd31e56c4571a585b5ee66f4be4d17d",
                             "bytes": 232764982,
+                            "downloadSize": 233,
+                            "diskSize": 517,
                             "steps": {
                                 "download": true,
                                 "install": true,
