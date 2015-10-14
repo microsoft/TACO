@@ -35,10 +35,12 @@ import RemoteMock = require ("./utils/remoteMock");
 import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import TacoUtility = require ("taco-utils");
 import ms = require ("./utils/memoryStream");
+import commandHelper = require ("./utils/commandHelper");
+import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
 
 import utils = TacoUtility.UtilHelper;
 
-var remote: RemoteMod = new RemoteMod();
+var remote: TacoCommandBase = commandHelper.getCommand("remote");
 
 describe("taco remote", function(): void {
     var testHome: string = path.join(os.tmpdir(), "taco-cli", "setup");

@@ -28,8 +28,6 @@ import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 import util = require ("util");
 
-import buildMod = require ("../cli/build");
-import createMod = require ("../cli/create");
 import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
 import mockCordova = require ("./utils/mockCordova");
@@ -45,8 +43,11 @@ import TacoUtility = require ("taco-utils");
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
 
-var build: buildMod = new buildMod();
-var create: createMod = new createMod();
+import commandHelper = require ("./utils/commandHelper");
+import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
+
+var build: TacoCommandBase = commandHelper.getCommand("build");
+var create: TacoCommandBase = commandHelper.getCommand("create");
 
 interface IExpectedRequest {
     expectedUrl: string;

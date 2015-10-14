@@ -24,16 +24,17 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 
-import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import PlatformHelper = require ("../cli/utils/platformHelper");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
+import commandHelper = require ("./utils/commandHelper");
+import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
 
 import utils = TacoUtility.UtilHelper;
 
-var create: createMod = new createMod();
+var create: TacoCommandBase = commandHelper.getCommand("create");
 describe("taco PlatformHelper", function (): void {
     var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "PlatformHelper");
     var originalCwd: string;

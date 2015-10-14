@@ -27,10 +27,12 @@ import tacoUtils = require ("taco-utils");
 import Help = require ("../cli/help");
 import ms = require ("./utils/memoryStream");
 
-import commands = tacoUtils.Commands.ICommandData;
+import ICommandData = tacoUtils.Commands.ICommandData;
+import commandHelper = require ("./utils/commandHelper");
+import TacoCommandBase = tacoUtils.Commands.TacoCommandBase;
 
 describe("help for a command", function (): void {
-    var help: Help = new Help();
+    var help: TacoCommandBase = commandHelper.getCommand("help");
     // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
     // stdoutWrite just doesn't work
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
@@ -38,7 +40,7 @@ describe("help for a command", function (): void {
     var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
-        var data: commands = {
+        var data: ICommandData = {
             options: {},
             original: [command],
             remain: [command]
