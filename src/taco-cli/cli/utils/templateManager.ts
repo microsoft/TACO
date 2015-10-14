@@ -72,13 +72,10 @@ class TemplateManager {
         ".gitattributes"
     ];
     private static TEMPORARY_TEMPLATE_PREFIX: string = "taco_template_";
+    private static temporaryTemplateDir: string;   // The temporary directory to git clone / extract templates to
 
     private kitHelper: TacoKits.IKitHelper = null;
     private templateName: string = null;
-
-    constructor(kits: TacoKits.IKitHelper) {
-        this.kitHelper = kits;
-    }
 
     private static performTokenReplacements(projectPath: string, appId: string, appName: string): Q.Promise<any> {
         var replaceParams: Replace.IReplaceParameters = {
@@ -104,20 +101,9 @@ class TemplateManager {
     }
 
     private static cleanTemporaryTemplateFolder(folderToDelete: string): Q.Promise<any> {
-        // Detect whether we need to clean just this folder (git template) or the parent folder (taco kits template)
-        // For that, we look for the taco template prefix; if we don't find it, it means we need to delete the parent
-        var mustDeleteParent: boolean = path.basename(folderToDelete).indexOf(TemplateManager.TEMPORARY_TEMPLATE_PREFIX) === -1;
-
-        if (mustDeleteParent) {
-            // Make sure the parent starts with the taco template prefix
-            var parentFolder: string = path.dirname(folderToDelete);
-
-            if (path.basename(parentFolder).indexOf(TemplateManager.TEMPORARY_TEMPLATE_PREFIX) === -1) {
-                // Neither the requested folder nor its parent appear to be a temporary taco template; don't do anything
-                return Q.resolve({});
-            }
-
-            folderToDelete = parentFolder;
+        if (path.basename(folderToDelete).indexOf(TemplateManager.TEMPORARY_TEMPLATE_PREFIX) === -1) {
+            // The requested folder does not start with the TACO template prefix, this may not be a TACO template so don't delete it
+            return Q.resolve({});
         }
 
         // Attempt to clean the temporary template folder
@@ -175,20 +161,20 @@ class TemplateManager {
         return cordovaWrapper.create(cliVersion, cordovaParameters);
     }
 
-    private static createUnusedFolderPath(parentDir: string): string {
-        var dirPath: string = path.join(parentDir, TemplateManager.TEMPORARY_TEMPLATE_PREFIX + crypto.pseudoRandomBytes(20).toString("hex"));
+    private static createUnusedFolderPath(): string {
+        var dirPath: string = path.join(TemplateManager.temporaryTemplateDir, TemplateManager.TEMPORARY_TEMPLATE_PREFIX + crypto.pseudoRandomBytes(20).toString("hex"));
 
         while (fs.existsSync(dirPath)) {
-            dirPath = path.join(parentDir, TemplateManager.TEMPORARY_TEMPLATE_PREFIX + crypto.pseudoRandomBytes(20).toString("hex"));
+            dirPath = path.join(TemplateManager.temporaryTemplateDir, TemplateManager.TEMPORARY_TEMPLATE_PREFIX + crypto.pseudoRandomBytes(20).toString("hex"));
         }
 
         return dirPath;
     }
 
-    private static gitClone(repo: string, cloneParentDir: string): Q.Promise<string> {
+    private static gitClone(repo: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
-        var destination: string = TemplateManager.createUnusedFolderPath(cloneParentDir);
+        var destination: string = TemplateManager.createUnusedFolderPath();
         var command: string = "git";
         var args: string[] = [
             "clone",
@@ -197,7 +183,7 @@ class TemplateManager {
             repo,
             destination
         ];
-        var options: childProcess.IExecOptions = { cwd: cloneParentDir, stdio: "inherit" }; // Set cwd for the git child process to be in the temporary dir to ensure any created log or other files get created there
+        var options: childProcess.IExecOptions = { cwd: TemplateManager.temporaryTemplateDir, stdio: "inherit" };   // Set cwd for the git child process to be in the temporary dir to ensure any logs or other files get created there
 
         childProcess.spawn(command, args, options)
             .on("error", function (err: any): void {
@@ -219,11 +205,16 @@ class TemplateManager {
         return deferred.promise;
     }
 
-    private static acquireFromGit(templateUrl: string, cloneParentDir: string): Q.Promise<string> {
+    private static acquireFromGit(templateUrl: string): Q.Promise<string> {
         loggerHelper.logSeparatorLine();
         logger.log(resources.getString("CommandCreateGitTemplateHeader"));
 
-        return TemplateManager.gitClone(templateUrl, cloneParentDir);
+        return TemplateManager.gitClone(templateUrl);
+    }
+
+    constructor(kits: TacoKits.IKitHelper, tempTemplateDir: string = os.tmpdir()) {
+        this.kitHelper = kits;
+        TemplateManager.temporaryTemplateDir = tempTemplateDir;
     }
 
     /**
@@ -308,28 +299,28 @@ class TemplateManager {
             });
     }
 
-    private acquireTemplate(templateId: string, kitId: string, tempTemplateDir: string = os.tmpdir()): Q.Promise<string> {
+    private acquireTemplate(templateId: string, kitId: string): Q.Promise<string> {
         if (/^https?:\/\//.test(templateId)) {
             this.templateName = resources.getString("CommandCreateGitTemplateName");
 
-            return TemplateManager.acquireFromGit(templateId, tempTemplateDir)
+            return TemplateManager.acquireFromGit(templateId)
                 .then(function (templateLocation: string): string {
                     loggerHelper.logSeparatorLine();
 
                     return templateLocation;
                 });
         } else {
-            return this.acquireFromTacoKits(templateId, kitId, tempTemplateDir);
+            return this.acquireFromTacoKits(templateId, kitId);
         }
     }
 
-    private acquireFromTacoKits(templateId: string, kitId: string, tempTemplateDir: string): Q.Promise<string> {
+    private acquireFromTacoKits(templateId: string, kitId: string): Q.Promise<string> {
         var self: TemplateManager = this;
 
         return this.kitHelper.getTemplateOverrideInfo(kitId, templateId)
             .then(function (templateOverrideForKit: TacoKits.ITemplateOverrideInfo): Q.Promise<string> {
                 var templateInfo: TacoKits.ITemplateInfo = templateOverrideForKit.templateInfo;
-                var extractDestination: string = TemplateManager.createUnusedFolderPath(tempTemplateDir);
+                var extractDestination: string = TemplateManager.createUnusedFolderPath();
 
                 if (!fs.existsSync(templateInfo.url)) {
                     return Q.reject<string>(errorHelper.get(TacoErrorCodes.CommandCreateTemplatesUnavailable));
@@ -343,8 +334,8 @@ class TemplateManager {
 
                 templateZip.extractAllTo(extractDestination);
 
-                // For taco-kits templates, the template items are not at the root of the archive, but under a root folder with the template ID as the name
-                return Q.resolve(path.join(extractDestination, templateId));
+                // Return the extract destination as the template source path
+                return Q.resolve(extractDestination);
             });
     }
 }
