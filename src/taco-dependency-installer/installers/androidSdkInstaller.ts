@@ -21,6 +21,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import request = require ("request");
+import util = require ("util");
 import wrench = require ("wrench");
 
 import InstallerBase = require ("./installerBase");
@@ -35,11 +36,9 @@ import utilHelper = tacoUtils.UtilHelper;
 
 class AndroidSdkInstaller extends InstallerBase {
     private static ANDROID_HOME_NAME: string = "ANDROID_HOME";
-    private static ANDROID_PACKAGES: string[] = [
-        "tools",
+    private static ANDROID_PACKAGES: string[] = [    // IDs of Android Packages to install. To get the list of available packages, run "android list sdk -u -a -e"
+        // "tools",  // Android SDK comes by default with the tools package, so there is no need to update it. In the future, if we feel we want dependency installer to always install the latest Tools package, then uncomment this.
         "platform-tools",
-        "extra-android-support",
-        "extra-android-m2repository",
         "build-tools-19.1.0",
         "build-tools-21.1.2",
         "build-tools-22.0.1",
@@ -122,31 +121,76 @@ class AndroidSdkInstaller extends InstallerBase {
 
         // Initialize values
         var androidHomeValue: string = path.join(this.installDestination, "android-sdk-macosx");
-        var addToPathTools: string = "$" + AndroidSdkInstaller.ANDROID_HOME_NAME + "/tools/";
-        var addToPathPlatformTools: string = "$" + AndroidSdkInstaller.ANDROID_HOME_NAME + "/platform-tools/";
-        var newPath: string = "\"$PATH:" + addToPathTools + ":" + addToPathPlatformTools + "\"";
-        var appendToBashProfile: string = "\n# Android SDK\nexport ANDROID_HOME=" + androidHomeValue + "\nexport PATH=" + newPath;
-        var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
-        var updateCommand: string = "echo '" + appendToBashProfile + "' >> '" + bashProfilePath + "'";
-        var mustChown: boolean = !fs.existsSync(bashProfilePath);
+        var fullPathTools: string = path.join(androidHomeValue, "tools/");
+        var fullPathPlatformTools: string = path.join(androidHomeValue, "platform-tools/");
+        var shortPathTools: string = util.format("$%s%stools", AndroidSdkInstaller.ANDROID_HOME_NAME, path.sep);
+        var shortPathPlatformTools: string = util.format("$%s%splatform-tools", AndroidSdkInstaller.ANDROID_HOME_NAME, path.sep);
+        var addToPath: string = "";
+        var exportPathLine: string = "";
+        var exportAndroidHomeLine: string = "";
+        var updateCommand: string = "";
+        var useShortPaths: boolean = true;
 
+        // Save Android home value
         this.androidHomeValue = androidHomeValue;
 
-        childProcess.exec(updateCommand, (error: Error, stdout: Buffer, stderr: Buffer) => {
-            if (error) {
-                this.telemetry
-                    .add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", /*isPii*/ false)
-                    .addError(error);
-                deferred.reject(error);
-            } else {
-                // If .bash_profile didn't exist before, make sure the owner is the current user, not root
-                if (mustChown) {
-                    fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
-                }
+        // Check if we need to add an ANDROID_HOME value
+        if (!process.env[AndroidSdkInstaller.ANDROID_HOME_NAME]) {
+            exportAndroidHomeLine = util.format("%sexport %s=\"%s\"", os.EOL, AndroidSdkInstaller.ANDROID_HOME_NAME, androidHomeValue);
+        } else {
+            var existingSdkHome: string = process.env[AndroidSdkInstaller.ANDROID_HOME_NAME];
 
-                deferred.resolve({});
+            // Process the existing ANDROID_HOME to resolve to an absolute path, including processing ~ notation and environment variables
+            existingSdkHome = path.resolve(utilHelper.expandEnvironmentVariables(existingSdkHome));
+
+            if (existingSdkHome !== androidHomeValue) {
+                // A conflicting ANDROID_HOME already exists, warn the user, but don't add our own ANDROID_HOME
+                this.logger.logWarning(resources.getString("SystemVariableExistsDarwin", AndroidSdkInstaller.ANDROID_HOME_NAME, this.androidHomeValue));
+                useShortPaths = false;
             }
-        });
+        }
+
+        // Check if we need to update PATH
+        if (!installerUtils.pathContains(fullPathTools)) {
+            addToPath += path.delimiter + (useShortPaths ? shortPathTools : fullPathTools);
+        }
+
+        if (!installerUtils.pathContains(fullPathPlatformTools)) {
+            addToPath += path.delimiter + (useShortPaths ? shortPathPlatformTools : fullPathPlatformTools);
+        }
+
+        if (addToPath) {
+            exportPathLine = util.format("%sexport PATH=\"$PATH%s\"", os.EOL, addToPath);
+        }
+
+        // Check if we need to update .bash_profile
+        var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
+        var mustChown: boolean = !fs.existsSync(bashProfilePath);
+
+        if (exportAndroidHomeLine || exportPathLine) {
+            updateCommand = util.format("echo '%s# Android SDK%s%s' >> '%s'", os.EOL, exportAndroidHomeLine, exportPathLine, bashProfilePath);
+        }
+
+        // Perform the update if necessary
+        if (updateCommand) {
+            childProcess.exec(updateCommand, (error: Error, stdout: Buffer, stderr: Buffer) => {
+                if (error) {
+                    this.telemetry
+                        .add("error.description", "ErrorOnChildProcess on updateVariablesDarwin", /*isPii*/ false)
+                        .addError(error);
+                    deferred.reject(error);
+                } else {
+                    // If .bash_profile didn't exist before, make sure the owner is the current user, not root
+                    if (mustChown) {
+                        fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
+                    }
+
+                    deferred.resolve({});
+                }
+            });
+        } else {
+            deferred.resolve({});
+        }
 
         return deferred.promise;
     }
@@ -154,9 +198,14 @@ class AndroidSdkInstaller extends InstallerBase {
     protected postInstallDarwin(): Q.Promise<any> {
         var self: AndroidSdkInstaller = this;
 
-        return this.addExecutePermission()
+        // We need to add execute permission to the android executable in order to run it
+        return this.addExecutePermission(path.join(this.androidHomeValue, "tools", "android"))
             .then(function (): Q.Promise<any> {
                 return self.postInstallDefault();
+            })
+            .then(function (): Q.Promise<any> {
+                // We need to add execute permissions for the Gradle wrapper
+                return self.addExecutePermission(path.join(self.androidHomeValue, "tools", "templates", "gradle", "wrapper", "gradlew"));
             });
     }
 
@@ -198,9 +247,9 @@ class AndroidSdkInstaller extends InstallerBase {
         return Q.resolve({});
     }
 
-    private addExecutePermission(): Q.Promise<any> {
+    private addExecutePermission(fileFullPath: string): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var command: string = "chmod a+x " + path.join(this.androidHomeValue, "tools", "android");
+        var command: string = util.format("chmod a+x \"%s\"", fileFullPath);
 
         childProcess.exec(command, (error: Error, stdout: Buffer, stderr: Buffer) => {
             if (error) {
@@ -250,16 +299,7 @@ class AndroidSdkInstaller extends InstallerBase {
             AndroidSdkInstaller.ANDROID_PACKAGES.join(",")
         ];
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = null;
-
-        if (os.platform() === "darwin") {
-            cp = childProcess.spawn(command, args, {
-                uid: parseInt(process.env.SUDO_UID, 10),
-                gid: parseInt(process.env.SUDO_GID, 10)
-            });
-        } else {
-            cp = childProcess.spawn(command, args);
-        }
+        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID, 10), gid: parseInt(process.env.SUDO_GID, 10) }) : childProcess.spawn(command, args);
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData: string = data.toString();
@@ -297,9 +337,9 @@ class AndroidSdkInstaller extends InstallerBase {
     private postInstallDefault(): Q.Promise<any> {
         var self: AndroidSdkInstaller = this;
         return this.installAndroidPackages()
-        .then(function (): Q.Promise<any> {
-            return self.killAdb();
-        });
+            .then(function (): Q.Promise<any> {
+                return self.killAdb();
+            });
     }
 }
 

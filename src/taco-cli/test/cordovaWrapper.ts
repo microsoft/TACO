@@ -59,7 +59,8 @@ describe("cordovaWrapper", () => {
                     return Q.reject<mockCordova.MockCordova510>(new Error("Expected to load cordova package"));
                 }
                 return Q(cordova);
-            }
+            },
+            lazyRun: (packageName: string, packageId: string, commandName: string): Q.Promise<string> => Q("cordova")
         };
         ProjectHelper.createJsonFileWithContents(path.join(projectHome, "taco.json"), { "cordova-cli": "4.3.0" })
             .then(() => done(), done);
@@ -94,8 +95,9 @@ describe("cordovaWrapper", () => {
         }).done((): void => done(), done);
     });
 
-    it("should handle problems launching cordova via the command line", (done: MochaDone): void => {
-        CordovaWrapper.cli(["fakeCommand"]).then((): void => {
+    it("should handle problems launching cordova via the command line", function(done: MochaDone): void {
+        this.timeout(120000); // Installing Cordova for the passthrough can take some time
+        CordovaWrapper.cli(["fakeCommand"]).then((): Q.Promise<any> => {
             throw new Error("Should have failed");
         }, (err: TacoError): void => {
             err.errorCode.should.be.equal(TacoErrorCodes.CordovaCommandFailed);

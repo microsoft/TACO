@@ -11,6 +11,7 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
 /// <reference path="../../typings/expressExtensions.d.ts" />
+/// <reference path="../../typings/helmet.d.ts" />
 /// <reference path="../../typings/morgan.d.ts" />
 /// <reference path="../../typings/errorhandler.d.ts" />
 /// <reference path="../../typings/remotebuild.d.ts" />
@@ -19,11 +20,13 @@
 import errorhandler = require ("errorhandler");
 import express = require ("express");
 import fs = require ("fs");
+import helmet = require ("helmet");
 import http = require ("http");
 import https = require ("https");
 import expressLogger = require ("morgan");
 import path = require ("path");
 import Q = require ("q");
+import semver = require ("semver");
 import util = require ("util");
 
 import HostSpecifics = require ("./hostSpecifics");
@@ -51,6 +54,13 @@ class Server {
         var app: Express.Express = express();
         app.use(expressLogger("dev"));
         app.use(errorhandler());
+        if (conf.secure) {
+            app.use(helmet.hsts({ // Using recommended settings from https://certsimple.com/blog/a-plus-node-js-ssl
+                maxAge: 1000 * 60 * 60 * 24 * 365, // one year in milliseconds
+                includeSubdomains: true,
+                force: true
+            }));
+        }
 
         var serverDir: string = conf.serverDir;
         UtilHelper.createDirectoryIfNecessary(serverDir);
@@ -238,10 +248,40 @@ class Server {
                 return Q(certStore);
             }).
             then(function (certStore: HostSpecifics.ICertStore): https.Server {
+                var cipherList: string[] = ["ECDHE-ECDSA-AES256-GCM-SHA384",
+                    "ECDHE-ECDSA-AES128-GCM-SHA256",
+                    "ECDHE-RSA-AES256-SHA384",
+                    "ECDHE-RSA-AES128-SHA256",
+                    "ECDHE-RSA-AES256-SHA",
+                    "ECDHE-RSA-AES128-SHA",
+                    "DHE-RSA-AES256-GCM-SHA384",
+                    "DHE-RSA-AES128-GCM-SHA256",
+                    "DHE-RSA-AES256-SHA256",
+                    "DHE-RSA-AES256-SHA256",
+                    "DHE-RSA-AES128-SHA256",
+                    "DHE-RSA-AES256-SHA",
+                    "DHE-RSA-AES128-SHA",
+                    "!aNULL",
+                    "!eNULL",
+                    "!EXPORT",
+                    "!DES",
+                    "!RC4",
+                    "!MD5",
+                    "!PSK",
+                    "!SRP",
+                    "!CAMELLIA"];
+                // TLS 1.2 is only supported in nodejs version 0.12.0 and greater, but TLS 1.0 is supported in nodejs version 0.10.0 and greater
+                // Prior to 0.10.0 the option is not exposed, and we do not support that.
+                // See https://github.com/nodejs/node/blob/0439a28d519fb6efe228074b0588a59452fc1677/ src / node_crypto.cc#L295 for an example
+                // of where these protocol strings come from / are used.
+                var protocol: string = semver.gte(process.versions.node, "0.12.0") ? "TLSv1_2_server_method" : "TLSv1_server_method";
                 var sslSettings: https.ServerOptions = {
                     key: certStore.getKey(),
                     cert: certStore.getCert(),
                     ca: certStore.getCA(),
+                    ciphers: cipherList.join(":"),
+                    honorCipherOrder: true,
+                    secureProtocol: protocol,
                     requestCert: true,
                     rejectUnauthorized: false
                 };

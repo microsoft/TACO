@@ -21,7 +21,6 @@ module TacoDependencyInstaller {
         FileCorruptError = 2106,
         FileNotFound = 2107,
         InstallationErrors = 2108,
-        LicenseAgreementError = 2109,
         NoAdminRights = 2110,
         NoPowershell = 2111,
         NoValidInstallOrder = 2112,

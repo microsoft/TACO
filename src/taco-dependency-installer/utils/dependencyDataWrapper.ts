@@ -91,19 +91,9 @@ class DependencyDataWrapper {
      */
     public getInstallerInfo(id: string, version: string, platform: string = process.platform, architecture: string = os.arch()): DependencyInstallerInterfaces.IInstallerData {
         if (this.isSystemSupported(id, version, platform, architecture)) {
-            // We don't want to return the steps declaration, as this is for internal use, so we manually construct an IInstallerData while skipping the steps declaraion
             var infoSource: DependencyInstallerInterfaces.IInstallerData = this.dependencies[id].versions[version][platform][architecture];
-            var infoResult: DependencyInstallerInterfaces.IInstallerData = {
-                installSource: infoSource.installSource,
-                sha1: infoSource.sha1,
-                bytes: infoSource.bytes
-            };
 
-            if (infoSource.installDestination) {
-                infoResult.installDestination = infoSource.installDestination;
-            }
-
-            return infoResult;
+            return JSON.parse(JSON.stringify(infoSource)); // Using JSON.parse and JSON.stringify to clone the object
         }
 
         return null;

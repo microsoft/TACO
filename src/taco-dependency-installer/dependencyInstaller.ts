@@ -108,9 +108,14 @@ module TacoDependencyInstaller {
 
                 telemetry.step("promptUserBeforeInstall");
                 return this.promptUserBeforeInstall()
-                    .then(function (): Q.Promise<number> {
-                        telemetry.step("spawnElevatedInstaller");
-                        return self.spawnElevatedInstaller();
+                    .then(function (acceptedPrompt: boolean): Q.Promise<number> {
+                        if (acceptedPrompt) {
+                            telemetry.step("spawnElevatedInstaller");
+
+                            return self.spawnElevatedInstaller();
+                        } else {
+                            return Q.resolve(installerProtocol.ExitCode.RefusedPrompt);
+                        }
                     })
                     .then(function (exitCode: number): void {
                         telemetry.step("printSummaryLine").add("exitCode", exitCode, /*isPii*/ false);
@@ -318,9 +323,10 @@ module TacoDependencyInstaller {
             });
         }
 
-        private promptUserBeforeInstall(): Q.Promise<any> {
+        private promptUserBeforeInstall(): Q.Promise<boolean> {
             this.buildInstallConfigFile();
 
+            var self = this;
             var needsLicenseAgreement: boolean = this.missingDependencies.some(function (value: IDependency): boolean {
                 // Return true if at least one of the missing dependencies has a license url, false if not
                 return !!value.licenseUrl;
@@ -341,6 +347,17 @@ module TacoDependencyInstaller {
                 if (value.licenseUrl) {
                     logger.log(resources.getString("DependencyLicense", value.licenseUrl));
                 }
+
+                // For download size and disk size, we need to fetch the underlying installer data
+                var installerData: DependencyInstallerInterfaces.IInstallerData = self.dependenciesDataWrapper.getInstallerInfo(value.id, value.version);
+
+                if (installerData.downloadSize) {
+                    logger.log(resources.getString("DownloadSize", installerData.downloadSize));
+                }
+
+                if (installerData.diskSize) {
+                    logger.log(resources.getString("DiskSize", installerData.diskSize));
+                }
             });
 
             logger.logLine();
@@ -356,14 +373,14 @@ module TacoDependencyInstaller {
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
-                    if (answer === resources.getString("YesString")) {
+                    if (answer.toLocaleLowerCase() === resources.getString("YesString")) {
                         logger.logLine();
                         loggerHelper.logSeparatorLine();
                         logger.logLine();
 
-                        return Q.resolve({});
+                        return Q.resolve(true);
                     } else {
-                        return Q.reject(errorHelper.get(TacoErrorCodes.LicenseAgreementError));
+                        return Q.resolve(false);
                     }
                 });
         }
@@ -527,8 +544,11 @@ module TacoDependencyInstaller {
                 command = "node";
                 args = [];
             } else {
+                // If we launch the process with sudo, we need to use the -E switch, which preserves the environment. By default, sudo clears the environment and replaces it with safe values, which means
+                // the elevated process won't have access to variables such as ANDROID_HOME. We need to have access to those variables in the elevated installer, otherwise we will detect that the env
+                // variables are not set and we will set them again.
                 command = "sudo";
-                args = ["node"];
+                args = ["-E", "node"];
             }
 
             args = args.concat([
@@ -567,6 +587,9 @@ module TacoDependencyInstaller {
                     break;
                 case installerExitCode.FatalError:
                     throw errorHelper.get(TacoErrorCodes.FatalError);
+                case installerExitCode.RefusedPrompt:
+                    logger.log(resources.getString("LicenseAgreementRefused"));
+                    break;
                 default:
                     throw errorHelper.get(TacoErrorCodes.UnknownExitCode);
             }

@@ -697,11 +697,11 @@ describe("taco create", function (): void {
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                         cliVersion: { isPii: false, value: cliVersion },
-                        cordova: { isPii: false, value: "5.2.0" },
-                        "options.cordova": { isPii: false, value: "5.2.0" }
+                        cordova: { isPii: false, value: "4.3.0" },
+                        "options.cordova": { isPii: false, value: "4.3.0" }
             };
 
-            createProjectAndVerifyTelemetryProps([projectPath, "--cordova", "5.2.0"], expected, done);
+            createProjectAndVerifyTelemetryProps([projectPath, "--cordova", "4.3.0"], expected, done);
         });
     });
 });
