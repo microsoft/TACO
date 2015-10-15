@@ -19,8 +19,9 @@ declare module TacoTestsUtils {
 
         class Helper implements TacoUtility.TelemetryGeneratorFactory {
             getTelemetryGenerators(): Generator[];
-            getAllEvents(): TacoUtility.ICommandTelemetryProperties[];
             generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TacoUtility.TelemetryGenerator): T; }): T;
+            // Warning: We have no way of rejecting this promise, so we might get a test timeout if the events are never sent
+            getAllSentEvents(): Q.Promise<TacoUtility.ICommandTelemetryProperties[]>;
         }
     }
 }

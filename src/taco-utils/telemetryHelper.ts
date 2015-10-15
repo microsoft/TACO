@@ -92,13 +92,12 @@ module TacoUtility {
         }
 
         public time<T>(name: string, codeToMeasure: { (): T }): T {
-            var startTime: number[] = process.hrtime();
-            return PromisesUtils.executeAfter(codeToMeasure(),
-                () => this.finishTime(name, startTime),
-                (reason: any) => {
-                    this.addError(reason);
-                    return Q.reject(reason);
-                });
+            var startTime: number[];
+            return PromisesUtils.wrapExecution(
+                () => startTime = process.hrtime(), // Before
+                codeToMeasure,
+                () => this.finishTime(name, startTime), // After
+                (reason: any) => this.addError(reason)); // On failure
         }
 
         public step(name: string): TelemetryGeneratorBase {
@@ -239,8 +238,11 @@ module TacoUtility {
         }
 
         public static generate<T>(name: string, codeGeneratingTelemetry: { (telemetry: TelemetryGenerator): T }): T {
-            var generator: TelemetryGenerator = new TelemetryGenerator(name);
-            return PromisesUtils.executeAfter(generator.time(null, () => codeGeneratingTelemetry(generator)), () => generator.send());
+            var generator: TelemetryGenerator;
+            return PromisesUtils.wrapExecution(
+                () => generator = new TelemetryGenerator(name), // Before
+                () => generator.time(null, () => codeGeneratingTelemetry(generator)),
+                () => generator.send()); // After
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {

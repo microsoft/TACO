@@ -29,6 +29,8 @@ import _ = require("lodash");
 
 import nodeFakes = tacoTestsUtils.NodeFakes;
 
+type TelemetryEvent = TacoUtility.ICommandTelemetryProperties;
+
 class FakeLogger implements ILogger {
     public log(message: string): void {
         // TODO: Store all messages in memory, so we can test them
@@ -70,7 +72,7 @@ describe("AndroidSdkInstaller telemetry", () => {
             // AndroidSdkInstaller is required for the mock to work
             mockery.registerMock("child_process", new nodeFakes.ChildProcessModule().fakeAllExecCallsEndingWithErrors());
 
-            var fakeTelemetryHelper = new tacoTestsUtils.TelemetryFakes.Helper();
+            var fakeTelemetryHelper: TacoTestsUtils.TelemetryFakes.Helper = new tacoTestsUtils.TelemetryFakes.Helper();
             var tacoUtilsWithFakeTelemetry = _.extend({}, tacoUtils, { TelemetryHelper: fakeTelemetryHelper, HasFakes: true });
             mockery.registerMock("taco-utils", tacoUtilsWithFakeTelemetry);
 
@@ -119,8 +121,10 @@ describe("AndroidSdkInstaller telemetry", () => {
 
             androidSdkInstaller.run()
                 .done(() => done(new Error("Should have gotten a rejection in this test")), () => {
-                    fakeTelemetryHelper.getAllEvents().should.eql(expectedTelemetry);
-                    done();
+                    fakeTelemetryHelper.getAllSentEvents().done((allSentEvents: TelemetryEvent[]) => {
+                        allSentEvents.should.eql(expectedTelemetry);
+                        done();
+                    });
                 });
         });
     });
