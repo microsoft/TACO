@@ -35,14 +35,14 @@ import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
 import ms = require("./utils/memoryStream");
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = tacoUtility.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = tacoUtility.Commands.ICommand;
 
 import utils = TacoUtility.UtilHelper;
 
-var platformCommand: TacoCommandBase = commandHelper.getCommand("platform");
-var pluginCommand: TacoCommandBase = commandHelper.getCommand("plugin");
-var createCommand: TacoCommandBase = commandHelper.getCommand("create");
+var platformCommand: ICommand = CommandHelper.getCommand("platform");
+var pluginCommand: ICommand = CommandHelper.getCommand("plugin");
+var createCommand: ICommand = CommandHelper.getCommand("create");
 
 var testKitId: string = "5.1.1-Kit";
 

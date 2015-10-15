@@ -27,8 +27,8 @@ import Version = require ("../cli/version");
 import Commands = tacoUtils.Commands;
 import utils = tacoUtils.UtilHelper;
 
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = tacoUtils.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = tacoUtils.Commands.ICommand;
 
 interface ICommandOptionsAndArgsInfo {
     name: string;
@@ -58,7 +58,7 @@ describe("taco meta command tests: ", function (): void {
     var tacoInvalidArgs: string[][] = [["/?"], ["?"]];
 
     function runHelp(command: string): Q.Promise<any> {
-        var help: TacoCommandBase = commandHelper.getCommand("help");
+        var help: ICommand = CommandHelper.getCommand("help");
 
         // Construct CommandData and pass it as argument
         var original: string[] = [];

@@ -40,10 +40,10 @@ import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
 
-var create: TacoCommandBase = commandHelper.getCommand("create");
+var create: ICommand = CommandHelper.getCommand("create");
 
 describe("taco run", function (): void {
     this.timeout(60000); // The remote tests sometimes take some time to run
@@ -110,7 +110,7 @@ describe("taco run", function (): void {
     });
 
     var runRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var run: TacoCommandBase = commandHelper.getCommand("run");
+        var run: ICommand = CommandHelper.getCommand("run");
         return run.run({
             options: {},
             original: args,

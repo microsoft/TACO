@@ -49,11 +49,11 @@ import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
-import commandHelper = require("./utils/commandHelper");
-import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
+import CommandHelper = require("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
 
-var build: TacoCommandBase = commandHelper.getCommand("build");
-var create: TacoCommandBase = commandHelper.getCommand("create");
+var build: ICommand = CommandHelper.getCommand("build");
+var create: ICommand = CommandHelper.getCommand("create");
 
 describe("taco build", function (): void {
     var testHttpServer: http.Server;
@@ -121,7 +121,7 @@ describe("taco build", function (): void {
     });
 
     var buildRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var command: TacoCommandBase = commandHelper.getCommand("build");
+        var command: ICommand = CommandHelper.getCommand("build");
         return command.run({
             options: {},
             original: args,

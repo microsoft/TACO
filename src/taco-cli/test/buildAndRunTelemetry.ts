@@ -43,11 +43,11 @@ import TacoUtility = require ("taco-utils");
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
 
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
 
-var build: TacoCommandBase = commandHelper.getCommand("build");
-var create: TacoCommandBase = commandHelper.getCommand("create");
+var build: ICommand = CommandHelper.getCommand("build");
+var create: ICommand = CommandHelper.getCommand("create");
 
 interface IExpectedRequest {
     expectedUrl: string;

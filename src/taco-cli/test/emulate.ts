@@ -38,10 +38,10 @@ import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
 
-var create: TacoCommandBase = commandHelper.getCommand("create");
+var create: ICommand = CommandHelper.getCommand("create");
 
 describe("taco emulate", function (): void {
     var testHttpServer: http.Server;
@@ -109,7 +109,7 @@ describe("taco emulate", function (): void {
     });
 
     var emulateRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var emulate: TacoCommandBase = commandHelper.getCommand("emulate");
+        var emulate: ICommand = CommandHelper.getCommand("emulate");
         return emulate.run({
             options: {},
             original: args,

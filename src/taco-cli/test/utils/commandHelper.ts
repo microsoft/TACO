@@ -20,7 +20,7 @@ class CommandHelper {
     /**
      * Gets specified task object for use in testing.
      */
-    public static getCommand(name: string): commands.TacoCommandBase {
+    public static getCommand(name: string): commands.ICommand {
         return CommandHelper.commandsFactory.getTask(name, [], path.join(__dirname, "..", "..", "cli"));
     }
 }

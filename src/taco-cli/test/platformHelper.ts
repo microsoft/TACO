@@ -29,12 +29,12 @@ import resources = require ("../resources/resourceManager");
 import PlatformHelper = require ("../cli/utils/platformHelper");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = TacoUtility.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
 
 import utils = TacoUtility.UtilHelper;
 
-var create: TacoCommandBase = commandHelper.getCommand("create");
+var create: ICommand = CommandHelper.getCommand("create");
 describe("taco PlatformHelper", function (): void {
     var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "PlatformHelper");
     var originalCwd: string;

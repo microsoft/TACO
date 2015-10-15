@@ -47,8 +47,8 @@ import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 
-import commandHelper = require ("./utils/commandHelper");
-import TacoCommandBase = tacoUtils.Commands.TacoCommandBase;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = tacoUtils.Commands.ICommand;
 
 interface IScenarioList {
     [scenario: number]: string;
@@ -172,7 +172,7 @@ describe("taco create", function (): void {
     }
 
     function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {
-        var create: TacoCommandBase = commandHelper.getCommand("create");
+        var create: ICommand = CommandHelper.getCommand("create");
 
         return create.run(makeICommandData(scenario, successScenarios))
             .then(function (): void {
@@ -197,7 +197,7 @@ describe("taco create", function (): void {
     }
 
     function runFailureScenario<T>(scenario: number, expectedErrorCode?: T): Q.Promise<any> {
-        var create: TacoCommandBase = commandHelper.getCommand("create");
+        var create: ICommand = CommandHelper.getCommand("create");
 
         return create.run(makeICommandData(scenario, failureScenarios))
             .then(function (): Q.Promise<any> {
@@ -471,7 +471,7 @@ describe("taco create", function (): void {
                 original: createCommandLineArguments,
                 remain: createCommandLineArguments.slice()
             };
-            var create: TacoCommandBase = commandHelper.getCommand("create");
+            var create: ICommand = CommandHelper.getCommand("create");
             create.run(commandData).done(() => {
                 var expected : string = expectedMessages.join("\n");
 
@@ -646,7 +646,7 @@ describe("taco create", function (): void {
         var cliVersion: string = require("../package.json").version;
 
         function createProjectAndVerifyTelemetryProps(args: string[], expectedProperties: TacoUtility.ICommandTelemetryProperties, done: MochaDone): void {
-            var create: TacoCommandBase = commandHelper.getCommand("create");
+            var create: ICommand = CommandHelper.getCommand("create");
             var commandData: tacoUtils.Commands.ICommandData = {
                 options: {},
                 original: args,
