@@ -35,7 +35,6 @@ import rimraf = require ("rimraf");
 import util = require ("util");
 import wrench = require ("wrench");
 
-import Create = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
@@ -47,6 +46,9 @@ import ms = require ("./utils/memoryStream");
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
+
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = tacoUtils.Commands.ICommand;
 
 interface IScenarioList {
     [scenario: number]: string;
@@ -169,7 +171,7 @@ describe("taco create", function (): void {
     }
 
     function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {
-        var create: Create = new Create();
+        var create: ICommand = CommandHelper.getCommand("create");
 
         return create.run(makeICommandData(scenario, successScenarios))
             .then(function (): void {
@@ -194,7 +196,7 @@ describe("taco create", function (): void {
     }
 
     function runFailureScenario<T>(scenario: number, expectedErrorCode?: T): Q.Promise<any> {
-        var create: Create = new Create();
+        var create: ICommand = CommandHelper.getCommand("create");
 
         return create.run(makeICommandData(scenario, failureScenarios))
             .then(function (): Q.Promise<any> {
@@ -468,7 +470,7 @@ describe("taco create", function (): void {
                 original: createCommandLineArguments,
                 remain: createCommandLineArguments.slice()
             };
-            var create: Create = new Create();
+            var create: ICommand = CommandHelper.getCommand("create");
             create.run(commandData).done(() => {
                 var expected : string = expectedMessages.join("\n");
 
@@ -643,7 +645,7 @@ describe("taco create", function (): void {
         var cliVersion: string = require("../package.json").version;
 
         function createProjectAndVerifyTelemetryProps(args: string[], expectedProperties: TacoUtility.ICommandTelemetryProperties, done: MochaDone): void {
-            var create: Create = new Create();
+            var create: ICommand = CommandHelper.getCommand("create");
             var commandData: tacoUtils.Commands.ICommandData = {
                 options: {},
                 original: args,
