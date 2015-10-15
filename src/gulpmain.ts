@@ -44,7 +44,7 @@ gulp.task("compile", function (): Q.Promise<any> {
     return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
-        .pipe(sourcemaps.write("."))
+        .pipe(sourcemaps.write(".", {sourceRoot: ""}))
         .pipe(gulp.dest(buildConfig.buildPackages)));
 });
 
@@ -122,6 +122,11 @@ gulp.task("tslint", function(): Q.Promise<any> {
 /* Task to run tests */
 gulp.task("run-tests", ["install-build", "tslint"], function (): Q.Promise<any> {
     return gulpUtils.runAllTests(tacoModules, buildConfig.buildPackages);
+});
+
+/* Task to run tests */
+gulp.task("coverage", [], function(): Q.Promise<any> {
+    return gulpUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage);
 });
 
 /* Task to archive template folders */

@@ -4,6 +4,7 @@
     "build": "../build",
     "buildSrc": "../build/src",
     "buildPackages": "../build/packages/node_modules",
+    "buildCoverage": "../build/coverage",
     "buildTools": "../build/tools",
     "buildTemplates": "../build/packages/node_modules/taco-kits/templates",
     "tsCompileOptions": { "noImplicitAny": true, "noEmitOnError": true, "target": "ES5", "module": "commonjs", "sourceMap": true, "sortOutput": true }

@@ -60,6 +60,8 @@ describe("taco PlatformHelper", function (): void {
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         rimraf(tacoHome, done);
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     it("should correctly report build locations when --local is specified", function (mocha: MochaDone): void {

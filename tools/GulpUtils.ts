@@ -19,51 +19,67 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
-import zlib = require ("zlib")
+import zlib = require("zlib");
 
 class GulpUtils {
     private static TestCommand: string = "test";
+    private static CoverageJsonFileName: string = "coverage.json";
 
-    public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToTest.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
+    public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageResultsPath: string): Q.Promise<any> {
+        coverageResultsPath = path.resolve(coverageResultsPath);
+        var coverageJsonFiles: string[] = [];
 
+        // for each module, sequentially run tests with coverage (with json reporting)  
+        return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
+
+                var moduleCoverageResultsPath: string = path.resolve(coverageResultsPath, val);
                 var modulePath = path.resolve(modulesRoot, val);
-                // check if package has any tests
-                var pkg = require(path.join(modulePath, "package.json"));
-                if (!pkg.scripts || !(GulpUtils.TestCommand in pkg.scripts)) {
-                    return Q({});
-                }
-
-                var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                var testProcess = child_process.spawn(npmCommand, [GulpUtils.TestCommand], { cwd: modulePath, stdio: "inherit" });
-                var deferred = Q.defer();
-                testProcess.on("close", function (code: number): void {
-                    if (code) {
-                        deferred.reject("Test failed for " + modulePath);
-                    } else {
-                        deferred.resolve({});
-                    }
-                });
-                return deferred.promise;
+                return GulpUtils.runModuleCoverage(modulePath, moduleCoverageResultsPath)
+                    .then(function(): void {
+                        coverageJsonFiles.push(path.join(moduleCoverageResultsPath, GulpUtils.CoverageJsonFileName));
+                    });
             });
         }, Q({}))
+            // collect all generated coverage.json and use them to remap to typescript sources
+            .then(function(): Q.Promise<any> {
+
+                var loadCoverage: any = require("remap-istanbul/lib/loadCoverage");
+                var remap: any = require("remap-istanbul/lib/remap");
+                var writeReport: any = require("remap-istanbul/lib/writeReport");
+
+                var coverage = loadCoverage(coverageJsonFiles);
+                var collector = remap(coverage, {basePath: "./"});
+                return writeReport(collector, "html", coverageResultsPath);
+            });
+    }
+
+    public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
+        return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
+                var modulePath = path.resolve(modulesRoot, val);
+                var mocha: any = require("gulp-mocha");
+
+                return GulpUtils.streamToPromise(gulp.src(GulpUtils.getTestPathsGlob(modulePath))
+                    .pipe(mocha()));
+            });
+        }, Q({}));
     }
 
     public static installModules(modulesToInstall: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToInstall.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
+        return modulesToInstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
                 return GulpUtils.installModule(path.resolve(modulesRoot, val));
             });
-        }, Q({}))
+        }, Q({}));
     }
 
     public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
-        return modulesToUninstall.reduce(function (soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
+        return modulesToUninstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
                 return GulpUtils.uninstallModule(val, installRoot);
             });
-        }, Q({}))
+        }, Q({}));
     }
 
     public static copyFiles(pathsToCopy: string[], destPath: string): Q.Promise<any> {
@@ -208,6 +224,28 @@ class GulpUtils {
         return deferred.promise;
     }
 
+    private static runModuleCoverage(modulePath: string, moduleCoverageResultsPath: string): Q.Promise<any> {
+
+        var istanbul: any = require("gulp-istanbul");
+        var mocha: any = require("gulp-mocha");
+
+        var srcglob: string[] = [modulePath + "/**/*.js", "!" + modulePath + "/node_modules/**", "!" + modulePath + "/test/**"];
+        return GulpUtils.streamToPromise(gulp.src(srcglob)
+            .pipe(istanbul({ includeUntested: true}))
+            .pipe(istanbul.hookRequire()))
+            .then(function(): Q.Promise<any> {
+                return GulpUtils.streamToPromise(gulp.src(GulpUtils.getTestPathsGlob(modulePath))
+                    .pipe(mocha())
+                    .pipe(istanbul.writeReports({
+                        dir: moduleCoverageResultsPath,
+                        reporters: ["json"],
+                        reportOpts: {
+                            json: { dir: moduleCoverageResultsPath, file: GulpUtils.CoverageJsonFileName }
+                        }
+                    })));
+            });
+    }
+
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
@@ -245,6 +283,10 @@ class GulpUtils {
             }
             return folder;
         }, start + path.sep);
+    }
+
+    private static getTestPathsGlob(modulePath: string): string[] {
+        return [modulePath + "/test/**/*.js"];
     }
 }
 

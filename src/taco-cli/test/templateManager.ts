@@ -154,6 +154,8 @@ describe("TemplateManager", function (): void {
     after(function (done: MochaDone): void {
         // Delete run folder
         rimraf(runFolder, done);
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     describe("acquireFromTacoKits()", function (): void {

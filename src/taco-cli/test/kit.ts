@@ -56,7 +56,6 @@ describe("Kit", function (): void {
         return kit.run(data);
     }
 
-    var previous: boolean;
     var runFolder: string = path.resolve(os.tmpdir(), "taco_cli_kit");
     var tacoHome: string = path.join(runFolder, "taco_home");
     var cliProjectDir: string = "cliProject";
@@ -105,7 +104,6 @@ describe("Kit", function (): void {
     before(() => {
         originalCwd = process.cwd();
 
-        previous = process.env["TACO_UNIT_TEST"];
         process.env["TACO_UNIT_TEST"] = true;
 
         // Use a dummy home location so we don't trash any real configurations
@@ -119,7 +117,8 @@ describe("Kit", function (): void {
     });
 
     after((done: MochaDone) => {
-        process.env["TACO_UNIT_TEST"] = previous;
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         rimraf(runFolder, function (err: Error): void { done(); }); // ignore errors

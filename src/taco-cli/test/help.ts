@@ -37,7 +37,6 @@ describe("help for a command", function (): void {
     // stdoutWrite just doesn't work
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
     var memoryStdout: ms.MemoryStream;
-    var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
         var data: ICommandData = {
@@ -61,14 +60,14 @@ describe("help for a command", function (): void {
     }
 
     before(() => {
-        previous = process.env["TACO_UNIT_TEST"];
         process.env["TACO_UNIT_TEST"] = true;
     });
 
     after(() => {
         // We just need to reset the stdout just once, after all the tests have finished
         process.stdout.write = stdoutWrite;
-        process.env["TACO_UNIT_TEST"] = previous;
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     beforeEach(() => {

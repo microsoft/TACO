@@ -60,6 +60,8 @@ describe("taco remote", function(): void {
         }
 
         rimraf(testHome, function(err: Error): void { done(); }); // ignore errors
+        // Reset mocked out resources
+        process.env["TACO_UNIT_TEST"] = false;
     });
 
     function makeICommandData(args: string[]): TacoUtility.Commands.ICommandData {
