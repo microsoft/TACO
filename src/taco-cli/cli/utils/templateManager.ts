@@ -298,7 +298,7 @@ class TemplateManager {
             .then(function (templateOverrideInfo: TacoKits.ITemplateOverrideInfo): number {
                 var templateZip: AdmZip = new AdmZip(templateOverrideInfo.templateInfo.url);
 
-                return templateZip.getEntries().length - 1; // We substract 1, because the returned count includes the root folder of the template
+                return templateZip.getEntries().length;
             });
     }
 

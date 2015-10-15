@@ -93,7 +93,6 @@ describe("taco create", function (): void {
     // Important paths
     var runFolder: string = path.resolve(os.tmpdir(), "taco_cli_create_test_run");
     var tacoHome: string = path.join(runFolder, "taco_home");
-    var templateCache: string = path.join(tacoHome, "templates");
     var copyFromPath: string = path.resolve(__dirname, "resources", "templates", "testKit", "testTemplate");
     var testTemplateKitSrc: string = path.resolve(__dirname, "resources", "templates", testKitId);
     var testTemplateSrc: string = path.join(testTemplateKitSrc, testTemplateId);

@@ -328,6 +328,26 @@ describe("TemplateManager", function (): void {
         });
     });
 
+    describe("getTemplateEntriesCount()", function (): void {
+        it("should return the correct count of template entries", function (done: MochaDone): void {
+            // Create a test TemplateManager
+            var templates: templateManager = new templateManager(mockKitHelper, runFolder);
+
+            // Count entries for the test template and make sure count is as expected
+            templates.getTemplateEntriesCount(testKitId, testTemplateId)
+                .then(function (count: number): void {
+                    // We should have 3 items: "a.txt", "folder1" and "folder1/b.txt"
+                    try {
+                        count.should.equal(3);
+                    } catch (err) {
+                        done(err);
+                    }
+
+                    done();
+                });
+        });
+    });
+
     describe("copyTemplateItemsToProject()", function (): void {
         var testProjectPath: string = path.join(runFolder, "testProject");
 
