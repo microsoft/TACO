@@ -71,6 +71,7 @@ class TemplateManager {
         ".gitignore",
         ".gitattributes"
     ];
+    private static TACO_IGNORE_FILENAME: string = ".taco-ignore";
     private static TEMPORARY_TEMPLATE_PREFIX: string = "taco_template_";
     private static temporaryTemplateDir: string;   // The temporary directory to git clone / extract templates to
 
@@ -146,8 +147,10 @@ class TemplateManager {
 
         // If we reach this point, we are in case 1) (see above comment), so we need to perform a recursive copy
         var filterFunc: (itemPath: string) => boolean = function (itemPath: string): boolean {
-            // Return true if the item path is not in our list of git files to ignore
-            return TemplateManager.GIT_FILE_LIST.indexOf(path.basename(itemPath)) === -1;
+            // If the item name is in our git file list, or if it is the TACO ignore file, we need to skip this item (return false to skip)
+            var fileName: string = path.basename(itemPath);
+
+            return TemplateManager.GIT_FILE_LIST.indexOf(fileName) === -1 && fileName !== TemplateManager.TACO_IGNORE_FILENAME;
         };
 
         var options: tacoUtility.ICopyOptions = { clobber: false, filter: filterFunc };

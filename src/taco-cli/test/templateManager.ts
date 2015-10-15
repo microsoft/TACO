@@ -146,7 +146,7 @@ describe("TemplateManager", function (): void {
                 });
 
                 archive.pipe(outputStream);
-                archive.directory(testTemplateNoWwwPath, testTemplateId).finalize();
+                archive.bulk({ expand: true, cwd: testTemplateNoWwwPath, src: ["**"] }).finalize();
             }
         });
     });
@@ -384,7 +384,7 @@ describe("TemplateManager", function (): void {
                 });
         });
 
-        it("should ignore git-specific files", function (done: MochaDone): void {
+        it("should ignore git-specific files and .taco-ignore files", function (done: MochaDone): void {
             var templates: templateManager = new templateManager(mockKitHelper, runFolder);
             var cordovaParameters: Cordova.ICordovaCreateParameters = {
                 appId: "test",
