@@ -19,6 +19,7 @@ import commands = require ("./commands");
 import packageLoader = require ("./tacoPackageLoader");
 import promisesUtils = require("./promisesUtils");
 import telemetry = require("./telemetry");
+import processUtils = require("./processUtils");
 
 import Telemetry = telemetry.Telemetry;
 import PromisesUtils = promisesUtils.PromisesUtils;
@@ -50,7 +51,7 @@ module TacoUtility {
 
         constructor(componentName: string) {
             this.componentName = componentName;
-            this.currentStepStartTime = process.hrtime();
+            this.currentStepStartTime = processUtils.ProcessUtils.getProcess().hrtime();
         }
 
         protected abstract sendTelemetryEvent(telemetryEvent: Telemetry.TelemetryEvent): void;
@@ -94,7 +95,7 @@ module TacoUtility {
         public time<T>(name: string, codeToMeasure: { (): T }): T {
             var startTime: number[];
             return PromisesUtils.wrapExecution(
-                () => startTime = process.hrtime(), // Before
+                () => startTime = processUtils.ProcessUtils.getProcess().hrtime(), // Before
                 codeToMeasure,
                 () => this.finishTime(name, startTime), // After
                 (reason: any) => this.addError(reason)); // On failure
@@ -108,7 +109,7 @@ module TacoUtility {
             // Then we prepare to start gathering information about the next step
             this.currentStep = name;
             this.telemetryProperties = {};
-            this.currentStepStartTime = process.hrtime();
+            this.currentStepStartTime = processUtils.ProcessUtils.getProcess().hrtime();
             return this;
         }
 
@@ -148,7 +149,7 @@ module TacoUtility {
         }
 
         private finishTime(name: string, startTime: number[]): void {
-            var endTime: number[] = process.hrtime(startTime);
+            var endTime: number[] = processUtils.ProcessUtils.getProcess().hrtime(startTime);
             this.add(this.combine(name, "time"), String(endTime[0] * 1000 + endTime[1] / 1000000), /*isPii*/ false);
         }
     }

@@ -80,7 +80,7 @@ class InstallerBase {
         this.telemetry.step("download");
         this.logger.log(resources.getString("DownloadingLabel"));
 
-        switch (process.platform) {
+        switch (tacoUtils.ProcessUtils.getProcess().platform) {
             case "win32":
                 return this.downloadWin32();
             case "darwin":
@@ -89,10 +89,10 @@ class InstallerBase {
                         // After we download something on Mac OS, we need to change the owner of the cached installer back to the current user, otherwise
                         // they won't be able to delete their taco_home folder without admin privileges
                         wrench.chownSyncRecursive(InstallerBase.installerCache,
-                            parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
+                            parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_UID, 10), parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_GID, 10));
                     });
             default:
-                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
+                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, tacoUtils.ProcessUtils.getProcess().platform));
         }
     }
 
@@ -112,13 +112,13 @@ class InstallerBase {
         this.telemetry.step("install");
         this.logger.log(resources.getString("InstallingLabel"));
 
-        switch (process.platform) {
+        switch (tacoUtils.ProcessUtils.getProcess().platform) {
             case "win32":
                 return this.installWin32();
             case "darwin":
                 return this.installDarwin();
             default:
-                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
+                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, tacoUtils.ProcessUtils.getProcess().platform));
         }
     }
 
@@ -138,13 +138,13 @@ class InstallerBase {
         this.telemetry.step("updateVariables");
         this.logger.log(resources.getString("SettingSystemVariablesLabel"));
 
-        switch (process.platform) {
+        switch (tacoUtils.ProcessUtils.getProcess().platform) {
             case "win32":
                 return this.updateVariablesWin32();
             case "darwin":
                 return this.updateVariablesDarwin();
             default:
-                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
+                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, tacoUtils.ProcessUtils.getProcess().platform));
         }
     }
 
@@ -164,13 +164,13 @@ class InstallerBase {
         this.telemetry.step("postInstall");
         this.logger.log(resources.getString("ConfiguringLabel"));
 
-        switch (process.platform) {
+        switch (tacoUtils.ProcessUtils.getProcess().platform) {
             case "win32":
                 return this.postInstallWin32();
             case "darwin":
                 return this.postInstallDarwin();
             default:
-                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, process.platform));
+                return Q.reject<number>(errorHelper.get(TacoErrorCodes.UnsupportedPlatform, tacoUtils.ProcessUtils.getProcess().platform));
         }
     }
 

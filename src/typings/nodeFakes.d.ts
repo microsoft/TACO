@@ -79,10 +79,14 @@ declare module TacoTestsUtils {
             uid?: Number;
             gid?: Number;
         };
+        interface IProcessUtils {
+            getProcess(): NodeJS.Process;
+        }
         class Process {
             env: IEnvironmentVariables;
             constructor();
             asProcess(): NodeJS.Process;
+            buildProcessUtils(): IProcessUtils;
             /** Methods to configure the fake process **/
             fakeDeterministicHrtime(): Process;
             fakeMacOS(): Process;

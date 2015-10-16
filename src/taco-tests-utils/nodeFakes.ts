@@ -60,6 +60,10 @@ export module NodeFakes {
 
     export type SpawnOptions = { cwd?: string; stdio?: any; custom?: any; env?: any; detached?: boolean; uid?: Number; gid?: Number; }
 
+    interface IProcessUtils {
+        getProcess(): NodeJS.Process;
+    }
+
     export class Process {
         public env: IEnvironmentVariables;
 
@@ -69,6 +73,11 @@ export module NodeFakes {
 
         public asProcess(): NodeJS.Process {
             return <NodeJS.Process> <any> this;
+        }
+
+        public buildProcessUtils(): IProcessUtils  {
+            var fakeProcess = this.asProcess();
+            return { getProcess: (): NodeJS.Process => fakeProcess };
         }
 
         /** Methods to configure the fake process **/

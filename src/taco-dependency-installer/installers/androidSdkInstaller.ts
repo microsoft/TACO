@@ -111,7 +111,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 // If some segments of the path the SDK was extracted to didn't exist before, it means they were created as part of the install. They will have root as the owner, so we 
                 // must change the owner back to the current user.
                 if (firstNonExistentDir) {
-                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
+                    wrench.chownSyncRecursive(firstNonExistentDir, parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_UID, 10), parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_GID, 10));
                 }
             });
     }
@@ -135,10 +135,10 @@ class AndroidSdkInstaller extends InstallerBase {
         this.androidHomeValue = androidHomeValue;
 
         // Check if we need to add an ANDROID_HOME value
-        if (!process.env[AndroidSdkInstaller.ANDROID_HOME_NAME]) {
+        if (!tacoUtils.ProcessUtils.getProcess().env[AndroidSdkInstaller.ANDROID_HOME_NAME]) {
             exportAndroidHomeLine = util.format("%sexport %s=\"%s\"", os.EOL, AndroidSdkInstaller.ANDROID_HOME_NAME, androidHomeValue);
         } else {
-            var existingSdkHome: string = process.env[AndroidSdkInstaller.ANDROID_HOME_NAME];
+            var existingSdkHome: string = tacoUtils.ProcessUtils.getProcess().env[AndroidSdkInstaller.ANDROID_HOME_NAME];
 
             // Process the existing ANDROID_HOME to resolve to an absolute path, including processing ~ notation and environment variables
             existingSdkHome = path.resolve(utilHelper.expandEnvironmentVariables(existingSdkHome));
@@ -164,7 +164,7 @@ class AndroidSdkInstaller extends InstallerBase {
         }
 
         // Check if we need to update .bash_profile
-        var bashProfilePath: string = path.join(process.env.HOME, ".bash_profile");
+        var bashProfilePath: string = path.join(tacoUtils.ProcessUtils.getProcess().env.HOME, ".bash_profile");
         var mustChown: boolean = !fs.existsSync(bashProfilePath);
 
         if (exportAndroidHomeLine || exportPathLine) {
@@ -182,7 +182,7 @@ class AndroidSdkInstaller extends InstallerBase {
                 } else {
                     // If .bash_profile didn't exist before, make sure the owner is the current user, not root
                     if (mustChown) {
-                        fs.chownSync(bashProfilePath, parseInt(process.env.SUDO_UID, 10), parseInt(process.env.SUDO_GID, 10));
+                        fs.chownSync(bashProfilePath, parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_UID, 10), parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_GID, 10));
                     }
 
                     deferred.resolve({});
@@ -299,7 +299,7 @@ class AndroidSdkInstaller extends InstallerBase {
             AndroidSdkInstaller.ANDROID_PACKAGES.join(",")
         ];
         var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(process.env.SUDO_UID, 10), gid: parseInt(process.env.SUDO_GID, 10) }) : childProcess.spawn(command, args);
+        var cp: childProcess.ChildProcess = os.platform() === "darwin" ? childProcess.spawn(command, args, { uid: parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_UID, 10), gid: parseInt(tacoUtils.ProcessUtils.getProcess().env.SUDO_GID, 10) }) : childProcess.spawn(command, args);
 
         cp.stdout.on("data", function (data: Buffer): void {
             var stringData: string = data.toString();
