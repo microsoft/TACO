@@ -33,15 +33,15 @@ type TelemetryEvent = TacoUtility.ICommandTelemetryProperties;
 
 class FakeLogger implements ILogger {
     public log(message: string): void {
-        // TODO: Store all messages in memory, so we can test them
+        // Currently we don't care about these messages
     }
 
     public logWarning(message: string): void {
-        // TODO: Store all messages in memory, so we can test them
+        // Currently we don't care about these messages
     }
 
     public logError(message: string): void {
-        // TODO: Store all messages in memory, so we can test them
+        // Currently we don't care about these messages
     }
 
     public promptForEnvVariableOverwrite(message: string): Q.Promise<any> {
