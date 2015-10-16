@@ -31,24 +31,18 @@ import tacoUtility = require("taco-utils");
 import util = require ("util");
 import wrench = require ("wrench");
 
-import Platform = require ("../cli/platform");
-import Plugin = require ("../cli/plugin");
-import Create = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
 import ms = require("./utils/memoryStream");
-import commands = tacoUtility.Commands;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = tacoUtility.Commands.ICommand;
 
 import utils = TacoUtility.UtilHelper;
 
-var platformCommand: Platform = new Platform();
-platformCommand.info = <commands.ICommandInfo> {};
-platformCommand.info.aliases = {"rm": "remove", "ls": "list"};
-var pluginCommand: Plugin = new Plugin();
-pluginCommand.info = <commands.ICommandInfo> {};
-pluginCommand.info.aliases = { "rm": "remove", "ls": "list" };
-var createCommand: Create = new Create();
+var platformCommand: ICommand = CommandHelper.getCommand("platform");
+var pluginCommand: ICommand = CommandHelper.getCommand("plugin");
+var createCommand: ICommand = CommandHelper.getCommand("create");
 
 var testKitId: string = "5.1.1-Kit";
 

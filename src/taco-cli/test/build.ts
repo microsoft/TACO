@@ -33,7 +33,6 @@ import util = require ("util");
 
 import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import buildMod = require ("../cli/build");
-import createMod = require ("../cli/create");
 import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
 import mockCordova = require ("./utils/mockCordova");
@@ -50,8 +49,11 @@ import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
-var build: buildMod = new buildMod();
-var create: createMod = new createMod();
+import CommandHelper = require("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
+
+var build: ICommand = CommandHelper.getCommand("build");
+var create: ICommand = CommandHelper.getCommand("create");
 
 describe("taco build", function (): void {
     var testHttpServer: http.Server;
@@ -119,7 +121,7 @@ describe("taco build", function (): void {
     });
 
     var buildRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var command: buildMod = new buildMod();
+        var command: ICommand = CommandHelper.getCommand("build");
         return command.run({
             options: {},
             original: args,
