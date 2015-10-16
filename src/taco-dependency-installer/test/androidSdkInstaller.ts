@@ -119,13 +119,12 @@ describe("AndroidSdkInstaller telemetry", () => {
                 }
             ];
 
-            androidSdkInstaller.run()
-                .done(() => done(new Error("Should have gotten a rejection in this test")), () => {
-                    fakeTelemetryHelper.getAllSentEvents().done((allSentEvents: TelemetryEvent[]) => {
+            return androidSdkInstaller.run()
+                .then(() => Q.reject(new Error("Should have gotten a rejection in this test")), () => {
+                    return fakeTelemetryHelper.getAllSentEvents().then((allSentEvents: TelemetryEvent[]) => {
                         allSentEvents.should.eql(expectedTelemetry);
-                        done();
                     });
-                });
+                }).done(done, done);
         });
     });
 });
