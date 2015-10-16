@@ -515,9 +515,9 @@ module TacoDependencyInstaller {
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 
-                    cp.on("error", function (err: Error): void {
+                    cp.on("error", function (err: any): void {
                         // Handle ENOENT if Powershell is not found
-                        if (err.name === "ENOENT") {
+                        if (err.code === "ENOENT") {
                             deferred.reject(errorHelper.get(TacoErrorCodes.NoPowershell));
                         } else {
                             deferred.reject(errorHelper.wrap(TacoErrorCodes.UnknownExitCode, err));

@@ -32,16 +32,9 @@ class AndroidPackagesInstaller extends InstallerBase {
     private static PLATFORM_TOOLS_PKG: string = "platform-tools";
     private static BUILD_TOOLS_PKG_PREFIX: string = "build-tools-";
 
-    private androidHomeValue: string;
     private androidCommand: string;
     private adbCommand: string;
     private availablePackages: string[];
-
-    private static getAndroidTargetPackageId(): Q.Promise<string> {
-        // Read the Android project properties
-        // Find the value at the "target=" line
-        // Ensure the extracted value is available in the package list
-    }
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
         super(installerInfo, softwareVersion, installTo, logger, steps, "androidPackages");
@@ -61,17 +54,16 @@ class AndroidPackagesInstaller extends InstallerBase {
 
         if (androidHomeValue) {
             // ANDROID_HOME is set, use that to find the android executable
-            this.androidHomeValue = utilHelper.expandEnvironmentVariables(androidHomeValue);
+            androidHomeValue = utilHelper.expandEnvironmentVariables(androidHomeValue);
 
             // Build the android and adb commands and save them in members for reusability
             var androidExecutable: string = os.platform() === "win32" ? "android.bat" : "android";
             var adbExecutable: string = os.platform() === "win32" ? "adb.exe" : "adb";
 
-            this.androidCommand = path.join(this.androidHomeValue, "tools", androidExecutable);
-            this.androidCommand = path.join(this.androidHomeValue, "platform-tools", adbExecutable);
+            this.androidCommand = path.join(androidHomeValue, "tools", androidExecutable);
+            this.adbCommand = path.join(androidHomeValue, "platform-tools", adbExecutable);
         } else {
             // ANDROID_HOME is not set, but the android and adb executables might still be in the PATH
-            this.androidHomeValue = "";
             this.androidCommand = "android";
             this.adbCommand = "adb";
         }
@@ -94,12 +86,16 @@ class AndroidPackagesInstaller extends InstallerBase {
         cp.stdout.on("data", function (data: Buffer): void {
             output += data.toString();
         });
-        cp.on("error", (err: Error) => {
-            asd
+        cp.on("error", (err: any) => {
             this.telemetry
                 .add("error.description", "ErrorOnChildProcess on installAndroidPackages", /*isPii*/ false)
                 .addError(err);
-            deferred.reject(err);
+
+            if (err.code === "ENOENT") {
+                deferred.reject(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand)));
+            } else {
+                deferred.reject(err);
+            }
         });
         cp.on("exit", (code: number) => {
             if (errorOutput) {
@@ -109,9 +105,16 @@ class AndroidPackagesInstaller extends InstallerBase {
                     .add("error.message", errorOutput, /*isPii*/ true);
                 deferred.reject(new Error(errorOutput));
             } else {
-                // Parse for package ids and save them
+                this.availablePackages = [];
 
-                fdsfds
+                // Parse for package ids and save them
+                var regex: RegExp = /id: \d+ or "(.+)"/g;
+                var match: RegExpMatchArray = regex.exec(output);
+
+                while (match) {
+                    this.availablePackages.push(match[1]);  // Index 0 is the entire matched line, index 1 is the captured group which is the actual package ID
+                    match = regex.exec(output);
+                }
 
                 deferred.resolve({});
             }
@@ -146,21 +149,33 @@ class AndroidPackagesInstaller extends InstallerBase {
         return packageId;
     }
 
+    private getAndroidTargetPackageId(): string {
+        // Read the Android project properties
+        var projectPropertiesPath: string = path.join("platforms", "android", "project.properties");
+        var fileContent: string = fs.readFileSync(projectPropertiesPath).toString();
+
+        // Find the value at the "target=" line
+        var androidTargetId: string = /target=(.+)/.exec(fileContent)[1];
+
+        // Make sure the android target is in the list of available packages, otherwise it is an error state
+        if (this.availablePackages.indexOf(androidTargetId) === -1) {
+            throw new Error(resources.getString("UnknownAndroidTarget", androidTargetId, projectPropertiesPath));
+        }
+
+        return androidTargetId;
+    }
+
     private installDefault(): Q.Promise<any> {
         var self: AndroidPackagesInstaller = this;
 
         this.buildAndroidCommands();
 
         return Q({})
-            .then(function (): void {
+            .then(function (): Q.Promise<any> {
                 // Read available packages and save them in a member
-                self.getAvailableAndroidPackages();
+                return self.getAvailableAndroidPackages();
             })
-            .then(function (): Q.Promise<string> {
-                // Get the android-target package to install
-                return AndroidPackagesInstaller.getAndroidTargetPackageId();
-            })
-            .then(function (androidTargetPackage: string): Q.Promise<any> {
+            .then(function (): Q.Promise<any> {
                 var packagesToInstall: string[] = [];
 
                 // Get the build-tools package to install
@@ -177,18 +192,27 @@ class AndroidPackagesInstaller extends InstallerBase {
                     packagesToInstall.push(buildToolsPackage);
                 }
 
-                // Add the android target package to the list
-                packagesToInstall.push(androidTargetPackage);
+                // Get the android target package to install
+                try {
+                    var androidTargetPackage: string = self.getAndroidTargetPackageId();
+
+                    if (androidTargetPackage) {
+                        packagesToInstall.push(androidTargetPackage);
+                    }
+                } catch (err) {
+                    // An error will occur if the Android target is unknown
+                    return Q.reject(err);
+                }
 
                 // Build the list of packages to install
                 var packagesFilter: string = packagesToInstall.join(",");
 
                 // Invoke the update command
-                return self.installAndroidPackages(packagesFilter);
-            })
-            .then(function (): Q.Promise<any> {
-                // Kill the adb server
-                return self.killAdb();
+                return self.installAndroidPackages(packagesFilter)
+                    .then(function (): Q.Promise<any> {
+                        // Kill the adb server
+                        return self.killAdb();
+                    });
             });
     }
 
@@ -218,12 +242,16 @@ class AndroidPackagesInstaller extends InstallerBase {
         cp.stderr.on("data", function (data: Buffer): void {
             errorOutput += data.toString();
         });
-        cp.on("error", (err: Error) => {
-            asd
+        cp.on("error", (err: any) => {
             this.telemetry
                 .add("error.description", "ErrorOnChildProcess on installAndroidPackages", /*isPii*/ false)
                 .addError(err);
-            deferred.reject(err);
+
+            if (err.code === "ENOENT") {
+                deferred.reject(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand)));
+            } else {
+                deferred.reject(err);
+            }
         });
         cp.on("exit", (code: number) => {
             if (errorOutput) {
@@ -247,12 +275,16 @@ class AndroidPackagesInstaller extends InstallerBase {
         var deferred: Q.Deferred<any> = Q.defer<any>();
 
         var adbProcess: childProcess.ChildProcess = childProcess.spawn(this.adbCommand, ["kill-server"]);
-        adbProcess.on("error", (error: Error) => {
-            asd
+        adbProcess.on("error", (err: any) => {
             this.telemetry
                 .add("error.description", "ErrorOnKillingAdb in killAdb", /*isPii*/ false)
-                .addError(error);
-            deferred.reject(error);
+                .addError(err);
+
+            if (err.code === "ENOENT") {
+                deferred.reject(resources.getString("AndroidCommandNotFound", "adb"));
+            } else {
+                deferred.reject(err);
+            }
         });
 
         adbProcess.on("exit", function (code: number): void {

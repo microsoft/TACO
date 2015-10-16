@@ -110,6 +110,8 @@
     "NeedInstallDestination": "Error: An installation destination is needed for this dependency. Please make sure there is an install path in the installation configuration file.",
     "_NeedInstallDestination.comment": "Error shown when a dependency needs an install destination, but the install config file didn't contain one",
 
-    "AndroidCommandNotFound": "Error: Could not invoke '{0} command. Please make sure Android SDK is installed and the environment variables are correctly set: ",
-    "_NeedInstallDestination.comment": "Error shown when a dependency needs an install destination, but the install config file didn't contain one"
+    "AndroidCommandNotFound": "Error: Could not invoke '{0}' command. Please make sure Android SDK is installed and the environment variables are correctly set. Running 'install-reqs' again to install Android SDK might fix this issue.",
+    "_AndroidCommandNotFound.comment": "Error shown when installing Android SDK packages fails to invoke a command, most likely 'android' or 'adb'. {0} is the name of the command that couldn't be invoked.",
+    "UnknownAndroidTarget": "Unknown Android target: '{0}'. Please make sure a valid target is set in the project.properties file, located at: {1}",
+    "_UnknownAndroidTarget.comment": "Error / warning shown when installing Android SDK packages and the specified Android Target does not appear in the list of available Android SDK packages. {0} is the target in the project properties, {1} is the full path to the properties file."
 }

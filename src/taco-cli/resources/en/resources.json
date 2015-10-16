@@ -405,7 +405,7 @@
     "_CommandInstallSkipSystem.comment": "Warning shown when skipping platforms for install-reqs due to the platform not being supported on the system (e.g. iOS on Windows machines).",
     "CommandInstallSkipNotAdded": "The following platforms will be skipped because they haven't been added to your project yet:<br/>",
     "_CommandInstallSkipNotAdded.comment": "Warning shown when skipping platforms for install-reqs due to the platform not being added to the user's project.",
-    "CommandInstallSkipNoReqsSupport": "The following platforms will be skipped because they don't support Cordova's requirements checking:<br/>",
+    "CommandInstallSkipNoReqsSupport": "The following platforms will be skipped because their currently installed version doesn't support Cordova's requirements checking:<br/>",
     "_CommandInstallSkipNoReqsSupport.comment": "Warning shown when skipping platforms for install-reqs due to the platform not being recent enough to support 'cordova requirements' command.",
     "CommandInstallNoReqsSupportHint": "<highlight>Note:</highlight> To manually update a single platform, remove the platform from your project and then run:<br/><br/>    <highlight>taco platform add </highlight>[platform]<highlight>@</highlight>[version]",
     "_CommandInstallNoReqsSupportHint.comment": "Hint shown when skipping platforms for install-reqs due to the platform not being recent enough to support 'cordova requirements' command.",

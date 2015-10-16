@@ -15,13 +15,13 @@
                             "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
                             "bytes": 187480692,
                             "installDestination": "%programfiles%/Android",
-                            "downloadSize": 493,
-                            "diskSize": 811,
+                            "downloadSize": 187,
+                            "diskSize": 286,
                             "steps": {
                                 "download": true,
                                 "install": true,
                                 "updateVariables": true,
-                                "postInstall": true
+                                "postInstall": false
                             }
                         },
                         "x64": {
@@ -29,13 +29,13 @@
                             "sha1": "b6a4899efbf20fc593042f1515446c6630ba502e",
                             "bytes": 187480692,
                             "installDestination": "%programfiles(x86)%/Android",
-                            "downloadSize": 493,
-                            "diskSize": 811,
+                            "downloadSize": 187,
+                            "diskSize": 286,
                             "steps": {
                                 "download": true,
                                 "install": true,
                                 "updateVariables": true,
-                                "postInstall": true
+                                "postInstall": false
                             }
                         }
                     },
@@ -45,8 +45,8 @@
                             "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
                             "bytes": 98330824,
                             "installDestination": "$HOME/Library/Android",
-                            "downloadSize": 391,
-                            "diskSize": 689,
+                            "downloadSize": 98,
+                            "diskSize": 138,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -59,8 +59,8 @@
                             "sha1": "41f0f3e76d6868018740e654aefb04fd765c357d",
                             "bytes": 98330824,
                             "installDestination": "$HOME/Library/Android",
-                            "downloadSize": 391,
-                            "diskSize": 689,
+                            "downloadSize": 98,
+                            "diskSize": 138,
                             "steps": {
                                 "download": true,
                                 "install": true,
@@ -73,7 +73,60 @@
             }
         },
         "androidTarget": {
-            "isImplicit": true
+            "displayName": "Android SDK Packages (platform-tools, build-tools, android-target)",
+            "installerPath": "./installers/androidPackagesInstaller",
+            "licenseUrl": "https://developer.android.com/sdk/terms.html",
+            "prerequisites": [
+                "androidSdk"
+            ],
+            "versions": {
+                "latest": {
+                    "win32": {
+                        "ia32": {
+                            "downloadSize": 108,
+                            "diskSize": 211,
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        },
+                        "x64": {
+                            "downloadSize": 108,
+                            "diskSize": 211,
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        }
+                    },
+                    "darwin": {
+                        "ia32": {
+                            "downloadSize": 107,
+                            "diskSize": 231,
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        },
+                        "x64": {
+                            "downloadSize": 107,
+                            "diskSize": 231,
+                            "steps": {
+                                "download": false,
+                                "install": true,
+                                "updateVariables": false,
+                                "postInstall": false
+                            }
+                        }
+                    }
+                }
+            }
         },
         "gradle": {
             "isImplicit": true
