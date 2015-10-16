@@ -19,8 +19,6 @@ import Q = require ("q");
 
 import InstallerBase = require ("./installerBase");
 import installerProtocol = require ("../elevatedInstallerProtocol");
-import installerUtils = require ("../utils/installerUtils");
-import installerUtilsWin32 = require ("../utils/win32/installerUtilsWin32");
 import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
