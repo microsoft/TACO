@@ -19,7 +19,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
-import zlib = require("zlib");
+import zlib = require ("zlib");
 
 interface IPackageJson {
     version: string;
@@ -80,11 +80,11 @@ class GulpUtils {
         return GulpUtils.streamToPromise(gulp.src(pathsToCopy).pipe(gulp.dest(destPath)));
     }
 
-    public static prepareDevPackages(destPath: string, dropLocation: string, packed: boolean = false): Q.Promise<any> {
+    public static prepareDevPackages(srcPath: string, destPath: string, dropLocation: string, packed: boolean = false): Q.Promise<any> {
 
         var uncPathPadding = dropLocation.indexOf("\\\\") === 0 ? "\\\\" : "";
 
-        return GulpUtils.preparePackages(destPath,
+        return GulpUtils.preparePackages(srcPath, destPath,
             function(json: IPackageJson): IPackageJson {
                 return GulpUtils.updateInternalDependencies(json, function (packageKey: string, value: string) : string {
                     return util.format("file:%s%s", uncPathPadding, path.resolve(dropLocation, packageKey + ".tgz"));
@@ -101,8 +101,8 @@ class GulpUtils {
             });
     }
 
-    public static preparePublishPackages(destPath: string, suffix: string): Q.Promise<any> {
-        return GulpUtils.preparePackages(destPath,
+    public static preparePublishPackages(srcPath: string, destPath: string, suffix: string): Q.Promise<any> {
+        return GulpUtils.preparePackages(srcPath, destPath,
             function(json: IPackageJson): IPackageJson {
                 json.version = GulpUtils.getPublishVersion(json.version, suffix);
                 return GulpUtils.updateInternalDependencies(json, function (packageKey: string, value: string): string {
@@ -114,10 +114,17 @@ class GulpUtils {
             function(json: IDynamicDependenicesJson): IDynamicDependenicesJson {
                 Object.keys(json).forEach(function(packageKey: string): void {
                     var entry: IDynamicDependencyEntry = json[packageKey];
-                    entry.dev = undefined;
-                    entry.localPath = undefined;
-                    var packageJson: IPackageJson = GulpUtils.getPackageJson(destPath, entry.packageName);
-                    entry.packageId = packageKey + "@" + GulpUtils.getPublishVersion(packageJson.version, suffix);
+                    if (entry.dev) {
+                        // If we have been using the latest dev version of this package, then update the reference to be that dev version
+                        delete entry.dev;
+                        delete entry.localPath;
+                        if (entry.packageId.indexOf("@") === -1 && suffix !== "") {
+                            // If this package is taking "latest" and we are not building a release package,
+                            // then update the dependency to point to the beta version of the package
+                            var packageJson: IPackageJson = GulpUtils.getPackageJson(destPath, entry.packageName);
+                            entry.packageId = packageKey + "@" + GulpUtils.getPublishVersion(packageJson.version, suffix);
+                        }
+                    }
                 });
                 return json;
             });
@@ -255,19 +262,20 @@ class GulpUtils {
         return deferred.promise;
     }
 
-    private static preparePackages(destPath: string,
+    private static preparePackages(srcPath: string,
+                                  destPath: string,
                                   preparePackageJson: (json: IPackageJson) => IPackageJson,
                                   prepareDynamicDependencies: (json: IDynamicDependenicesJson) => IDynamicDependenicesJson): Q.Promise<any> {
 
         return Q.all([
-            GulpUtils.streamToPromise(gulp.src(path.join(destPath, "/**/package.json"))
+            GulpUtils.streamToPromise(gulp.src(path.join(srcPath, "/**/package.json"))
                 .pipe(jsonEditor(
                     function(json: IPackageJson): any {
                         return preparePackageJson(json);
                     }))
                 .pipe(gulp.dest(destPath))),
 
-            GulpUtils.streamToPromise(gulp.src(path.join(destPath, "/**/dynamicDependencies.json"))
+            GulpUtils.streamToPromise(gulp.src(path.join(srcPath, "/**/dynamicDependencies.json"))
                 .pipe(jsonEditor(
                     function(json: IDynamicDependenicesJson): IDynamicDependenicesJson {
                         return prepareDynamicDependencies(json);

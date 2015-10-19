@@ -57,8 +57,12 @@ gulp.task("package", [], function (callback: gulp.TaskCallback): void {
     runSequence("build", "just-package", callback);
 });
 
-gulp.task("beta-package", ["build"], function(): Q.Promise<any> {
-    return gulpUtils.preparePublishPackages(buildConfig.buildPackages, "beta")
+gulp.task("all-package", ["build"], function (callback: gulp.TaskCallback): void {
+    runSequence("just-package", "just-beta-package", "just-release-package", callback);
+});
+
+gulp.task("just-beta-package", [], function(): Q.Promise<any> {
+    return gulpUtils.preparePublishPackages(buildConfig.src, buildConfig.buildPackages, "beta")
         .then(function(): Q.Promise<any> {
             // npm pack each folder, put the tgz in the parent folder
             return gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages, "beta");
@@ -68,8 +72,8 @@ gulp.task("beta-package", ["build"], function(): Q.Promise<any> {
         });
 });
 
-gulp.task("release-package", ["build"], function(): Q.Promise<any> {
-    return gulpUtils.preparePublishPackages(buildConfig.buildPackages, "")
+gulp.task("just-release-package", [], function(): Q.Promise<any> {
+    return gulpUtils.preparePublishPackages(buildConfig.src, buildConfig.buildPackages, "")
         .then(function(): Q.Promise<any> {
             // npm pack each folder, put the tgz in the parent folder
             return gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages, "release");
@@ -80,7 +84,7 @@ gulp.task("release-package", ["build"], function(): Q.Promise<any> {
 });
 
 gulp.task("just-package", [], function(): Q.Promise<any> {
-    return gulpUtils.prepareDevPackages(buildConfig.buildPackages, options.drop, true)
+    return gulpUtils.prepareDevPackages(buildConfig.src, buildConfig.buildPackages, options.drop || buildConfig.buildPackages, true)
         .then(function(): Q.Promise<any> {
             // npm pack each folder, put the tgz in the parent folder
             return gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
