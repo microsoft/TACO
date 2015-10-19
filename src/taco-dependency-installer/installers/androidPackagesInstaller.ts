@@ -252,12 +252,15 @@ class AndroidPackagesInstaller extends InstallerBase {
             }
         });
         cp.on("exit", (code: number) => {
-            if (errorOutput) {
+            if (errorOutput || code) {
                 this.telemetry
                     .add("error.description", "ErrorOnExitOfChildProcess on installAndroidPackages", /*isPii*/ false)
                     .add("error.code", code, /*isPii*/ false)
                     .add("error.message", errorOutput, /*isPii*/ true);
-                deferred.reject(new Error(errorOutput));
+
+                var errorString: string = errorOutput || resources.getString("InstallerExitCode", code);
+
+                deferred.reject(new Error(errorString));
             } else {
                 deferred.resolve({});
             }
