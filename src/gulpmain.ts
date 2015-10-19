@@ -53,15 +53,23 @@ gulp.task("build", ["prepare-templates"], function (callback: gulp.TaskCallback)
     runSequence("compile", "copy", callback);
 });
 
-gulp.task("dev-package", ["build"], function(): Q.Promise<any> {
+gulp.task("package", [], function (callback: gulp.TaskCallback): void {
+    runSequence("build", "just-package", callback);
+});
+
+gulp.task("just-package", [], function (callback: gulp.TaskCallback): void {
+    runSequence("dev-package", "beta-package", "release-package", callback);
+});
+
+gulp.task("dev-package", [], function(): Q.Promise<any> {
     return gulpUtils.package(buildConfig.buildPackages, allModules, "dev", options.drop || buildConfig.buildPackages);
 });
 
-gulp.task("beta-package", ["build"], function(): Q.Promise<any> {
+gulp.task("beta-package", [], function(): Q.Promise<any> {
     return gulpUtils.package(buildConfig.buildPackages, allModules, "beta", options.drop || buildConfig.buildPackages);
 });
 
-gulp.task("release-package", ["build"], function(): Q.Promise<any> {
+gulp.task("release-package", [], function(): Q.Promise<any> {
     return gulpUtils.package(buildConfig.buildPackages, allModules, "release", options.drop || buildConfig.buildPackages);
 });
 

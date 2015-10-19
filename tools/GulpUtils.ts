@@ -83,7 +83,7 @@ class GulpUtils {
     public static package(srcPath: string, tacoModules: string[], buildType: string, destPath: string): Q.Promise<any> {
 
         return Q.all([
-            GulpUtils.updateInternalDependencies(srcPath, buildType, destPath),
+            GulpUtils.updateInternalDependencies(srcPath, tacoModules, buildType, destPath),
             GulpUtils.updateDynamicDependencies(srcPath, buildType, destPath)
         ])
             .then(function(): Q.Promise<any> {
@@ -93,7 +93,6 @@ class GulpUtils {
                 console.error("Error packaging: " + err);
                 throw err;
             });
-        //         var uncPathPadding = dropLocation.indexOf("\\\\") === 0 ? "\\\\" : "";
     }
 
     public static deleteDirectoryRecursive(dirPath: string): Q.Promise<any> {
@@ -200,19 +199,19 @@ class GulpUtils {
         }, start + path.sep);
     }
 
-    private static updateInternalDependencies(srcPath: string, buildType: string, destPath?: string): Q.Promise<any> {
+    private static updateInternalDependencies(srcPath: string, tacoModules: string[], buildType: string, destPath?: string): Q.Promise<any> {
         return GulpUtils.streamToPromise(gulp.src(path.join(srcPath, "/*/package.json"))
             .pipe(jsonEditor(
                 function(json: IPackageJson): IPackageJson {
                     // update the version
                     json.version = GulpUtils.transformPackageVersion(json.version, buildType);
                     Object.keys(json.dependencies || {}).forEach(function(packageKey: string): void {
-                        if (json.dependencies[packageKey].indexOf("file:") == 0) {
+                        if (tacoModules.indexOf(packageKey) >= 0) {
                             json.dependencies[packageKey] = GulpUtils.getDependencyValue(packageKey, srcPath, buildType, destPath);
                         }
                     });
                     Object.keys(json.optionalDependencies || {}).forEach(function(packageKey: string): void {
-                        if (json.optionalDependencies[packageKey].indexOf("file:") == 0) {
+                        if (tacoModules.indexOf(packageKey) >= 0) {
                             json.optionalDependencies[packageKey] = GulpUtils.getDependencyValue(packageKey, srcPath, buildType, destPath);
                         }
                     });
@@ -228,13 +227,23 @@ class GulpUtils {
                     Object.keys(json).forEach(function(packageKey: string): void {
                         var entry: IDynamicDependencyEntry = json[packageKey];
                         if (entry.dev) {
-                            if (buildType == "dev") {
-                                entry.localPath = GulpUtils.getDevDependencyValue(entry.packageName, srcPath, destPath);
-                            } else {
-                                entry.dev = undefined;
-                                entry.localPath = undefined;
-                                var packageJson: IPackageJson = GulpUtils.getPackageJson(srcPath, entry.packageName);
-                                entry.packageId = entry.packageName + "@" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
+                            switch (buildType) {
+                                case "dev":
+                                    entry.localPath = GulpUtils.getDevDependencyValue(entry.packageName, srcPath, destPath);
+                                    break;
+                                case "release":
+                                    entry.dev = undefined;
+                                    entry.localPath = undefined;
+                                    entry.packageId = entry.packageName;
+                                    break;
+                                case "beta":
+                                    entry.dev = undefined;
+                                    entry.localPath = undefined;
+                                    var packageJson: IPackageJson = GulpUtils.getPackageJson(srcPath, entry.packageName);
+                                    entry.packageId = entry.packageName + "@" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
+                                    break;
+                                default:
+                                    throw new Error("Invalid build type " + buildType + " requested");
                             }
                         }
                     });
@@ -306,7 +315,7 @@ class GulpUtils {
                 return "^" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
 
             default:
-                throw new Error("invalid build type " + buildType + " requested");
+                throw new Error("Invalid build type " + buildType + " requested");
         }
     }
 
@@ -320,12 +329,13 @@ class GulpUtils {
             case "beta":
                 return util.format("%s-%s", bareVersion, buildType);
             default:
-                throw new Error("invalid build type " + buildType + " requested");
+                throw new Error("Invalid build type " + buildType + " requested");
         }
     }
 
     private static getDevDependencyValue(dependencyName: string, srcPath: string, destPath: string): string {
-        return util.format("file://%s.tgz", path.resolve(destPath || srcPath, dependencyName));
+        var uncPathPadding = destPath.indexOf("\\\\") === 0 ? "\\\\" : "";
+        return util.format("file://%s%s.tgz", uncPathPadding, path.resolve(destPath || srcPath, dependencyName));
     }
 
     private static getPackageJson(srcPath: string, packageName: string): IPackageJson {
