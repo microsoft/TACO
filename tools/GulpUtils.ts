@@ -231,19 +231,20 @@ class GulpUtils {
                                 case "dev":
                                     entry.localPath = GulpUtils.getDevDependencyValue(entry.packageName, srcPath, destPath);
                                     break;
-                                case "release":
-                                    entry.dev = undefined;
-                                    entry.localPath = undefined;
-                                    entry.packageId = entry.packageName;
-                                    break;
                                 case "beta":
-                                    entry.dev = undefined;
-                                    entry.localPath = undefined;
-                                    var packageJson: IPackageJson = GulpUtils.getPackageJson(srcPath, entry.packageName);
-                                    entry.packageId = entry.packageName + "@" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
+                                    // If this package is taking "latest" and we are building a beta package,
+                                    // then update the dependency to point to the beta version of the package
+                                    if (entry.expirationIntervalInHours) {
+                                        var packageJson: IPackageJson = GulpUtils.getPackageJson(srcPath, entry.packageName);
+                                        entry.packageId = entry.packageName + "@" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
+                                    }
+                                // intentional pass through, no "break;"
+                                case "release":
+                                    delete entry.dev;
+                                    delete entry.localPath;
                                     break;
                                 default:
-                                    throw new Error("Invalid build type " + buildType + " requested");
+                                    throw new Error(util.format("Unsupported build type '%s' requested", buildType));
                             }
                         }
                     });
@@ -315,7 +316,7 @@ class GulpUtils {
                 return "^" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
 
             default:
-                throw new Error("Invalid build type " + buildType + " requested");
+                throw new Error(util.format("Unsupported build type '%s' requested", buildType));
         }
     }
 
@@ -329,7 +330,7 @@ class GulpUtils {
             case "beta":
                 return util.format("%s-%s", bareVersion, buildType);
             default:
-                throw new Error("Invalid build type " + buildType + " requested");
+                throw new Error(util.format("Unsupported build type '%s' requested", buildType));
         }
     }
 
