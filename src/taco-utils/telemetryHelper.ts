@@ -17,9 +17,12 @@ import Q = require ("q");
 
 import commands = require ("./commands");
 import packageLoader = require ("./tacoPackageLoader");
-import telemetry = require ("./telemetry");
+import promisesUtils = require("./promisesUtils");
+import telemetry = require("./telemetry");
+import processUtils = require("./processUtils");
 
 import Telemetry = telemetry.Telemetry;
+import PromisesUtils = promisesUtils.PromisesUtils;
 
 module TacoUtility {
     export interface ITelemetryPropertyInfo {
@@ -39,22 +42,25 @@ module TacoUtility {
         errorCode: number;
     }
 
-    export class TelemetryGenerator {
-        private telemetryProperties: ICommandTelemetryProperties = {};
+    export abstract class TelemetryGeneratorBase {
+        protected telemetryProperties: ICommandTelemetryProperties = {};
         private componentName: string;
-        private currentStepStartTime: number[] = process.hrtime();
+        private currentStepStartTime: number[];
         private currentStep: string = "initialStep";
         private errorIndex: number = -1; // In case we have more than one error (We start at -1 because we increment it before using it)
 
         constructor(componentName: string) {
             this.componentName = componentName;
+            this.currentStepStartTime = processUtils.ProcessUtils.getProcess().hrtime();
         }
 
-        public add(baseName: string, value: any, isPii: boolean): TelemetryGenerator {
+        protected abstract sendTelemetryEvent(telemetryEvent: Telemetry.TelemetryEvent): void;
+
+        public add(baseName: string, value: any, isPii: boolean): TelemetryGeneratorBase {
             return this.addWithPiiEvaluator(baseName, value, () => isPii);
         }
 
-        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGenerator {
+        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGeneratorBase {
             // We have 3 cases:
             //     * Object is an array, we add each element as baseNameNNN
             //     * Object is a hash, we add each element as baseName.KEY
@@ -76,7 +82,7 @@ module TacoUtility {
             return this;
         }
 
-        public addError(error: Error): TelemetryGenerator {
+        public addError(error: Error): TelemetryGeneratorBase {
             this.add("error.message" + ++this.errorIndex, error, /*isPii*/ true);
             var errorWithErrorCode: IHasErrorCode = <IHasErrorCode> <Object> error;
             if (errorWithErrorCode.errorCode) {
@@ -87,16 +93,15 @@ module TacoUtility {
         }
 
         public time<T>(name: string, codeToMeasure: { (): T }): T {
-            var startTime: number[] = process.hrtime();
-            return executeAfter(codeToMeasure(),
-                () => this.finishTime(name, startTime),
-                (reason: any) => {
-                    this.addError(reason);
-                    return Q.reject(reason);
-                });
+            var startTime: number[];
+            return PromisesUtils.wrapExecution(
+                () => startTime = processUtils.ProcessUtils.getProcess().hrtime(), // Before
+                codeToMeasure,
+                () => this.finishTime(name, startTime), // After
+                (reason: any) => this.addError(reason)); // On failure
         }
 
-        public step(name: string): TelemetryGenerator {
+        public step(name: string): TelemetryGeneratorBase {
             // First we finish measuring this step time, and we send a telemetry event for this step
             this.finishTime(this.currentStep, this.currentStepStartTime);
             this.sendCurrentStep();
@@ -104,7 +109,7 @@ module TacoUtility {
             // Then we prepare to start gathering information about the next step
             this.currentStep = name;
             this.telemetryProperties = {};
-            this.currentStepStartTime = process.hrtime();
+            this.currentStepStartTime = processUtils.ProcessUtils.getProcess().hrtime();
             return this;
         }
 
@@ -120,7 +125,7 @@ module TacoUtility {
             this.add("step", this.currentStep, /*isPii*/ false);
             var telemetryEvent: Telemetry.TelemetryEvent = new Telemetry.TelemetryEvent(Telemetry.appName + "/" + this.componentName);
             TelemetryHelper.addTelemetryEventProperties(telemetryEvent, this.telemetryProperties);
-            Telemetry.send(telemetryEvent);
+            this.sendTelemetryEvent(telemetryEvent);
         }
 
         private addArray(baseName: string, array: any[], piiEvaluator: { (value: string, name: string): boolean }): void {
@@ -144,25 +149,14 @@ module TacoUtility {
         }
 
         private finishTime(name: string, startTime: number[]): void {
-            var endTime: number[] = process.hrtime(startTime);
+            var endTime: number[] = processUtils.ProcessUtils.getProcess().hrtime(startTime);
             this.add(this.combine(name, "time"), String(endTime[0] * 1000 + endTime[1] / 1000000), /*isPii*/ false);
         }
     }
 
-    /* 
-    * Given an object that might be either a value or a promise, we'll execute a callback after the object gets "finished"
-    *    In the case of a promise, that means on the .finally handler. In the case of a value, that means immediately.
-    *    It also supports attaching a fail callback in case it's a promise
-    */
-    function executeAfter<T>(valueOrPromise: T, afterCallback: { (): void }, failCallback: { (reason: any): void } = (reason: any) => Q.reject(reason)): T {
-        var valueAsPromise: Q.Promise<any> = <Q.Promise<any>> <Object> valueOrPromise;
-        if (_.isObject(valueAsPromise) && _.isFunction(valueAsPromise.finally)) {
-            // valueOrPromise must be a promise. We'll add the callback as a finally handler
-            return <T> <Object> valueAsPromise.finally(afterCallback).fail(failCallback);
-        } else {
-            // valueOrPromise is just a value. We'll execute the callback now
-            afterCallback();
-            return valueOrPromise;
+    export class TelemetryGenerator extends TelemetryGeneratorBase {
+        protected sendTelemetryEvent(telemetryEvent: Telemetry.TelemetryEvent): void {
+            Telemetry.send(telemetryEvent);
         }
     }
 
@@ -245,8 +239,11 @@ module TacoUtility {
         }
 
         public static generate<T>(name: string, codeGeneratingTelemetry: { (telemetry: TelemetryGenerator): T }): T {
-            var generator: TelemetryGenerator = new TelemetryGenerator(name);
-            return executeAfter(generator.time(null, () => codeGeneratingTelemetry(generator)), () => generator.send());
+            var generator: TelemetryGenerator;
+            return PromisesUtils.wrapExecution(
+                () => generator = new TelemetryGenerator(name), // Before
+                () => generator.time(null, () => codeGeneratingTelemetry(generator)),
+                () => generator.send()); // After
         }
 
         private static createBasicCommandTelemetry(commandName: string, args: string[] = null): Telemetry.TelemetryEvent {

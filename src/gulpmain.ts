@@ -26,7 +26,7 @@ import gulpUtils = require ("../tools/GulpUtils");
 // var require needed to require build_config.json
 var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
 /* tslint:enable:no-var-requires */
-var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib"];
+var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib", "taco-tests-utils"];
 var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
 
 // honour --moduleFilter flag.

@@ -501,6 +501,7 @@ declare module "https" {
         rejectUnauthorized?: boolean;
         NPNProtocols?: any;
         SNICallback?: (servername: string) => any;
+        secureProtocol?: string; // See https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener. See https://github.com/Microsoft/TACO/issues/18
     }
 
     export interface RequestOptions {
