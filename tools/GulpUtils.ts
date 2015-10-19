@@ -217,7 +217,7 @@ class GulpUtils {
                     });
                     return json;
                 }))
-            .pipe(gulp.dest(destPath)));
+            .pipe(gulp.dest(srcPath)));
     }
 
     private static updateDynamicDependencies(srcPath: string, buildType: string, destPath: string): Q.Promise<any> {
@@ -252,7 +252,7 @@ class GulpUtils {
                     return json;
                 }
             ))
-            .pipe(gulp.dest(destPath)));
+            .pipe(gulp.dest(srcPath)));
     }
 
     private static packageModules(srcPath: string, modules: string[], buildType: string, destPath: string): Q.Promise<any> {
@@ -285,9 +285,9 @@ class GulpUtils {
 
                     var targetPath: string = "";
                     if (buildType != "dev") {
-                        targetPath = path.resolve(destPath, buildType, tacoModule + ".tgz");
+                        targetPath = path.resolve(srcPath, buildType, tacoModule + ".tgz");
                     } else {
-                        targetPath = path.resolve(destPath, tacoModule + ".tgz");
+                        targetPath = path.resolve(srcPath, tacoModule + ".tgz");
                     }
                     var parentDir = path.dirname(targetPath);
                     if (!fs.existsSync(parentDir)) {
