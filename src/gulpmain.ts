@@ -57,17 +57,20 @@ gulp.task("package", [], function (callback: gulp.TaskCallback): void {
     runSequence("build", "just-package", callback);
 });
 
-gulp.task("just-package", [], function (): Q.Promise<any> {
-    return Q.all([
-        gulpUtils.updateLocalPackageFilePaths("/**/package.json", buildConfig.src, buildConfig.buildPackages, options.drop || buildConfig.buildPackages),
-        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop, true)
-    ]).then(function (): Q.Promise<any> {
-        // npm pack each folder, put the tgz in the parent folder
-        return gulpUtils.packageModules(buildConfig.buildPackages, allModules, options.drop || buildConfig.buildPackages);
-    }).catch(function (err: any): any {
-        console.error("Error packaging: " + err);
-        throw err;
-    });
+gulp.task("just-package", [], function (callback: gulp.TaskCallback): void {
+    runSequence("dev-package", "beta-package", "release-package", callback);
+});
+
+gulp.task("dev-package", [], function(): Q.Promise<any> {
+    return gulpUtils.package(buildConfig.buildPackages, allModules, "dev", options.drop || buildConfig.buildPackages);
+});
+
+gulp.task("beta-package", [], function(): Q.Promise<any> {
+    return gulpUtils.package(buildConfig.buildPackages, allModules, "beta", options.drop || buildConfig.buildPackages);
+});
+
+gulp.task("release-package", [], function(): Q.Promise<any> {
+    return gulpUtils.package(buildConfig.buildPackages, allModules, "release", options.drop || buildConfig.buildPackages);
 });
 
 /* full clean build */
@@ -76,18 +79,20 @@ gulp.task("rebuild", function (callback: gulp.TaskCallback): void {
 });
 
 /* Task to install the compiled modules */
-gulp.task("install-build", ["package"], function (): Q.Promise<any> {
+gulp.task("install-build", ["dev-package"], function (): Q.Promise<any> {
     return gulpUtils.installModules(tacoModules, buildConfig.buildPackages);
 });
 
-/* Cleans up the build location, will have to call "gulp prep" again */
 gulp.task("clean", function (): Q.Promise<any> {
-    return gulpUtils.uninstallModules(tacoModules, buildConfig.buildPackages);
+    return gulpUtils.uninstallModules(tacoModules, buildConfig.buildPackages)
+    .then(function(): Q.Promise<any> {
+        return gulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.buildPackages));
+    });
 });
 
 /* Cleans up only the templates in the build folder */
-gulp.task("clean-templates", function (callback: (err: Error) => void): void {
-    gulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.buildTemplates), callback);
+gulp.task("clean-templates", function (): Q.Promise<any> {
+    return gulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.buildTemplates));
 });
 
 /* copy package.json and resources.json files from source to bin */
@@ -100,13 +105,10 @@ gulp.task("copy", function (): Q.Promise<any> {
         "/*/.npmignore",
         "/**/templates/**",
         "/**/examples/**",
-        "!/**/dynamicDependencies.json"
+        "/**/dynamicDependencies.json"
     ].map((val: string): string => val[0] === "!" ? "!" + path.join(buildConfig.src, val.substring(1)) : path.join(buildConfig.src, val));
 
-    return Q.all([
-        gulpUtils.copyFiles(filesToCopy, buildConfig.buildPackages),
-        gulpUtils.copyDynamicDependenciesJson("/**/dynamicDependencies.json", buildConfig.src, buildConfig.buildPackages, options.drop && path.join(options.drop, "node_modules"))
-    ]);
+    return gulpUtils.copyFiles(filesToCopy, buildConfig.buildPackages);
 });
 
 /* Task to run typescript linter on source code (excluding typings) */
