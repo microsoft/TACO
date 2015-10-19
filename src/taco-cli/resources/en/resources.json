@@ -43,8 +43,6 @@
     "CommandCreateGitTemplateHeader": "Acquiring template from git...<br/>",
     "_CommandCreateGitTemplateHeader.comment": "The header before the git output when using 'taco create' with a template from git.",
 
-    "CommandCreateStatusCreatingNewProject":  "Creating a new Cordova project.",
-    "_CommandCreateStatusCreatingNewProject.comment":  "Status description printed when the 'taco create' command is invoked, to say that 'we are busy working'",
     "_CommandCreateStatusTableSectionSeparator.comment":  "This is a section delimiter, used on the 'taco create' command to show on the console a text table. If another language uses words that are much longer, we might want to make this one longer too",
     "CommandCreateStatusTableNameDescription":  "Name",
     "_CommandCreateStatusTableNameDescription.comment":  "Name property of a project, used when we show a table with the project attributes when 'taco create' is invoked",

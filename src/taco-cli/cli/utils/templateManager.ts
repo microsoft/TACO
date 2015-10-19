@@ -190,6 +190,8 @@ class TemplateManager {
 
         childProcess.spawn(command, args, options)
             .on("error", function (err: any): void {
+                loggerHelper.logSeparatorLine();
+
                 if (err.code === "ENOENT") {
                     // ENOENT error thrown if no git is found
                     deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateNoGit));
@@ -198,6 +200,8 @@ class TemplateManager {
                 }
             })
             .on("exit", function (code: number): void {
+                loggerHelper.logSeparatorLine();
+
                 if (code) {
                     deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateGitCloneError));
                 } else {
@@ -308,8 +312,6 @@ class TemplateManager {
 
             return TemplateManager.acquireFromGit(templateId)
                 .then(function (templateLocation: string): string {
-                    loggerHelper.logSeparatorLine();
-
                     return templateLocation;
                 });
         } else {
