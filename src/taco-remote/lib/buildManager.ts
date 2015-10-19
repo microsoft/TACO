@@ -369,10 +369,20 @@ class BuildManager {
         if (fs.existsSync(changeListFile)) {
             buildInfo.changeList = JSON.parse(fs.readFileSync(changeListFile, { encoding: "utf-8" }));
             if (buildInfo.changeList) {
+                buildInfo.changeList.deletedFiles = buildInfo.changeList.deletedFiles.map(function (deletedFile: string): string {
+                    // Convert all \ and / characters in the path string into platform-appropriate path separators
+                    return deletedFile.split("\\").join(path.sep).split("/").join(path.sep);
+                });
                 buildInfo.changeList.deletedFiles.forEach(function (deletedFile: string): void {
-                    if (!deletedFile.match(/^plugins[\/]/)) {
+                    
+                    if (deletedFile.split(path.sep)[0] === "plugins") {
                         // Don't remove files within the plugins folder; they should be cordova plugin remove'd later on
-                        var fileToDelete: string = path.join(buildInfo.appDir, path.normalize(deletedFile));
+                        var fileToDelete: string = path.join(buildInfo.appDir, deletedFile);
+                        if (path.relative(buildInfo.appDir, fileToDelete)[0] == ".") {
+                            // Escaping the project folder; don't let that happen.
+                            Logger.logWarning(resources.getString("AttemptedDeleteFileOutsideProject", fileToDelete));
+                            return;
+                        }
 
                         if (fs.existsSync(fileToDelete)) {
                             fs.unlinkSync(fileToDelete);

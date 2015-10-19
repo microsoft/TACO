@@ -56,6 +56,8 @@
     "_NoTgzFound.comment": "Message printed to console and reported back to Visual Studio when unable to find the uploaded project. {0} is where the file was expected",
     "TgzExtractError": "An error occurred in extracting contents from {0}: {1}",
     "_TgzExtractError.comment": "Message printed to console and reported back to Visual Studio when an error occurs when extracting the tgz. {0} is the tgz file, and {1} is the error",
+    "AttemptedDeleteFileOutsideProject": "Warning: build requested deleting file '{0}'",
+    "_AttemptedDeleteFileOutsideProject.comment": "Message printed to console when a build tries to delete a file outside of the build directory. {0} is the path of the file",
 
     "BuildInvokedTwice": "Invalid request: build.js process already in use but was asked to build again. This is likely a programming error as a build.js process is meant to be used only once.",
     "_BuildInvokedTwice.comment": "Message when multiple builds are invoked at the same time.",
