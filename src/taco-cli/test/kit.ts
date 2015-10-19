@@ -30,8 +30,6 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 import util = require ("util");
 
-import createMod = require ("../cli/create");
-import kitMod = require ("../cli/kit");
 import kitHelper = require ("../cli/utils/kitHelper");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import TacoUtility = require ("taco-utils");
@@ -41,6 +39,8 @@ import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 
 import commands = tacoUtils.Commands.ICommandData;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
 
 interface IKeyValuePair<T> {
     [key: string]: T;
@@ -50,7 +50,7 @@ describe("Kit", function (): void {
     this.timeout(20000);
 
     function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var kit: kitMod = new kitMod();
+        var kit: ICommand = CommandHelper.getCommand("kit");
         var data: commands = {
             options: {},
             original: args,
@@ -76,7 +76,7 @@ describe("Kit", function (): void {
         kit: "5.1.1-Kit", "cordova-cli": "5.1.1" 
     };
     function createProject(args: string[], projectDir: string): Q.Promise<any> {
-        var create: createMod = new createMod();
+        var create: ICommand = CommandHelper.getCommand("create");
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);

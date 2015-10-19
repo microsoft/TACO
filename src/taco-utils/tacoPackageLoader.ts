@@ -16,7 +16,8 @@
 import assert = require ("assert");
 import child_process = require ("child_process");
 import fs = require ("fs");
-import mkdirp = require ("mkdirp");
+import mkdirp = require("mkdirp");
+import os = require("os");
 import path = require ("path");
 import rimraf = require ("rimraf");
 import semver = require ("semver");
@@ -88,6 +89,7 @@ module TacoUtility {
 
     export interface ITacoPackageLoader {
         lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
+        lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;
     }
 
     export class TacoPackageLoader {
@@ -95,6 +97,43 @@ module TacoUtility {
         public static FILE_URI_REGEX: RegExp = /^file:\/\/.*/;
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
+
+        /**
+         * Returns a path to the specified command exported from the specified package. If the package is not already downloaded,
+         * then first download and cache it locally.
+         *
+         * @param {string} packageName The name of the package to load
+         * @param {string} packageId The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} commandName The name of the binary to find
+         * @param {LogLevel} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
+         * @returns {Q.Promise<string>} A promise which is either rejected with a failure to find the local the binary or resolved with a path to the binary
+         */
+        public static lazyRun(packageName: string, packageId: string, commandName: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<string> {
+            var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel);
+
+            return Q({})
+                .then(function (): Q.Promise<void> {
+                    return TacoPackageLoader.installPackageIfNeeded(request);
+                })
+                .then(function (): Q.Promise<string> {
+                    var packageJsonFilePath = path.join(request.targetPath, "package.json");
+                    var packageJson = JSON.parse(<any> fs.readFileSync(packageJsonFilePath));
+
+                    if (packageJson.bin && packageJson.bin[commandName]) {
+                        var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
+                        if (os.platform() === "win32") {
+                            commandFilePath += ".cmd";
+                        }
+                        if (fs.existsSync(commandFilePath)) {
+                            return Q.resolve(commandFilePath);
+                        }
+                    }
+
+                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
+                });
+        }
 
         /**
          * Load a node package with specified version. If the package is not already downloaded,

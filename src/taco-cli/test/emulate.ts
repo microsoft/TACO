@@ -28,10 +28,8 @@ import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 
 import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
-import createMod = require ("../cli/create");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import emulateMod = require ("../cli/emulate");
 import ServerMock = require ("./utils/serverMock");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
@@ -40,7 +38,10 @@ import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
 import utils = TacoUtility.UtilHelper;
 
-var create: createMod = new createMod();
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
+
+var create: ICommand = CommandHelper.getCommand("create");
 
 describe("taco emulate", function (): void {
     var testHttpServer: http.Server;
@@ -108,7 +109,7 @@ describe("taco emulate", function (): void {
     });
 
     var emulateRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var emulate: emulateMod = new emulateMod();
+        var emulate: ICommand = CommandHelper.getCommand("emulate");
         return emulate.run({
             options: {},
             original: args,

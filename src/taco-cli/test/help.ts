@@ -27,10 +27,12 @@ import tacoUtils = require ("taco-utils");
 import Help = require ("../cli/help");
 import ms = require ("./utils/memoryStream");
 
-import commands = tacoUtils.Commands.ICommandData;
+import ICommandData = tacoUtils.Commands.ICommandData;
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = tacoUtils.Commands.ICommand;
 
 describe("help for a command", function (): void {
-    var help: Help = new Help();
+    var help: ICommand = CommandHelper.getCommand("help");
     // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
     // stdoutWrite just doesn't work
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
@@ -38,7 +40,7 @@ describe("help for a command", function (): void {
     var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
-        var data: commands = {
+        var data: ICommandData = {
             options: {},
             original: [command],
             remain: [command]
@@ -153,7 +155,6 @@ describe("help for a command", function (): void {
             "        --save ........... CommandPlatformSaveUpdateDescription",
             "   check ................. CommandPlatformCheckSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   platforms -> platform",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
@@ -179,7 +180,6 @@ describe("help for a command", function (): void {
             "        --save ........... CommandPlatformSaveUpdateDescription",
             "   check ................. CommandPlatformCheckSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   platforms -> platform",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
@@ -204,7 +204,6 @@ describe("help for a command", function (): void {
             "   list ............................... CommandPluginListSubcommandDescription",
             "   search ............................. CommandPluginSearchSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   plugins -> plugin",
             "   rm -> remove",
             "   ls -> list",
             ""], done);
@@ -229,7 +228,6 @@ describe("help for a command", function (): void {
             "   list ............................... CommandPluginListSubcommandDescription",
             "   search ............................. CommandPluginSearchSubcommandDescription",
             "CommandHelpUsageAliases",
-            "   plugins -> plugin",
             "   rm -> remove",
             "   ls -> list",
             ""], done);

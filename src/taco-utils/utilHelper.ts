@@ -219,6 +219,11 @@ module TacoUtility {
         public static expandEnvironmentVariables(str: string): string {
             var regex: RegExp = process.platform === "win32" ? /%(.+?)%/g : /\$(.+?)(?:\/|$)/g;
 
+            // For Mac OS, first try to detect the ~ notation at the start of the string and replace it with the HOME value
+            if (os.platform() === "darwin" && process.env.HOME) {
+                str = str.replace(/^~(?=\/|$)/, process.env.HOME);
+            }
+
             return str.replace(regex, function (substring: string, ...args: any[]): string {
                 if (process.env[args[0]]) {
                     var newValue: string = process.env[args[0]];

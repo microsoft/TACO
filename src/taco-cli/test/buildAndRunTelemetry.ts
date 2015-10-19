@@ -28,8 +28,6 @@ import querystring = require ("querystring");
 import rimraf = require ("rimraf");
 import util = require ("util");
 
-import buildMod = require ("../cli/build");
-import createMod = require ("../cli/create");
 import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
 import mockCordova = require ("./utils/mockCordova");
@@ -45,8 +43,11 @@ import TacoUtility = require ("taco-utils");
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
 
-var build: buildMod = new buildMod();
-var create: createMod = new createMod();
+import CommandHelper = require ("./utils/commandHelper");
+import ICommand = TacoUtility.Commands.ICommand;
+
+var build: ICommand = CommandHelper.getCommand("build");
+var create: ICommand = CommandHelper.getCommand("create");
 
 interface IExpectedRequest {
     expectedUrl: string;
@@ -105,7 +106,8 @@ module BuildAndRunTelemetryTests {
         var customLoader: TacoUtility.ITacoPackageLoader = {
             lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel): any => {
                 return Q(cordova);
-            }
+            },
+            lazyRun: (packageName: string, packageId: string, commandName: string): Q.Promise<string> => Q("cordova")
         };
 
         before(() => {
@@ -434,7 +436,8 @@ module BuildAndRunTelemetryTests {
                 .then(() => done(), done);
         });
 
-        it("5. --uknown_option unknown_platform", (done: MochaDone) => {
+        it("5. --uknown_option unknown_platform", function (done: MochaDone): void {
+            this.timeout(120000); // Installing Cordova for the passthrough can take some time
             var args: string[] = ["--uknown_option=unknown_value", "unknown_platform"];
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.requestedViaCommandLine.local1": { isPii: true, value: "unknown_platform" },

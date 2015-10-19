@@ -247,7 +247,7 @@ class Certs {
         var cnfPath: string = path.join(conf.serverDir, "certs", "openssl.cnf");
         Certs.writeConfigFile(cnfPath, conf);
 
-        return Certs.openSslPromise("genrsa -out " + outKeyPath + " 1024").
+        return Certs.openSslPromise("genrsa -out " + outKeyPath + " 2048").
             then(function (): Q.Promise<{}> {
             return Certs.openSslPromise("req -new -subj /CN=" + cn + " -key " + outKeyPath + " -out " + csrPath + " -config " + cnfPath);
         }).
