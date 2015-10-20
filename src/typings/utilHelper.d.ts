@@ -123,7 +123,7 @@ declare module TacoUtility {
     }
 
     interface ICopyOptions {
-        clobber: boolean;
-        filter: (itemPath: string) => boolean;
+        clobber?: boolean;
+        filter?: (itemPath: string) => boolean;
     }
 }

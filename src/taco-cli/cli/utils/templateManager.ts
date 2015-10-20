@@ -66,12 +66,14 @@ class TemplateDescriptor implements TemplateManager.ITemplateDescriptor {
 
 class TemplateManager {
     private static DEFAULT_TEMPLATE_ID: string = "blank";
-    private static GIT_FILE_LIST: string[] = [
-        ".git",
+    private static IGNORE_FILES_LIST: string[] = [
         ".gitignore",
-        ".gitattributes"
+        ".gitattributes",
+        ".taco-ignore"
     ];
-    private static TACO_IGNORE_FILENAME: string = ".taco-ignore";
+    private static IGNORE_DIRS_LIST: string[] = [
+        ".git"
+    ];
     private static TEMPORARY_TEMPLATE_PREFIX: string = "taco_template_";
     private static temporaryTemplateDir: string;   // The temporary directory to git clone / extract templates to
 
@@ -118,6 +120,23 @@ class TemplateManager {
         return deferred.promise;
     }
 
+    private static deleteIgnoredFiles(tempTemplatePath: string): void {
+        wrench.readdirSyncRecursive(tempTemplatePath).forEach(function (item: string): void {
+            var itemPath = path.join(tempTemplatePath, item);
+
+            // If the item no longer exists, it means it was deleted as part of a directory we ignored, so don't do anything
+            if (fs.existsSync(itemPath)) {
+                var ignoreSource: string[] = fs.statSync(itemPath).isDirectory() ? TemplateManager.IGNORE_DIRS_LIST : TemplateManager.IGNORE_FILES_LIST;
+                var itemName: string = path.basename(item);
+
+                if (ignoreSource.indexOf(itemName) !== -1) {
+                    // This item is in the list of our items to ignore; delete it
+                    rimraf.sync(itemPath);
+                }
+            }
+        });
+    }
+
     private static copyTemplateItemsToProject(cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<any> {
         /*
         Cordova's --copy-from behavior: "cordova create [project path] --copy-from [template path]" supports 2 scenarios: 1) The template is for the entire project; 2) The template is only
@@ -145,15 +164,7 @@ class TemplateManager {
             return Q.resolve({});
         }
 
-        // If we reach this point, we are in case 1) (see above comment), so we need to perform a recursive copy
-        var filterFunc: (itemPath: string) => boolean = function (itemPath: string): boolean {
-            // If the item name is in our git file list, or if it is the TACO ignore file, we need to skip this item (return false to skip)
-            var fileName: string = path.basename(itemPath);
-
-            return TemplateManager.GIT_FILE_LIST.indexOf(fileName) === -1 && fileName !== TemplateManager.TACO_IGNORE_FILENAME;
-        };
-
-        var options: tacoUtility.ICopyOptions = { clobber: false, filter: filterFunc };
+        var options: tacoUtility.ICopyOptions = { clobber: false };
 
         return utils.copyRecursive(cordovaParameters.copyFrom, cordovaParameters.projectPath, options);
     }
@@ -240,6 +251,11 @@ class TemplateManager {
         templateId = templateId ? templateId : TemplateManager.DEFAULT_TEMPLATE_ID;
 
         return this.acquireTemplate(templateId, kitId)
+            .then(function (templatePath: string): string {
+                TemplateManager.deleteIgnoredFiles(templatePath);
+
+                return templatePath;
+            })
             .then(function (templatePath: string): Q.Promise<any> {
                 return TemplateManager.cordovaCreate(templatePath, cordovaCliVersion, cordovaParameters);
             })
