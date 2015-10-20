@@ -19,14 +19,21 @@ declare module TacoUtility {
         [propertyName: string]: ITelemetryPropertyInfo;
     }
 
-    class TelemetryGenerator {
+    class TelemetryGeneratorBase {
         public constructor(componentName: string);
         public time<T>(name: string, codeToMeasure: { (): Q.Promise<T> }): Q.Promise<T>;
-        public step(name: string): TelemetryGenerator;
-        public add(baseName: string, value: any, isPii: boolean): TelemetryGenerator;
-        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGenerator;
+        public step(name: string): TelemetryGeneratorBase;
+        public add(baseName: string, value: any, isPii: boolean): TelemetryGeneratorBase;
+        public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGeneratorBase;
         public send(): void;
-        public addError(error: Error): TelemetryGenerator;
+        public addError(error: Error): TelemetryGeneratorBase;
+    }
+
+    class TelemetryGenerator extends TelemetryGeneratorBase {
+    }
+
+    interface TelemetryGeneratorFactory {
+        generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TelemetryGeneratorBase): T }): T;
     }
 
     class TelemetryHelper {
@@ -41,6 +48,6 @@ declare module TacoUtility {
         static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
              commandOptions: { [flag: string]: any }, nonPiiOptions?: string[]): ICommandTelemetryProperties;
         static addObjectToTelemetry(telemetryProperties: ICommandTelemetryProperties, baseName: string, value: any, isPii: boolean): void;
-        static generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TelemetryGenerator): T }): T;
+        static generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TelemetryGeneratorBase): T }): T;
     }
 }
