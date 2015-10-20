@@ -16,6 +16,7 @@ import fs = require ("fs");
 import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
+import util = require ("util");
 
 import InstallerBase = require ("./installerBase");
 import installerProtocol = require ("../elevatedInstallerProtocol");
@@ -33,6 +34,15 @@ class AndroidPackagesInstaller extends InstallerBase {
     private androidCommand: string;
     private adbCommand: string;
     private availablePackages: string[];
+
+    private static removeOptionsFromStderr(stderr: string): string {
+        // For some reason, Android SDK outputs the java options specified in _JAVA_OPTIONS env variable to stderr when it picks them up. This means TACO detects an error in the SDK command,
+        // when in reality everything went fine. Here, we filter out such lines from the error output.
+        return stderr.split(os.EOL).filter(function (line: string): boolean {
+            // Return true to keep a line; we keep it if it doesn't start with "Picked up "
+            return line.indexOf("Picked up ") === -1;
+        }).join(os.EOL);
+    }
 
     constructor(installerInfo: DependencyInstallerInterfaces.IInstallerData, softwareVersion: string, installTo: string, logger: ILogger, steps: DependencyInstallerInterfaces.IStepsDeclaration) {
         super(installerInfo, softwareVersion, installTo, logger, steps, "androidPackages");
@@ -90,18 +100,23 @@ class AndroidPackagesInstaller extends InstallerBase {
                 .addError(err);
 
             if (err.code === "ENOENT") {
-                deferred.reject(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand)));
+                deferred.reject(new Error(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand))));
             } else {
                 deferred.reject(err);
             }
         });
         cp.on("exit", (code: number) => {
-            if (errorOutput) {
+            errorOutput = AndroidPackagesInstaller.removeOptionsFromStderr(errorOutput);
+
+            if (errorOutput || code) {
                 this.telemetry
                     .add("error.description", "ErrorOnExitOfChildProcess on installAndroidPackages", /*isPii*/ false)
                     .add("error.code", code, /*isPii*/ false)
                     .add("error.message", errorOutput, /*isPii*/ true);
-                deferred.reject(new Error(errorOutput));
+
+                var errorString: string = errorOutput || resources.getString("InstallerExitCode", util.format("%s %s", this.androidCommand, args.join(" ")), code);
+
+                deferred.reject(new Error(errorString));
             } else {
                 this.availablePackages = [];
 
@@ -246,19 +261,21 @@ class AndroidPackagesInstaller extends InstallerBase {
                 .addError(err);
 
             if (err.code === "ENOENT") {
-                deferred.reject(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand)));
+                deferred.reject(new Error(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand))));
             } else {
                 deferred.reject(err);
             }
         });
         cp.on("exit", (code: number) => {
+            errorOutput = AndroidPackagesInstaller.removeOptionsFromStderr(errorOutput);
+
             if (errorOutput || code) {
                 this.telemetry
                     .add("error.description", "ErrorOnExitOfChildProcess on installAndroidPackages", /*isPii*/ false)
                     .add("error.code", code, /*isPii*/ false)
                     .add("error.message", errorOutput, /*isPii*/ true);
 
-                var errorString: string = errorOutput || resources.getString("InstallerExitCode", code);
+                var errorString: string = errorOutput || resources.getString("InstallerExitCode", util.format("%s %s", this.androidCommand, args.join(" ")), code);
 
                 deferred.reject(new Error(errorString));
             } else {
@@ -274,15 +291,15 @@ class AndroidPackagesInstaller extends InstallerBase {
         // as stray adb processes spawned by the android installer
         // can result in a hang post installation
         var deferred: Q.Deferred<any> = Q.defer<any>();
-
         var adbProcess: childProcess.ChildProcess = childProcess.spawn(this.adbCommand, ["kill-server"]);
+
         adbProcess.on("error", (err: any) => {
             this.telemetry
                 .add("error.description", "ErrorOnKillingAdb in killAdb", /*isPii*/ false)
                 .addError(err);
 
             if (err.code === "ENOENT") {
-                deferred.reject(resources.getString("AndroidCommandNotFound", "adb"));
+                deferred.reject(new Error(resources.getString("AndroidCommandNotFound", "adb")));
             } else {
                 deferred.reject(err);
             }
