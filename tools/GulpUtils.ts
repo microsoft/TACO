@@ -229,7 +229,7 @@ class GulpUtils {
                         if (entry.dev) {
                             switch (buildType) {
                                 case "dev":
-                                    entry.localPath = GulpUtils.getDevDependencyValue(entry.packageName, srcPath, destPath);
+                                    entry.localPath = util.format("file://%s.tgz", path.resolve(destPath || srcPath, packageKey));
                                     break;
                                 case "beta":
                                     // If this package is taking "latest" and we are building a beta package,
@@ -309,7 +309,8 @@ class GulpUtils {
         switch (buildType) {
 
             case "dev":
-                return GulpUtils.getDevDependencyValue(dependencyName, srcPath, destPath);
+                var uncPathPadding = destPath.indexOf("\\\\") === 0 ? "\\\\" : "";
+                return util.format("file:%s%s.tgz", uncPathPadding, path.resolve(destPath || srcPath, dependencyName));
 
             case "beta":
             case "release":
@@ -334,11 +335,6 @@ class GulpUtils {
             default:
                 throw new Error(util.format("Unsupported build type '%s' requested", buildType));
         }
-    }
-
-    private static getDevDependencyValue(dependencyName: string, srcPath: string, destPath: string): string {
-        var uncPathPadding = destPath.indexOf("\\\\") === 0 ? "\\\\" : "";
-        return util.format("file:%s%s.tgz", uncPathPadding, path.resolve(destPath || srcPath, dependencyName));
     }
 
     private static getPackageJson(srcPath: string, packageName: string): IPackageJson {
