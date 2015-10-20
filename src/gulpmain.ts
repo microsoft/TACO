@@ -54,7 +54,7 @@ gulp.task("build", ["prepare-templates"], function (callback: gulp.TaskCallback)
 });
 
 gulp.task("package", [], function (callback: gulp.TaskCallback): void {
-    runSequence("build", "just-package", callback);
+    runSequence("build", "dev-package", callback);
 });
 
 gulp.task("just-package", [], function(callback: gulp.TaskCallback): void {
@@ -79,7 +79,7 @@ gulp.task("rebuild", function (callback: gulp.TaskCallback): void {
 });
 
 /* Task to install the compiled modules */
-gulp.task("install-build", ["dev-package"], function (): Q.Promise<any> {
+gulp.task("install-build", ["package"], function (): Q.Promise<any> {
     return gulpUtils.installModules(tacoModules, buildConfig.buildPackages);
 });
 
