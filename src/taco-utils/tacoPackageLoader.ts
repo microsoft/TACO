@@ -339,7 +339,8 @@ module TacoUtility {
             var deferred: Q.Deferred<number> = Q.defer<number>();
             var args: string[] = [npmCommand, packageId];
 
-            if (typeof logLevel !== "undefined" && logLevel !== InstallLogLevel.taco) {
+            if (logLevel && logLevel !== InstallLogLevel.taco) {
+                // Ignore logLevel if it is undefined, InstallLogLevel.undefined = 0 or InstallLogLevel.taco
                 args.push("--loglevel", InstallLogLevel[logLevel]);
             }
 
