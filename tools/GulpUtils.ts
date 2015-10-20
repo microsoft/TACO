@@ -293,8 +293,10 @@ class GulpUtils {
                     if (!fs.existsSync(parentDir)) {
                         fs.mkdirSync(parentDir);
                     }
-                    fs.createReadStream(packed).pipe(fs.createWriteStream(targetPath));
-                    fs.unlinkSync(packed);
+                    GulpUtils.streamToPromise(fs.createReadStream(packed).pipe(fs.createWriteStream(targetPath)))
+                        .then(function(): void {
+                            fs.unlinkSync(packed);
+                        });
                 }
             });
         }).catch(function(err: any): any {

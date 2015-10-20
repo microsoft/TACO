@@ -277,7 +277,7 @@ module TacoUtility {
             if ((TacoPackageLoader.GIT_URI_REGEX.test(packageId))) {
                 packageType = PackageSpecType.Uri;
             } else if (TacoPackageLoader.FILE_URI_REGEX.test(packageId)) {
-                packageId = packageId.substring("file://".length);
+                packageId = packageId.substring("file:".length);
                 packageType = PackageSpecType.FilePath;
             } else {
                 // moving this down after Uri/FilePath because both can have '@'. Parse the packageId to retrieve packageVersion
