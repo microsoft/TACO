@@ -94,7 +94,7 @@ module TacoUtility {
 
     export class TacoPackageLoader {
         public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
-        public static FILE_URI_REGEX: RegExp = /^file:\/\/.*/;
+        public static FILE_URI_REGEX: RegExp = /^file:.*/;
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
 

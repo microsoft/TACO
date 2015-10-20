@@ -336,7 +336,7 @@ class GulpUtils {
 
     private static getDevDependencyValue(dependencyName: string, srcPath: string, destPath: string): string {
         var uncPathPadding = destPath.indexOf("\\\\") === 0 ? "\\\\" : "";
-        return util.format("file://%s%s.tgz", uncPathPadding, path.resolve(destPath || srcPath, dependencyName));
+        return util.format("file:%s%s.tgz", uncPathPadding, path.resolve(destPath || srcPath, dependencyName));
     }
 
     private static getPackageJson(srcPath: string, packageName: string): IPackageJson {
