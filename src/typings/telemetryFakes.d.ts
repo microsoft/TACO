@@ -22,6 +22,7 @@ declare module TacoTestsUtils {
             generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TacoUtility.TelemetryGenerator): T; }): T;
             // Warning: We have no way of rejecting this promise, so we might get a test timeout if the events are never sent
             getAllSentEvents(): Q.Promise<TacoUtility.ICommandTelemetryProperties[]>;
+            clear(): void;
         }
     }
 }

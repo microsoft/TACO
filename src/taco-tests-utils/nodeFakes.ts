@@ -17,9 +17,17 @@
 
 import _ = require("lodash");
 
+/* tslint:disable:no-var-requires */
+/* We don't have a .d.ts file for mock-spawn */
+var mockSpawnModule = require("mock-spawn");
+/* tslint:enable:no-var-requires */
+
 export module NodeFakes {
     export interface IEnvironmentVariables {
+        // We should add here the environment variables that we use in TACO. Remember to also add them in the .d.ts file
         HOME?: string;
+        ANDROID_HOME?: string;
+        PATH?: string;
     }
 
     export type IChildProcess = NodeJSChildProcess.ChildProcess;
@@ -29,6 +37,8 @@ export module NodeFakes {
     export type Callback = (error: Error, stdout: Buffer, stderr: Buffer) => void;
 
     export type ExecSecondArgument = IExecOptions | Callback;
+
+    export type CommandTester = (command: string) => boolean;
 
     export type ExecFileOptions = {
         cwd?: string; stdio?: any; customFds?: any; env?: any;
@@ -68,7 +78,7 @@ export module NodeFakes {
         public env: IEnvironmentVariables;
 
         constructor() {
-            this.env = _.extend({}, process.env);
+            this.env = {};
         }
 
         public asProcess(): NodeJS.Process {
@@ -109,7 +119,7 @@ export module NodeFakes {
         public fakeWindows(): Process {
             var username = "my_username";
             this.asProcess().platform = "win32";
-            // this.asProcess().env.HOME = "C:\\Users\\" + username;
+            this.asProcess().env.HOME = "C:\\Users\\" + username;
             return this;
         }
     }
@@ -175,27 +185,42 @@ export module NodeFakes {
     }
 
     export class ChildProcessModule /* implements typeof NodeJSChildProcess*/ {
-        /** Methods to configure the fake process **/
+        /** mock spawn variable. Docs at https://www.npmjs.com/package/mock-spawn **/
+        public mockSpawn: any = mockSpawnModule();
+
+        // We simulate that all calls to exect are succesfull
+        public fakeAllExecCallsSucceed(): ChildProcessModule {
+            this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback: Callback = null): IChildProcess => {
+                return this.callCallback(command, optionsOrCallback, callback, true);
+            };
+            return this;
+        }
 
         // We simulate that all calls to exect end with an error
         public fakeAllExecCallsEndingWithErrors(): ChildProcessModule {
+            this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback: Callback = null): IChildProcess => {
+                return this.callCallback(command, optionsOrCallback, callback, false);
+            };
+            return this;
+        }
+
+        public fakeUsingCommandToDetermineResult(successFilter: CommandTester, failureFilter: CommandTester): ChildProcessModule {
             this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback?: Callback): IChildProcess => {
-                var realCallback = <Callback> (callback || optionsOrCallback);
+                var isSuccess: boolean = successFilter(command);
+                var isFailure: boolean = failureFilter(command);
 
-                // We call the callback in an async way
-                setTimeout(() => {
-                    realCallback(new Error("Error while executing " + command), /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
-                }, 0);
-
-                return new ChildProcess();
+                if (isSuccess !== isFailure) {
+                    return this.callCallback(command, optionsOrCallback, callback, isSuccess);
+                } else {
+                    throw new Error("A command should be exactly a success, or a failure. It can't be both nor either.\n"
+                        + "Command: " + command + " isSuccess: " + isSuccess + " isFailure: " + isFailure);
+                }
             };
             return this;
         }
 
         public spawn(command: string, args?: string[], options?: SpawnOptions): IChildProcess {
-            /* TODO: We should consider integrating this method with this library https://www.npmjs.com/package/mock-spawn 
-               if we need to mock spawn */
-            throw this.notImplementedError();
+            return this.mockSpawn(command, args, options);
         }
 
         public exec(command: string, options: IExecOptions, callback: Callback): IChildProcess;
@@ -213,6 +238,17 @@ export module NodeFakes {
 
         public fork(modulePath: string, args?: string[], options?: ForkOptions): IChildProcess {
             throw this.notImplementedError();
+        }
+
+        private callCallback(command: string, optionsOrCallback: ExecSecondArgument,
+            callback: Callback, wasSuccessful: boolean): ChildProcess {
+            var realCallback = <Callback> (callback || optionsOrCallback);
+            // We call the callback in an async way
+            var error = wasSuccessful ? null : new Error("Error while executing " + command);
+            setTimeout(() => {
+                realCallback(error, /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
+            }, 0);
+            return new ChildProcess();
         }
 
         private notImplementedError(): Error {

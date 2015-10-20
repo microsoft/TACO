@@ -41,7 +41,7 @@ module InstallerUtils {
 }
 
 class InstallerUtils {
-    private static pathName: string = os.platform() === "win32" ? "Path" : "PATH";
+    private static PATH_NAME: string = "PATH"; // *nix uses uppercase and it's case sensitive. Windows is case insensitive
     /**
      * Verifies if the specified file is valid by comparing its sha1 signature and its size in bytes with the provided expectedSha1 and expectedBytes.
      *
@@ -119,8 +119,8 @@ class InstallerUtils {
     public static promptUser(message: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var rl: readline.ReadLine = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
+            input: tacoUtils.ProcessUtils.getProcess().stdin,
+            output: tacoUtils.ProcessUtils.getProcess().stdout
         });
 
         rl.question(message, function (answer: string): void {
@@ -143,9 +143,9 @@ class InstallerUtils {
      * @return {Q.Promise<boolean>} A promise resolved with a boolean indicating whether the specified environment variable must be set
      */
     public static mustSetSystemVariable(name: string, value: string, logger: ILogger): Q.Promise<boolean> {
-        if (!process.env[name]) {
+        if (!tacoUtils.ProcessUtils.getProcess().env[name]) {
             return Q.resolve(true);
-        } else if (path.resolve(utils.expandEnvironmentVariables(process.env[name])) === path.resolve(utils.expandEnvironmentVariables(value))) {
+        } else if (path.resolve(utils.expandEnvironmentVariables(tacoUtils.ProcessUtils.getProcess().env[name])) === path.resolve(utils.expandEnvironmentVariables(value))) {
             // If this environment variable is already defined, but it is already set to what we need, we don't need to set it again
             return Q.resolve(false);
         }
@@ -197,7 +197,7 @@ class InstallerUtils {
      *
      * @return {boolean} A boolean set to true if the Path system variable already contains the specified value in one of its segments
      */
-    public static pathContains(valueToCheck: string, pathValue: string = process.env[InstallerUtils.pathName]): boolean {
+    public static pathContains(valueToCheck: string, pathValue: string = tacoUtils.ProcessUtils.getProcess().env[InstallerUtils.PATH_NAME]): boolean {
         if (!pathValue) {
             return false;
         }

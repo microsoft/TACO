@@ -18,7 +18,8 @@
   "main": "tacoTestsUtils.js",
   "dependencies": {
     "lodash": "^3.10.1",
-    "q": "~1.4.1"
+    "q": "~1.4.1",
+    "mock-spawn": "~0.2.6"
   },
   "devDependencies": {
     "typescript": "~1.6.2"
