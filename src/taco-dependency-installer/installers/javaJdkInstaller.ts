@@ -48,30 +48,30 @@ class JavaJdkInstaller extends InstallerBase {
         if (!this.installDestination) {
             this.telemetry.add("error.description", "InstallDestination needed on installWin32", /*isPii*/ false);
             deferred.reject(new Error(resources.getString("NeedInstallDestination")));
-        }
+        } else {
+            // Run installer
+            var commandLine: string = this.installerDownloadPath + " /quiet /norestart /lvx %temp%/javajdk.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
 
-        // Run installer
-        var commandLine: string = this.installerDownloadPath + " /quiet /norestart /lvx %temp%/javajdk.log /INSTALLDIR=" + utils.quotesAroundIfNecessary(this.installDestination);
-
-        childProcess.exec(commandLine, (err: Error) => {
-            if (err) {
-                this.telemetry.addError(err);
-                var code: number = (<any> err).code;
-                if (code) {
-                    this.telemetry
-                        .add("error.description", "InstallerError on installWin32", /*isPii*/ false)
-                        .add("error.code", code, /*isPii*/ false);
-                    deferred.reject(new Error(resources.getString("InstallerError", self.installerDownloadPath, code)));
+            childProcess.exec(commandLine, (err: Error) => {
+                if (err) {
+                    this.telemetry.addError(err);
+                    var code: number = (<any> err).code;
+                    if (code) {
+                        this.telemetry
+                            .add("error.description", "InstallerError on installWin32", /*isPii*/ false)
+                            .add("error.code", code, /*isPii*/ false);
+                        deferred.reject(new Error(resources.getString("InstallerError", self.installerDownloadPath, code)));
+                    } else {
+                        this.telemetry
+                            .add("error.description", "CouldNotRunInstaller on installWin32", /*isPii*/ false)
+                            .add("error.name", err.name, /*isPii*/ false);
+                        deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerDownloadPath, err.name)));
+                    }
                 } else {
-                    this.telemetry
-                        .add("error.description", "CouldNotRunInstaller on installWin32", /*isPii*/ false)
-                        .add("error.name", err.name, /*isPii*/ false);
-                    deferred.reject(new Error(resources.getString("CouldNotRunInstaller", self.installerDownloadPath, err.name)));
+                    deferred.resolve({});
                 }
-            } else {
-                deferred.resolve({});
-            }
-        });
+            });
+        }
 
         return deferred.promise;
     }
@@ -108,7 +108,6 @@ class JavaJdkInstaller extends InstallerBase {
         var self: JavaJdkInstaller = this;
         var deferred: Q.Deferred<any> = Q.defer<any>();
         var command: string = "hdiutil attach " + this.installerDownloadPath;
-
         childProcess.exec(command, (error: Error, stdout: Buffer, stderr: Buffer) => {
             // Save the mounted volume's name
             var stringOutput: string = stdout.toString();

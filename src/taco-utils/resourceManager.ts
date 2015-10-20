@@ -96,7 +96,7 @@ module TacoUtility {
             var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             var result: string = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
 
-            if (result && processUtils.ProcessUtils.getProcess().env["TACO_UNIT_TEST"]) {
+            if (result && processUtils.ProcessUtils.getProcess().env["TACO_UNIT_TEST"] === "true") {
                 // Mock out resources for consistency in unit tests, but only if they exist
                 return id;
             } else {
