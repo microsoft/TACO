@@ -23,7 +23,7 @@ import utils = tacoUtils.UtilHelper;
 import BuildInfo = tacoUtils.BuildInfo;
 
 // Note: this file is not intended to be loaded as a module, but rather in a separate process.
-process.on("message", function (emulateRequest: { appDir: string; appName: string; target: string }): void {
+process.on("message", function (emulateRequest: { appDir: string; appName: string; target: string, version: string }): void {
     Q(IOSEmulateHelper.emulate(emulateRequest))
         .then(function (result: { status: string; messageId: string; messageArgs?: any }): void {
         process.send(result);
@@ -32,17 +32,19 @@ process.on("message", function (emulateRequest: { appDir: string; appName: strin
 
 class IOSEmulateHelper {
     private static IOS_SIMULATOR_TARGETS: { [id: string]: string } = {
-        "iphone 4s": "--retina",
-        "iphone 5": "--retina --tall",
-        "iphone 5s": "--retina --tall --64bit",
-        "iphone 6": "--devicetypeid com.apple.CoreSimulator.SimDeviceType.iPhone-6",
-        "iphone 6 plus": "--devicetypeid com.apple.CoreSimulator.SimDeviceType.iPhone-6-Plus",
-        "ipad 2": "--family ipad",
-        "ipad air": "--family ipad --retina --64bit",
-        "ipad retina": "--family ipad --retina"
+        "iphone 4s": "iPhone-4s",
+        "iphone 5": "iPhone-5",
+        "iphone 5s": "iPhone-5s",
+        "iphone 6": "iPhone-6",
+        "iphone 6 plus": "iPhone-6-Plus",
+        "iphone 6s": "iPhone-6s",
+        "iphone 6s plus": "iPhone-6s-Plus",
+        "ipad 2": "iPad-2",
+        "ipad air": "iPad-Air",
+        "ipad retina": "iPad-Retina"
     };
 
-    public static emulate(emulateRequest: { appDir: string; appName: string; target: string }): Q.Promise<{ status: string; messageId: string; messageArgs?: any }> {
+    public static emulate(emulateRequest: { appDir: string; appName: string; target: string, version: string }): Q.Promise<{ status: string; messageId: string; messageArgs?: any }> {
         return Q.fcall(IOSEmulateHelper.cdToAppDir, emulateRequest.appDir)
         .then(function (): Q.Promise<{}> { return IOSEmulateHelper.cordovaEmulate(emulateRequest); })
         .then(function success(): { status: string; messageId: string; messageArgs?: any } {
@@ -60,10 +62,10 @@ class IOSEmulateHelper {
         process.chdir(appDir);
     }
 
-    private static cordovaEmulate(emulateRequest: { appDir: string; appName: string; target: string }): Q.Promise<{}> {
+    private static cordovaEmulate(emulateRequest: { appDir: string; appName: string; target: string, version: string }): Q.Promise<{}> {
         var deferred: Q.Deferred<any> = Q.defer();
         var emulatorAppPath: string = utils.quotesAroundIfNecessary(path.join(emulateRequest.appDir, "platforms", "ios", "build", "emulator", emulateRequest.appName + ".app"));
-        var emulatorProcess: child_process.ChildProcess = utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+        var emulatorProcess: child_process.ChildProcess = utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target, emulateRequest.version)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
             if (error) {
                 deferred.reject(error);
             } else {
@@ -81,9 +83,12 @@ class IOSEmulateHelper {
         });
     }
 
-    private static iosSimTarget(emulateRequestTarget: string): string {
-        emulateRequestTarget = emulateRequestTarget.toLowerCase();
-        var iosSimTarget: string = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget] || "--family iphone --retina";
-        return iosSimTarget;
+    private static iosSimTarget(emulateRequestTarget: string, version: string): string {
+        // Allow for non-recognised targets to be directly specified, but strip out invalid characters
+        var iosSimTarget: string = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget.toLowerCase()] || emulateRequestTarget.replace(/[^a-zA-Z0-9-]/g,""); 
+        if (version && version.match(/[0-9]*\.[0-9]*/)) {
+            iosSimTarget = util.format("%s, %s", iosSimTarget, version);
+        }
+        return util.format("--devicetypeid '%s'", iosSimTarget);
     }
 }
