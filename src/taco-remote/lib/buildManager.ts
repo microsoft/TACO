@@ -371,11 +371,10 @@ class BuildManager {
             if (buildInfo.changeList) {
                 buildInfo.changeList.deletedFiles = buildInfo.changeList.deletedFiles.map(function (deletedFile: string): string {
                     // Convert all \ and / characters in the path string into platform-appropriate path separators
-                    return deletedFile.split("\\").join(path.sep).split("/").join(path.sep);
+                    return deletedFile.replace(/[\\\/]/g, path.sep);
                 });
                 buildInfo.changeList.deletedFiles.forEach(function (deletedFile: string): void {
-                    
-                    if (deletedFile.split(path.sep)[0] === "plugins") {
+                    if (deletedFile.split(path.sep)[0] !== "plugins") {
                         // Don't remove files within the plugins folder; they should be cordova plugin remove'd later on
                         var fileToDelete: string = path.join(buildInfo.appDir, deletedFile);
                         if (path.relative(buildInfo.appDir, fileToDelete)[0] == ".") {
