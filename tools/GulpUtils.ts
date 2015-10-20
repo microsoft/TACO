@@ -234,10 +234,8 @@ class GulpUtils {
                                 case "beta":
                                     // If this package is taking "latest" and we are building a beta package,
                                     // then update the dependency to point to the beta version of the package
-                                    if (entry.expirationIntervalInHours) {
-                                        var packageJson: IPackageJson = GulpUtils.getPackageJson(srcPath, entry.packageName);
-                                        entry.packageId = entry.packageName + "@" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
-                                    }
+                                    var packageJson: IPackageJson = GulpUtils.getPackageJson(srcPath, entry.packageName);
+                                    entry.packageId = entry.packageName + "@" + GulpUtils.transformPackageVersion(packageJson.version, buildType);
                                 // intentional pass through, no "break;"
                                 case "release":
                                     delete entry.dev;
