@@ -17,6 +17,7 @@ import util = require ("util");
 import jsonSerializer = require ("./jsonSerializer");
 import logFormathelper = require ("./logFormatHelper");
 import logger = require ("./logger");
+import resources = require ("./resources/resourceManager");
 
 import JsonSerializer = jsonSerializer.JsonSerializer;
 import Logger = logger.Logger;
@@ -220,6 +221,15 @@ module TacoUtility {
          */
         public static logList(listElements: string[]): void {
             listElements.forEach((element: string) => Logger.log(" * " + element));
+        }
+
+        /**
+         * Prints a disclaimer about the fact that TACO uses third-party packages and dependencies.
+         */
+        public static printThirdPartyDisclaimer(): void {
+            Logger.logLine();
+            Logger.log(resources.getString("ThirdPartyDisclaimer"));
+            Logger.logLine();
         }
 
         /**
