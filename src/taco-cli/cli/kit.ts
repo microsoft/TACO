@@ -67,9 +67,6 @@ class Kit extends commands.TacoCommandBase {
      */
     public static yesOrNoHandler: IMockReadLine = null;
 
-    public name: string = "kit";
-    public info: commands.ICommandInfo;
-    
     private static KNOWN_OPTIONS: Nopt.CommandData = {
         kit: String,
         json: String,
@@ -81,6 +78,8 @@ class Kit extends commands.TacoCommandBase {
     private static DEFAULT_METADATA_FILENAME: string = "KitMetadata.json";
     private static SHORT_HANDS: Nopt.ShortFlags = {};
 
+    public name: string = "kit";
+    public info: commands.ICommandInfo;
     /**
      * Prompts the user with the prompt string and returns the response
      */
@@ -105,8 +104,8 @@ class Kit extends commands.TacoCommandBase {
         return Kit.promptUser(resources.getString("CommandKitSelectProjectUpdatePrompt"))
         .then(function (answer: string): Q.Promise<any> {
             if (answer && answer.length > 0 ) {
-                answer = answer.toLowerCase();
-                if (resources.getString("PromptResponseYes").split("\n").indexOf(answer) !== -1) {
+                var intendedAnswer: string = answer.toLowerCase(); // Try the "lower-case" version of the answer as well
+                if (resources.getString("PromptResponseYes").split("\n").indexOf(answer) !== -1 || resources.getString("PromptResponseYes").split("\n").indexOf(intendedAnswer) !== -1) {
                     logger.logLine();
                     return Kit.updateProject(updateToCliProject, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
                 }

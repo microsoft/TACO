@@ -36,6 +36,7 @@ import RemoteMod = require ("../cli/remote");
 import kitHelper = require ("../cli/utils/kitHelper");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import TacoUtility = require ("taco-utils");
+import TacoTestUtility = require ("taco-tests-utils");
 
 import utils = TacoUtility.UtilHelper;
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
@@ -44,12 +45,14 @@ import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import commands = tacoUtils.Commands.ICommandData;
 import CommandHelper = require ("./utils/commandHelper");
 import ICommand = TacoUtility.Commands.ICommand;
+import IComponentVersionMap = TacoTestUtility.IComponentVersionMap;
+import TestProjectHelper = TacoTestUtility.ProjectHelper;
 
 interface IKeyValuePair<T> {
     [key: string]: T;
 }
 
-describe("Kit", function (): void {
+describe("Kit command : ", function (): void {
     this.timeout(20000);
 
     function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
@@ -71,12 +74,20 @@ describe("Kit", function (): void {
     var tempJson: string = path.resolve(runFolder, "temp.json");
     var originalCwd: string;
 
-    var expectedCliTacoJsonKeyValues: IKeyValuePair<string> = {
-        "cordova-cli": "5.1.1" 
+    var expectedCliTacoJsonKeyValues1: IKeyValuePair<string> = {
+        "cordova-cli": "4.3.1"
+    };
+
+    var expectedCliTacoJsonKeyValues2: IKeyValuePair<string> = {
+        "cordova-cli": "5.1.1"
     };
 
     var expectedKitTacoJsonKeyValues: IKeyValuePair<string> = {
-        kit: "5.1.1-Kit", "cordova-cli": "5.1.1" 
+        kit: "5.1.1-Kit", "cordova-cli": "5.1.1"
+    };
+
+    var expectedKitPlatformVersion: IComponentVersionMap = {
+        android: "4.0.2"
     };
 
     function createProject(args: string[], projectDir: string): Q.Promise<any> {
@@ -122,6 +133,23 @@ describe("Kit", function (): void {
         });
     };
 
+    function addPlatformToProject(platfromName: string, projectPath: string): Q.Promise<any> {
+        process.chdir(projectPath);
+        return platformRun(["add", platfromName]);
+    };
+
+    function addTestPluginsToProject(projectPath: string): Q.Promise<any> {
+        process.chdir(projectPath);
+        return pluginRun(["add", "cordova-plugin-camera"])
+        .then(function(): Q.Promise<any> {
+            return sleep(100);
+        }).then(function (): Q.Promise<any> {
+            var medicPluginTestsPath = path.resolve(".", "plugins", "cordova-plugin-camera", "tests");
+            var pluginCommandArgs: string[] = ["add", medicPluginTestsPath];
+            return pluginRun(pluginCommandArgs);
+        });
+    };
+
     function getMockYesOrNoHandler(errorHandler: (err: Error) => void, onClose: () => void, desiredResponse: string): {
         question: (question: string, callback: (answer: string) => void) => void;
         close: () => void;
@@ -152,8 +180,7 @@ describe("Kit", function (): void {
         .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
             fs.existsSync(tacoJsonPath).should.be.true;
 
-            var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
-
+            var tacoJson: IKeyValuePair<string> = JSON.parse(fs.readFileSync(tacoJsonPath, { encoding: "utf-8" }));
             tacoJsonKeyValues.should.be.eql(tacoJson);
             return telemetryParameters;
         });
@@ -171,7 +198,7 @@ describe("Kit", function (): void {
             // file exists and has the expected values
 
             fs.existsSync(tacoJsonPath).should.be.true;
-            var tacoJson: IKeyValuePair<string> = require(tacoJsonPath);
+            var tacoJson: IKeyValuePair<string> = JSON.parse(fs.readFileSync(tacoJsonPath, { encoding: "utf-8" }));
             tacoJsonKeyValues.should.be.eql(tacoJson);
 
             return Q.resolve(null);
@@ -252,31 +279,18 @@ describe("Kit", function (): void {
             });
     });
 
-    describe("'taco kit select' to convert a Kit project to a cli project works as expected", function (): void {
+    describe("Kit project to a cli project: ", function (): void {
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
 
-        this.timeout(60000);
+        this.timeout(180000);
 
         before(function (done: MochaDone): void {
             rimraf.sync(kitProjectpath);
             createKitProject("5.1.1-Kit")
-            .then(function (): void {
-                process.chdir(kitProjectpath);
-            })
             .then(function (): Q.Promise<any> {
-                return pluginRun(["add", "cordova-plugin-camera"]);
+                return addPlatformToProject("android", kitProjectpath);
             })
-            .then(function (): Q.Promise<any> {
-                return platformRun(["add", "android"]);
-            })
-            .then(function(): Q.Promise<any> {
-                return sleep(10);
-            }).then(function (): Q.Promise<any> {
-                var medicPluginTestsPath = path.resolve(".", "plugins", "cordova-plugin-camera", "tests")
-                var pluginCommandArgs: string[] = ["add", medicPluginTestsPath];
-                return pluginRun(pluginCommandArgs);
-             })
             .then(function(): void {
                     done();
                 }, function(err: TacoUtility.TacoError): void {
@@ -291,48 +305,38 @@ describe("Kit", function (): void {
 
         it("'taco kit select --cordova {Invalid-CLI-VERSION}' should execute with expected errors", function (done: MochaDone): void {
             runKitCommandFailureCaseAndVerifyTacoJson<TacoErrorCodes>(["select", "--cordova", "InvalidCordovaCliVersion"], tacoJsonPath, expectedKitTacoJsonKeyValues, TacoErrorCodes.ErrorInvalidVersion)
-            .done(() => done(), done)
+                .done(() => done(), done);
         });
 
-        it("'taco kit select --cordova {CLI-VERSION}' should execute with no errors", function (done: MochaDone): void {
-            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, () => {}, "y");
-            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "5.1.1"], tacoJsonPath, expectedCliTacoJsonKeyValues)
-                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+        it("'taco kit select --cordova {CLI-VERSION}' on a project with a platform added, should execute with no errors", function (done: MochaDone): void {
+            /* tslint:disable:no-empty */
+            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, () => {}, "PromptResponseNo");
+            /* tslint:enable:no-empty */
+            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "4.3.1"], tacoJsonPath, expectedCliTacoJsonKeyValues1)
+                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
                     var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "select" },
-                        "options.cordova": { isPii: false, value: "5.1.1" }
+                        "options.cordova": { isPii: false, value: "4.3.1" }
                     };
                     telemetryParameters.should.be.eql(expected);
+                    return sleep(60);
                 })
                 .done(() => done(), done);
         });
     });
 
-    describe("'taco kit select' to convert CLI project to a Kit project works as expected", function (): void {
+    describe("CLI project to a Kit project: ", function (): void {
         var cliProjectpath: string = path.join(tacoHome, cliProjectDir);
         var tacoJsonPath: string = path.resolve(cliProjectpath, "taco.json");
-        
-        this.timeout(60000);
+
+        this.timeout(180000);
 
         before(function (done: MochaDone): void {
             rimraf.sync(cliProjectpath);
             createCliProject("5.1.1")
-            .then(function (): void {
-                process.chdir(cliProjectpath);
-            })
             .then(function (): Q.Promise<any> {
-                return pluginRun(["add", "cordova-plugin-camera"]);
+                return addPlatformToProject("android", cliProjectpath);
             })
-            .then(function (): Q.Promise<any> {
-                return platformRun(["add", "android"]);
-            })
-            .then(function(): Q.Promise<any> {
-                return sleep(10);
-            }).then(function (): Q.Promise<any> {
-                var medicPluginTestsPath = path.resolve(".", "plugins", "cordova-plugin-camera", "tests")
-                var pluginCommandArgs: string[] = ["add", medicPluginTestsPath];
-                return pluginRun(pluginCommandArgs);
-             })
             .then(function(): void {
                     done();
                 }, function(err: TacoUtility.TacoError): void {
@@ -346,21 +350,28 @@ describe("Kit", function (): void {
         });
 
         it("'taco kit select --kit {Invalid-kit-ID}' should execute with expected error", function (done: MochaDone): void {
-            runKitCommandFailureCaseAndVerifyTacoJson<TacoKitsErrorCodes>(["select", "--kit", "InvalidKit"], tacoJsonPath, expectedCliTacoJsonKeyValues, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit)
-            .done(() => done(), done);
+            runKitCommandFailureCaseAndVerifyTacoJson<TacoKitsErrorCodes>(["select", "--kit", "InvalidKit"], tacoJsonPath, expectedCliTacoJsonKeyValues2, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit)
+                .done(() => done(), done);
         });
 
-        it("'taco kit select --kit {kit-ID}' should execute with no errors", function (done: MochaDone): void {
-            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, () => {}, "y");
-            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
-                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+        it("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): void {
+            /* tslint:disable:no-empty */
+            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, () => {}, "PromptResponseNo");
+            /* tslint:enable:no-empty */
+            return addTestPluginsToProject(cliProjectpath)
+            .then(function (): Q.Promise<any> {
+                return runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
+                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
                     var expected = {
                         subCommand: { isPii: false, value: "select" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
                     };
                     telemetryParameters.should.be.eql(expected);
-                })
-                .done(() => done(), done);
+                    return sleep(60);
+                }).then(() => {
+                    TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
+                });
+            }).done(() => done(), done);
         });
     });
 });

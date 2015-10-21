@@ -34,11 +34,14 @@ import wrench = require ("wrench");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
+import TacoTestUtility = require ("taco-tests-utils");
 import ms = require("./utils/memoryStream");
 import CommandHelper = require ("./utils/commandHelper");
 import ICommand = tacoUtility.Commands.ICommand;
 
 import utils = TacoUtility.UtilHelper;
+import TestProjectHelper = TacoTestUtility.ProjectHelper;
+import IComponentVersionMap = TacoTestUtility.IComponentVersionMap;
 
 var platformCommand: ICommand = CommandHelper.getCommand("platform");
 var pluginCommand: ICommand = CommandHelper.getCommand("plugin");
@@ -50,10 +53,6 @@ var testKitId: string = "5.1.1-Kit";
 // var require needed to require package json
 var cliVersion: string = require("../package.json").version;
 /* tslint:enable:no-var-requires */
-
-interface IComponentVersionMap {
-    [component: string]: string;
-}
 
 interface ICommandAndResult {
     command: string;
@@ -291,66 +290,6 @@ describe("taco platform for kit", function(): void {
         });
     }
 
-    function getInstalledPlatforms(platformsExpected: IComponentVersionMap, projectPath: string): string[] {
-        var platformsDir: string = path.join(projectPath, "platforms");
-        if (!fs.existsSync(platformsDir)) {
-            return [];
-        }
-
-        return fs.readdirSync(platformsDir).filter(function(platform: string): boolean {
-            return Object.keys(platformsExpected).indexOf(platform) > -1;
-        });
-    }
-
-    function checkPlatformVersions(platformsExpected: IComponentVersionMap, projectPath: string): Q.Promise<any> {
-        var platformsInstalled: string[] = getInstalledPlatforms(platformsExpected, projectPath);
-        var onWindows: boolean = process.platform === "win32";
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        return Q.all(platformsInstalled.map(function(platform: string): Q.Promise<any> {
-            var cmdName: string = "version";
-            if (onWindows) {
-                cmdName = cmdName + ".bat";
-            }
-
-            var cmdPath: string = path.join(projectPath, "platforms", platform, "cordova", cmdName);
-            var versionProc: child_process.ChildProcess = child_process.spawn(cmdPath);
-            versionProc.stdout.on("data", function(data: any): void {
-                var version: string = data.toString();
-                if (!path) {
-                    deferred.reject("Verson string not found");
-                } else {
-                    version.trim().should.be.equal(platformsExpected[platform]);
-                    deferred.resolve({});
-                }
-            });
-            versionProc.on("close", function(code: number): void {
-                deferred.reject("Unable to find version string");
-            });
-            versionProc.on("error", function(err: any): void {
-                deferred.reject(err);
-            });
-            return deferred.promise;
-        }));
-    }
-
-    function getInstalledPluginVersion(plugin: string, projectPath: string): string {
-        var pluginPackgeJson: string = path.join(projectPath, "plugins", plugin, "package.json");
-        var pluginInfo: any = require(pluginPackgeJson);
-        if (pluginInfo) {
-            return pluginInfo["version"];
-        }
-
-        return "";
-    }
-
-    function checkPluginVersions(pluginsExpected: IComponentVersionMap, projectPath: string): void {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-        Object.keys(pluginsExpected).forEach(function(plugin: string): void {
-            var versionInstalled: string = getInstalledPluginVersion(plugin, projectPath);
-            versionInstalled.trim().should.be.equal(pluginsExpected[plugin]);
-        });
-    }
-
     function sleep(milliseconds: number): Q.Promise<any> {
         var deferred: Q.Deferred<any> = Q.defer();
         setTimeout(deferred.resolve, milliseconds);
@@ -407,7 +346,7 @@ describe("taco platform for kit", function(): void {
                     }).then(function(): void {
                         if (args[0] === "add") {
                             // Check the version of platform after addition
-                            checkPlatformVersions(scenario.expectedVersions, kitProjectpath);
+                            TestProjectHelper.checkPlatformVersions(scenario.expectedVersions, kitProjectpath);
                         }
                     }).then(function(): void {
                         done();
@@ -427,7 +366,7 @@ describe("taco platform for kit", function(): void {
                     }).then(function(): void {
                         if (args[0] === "add") {
                             // Check the version of plugin after addition
-                            checkPluginVersions(scenario.expectedVersions, kitProjectpath);
+                            TestProjectHelper.checkPluginVersions(scenario.expectedVersions, kitProjectpath);
                         }
                     }).then(function(): void {
                         done();
@@ -465,7 +404,7 @@ describe("taco platform for kit", function(): void {
                     }).then(function(): void {
                         if (args[0] === "add") {
                             // Check the version of platform after addition
-                            checkPlatformVersions(scenario.expectedVersions, cliProjectPath);
+                            TestProjectHelper.checkPlatformVersions(scenario.expectedVersions, cliProjectPath);
                         }
                     }).then(function(): void {
                         done();
@@ -485,7 +424,7 @@ describe("taco platform for kit", function(): void {
                     }).then(function(): void {
                         if (args[0] === "add") {
                             // Check the version of plugin after addition
-                            checkPluginVersions(scenario.expectedVersions, cliProjectPath);
+                            TestProjectHelper.checkPluginVersions(scenario.expectedVersions, cliProjectPath);
                         }
                     }).then(function(): void {
                         done();
