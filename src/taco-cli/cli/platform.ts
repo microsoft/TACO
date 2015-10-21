@@ -46,7 +46,8 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         var platformInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
         var self: Platform = this;
 
-        var subCommand: string = this.cordovaCommandParams.subCommand;
+        var subCommand: string = this.resolveAlias(this.cordovaCommandParams.subCommand);
+        
         if (subCommand !== "add" && subCommand !== "remove") {
             return Q({});
         }
