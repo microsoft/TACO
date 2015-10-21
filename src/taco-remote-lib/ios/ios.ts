@@ -50,7 +50,7 @@ class IOSAgent implements ITargetPlatform {
         this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9322;
 
         if (utils.ArgsHelper.argToBool(config.get("allowsEmulate"))) {
-            process.env["PATH"] = path.resolve(__dirname, path.join("..", "node_modules", "ios-sim", "build", "release")) + ":" + process.env["PATH"];
+            process.env["PATH"] = path.resolve(__dirname, path.join("..", "node_modules", ".bin")) + ":" + process.env["PATH"];
             child_process.exec("which ios-sim", function (err: Error, stdout: Buffer, stderr: Buffer): void {
                 if (err) {
                     Logger.logError(resources.getString("IOSSimNotFound"));
@@ -84,10 +84,16 @@ class IOSAgent implements ITargetPlatform {
         }).then(function (success: net.Socket): void {
             res.status(200).send(buildInfo.localize(req, resources));
         }, function (failure: any): void {
-            if (failure instanceof Error) {
-                res.status(404).send(resources.getStringForLanguage(req, failure.message));
-            } else {
+            if (failure.message) {
+                var response = resources.getStringForLanguage(req, failure.message);
+                if (!response) {
+                    response = resources.getStringForLanguage(req, "UnableToLaunchAppWithReason", failure.message);
+                }
+                res.status(404).send(response);
+            } else if (typeof failure === "string") {
                 res.status(404).send(resources.getStringForLanguage(req, failure));
+            } else {
+                res.status(404).send(resources.getStringForLanguage(req, "UnableToLaunchAppWithReason", failure.toString()));
             }
         });
     }
@@ -152,7 +158,7 @@ class IOSAgent implements ITargetPlatform {
         var emulateProcess: child_process.ChildProcess = child_process.fork(path.join(__dirname, "iosEmulateHelper.js"), [], { silent: true });
         var emulateLogger: ProcessLogger = new ProcessLogger();
         emulateLogger.begin(buildInfo.buildDir, "emulate.log", buildInfo.buildLang, emulateProcess);
-        emulateProcess.send({ appDir: buildInfo.appDir, appName: cfg.id(), target: req.query.target }, null);
+        emulateProcess.send({ appDir: buildInfo.appDir, appName: cfg.id(), target: req.query.target, version: req.query.iOSVersion }, null);
 
         emulateProcess.on("message", function (result: { status: string; messageId: string; messageArgs?: any }): void {
             buildInfo.updateStatus(result.status, result.messageId, result.messageArgs);

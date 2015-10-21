@@ -125,6 +125,12 @@ class IosAppRunnerHelper {
             deferred3.reject("UnableToLaunchApp");
         });
 
+        socket.on("error", function (err: Error): void {
+            deferred1.reject(err);
+            deferred2.reject(err);
+            deferred3.reject(err);
+        });
+
         socket.connect(portNumber, "localhost", function (): void {
             // set argument 0 to the (encoded) path of the app
             var cmd: string = IosAppRunnerHelper.makeGdbCommand("A" + encodedPath.length + ",0," + encodedPath);
