@@ -139,10 +139,8 @@ class Builder {
         var pluginNameRegex: RegExp = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
         var deletedPlugins: string[] = [];
         if (this.currentBuild.changeList && this.currentBuild.changeList.deletedFiles) {
-            deletedPlugins = this.currentBuild.changeList.deletedFiles.map(function (file: string): string {
-                // Normalize filenames to use this platform's slashes, when the client may have sent back-slashes
-                return path.normalize(path.join.apply(path, file.split("\\")));
-            }).filter(function (file: string): boolean {
+            deletedPlugins = this.currentBuild.changeList.deletedFiles.filter(function (file: string): boolean {
+                // file paths have been pre-normalised to use this platform's slashes
                 // A plugin is deleted if its plugin.xml is deleted
                 return !!file.match(pluginNameRegex);
             }).map(function (file: string): string {

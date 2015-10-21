@@ -94,9 +94,11 @@ module TacoUtility {
 
     export class TacoPackageLoader {
         public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
-        public static FILE_URI_REGEX: RegExp = /^file:\/\/.*/;
+        public static FILE_URI_REGEX: RegExp = new RegExp("^" + TacoPackageLoader.FILE_REGEX_PREFIX + ".*");
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
+
+        private static FILE_REGEX_PREFIX: string = "file://";
 
         /**
          * Returns a path to the specified command exported from the specified package. If the package is not already downloaded,
@@ -277,7 +279,7 @@ module TacoUtility {
             if ((TacoPackageLoader.GIT_URI_REGEX.test(packageId))) {
                 packageType = PackageSpecType.Uri;
             } else if (TacoPackageLoader.FILE_URI_REGEX.test(packageId)) {
-                packageId = packageId.substring("file://".length);
+                packageId = packageId.substring(TacoPackageLoader.FILE_REGEX_PREFIX.length);
                 packageType = PackageSpecType.FilePath;
             } else {
                 // moving this down after Uri/FilePath because both can have '@'. Parse the packageId to retrieve packageVersion
@@ -339,7 +341,8 @@ module TacoUtility {
             var deferred: Q.Deferred<number> = Q.defer<number>();
             var args: string[] = [npmCommand, packageId];
 
-            if (typeof logLevel !== "undefined" && logLevel !== InstallLogLevel.taco) {
+            if (logLevel && logLevel !== InstallLogLevel.taco) {
+                // Ignore logLevel if it is undefined, InstallLogLevel.undefined = 0 or InstallLogLevel.taco
                 args.push("--loglevel", InstallLogLevel[logLevel]);
             }
 
