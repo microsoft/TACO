@@ -27,7 +27,8 @@
         "q": "1.0.1",
         "rimraf": "2.2.6",
         "plist-with-patches": "0.5.1",
-        "taco-utils": "file:../taco-utils"
+        "taco-utils": "file:../taco-utils",
+        "semver": "^4.3.6"
     },
     "devDependencies": {
         "typescript": "~1.6.2",
