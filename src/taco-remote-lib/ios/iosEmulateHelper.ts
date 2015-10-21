@@ -85,7 +85,7 @@ class IOSEmulateHelper {
 
     private static iosSimTarget(emulateRequestTarget: string, version: string): string {
         // Allow for non-recognised targets to be directly specified, but strip out invalid characters
-        var iosSimTarget: string = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget.toLowerCase()] || emulateRequestTarget.replace(/[^a-zA-Z0-9-]/g,""); 
+        var iosSimTarget: string = IOSEmulateHelper.IOS_SIMULATOR_TARGETS[emulateRequestTarget.toLowerCase()] || emulateRequestTarget.replace(/[^a-zA-Z0-9-]/g, "");
         if (version && version.match(/[0-9]*\.[0-9]*/)) {
             iosSimTarget = util.format("%s, %s", iosSimTarget, version);
         }
