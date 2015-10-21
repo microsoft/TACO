@@ -322,7 +322,7 @@ module TacoUtility {
         private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel: InstallLogLevel): IPackageInstallRequest {
             if (fs.existsSync(dependencyConfigPath)) {
                 try {
-                    var dependencyLookup: any = require(dependencyConfigPath);
+                    var dependencyLookup: any = JSON.parse(<any> fs.readFileSync(dependencyConfigPath));
                     var packageEntry: IDynamicDependencyEntry = dependencyLookup[packageKey];
                     if (packageEntry) {
                         // if a local path is specified use that otherwise fallback to packageName@packageVersion
