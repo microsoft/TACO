@@ -229,7 +229,7 @@ class GulpUtils {
                         if (entry.dev) {
                             switch (buildType) {
                                 case "dev":
-                                    entry.localPath = util.format("file://%s.tgz", path.resolve(destPath || srcPath, packageKey));
+                                    entry.localPath = util.format("file://%s.tgz", path.resolve(destPath || srcPath, entry.packageName));
                                     break;
                                 case "beta":
                                     // If this package is taking "latest" and we are building a beta package,
