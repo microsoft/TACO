@@ -32,7 +32,6 @@ import rimraf = require ("rimraf");
 import util = require ("util");
 
 import KitMod = require ("../cli/kit");
-import RemoteMod = require ("../cli/remote");
 import kitHelper = require ("../cli/utils/kitHelper");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import TacoUtility = require ("taco-utils");
@@ -105,15 +104,15 @@ describe("Kit command : ", function (): void {
             var projectPath: string = path.join(tacoHome, projectDir);
             process.chdir(projectPath);
         });
-    };
+    }
 
     function createCliProject(cli: string): Q.Promise<any> {
          return createProject(["cliProject", "--cordova", cli], cliProjectDir);
-    };
+    }
 
     function createKitProject(kit: string): Q.Promise<any> {
         return createProject(["kitProject", "--kit", kit], kitProjectDir);
-    };
+    }
 
     function platformRun(args: string[]): Q.Promise<any> {
         var platform: ICommand = CommandHelper.getCommand("platform");
@@ -122,7 +121,7 @@ describe("Kit command : ", function (): void {
             original: args,
             remain: args
         });
-    };
+    }
 
     function pluginRun(args: string[]): Q.Promise<any> {
         var plugin: ICommand = CommandHelper.getCommand("plugin");
@@ -131,12 +130,12 @@ describe("Kit command : ", function (): void {
             original: args,
             remain: args
         });
-    };
+    }
 
     function addPlatformToProject(platfromName: string, projectPath: string): Q.Promise<any> {
         process.chdir(projectPath);
         return platformRun(["add", platfromName]);
-    };
+    }
 
     function addTestPluginsToProject(projectPath: string): Q.Promise<any> {
         process.chdir(projectPath);
@@ -148,7 +147,7 @@ describe("Kit command : ", function (): void {
             var pluginCommandArgs: string[] = ["add", medicPluginTestsPath];
             return pluginRun(pluginCommandArgs);
         });
-    };
+    }
 
     function getMockYesOrNoHandler(errorHandler: (err: Error) => void, onClose: () => void, desiredResponse: string): {
         question: (question: string, callback: (answer: string) => void) => void;
@@ -172,7 +171,7 @@ describe("Kit command : ", function (): void {
         var deferred: Q.Deferred<any> = Q.defer();
         setTimeout(deferred.resolve, milliseconds);
         return deferred.promise;
-    };
+    }
 
     function runKitCommandSuccessCaseAndVerifyTacoJson(args: string[],
         tacoJsonPath: string, tacoJsonKeyValues: IKeyValuePair<string>): Q.Promise<TacoUtility.ICommandTelemetryProperties> {

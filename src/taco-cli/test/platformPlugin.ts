@@ -37,11 +37,11 @@ import TacoUtility = require ("taco-utils");
 import TacoTestUtility = require ("taco-tests-utils");
 import ms = require("./utils/memoryStream");
 import CommandHelper = require ("./utils/commandHelper");
-import ICommand = tacoUtility.Commands.ICommand;
 
-import utils = TacoUtility.UtilHelper;
-import TestProjectHelper = TacoTestUtility.ProjectHelper;
+import ICommand = tacoUtility.Commands.ICommand;
 import IComponentVersionMap = TacoTestUtility.IComponentVersionMap;
+import TestProjectHelper = TacoTestUtility.ProjectHelper;
+import utils = TacoUtility.UtilHelper;
 
 var platformCommand: ICommand = CommandHelper.getCommand("platform");
 var pluginCommand: ICommand = CommandHelper.getCommand("plugin");
