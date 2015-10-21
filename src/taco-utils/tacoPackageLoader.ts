@@ -93,12 +93,12 @@ module TacoUtility {
     }
 
     export class TacoPackageLoader {
+        public static FILE_REGEX_PREFIX: string = "file://";
+
         public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
         public static FILE_URI_REGEX: RegExp = new RegExp("^" + TacoPackageLoader.FILE_REGEX_PREFIX + ".*");
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
-
-        private static FILE_REGEX_PREFIX: string = "file://";
 
         /**
          * Returns a path to the specified command exported from the specified package. If the package is not already downloaded,
