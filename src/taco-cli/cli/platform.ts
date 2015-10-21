@@ -47,7 +47,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
         var self: Platform = this;
 
         var subCommand: string = this.cordovaCommandParams.subCommand;
-        if (subCommand !== "add") {
+        if (subCommand !== "add" && subCommand !== "remove") {
             return Q({});
         }
 
@@ -65,6 +65,8 @@ class Platform extends commandBase.PlatformPluginCommandBase {
                             // Use kit overrides only if platform has not already been overridden in config.xml
                             if (!versionOverridden && platformOverrides && platformOverrides[platformName]) {
                                 platformInfo.spec = platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
+                                platformInfoToPersist.push(platformInfo);
+                            } else if (versionOverridden && subCommand === "remove") {
                                 platformInfoToPersist.push(platformInfo);
                             }
 
