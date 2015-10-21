@@ -84,10 +84,16 @@ class IOSAgent implements ITargetPlatform {
         }).then(function (success: net.Socket): void {
             res.status(200).send(buildInfo.localize(req, resources));
         }, function (failure: any): void {
-            if (failure instanceof Error) {
-                res.status(404).send(resources.getStringForLanguage(req, failure.message));
-            } else {
+            if (failure.message) {
+                var response = resources.getStringForLanguage(req, failure.message);
+                if (!response) {
+                    response = resources.getStringForLanguage(req, "UnableToLaunchAppWithReason", failure.message);
+                }
+                res.status(404).send(response);
+            } else if (typeof failure === "string") {
                 res.status(404).send(resources.getStringForLanguage(req, failure));
+            } else {
+                res.status(404).send(resources.getStringForLanguage(req, "UnableToLaunchAppWithReason", failure.toString()));
             }
         });
     }
