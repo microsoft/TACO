@@ -257,8 +257,6 @@ class Create extends commands.TacoCommandBase {
         var cordovaParameters: Cordova.ICordovaCreateParameters = this.commandParameters.cordovaParameters;
         var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
 
-        logger.log(resources.getString("CommandCreateStatusCreatingNewProject"));
-
         var indentation: number = 6; // We leave some empty space on the left before the text/table starts
         var nameDescriptionPairs: INameDescription[] = [
             { name: resources.getString("CommandCreateStatusTableNameDescription"), description: cordovaParameters.appName },

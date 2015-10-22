@@ -504,7 +504,6 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath("onboarding-experience", 1);
 
             var firstPart: string[] = [
-                "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
@@ -539,7 +538,6 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath("onboarding-experience", 2);
 
             var firstPart: string[] = [
-                "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
@@ -575,7 +573,6 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath("onboarding-experience", 3);
 
             var firstPart: string[] = [
-                "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
@@ -610,7 +607,6 @@ describe("taco create", function (): void {
             this.timeout(60000); // installing the node packages during create can take a long time
             kitHelper.getDefaultKit().done((defaultKitId: string) => {
                 var firstPart: string[] = [
-                    "CommandCreateStatusCreatingNewProject",
                     "      ----------",
                     "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                     "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
