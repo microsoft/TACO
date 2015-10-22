@@ -31,7 +31,6 @@ import CheckForNewerVersion = require ("./utils/checkForNewerVersion");
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
 import logger = tacoUtility.Logger;
-import loggerHelper = tacoUtility.LoggerHelper;
 import LogLevel = tacoUtility.LogLevel;
 import TacoError = tacoUtility.TacoError;
 import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
@@ -61,8 +60,7 @@ class Taco {
             require("./logo");
 
             // Print the third-party disclaimer, and save the global setting for this session to prevent printing the disclaimer again
-            loggerHelper.printThirdPartyDisclaimer();
-            TacoGlobalConfig.isDisclaimerDisplayed = true;
+            logger.log(resources.getString("ThirdPartyDisclaimer"));
 
             return Settings.saveSettings({});
         }).then(function (settings: Settings.ISettings): void {

@@ -224,15 +224,6 @@ module TacoUtility {
         }
 
         /**
-         * Prints a disclaimer about the fact that TACO uses third-party packages and dependencies.
-         */
-        public static printThirdPartyDisclaimer(): void {
-            Logger.logLine();
-            Logger.log(resources.getString("ThirdPartyDisclaimer"));
-            Logger.logLine();
-        }
-
-        /**
          * Returns the length of the longest value of the property specified with the getter
          * @param {list[]} array of elements
          * @param {propertyGetter} lambda function to extract the property we want to measure the length, from each element

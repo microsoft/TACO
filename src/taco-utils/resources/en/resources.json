@@ -74,7 +74,5 @@
     "TelemetryCurrentlyOptedInPrompt": "Would you like to continue doing so?",
     "_TelemetryCurrentlyOptedInPrompt.comment": "This is the string presented to the user before asking to opt in for telemetry when he has currently opted in.",
     "TelemetryCurrentlyOptedOutPrompt": "Would you like to allow us to collect your usage data?",
-    "_TelemetryCurrentlyOptedOutPrompt.comment": "This is the string presented to the user before asking to opt in for telemetry when he has currently opted out.",
-    "ThirdPartyDisclaimer": "<bold>Disclaimer:</bold> TACO uses third-party packages. Each package is licensed to you by its owner. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies.",
-    "_ThirdPartyDisclaimer.comment": "A disclaimer about the fact that TACO uses third-party dependencies. This is shown the very first time a user uses TACO, and each time a third-party package is programmatically downloaded."
+    "_TelemetryCurrentlyOptedOutPrompt.comment": "This is the string presented to the user before asking to opt in for telemetry when he has currently opted out."
 }

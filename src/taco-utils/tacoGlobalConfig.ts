@@ -18,7 +18,6 @@ module TacoUtility {
     export class TacoGlobalConfig {
         private static LANG_NAME: string = "TACO_LANG";
         private static LOG_LEVEL_NAME: string = "TACO_LOG_LEVEL";
-        private static IS_DISCLAIMER_DISPLAYED_NAME: string = "TACO_IS_DISCLAIMER_DISPLAYED";
 
         public static get lang(): string {
             return process.env[TacoGlobalConfig.LANG_NAME];
@@ -42,14 +41,6 @@ module TacoUtility {
 
             // Save the string name of the enum value to process.env
             process.env[TacoGlobalConfig.LOG_LEVEL_NAME] = LogLevel[level];
-        }
-
-        public static get isDisclaimerDisplayed(): boolean {
-            return process.env[TacoGlobalConfig.IS_DISCLAIMER_DISPLAYED_NAME] === "true";
-        }
-
-        public static set isDisclaimerDisplayed(isDisplayed: boolean) {
-            process.env[TacoGlobalConfig.IS_DISCLAIMER_DISPLAYED_NAME] = isDisplayed;
         }
     }
 }

@@ -84,10 +84,5 @@ declare module TacoUtility {
          * Logs an array of strings with proper indentation and a fixed bullet (*) (This is a list, in the sense of an HTML <ul><li></li></ul> list)
          */
         public static logList(listElements: string[]): void;
-
-        /**
-         * Prints a disclaimer about the fact that TACO uses third-party packages and dependencies.
-         */
-        public static printThirdPartyDisclaimer(): void;
     }
 }

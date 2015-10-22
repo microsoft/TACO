@@ -25,7 +25,6 @@ import Q = require ("q");
 
 import installLogLevel = require ("./installLogLevel");
 import loggerUtil = require ("./logger");
-import loggerHelper = require("./loggerHelper");
 import logLevel = require ("./logLevel");
 import resources = require ("./resources/resourceManager");
 import tacoErrorCodes = require ("./tacoErrorCodes");
@@ -341,13 +340,6 @@ module TacoUtility {
         private static runNpmCommand(npmCommand: string, packageId: string, cwd: string, flags: string[], logLevel?: InstallLogLevel): Q.Promise<number> {
             var deferred: Q.Deferred<number> = Q.defer<number>();
             var args: string[] = [npmCommand, packageId];
-
-            // Print third-party disclaimer if we haven't already printed it in this session
-            if (!TacoGlobalConfig.isDisclaimerDisplayed) {
-                loggerHelper.LoggerHelper.printThirdPartyDisclaimer();
-                TacoGlobalConfig.isDisclaimerDisplayed = true;
-            }
-
             if (logLevel && logLevel !== InstallLogLevel.taco) {
                 // Ignore logLevel if it is undefined, InstallLogLevel.undefined = 0 or InstallLogLevel.taco
                 args.push("--loglevel", InstallLogLevel[logLevel]);

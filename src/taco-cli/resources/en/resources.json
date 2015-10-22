@@ -5,6 +5,9 @@
     "TacoCommandPassthrough": "Unknown TACO command, passing it to Cordova",
     "_TacoCommandPassthrough.comment": "Message printed when taco is given a command we don't understand and we pass through to Cordova",
 
+    "ThirdPartyDisclaimer": "<bold>Disclaimer:</bold> TACO uses third-party packages. Each package is licensed to you by its owner. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies.",
+    "_ThirdPartyDisclaimer.comment": "A disclaimer about the fact that TACO uses third-party dependencies. This is shown the very first time a user uses TACO, and each time a third-party package is programmatically downloaded.",
+
     "CommandCreateDescription": "Create a new Cordova based TACO project",
     "_CommandCreateDescription.comment": "Description of the 'taco create' command",
     "CommandCreateArgsPath": "Where to create the project",
