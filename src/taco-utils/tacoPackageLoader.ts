@@ -93,12 +93,15 @@ module TacoUtility {
     }
 
     export class TacoPackageLoader {
+        /* tslint:disable:member-ordering */
+        // Need to declare FILE_REGEX_PREFIX before FILE_URI_REGEX, but don't want to expose it outside the class
+        private static FILE_REGEX_PREFIX: string = "file://";
+
         public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
         public static FILE_URI_REGEX: RegExp = new RegExp("^" + TacoPackageLoader.FILE_REGEX_PREFIX + ".*");
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;
-
-        private static FILE_REGEX_PREFIX: string = "file://";
+        /* tslint:enable:member-ordering */
 
         /**
          * Returns a path to the specified command exported from the specified package. If the package is not already downloaded,
