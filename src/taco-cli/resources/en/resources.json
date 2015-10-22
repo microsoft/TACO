@@ -127,6 +127,8 @@
     "_CommandSimulateAndroidExample.comment": "Text for 'taco simulate android' example command description",
     "CommandSimulateWindowsEdgeExample": "Launches plugin simulation for the 'windows' platform in Edge",
     "_CommandSimulateWindowsEdgeExample.comment": "Text for 'taco simulate windows --target=edge' example command description",
+    "CommandSimulateUnknownError": "Error: An error occurred launching taco-simulate.",
+    "_CommandSimulateUnknownError.comment": "Description for when a generic error occurs launching taco-simulate.",
 
     "CommandKitListCurrentKit": "<bold>Current Kit</bold>: {0}",
     "_CommandKitListCurrentKit.comment": "Title for the Currently used kit Id displayed on executing the 'taco kit list' command",
