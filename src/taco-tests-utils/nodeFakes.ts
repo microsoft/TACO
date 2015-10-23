@@ -28,6 +28,7 @@ export module NodeFakes {
         HOME?: string;
         ANDROID_HOME?: string;
         PATH?: string;
+        TACO_UNIT_TEST?: string;
     }
 
     export type IChildProcess = NodeJSChildProcess.ChildProcess;
@@ -78,7 +79,7 @@ export module NodeFakes {
         public env: IEnvironmentVariables;
 
         constructor() {
-            this.env = {};
+            this.clearEnv();
         }
 
         public asProcess(): NodeJS.Process {
@@ -120,6 +121,11 @@ export module NodeFakes {
             var username = "my_username";
             this.asProcess().platform = "win32";
             this.asProcess().env.HOME = "C:\\Users\\" + username;
+            return this;
+        }
+
+        public clearEnv(): Process {
+            this.env = { TACO_UNIT_TEST: "true" };
             return this;
         }
     }

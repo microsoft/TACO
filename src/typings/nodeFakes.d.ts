@@ -15,6 +15,7 @@ declare module TacoTestsUtils {
             HOME?: string;
             ANDROID_HOME?: string;
             PATH?: string;
+            TACO_UNIT_TEST?: string;
         }
         type IChildProcess = NodeJSChildProcess.ChildProcess;
         type IExecOptions = NodeJSChildProcess.IExecOptions;
@@ -96,6 +97,7 @@ declare module TacoTestsUtils {
             public fakeDeterministicHrtime(): Process;
             public fakeMacOS(): Process;
             public fakeWindows(): Process;
+            public clearEnv(): Process;
         }
         abstract class EventEmitter implements NodeJS.EventEmitter {
             protected abstract notImplementedError(): Error;

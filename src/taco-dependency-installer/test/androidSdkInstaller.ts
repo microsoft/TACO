@@ -119,7 +119,7 @@ describe("AndroidSdkInstaller telemetry", () => {
     beforeEach(() => {
         fakeTelemetryHelper.clear(); // So we'll only get the new events in each scenario
         steps = { download: false, install: false, updateVariables: false, postInstall: false }; // We reset all the steps to false
-        fakeProcess.env = {}; // Reset environment variables, given that we modify some of them in the tests
+        fakeProcess.clearEnv(); // Reset environment variables, given that we modify some of them in the tests
     });
 
     function telemetryGeneratedShouldBe(expectedTelemetry: TacoUtility.ICommandTelemetryProperties[],
@@ -181,7 +181,7 @@ describe("AndroidSdkInstaller telemetry", () => {
                     time: { isPii: false, value: "3000" }
                 }];
 
-            return telemetryGeneratedShouldBe(expectedTelemetry, /An installation destination is needed for this dependency/, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /NeedInstallDestination/, done);
         });
     });
 

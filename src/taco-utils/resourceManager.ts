@@ -13,8 +13,9 @@ import fs = require ("fs");
 import path = require ("path");
 
 import argsHelper = require ("./argsHelper");
+import processUtils = require("./processUtils");
+import resourceSet = require("./resourceSet");
 import tacoGlobalConfig = require ("./tacoGlobalConfig");
-import resourceSet = require ("./resourceSet");
 
 import ArgsHelper = argsHelper.ArgsHelper;
 import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
@@ -95,7 +96,7 @@ module TacoUtility {
             var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
             var result: string = this.getStringForLocale(this.bestLanguageMatch(this.getCurrentLocale()), id, args);
 
-            if (result && process.env["TACO_UNIT_TEST"]) {
+            if (result && processUtils.ProcessUtils.getProcess().env["TACO_UNIT_TEST"]) {
                 // Mock out resources for consistency in unit tests, but only if they exist
                 return id;
             } else {
