@@ -104,9 +104,8 @@ class Kit extends commands.TacoCommandBase {
         return Kit.promptUser(resources.getString("CommandKitSelectProjectUpdatePrompt"))
         .then(function (answer: string): Q.Promise<any> {
             if (answer && answer.length > 0 ) {
-                // Try the lower-case version of the answer as well (This is needed so we can have better test coverage for "yes" and "no" response code paths)
-                var intendedAnswer: string = answer.toLowerCase();
-                if (resources.getString("PromptResponseYes").split("\n").indexOf(answer) !== -1 || resources.getString("PromptResponseYes").split("\n").indexOf(intendedAnswer) !== -1) {
+                answer = answer.toLowerCase();
+                if (resources.getString("PromptResponseYes").toLowerCase().split("\n").indexOf(answer) !== -1) {
                     logger.logLine();
                     return Kit.updateProject(updateToCliProject, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
                 }

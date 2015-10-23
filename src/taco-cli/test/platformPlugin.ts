@@ -39,7 +39,7 @@ import ms = require("./utils/memoryStream");
 import CommandHelper = require ("./utils/commandHelper");
 
 import ICommand = tacoUtility.Commands.ICommand;
-import IComponentVersionMap = TacoTestUtility.IComponentVersionMap;
+import IKeyValuePair = TacoTestUtility.IKeyValuePair;
 import TestProjectHelper = TacoTestUtility.ProjectHelper;
 import utils = TacoUtility.UtilHelper;
 
@@ -56,32 +56,32 @@ var cliVersion: string = require("../package.json").version;
 
 interface ICommandAndResult {
     command: string;
-    expectedVersions: IComponentVersionMap;
+    expectedVersions: IKeyValuePair<string>;
     expectedTelemetryProperties: TacoUtility.ICommandTelemetryProperties;
 }
 
 // Expected valued for various scenarios
-var userOverridePlatformVersions: IComponentVersionMap = {
+var userOverridePlatformVersions: IKeyValuePair<string> = {
     android: "4.0.1",
     ios: "3.8.0"
 };
 
-var kitPlatformVersions: IComponentVersionMap = {
+var kitPlatformVersions: IKeyValuePair<string> = {
     android: "4.0.2",
     ios: "3.8.0"
 };
 
-var cliPlatformVersions: IComponentVersionMap = {
+var cliPlatformVersions: IKeyValuePair<string> = {
     android: "4.0.0",
     ios: "3.8.0"
 };
 
-var userOverridePluginVersions: IComponentVersionMap = {
+var userOverridePluginVersions: IKeyValuePair<string> = {
     "cordova-plugin-camera": "1.0.0",
     "cordova-plugin-contacts": "1.0.0"
 };
 
-var kitPluginVersions: IComponentVersionMap = {
+var kitPluginVersions: IKeyValuePair<string> = {
     "cordova-plugin-camera": "1.1.0",
     "cordova-plugin-contacts": "1.0.0"
 };

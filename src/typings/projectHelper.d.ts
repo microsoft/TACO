@@ -9,13 +9,13 @@
 /// <reference path="../typings/node.d.ts" />
 
 declare module TacoTestsUtils {
-    interface IComponentVersionMap {
-        [component: string]: string;
+    interface IKeyValuePair<T> {
+        [key: string]: T;
     }
 
     class ProjectHelper {
-        public static checkPlatformVersions(platformsExpected: IComponentVersionMap, projectPath: string): Q.Promise<any>;
-        public static checkPluginVersions(pluginsExpected: IComponentVersionMap, projectPath: string): void;
+        public static checkPlatformVersions(platformsExpected: IKeyValuePair<string>, projectPath: string): Q.Promise<any>;
+        public static checkPluginVersions(pluginsExpected: IKeyValuePair<string>, projectPath: string): void;
     }
 }
 

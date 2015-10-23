@@ -21,12 +21,12 @@ import path = require ("path");
 import Q = require ("q");
 
 module TacoTestsUtils {
-    interface IComponentVersionMap {
-        [component: string]: string;
+    interface IKeyValuePair<T> {
+        [key: string]: T;
     }
 
     export class ProjectHelper {
-        public static checkPlatformVersions(platformsExpected: IComponentVersionMap, projectPath: string): Q.Promise<any> {
+        public static checkPlatformVersions(platformsExpected: IKeyValuePair<string>, projectPath: string): Q.Promise<any> {
             var platformsInstalled: string[] = ProjectHelper.getInstalledPlatforms(platformsExpected, projectPath);
             var onWindows: boolean = process.platform === "win32";
             var deferred: Q.Deferred<any> = Q.defer<any>();
@@ -57,7 +57,7 @@ module TacoTestsUtils {
             }));
         }
 
-        public static checkPluginVersions(pluginsExpected: IComponentVersionMap, projectPath: string): void {
+        public static checkPluginVersions(pluginsExpected: IKeyValuePair<string>, projectPath: string): void {
             var deferred: Q.Deferred<any> = Q.defer<any>();
             Object.keys(pluginsExpected).forEach(function(plugin: string): void {
                 var versionInstalled: string = ProjectHelper.getInstalledPluginVersion(plugin, projectPath);
@@ -65,7 +65,7 @@ module TacoTestsUtils {
             });
         }
 
-        private static getInstalledPlatforms(platformsExpected: IComponentVersionMap, projectPath: string): string[] {
+        private static getInstalledPlatforms(platformsExpected: IKeyValuePair<string>, projectPath: string): string[] {
             var platformsDir: string = path.join(projectPath, "platforms");
             if (!fs.existsSync(platformsDir)) {
                 return [];
