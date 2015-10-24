@@ -28,7 +28,7 @@ class InstallerUtilsWin32 {
      *
      * @param {string} name The name of the environment variable to set
      * @param {string} value The desired value for the specified environment variable
-     * @param {InstallerProtocol.ILogger} logger The logger for the current process
+     * @param {InstallerProtocol.ILogger} logger The logger for the process
      *
      * @return {Q.Promise<any>} A promise resolved with an empty object if the operation succeeds, or rejected with the appropriate error if not
      */
@@ -52,8 +52,8 @@ class InstallerUtilsWin32 {
      * @return {Q.Promise<any>} A promise resolved with an empty object if the operation succeeds, or rejected with the appropriate error if not
      */
     public static addToPathIfNeededWin32(addToPath: string[]): Q.Promise<any> {
-        var pathName: string = "Path";
-        var pathValue: string = process.env[pathName];
+        var pathName: string = "PATH"; // Windows is case-insensitive. We use uppercase to be more compatible with *nix systems
+        var pathValue: string = tacoUtils.ProcessUtils.getProcess().env[pathName];
 
         addToPath.forEach(function (value: string): void {
             if (!installerUtils.pathContains(value)) {
@@ -61,7 +61,7 @@ class InstallerUtilsWin32 {
             }
         });
 
-        if (pathValue === process.env[pathName]) {
+        if (pathValue === tacoUtils.ProcessUtils.getProcess().env[pathName]) {
             return Q.resolve({});
         }
 
@@ -78,13 +78,13 @@ class InstallerUtilsWin32 {
      * @return {Q.Promise<any>} A promise resolved with an empty object if the operation succeeds, or rejected with the appropriate error if not
      */
     public static setEnvironmentVariableWin32(name: string, value: string): Q.Promise<any> {
-        if (process.platform !== "win32") {
+        if (tacoUtils.ProcessUtils.getProcess().platform !== "win32") {
             // No-op for platforms other than win32
             return Q.resolve({});
         }
 
         // Set variable for this running process
-        process.env[name] = value;
+        tacoUtils.ProcessUtils.getProcess().env[name] = value;
 
         // Set variable for the system
         var scriptPath: string = path.resolve(__dirname, "setSystemVariable.ps1");
