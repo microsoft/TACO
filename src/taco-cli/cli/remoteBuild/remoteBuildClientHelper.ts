@@ -26,6 +26,7 @@ import querystring = require ("querystring");
 import request = require ("request");
 import stream = require ("stream");
 import tar = require ("tar");
+import url = require ("url");
 import util = require ("util");
 import zlib = require ("zlib");
 
@@ -466,8 +467,15 @@ class RemoteBuildClientHelper {
                     if (GlobalConfig.logLevel === LogLevel.Diagnostic) {
                         Logger.log(resources.getString("NewRemoteBuildInfo", body));
                     }
-
-                    deferred.resolve(response.headers["content-location"]);
+                    
+                    // The server responds with a content-location header indicating where the newly submitted build is now located
+                    // However the URL in that header may have a different host to what we expect, especially in the case of proxies
+                    // or ipv6 addresses. To fix this, we'll ignore the host part of the URL and replace it with the host we want to
+                    // communicate with ourselves.
+                    var reportedBuildUrl = url.parse(response.headers["content-location"]);
+                    var buildServerUrl = url.parse(buildUrl);
+                    reportedBuildUrl.host = buildServerUrl.host;
+                    deferred.resolve(url.format(reportedBuildUrl));
                 } else {
                     deferred.reject(errorHelper.get(TacoErrorCodes.ErrorDuringRemoteBuildSubmission, body));
                 }
