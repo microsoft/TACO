@@ -41,9 +41,9 @@ import utils = tacoUtility.UtilHelper;
 import IDictionary = cordovaHelper.IDictionary;
 
 enum ProjectComponentType {
-        Unknown = -1,
-        Platform = 0,
-        Plugin = 1
+    Unknown = -1,
+    Platform = 0,
+    Plugin = 1
 }
 
 interface IKitInfo {
@@ -51,9 +51,11 @@ interface IKitInfo {
     cordovaCliVersion: string;
 }
 
-interface IMockReadLine {
-    question: (question: string, callback: (answer: string) => void) => void;
-    close: () => void;
+module Kit {
+    export interface IMockReadLine {
+        question: (question: string, callback: (answer: string) => void) => void;
+        close: () => void;
+    }
 }
 
 /**
@@ -65,7 +67,7 @@ class Kit extends commands.TacoCommandBase {
     /**
      * Mockable CLI for test purposes
      */
-    public static yesOrNoHandler: IMockReadLine = null;
+    public static yesOrNoHandler: Kit.IMockReadLine = null;
 
     private static KNOWN_OPTIONS: Nopt.CommandData = {
         kit: String,
@@ -85,7 +87,7 @@ class Kit extends commands.TacoCommandBase {
      */
     public static promptUser(prompt: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var yesOrNoHandler: IMockReadLine = Kit.yesOrNoHandler ? Kit.yesOrNoHandler : readline.createInterface({ input: process.stdin, output: process.stdout });
+        var yesOrNoHandler: Kit.IMockReadLine = Kit.yesOrNoHandler ? Kit.yesOrNoHandler : readline.createInterface({ input: process.stdin, output: process.stdout });
 
         yesOrNoHandler.question(prompt, function (answer: string): void {
             yesOrNoHandler.close();

@@ -137,6 +137,8 @@ describe("Kit command : ", function (): void {
         process.chdir(projectPath);
         return pluginRun(["add", "cordova-plugin-camera"])
         .then(function(): Q.Promise<any> {
+            // cordova.raw.plugin("add", [...]) returns before the plugin is actually added.
+            // So, a delay is required here to ensure that the plugins are indeed added 
             return sleep(100);
         }).then(function (): Q.Promise<any> {
             var medicPluginTestsPath = path.resolve(".", "plugins", "cordova-plugin-camera", "tests");
@@ -145,10 +147,7 @@ describe("Kit command : ", function (): void {
         });
     }
 
-    function getMockYesOrNoHandler(errorHandler: (err: Error) => void, onClose: () => void, desiredResponse: string): {
-        question: (question: string, callback: (answer: string) => void) => void;
-        close: () => void;
-    } {
+    function getMockYesOrNoHandler(errorHandler: (err: Error) => void, onClose: () => void, desiredResponse: string): KitMod.IMockReadLine {
         return {
             question: function (question: string, callback: (answer: string) => void): void {
                 switch (question) {
@@ -301,13 +300,12 @@ describe("Kit command : ", function (): void {
         it("'taco kit select --cordova {CLI-VERSION}' on a project with a platform added, should execute with no errors", function (done: MochaDone): void {
             KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseNo");
             runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "4.3.1"], tacoJsonPath, expectedCliTacoJsonKeyValues1)
-                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
+                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
                     var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "select" },
                         "options.cordova": { isPii: false, value: "4.3.1" }
                     };
                     telemetryParameters.should.be.eql(expected);
-                    return sleep(60);
                 })
                 .done(() => done(), done);
         });
@@ -346,13 +344,12 @@ describe("Kit command : ", function (): void {
             return addTestPluginsToProject(cliProjectpath)
             .then(function (): Q.Promise<any> {
                 return runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
-                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): Q.Promise<any> {
+                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
                     var expected = {
                         subCommand: { isPii: false, value: "select" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
                     };
                     telemetryParameters.should.be.eql(expected);
-                    return sleep(60);
                 }).then(() => {
                     TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
                 });

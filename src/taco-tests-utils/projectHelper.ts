@@ -40,10 +40,10 @@ module TacoTestsUtils {
                 var versionProc: child_process.ChildProcess = child_process.spawn(cmdPath);
                 versionProc.stdout.on("data", function(data: any): void {
                     var version: string = data.toString();
-                    if (!path) {
+                    if (!version) {
                         deferred.reject("Verson string not found");
                     } else {
-                        version.trim().should.be.equal(platformsExpected[platform]);
+                        should.assert(version.trim() === platformsExpected[platform], "Unexpected platform version");
                         deferred.resolve({});
                     }
                 });
@@ -58,7 +58,6 @@ module TacoTestsUtils {
         }
 
         public static checkPluginVersions(pluginsExpected: IKeyValuePair<string>, projectPath: string): void {
-            var deferred: Q.Deferred<any> = Q.defer<any>();
             Object.keys(pluginsExpected).forEach(function(plugin: string): void {
                 var versionInstalled: string = ProjectHelper.getInstalledPluginVersion(plugin, projectPath);
                 versionInstalled.trim().should.be.equal(pluginsExpected[plugin]);
