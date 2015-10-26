@@ -41,14 +41,21 @@ import utils = tacoUtility.UtilHelper;
 import IDictionary = cordovaHelper.IDictionary;
 
 enum ProjectComponentType {
-        Unknown = -1,
-        Platform = 0,
-        Plugin = 1
+    Unknown = -1,
+    Platform = 0,
+    Plugin = 1
 }
 
 interface IKitInfo {
     kitId: string;
     cordovaCliVersion: string;
+}
+
+module Kit {
+    export interface IMockReadLine {
+        question: (question: string, callback: (answer: string) => void) => void;
+        close: () => void;
+    }
 }
 
 /**
@@ -57,6 +64,11 @@ interface IKitInfo {
  * handles "taco kit"
  */
 class Kit extends commands.TacoCommandBase {
+    /**
+     * Mockable CLI for test purposes
+     */
+    public static yesOrNoHandler: Kit.IMockReadLine = null;
+
     private static KNOWN_OPTIONS: Nopt.CommandData = {
         kit: String,
         json: String,
@@ -70,13 +82,12 @@ class Kit extends commands.TacoCommandBase {
 
     public name: string = "kit";
     public info: commands.ICommandInfo;
-
     /**
      * Prompts the user with the prompt string and returns the response
      */
     public static promptUser(prompt: string): Q.Promise<string> {
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var yesOrNoHandler: readline.ReadLine = readline.createInterface({ input: process.stdin, output: process.stdout });
+        var yesOrNoHandler: Kit.IMockReadLine = Kit.yesOrNoHandler ? Kit.yesOrNoHandler : readline.createInterface({ input: process.stdin, output: process.stdout });
 
         yesOrNoHandler.question(prompt, function (answer: string): void {
             yesOrNoHandler.close();
@@ -96,7 +107,7 @@ class Kit extends commands.TacoCommandBase {
         .then(function (answer: string): Q.Promise<any> {
             if (answer && answer.length > 0 ) {
                 answer = answer.toLowerCase();
-                if (resources.getString("PromptResponseYes").split("\n").indexOf(answer) !== -1) {
+                if (resources.getString("PromptResponseYes").toLowerCase().split("\n").indexOf(answer) !== -1) {
                     logger.logLine();
                     return Kit.updateProject(updateToCliProject, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
                 }

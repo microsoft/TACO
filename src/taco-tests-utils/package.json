@@ -19,7 +19,8 @@
   "dependencies": {
     "lodash": "^3.10.1",
     "q": "~1.4.1",
-    "mock-spawn": "~0.2.6"
+    "mock-spawn": "~0.2.6",
+    "should": "4.3.0"
   },
   "devDependencies": {
     "typescript": "~1.6.2"

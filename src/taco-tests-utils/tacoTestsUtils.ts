@@ -8,6 +8,7 @@
 
 "use strict";
 import nodeFakes = require("./nodeFakes");
+import projectHelper = require("./projectHelper");
 import telemetryFakes = require("./telemetryFakes");
 
 module TacoTestsUtils {
@@ -16,6 +17,7 @@ module TacoTestsUtils {
     // put more classes here, known limitation that classes in external modules CANNOT span multiple files
     export var NodeFakes: typeof nodeFakes.NodeFakes = nodeFakes.NodeFakes;
     export var TelemetryFakes: typeof telemetryFakes.TelemetryFakes = telemetryFakes.TelemetryFakes;
+    export var ProjectHelper: typeof projectHelper.ProjectHelper = projectHelper.ProjectHelper;
     /* tslint:enable:variable-name */
 }
 
