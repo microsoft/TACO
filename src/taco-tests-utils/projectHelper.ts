@@ -29,8 +29,8 @@ module TacoTestsUtils {
         public static checkPlatformVersions(platformsExpected: IKeyValuePair<string>, projectPath: string): Q.Promise<any> {
             var platformsInstalled: string[] = ProjectHelper.getInstalledPlatforms(platformsExpected, projectPath);
             var onWindows: boolean = process.platform === "win32";
-            var deferred: Q.Deferred<any> = Q.defer<any>();
             return Q.all(platformsInstalled.map(function(platform: string): Q.Promise<any> {
+                var deferred: Q.Deferred<any> = Q.defer<any>();
                 var cmdName: string = "version";
                 if (onWindows) {
                     cmdName = cmdName + ".bat";
