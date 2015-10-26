@@ -11,6 +11,10 @@
 /// <reference path="../../typings/mockery.d.ts"/>
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/telemetryFakes.d.ts"/>
+/// <reference path="../../typings/mock-fs.d.ts"/>
+/// <reference path="../../typings/nodeFakes.d.ts"/>
+/// <reference path="../../typings/lodash.d.ts"/>
+/// <reference path="../../typings/tacoTestsUtils.d.ts"/>
 
 "use strict";
 
@@ -23,6 +27,8 @@ var shouldModule = require("should");
 import installerProtocol = require("../elevatedInstallerProtocol");
 import ILogger = installerProtocol.ILogger;
 import mockery = require("mockery");
+import mockFs = require("mock-fs");
+import path = require("path");
 import Q = require("q");
 import tacoTestsUtils = require("taco-tests-utils");
 import _ = require("lodash");
@@ -50,64 +56,95 @@ class FakeLogger implements ILogger {
 }
 
 describe("AndroidSdkInstaller telemetry", () => {
+    // Parameters for AndroidSdkInstaller
+    var steps: DependencyInstallerInterfaces.IStepsDeclaration;
+    var installerInfo: DependencyInstallerInterfaces.IInstallerData = {
+        installSource: "",
+        sha1: "",
+        bytes: 0,
+        installDestination: "",
+        steps: steps
+    };
+    var softwareVersion: string = "";
+    var installTo: string = "C:\\Program Files (x86)\\Android"; // Default installation directory in windows
+
+    // Mocks used by the tests
+    var mockPath: typeof path;
+    var fakeTelemetryHelper: TacoTestsUtils.TelemetryFakes.Helper;
+    var fakeProcess: nodeFakes.Process;
+    var androidSdkInstallerClass: any;
+    var childProcessModule: nodeFakes.ChildProcessModule;
+
     before(() => {
         // We tell mockery to replace "require()" with our own custom mock objects
         mockery.enable({ useCleanCache: true, warnOnUnregistered: false });
+
+        fakeProcess = new nodeFakes.Process()
+            .fakeDeterministicHrtime();
+
+        var fakeProcessUtilsModule = { ProcessUtils: fakeProcess.buildProcessUtils() };
+
+        mockery.registerMock("./processUtils", fakeProcessUtilsModule); // TelemetryHelper loads ./processUtils
+        var tacoUtils: typeof TacoUtility = require("taco-utils");
+        tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
+
+        // Register mocks. child_process and taco-utils mocks needs to be registered before 
+        // AndroidSdkInstaller is required for the mocking to work
+        childProcessModule = new nodeFakes.ChildProcessModule().fakeAllExecCallsEndingWithErrors();
+        mockery.registerMock("child_process", childProcessModule);
+
+        // Reload taco-tests-utils but now with the fake processUtils loaded, so the fake telemetry will use the fake process
+        var tacoTestsUtilsWithMocks: typeof tacoTestsUtils = require("taco-tests-utils");
+
+        fakeTelemetryHelper = new tacoTestsUtilsWithMocks.TelemetryFakes.Helper();
+        var tacoUtilsWithFakes = _.extend({}, tacoUtils, { TelemetryHelper: fakeTelemetryHelper, HasFakes: true },
+            fakeProcessUtilsModule);
+        mockery.registerMock("taco-utils", tacoUtilsWithFakes); // AndroidSdkInstaller loads taco-utils
+
+        // We need to mock path if we want to run windows tests on a mac, so it'll use ; as path delimiter
+        mockPath = <typeof path> _.extend({}, path);
+        mockery.registerMock("path", mockPath); // installerUtils uses path.delimiter, and it breaks the Windows tests on mac if not
+
+        // We require the AndroidSdkInstaller file, which will use all the mocked dependencies
+        androidSdkInstallerClass = require("../installers/androidSdkInstaller");
     });
 
     after(() => {
         // Clean up and revert everything back to normal
         mockery.deregisterAll();
         mockery.disable();
+        mockFs.restore();
     });
+
+    beforeEach(() => {
+        fakeTelemetryHelper.clear(); // So we'll only get the new events in each scenario
+        steps = { download: false, install: false, updateVariables: false, postInstall: false }; // We reset all the steps to false
+        fakeProcess.clearEnv(); // Reset environment variables, given that we modify some of them in the tests
+    });
+
+    function telemetryGeneratedShouldBe(expectedTelemetry: TacoUtility.ICommandTelemetryProperties[],
+        expectedMessagePattern: RegExp, done: MochaDone): Q.Promise<any> {
+        var androidSdkInstaller = new androidSdkInstallerClass(installerInfo, softwareVersion, installTo,
+            new FakeLogger(), steps);
+
+        return androidSdkInstaller.run()
+            .then(() => Q.reject(new Error("Should have gotten a rejection in this test")), (error: Error) => {
+                return fakeTelemetryHelper.getAllSentEvents().then((allSentEvents: TelemetryEvent[]) => {
+                    // We check the message first, because some coding defects can make the tests end in unexpected states
+                    error.message.should.match(expectedMessagePattern);
+
+                    // Then we validate the telemetry
+                    allSentEvents.should.eql(expectedTelemetry);
+                });
+            }).done(done, done);
+    }
 
     describe("updateVariablesDarwin", () => {
         it("generates telemetry if there is an error on the update command", (done: MochaDone) => {
-            var fakeProcessUtilsModule = {
-                ProcessUtils: new nodeFakes.Process().fakeMacOS()
-                    .fakeDeterministicHrtime().buildProcessUtils()
-            };
-            mockery.registerMock("./processUtils", fakeProcessUtilsModule); // TelemetryHelper loads ./processUtils
-            var tacoUtils: typeof TacoUtility = require("taco-utils");
-            tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
+            fakeProcess.fakeMacOS();
+            steps.updateVariables = true; // We only test this step on this test
 
-            // Register mocks. child_process and taco-utils mocks needs to be register before 
-            // AndroidSdkInstaller is required for the mock to work
-            mockery.registerMock("child_process", new nodeFakes.ChildProcessModule().fakeAllExecCallsEndingWithErrors());
-
-            // Reload taco-tests-utils but now with the fake processUtils loaded, so the fake telemetry will use the fake process
-            var tacoTestsUtilsWithMocks: typeof tacoTestsUtils = require("taco-tests-utils");
-
-            var fakeTelemetryHelper: TacoTestsUtils.TelemetryFakes.Helper = new tacoTestsUtilsWithMocks.TelemetryFakes.Helper();
-            var tacoUtilsWithFakes = _.extend({}, tacoUtils, { TelemetryHelper: fakeTelemetryHelper, HasFakes: true },
-                fakeProcessUtilsModule);
-            mockery.registerMock("taco-utils", tacoUtilsWithFakes); // AndroidSdkInstaller loads taco-utils
-
-            // We require the AndroidSdkInstaller file, which will use all the mocked dependencies
-            var androidSdkInstallerClass = require("../installers/androidSdkInstaller");
-
-            var steps: DependencyInstallerInterfaces.IStepsDeclaration = {
-                download: false,
-                install: false,
-                updateVariables: true, // We only test this step on this test
-                postInstall: false
-            };
-
-            var installerInfo: DependencyInstallerInterfaces.IInstallerData = {
-                installSource: "",
-                sha1: "",
-                bytes: 0,
-                installDestination: "",
-                steps: steps
-            };
-
-            var softwareVersion: string = "";
-            var installTo: string = "";
-
-            var androidSdkInstaller = new androidSdkInstallerClass(installerInfo, softwareVersion, installTo,
-                new FakeLogger(), steps);
-
-            var expectedTelemetry = [
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
                 {
                     "initialStep.time": { isPii: false, value: "2000" },
                     step: { isPii: false, value: "initialStep" }
@@ -121,12 +158,193 @@ describe("AndroidSdkInstaller telemetry", () => {
                 }
             ];
 
-            return androidSdkInstaller.run()
-                .then(() => Q.reject(new Error("Should have gotten a rejection in this test")), () => {
-                    return fakeTelemetryHelper.getAllSentEvents().then((allSentEvents: TelemetryEvent[]) => {
-                        allSentEvents.should.eql(expectedTelemetry);
-                    });
-                }).done(done, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /Error while executing/, done);
+        });
+    });
+
+    describe("installation", () => {
+        it("generates telemetry error if there is no install location", (done: MochaDone) => {
+            fakeProcess.fakeMacOS();
+            steps.install = true; // We only test this step on this test
+            installTo = ""; // We don't have an install location
+
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
+                {
+                    "initialStep.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "initialStep" }
+                },
+                {
+                    "error.description": { isPii: false, value: "NeedInstallDestination on installDefault" },
+                    "install.time": { isPii: false, value: "2000" },
+                    lastStepExecuted: { isPii: false, value: "install" },
+                    step: { isPii: false, value: "install" },
+                    time: { isPii: false, value: "3000" }
+                }];
+
+            return telemetryGeneratedShouldBe(expectedTelemetry, /NeedInstallDestination/, done);
+        });
+    });
+
+    describe("post-installation in mac", () => {
+        it("generates telemetry error if we can't give executable permissions to the android executable", (done: MochaDone) => {
+            fakeProcess.fakeMacOS();
+
+            steps.postInstall = true; // We only test this step on this test
+            steps.updateVariables = true; // We need this step because post-install uses this.androidHomeValue populated in this step
+
+            // child_process.exec will succeed while setting the path, and fail while giving permissions
+            childProcessModule.fakeUsingCommandToDetermineResult((command: string) => /export PATH=/.test(command),
+                (command: string) => /chmod a\+x/.test(command));
+
+            var filePath = path.join(fakeProcess.env.HOME, ".bash_profile");
+            var files: mockFs.Config = {};
+            files[filePath] = "";
+            mockFs(files);
+
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
+                {
+                    "initialStep.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "initialStep" }
+                },
+                {
+                    step: { isPii: false, value: "updateVariables" },
+                    "updateVariables.time": { isPii: false, value: "1000" }
+                },
+                {
+                    "error.description": {
+                        isPii: false,
+                        value: "ErrorOnChildProcess on addExecutePermission"
+                    },
+                    lastStepExecuted: { isPii: false, value: "postInstall" },
+                    "postInstall.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "postInstall" },
+                    time: { isPii: false, value: "5000" }
+                }
+            ];
+
+            return telemetryGeneratedShouldBe(expectedTelemetry, /Error while executing/g, done);
+        });
+    });
+
+    describe("post-installation in windows", () => {
+        beforeEach(() => {
+            fakeProcess.fakeWindows();
+            mockPath.delimiter = ";"; // Installer utils uses this, and the path logic breaks in Mac if we don't mock it
+
+            steps.postInstall = true; // We only test this step on this test
+            steps.updateVariables = true; // We need this step because post-install uses this.androidHomeValue populated in this step
+
+            // Set ANDROID_HOME so updateVariables won't try to re-set it
+            installTo = "C:\\Program Files (x86)\\Android"; // We don't have an install location
+            var androidHomePath = fakeProcess.env.ANDROID_HOME = mockPath.join(installTo, "android-sdk-windows");
+
+            // Set android paths in the PATH so we won't have to add them
+            var platformToolsPath = mockPath.join(androidHomePath, "platform-tools");
+            var androidToolsPath = mockPath.join(androidHomePath, "tools");
+            fakeProcess.env.PATH = platformToolsPath + mockPath.delimiter + androidToolsPath;
+        });
+
+        it("installAndroidPackages generates telemetry error if the command used generates errors in stderr", (done: MochaDone) => {
+            var spawnErrorMessage = "Couldn't find the Android update command executable";
+            childProcessModule.mockSpawn.setDefault(
+                childProcessModule.mockSpawn.simple(/*exitCode*/ 0, /*stdout*/ "", /*stderr*/ spawnErrorMessage));
+
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
+                {
+                    "initialStep.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "initialStep" }
+                },
+                {
+                    step: { isPii: false, value: "updateVariables" },
+                    "updateVariables.time": { isPii: false, value: "1000" }
+                },
+                {
+                    "error.code": { isPii: false, value: "0" },
+                    "error.description": {
+                        isPii: false,
+                        value: "ErrorOnExitOfChildProcess on postInstallDefault"
+                    },
+                    "error.message": {
+                        isPii: true,
+                        value: "Couldn't find the Android update command executable"
+                    },
+                    lastStepExecuted: { isPii: false, value: "postInstall" },
+                    "postInstall.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "postInstall" },
+                    time: { isPii: false, value: "5000" }
+                }
+            ];
+
+            return telemetryGeneratedShouldBe(expectedTelemetry, new RegExp(spawnErrorMessage), done);
+        });
+
+        it("installAndroidPackages generates telemetry error if the command used is invalid", (done: MochaDone) => {
+            var spawnErrorMessage = "The command is not recognized by the system";
+            childProcessModule.mockSpawn.setDefault(function (callback: Function): void {
+                /* Warning: The "this" in the next line is the one passed by mockSpawn library. For that
+                   to work this context needs to be a JavaScript lambda function. Do not convert this to
+                   an arrow function, or this will break because of the change in semantics. */
+                this.emit("error", new Error(spawnErrorMessage)); // invokes childProcess.on('error')
+                setTimeout(() => callback(8), 0); // Then the child process ends with an arbitrary error code of 8
+            });
+
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
+                {
+                    "initialStep.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "initialStep" }
+                },
+                {
+                    step: { isPii: false, value: "updateVariables" },
+                    "updateVariables.time": { isPii: false, value: "1000" }
+                },
+                {
+                    "error.description": {
+                        isPii: false,
+                        value: "ErrorOnChildProcess on postInstallDefault"
+                    },
+                    lastStepExecuted: { isPii: false, value: "postInstall" },
+                    "postInstall.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "postInstall" },
+                    time: { isPii: false, value: "5000" }
+                }
+            ];
+
+            return telemetryGeneratedShouldBe(expectedTelemetry, new RegExp(spawnErrorMessage), done);
+        });
+
+        it("killAdb generates telemetry error if the command used is invalid", (done: MochaDone) => {
+            // First call to install the android packages will succeed
+            childProcessModule.mockSpawn.sequence.add(childProcessModule.mockSpawn.simple(/*exitCode*/ 0, /*stdout*/ "", /*stderr*/ ""));
+
+            // Second call to kill adb will fail
+            var spawnErrorMessage = "The kill adb command is not recognized by the system";
+            childProcessModule.mockSpawn.sequence.add(function (callback: Function): void {
+                /* Warning: The "this" in the next line is the one passed by mockSpawn library. For that
+                   to work this context needs to be a JavaScript lambda function. Do not convert this to
+                   an arrow function, or this will break because of the change in semantics. */
+                this.emit("error", new Error(spawnErrorMessage)); // invokes childProcess.on('error')
+                setTimeout(() => callback(8), 0); // Then the child process ends with an arbitrary error code of 8
+            });
+
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
+                {
+                    "initialStep.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "initialStep" }
+                },
+                {
+                    step: { isPii: false, value: "updateVariables" },
+                    "updateVariables.time": { isPii: false, value: "1000" }
+                },
+                {
+                    "error.description": { isPii: false, value: "ErrorOnKillingAdb in killAdb" },
+                    lastStepExecuted: { isPii: false, value: "postInstall" },
+                    "postInstall.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "postInstall" },
+                    time: { isPii: false, value: "5000" }
+                }
+            ];
+
+            return telemetryGeneratedShouldBe(expectedTelemetry, new RegExp(spawnErrorMessage), done);
         });
     });
 });

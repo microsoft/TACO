@@ -11,11 +11,16 @@
 declare module TacoTestsUtils {
     export module NodeFakes {
         interface IEnvironmentVariables {
+            // We should add here the environment variables that we use in TACO. Remember to also add them in the .ts file
             HOME?: string;
+            ANDROID_HOME?: string;
+            PATH?: string;
+            TACO_UNIT_TEST?: string;
         }
         type IChildProcess = NodeJSChildProcess.ChildProcess;
         type IExecOptions = NodeJSChildProcess.IExecOptions;
         type Callback = (error: Error, stdout: Buffer, stderr: Buffer) => void;
+        type CommandTester = (command: string) => boolean;
         type ExecSecondArgument = IExecOptions | Callback;
         type ExecFileOptions = {
             cwd?: string;
@@ -83,14 +88,16 @@ declare module TacoTestsUtils {
             getProcess(): NodeJS.Process;
         }
         class Process {
-            env: IEnvironmentVariables;
-            constructor();
-            asProcess(): NodeJS.Process;
-            buildProcessUtils(): IProcessUtils;
+            public env: IEnvironmentVariables;
+            public constructor();
+            public asProcess(): NodeJS.Process;
+            public buildProcessUtils(): IProcessUtils;
+
             /** Methods to configure the fake process **/
-            fakeDeterministicHrtime(): Process;
-            fakeMacOS(): Process;
-            fakeWindows(): Process;
+            public fakeDeterministicHrtime(): Process;
+            public fakeMacOS(): Process;
+            public fakeWindows(): Process;
+            public clearEnv(): Process;
         }
         abstract class EventEmitter implements NodeJS.EventEmitter {
             protected abstract notImplementedError(): Error;
@@ -115,7 +122,17 @@ declare module TacoTestsUtils {
         }
         class ChildProcessModule {
             /** Methods to configure the fake process **/
+            // This method will make all child_process.exec call succeed
+            fakeAllExecCallsSucceed(): ChildProcessModule;
+            // This method will make all child_process.exec call fail
             fakeAllExecCallsEndingWithErrors(): ChildProcessModule;
+            // This method will make some child_process.exec call fail, and some succeed based on the lambda tests passed
+            fakeUsingCommandToDetermineResult(successFilter: CommandTester, failureFilter: CommandTester): ChildProcessModule;
+
+            /** mock spawn variable. Docs at https://www.npmjs.com/package/mock-spawn **/
+            public mockSpawn: any; // This is an instance of mockSpawn();
+
+            /** child_process methods **/
             spawn(command: string, args?: string[], options?: SpawnOptions): IChildProcess;
             exec(command: string, options: IExecOptions, callback: Callback): IChildProcess;
             exec(command: string, callback: Callback): IChildProcess;

@@ -5,6 +5,9 @@
     "TacoCommandPassthrough": "Unknown TACO command, passing it to Cordova",
     "_TacoCommandPassthrough.comment": "Message printed when taco is given a command we don't understand and we pass through to Cordova",
 
+    "ThirdPartyDisclaimer": "<bold>Disclaimer:</bold> TACO uses third-party packages. Each package is licensed to you by its owner. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages. Some packages may include dependencies which are governed by additional licenses. Follow the package source (feed) URL to determine any dependencies.",
+    "_ThirdPartyDisclaimer.comment": "A disclaimer about the fact that TACO uses third-party dependencies. This is shown the very first time a user uses TACO, and each time a third-party package is programmatically downloaded.",
+
     "CommandCreateDescription": "Create a new Cordova based TACO project",
     "_CommandCreateDescription.comment": "Description of the 'taco create' command",
     "CommandCreateArgsPath": "Where to create the project",
@@ -43,8 +46,6 @@
     "CommandCreateGitTemplateHeader": "Acquiring template from git...<br/>",
     "_CommandCreateGitTemplateHeader.comment": "The header before the git output when using 'taco create' with a template from git.",
 
-    "CommandCreateStatusCreatingNewProject":  "Creating a new Cordova project.",
-    "_CommandCreateStatusCreatingNewProject.comment":  "Status description printed when the 'taco create' command is invoked, to say that 'we are busy working'",
     "_CommandCreateStatusTableSectionSeparator.comment":  "This is a section delimiter, used on the 'taco create' command to show on the console a text table. If another language uses words that are much longer, we might want to make this one longer too",
     "CommandCreateStatusTableNameDescription":  "Name",
     "_CommandCreateStatusTableNameDescription.comment":  "Name property of a project, used when we show a table with the project attributes when 'taco create' is invoked",

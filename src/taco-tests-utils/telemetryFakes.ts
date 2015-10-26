@@ -66,5 +66,9 @@ export module TelemetryFakes {
                 () => generator.time(null, () => codeGeneratingTelemetry(generator)),
                 () => generator.sendAndNotify()); // After
         }
+
+        public clear(): void {
+            this.telemetryGenerators = [];
+        }
     }
 }
