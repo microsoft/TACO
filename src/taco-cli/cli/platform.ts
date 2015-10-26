@@ -127,6 +127,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
             break;
 
             case CommandOperationStatus.Success: {
+                logger.logLine();
                 this.printSuccessMessage(platforms, operation);
                 break;
             }
