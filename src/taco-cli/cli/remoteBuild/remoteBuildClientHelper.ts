@@ -469,7 +469,7 @@ class RemoteBuildClientHelper {
                     if (GlobalConfig.logLevel === LogLevel.Diagnostic) {
                         Logger.log(resources.getString("NewRemoteBuildInfo", body));
                     }
-                    
+
                     // The server responds with a content-location header indicating where the newly submitted build is now located
                     // However the URL in that header may have a different host to what we expect, especially in the case of proxies
                     // or ipv6 addresses. To fix this, we'll ignore the host part of the URL and replace it with the host we want to
