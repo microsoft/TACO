@@ -114,7 +114,7 @@ module TacoUtility {
          * @param {string} command - TACO command being inquired
          */
         private printCommandUsage(command: string): void {
-            if (this.commandsFactory.aliases[command]) {
+            if (this.commandsFactory.aliases && this.commandsFactory.aliases[command]) {
                 command = this.commandsFactory.aliases[command];
             }
 
@@ -263,7 +263,7 @@ module TacoUtility {
          * @param {string} id - command to query
          */
         private commandExists(command: string): boolean {
-            return command in this.commandsFactory.listings || command in this.commandsFactory.aliases;
+            return command in this.commandsFactory.listings || (this.commandsFactory.aliases && command in this.commandsFactory.aliases);
         }
     }
 }

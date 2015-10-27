@@ -10,6 +10,7 @@
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
 /// <reference path="../../typings/tacoKits.d.ts"/>
+/// <reference path="../../typings/tacoTestsUtils.d.ts"/>
 
 "use strict";
 
@@ -26,9 +27,10 @@ var colors: any = require("colors/safe");
 
 import tacoUtils = require ("taco-utils");
 import Templates = require ("../cli/templates");
-import ms = require ("./utils/memoryStream");
+import tacoTestsUtils = require ("taco-tests-utils");
 
 import commands = tacoUtils.Commands.ICommandData;
+import MemoryStream = tacoTestsUtils.MemoryStream;
 
 describe("templates", function (): void {
     this.timeout(20000);
@@ -62,10 +64,10 @@ describe("templates", function (): void {
         // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
         // stdoutWrite just doesn't work
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-        var memoryStdout: ms.MemoryStream;
+        var memoryStdout: MemoryStream;
 
         beforeEach(() => {
-            memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+            memoryStdout = new MemoryStream; // Each individual test gets a new and empty console
             process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
         });
 

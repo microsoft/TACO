@@ -10,6 +10,7 @@
 import nodeFakes = require("./nodeFakes");
 import projectHelper = require("./projectHelper");
 import telemetryFakes = require("./telemetryFakes");
+import memoryStream = require("./memoryStream");
 
 module TacoTestsUtils {
     /* tslint:disable:variable-name */
@@ -18,6 +19,7 @@ module TacoTestsUtils {
     export var NodeFakes: typeof nodeFakes.NodeFakes = nodeFakes.NodeFakes;
     export var TelemetryFakes: typeof telemetryFakes.TelemetryFakes = telemetryFakes.TelemetryFakes;
     export var ProjectHelper: typeof projectHelper.ProjectHelper = projectHelper.ProjectHelper;
+    export var MemoryStream: typeof memoryStream.MemoryStream = memoryStream.MemoryStream;
     /* tslint:enable:variable-name */
 }
 
