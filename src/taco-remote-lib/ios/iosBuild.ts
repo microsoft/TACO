@@ -19,6 +19,7 @@ import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
+import semver = require ("semver");
 
 import Builder = require ("../common/builder");
 import plist = require ("./plist");
@@ -68,6 +69,12 @@ class IOSBuilder extends Builder {
     }
 
     protected beforePrepare(): Q.Promise<any> {
+        if (semver.lt(this.currentBuild["vcordova"], "5.3.3") && semver.gte(process.versions.node, "4.0.0")) {
+            var preferences = this.cfg.preferences();
+            if (preferences["target-device"] || preferences["deployment-target"]) {
+                throw new Error(resources.getString("UnsupportedCordovaAndNodeVersion"));
+            }
+        }
         return Q({});
     }
 
