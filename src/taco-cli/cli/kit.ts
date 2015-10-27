@@ -647,7 +647,7 @@ class Kit extends commands.TacoCommandBase {
                             return Kit.promptAndUpdateProject(tacoJsonEditParams, installedPlatformVersions,
                                 installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
                         } else {
-                            return Q.resolve({});
+                            return projectHelper.editTacoJsonFile(tacoJsonEditParams);
                         }
                     });
                 });
@@ -712,7 +712,7 @@ class Kit extends commands.TacoCommandBase {
                         Kit.printListOfComponentsSkippedForUpdate(nonUpdatablePlugins);
                         return Kit.promptAndUpdateProject(tacoJsonEditParams, platformVersions, pluginsToUpdate);
                     } else {
-                        return Q.resolve({});
+                        return projectHelper.editTacoJsonFile(tacoJsonEditParams);
                     }
                 });
             });
