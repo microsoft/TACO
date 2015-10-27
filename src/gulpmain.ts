@@ -44,7 +44,7 @@ gulp.task("compile", function (): Q.Promise<any> {
     return gulpUtils.streamToPromise(gulp.src([buildConfig.src + "/**/*.ts", "!" + buildConfig.src + "/gulpmain.ts"])
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
-        .pipe(sourcemaps.write("."))
+        .pipe(sourcemaps.write(".", {sourceRoot: ""}))
         .pipe(gulp.dest(buildConfig.buildPackages)));
 });
 
@@ -131,5 +131,18 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
     return gulpUtils.prepareTemplates(buildConfig.templates, buildConfig.buildTemplates);
 });
 /* tslint:enable:no-console */
+
+/* Task to run tests */
+gulp.task("coverage-js", ["install-build"], function(): Q.Promise<any> {
+    return gulpUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage);
+});
+
+gulp.task("coverage", ["coverage-js"], function(): Q.Promise<any> {
+    var coverageResults: string[] = [buildConfig.buildCoverage];
+    if (options.coverageFiles) {
+        coverageResults.push(options.coverageFiles);
+    }
+    return gulpUtils.generateReports(coverageResults, buildConfig.buildCoverage);
+});
 
 module.exports = gulp;

@@ -17,7 +17,8 @@
     "homepage": "http://taco.tools",
     "main": "tacoUtils.js",
     "scripts": {
-        "test": "mocha"
+        "test": "mocha",
+        "coverage": "istanbul cover --report json node_modules\\mocha\\bin\\_mocha -- --reporter spec"
     },
     "dependencies": {
         "applicationinsights": "0.15.5",

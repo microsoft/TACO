@@ -32,48 +32,88 @@ interface IDynamicDependenicesJson {
 }
 
 class GulpUtils {
+    private static CoverageCommand: string = "coverage";
     private static TestCommand: string = "test";
 
-    public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
-
-                var modulePath = path.resolve(modulesRoot, val);
-                // check if package has any tests
-                var pkg = require(path.join(modulePath, "package.json"));
-                if (!pkg.scripts || !(GulpUtils.TestCommand in pkg.scripts)) {
-                    return Q({});
-                }
-
-                var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                var testProcess = child_process.spawn(npmCommand, [GulpUtils.TestCommand], { cwd: modulePath, stdio: "inherit" });
-                var deferred = Q.defer();
-                testProcess.on("close", function(code: number): void {
-                    if (code) {
-                        deferred.reject("Test failed for " + modulePath);
-                    } else {
-                        deferred.resolve({});
-                    }
+    public static generateReports(coverageResultsPaths: string[], coverageReportPath: string): Q.Promise<any> {
+        var coverageJsonsList: string[] = [];
+        return GulpUtils.chainAsync<string>(coverageResultsPaths, (coverageResultPath: string) => {
+            coverageResultPath = path.resolve(coverageResultPath);
+            return Q.denodeify(fs.readdir)(coverageResultPath)
+                .then(function(files: string[]): string[] {
+                    return files.filter(file => {
+                        return file.toLowerCase().indexOf("coverage-") === 0 && path.extname(file) === ".json";
+                    }).map(file => path.join(coverageResultPath, file));
                 });
-                return deferred.promise;
+        })
+        .then(function(coverageJsonsList: string[]): void {
+            // collect all generated coverage.json and use them to remap to typescript sources
+            var loadCoverage: any = require("remap-istanbul/lib/loadCoverage");
+            var remap: any = require("remap-istanbul/lib/remap");
+            var writeReport: any = require("remap-istanbul/lib/writeReport");
+
+            var coverage = loadCoverage(coverageJsonsList);
+            var collector = remap(coverage, { basePath: "./" });
+            return writeReport(collector, "html", coverageReportPath);
+        });
+    }
+
+    public static runCoverage(modulesToTest: string[], modulesRoot: string, coveragePath: string): Q.Promise<any> {
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.CoverageCommand)
+            .then(function(): Q.Promise<any> {
+                return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
+                    // We don't specify coverage output path in package.json for 2 reasons
+                    // 1. It is wierd that running "npm run-script coverage" generates the output 2 level up in coverage folder
+                    // 2. we need to duplicate the hardcoding in every package.json
+                    var coverageJsonSrc = path.resolve(modulesRoot, moduleName, "coverage", "coverage.json");
+                    if (!fs.existsSync(coverageJsonSrc)) {
+                        return Q({});
+                    }
+
+                    var coverageJsonDest = path.resolve(coveragePath, util.format("coverage-%s.json", moduleName));
+                    return GulpUtils.streamToPromise(fs.createReadStream(coverageJsonSrc).pipe(fs.createWriteStream(coverageJsonDest)));
+                });
             });
-        }, Q({}));
+    }
+
+    public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand);
+    }
+
+    private static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string): Q.Promise<any> {
+        return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
+
+            var modulePath = path.resolve(modulesRoot, moduleName);
+            // check if package has any tests
+            var pkg = require(path.join(modulePath, "package.json"));
+            if (!pkg.scripts || !(scriptName in pkg.scripts)) {
+                return Q({});
+            }
+
+            var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
+            var testProcess = child_process.spawn(npmCommand, ["run-script", scriptName], { cwd: modulePath, stdio: "inherit" });
+            var deferred = Q.defer();
+            testProcess.on("close", function(code: number): void {
+                if (code) {
+                    deferred.reject("Test failed for " + modulePath);
+                } else {
+                    deferred.resolve({});
+                }
+            });
+            return deferred.promise;
+        });
     }
 
     public static installModules(modulesToInstall: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToInstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
-                return GulpUtils.installModule(path.resolve(modulesRoot, val));
-            });
-        }, Q({}));
+        return GulpUtils.chainAsync<string>(modulesToInstall, moduleName => {
+            return GulpUtils.installModule(path.resolve(modulesRoot, moduleName));
+        });
     }
 
     public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
-        return modulesToUninstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
-                return GulpUtils.uninstallModule(val, installRoot);
-            });
-        }, Q({}));
+        return GulpUtils.chainAsync<string>(modulesToUninstall, moduleName => {
+                return GulpUtils.uninstallModule(moduleName, installRoot);
+        });
     }
 
     public static copyFiles(pathsToCopy: string[], destPath: string): Q.Promise<any> {
@@ -340,6 +380,13 @@ class GulpUtils {
         return <IPackageJson>JSON.parse(fs.readFileSync(jsonPath, ""));
     }
 
+    private static chainAsync<T>(values: T[], func: (value: T) => Q.Promise<any>): Q.Promise<any> {
+        return values.reduce(function(soFar: Q.Promise<any>, val: T): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
+                return func(val);
+            });
+        }, Q({}));
+    }
 }
 
 export = GulpUtils;
