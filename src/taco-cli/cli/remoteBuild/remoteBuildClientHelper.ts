@@ -267,7 +267,7 @@ class RemoteBuildClientHelper {
         var newChangeTime: { [file: string]: number } = {};
         var isIncremental: boolean = false;
         try {
-            var json: { [file: string]: number } = JSON.parse(<any> fs.readFileSync(changeTimeFile));
+            var json: { [file: string]: number } = JSON.parse(fs.readFileSync(changeTimeFile, "utf8"));
             Object.keys(json).forEach(function (file: string): void {
                 lastChangeTime[file] = json[file];
             });

@@ -124,7 +124,7 @@ module TacoUtility {
                 })
                 .then(function (): Q.Promise<string> {
                     var packageJsonFilePath = path.join(request.targetPath, "package.json");
-                    var packageJson = JSON.parse(<any> fs.readFileSync(packageJsonFilePath));
+                    var packageJson = JSON.parse(fs.readFileSync(packageJsonFilePath, "utf8"));
 
                     if (packageJson.bin && packageJson.bin[commandName]) {
                         var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
@@ -325,7 +325,7 @@ module TacoUtility {
         private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel: InstallLogLevel): IPackageInstallRequest {
             if (fs.existsSync(dependencyConfigPath)) {
                 try {
-                    var dependencyLookup: any = JSON.parse(<any> fs.readFileSync(dependencyConfigPath));
+                    var dependencyLookup: any = JSON.parse(fs.readFileSync(dependencyConfigPath, "utf8"));
                     var packageEntry: IDynamicDependencyEntry = dependencyLookup[packageKey];
                     if (packageEntry) {
                         // if a local path is specified use that otherwise fallback to packageName@packageVersion
