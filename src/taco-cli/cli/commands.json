@@ -392,6 +392,14 @@
             {
                 "name": "--device", "description": "[CommandRunDeviceDescription]"
             }
+	    ,
+            {
+                "name": "--livereload", "description": "[CommandRunLiveReloadDescription]"
+            }
+	    ,
+            {
+                "name": "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+            }
             ,
             {
                 "name": "--emulator", "description": "[CommandRunEmulatorDescription]"
@@ -436,6 +444,14 @@
             ,
             {
                 "name": "--release", "description": "[CommandRunReleaseDescription]"
+            }
+ ,
+            {
+                "name": "--livereload", "description": "[CommandRunLiveReloadDescription]"
+            }
+	    ,
+            {
+                "name": "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
             }
             ,
             {
