@@ -32,55 +32,13 @@ interface IDynamicDependenicesJson {
 }
 
 class GulpUtils {
-    private static CoverageCommand: string = "coverage";
     private static TestCommand: string = "test";
-
-    public static generateReports(coverageResultsPaths: string[], coverageReportPath: string): Q.Promise<any> {
-        var coverageJsonsList: string[] = [];
-        return GulpUtils.chainAsync<string>(coverageResultsPaths, (coverageResultPath: string) => {
-            coverageResultPath = path.resolve(coverageResultPath);
-            return Q.denodeify(fs.readdir)(coverageResultPath)
-                .then(function(files: string[]): string[] {
-                    return files.filter(file => {
-                        return file.toLowerCase().indexOf("coverage-") === 0 && path.extname(file) === ".json";
-                    }).map(file => path.join(coverageResultPath, file));
-                });
-        })
-        .then(function(coverageJsonsList: string[]): void {
-            // collect all generated coverage.json and use them to remap to typescript sources
-            var loadCoverage: any = require("remap-istanbul/lib/loadCoverage");
-            var remap: any = require("remap-istanbul/lib/remap");
-            var writeReport: any = require("remap-istanbul/lib/writeReport");
-
-            var coverage = loadCoverage(coverageJsonsList);
-            var collector = remap(coverage, { basePath: "./" });
-            return writeReport(collector, "html", coverageReportPath);
-        });
-    }
-
-    public static runCoverage(modulesToTest: string[], modulesRoot: string, coveragePath: string): Q.Promise<any> {
-        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.CoverageCommand)
-            .then(function(): Q.Promise<any> {
-                return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
-                    // We don't specify coverage output path in package.json for 2 reasons
-                    // 1. It is wierd that running "npm run-script coverage" generates the output 2 level up in coverage folder
-                    // 2. we need to duplicate the hardcoding in every package.json
-                    var coverageJsonSrc = path.resolve(modulesRoot, moduleName, "coverage", "coverage.json");
-                    if (!fs.existsSync(coverageJsonSrc)) {
-                        return Q({});
-                    }
-
-                    var coverageJsonDest = path.resolve(coveragePath, util.format("coverage-%s.json", moduleName));
-                    return GulpUtils.streamToPromise(fs.createReadStream(coverageJsonSrc).pipe(fs.createWriteStream(coverageJsonDest)));
-                });
-            });
-    }
 
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
         return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand);
     }
 
-    private static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string): Q.Promise<any> {
+    public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string): Q.Promise<any> {
         return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
 
             var modulePath = path.resolve(modulesRoot, moduleName);
@@ -112,7 +70,7 @@ class GulpUtils {
 
     public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
         return GulpUtils.chainAsync<string>(modulesToUninstall, moduleName => {
-                return GulpUtils.uninstallModule(moduleName, installRoot);
+            return GulpUtils.uninstallModule(moduleName, installRoot);
         });
     }
 
@@ -200,6 +158,14 @@ class GulpUtils {
         return deferred.promise;
     }
 
+    public static chainAsync<T>(values: T[], func: (value: T) => Q.Promise<any>): Q.Promise<any> {
+        return values.reduce(function(soFar: Q.Promise<any>, val: T): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
+                return func(val);
+            });
+        }, Q({}));
+    }
+
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
@@ -227,7 +193,7 @@ class GulpUtils {
         });
     }
 
-    private static mkdirp(dir: string): void {
+    public static mkdirp(dir: string): void {
         var folders = dir.split(path.sep);
         var start = folders.shift();
         folders.reduce(function(soFar: string, currentFolder: string): string {
@@ -379,14 +345,5 @@ class GulpUtils {
         var jsonPath = path.resolve(srcPath, packageName, "package.json");
         return <IPackageJson>JSON.parse(fs.readFileSync(jsonPath, ""));
     }
-
-    private static chainAsync<T>(values: T[], func: (value: T) => Q.Promise<any>): Q.Promise<any> {
-        return values.reduce(function(soFar: Q.Promise<any>, val: T): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
-                return func(val);
-            });
-        }, Q({}));
-    }
 }
-
 export = GulpUtils;

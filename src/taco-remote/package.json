@@ -35,13 +35,14 @@
     "devDependencies": {
         "typescript": "~1.6.2",
         "mocha": "2.0.1",
+        "istanbul": "^0.4.0",
         "should": "4.3.0",
         "morgan": "1.5.1",
         "nconf": "0.6.9"
     },
     "scripts": {
         "test": "mocha",
-        "coverage": "istanbul cover --report json node_modules\\mocha\\bin\\_mocha -- --reporter spec"
+        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "directories": {
         "lib": "lib",

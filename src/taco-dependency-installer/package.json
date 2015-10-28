@@ -18,7 +18,7 @@
   "main": "dependencyInstaller.js",
   "scripts": {
     "test": "mocha",
-    "coverage": "istanbul cover --report json node_modules\\mocha\\bin\\_mocha -- --reporter spec"
+    "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
   },
   "dependencies": {
     "adm-zip": "0.4.4",
@@ -32,6 +32,7 @@
   "devDependencies": {
     "lodash": "~3.10.1",
     "mocha": "2.0.1",
+    "istanbul": "^0.4.0",
     "rimraf": "2.2.6",
     "should": "4.3.0",
     "taco-tests-utils": "file:../taco-tests-utils",

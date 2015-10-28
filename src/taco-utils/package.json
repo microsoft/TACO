@@ -18,7 +18,7 @@
     "main": "tacoUtils.js",
     "scripts": {
         "test": "mocha",
-        "coverage": "istanbul cover --report json node_modules\\mocha\\bin\\_mocha -- --reporter spec"
+        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "dependencies": {
         "applicationinsights": "0.15.5",
@@ -38,6 +38,7 @@
     "devDependencies": {
         "typescript": "~1.6.2",
         "mocha": "2.0.1",
+        "istanbul": "^0.4.0",
         "should": "4.3.0"
     },
     "license": "MIT"

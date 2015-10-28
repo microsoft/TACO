@@ -17,6 +17,7 @@ import path = require ("path");
 import Q = require ("q");
 
 import gulpUtils = require ("../tools/GulpUtils");
+import GulpCoverageUtils = require ("../tools/GulpCoverageUtils");
 
 /* tslint:disable:no-console */
 // Disable console rule for gulp file, since this is a build file
@@ -31,7 +32,7 @@ var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
 
 // honour --moduleFilter flag.
 // gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
-var options: any = nopt({ moduleFilter: String, drop: String }, {}, process.argv);
+var options: any = nopt({ moduleFilter: String, drop: String, coverageFiles: String }, {}, process.argv);
 if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
     tacoModules = [options.moduleFilter];
 }
@@ -132,17 +133,9 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
 });
 /* tslint:enable:no-console */
 
-/* Task to run tests */
-gulp.task("coverage-js", ["install-build"], function(): Q.Promise<any> {
-    return gulpUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage);
-});
-
-gulp.task("coverage", ["coverage-js"], function(): Q.Promise<any> {
-    var coverageResults: string[] = [buildConfig.buildCoverage];
-    if (options.coverageFiles) {
-        coverageResults.push(options.coverageFiles);
-    }
-    return gulpUtils.generateReports(coverageResults, buildConfig.buildCoverage);
+/* Task to coverage tests */
+gulp.task("coverage", ["install-build"], function(): Q.Promise<any> {
+    return GulpCoverageUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage, options.coverageFiles);
 });
 
 module.exports = gulp;
