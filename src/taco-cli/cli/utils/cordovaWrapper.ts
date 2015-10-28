@@ -172,10 +172,22 @@ class CordovaWrapper {
         });
     }
 
-    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
-        return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
-        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
+    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise <any> {
+	return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+            // First install the plugin if it's not yet installed on this project
+            return cordova.raw.plugin('ls', null, null).then(function(pluginList: string[]): Q.Promise <any> {
+		var livereloadPlugin: string = "cordova-plugin-livereload";
+		var livereloadPluginGithubURL: string = "https://github.com/omefire/cordova-plugin-livereload.git";
+		if (pluginList.indexOf(livereloadPlugin) > -1) {
+                    return Q.resolve({});
+		}
+		return cordova.raw.plugin('add', livereloadPluginGithubURL);
+            }).then(function(): Q.Promise <any> {
+		return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+	    });
+	}, () => {
+	    return ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))
+	});
     }
 
     /**

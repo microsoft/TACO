@@ -364,6 +364,21 @@ class CordovaHelper {
             downstreamArgs.push("--archs=" + commandData.options["archs"]);
         }
 
+	// ToDO:  what if devicesync? commandData.options["devicesync"]
+	// what if user typed: taco run ios --livereload -- --justlaunch ? => cordova run ios -- --livereload --justlaunch
+	// what if user typed: taco run ios --livereload ? => cordova run ios -- --livereload
+	// what if user typed: taco run ios -- ?
+	// ToDO: After processing its args, the livereload plugin should delete the --livereload options (livereload, ignore, tunnel) ?
+	if (commandData.options["livereload"]) {
+	    var livereloadIndex: number = commandData.original.indexOf("--livereload");
+	    var doubleDashIndex: number = commandData.original.indexOf("--");
+	    if (doubleDashIndex >= 0) {
+	        commandData.original.splice(doubleDashIndex + 1, 0, "--livereload");
+	    } else {
+	        commandData.original.splice(livereloadIndex, 0, "--");
+	    }
+	}
+
         // Include all arguments after, but not including, a lone "--"
         var additionalArguments: string[] = commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : [];
         opts.options = downstreamArgs.concat(additionalArguments);
