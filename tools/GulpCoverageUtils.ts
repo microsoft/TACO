@@ -11,14 +11,15 @@ import GulpUtils = require ("../tools/GulpUtils");
 class GulpCoverageUtils {
     // this is our default report type
     // Valid values are: clover, cobertura, html, json-summary, json, file, lcovonly, teamcity, text-lcov, text-summary or text
-    private static CoverageReportType: string = "html";
-    private static CoverageCommand: string = "coverage";
+    private static COVERAGE_REPORT_TYPE: string = "html";
+    private static COVERAGE_COMMAND: string = "coverage";
+    private static SECONDARY_COVERAGE_DIR: string = "secondary";
 
     public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageOutputDir: string, otherCoverageDir: string): Q.Promise<any> {
         coverageOutputDir = path.resolve(coverageOutputDir);
         modulesRoot = path.resolve(modulesRoot);
 
-        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpCoverageUtils.CoverageCommand)
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpCoverageUtils.COVERAGE_COMMAND)
             .then(function(): Q.Promise<any> {
                 return Q.all<any>(modulesToTest.map(moduleName => {
                     // this post coverage copy back is needed more for the scenario to support
@@ -32,6 +33,8 @@ class GulpCoverageUtils {
                     coverageResults.push(otherCoverageDir);
                 }
                 return GulpCoverageUtils.mergeAndGenerateReports(coverageResults, coverageOutputDir, modulesRoot);
+            }).then(function(): Q.Promise<any> {
+                return GulpUtils.deleteDirectoryRecursive(path.resolve(coverageOutputDir, GulpCoverageUtils.SECONDARY_COVERAGE_DIR));
             });
     }
 
@@ -48,7 +51,7 @@ class GulpCoverageUtils {
 
                 var coverage = loadCoverage(coverageJsonsList);
                 var collector = remap(coverage, { basePath: "./" });
-                return writeReport(collector, GulpCoverageUtils.CoverageReportType, coverageOutputDir);
+                return writeReport(collector, GulpCoverageUtils.COVERAGE_REPORT_TYPE, coverageOutputDir);
             });
     }
 
@@ -62,18 +65,15 @@ class GulpCoverageUtils {
                         return file.toLowerCase().indexOf("coverage-") === 0 && path.extname(file) === ".json";
                     }).map(file => path.join(coverageResultsPath, file));
                 });
-        })).spread(function(...args: string[][]): string[] {
-            return args.reduce((coverageFilesList: string[], coverageFiles: string[]) => {
-                return coverageFilesList.concat(coverageFiles);
+        })).then(function(coverageFiles: string[][]): string[] {
+            return coverageFiles.reduce((coverageFilesList: string[], files: string[]) => {
+                return coverageFilesList.concat(files);
             });
-
         });
     }
 
     private static normalizeCoveragePaths(coverageJsonsList: string[], coverageOutputDir: string, modulesRoot: string): Q.Promise<string[]> {
         var index: number = 0;
-        // put all extra coverage files in a random location under coverage
-        var randomDir: string = Math.floor(Math.random() * 10000) + 1000 + "";
         return Q.all<string>(coverageJsonsList.map(coverageJsonPath => {
 
             // ignore if this coverage report belongs to current repository
@@ -82,8 +82,8 @@ class GulpCoverageUtils {
             }
 
             var remappedJson: any = GulpCoverageUtils.normalizePathsInCoverageJson(coverageJsonPath, modulesRoot);
-            GulpUtils.mkdirp(path.resolve(coverageOutputDir, randomDir));
-            var destPath = path.resolve(coverageOutputDir, randomDir, util.format("coverage%d.json", index++));
+            GulpUtils.mkdirp(path.resolve(coverageOutputDir, GulpCoverageUtils.SECONDARY_COVERAGE_DIR));
+            var destPath = path.resolve(coverageOutputDir, GulpCoverageUtils.SECONDARY_COVERAGE_DIR, util.format("coverage%d.json", index++));
             return Q.denodeify(fs.writeFile)(destPath, JSON.stringify(remappedJson))
                 .then(() => Q.resolve(destPath));
         }));
