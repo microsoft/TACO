@@ -7,14 +7,14 @@
             "deprecated": true,
             "deprecatedReasonUri": "http://cordova.apache.org/blog/2014102310023",
             "plugins": {
-               "cordova-plugin-camera": {
-                "version": "1.0.1",
-                "supported-platforms": "ios, android, wp8"
-            },
-            "cordova-plugin-media-capture": {
-                "version": "1.0.1",
-                "supported-platforms": "ios, android, windows, windows8"
-            }
+                "cordova-plugin-camera": {
+                    "version": "1.0.1",
+                    "supported-platforms": "ios, android, wp8"
+                },
+                "cordova-plugin-media-capture": {
+                    "version": "1.0.1",
+                    "supported-platforms": "ios, android, windows, windows8"
+                }
             }
         },
         "4.3.1-Kit": {

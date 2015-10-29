@@ -236,7 +236,9 @@ class RemoteBuildClientHelper {
      * Convert errors from error codes to localizable strings
      */
     private static errorFromRemoteBuildServer(serverUrl: string, requestError: any, fallbackErrorCode: TacoErrorCodes): Error {
-        if (requestError.code.indexOf("CERT_") !== -1) {
+        if (!requestError.code) {
+            return errorHelper.wrap(fallbackErrorCode, <Error> requestError, serverUrl);
+        } else if (requestError.code.indexOf("CERT_") !== -1) {
             return errorHelper.get(TacoErrorCodes.InvalidRemoteBuildClientCert);
         } else if (serverUrl.indexOf("https://") === 0 && requestError.code === "ECONNRESET") {
             return errorHelper.get(TacoErrorCodes.RemoteBuildSslConnectionReset, serverUrl);

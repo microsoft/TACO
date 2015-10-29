@@ -19,6 +19,10 @@ declare module TacoUtility {
         [propertyName: string]: ITelemetryPropertyInfo;
     }
 
+    interface IExternalTelemetryProvider {
+        sendTelemetry: (event: string, props: Telemetry.ITelemetryProperties, error?: Error) => void;
+    }
+
     class TelemetryGeneratorBase {
         public constructor(componentName: string);
         public time<T>(name: string, codeToMeasure: { (): Q.Promise<T> }): Q.Promise<T>;
@@ -40,8 +44,8 @@ declare module TacoUtility {
         static telemetryProperty(propertyValue: any, isPii?: boolean): ITelemetryPropertyInfo;
         public static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
             commandOptions: { [flag: string]: any }, nonPiiOptions?: string[]): ICommandTelemetryProperties;
-        static sendCommandSuccessTelemetry(commandName: string, commandProperties: ICommandTelemetryProperties, args: string[]): void;
-        static sendCommandFailureTelemetry(commandName: string, error: any, properties: ICommandTelemetryProperties, args: string[]): void;
+        static sendCommandSuccessTelemetry(commandName: string, commandProperties: ICommandTelemetryProperties, args?: string[]): void;
+        static sendCommandFailureTelemetry(commandName: string, error: any, properties: ICommandTelemetryProperties, args?: string[]): void;
         static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void;
         static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void;
         static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo;
@@ -49,5 +53,6 @@ declare module TacoUtility {
              commandOptions: { [flag: string]: any }, nonPiiOptions?: string[]): ICommandTelemetryProperties;
         static addObjectToTelemetry(telemetryProperties: ICommandTelemetryProperties, baseName: string, value: any, isPii: boolean): void;
         static generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TelemetryGeneratorBase): T }): T;
+        static getExternalTelemetryObject(componentName: string, baseProps: TacoUtility.Telemetry.ITelemetryProperties, errorHandler?: (error: Error) => TacoError): IExternalTelemetryProvider;
     }
 }

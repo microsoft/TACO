@@ -40,9 +40,12 @@ import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
 import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
+import tacoTestUtils = require ("taco-tests-utils");
+
 import TemplateManager = require ("../cli/utils/templateManager");
 import ms = require ("./utils/memoryStream");
 
+import IKeyValuePair = tacoTestUtils.IKeyValuePair;
 import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
@@ -52,10 +55,6 @@ import ICommand = tacoUtils.Commands.ICommand;
 
 interface IScenarioList {
     [scenario: number]: string;
-}
-
-interface IKeyValuePair<T> {
-    [key: string]: T;
 }
 
 describe("taco create", function (): void {
@@ -504,7 +503,6 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath("onboarding-experience", 1);
 
             var firstPart: string[] = [
-                "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
@@ -539,7 +537,6 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath("onboarding-experience", 2);
 
             var firstPart: string[] = [
-                "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
@@ -575,7 +572,6 @@ describe("taco create", function (): void {
             var projectPath: string = getProjectPath("onboarding-experience", 3);
 
             var firstPart: string[] = [
-                "CommandCreateStatusCreatingNewProject",
                 "      ----------",
                 "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                 "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",
@@ -610,7 +606,6 @@ describe("taco create", function (): void {
             this.timeout(60000); // installing the node packages during create can take a long time
             kitHelper.getDefaultKit().done((defaultKitId: string) => {
                 var firstPart: string[] = [
-                    "CommandCreateStatusCreatingNewProject",
                     "      ----------",
                     "      CommandCreateStatusTableNameDescription ..... HelloTaco",
                     "      CommandCreateStatusTableIDDescription ..... io.taco.hellotaco",

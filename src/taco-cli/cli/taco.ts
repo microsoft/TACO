@@ -56,7 +56,12 @@ class Taco {
      */
     public static run(): void {
         Settings.loadSettings().fail(function (err: any): Q.Promise<Settings.ISettings> {
-            require("./logo"); // Prints the logo as a side effect of requiring it. Require caching will make sure we don't execute it twice in the one session.
+            // This is the first time TACO is invoked, so print the logo. Logo gets printed as a side effect of the require. Require caching will make sure we don't execute it twice in the one session.
+            require("./logo");
+
+            // Print the third-party disclaimer, and save the global setting for this session to prevent printing the disclaimer again
+            logger.log(resources.getString("ThirdPartyDisclaimer"));
+
             return Settings.saveSettings({});
         }).then(function (settings: Settings.ISettings): void {
             telemetry.init("TACO", require("../package.json").version);
