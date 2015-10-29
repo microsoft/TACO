@@ -193,10 +193,10 @@ class CordovaWrapper {
         }
 
         return projectHelper.getInstalledComponents(projectHelper.getProjectRoot(), "plugins").then((pluginList) => {
-            return pluginList.indexOf(DEVICESYNC_PLUGIN_NAME) > -1;
+            return pluginList.indexOf(CordovaWrapper.DEVICESYNC_PLUGIN_NAME) > -1;
         }).then((isPluginInstalled) => {
             if (!isPluginInstalled) {
-                return cordova.raw.plugin("add", DEVICESYNC_PLUGIN_GITHUB_URL); // what if there's an error here?
+                return cordova.raw.plugin("add", CordovaWrapper.DEVICESYNC_PLUGIN_GITHUB_URL); // what if there's an error here?
             }
             return Q.resolve({});
         });
