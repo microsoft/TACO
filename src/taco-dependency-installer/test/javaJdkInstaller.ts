@@ -79,7 +79,7 @@ describe("JavaJdkInstaller telemetry", () => {
         var tacoTestsUtilsWithMocks: typeof tacoTestsUtils = require("taco-tests-utils");
 
         fakeTelemetryHelper = new tacoTestsUtilsWithMocks.TelemetryFakes.Helper();
-        tacoUtilsWithFakes = <typeof TacoUtility>_.extend({}, tacoUtilsWithFakes,
+        tacoUtilsWithFakes = <typeof TacoUtility> _.extend({}, tacoUtilsWithFakes,
             { TelemetryHelper: fakeTelemetryHelper, HasFakes: true }, fakeProcessUtilsModule);
         mockery.registerMock("taco-utils", tacoUtilsWithFakes); // javaJdkInstaller loads taco-utils
 
@@ -133,39 +133,6 @@ describe("JavaJdkInstaller telemetry", () => {
             childProcessExecBehavior = null;
         });
 
-        it("generates telemetry error when attaching the dmg file gives an error", (done: MochaDone) => {
-            // child_process.exec call will fail for attach dmg, but succeed for detach dmg
-            var timesCalled = 0;
-            childProcessModule.exec = (command: string, optionsOrCallback: nodeFakes.ExecSecondArgument,
-                callback: nodeFakes.Callback = null): nodeFakes.IChildProcess => {
-                var realCallback = <nodeFakes.Callback> (callback || optionsOrCallback);
-                if (timesCalled++ === 0) {
-                    // This is for the attach call
-                    realCallback(new Error("Couldn't attach dmg file"), /*stdout*/ new Buffer("/Volumes/Macintosh HD"), /*stderr*/ new Buffer(""));
-                } else {
-                    // This is for the detach call
-                    realCallback(null, /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
-                }
-                return new nodeFakes.ChildProcess();
-            };
-
-            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
-                {
-                    "initialStep.time": { isPii: false, value: "2000" },
-                    step: { isPii: false, value: "initialStep" }
-                },
-                {
-                    "error.description": { isPii: false, value: "ErrorOnChildProcess on attachDmg" },
-                    "install.time": { isPii: false, value: "2000" },
-                    lastStepExecuted: { isPii: false, value: "install" },
-                    step: { isPii: false, value: "install" },
-                    time: { isPii: false, value: "3000" }
-                }
-            ];
-
-            return telemetryGeneratedShouldBe(expectedTelemetry, /Couldn\'t attach dmg file/, done);
-        });
-
         function fakeExecToTestPackageInstallerFailure(command: string, optionsOrCallback: nodeFakes.ExecSecondArgument,
             callback: nodeFakes.Callback = null): nodeFakes.IChildProcess {
             var realCallback = <nodeFakes.Callback> (callback || optionsOrCallback);
@@ -198,6 +165,39 @@ describe("JavaJdkInstaller telemetry", () => {
             callTime++;
             return new nodeFakes.ChildProcess();
         }
+
+        it("generates telemetry error when attaching the dmg file gives an error", (done: MochaDone) => {
+            // child_process.exec call will fail for attach dmg, but succeed for detach dmg
+            var timesCalled = 0;
+            childProcessModule.exec = (command: string, optionsOrCallback: nodeFakes.ExecSecondArgument,
+                callback: nodeFakes.Callback = null): nodeFakes.IChildProcess => {
+                var realCallback = <nodeFakes.Callback> (callback || optionsOrCallback);
+                if (timesCalled++ === 0) {
+                    // This is for the attach call
+                    realCallback(new Error("Couldn't attach dmg file"), /*stdout*/ new Buffer("/Volumes/Macintosh HD"), /*stderr*/ new Buffer(""));
+                } else {
+                    // This is for the detach call
+                    realCallback(null, /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
+                }
+                return new nodeFakes.ChildProcess();
+            };
+
+            var expectedTelemetry: TacoUtility.ICommandTelemetryProperties[] = [
+                {
+                    "initialStep.time": { isPii: false, value: "2000" },
+                    step: { isPii: false, value: "initialStep" }
+                },
+                {
+                    "error.description": { isPii: false, value: "ErrorOnChildProcess on attachDmg" },
+                    "install.time": { isPii: false, value: "2000" },
+                    lastStepExecuted: { isPii: false, value: "install" },
+                    step: { isPii: false, value: "install" },
+                    time: { isPii: false, value: "3000" }
+                }
+            ];
+
+            return telemetryGeneratedShouldBe(expectedTelemetry, /Couldn\'t attach dmg file/, done);
+        });
 
         it("generates telemetry error when the package installer gives an error", (done: MochaDone) => {
             // child_process.exec call will only fail for the install packages call
