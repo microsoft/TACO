@@ -65,9 +65,10 @@ describe("JavaJdkInstaller telemetry", () => {
         fakeProcess = new nodeFakes.Process().fakeDeterministicHrtime();
 
         var fakeProcessUtilsModule = { ProcessUtils: fakeProcess.buildProcessUtils() };
-        mockery.registerMock("./processUtils", fakeProcessUtilsModule); // TelemetryHelper loads ./processUtils
+        mockery.registerMock("./processUtils", fakeProcessUtilsModule); // TelemetryHelper and Resources loads ./processUtils
+        var tacoUtilsWithFakes: typeof TacoUtility = require("taco-utils"); // Reload taco utils with mocks
 
-        tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
+        tacoUtilsWithFakes.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
 
         // Register mocks. child_process and taco-utils mocks needs to be registered before 
         // javaJdkInstaller is required for the mocking to work
@@ -78,7 +79,8 @@ describe("JavaJdkInstaller telemetry", () => {
         var tacoTestsUtilsWithMocks: typeof tacoTestsUtils = require("taco-tests-utils");
 
         fakeTelemetryHelper = new tacoTestsUtilsWithMocks.TelemetryFakes.Helper();
-        var tacoUtilsWithFakes = _.extend({}, tacoUtils, { TelemetryHelper: fakeTelemetryHelper, HasFakes: true }, fakeProcessUtilsModule);
+        tacoUtilsWithFakes = <typeof TacoUtility>_.extend({}, tacoUtilsWithFakes,
+            { TelemetryHelper: fakeTelemetryHelper, HasFakes: true }, fakeProcessUtilsModule);
         mockery.registerMock("taco-utils", tacoUtilsWithFakes); // javaJdkInstaller loads taco-utils
 
         // We require the javaJdkInstaller file, which will use all the mocked dependencies
@@ -218,7 +220,7 @@ describe("JavaJdkInstaller telemetry", () => {
                 }
             ];
 
-            return telemetryGeneratedShouldBe(expectedTelemetry, /didn\'t exit cleanly/, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /InstallerError/, done);
         });
 
         it("generates telemetry error when the package installer can't be run", (done: MochaDone) => {
@@ -241,7 +243,7 @@ describe("JavaJdkInstaller telemetry", () => {
                 }
             ];
 
-            return telemetryGeneratedShouldBe(expectedTelemetry, /didn\'t exit cleanly/, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /CouldNotRunInstaller/, done);
         });
 
         it("generates telemetry error when the detach dmg command fails", (done: MochaDone) => {
@@ -293,7 +295,7 @@ describe("JavaJdkInstaller telemetry", () => {
                 }
             ];
 
-            return telemetryGeneratedShouldBe(expectedTelemetry, /An installation destination is needed for this dependency/, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /NeedInstallDestination/, done);
         });
 
         it("generates telemetry if the installer ends with an error", (done: MochaDone) => {
@@ -319,7 +321,7 @@ describe("JavaJdkInstaller telemetry", () => {
                 }
             ];
 
-            return telemetryGeneratedShouldBe(expectedTelemetry, /didn\'t exit cleanly/, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /InstallerError/, done);
         });
 
         it("generates telemetry if the installer can't be run", (done: MochaDone) => {
@@ -341,7 +343,7 @@ describe("JavaJdkInstaller telemetry", () => {
                 }
             ];
 
-            return telemetryGeneratedShouldBe(expectedTelemetry, /didn\'t exit cleanly/, done);
+            return telemetryGeneratedShouldBe(expectedTelemetry, /CouldNotRunInstaller/, done);
         });
     });
 });
