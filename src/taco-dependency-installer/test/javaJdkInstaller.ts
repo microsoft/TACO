@@ -128,6 +128,7 @@ describe("JavaJdkInstaller telemetry", () => {
             fakeProcess.fakeMacOS();
             steps.install = true; // We only test this step on this test
             callTime = 0;
+            childProcessExecBehavior = null;
         });
 
         it("generates telemetry error when attaching the dmg file gives an error", (done: MochaDone) => {
@@ -181,6 +182,8 @@ describe("JavaJdkInstaller telemetry", () => {
                     case ChildProcessExecBehavior.DetachingDmgFileFailsScenario:
                         couldntRunPackageInstallerError = null;
                         break;
+                    default:
+                        throw new Error("Unexpected value. The test probably forgot to set the childProcessExecBehavior variable");
                 }
                 realCallback(couldntRunPackageInstallerError, /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
             } else {
