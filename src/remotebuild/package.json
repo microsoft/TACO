@@ -42,12 +42,14 @@
     "devDependencies": {
         "typescript": "~1.6.2",
         "mocha": "2.0.1",
+        "istanbul": "^0.4.0",
         "mkdirp": "0.3.5",
         "should": "4.3.0",
         "request": "2.36.0"
     },
     "scripts": {
-        "test": "mocha"
+        "test": "mocha",
+        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "directories": {
         "lib": "lib",

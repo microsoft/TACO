@@ -35,45 +35,43 @@ class GulpUtils {
     private static TestCommand: string = "test";
 
     public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToTest.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand);
+    }
 
-                var modulePath = path.resolve(modulesRoot, val);
-                // check if package has any tests
-                var pkg = require(path.join(modulePath, "package.json"));
-                if (!pkg.scripts || !(GulpUtils.TestCommand in pkg.scripts)) {
-                    return Q({});
+    public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string): Q.Promise<any> {
+        return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
+
+            var modulePath = path.resolve(modulesRoot, moduleName);
+            // check if package has any tests
+            var pkg = require(path.join(modulePath, "package.json"));
+            if (!pkg.scripts || !(scriptName in pkg.scripts)) {
+                return Q({});
+            }
+
+            var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
+            var testProcess = child_process.spawn(npmCommand, ["run-script", scriptName], { cwd: modulePath, stdio: "inherit" });
+            var deferred = Q.defer();
+            testProcess.on("close", function(code: number): void {
+                if (code) {
+                    deferred.reject("Test failed for " + modulePath);
+                } else {
+                    deferred.resolve({});
                 }
-
-                var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-                var testProcess = child_process.spawn(npmCommand, [GulpUtils.TestCommand], { cwd: modulePath, stdio: "inherit" });
-                var deferred = Q.defer();
-                testProcess.on("close", function(code: number): void {
-                    if (code) {
-                        deferred.reject("Test failed for " + modulePath);
-                    } else {
-                        deferred.resolve({});
-                    }
-                });
-                return deferred.promise;
             });
-        }, Q({}));
+            return deferred.promise;
+        });
     }
 
     public static installModules(modulesToInstall: string[], modulesRoot: string): Q.Promise<any> {
-        return modulesToInstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
-                return GulpUtils.installModule(path.resolve(modulesRoot, val));
-            });
-        }, Q({}));
+        return GulpUtils.chainAsync<string>(modulesToInstall, moduleName => {
+            return GulpUtils.installModule(path.resolve(modulesRoot, moduleName));
+        });
     }
 
     public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
-        return modulesToUninstall.reduce(function(soFar: Q.Promise<any>, val: string): Q.Promise<any> {
-            return soFar.then(function(): Q.Promise<any> {
-                return GulpUtils.uninstallModule(val, installRoot);
-            });
-        }, Q({}));
+        return GulpUtils.chainAsync<string>(modulesToUninstall, moduleName => {
+            return GulpUtils.uninstallModule(moduleName, installRoot);
+        });
     }
 
     public static copyFiles(pathsToCopy: string[], destPath: string): Q.Promise<any> {
@@ -160,6 +158,14 @@ class GulpUtils {
         return deferred.promise;
     }
 
+    public static chainAsync<T>(values: T[], func: (value: T) => Q.Promise<any>): Q.Promise<any> {
+        return values.reduce(function(soFar: Q.Promise<any>, val: T): Q.Promise<any> {
+            return soFar.then(function(): Q.Promise<any> {
+                return func(val);
+            });
+        }, Q({}));
+    }
+
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
@@ -187,7 +193,7 @@ class GulpUtils {
         });
     }
 
-    private static mkdirp(dir: string): void {
+    public static mkdirp(dir: string): void {
         var folders = dir.split(path.sep);
         var start = folders.shift();
         folders.reduce(function(soFar: string, currentFolder: string): string {
@@ -339,7 +345,5 @@ class GulpUtils {
         var jsonPath = path.resolve(srcPath, packageName, "package.json");
         return <IPackageJson>JSON.parse(fs.readFileSync(jsonPath, ""));
     }
-
 }
-
 export = GulpUtils;
