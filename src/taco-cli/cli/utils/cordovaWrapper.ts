@@ -35,6 +35,8 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 class CordovaWrapper {
     private static cordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
+    private static DEVICESYNC_PLUGIN_NAME: string = "cordova-plugin-livereload";
+    private static DEVICESYNC_PLUGIN_GITHUB_URL: string = "https://github.com/omefire/cordova-plugin-livereload.git";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
         var deferred = Q.defer<string>();
@@ -170,24 +172,36 @@ class CordovaWrapper {
         });
     }
 
-    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise <any> {
+    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
+	// ToDO: check whether plugin is installed when doing it via a cordova process
+	// Test: taco run android --livereload with plugin already installed (done)
+	// Test: taco run android --livereload with plugin NOT yet installed (done)
+	// Test: taco run android [remote] => no plugin install
+	// Test: taco run android [local] => no plugin install
 	return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            // First install the plugin if it's not yet installed on this project
-            return cordova.raw.plugin('ls', null, null).then(function(pluginList: string[]): Q.Promise <any> {
-		var livereloadPlugin: string = "cordova-plugin-livereload";
-		var livereloadPluginGithubURL: string = "https://github.com/omefire/cordova-plugin-livereload.git";
-		if (pluginList.indexOf(livereloadPlugin) > -1) {
-                    return Q.resolve({});
-		}
-		return cordova.raw.plugin('add', livereloadPluginGithubURL);
-            }).then(function(): Q.Promise <any> {
+	    return CordovaWrapper.installDeviceSyncPluginIfNecessary(cordova, commandData).then(function(): Q.Promise<any> {
 		return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
 	    });
-	}, () => {
-	    return ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))
-	});
+	}, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
+    private static installDeviceSyncPluginIfNecessary(cordova: Cordova.ICordova, commandData: commands.ICommandData): Q.Promise < any > {
+        var isDeviceSync: boolean = !!commandData.options["livereload"] || !!commandData.options["devicesync"];
+
+        if (!isDeviceSync) {
+            return Q.resolve({});
+        }
+
+        return projectHelper.getInstalledComponents(projectHelper.getProjectRoot(), "plugins").then((pluginList) => {
+            return pluginList.indexOf(DEVICESYNC_PLUGIN_NAME) > -1;
+        }).then((isPluginInstalled) => {
+            if (!isPluginInstalled) {
+                return cordova.raw.plugin("add", DEVICESYNC_PLUGIN_GITHUB_URL); // what if there's an error here?
+            }
+            return Q.resolve({});
+        });
+    }
+    
     /**
      * Perform an operation using either the Cordova API, or spwaning a Cordova process.
      * The first argument is a function which is given a Cordova object, and can operate on it as it wishes.
