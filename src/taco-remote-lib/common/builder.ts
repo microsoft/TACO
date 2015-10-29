@@ -169,7 +169,7 @@ class Builder {
         var fetchJsonPath: string = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
-                fetchJson = JSON.parse(<any> fs.readFileSync(fetchJsonPath));
+                fetchJson = JSON.parse(fs.readFileSync(fetchJsonPath, "utf8"));
             } catch (e) {
                 // fetch.json is malformed; act as though no plugins are installed
                 // If it turns out we do need variables from the fetch.json, then cordova will throw an error

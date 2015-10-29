@@ -68,6 +68,8 @@
     "_UnsupportedPlatform.comment": "Message reported to the client when a request for an unsupported platform is made",
     "NoCordovaVersionSpecified": "No Cordova version specified!",
     "_NoCordovaVersionSpecified.comment": "Error reported when trying to build without any version specified",
+    "UnsupportedCordovaAndNodeVersion": "Incompatible configuration: Unable to build using Cordova < 5.3.3 and Node >= 4.0.0, with deployment-target or target-device specified in the config.xml",
+    "_UnsupportedCordovaAndNodeVersion.comment": "Error reported when trying to build cordova < 5.3.3 on node >= 4.0.0 when it would result in a deadlock.",
 
     "DoneBuilding": "Done building {0}",
     "_DoneBuilding.comment": "Message logged when a build is completed successfully. {0} is the build number",

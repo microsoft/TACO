@@ -285,6 +285,7 @@ class BuildManager {
     private beginBuild(req: express.Request, buildInfo: BuildInfo): void {
         var self: BuildManager = this;
         var extractToDir: string = path.join(buildInfo.buildDir, "cordovaApp");
+        var extractToRemoteDir = path.join(extractToDir, "remote");
         buildInfo.buildSuccessful = false;
         buildInfo.appDir = extractToDir;
         try {
@@ -328,7 +329,7 @@ class BuildManager {
 
             // Here we want to exclusively extract the contents of the /plugins folder, and we will put it in a separate location
             // Later in taco-remote-lib we will manually merge the plugins into the project to ensure they are added correctly.
-            var localPath: string = path.relative(extractToDir, who.props.path);
+            var localPath: string = path.relative(extractToRemoteDir, who.props.path);
             return !who.props.depth || (who.props.depth === 0 && who.props.Directory) || localPath.split(path.sep)[0] === "plugins";
         };
 
@@ -342,7 +343,7 @@ class BuildManager {
             extractDeferred.resolve({});
         });
         // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-        var pluginExtractor: tar.ExtractStream = tar.Extract(<tar.ExtractOptions> { path: path.join(extractToDir, "remote"), strip: 1, filter: pluginsOnlyFilter });
+        var pluginExtractor: tar.ExtractStream = tar.Extract(<tar.ExtractOptions> { path: extractToRemoteDir, strip: 1, filter: pluginsOnlyFilter });
         pluginExtractor.on("end", function (): void {
             extractPluginDeferred.resolve({});
         });

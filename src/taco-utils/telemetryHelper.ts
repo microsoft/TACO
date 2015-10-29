@@ -263,7 +263,7 @@ module TacoUtility {
                     var telemetryProperties: ICommandTelemetryProperties = {};
                     TelemetryHelper.addTelemetryProperties(telemetryProperties, baseProps);
                     TelemetryHelper.addTelemetryProperties(telemetryProperties, props);
-                    var name = componentName + "." + event;
+                    var name = componentName + "/" + event;
                     if (error) {
                         if (errorHandler) {
                             error = errorHandler(error);

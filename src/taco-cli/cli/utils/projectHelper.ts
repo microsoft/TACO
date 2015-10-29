@@ -154,7 +154,7 @@ class ProjectHelper {
             }
 
             if (fs.existsSync(tacoJsonFilePath)) {
-                tacoJson = JSON.parse(<any> fs.readFileSync(tacoJsonFilePath));
+                tacoJson = JSON.parse(fs.readFileSync(tacoJsonFilePath, "utf8"));
                 ProjectHelper.cachedProjectFilePath = tacoJsonFilePath;
             } else {
                 return projectInfo;

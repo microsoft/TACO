@@ -44,7 +44,7 @@ class Settings {
         }
 
         try {
-            Settings.settings = JSON.parse(<any> fs.readFileSync(Settings.settingsFile));
+            Settings.settings = JSON.parse(fs.readFileSync(Settings.settingsFile, "utf8"));
             return Q(Settings.settings);
         } catch (e) {
             if (e.code === "ENOENT") {
