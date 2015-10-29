@@ -170,6 +170,8 @@
     "_CommandKitSelectStatusUpdatingPlatforms.comment": "Status message on updating platforms",
     "CommandKitSelectStatusUpdatingPlugins": "Updating plugins...",
     "_CommandKitSelectStatusUpdatingPlugins.comment": "Status message on updating plugins",
+    "CommandKitSelectStatusUpdatingTacoJson": "Updating taco.json...",
+    "_CommandKitSelectStatusUpdatingTacoJson.comment": "Status message on updating taco.json file of the project",
     "CommandKitSelectStatusSuccess": "<success>Success!</success>",
     "_CommandKitSelectStatusSuccess.comment": "Status message on successfully updating platforms and plugins",
     "CommandKitListCurrentCordovaCLI": "<bold>Current Cordova CLI</bold>: {0}",
@@ -307,13 +309,9 @@
     "_CommandPluginWithIdStatusAdded.comment": "Status message after successfully installed plugin {0}",
     "CommandPluginStatusRemoved": "<success>Success!</success> Plugin <highlight>{0}</highlight> removed<br/>",
     "_CommandPluginStatusRemoved.comment": "Status message after successfully removing plugin {0}",
-    "CommandPluginStatusAdding": "Fetching plugin \"<highlight>{0}</highlight>\" via npm.<br/>",
-    "_CommandPluginStatusAdding.comment": "Status message shown while adding a platform {0} of version {1} from NPM",
     "CommandPluginTestedPlatforms": "The plugin <highlight>{0}</highlight> has been validated on platform(s) - {1}.<br/>",
     "_CommandPluginTestedPlatforms.comment": "Status message regarding the tested platforms while adding a plugin {0}",
-    "CommandPluginStatusRemoving": "Removing plugin <highlight>{0}</highlight> from Cordova project...<br/>",
-    "_CommandPluginStatusRemoving.comment": "Status message shown while removing a plugin {0} from the project",
-
+    
     "CommandBuildDescription": "Build the project for a given platform",
     "_CommandBuildDescription.comment": "Description for 'taco build'",
     "CommandBuildPlatformDescription": "The platform that you wish to build",

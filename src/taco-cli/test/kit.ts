@@ -85,6 +85,10 @@ describe("Kit command : ", function (): void {
         android: "4.0.2"
     };
 
+    var expectedKitPluginVersion: IKeyValuePair<string> = {
+        "cordova-plugin-camera": "1.2.0"
+    };
+
     function createProject(args: string[], projectDir: string): Q.Promise<any> {
         var create: ICommand = CommandHelper.getCommand("create");
         // Create a dummy test project with no platforms added
@@ -299,7 +303,7 @@ describe("Kit command : ", function (): void {
 
         it("'taco kit select --cordova {CLI-VERSION}' on a project with a platform added, should execute with no errors", function (done: MochaDone): void {
             KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseNo");
-            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "4.3.1"], tacoJsonPath, expectedCliTacoJsonKeyValues1)
+            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "4.3.1"], tacoJsonPath, expectedKitTacoJsonKeyValues)
                 .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
                     var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "select" },
@@ -340,19 +344,19 @@ describe("Kit command : ", function (): void {
         });
 
         it("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): void {
-            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseNo");
+            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseYes");
             return addTestPluginsToProject(cliProjectpath)
             .then(function (): Q.Promise<any> {
-                return runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
-                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
-                    var expected = {
-                        subCommand: { isPii: false, value: "select" },
-                        "options.kit": { isPii: false, value: "5.1.1-Kit" }
-                    };
-                    telemetryParameters.should.be.eql(expected);
-                }).then(() => {
-                    TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
-                });
+                return runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues);
+            })
+            .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
+                var expected = {
+                    subCommand: { isPii: false, value: "select" },
+                    "options.kit": { isPii: false, value: "5.1.1-Kit" }
+                };
+                telemetryParameters.should.be.eql(expected);
+                TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
+                TestProjectHelper.checkPluginVersions(expectedKitPluginVersion, cliProjectpath);
             }).done(() => done(), done);
         });
     });

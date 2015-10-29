@@ -94,8 +94,6 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
                 });
             }, Q({}));
         }).then(function (): Q.Promise<any> {
-            // Set target and print status message
-            self.printStatusMessage(targets, self.cordovaCommandParams.subCommand, CommandOperationStatus.InProgress);
             self.cordovaCommandParams.targets = targets;
             return Q.resolve(pluginInfoToPersist);
         });
@@ -142,35 +140,9 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
         }
 
         switch (status) {
-            case CommandOperationStatus.InProgress: {
-                this.printInProgressMessage(plugins, operation);
-            }
-            break;
-
             case CommandOperationStatus.Success: {
+                logger.logLine();
                 this.printSuccessMessage(plugins, operation);
-            }
-            break;
-        }
-    }
-
-    /**
-     * Prints the plugin addition/removal operation progress message
-     */
-    private printInProgressMessage(plugins: string, operation: string): void {
-        switch (this.resolveAlias(operation)) {
-            case "add": {
-                logger.log(resources.getString("CommandPluginStatusAdding", plugins));
-            }
-            break;
-
-            case "remove": {
-                logger.log(resources.getString("CommandPluginStatusRemoving", plugins));
-            }
-            break;
-
-            case "update": {
-                logger.log(resources.getString("CommandPluginStatusUpdating", plugins));
             }
             break;
         }
