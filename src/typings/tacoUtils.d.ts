@@ -30,6 +30,7 @@
 /// <reference path="../typings/utilHelper.d.ts" />
 /// <reference path="../typings/promisesUtils.d.ts" />
 /// <reference path="../typings/processUtils.d.ts" />
+/// <reference path="../typings/npmHelper.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoUtility namespace,
 // include a reference to the d.ts file that is generated (as above), and make sure

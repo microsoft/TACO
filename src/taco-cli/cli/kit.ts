@@ -29,6 +29,7 @@ import readline = require ("readline");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoUtility = require ("taco-utils");
+import npmHelper = require ("./utils/kitHelper");
 
 import commands = tacoUtility.Commands;
 import CordovaWrapper = tacoUtility.CordovaWrapper;
@@ -37,6 +38,7 @@ import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import ProjectHelper = tacoUtility.ProjectHelper;
 import utils = tacoUtility.UtilHelper;
+import NpmHelper = tacoUtility.NpmHelper;
 
 enum ProjectComponentType {
     Unknown = -1,
@@ -664,27 +666,26 @@ class Kit extends commands.TacoCommandBase {
         if (!semver.valid(version)) {
             return Q.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
         }
+
         CordovaHelper.ensureCordovaVersionAcceptable(version);
+        
+        Q({})
+            .then(function(): any {
+                return NpmHelper.view(["cordova", "versions"], ".");
+            })
+            .then(function(result: any) {
+                var versions: any[] = [];
+                if (result) {
+                    var cordovaVersion = Object.keys(result)[0];
+                    versions = result[cordovaVersion].versions;
+                }
 
-        var npmCommand: string = process.platform === "win32" ? "npm.cmd" : "npm";
-        var npmProcess: child_process.ChildProcess = child_process.spawn(npmCommand, ["view", "cordova", "versions"]);
-        npmProcess.on("error", function (error: Error): void {
-            throw errorHelper.get(TacoErrorCodes.ErrorReadingPackageVersions, "cordova");
-        });
-
-        npmProcess.stdout.on("data", function (data: any): void {
-            try {
-                // The versions are returned as stringified array of strings
-                var versions: string = data.toString();
-                if (versions.indexOf("'" + version + "'") !== -1) {
+                if (versions.indexOf(version) !== -1) {
                     deferred.resolve(version);
                 } else {
                     deferred.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
                 }
-            } catch (error) {
-                deferred.reject(errorHelper.get(TacoErrorCodes.ErrorReadingPackageVersions, "cordova"));
-            }
-        });
+            });
 
         return deferred.promise;
     }
