@@ -155,6 +155,9 @@ describe("DependencyInstaller", function (): void {
     });
 
     after(function (done: MochaDone): void {
+        // Restore ResourcesManager
+        process.env["TACO_UNIT_TEST"] = false;
+
         // Clean up run folder
         rimraf(runFolder, done);
     });
