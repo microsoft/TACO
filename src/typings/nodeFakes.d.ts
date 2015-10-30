@@ -122,10 +122,14 @@ declare module TacoTestsUtils {
         }
         class ChildProcessModule {
             /** Methods to configure the fake process **/
+            // This methods will make all the exec call behave exactly the same, as specified by the parameters
+            fakesAlwaysReturning(errorOrNullIfSuccesfull: Error, stdout?: string, stderr?: string): ChildProcessModule;
             // This method will make all child_process.exec call succeed
             fakeAllExecCallsSucceed(): ChildProcessModule;
             // This method will make all child_process.exec call fail
             fakeAllExecCallsEndingWithErrors(): ChildProcessModule;
+            // This method will make all child_process.exec call fail with the specified error
+            fakeAllExecCallsEndingWithError(error: Error): ChildProcessModule;
             // This method will make some child_process.exec call fail, and some succeed based on the lambda tests passed
             fakeUsingCommandToDetermineResult(successFilter: CommandTester, failureFilter: CommandTester): ChildProcessModule;
 

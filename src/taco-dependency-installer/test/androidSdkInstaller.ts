@@ -7,14 +7,14 @@
  */
 
 /// <reference path="../../typings/dependencyInstallerInterfaces.d.ts"/>
+/// <reference path="../../typings/lodash.d.ts"/>
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/mockery.d.ts"/>
-/// <reference path="../../typings/should.d.ts"/>
-/// <reference path="../../typings/telemetryFakes.d.ts"/>
 /// <reference path="../../typings/mock-fs.d.ts"/>
 /// <reference path="../../typings/nodeFakes.d.ts"/>
-/// <reference path="../../typings/lodash.d.ts"/>
+/// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/tacoTestsUtils.d.ts"/>
+/// <reference path="../../typings/telemetryFakes.d.ts"/>
 
 "use strict";
 
@@ -25,35 +25,19 @@ var shouldModule = require("should");
 /* tslint:enable:no-var-requires */
 
 import installerProtocol = require("../elevatedInstallerProtocol");
-import ILogger = installerProtocol.ILogger;
+import FakeLogger = require("./fakeLogger");
+import _ = require("lodash");
 import mockery = require("mockery");
 import mockFs = require("mock-fs");
 import path = require("path");
 import Q = require("q");
 import tacoTestsUtils = require("taco-tests-utils");
-import _ = require("lodash");
+
+import ILogger = installerProtocol.ILogger;
 
 import nodeFakes = tacoTestsUtils.NodeFakes;
 
 type TelemetryEvent = TacoUtility.ICommandTelemetryProperties;
-
-class FakeLogger implements ILogger {
-    public log(message: string): void {
-        // Currently we don't care about these messages
-    }
-
-    public logWarning(message: string): void {
-        // Currently we don't care about these messages
-    }
-
-    public logError(message: string): void {
-        // Currently we don't care about these messages
-    }
-
-    public promptForEnvVariableOverwrite(message: string): Q.Promise<any> {
-        return Q({});
-    }
-}
 
 describe("AndroidSdkInstaller telemetry", () => {
     // Parameters for AndroidSdkInstaller
@@ -79,8 +63,7 @@ describe("AndroidSdkInstaller telemetry", () => {
         // We tell mockery to replace "require()" with our own custom mock objects
         mockery.enable({ useCleanCache: true, warnOnUnregistered: false });
 
-        fakeProcess = new nodeFakes.Process()
-            .fakeDeterministicHrtime();
+        fakeProcess = new nodeFakes.Process().fakeDeterministicHrtime();
 
         var fakeProcessUtilsModule = { ProcessUtils: fakeProcess.buildProcessUtils() };
 

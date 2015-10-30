@@ -195,17 +195,32 @@ export module NodeFakes {
         public mockSpawn: any = mockSpawnModule();
 
         // We simulate that all calls to exect are succesfull
-        public fakeAllExecCallsSucceed(): ChildProcessModule {
+        public fakesAlwaysReturning(errorOrNullIfSuccesfull: Error, stdout: string = "", stderr: string = ""): ChildProcessModule {
             this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback: Callback = null): IChildProcess => {
-                return this.callCallback(command, optionsOrCallback, callback, true);
+                var realCallback = <Callback> (callback || optionsOrCallback);
+                // We call the callback in an async way
+                setTimeout(() => {
+                    realCallback(errorOrNullIfSuccesfull, /*stdout*/ new Buffer(stdout), /*stderr*/ new Buffer(stderr));
+                }, 0);
+                return new ChildProcess();
             };
             return this;
         }
 
+        // We simulate that all calls to exect are succesfull
+        public fakeAllExecCallsSucceed(): ChildProcessModule {
+            return this.fakesAlwaysReturning(null);
+        }
+
         // We simulate that all calls to exect end with an error
         public fakeAllExecCallsEndingWithErrors(): ChildProcessModule {
+            return this.fakeAllExecCallsEndingWithError(undefined); // undefined forces it to use the default error
+        }
+
+        // This method will make all child_process.exec call fail with the specified error
+        public fakeAllExecCallsEndingWithError(error: Error): ChildProcessModule {
             this.exec = (command: string, optionsOrCallback: ExecSecondArgument, callback: Callback = null): IChildProcess => {
-                return this.callCallback(command, optionsOrCallback, callback, false);
+                return this.callCallback(command, optionsOrCallback, callback, false, error);
             };
             return this;
         }
@@ -247,12 +262,11 @@ export module NodeFakes {
         }
 
         private callCallback(command: string, optionsOrCallback: ExecSecondArgument,
-            callback: Callback, wasSuccessful: boolean): ChildProcess {
+            callback: Callback, wasSuccessful: boolean, error: Error = new Error("Error while executing " + command)): ChildProcess {
             var realCallback = <Callback> (callback || optionsOrCallback);
             // We call the callback in an async way
-            var error = wasSuccessful ? null : new Error("Error while executing " + command);
             setTimeout(() => {
-                realCallback(error, /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
+                realCallback(wasSuccessful ? null : error, /*stdout*/ new Buffer(""), /*stderr*/ new Buffer(""));
             }, 0);
             return new ChildProcess();
         }
