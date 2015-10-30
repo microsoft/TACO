@@ -2,6 +2,7 @@
     "src": ".",
     "templates": "../templates",
     "build": "../build",
+    "buildCoverage": "../build/coverage",
     "buildSrc": "../build/src",
     "buildPackages": "../build/packages/node_modules",
     "buildTools": "../build/tools",

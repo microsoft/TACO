@@ -139,10 +139,8 @@ class Builder {
         var pluginNameRegex: RegExp = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
         var deletedPlugins: string[] = [];
         if (this.currentBuild.changeList && this.currentBuild.changeList.deletedFiles) {
-            deletedPlugins = this.currentBuild.changeList.deletedFiles.map(function (file: string): string {
-                // Normalize filenames to use this platform's slashes, when the client may have sent back-slashes
-                return path.normalize(path.join.apply(path, file.split("\\")));
-            }).filter(function (file: string): boolean {
+            deletedPlugins = this.currentBuild.changeList.deletedFiles.filter(function (file: string): boolean {
+                // file paths have been pre-normalised to use this platform's slashes
                 // A plugin is deleted if its plugin.xml is deleted
                 return !!file.match(pluginNameRegex);
             }).map(function (file: string): string {
@@ -171,7 +169,7 @@ class Builder {
         var fetchJsonPath: string = path.join(remotePluginsPath, "fetch.json");
         if (fs.existsSync(fetchJsonPath)) {
             try {
-                fetchJson = JSON.parse(<any> fs.readFileSync(fetchJsonPath));
+                fetchJson = JSON.parse(fs.readFileSync(fetchJsonPath, "utf8"));
             } catch (e) {
                 // fetch.json is malformed; act as though no plugins are installed
                 // If it turns out we do need variables from the fetch.json, then cordova will throw an error

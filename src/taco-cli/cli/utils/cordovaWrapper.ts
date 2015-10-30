@@ -158,7 +158,7 @@ class CordovaWrapper {
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {
         return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
-            return output.split("\n")[0];
+            return output.split("\n")[0].split(" ")[0];
         });
     }
 

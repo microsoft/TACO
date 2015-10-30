@@ -87,8 +87,13 @@ class Create extends commands.TacoCommandBase {
 
                 var kitProject: boolean = self.isKitProject();
                 var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cordova"];
+                var tacoJsonEditParams: projectHelper.ITacoJsonEditParams = {
+                    projectPath: self.commandParameters.cordovaParameters.projectPath,
+                    isKitProject: kitProject,
+                    version: valueToSerialize
+                };
 
-                return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                return projectHelper.editTacoJsonFile(tacoJsonEditParams);
             })
             .then(function (): Q.Promise<any> {
                 self.finalize(templateDisplayName);
@@ -256,8 +261,6 @@ class Create extends commands.TacoCommandBase {
     private printNewProjectTable(kitOrCordovaStringResource: string, kitOrCordovaVersion: string): void {
         var cordovaParameters: Cordova.ICordovaCreateParameters = this.commandParameters.cordovaParameters;
         var projectFullPath: string = path.resolve(this.commandParameters.cordovaParameters.projectPath);
-
-        logger.log(resources.getString("CommandCreateStatusCreatingNewProject"));
 
         var indentation: number = 6; // We leave some empty space on the left before the text/table starts
         var nameDescriptionPairs: INameDescription[] = [

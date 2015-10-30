@@ -3,7 +3,6 @@
         "tacokit@1.0.0": {
             "cordova-cli": "5.1.1",
             "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=623759",
-            "default": true,
             "platforms": {
                 "android": {
                     "version": "4.0.2"
@@ -57,6 +56,7 @@
         "tacokit@2.0.0": {
             "cordova-cli": "5.2.0",
             "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=623759",
+            "default": true,
             "platforms": {
                 "android": {
                     "version": "4.1.1"
@@ -89,6 +89,9 @@
                 },
                 "cordova-plugin-file": {
                     "version": "3.0.0"
+                },
+                "cordova-plugin-file-transfer": {
+                    "version": "1.2.1"
                 },
                 "cordova-plugin-inappbrowser": {
                     "version": "1.0.1"

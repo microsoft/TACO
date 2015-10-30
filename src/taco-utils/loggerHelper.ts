@@ -17,6 +17,7 @@ import util = require ("util");
 import jsonSerializer = require ("./jsonSerializer");
 import logFormathelper = require ("./logFormatHelper");
 import logger = require ("./logger");
+import resources = require ("./resources/resourceManager");
 
 import JsonSerializer = jsonSerializer.JsonSerializer;
 import Logger = logger.Logger;

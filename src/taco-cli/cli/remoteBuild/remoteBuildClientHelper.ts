@@ -26,6 +26,7 @@ import querystring = require ("querystring");
 import request = require ("request");
 import stream = require ("stream");
 import tar = require ("tar");
+import url = require ("url");
 import util = require ("util");
 import zlib = require ("zlib");
 
@@ -236,7 +237,9 @@ class RemoteBuildClientHelper {
      * Convert errors from error codes to localizable strings
      */
     private static errorFromRemoteBuildServer(serverUrl: string, requestError: any, fallbackErrorCode: TacoErrorCodes): Error {
-        if (requestError.code.indexOf("CERT_") !== -1) {
+        if (!requestError.code) {
+            return errorHelper.wrap(fallbackErrorCode, <Error> requestError, serverUrl);
+        } else if (requestError.code.indexOf("CERT_") !== -1) {
             return errorHelper.get(TacoErrorCodes.InvalidRemoteBuildClientCert);
         } else if (serverUrl.indexOf("https://") === 0 && requestError.code === "ECONNRESET") {
             return errorHelper.get(TacoErrorCodes.RemoteBuildSslConnectionReset, serverUrl);
@@ -264,7 +267,7 @@ class RemoteBuildClientHelper {
         var newChangeTime: { [file: string]: number } = {};
         var isIncremental: boolean = false;
         try {
-            var json: { [file: string]: number } = JSON.parse(<any> fs.readFileSync(changeTimeFile));
+            var json: { [file: string]: number } = JSON.parse(fs.readFileSync(changeTimeFile, "utf8"));
             Object.keys(json).forEach(function (file: string): void {
                 lastChangeTime[file] = json[file];
             });
@@ -467,7 +470,14 @@ class RemoteBuildClientHelper {
                         Logger.log(resources.getString("NewRemoteBuildInfo", body));
                     }
 
-                    deferred.resolve(response.headers["content-location"]);
+                    // The server responds with a content-location header indicating where the newly submitted build is now located
+                    // However the URL in that header may have a different host to what we expect, especially in the case of proxies
+                    // or ipv6 addresses. To fix this, we'll ignore the host part of the URL and replace it with the host we want to
+                    // communicate with ourselves.
+                    var reportedBuildUrl = url.parse(response.headers["content-location"]);
+                    var buildServerUrl = url.parse(buildUrl);
+                    reportedBuildUrl.host = buildServerUrl.host;
+                    deferred.resolve(url.format(reportedBuildUrl));
                 } else {
                     deferred.reject(errorHelper.get(TacoErrorCodes.ErrorDuringRemoteBuildSubmission, body));
                 }

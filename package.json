@@ -1,27 +1,28 @@
 {
-    "name": "taco-dev-dependencies",
-    "private": true,
-    "author": {
-        "name": "Microsoft Corp."
-    },
-    "description": "specifies dependencies needed for developing taco",
-    "version": "0.0.1",
-    "devDependencies": {
-        "del": "^1.2.1",
-        "gulp": "latest",
-        "typescript": "1.5.3",
-        "gulp-json-editor": "latest",
-        "gulp-typescript": "2.8.3",
-        "gulp-tslint": "latest",
-        "gulp-sourcemaps": "latest",
-        "merge2": "latest",
-        "ncp": "latest",
-        "q": "latest",
-        "run-sequence": "latest",
-        "archiver": "latest",
-        "mocha-teamcity-reporter": "latest",
-        "nopt": "latest",
-        "replace": "latest",
-        "jsdoc-parse": "latest"
-    }
+  "name": "taco-dev-dependencies",
+  "private": true,
+  "author": {
+    "name": "Microsoft Corp."
+  },
+  "description": "specifies dependencies needed for developing taco",
+  "version": "0.0.1",
+  "devDependencies": {
+    "archiver": "latest",
+    "del": "^1.2.1",
+    "gulp": "latest",
+    "gulp-json-editor": "latest",
+    "gulp-sourcemaps": "latest",
+    "gulp-tslint": "latest",
+    "gulp-typescript": "~2.9.2",
+    "jsdoc-parse": "latest",
+    "merge2": "latest",
+    "mocha-teamcity-reporter": "latest",
+    "ncp": "latest",
+    "nopt": "latest",
+    "q": "latest",
+    "remap-istanbul": "^0.3.1",
+    "replace": "latest",
+    "run-sequence": "latest",
+    "typescript": "~1.6.2"
+  }
 }
