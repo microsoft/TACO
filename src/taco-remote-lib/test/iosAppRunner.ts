@@ -102,7 +102,7 @@ describe("Device functionality", function (): void {
             Logger.log("MockDebuggerProxy listening");
         });
 
-        Q.timeout(runner.startAppViaDebugger(port, appPath), 1000)
+        Q.timeout(runner.startAppViaDebugger(port, appPath, 5000), 1000)
             .done(function (): void {
             done();
         }, done);
@@ -179,7 +179,7 @@ describe("Device functionality", function (): void {
             Logger.log("MockDebuggerProxy listening");
         });
 
-        Q.timeout(runner.startAppViaDebugger(port, appPath), 1000).done(function (): void {
+        Q.timeout(runner.startAppViaDebugger(port, appPath, 5000), 1000).done(function (): void {
             done(new Error("Starting the app should have failed!"));
         }, function (err: any): void {
                 err.should.equal("UnableToLaunchApp");
