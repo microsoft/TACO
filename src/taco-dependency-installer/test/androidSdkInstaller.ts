@@ -227,7 +227,7 @@ describe("AndroidSdkInstaller telemetry", () => {
             fakeProcess.env.PATH = platformToolsPath + mockPath.delimiter + androidToolsPath;
         });
 
-        it("installAndroidPackages generates telemetry error if the command used generates errors in stderr", (done: MochaDone) => {
+        it.skip("installAndroidPackages generates telemetry error if the command used generates errors in stderr", (done: MochaDone) => {
             var spawnErrorMessage = "Couldn't find the Android update command executable";
             childProcessModule.mockSpawn.setDefault(
                 childProcessModule.mockSpawn.simple(/*exitCode*/ 0, /*stdout*/ "", /*stderr*/ spawnErrorMessage));
@@ -261,7 +261,7 @@ describe("AndroidSdkInstaller telemetry", () => {
             return telemetryGeneratedShouldBe(expectedTelemetry, new RegExp(spawnErrorMessage), done);
         });
 
-        it("installAndroidPackages generates telemetry error if the command used is invalid", (done: MochaDone) => {
+        it.skip("installAndroidPackages generates telemetry error if the command used is invalid", (done: MochaDone) => {
             var spawnErrorMessage = "The command is not recognized by the system";
             childProcessModule.mockSpawn.setDefault(function (callback: Function): void {
                 /* Warning: The "this" in the next line is the one passed by mockSpawn library. For that
@@ -295,7 +295,7 @@ describe("AndroidSdkInstaller telemetry", () => {
             return telemetryGeneratedShouldBe(expectedTelemetry, new RegExp(spawnErrorMessage), done);
         });
 
-        it("killAdb generates telemetry error if the command used is invalid", (done: MochaDone) => {
+        it.skip("killAdb generates telemetry error if the command used is invalid", (done: MochaDone) => {
             // First call to install the android packages will succeed
             childProcessModule.mockSpawn.sequence.add(childProcessModule.mockSpawn.simple(/*exitCode*/ 0, /*stdout*/ "", /*stderr*/ ""));
 
