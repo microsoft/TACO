@@ -1,7 +1,7 @@
 {
   "name": "taco-dependency-installer",
   "description": "Install platform-specific third-party dependencies for Cordova development",
-  "version": "1.0.3-dev",
+  "version": "1.1.0-dev",
   "author": {
     "name": "Microsoft Corporation",
     "email": "vscordovatools-admin@microsoft.com"
