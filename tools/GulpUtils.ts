@@ -16,11 +16,12 @@ import Q = require ("q");
 class GulpUtils {
     private static TestCommand: string = "test";
 
-    public static runAllTests(modulesToTest: string[], modulesRoot: string): Q.Promise<any> {
-        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand);
+    public static runAllTests(modulesToTest: string[], modulesRoot: string, failTestsAtEnd: boolean): Q.Promise<any> {
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand, failTestsAtEnd);
     }
 
-    public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string): Q.Promise<any> {
+    public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string, failAtEnd?: boolean): Q.Promise<any> {
+        var failures: string[] = [];
         return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
 
             var modulePath = path.resolve(modulesRoot, moduleName);
@@ -35,12 +36,22 @@ class GulpUtils {
             var deferred = Q.defer();
             testProcess.on("close", function(code: number): void {
                 if (code) {
-                    deferred.reject("Test failed for " + modulePath);
+                    if (failAtEnd) {
+                        failures.push(moduleName);
+                        deferred.resolve({});
+                    } else {
+                        deferred.reject("Test failed for " + modulePath);
+                    }
                 } else {
                     deferred.resolve({});
                 }
             });
             return deferred.promise;
+        }).then(function(): Q.Promise<any> {
+            if (failures.length > 0){
+                return Q.reject("Tests Failed for "+ failures.join(", "));
+            }
+            return Q.resolve({});
         });
     }
 

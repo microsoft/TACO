@@ -15,11 +15,11 @@ class GulpCoverageUtils {
     private static COVERAGE_COMMAND: string = "coverage";
     private static SECONDARY_COVERAGE_DIR: string = "secondary";
 
-    public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageOutputDir: string, otherCoverageDir: string): Q.Promise<any> {
+    public static runCoverage(modulesToTest: string[], modulesRoot: string, coverageOutputDir: string, secondaryCoverageDirs: string[]): Q.Promise<any> {
         coverageOutputDir = path.resolve(coverageOutputDir);
         modulesRoot = path.resolve(modulesRoot);
 
-        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpCoverageUtils.COVERAGE_COMMAND)
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpCoverageUtils.COVERAGE_COMMAND, true /* failAtEnd */)
             .then(function(): Q.Promise<any> {
                 return Q.all<any>(modulesToTest.map(moduleName => {
                     // this post coverage copy back is needed more for the scenario to support
@@ -29,8 +29,8 @@ class GulpCoverageUtils {
             })
             .then(function(): Q.Promise<any> {
                 var coverageResults: string[] = [coverageOutputDir];
-                if (otherCoverageDir) {
-                    coverageResults.push(otherCoverageDir);
+                if (secondaryCoverageDirs) {
+                    coverageResults.concat(secondaryCoverageDirs);
                 }
                 return GulpCoverageUtils.mergeAndGenerateReports(coverageResults, coverageOutputDir, modulesRoot);
             }).then(function(): Q.Promise<any> {
