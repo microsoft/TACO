@@ -1,5 +1,5 @@
 {
-	"tsCompileOptions" : {
+	"compilerOptions" : {
 		"module" : "commonjs"
 	}
 }
