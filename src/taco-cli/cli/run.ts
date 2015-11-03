@@ -46,6 +46,8 @@ import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 // taco run android --livereload --remote
 // taco emulate android --livereload  
 // taco run android --livereload --tunnel --ignore=css/**/*.*
+// unit tests
+// telemetry
 class Run extends commands.TacoCommandBase {
     private static KNOWN_OPTIONS: Nopt.CommandData = {
         local: Boolean,
@@ -99,7 +101,7 @@ class Run extends commands.TacoCommandBase {
 	    // DeviceSync/LiveReload not compatible with remote
 	    var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
 	    if (deviceSync) {
-		throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--devicesync/livereload", "--remote");
+		throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload/--devicesync", "--remote");
 	    }
 
             var buildOptions = commandData.remain.filter(function (opt: string): boolean { return opt.indexOf("--") === 0; });
@@ -252,9 +254,6 @@ class Run extends commands.TacoCommandBase {
         if (parsedOptions.options["devicesync"] && parsedOptions.options["livereload"]) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--devicesync", "--livereload");
         }
-
-        // ToDO: Raise errors for the following cases:
-        // --debuginfo? nobuild? debug? release?
 
         return parsedOptions;
     }

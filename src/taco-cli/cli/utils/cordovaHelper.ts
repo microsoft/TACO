@@ -347,18 +347,41 @@ class CordovaHelper {
             downstreamArgs.push("--archs=" + commandData.options["archs"]);
         }
 
-	// ToDO:  what if devicesync? commandData.options["devicesync"]
-	// what if user typed: taco run ios --livereload -- --justlaunch ? => cordova run ios -- --livereload --justlaunch
-	// what if user typed: taco run ios --livereload ? => cordova run ios -- --livereload
-	// what if user typed: taco run ios -- ?
-	// ToDO: After processing its args, the livereload plugin should delete the --livereload options (livereload, ignore, tunnel) ?
-	if (commandData.options["livereload"]) {
-	    var livereloadIndex: number = commandData.original.indexOf("--livereload");
-	    var doubleDashIndex: number = commandData.original.indexOf("--");
+	// ToDOs:
+	// taco run android ios --devicesync => only allow --devicesync when at least 2 platforms are supplied
+	// what if user typed: taco run ios --livereload -- --justlaunch ? => cordova run ios -- --livereload --ghostMode=false --justlaunch (done)
+	// what if user typed: taco run ios --livereload ? => cordova run ios -- --livereload --ghostMode=false  (done)
+	// what if user typed: taco run ios --devicesync -- --justlaunch ? => cordova run ios -- --livereload --justlaunch --ghostMode=true
+	// what if user typed: taco run ios -- ? =>  taco run ios (done)
+	// what if user typed: taco run ios --devicesync ? => (done)
+	// what if user typed: taco run ios --devicesync -- ? => (done)
+	// what if user typed: taco run ios --devicesync -- --justlaunch --xyz ? => (done)
+	// 
+	var isLiveReload = !!commandData.options["livereload"];
+	var isDeviceSync = !!commandData.options["devicesync"];
+
+	if (isLiveReload || isDeviceSync) {
+	    var index = isLiveReload ? commandData.original.indexOf("--livereload") : commandData.original.indexOf("--devicesync");
+
+	    // Replace '--devicesync' by '--livereload'.
+	    // ... because on the plugin side, the difference between the two is only in the '--ghostMode' option:
+	    //     * `taco run ios --livereload` === `cordova run ios -- --livereload --ghostMode=false`
+	    //     * `taco run ios android --devicesync` === `cordova run ios android -- --livereload --ghostMode=true`
+	    if (isDeviceSync) {
+	        var deviceSyncIndex = commandData.original.indexOf("--devicesync");
+	        commandData.original[deviceSyncIndex] = "--livereload";
+	    }
+
+	    var doubleDashIndex = commandData.original.indexOf("--");
+	    var ghostModeArg = "--ghostMode=";
+	    ghostModeArg += isLiveReload ? "false" : "true";
+	    
 	    if (doubleDashIndex >= 0) {
 	        commandData.original.splice(doubleDashIndex + 1, 0, "--livereload");
+	        commandData.original.splice(doubleDashIndex + 2, 0, ghostModeArg);
 	    } else {
-	        commandData.original.splice(livereloadIndex, 0, "--");
+	        commandData.original.splice(index, 0, "--");
+	        commandData.original.splice(index + 2, 0, ghostModeArg); // what if index goes past the array's length
 	    }
 	}
 

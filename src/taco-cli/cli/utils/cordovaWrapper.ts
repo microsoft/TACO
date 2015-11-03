@@ -186,9 +186,9 @@ class CordovaWrapper {
     }
 
     private static installDeviceSyncPluginIfNecessary(cordova: Cordova.ICordova, commandData: commands.ICommandData): Q.Promise < any > {
-        var isDeviceSync: boolean = !!commandData.options["livereload"] || !!commandData.options["devicesync"];
+        var isLiveReloadOrDeviceSync: boolean = !!commandData.options["livereload"] || !!commandData.options["devicesync"];
 
-        if (!isDeviceSync) {
+        if (!isLiveReloadOrDeviceSync) {
             return Q.resolve({});
         }
 
