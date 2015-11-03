@@ -11,13 +11,15 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/rimraf.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
+/// <reference path="../../typings/semver.d.ts" />
 
 "use strict";
 
-import fs = require("fs");
-import path = require("path");
-import Q = require("q");
-import rimraf = require("rimraf");
+import fs = require ("fs");
+import path = require ("path");
+import Q = require ("q");
+import rimraf = require ("rimraf");
+import semver = require ("semver");
 
 import resources = require("../resources/resourceManager");
 import utils = require("taco-utils");
@@ -63,6 +65,10 @@ class Builder {
     }
 
     public build(): Q.Promise<BuildInfo> {
+        if (semver.lt(this.currentBuild["vcordova"], "5.4.0") && semver.gte(process.versions.node, "5.0.0")) {
+            throw new Error(resources.getString("UnsupportedCordovaAndNode5Version"));
+        }
+
         var isDeviceBuild: boolean = this.currentBuild.options.indexOf("--device") !== -1;
         var self: Builder = this;
 
