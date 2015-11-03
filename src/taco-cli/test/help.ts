@@ -9,6 +9,7 @@
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/tacoUtils.d.ts"/>
+/// <reference path="../../typings/tacoTestsUtils.d.ts"/>
 
 "use strict";
 
@@ -25,18 +26,19 @@ var colors: any = require("colors/safe");
 
 import tacoUtils = require ("taco-utils");
 import Help = require ("../cli/help");
-import ms = require ("./utils/memoryStream");
+import tacoTestsUtils = require ("taco-tests-utils");
 
 import ICommandData = tacoUtils.Commands.ICommandData;
 import CommandHelper = require ("./utils/commandHelper");
 import ICommand = tacoUtils.Commands.ICommand;
+import MemoryStream = tacoTestsUtils.MemoryStream;
 
 describe("help for a command", function (): void {
     var help: ICommand = CommandHelper.getCommand("help");
     // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
     // stdoutWrite just doesn't work
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
+    var memoryStdout: MemoryStream;
     var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
@@ -72,7 +74,7 @@ describe("help for a command", function (): void {
     });
 
     beforeEach(() => {
-        memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+        memoryStdout = new MemoryStream; // Each individual test gets a new and empty console
         process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
     });
 

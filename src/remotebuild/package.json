@@ -45,7 +45,8 @@
         "istanbul": "^0.4.0",
         "mkdirp": "0.3.5",
         "should": "4.3.0",
-        "request": "2.36.0"
+        "request": "2.36.0",
+        "colors": "^1.0.3"
     },
     "scripts": {
         "test": "mocha",
