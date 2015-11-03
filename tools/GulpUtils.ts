@@ -16,11 +16,15 @@ import Q = require ("q");
 class GulpUtils {
     private static TestCommand: string = "test";
 
-    public static runAllTests(modulesToTest: string[], modulesRoot: string, failTestsAtEnd: boolean): Q.Promise<any> {
-        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand, failTestsAtEnd);
+    public static runAllTests(modulesToTest: string[], modulesRoot: string, failTestsAtEnd: boolean, reporter: string): Q.Promise<any> {
+        var args: string[] = [];
+        if (reporter) {
+            args = ["--reporter", reporter];
+        }
+      return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand, failTestsAtEnd, args);
     }
 
-    public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string, failAtEnd?: boolean): Q.Promise<any> {
+    public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string, failAtEnd: boolean, args: string[]): Q.Promise<any> {
         var failures: string[] = [];
         return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
 
@@ -32,7 +36,12 @@ class GulpUtils {
             }
 
             var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-            var testProcess = child_process.spawn(npmCommand, ["run-script", scriptName], { cwd: modulePath, stdio: "inherit" });
+            var commandArgs = ["run-script", scriptName];
+            if (args && args.length > 0){
+                commandArgs.push("--");
+                commandArgs = commandArgs.concat(args);
+            }
+            var testProcess = child_process.spawn(npmCommand, commandArgs, { cwd: modulePath, stdio: "inherit" });
             var deferred = Q.defer();
             testProcess.on("close", function(code: number): void {
                 if (code) {
