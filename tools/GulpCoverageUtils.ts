@@ -19,7 +19,7 @@ class GulpCoverageUtils {
         coverageOutputDir = path.resolve(coverageOutputDir);
         modulesRoot = path.resolve(modulesRoot);
 
-        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpCoverageUtils.COVERAGE_COMMAND, true /* failAtEnd */)
+        return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpCoverageUtils.COVERAGE_COMMAND, true /* failAtEnd */, [])
             .then(function(): Q.Promise<any> {
                 return Q.all<any>(modulesToTest.map(moduleName => {
                     // this post coverage copy back is needed more for the scenario to support

@@ -41,7 +41,8 @@ var supportedFlags: Nopt.FlagTypeMap = {
     modulesFilter: [String, Array], // Run any task for a selected module
     drop: String, // a custom drop location where built package.tgz can be dropped
     secondaryCoverageDirs: [String, Array], // list of secondary coverage files location
-    failTestsAtEnd: Boolean // if true, for multiple packages, fails test run only at the end
+    failTestsAtEnd: Boolean, // if true, for multiple packages, fails test run only at the end
+    testsReporter: String
 };
 
 var supportedShorthands: Nopt.ShortFlags = {
@@ -143,7 +144,7 @@ gulp.task("tslint", function(): Q.Promise<any> {
 
 /* Task to run tests */
 gulp.task("run-tests", ["install-build", "tslint"], function (): Q.Promise<any> {
-    return GulpUtils.runAllTests(tacoModules, buildConfig.buildPackages, options.failTestsAtEnd);
+    return GulpUtils.runAllTests(tacoModules, buildConfig.buildPackages, options.failTestsAtEnd, options.testsReporter);
 });
 
 /* Task to archive template folders */
