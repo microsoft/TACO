@@ -10,6 +10,8 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
+/// <reference path="../../typings/tacoTestsUtils.d.ts"/>
+
 "use strict";
 
 /* tslint:disable:no-var-requires */
@@ -35,13 +37,14 @@ import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoUtility = require ("taco-utils");
 import TacoTestUtility = require ("taco-tests-utils");
-import ms = require("./utils/memoryStream");
+import tacoTestsUtils = require("taco-tests-utils");
 import CommandHelper = require ("./utils/commandHelper");
 
 import ICommand = tacoUtility.Commands.ICommand;
 import IKeyValuePair = TacoTestUtility.IKeyValuePair;
 import TestProjectHelper = TacoTestUtility.ProjectHelper;
 import utils = TacoUtility.UtilHelper;
+import MemoryStream = tacoTestsUtils.MemoryStream;
 
 var platformCommand: ICommand = CommandHelper.getCommand("platform");
 var pluginCommand: ICommand = CommandHelper.getCommand("plugin");
@@ -439,7 +442,7 @@ describe("taco platform for kit", function(): void {
         // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
         // stdoutWrite just doesn't work
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-        var memoryStdout: ms.MemoryStream;
+        var memoryStdout: MemoryStream;
 
         beforeEach(function(done: MochaDone): void {
             this.timeout(60000); // Instaling the node packages during create can take a long time
@@ -447,7 +450,7 @@ describe("taco platform for kit", function(): void {
             // We create a taco project outside of the test
             Q.fcall(createCliProject, "5.0.0").done(() => {
                 // After the taco project is created, we initialize the console, so we won't get the creation messages in the console
-                memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+                memoryStdout = new MemoryStream; // Each individual test gets a new and empty console
                 process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
                 done();
             }, function(err: any): void {

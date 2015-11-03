@@ -1,102 +1,83 @@
-﻿/**
+/**
  *******************************************************
  *                                                     *
  *   Copyright (C) Microsoft. All rights reserved.     *
  *                                                     *
  *******************************************************
  */
-
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/should.d.ts"/>
 /// <reference path="../../typings/nconf.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts"/>
 /// <reference path="../../typings/tacoTestsUtils.d.ts"/>
-
 "use strict";
-
 /* tslint:disable:no-var-requires */
 // var require needed for should module to work correctly
 // Note not import: We don't want to refer to shouldModule, but we need the require to occur since it modifies the prototype of Object.
-var shouldModule: any = require("should");
+var shouldModule = require("should");
 /* tslint:enable:no-var-requires */
-
 /* tslint:disable:no-var-requires */
 // Special case to allow using color package with index signature for style rules
-var colors: any = require("colors/safe");
+var colors = require("colors/safe");
 /* tslint:enable:no-var-requires */
-
-import nconf = require("nconf");
-import path = require("path");
-import Q = require("q");
-
-import tacoUtils = require("taco-utils");
-import Help = require("../lib/help");
-import cli = require("../lib/cli");
-import RemoteBuildConf = require("../lib/remoteBuildConf");
-import tacoTestsUtils = require("taco-tests-utils");
-
-import UtilHelper = tacoUtils.UtilHelper;
-import ms = tacoTestsUtils;
-
-import ICommandData = tacoUtils.Commands.ICommandData;
-
-function parseRemoteBuildConf(): RemoteBuildConf {
+var nconf = require("nconf");
+var path = require("path");
+var tacoUtils = require("taco-utils");
+var Help = require("../lib/help");
+var RemoteBuildConf = require("../lib/remoteBuildConf");
+var tacoTestsUtils = require("taco-tests-utils");
+var UtilHelper = tacoUtils.UtilHelper;
+var ms = tacoTestsUtils;
+//import CommandHelper = require("./utils/commandHelper");
+//import ICommand = tacoUtils.Commands.ICommand;
+function parseRemoteBuildConf() {
     // Configuration preference: command line, then anything in a config file if specified by the --config arg, then some defaults for options not yet set
     nconf.argv();
     // Default to using TACO_HOME/RemoteBuild.config
     // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
-    var configFile: string = nconf.get("config") || path.join(UtilHelper.tacoHome, "RemoteBuild.config");
+    var configFile = nconf.get("config") || path.join(UtilHelper.tacoHome, "RemoteBuild.config");
     nconf.file({ file: configFile });
-
     return new RemoteBuildConf(nconf);
 }
-
-describe("help for remotebuild", function (): void {
+describe("help for remotebuild", function () {
     var remotebuildConf = parseRemoteBuildConf();
-    var help: Help = new Help(remotebuildConf);
-
+    var help = new Help(remotebuildConf);
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
-    var previous: boolean;
-
-    function helpRun(command: string): Q.Promise<any> {
-        var data: ICommandData = {
+    var memoryStdout;
+    var previous;
+    function helpRun(command) {
+        var data = {
             options: {},
             original: [command],
             remain: [command]
         };
-
         return help.run(data);
-    };
-
-    function testHelpForCommand(command: string, expectedLines: string[], done: MochaDone): void {
-        helpRun(command).done(() => {
-            var expected: string = expectedLines.join("\n");
-            var actual: string = colors.strip(memoryStdout.contentsAsText()); // The colors add extra characters
+    }
+    ;
+    function testHelpForCommand(command, expectedLines, done) {
+        helpRun(command).done(function () {
+            var expected = expectedLines.join("\n");
+            var actual = colors.strip(memoryStdout.contentsAsText()); // The colors add extra characters
             actual = actual.replace(/ (\.+) ?\n  +/gm, " $1 "); // We undo the word-wrapping
             actual = actual.replace(/ +$/gm, ""); // Remove useless spaces at the end of a line
             actual.should.be.equal(expected);
             done();
         }, done);
     }
-
-    before(() => {
+    before(function () {
         previous = process.env["TACO_UNIT_TEST"];
         process.env["TACO_UNIT_TEST"] = true;
     });
-
-    after(() => {
+    after(function () {
         // We just need to reset the stdout just once, after all the tests have finished
         process.stdout.write = stdoutWrite;
         process.env["TACO_UNIT_TEST"] = previous;
     });
-
-    beforeEach(() => {
+    beforeEach(function () {
         memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
         process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
     });
-
-    it("prints the help for remotebuild", function (done: MochaDone): void {
+    it("prints the help for remotebuild", function (done) {
         testHelpForCommand("", [
             "CommandHelpUsageSynopsis",
             "   remotebuild <COMMAND>",
@@ -110,10 +91,10 @@ describe("help for remotebuild", function (): void {
             "   version ............. CommandVersionDescription",
             "",
             "RemoteBuildModuleHelpText",
-            ""], done);
+            ""
+        ], done);
     });
-
-    it("prints the help for remotebuild start", function (done: MochaDone): void {
+    it("prints the help for remotebuild start", function (done) {
         testHelpForCommand("start", [
             "",
             "CommandStartDescription",
@@ -145,10 +126,10 @@ describe("help for remotebuild", function (): void {
             "",
             "",
             "RemoteBuildModuleHelpText",
-            ""], done);
+            ""
+        ], done);
     });
-
-    it("prints the help for remotebuild test", function (done: MochaDone): void {
+    it("prints the help for remotebuild test", function (done) {
         testHelpForCommand("test", [
             "",
             "CommandTestDescription",
@@ -181,10 +162,10 @@ describe("help for remotebuild", function (): void {
             "",
             "",
             "RemoteBuildModuleHelpText",
-            ""], done);
+            ""
+        ], done);
     });
-
-    it("prints the help for remotebuild certificates", function (done: MochaDone): void {
+    it("prints the help for remotebuild certificates", function (done) {
         testHelpForCommand("certificates", [
             "",
             "CommandGenerateDescription",
@@ -217,10 +198,10 @@ describe("help for remotebuild", function (): void {
             "",
             "",
             "RemoteBuildModuleHelpText",
-            ""], done);
+            ""
+        ], done);
     });
-
-    it("prints the help for remotebuild saveconfig", function (done: MochaDone): void {
+    it("prints the help for remotebuild saveconfig", function (done) {
         testHelpForCommand("saveconfig", [
             "",
             "CommandSaveConfigDescription",
@@ -236,10 +217,10 @@ describe("help for remotebuild", function (): void {
             "      --config [PATH] .................... RemoteBuildConfConfigFile",
             "",
             "RemoteBuildModuleHelpText",
-            ""], done);
+            ""
+        ], done);
     });
-
-    it("prints the help for remotebuild version", function (done: MochaDone): void {
+    it("prints the help for remotebuild version", function (done) {
         testHelpForCommand("version", [
             "",
             "CommandVersionDescription",
@@ -248,6 +229,8 @@ describe("help for remotebuild", function (): void {
             "",
             "",
             "RemoteBuildModuleHelpText",
-            ""], done);
+            ""
+        ], done);
     });
 });
+//# sourceMappingURL=help.js.map

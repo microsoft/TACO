@@ -10,6 +10,7 @@
 /// <reference path="../../typings/should.d.ts" />
 /// <reference path="../../typings/del.d.ts" />
 /// <reference path="../../typings/node.d.ts"/>
+/// <reference path="../../typings/tacoTestsUtils.d.ts"/>
 
 "use strict";
 
@@ -28,11 +29,12 @@ import Settings = require ("../cli/utils/settings");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
 import CheckForNewerVersion = require ("../cli/utils/checkForNewerVersion");
-import ms = require ("./utils/memoryStream");
+import tacoTestsUtils = require ("taco-tests-utils");
 import http = require ("http");
 import ServerMock = require ("./utils/serverMock");
 
 import utils = TacoUtility.UtilHelper;
+import MemoryStream = tacoTestsUtils.MemoryStream;
 
 enum MessageExpectation {
     WillBeShown,
@@ -47,7 +49,7 @@ describe("Check for newer version", function (): void {
     // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
     // stdoutWrite just doesn't work
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
+    var memoryStdout: MemoryStream;
 
     var expectedRequestAndResponse: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean, responseDelay?: number };
 
@@ -68,7 +70,7 @@ describe("Check for newer version", function (): void {
     });
 
     beforeEach(() => {
-        memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+        memoryStdout = new MemoryStream; // Each individual test gets a new and empty console
         process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
 
         // These contents were copied from http://registry.npmjs.org/remotebuild/latest and then renamed to what should be a taco-cli response
