@@ -425,6 +425,9 @@
     "RemoteBuildUnsupportedPlatform": "Error: Platform '{0}' not supported by current version of Cordova.",
     "_RemoteBuildUnsupportedPlatformcomment": "Error message printed when trying to 'taco remote add <platform>' and the platform is not supported. {0} is the platform",
 
+    "InvalidCordovaWithNode5": "Incompatible configuration: Unable to use Cordova < 5.4.0 with Node >= 5.0.0. Either upgrade to a newer version of Cordova, or revert to an older version of node. See http://go.microsoft.com/fwlink/?LinkID=618471 for more details.",
+    "_InvalidCordovaWithNode5.comment": "Error message printed when trying to use Cordova < 5.4.0 with Node >= 5.0.0.",
+
     "UnsupportedHostPlatform": "Error: Unsupported platform {0}",
     "_UnsupportedHostPlatform.comment": "Message printed when running on an operating system that we don't support. {0} is the platform",
     "NoCertificateFound": "Error: No certificate '{0}' found",

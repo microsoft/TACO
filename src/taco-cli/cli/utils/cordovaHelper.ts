@@ -12,6 +12,7 @@ import domain = require("domain");
 import os = require("os");
 import path = require ("path");
 import Q = require ("q");
+import semver = require ("semver");
 
 import errorHelper = require ("../tacoErrorHelper");
 import projectHelper = require ("./projectHelper");
@@ -280,12 +281,19 @@ class CordovaHelper {
         });
     }
 
+    public static ensureCordovaVersionAcceptable(cliVersion: string): void {
+        if (semver.valid(cliVersion) && semver.lt(cliVersion, "5.4.0") && semver.gte(process.versions.node, "5.0.0")) {
+            throw errorHelper.get(TacoErrorCodes.InvalidCordovaWithNode5);
+        }
+    }
+
     /**
      * Acquire the specified version of Cordova, and then invoke the given function with that Cordova as an argument.
      * The function invocation is wrapped in a domain, so any uncaught errors can be encapsulated, and the Cordova object
      * has listeners added to print any messages to the output.
      */
     public static wrapCordovaInvocation<T>(cliVersion: string, func: (cordova: Cordova.ICordova) => T | Q.Promise<T>, logVerbosity: tacoUtility.InstallLogLevel = tacoUtility.InstallLogLevel.warn, silent: boolean = false): Q.Promise<T> {
+        CordovaHelper.ensureCordovaVersionAcceptable(cliVersion);
         return packageLoader.lazyRequire(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + cliVersion, logVerbosity)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
                 if (!silent) {

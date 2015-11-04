@@ -628,6 +628,7 @@ class Kit extends commands.TacoCommandBase {
             isKitProject: true,
             version: kitId
         };
+        cordovaHelper.ensureCordovaVersionAcceptable(kitInfo["cordova-cli"]);
 
         // Query the installed platform/plugin versions, non-updatable plugin info (child plugins/plugins that were installed from GIT/local file system) and over-write taco.json with the new kit ID
         return Q.all([projectHelper.getInstalledPlatformVersions(projectPath), projectHelper.getInstalledPluginVersions(projectPath), projectHelper.getNonUpdatablePlugins(projectPath)])
@@ -664,6 +665,7 @@ class Kit extends commands.TacoCommandBase {
         if (!semver.valid(version)) {
             return Q.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
         }
+        cordovaHelper.ensureCordovaVersionAcceptable(version);
 
         var npmCommand: string = process.platform === "win32" ? "npm.cmd" : "npm";
         var npmProcess: child_process.ChildProcess = child_process.spawn(npmCommand, ["view", "cordova", "versions"]);
