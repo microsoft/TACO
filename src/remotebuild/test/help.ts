@@ -26,7 +26,6 @@ var colors: any = require("colors/safe");
 /* tslint:enable:no-var-requires */
 
 import nconf = require("nconf");
-import path = require("path");
 import Q = require("q");
 
 import tacoUtils = require("taco-utils");
@@ -36,27 +35,17 @@ import RemoteBuildConf = require("../lib/remoteBuildConf");
 import tacoTestsUtils = require("taco-tests-utils");
 
 import UtilHelper = tacoUtils.UtilHelper;
-import ms = tacoTestsUtils;
+import MemoryStream = tacoTestsUtils.MemoryStream;
 
 import ICommandData = tacoUtils.Commands.ICommandData;
 
-function parseRemoteBuildConf(): RemoteBuildConf {
-    // Configuration preference: command line, then anything in a config file if specified by the --config arg, then some defaults for options not yet set
-    nconf.argv();
-    // Default to using TACO_HOME/RemoteBuild.config
-    // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
-    var configFile: string = nconf.get("config") || path.join(UtilHelper.tacoHome, "RemoteBuild.config");
-    nconf.file({ file: configFile });
-
-    return new RemoteBuildConf(nconf);
-}
-
 describe("help for remotebuild", function (): void {
-    var remotebuildConf = parseRemoteBuildConf();
+    nconf.use("memory");
+    var remotebuildConf: RemoteBuildConf = new RemoteBuildConf(nconf);
     var help: Help = new Help(remotebuildConf);
 
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-    var memoryStdout: ms.MemoryStream;
+    var memoryStdout: MemoryStream;
     var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
@@ -92,7 +81,7 @@ describe("help for remotebuild", function (): void {
     });
 
     beforeEach(() => {
-        memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+        memoryStdout = new MemoryStream; // Each individual test gets a new and empty console
         process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
     });
 
@@ -245,6 +234,42 @@ describe("help for remotebuild", function (): void {
             "CommandVersionDescription",
             "",
             "   remotebuild version",
+            "",
+            "",
+            "RemoteBuildModuleHelpText",
+            ""], done);
+    });
+    
+    it("prints the help for taco-remote module", function (done: MochaDone): void {
+        testHelpForCommand("taco-remote", [
+            "",
+            "TacoRemoteHelpDescription",
+            "CommandHelpUsageOptions",
+            "      allowsEmulate .............. TacoRemoteConfigAllowsEmulate",
+            "      deleteBuildsOnShutdown ..... TacoRemoteConfigDeleteBuildsOnShutdown",
+            "      maxBuildsInQueue ........... TacoRemoteConfigMaxBuildsInQueue",
+            "      maxBuildsToKeep ............ TacoRemoteConfigMaxBuildsToKeep",
+            "      nativeDebugProxyPort ....... TacoRemoteConfigNativeDebugProxyPort",
+            "      webDebugProxyDevicePort .... TacoRemoteConfigWebDebugProxyDevicePort",
+            "      webDebugProxyPortMin ....... TacoRemoteConfigWebDebugProxyPortMin",
+            "      webDebugProxyPortMax ....... TacoRemoteConfigWebDebugProxyPortMax",
+            "CommandHelpUsageExamples",
+            "   * TacoRemoteHelpExample",
+            "",
+            "      {",
+            "         \"port\": 3002,",
+            "         \"modules\": {",
+            "            \"taco-remote\": {",
+            "               \"mountPath\": \"cordova\",",
+            "               \"maxBuildsToKeep\": 0,",
+            "               \"webDebugProxyDevicePort\": 4321,",
+            "               \"deleteBuildsOnShutdown\": true",
+            "            }",
+            "         }",
+            "      }",
+            "",
+            "CommandHelpUsageNotes",
+            "   * TacoRemoteHelpNotes",
             "",
             "",
             "RemoteBuildModuleHelpText",

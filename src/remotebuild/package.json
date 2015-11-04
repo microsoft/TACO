@@ -45,7 +45,8 @@
         "mkdirp": "0.3.5",
         "should": "4.3.0",
         "request": "2.36.0",
-        "colors": "^1.0.3"
+        "colors": "^1.0.3",
+        "taco-tests-utils": "file:../taco-tests-utils"
     },
     "scripts": {
         "test": "mocha"
