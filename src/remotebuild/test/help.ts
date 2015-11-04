@@ -40,10 +40,7 @@ import MemoryStream = tacoTestsUtils.MemoryStream;
 import ICommandData = tacoUtils.Commands.ICommandData;
 
 describe("help for remotebuild", function (): void {
-    nconf.use("memory");
-    var remotebuildConf: RemoteBuildConf = new RemoteBuildConf(nconf);
-    var help: Help = new Help(remotebuildConf);
-
+    var help: Help;
     var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
     var memoryStdout: MemoryStream;
     var previous: boolean;
@@ -72,12 +69,21 @@ describe("help for remotebuild", function (): void {
     before(() => {
         previous = process.env["TACO_UNIT_TEST"];
         process.env["TACO_UNIT_TEST"] = true;
+
+        nconf.overrides({});
+        nconf.defaults({});
+        nconf.use("memory");
+
+        var remotebuildConf: RemoteBuildConf = new RemoteBuildConf(nconf);
+        help = new Help(remotebuildConf);
     });
 
     after(() => {
         // We just need to reset the stdout just once, after all the tests have finished
         process.stdout.write = stdoutWrite;
-        process.env["TACO_UNIT_TEST"] = previous;
+        delete process.env["TACO_UNIT_TEST"];
+
+        nconf.reset();
     });
 
     beforeEach(() => {
