@@ -239,7 +239,7 @@ describe("help for remotebuild", function (): void {
             "RemoteBuildModuleHelpText",
             ""], done);
     });
-    
+
     it("prints the help for taco-remote module", function (done: MochaDone): void {
         testHelpForCommand("taco-remote", [
             "",
