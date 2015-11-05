@@ -8,6 +8,8 @@
 /// <reference path="../../typings/mocha.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/should.d.ts" />
+/// <reference path="../../typings/tacoTestsUtils.d.ts"/>
+
 "use strict";
 
 /* tslint:disable:no-var-requires */
@@ -34,11 +36,12 @@ import RemoteMod = require ("../cli/remote");
 import RemoteMock = require ("./utils/remoteMock");
 import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import TacoUtility = require ("taco-utils");
-import ms = require ("./utils/memoryStream");
+import tacoTestsUtils = require ("taco-tests-utils");
 import CommandHelper = require ("./utils/commandHelper");
 import ICommand = TacoUtility.Commands.ICommand;
 
 import utils = TacoUtility.UtilHelper;
+import MemoryStream = tacoTestsUtils.MemoryStream;
 
 var remote: ICommand = CommandHelper.getCommand("remote");
 
@@ -237,10 +240,10 @@ describe("taco remote", function(): void {
         // because of function overloading assigning "(buffer: string, cb?: Function) => boolean" as the type for
         // stdoutWrite just doesn't work
         var stdoutWrite = process.stdout.write; // We save the original implementation, so we can restore it later
-        var memoryStdout: ms.MemoryStream;
+        var memoryStdout: MemoryStream;
 
         beforeEach(() => {
-            memoryStdout = new ms.MemoryStream; // Each individual test gets a new and empty console
+            memoryStdout = new MemoryStream; // Each individual test gets a new and empty console
             process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
         });
 

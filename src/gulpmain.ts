@@ -20,22 +20,41 @@ import GulpUtils = require ("../tools/GulpUtils");
 import GulpCoverageUtils = require ("../tools/GulpCoverageUtils");
 import GulpPackageUtils = require ("../tools/GulpPackageUtils");
 
-/* tslint:disable:no-console */
-// Disable console rule for gulp file, since this is a build file
-// we don't want to take dependency on Logger here
-
 /* tslint:disable:no-var-requires */
 // var require needed to require build_config.json
 var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
 /* tslint:enable:no-var-requires */
-var tacoModules: string[] = ["taco-utils", "taco-kits", "taco-dependency-installer", "taco-cli", "remotebuild", "taco-remote", "taco-remote-lib", "taco-tests-utils"];
-var allModules: string[] = tacoModules.concat(["taco-remote-multiplexer"]);
 
-// honour --moduleFilter flag.
-// gulp --moduleFilter taco-cli will build/install/run tests only for taco-cli
-var options: any = nopt({ moduleFilter: String, drop: String, coverageFiles: String }, {}, process.argv);
-if (options.moduleFilter && tacoModules.indexOf(options.moduleFilter) > -1) {
-    tacoModules = [options.moduleFilter];
+var tacoModules: string[] = [
+    "taco-utils",
+    "taco-kits",
+    "taco-dependency-installer",
+    "taco-cli",
+    "remotebuild",
+    "taco-remote",
+    "taco-remote-lib",
+    "taco-tests-utils",
+    "taco-remote-multiplexer"
+];
+
+var supportedFlags: Nopt.FlagTypeMap = {
+    modulesFilter: [String, Array], // Run any task for a selected module
+    drop: String, // a custom drop location where built package.tgz can be dropped
+    secondaryCoverageDirs: [String, Array], // list of secondary coverage files location
+    failTestsAtEnd: Boolean, // if true, for multiple packages, fails test run only at the end
+    testsReporter: String
+};
+
+var supportedShorthands: Nopt.ShortFlags = {
+    "m": ["--modulesFilter"],
+    "scd": ["--secondaryCoverageDirs"],
+    "ftae": ["--failTestsAtEnd"]
+};
+
+var options: any = nopt(supportedFlags, supportedShorthands, process.argv);
+
+if (options.modulesFilter) {
+    tacoModules = tacoModules.filter((tacoModule: string) => options.modulesFilter.indexOf(tacoModule) > -1);
 }
 
 /* Default task for building /src folder into /bin */
@@ -64,15 +83,15 @@ gulp.task("just-package", [], function(callback: gulp.TaskCallback): void {
 });
 
 gulp.task("dev-package", ["copy"], function(): Q.Promise<any> {
-    return GulpPackageUtils.package(buildConfig.buildPackages, allModules, "dev", options.drop || buildConfig.buildPackages);
+    return GulpPackageUtils.package(buildConfig.buildPackages, tacoModules, "dev", options.drop || buildConfig.buildPackages);
 });
 
 gulp.task("beta-package", ["copy"], function(): Q.Promise<any> {
-    return GulpPackageUtils.package(buildConfig.buildPackages, allModules, "beta", options.drop || buildConfig.buildPackages);
+    return GulpPackageUtils.package(buildConfig.buildPackages, tacoModules, "beta", options.drop || buildConfig.buildPackages);
 });
 
 gulp.task("release-package", ["copy"], function(): Q.Promise<any> {
-    return GulpPackageUtils.package(buildConfig.buildPackages, allModules, "release", options.drop || buildConfig.buildPackages);
+    return GulpPackageUtils.package(buildConfig.buildPackages, tacoModules, "release", options.drop || buildConfig.buildPackages);
 });
 
 /* full clean build */
@@ -125,7 +144,7 @@ gulp.task("tslint", function(): Q.Promise<any> {
 
 /* Task to run tests */
 gulp.task("run-tests", ["install-build", "tslint"], function (): Q.Promise<any> {
-    return GulpUtils.runAllTests(tacoModules, buildConfig.buildPackages);
+    return GulpUtils.runAllTests(tacoModules, buildConfig.buildPackages, options.failTestsAtEnd, options.testsReporter);
 });
 
 /* Task to archive template folders */
@@ -136,7 +155,7 @@ gulp.task("prepare-templates", ["clean-templates"], function (): Q.Promise<any> 
 
 /* Task to coverage tests */
 gulp.task("coverage", ["install-build"], function(): Q.Promise<any> {
-    return GulpCoverageUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage, options.coverageFiles);
+    return GulpCoverageUtils.runCoverage(tacoModules, buildConfig.buildPackages, buildConfig.buildCoverage, options.secondaryCoverageDirs);
 });
 
 module.exports = gulp;
