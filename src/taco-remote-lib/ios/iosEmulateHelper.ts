@@ -53,7 +53,7 @@ class IOSEmulateHelper {
             if (e.status) {
                 return e;
             } else {
-                return { status: "error", messageId: "EmulateFailedWithError", messageArgs: e.message };
+                return { status: BuildInfo.ERROR, messageId: "EmulateFailedWithError", messageArgs: e.message };
             }
         });
     }
