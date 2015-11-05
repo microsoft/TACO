@@ -77,26 +77,26 @@ class AndroidPackagesInstaller extends InstallerBase {
         }
     }
 
-    private getAvailableAndroidPackages(): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer();
+    private executeAndroidCommand(args: string[], nameForTelemetry: string,
+        shouldAutomaticallyAcceptLicenseTerms: boolean): Q.Promise<string> {
+        var deferred: Q.Deferred<string> = Q.defer<string>();
+        var stdErrOutput: string = "";
+        var stdOutput: string = "";
 
-        // Call "android list sdk -e" and capture output
-        var args: string[] = [
-            "list",
-            "sdk",
-            "-e"
-        ];
-        var output: string = "";
-        var errorOutput: string = "";
         var cp: childProcess.ChildProcess = os.platform() === "darwin" ?
             childProcess.spawn(this.androidCommand, args, { uid: parseInt(process.env.SUDO_UID, 10), gid: parseInt(process.env.SUDO_GID, 10) }) : childProcess.spawn(this.androidCommand, args);
 
         cp.stdout.on("data", function (data: Buffer): void {
-            output += data.toString();
+            stdOutput += data.toString();
         });
+
+        cp.stderr.on("data", function (data: Buffer): void {
+            stdErrOutput += data.toString();
+        });
+
         cp.on("error", (err: any) => {
             this.telemetry
-                .add("error.description", "ErrorOnChildProcess on installAndroidPackages", /*isPii*/ false)
+                .add("error.description", "ErrorOnChildProcess on " + nameForTelemetry, /*isPii*/ false)
                 .addError(err);
 
             if (err.code === "ENOENT") {
@@ -105,35 +105,61 @@ class AndroidPackagesInstaller extends InstallerBase {
                 deferred.reject(err);
             }
         });
+
         cp.on("exit", (code: number) => {
-            errorOutput = AndroidPackagesInstaller.removeOptionsFromStderr(errorOutput);
+            stdErrOutput = AndroidPackagesInstaller.removeOptionsFromStderr(stdErrOutput);
 
-            if (errorOutput || code) {
+            if (stdErrOutput || code) {
                 this.telemetry
-                    .add("error.description", "ErrorOnExitOfChildProcess on installAndroidPackages", /*isPii*/ false)
+                    .add("error.description", "ErrorOnExitOfChildProcess on " + nameForTelemetry, /*isPii*/ false)
                     .add("error.code", code, /*isPii*/ false)
-                    .add("error.message", errorOutput, /*isPii*/ true);
+                    .add("error.message", stdErrOutput, /*isPii*/ true);
 
-                var errorString: string = errorOutput || resources.getString("InstallerExitCode", util.format("%s %s", this.androidCommand, args.join(" ")), code);
+                var errorString: string = stdErrOutput || resources.getString("InstallerExitCode", util.format("%s %s", this.androidCommand, args.join(" ")), code);
 
                 deferred.reject(new Error(errorString));
             } else {
-                this.availablePackages = [];
-
-                // Parse for package ids and save them
-                var regex: RegExp = /id: \d+ or "(.+)"/g;
-                var match: RegExpMatchArray = regex.exec(output);
-
-                while (match) {
-                    this.availablePackages.push(match[1]);  // Index 0 is the entire matched line, index 1 is the captured group which is the actual package ID
-                    match = regex.exec(output);
-                }
-
-                deferred.resolve({});
+                deferred.resolve(stdOutput);
             }
         });
 
+        if (shouldAutomaticallyAcceptLicenseTerms) {
+            cp.stdout.on("data", function (data: Buffer): void {
+                var stringData: string = data.toString();
+
+                if (/\[y\/n\]:/.test(stringData)) {
+                    // Accept license terms
+                    cp.stdin.write("y" + os.EOL);
+                    cp.stdin.end();
+                }
+            });
+        }
+
         return deferred.promise;
+    }
+
+    private getAvailableAndroidPackages(): Q.Promise<any> {
+        // Call "android list sdk -e"
+        var args: string[] = [
+            "list",
+            "sdk",
+            "-e"
+        ];
+
+        var outputPromise: Q.Promise<string> = this.executeAndroidCommand(args, "getAvailableAndroidPackages",
+             /*shouldAutomaticallyAcceptLicenseTerms*/ false);
+        return outputPromise.then((output: string) => {
+            this.availablePackages = [];
+
+            // Parse for package ids and save them
+            var regex: RegExp = /id: \d+ or "(.+)"/g;
+            var match: RegExpMatchArray = regex.exec(output);
+
+            while (match) {
+                this.availablePackages.push(match[1]);  // Index 0 is the entire matched line, index 1 is the captured group which is the actual package ID
+                match = regex.exec(output);
+            }
+        });
     }
 
     private getPlatformToolsPackageId(): string {
@@ -231,7 +257,6 @@ class AndroidPackagesInstaller extends InstallerBase {
 
     private installAndroidPackages(packagesFilter: string): Q.Promise<any> {
         // Install Android packages
-        var deferred: Q.Deferred<any> = Q.defer<any>();
         var args: string[] = [
             "update",
             "sdk",
@@ -239,51 +264,9 @@ class AndroidPackagesInstaller extends InstallerBase {
             "--filter",
             packagesFilter
         ];
-        var errorOutput: string = "";
-        var cp: childProcess.ChildProcess = os.platform() === "darwin" ?
-            childProcess.spawn(this.androidCommand, args, { uid: parseInt(process.env.SUDO_UID, 10), gid: parseInt(process.env.SUDO_GID, 10) }) : childProcess.spawn(this.androidCommand, args);
 
-        cp.stdout.on("data", function (data: Buffer): void {
-            var stringData: string = data.toString();
-
-            if (/\[y\/n\]:/.test(stringData)) {
-                // Accept license terms
-                cp.stdin.write("y" + os.EOL);
-                cp.stdin.end();
-            }
-        });
-        cp.stderr.on("data", function (data: Buffer): void {
-            errorOutput += data.toString();
-        });
-        cp.on("error", (err: any) => {
-            this.telemetry
-                .add("error.description", "ErrorOnChildProcess on installAndroidPackages", /*isPii*/ false)
-                .addError(err);
-
-            if (err.code === "ENOENT") {
-                deferred.reject(new Error(resources.getString("AndroidCommandNotFound", path.basename(this.androidCommand))));
-            } else {
-                deferred.reject(err);
-            }
-        });
-        cp.on("exit", (code: number) => {
-            errorOutput = AndroidPackagesInstaller.removeOptionsFromStderr(errorOutput);
-
-            if (errorOutput || code) {
-                this.telemetry
-                    .add("error.description", "ErrorOnExitOfChildProcess on installAndroidPackages", /*isPii*/ false)
-                    .add("error.code", code, /*isPii*/ false)
-                    .add("error.message", errorOutput, /*isPii*/ true);
-
-                var errorString: string = errorOutput || resources.getString("InstallerExitCode", util.format("%s %s", this.androidCommand, args.join(" ")), code);
-
-                deferred.reject(new Error(errorString));
-            } else {
-                deferred.resolve({});
-            }
-        });
-
-        return deferred.promise;
+        return this.executeAndroidCommand(args, "installAndroidPackages",
+            /*shouldAutomaticallyAcceptLicenseTerms*/ true);
     }
 
     private killAdb(): Q.Promise<any> {
