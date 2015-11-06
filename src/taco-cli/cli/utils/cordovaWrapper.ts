@@ -13,20 +13,22 @@
 
 "use strict";
 
-import assert = require ("assert");
-import child_process = require ("child_process");
-import os = require ("os");
-import path = require ("path");
-import Q = require ("q");
-import semver = require ("semver");
-import util = require ("util");
+import assert = require("assert");
+import child_process = require("child_process");
+import os = require("os");
+import path = require("path");
+import Q = require("q");
+import semver = require("semver");
+import util = require("util");
 
-import CordovaHelper = require ("./cordovaHelper");
-import projectHelper = require ("./projectHelper");
-import resources = require ("../../resources/resourceManager");
-import TacoErrorCodes = require ("../tacoErrorCodes");
-import errorHelper = require ("../tacoErrorHelper");
-import tacoUtility = require ("taco-utils");
+import CordovaHelper = require("./cordovaHelper");
+import projectHelper = require("./projectHelper");
+import resources = require("../../resources/resourceManager");
+import TacoErrorCodes = require("../tacoErrorCodes");
+import errorHelper = require("../tacoErrorHelper");
+import tacoUtility = require("taco-utils");
+
+import livereloadHelper = require("./liveReloadHelper");
 
 import commands = tacoUtility.Commands;
 import ConfigParser = Cordova.cordova_lib.configparser;
@@ -35,8 +37,6 @@ import packageLoader = tacoUtility.TacoPackageLoader;
 class CordovaWrapper {
     private static cordovaCommandName: string = os.platform() === "win32" ? "cordova.cmd" : "cordova";
     private static CORDOVA_CHECK_REQS_MIN_VERSION: string = "5.1.1";
-    private static DEVICESYNC_PLUGIN_NAME: string = "cordova-plugin-livereload";
-    private static DEVICESYNC_PLUGIN_GITHUB_URL: string = "https://github.com/omefire/cordova-plugin-livereload.git";
 
     public static cli(args: string[], captureOutput: boolean = false): Q.Promise<string> {
         var deferred = Q.defer<string>();
@@ -45,7 +45,7 @@ class CordovaWrapper {
         var options: child_process.IExecOptions = captureOutput ? { stdio: "pipe" } : { stdio: "inherit" };
         var proc = child_process.spawn(CordovaWrapper.cordovaCommandName, args, options);
 
-        proc.on("error", function (err: any): void {
+        proc.on("error", function(err: any): void {
             // ENOENT error thrown if no Cordova.cmd is found
             var tacoError = (err.code === "ENOENT") ?
                 errorHelper.get(TacoErrorCodes.CordovaCmdNotFound) :
@@ -54,15 +54,15 @@ class CordovaWrapper {
         });
 
         if (captureOutput) {
-            proc.stdout.on("data", function (data: Buffer): void {
+            proc.stdout.on("data", function(data: Buffer): void {
                 output += data.toString();
             });
-            proc.stderr.on("data", function (data: Buffer): void {
+            proc.stderr.on("data", function(data: Buffer): void {
                 errorOutput += data.toString();
             });
         }
 
-        proc.on("close", function (code: number): void {
+        proc.on("close", function(code: number): void {
             if (code) {
                 // Special handling for 'cordova requirements': this Cordova command returns an error when some requirements are not installed, when technically this is not really an error (the command executes
                 // correctly and reports that some requirements are missing). In that case, if the captureOutput flag is set, we don't want to report an error. To detect this case, we have to parse the returned
@@ -103,17 +103,17 @@ class CordovaWrapper {
      */
     public static invokePlatformPluginCommand(command: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: commands.ICommandData = null, isSilent: boolean = false): Q.Promise<any> {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-                if (command === "platform") {
-                    return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
-                } else if (command === "plugin") {
-                    return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
-                } else {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
-                }
+            if (command === "platform") {
+                return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+            } else if (command === "plugin") {
+                return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
+            } else {
+                return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
+            }
         }, () => {
-            assert(data);
-            return [command].concat(CordovaHelper.toCordovaCliArguments(data));
-        }, { logLevel: tacoUtility.InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
+                assert(data);
+                return [command].concat(CordovaHelper.toCordovaCliArguments(data));
+            }, { logLevel: tacoUtility.InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
     }
 
     public static emulate(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
@@ -124,21 +124,21 @@ class CordovaWrapper {
 
     public static requirements(platforms: string[]): Q.Promise<any> {
         return CordovaWrapper.getCordovaVersion()
-            .then(function (version: string): Q.Promise<any> {
-                // If the cordova version is older than 5.1.0, the 'requirements' command does not exist
-                if (!semver.gte(version, CordovaWrapper.CORDOVA_CHECK_REQS_MIN_VERSION)) {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld, version, CordovaWrapper.CORDOVA_CHECK_REQS_MIN_VERSION));
-                }
+            .then(function(version: string): Q.Promise<any> {
+            // If the cordova version is older than 5.1.0, the 'requirements' command does not exist
+            if (!semver.gte(version, CordovaWrapper.CORDOVA_CHECK_REQS_MIN_VERSION)) {
+                return Q.reject(errorHelper.get(TacoErrorCodes.CommandInstallCordovaTooOld, version, CordovaWrapper.CORDOVA_CHECK_REQS_MIN_VERSION));
+            }
 
-                return Q.resolve({});
-            })
-            .then(function (): Q.Promise<any> {
-                return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova510) => {
-                        return cordova.raw.requirements(platforms);
-                }, () => {
+            return Q.resolve({});
+        })
+            .then(function(): Q.Promise<any> {
+            return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova510) => {
+                return cordova.raw.requirements(platforms);
+            }, () => {
                     return ["requirements"].concat(platforms || []);
                 }, { logLevel: tacoUtility.InstallLogLevel.silent, captureOutput: true });
-            });
+        });
     }
 
     /**
@@ -157,13 +157,13 @@ class CordovaWrapper {
     }
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {
-        return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
+        return CordovaWrapper.cli(["-v"], true).then(function(output: string): string {
             return output.split("\n")[0];
         });
     }
 
     public static getCordovaVersion(): Q.Promise<string> {
-        return projectHelper.getProjectInfo().then(function (projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
+        return projectHelper.getProjectInfo().then(function(projectInfo: projectHelper.IProjectInfo): Q.Promise<string> {
             if (projectInfo.cordovaCliVersion) {
                 return Q.resolve(projectInfo.cordovaCliVersion);
             } else {
@@ -173,33 +173,27 @@ class CordovaWrapper {
     }
 
     public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
-	// ToDO: check whether plugin is installed when doing it via a cordova process
-	// Test: taco run android --livereload with plugin already installed (done)
-	// Test: taco run android --livereload with plugin NOT yet installed (done)
-	// Test: taco run android [remote] => no plugin install
-	// Test: taco run android [local] => no plugin install
-	return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-	    return CordovaWrapper.installDeviceSyncPluginIfNecessary(cordova, commandData).then(function(): Q.Promise<any> {
-		return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
-	    });
-	}, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
+        // ToDO: check whether plugin is installed when doing it via a cordova process
+        // Test: taco run android --livereload with plugin already installed (done)
+        // Test: taco run android --livereload with plugin NOT yet installed (done)
+        // Test: taco run android [remote] => no plugin install
+        // Test: taco run android [local] => no plugin install
+        // Test: taco emulate [combinations]
+        // Test: what if user doesn't use --livereload => never load its dependencies
+        // ToDO: what if user installs the livereload plugin and then runs with --livereload ?
+        return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+            return Q({}).then(function() {
+                if (livereloadHelper.isLiveReload(commandData)) {
+                    livereloadHelper.setupLiveReload(cordova, commandData);
+                }
+            }).then(function(): Q.Promise<any> {
+                return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+            });
+        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))); // check if plugin installed -> install -> process args -> run
     }
 
-    private static installDeviceSyncPluginIfNecessary(cordova: Cordova.ICordova, commandData: commands.ICommandData): Q.Promise < any > {
-        var isLiveReloadOrDeviceSync: boolean = !!commandData.options["livereload"] || !!commandData.options["devicesync"];
-
-        if (!isLiveReloadOrDeviceSync) {
-            return Q.resolve({});
-        }
-
-        return projectHelper.getInstalledComponents(projectHelper.getProjectRoot(), "plugins").then((pluginList) => {
-            return pluginList.indexOf(CordovaWrapper.DEVICESYNC_PLUGIN_NAME) > -1;
-        }).then((isPluginInstalled) => {
-            if (!isPluginInstalled) {
-                return cordova.raw.plugin("add", CordovaWrapper.DEVICESYNC_PLUGIN_GITHUB_URL); // what if there's an error here?
-            }
-            return Q.resolve({});
-        });
+    private static isLiveReloadOrDeviceSync(commandData: commands.ICommandData) {
+        return !!commandData.options["livereload"] || !!commandData.options["devicesync"];
     }
     
     /**

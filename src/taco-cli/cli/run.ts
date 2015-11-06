@@ -11,20 +11,20 @@
 
 "use strict";
 
-import assert = require ("assert");
-import path = require ("path");
-import Q = require ("q");
+import assert = require("assert");
+import path = require("path");
+import Q = require("q");
 
-import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
-import CordovaWrapper = require ("./utils/cordovaWrapper");
-import errorHelper = require ("./tacoErrorHelper");
-import PlatformHelper = require ("./utils/platformHelper");
-import RemoteBuildClientHelper = require ("./remoteBuild/remoteBuildClientHelper");
-import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
-import resources = require ("../resources/resourceManager");
-import Settings = require ("./utils/settings");
-import TacoErrorCodes = require ("./tacoErrorCodes");
-import tacoUtility = require ("taco-utils");
+import buildTelemetryHelper = require("./utils/buildTelemetryHelper");
+import CordovaWrapper = require("./utils/cordovaWrapper");
+import errorHelper = require("./tacoErrorHelper");
+import PlatformHelper = require("./utils/platformHelper");
+import RemoteBuildClientHelper = require("./remoteBuild/remoteBuildClientHelper");
+import RemoteBuildSettings = require("./remoteBuild/buildSettings");
+import resources = require("../resources/resourceManager");
+import Settings = require("./utils/settings");
+import TacoErrorCodes = require("./tacoErrorCodes");
+import tacoUtility = require("taco-utils");
 
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
@@ -80,16 +80,16 @@ class Run extends commands.TacoCommandBase {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
-                buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
-                return Q.all(platforms.map(function (platform: PlatformHelper.IPlatformWithLocation): Q.Promise<any> {
-                    assert(platform.location === PlatformHelper.BuildLocationType.Remote);
-                    return Run.runRemotePlatform(platform.platform, commandData, telemetryProperties);
-                }));
-            }).then(() => Run.generateTelemetryProperties(telemetryProperties, commandData));
+            buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
+            return Q.all(platforms.map(function(platform: PlatformHelper.IPlatformWithLocation): Q.Promise<any> {
+                assert(platform.location === PlatformHelper.BuildLocationType.Remote);
+                return Run.runRemotePlatform(platform.platform, commandData, telemetryProperties);
+            }));
+        }).then(() => Run.generateTelemetryProperties(telemetryProperties, commandData));
     }
 
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData, telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
-        return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
+        return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function(settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var configuration = commandData.options["release"] ? "release" : "debug";
             var buildTarget = commandData.options["target"] || (commandData.options["device"] ? "device" : "");
             var language = settings.language || "en";
@@ -98,13 +98,13 @@ class Run extends commands.TacoCommandBase {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
 	    
-	    // DeviceSync/LiveReload not compatible with remote
-	    var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
-	    if (deviceSync) {
-		throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload/--devicesync", "--remote");
-	    }
+            // DeviceSync/LiveReload not compatible with remote
+            var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
+            if (deviceSync) {
+                throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload/--devicesync", "--remote");
+            }
 
-            var buildOptions = commandData.remain.filter(function (opt: string): boolean { return opt.indexOf("--") === 0; });
+            var buildOptions = commandData.remain.filter(function(opt: string): boolean { return opt.indexOf("--") === 0; });
             var buildInfoPath = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
             var buildSettings = new RemoteBuildSettings({
@@ -121,7 +121,7 @@ class Run extends commands.TacoCommandBase {
 
             // Find the build that we are supposed to run
             if (commandData.options["nobuild"]) {
-                buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): BuildInfo {
+                buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function(buildInfo: BuildInfo): BuildInfo {
                     if (!buildInfo) {
                         // No info for the remote build: User must build first
                         var buildCommandToRun = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
@@ -139,32 +139,32 @@ class Run extends commands.TacoCommandBase {
             // This makes sure that our defaults match Cordova's, as well as being consistent between our own build and run.
             var runPromise: Q.Promise<BuildInfo>;
             if (commandData.options["device"]) {
-                runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+                runPromise = buildInfoPromise.then(function(buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.run(buildInfo, remoteConfig);
-                }).then(function (buildInfo: BuildInfo): BuildInfo {
+                }).then(function(buildInfo: BuildInfo): BuildInfo {
                     logger.log(resources.getString("CommandRunRemoteDeviceSuccess"));
                     return buildInfo;
                 });
             } else {
-                runPromise = buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+                runPromise = buildInfoPromise.then(function(buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                     return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
-                }).then(function (buildInfo: BuildInfo): BuildInfo {
+                }).then(function(buildInfo: BuildInfo): BuildInfo {
                     logger.log(resources.getString("CommandRunRemoteEmulatorSuccess"));
                     return buildInfo;
                 });
             }
 
-            return runPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+            return runPromise.then(function(buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 if (commandData.options["debuginfo"]) {
                     // enable debugging and report connection information
                     return RemoteBuildClientHelper.debug(buildInfo, remoteConfig)
-                        .then(function (debugBuildInfo: BuildInfo): BuildInfo {
-                            if (debugBuildInfo["webDebugProxyPort"]) {
-                                logger.log(JSON.stringify({ webDebugProxyPort: debugBuildInfo["webDebugProxyPort"] }));
-                            }
+                        .then(function(debugBuildInfo: BuildInfo): BuildInfo {
+                        if (debugBuildInfo["webDebugProxyPort"]) {
+                            logger.log(JSON.stringify({ webDebugProxyPort: debugBuildInfo["webDebugProxyPort"] }));
+                        }
 
-                            return debugBuildInfo;
-                        });
+                        return debugBuildInfo;
+                    });
                 } else {
                     return Q(buildInfo);
                 }
@@ -181,12 +181,12 @@ class Run extends commands.TacoCommandBase {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
-                buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
+            buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
 
-                return PlatformHelper.operateOnPlatforms(platforms,
-                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.run(commandData, localPlatforms),
-                    (remotePlatform: string): Q.Promise<any> => Run.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
-                    );
+            return PlatformHelper.operateOnPlatforms(platforms,
+                (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.run(commandData, localPlatforms),
+                (remotePlatform: string): Q.Promise<any> => Run.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
+                );
         }).then(() => Run.generateTelemetryProperties(telemetryProperties, commandData));
     }
 
@@ -224,7 +224,7 @@ class Run extends commands.TacoCommandBase {
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
-       return true;
+        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {

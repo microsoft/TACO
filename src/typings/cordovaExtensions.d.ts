@@ -110,7 +110,7 @@ declare module Cordova {
         platforms(command: any, targets?: any, opts?: any): Q.Promise<any>;
         plugin(command: any, targets?: any, opts?: ICordovaPluginOptions): Q.Promise<any>;
         plugins(command: any, targets?: any, opts?: any): Q.Promise<any>;
-        prepare(options: ICordovaRawOptions): Q.Promise<any>;
+        prepare(options?: ICordovaRawOptions): Q.Promise<any>;
         restore(target: any, args: any): Q.Promise<any>;
         run(options: ICordovaRawOptions): Q.Promise<any>;
         save(target: any, opts?: any): Q.Promise<any>;
