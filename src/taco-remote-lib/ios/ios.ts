@@ -218,6 +218,15 @@ class IOSAgent implements ITargetPlatform {
                 res.status(200).json(buildInfo.localize(req, resources));
             }
         });
+
+        ideviceinstaller.on("error", function (err: any): void {
+            res.status(500);
+            if (err.code === "ENOENT") {
+                res.send(resources.getStringForLanguage(req, "IdeviceinstallerNotFound"));
+            } else {
+                res.send(err);
+            }
+        });
     }
 
     public debugBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
