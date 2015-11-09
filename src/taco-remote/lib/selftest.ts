@@ -11,6 +11,7 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/fstream.d.ts" />
+/// <reference path="../../typings/tar.d.ts" />
 
 import fs = require ("fs");
 import fstream = require ("fstream");
@@ -45,20 +46,26 @@ class SelfTest {
      * @return a promise which is resolved if the build succeeded, or rejected if the build failed.
      */
     public static test(host: string, modMountPoint: string, downloadDir: string, deviceBuild: boolean, agent: https.Agent): Q.Promise<any> {
-        var vcordova: string = "4.3.0";
+        var vcordova: string = "5.4.0"; // Using 5.4.0 for maximum node compatibility
         var tempFolder: string = path.join(os.tmpdir(), "taco-remote", "selftest");
         rimraf.sync(tempFolder);
         utils.createDirectoryIfNecessary(tempFolder);
         var cordovaApp: string = path.join(tempFolder, "helloCordova");
 
         return TacoPackageLoader.lazyRequire<typeof Cordova>("cordova", "cordova@" + vcordova).then(function (cordova: typeof Cordova): Q.Promise<any> {
-            return cordova.raw.create(cordovaApp);
+            // Create a project and add a plugin
+            return cordova.raw.create(cordovaApp).then(function (): Q.Promise<any> {
+                var originalCwd = process.cwd();
+                process.chdir(cordovaApp);
+                return cordova.raw.plugin("add", ["cordova-plugin-device"], {}).finally(function (): void {
+                    process.chdir(originalCwd);
+                });
+            });
         }, function (err: Error): any {
-                Logger.logError(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));
-                throw err;
-            }).then(function (): Q.Promise<any> {
-            var pingInterval: number = 5000;
-            var maxPings: number = 10;
+            Logger.logError(resources.getString("CordovaAcquisitionFailed", vcordova, err.toString()));
+            throw err;
+        }).then(function (): Q.Promise<string> {
+            // Submit the project to be built
             var vcli: string = require("../package.json").version;
             var cfg: string = "debug";
             var buildOptions: string = deviceBuild ? "--device" : "--emulator";
@@ -68,67 +75,98 @@ class SelfTest {
             var cordovaAppDirReader: fstream.Reader = new fstream.Reader(<fstream.IReaderProps> { path: cordovaApp, type: "Directory", filter: SelfTest.filterForTar });
             tgzProducingStream = cordovaAppDirReader.pipe(tar.Pack()).pipe(zlib.createGzip());
 
-            var deferred: Q.Deferred<any> = Q.defer();
+            var submitDeferred: Q.Deferred<string> = Q.defer<string>();
 
             var buildUrl: string = util.format("%s/%s/build/tasks/?vcordova=%s&vcli=%s&cfg=%s&command=build&options=%s", host, modMountPoint, vcordova, vcli, cfg, buildOptions);
             // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
             tgzProducingStream.pipe(request.post(<request.Options> { url: buildUrl, agent: agent }, function (submitError: any, submitResponse: any, submitBody: any): void {
                 if (submitError) {
-                    deferred.reject(submitError);
+                    submitDeferred.reject(submitError);
                     return;
                 }
 
                 var buildingUrl: string = submitResponse.headers["content-location"];
                 if (!buildingUrl) {
-                    deferred.reject(new Error(submitBody));
+                    submitDeferred.reject(new Error(submitBody));
                     return;
                 }
 
-                var i: number = 0;
-                var ping: NodeJS.Timer = setInterval(function (): void {
-                    i++;
-                    Logger.log(util.format("%d...", i));
-                    // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-                    request.get(<request.Options> { url: buildingUrl, agent: agent }, function (statusError: any, statusResponse: any, statusBody: any): void {
-                        if (statusError) {
-                            clearInterval(ping);
-                            deferred.reject(statusError);
-                        }
-
-                        var build: any = JSON.parse(statusBody);
-                        if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
-                            clearInterval(ping);
-                            deferred.reject(new Error("Build Failed: " + statusBody));
-                        } else if (build["status"] === BuildInfo.COMPLETE) {
-                            clearInterval(ping);
-
-                            if (deviceBuild) {
-                                var downloadUrl: string = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
-                                var buildNumber: any = build["buildNumber"];
-                                var downloadFile: string = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
-                                var writeStream: fs.WriteStream = fs.createWriteStream(downloadFile);
-                                writeStream.on("error", function (err: Error): void {
-                                    deferred.reject(err);
-                                });
-                                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
-                                request(<request.Options> { url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
-                                    deferred.resolve({});
-                                }).on("error", function (err: Error): void {
-                                    deferred.reject(err);
-                                });
-                            } else {
-                                deferred.resolve({});
-                            }
-                        } else if (i > maxPings) {
-                            deferred.reject(new Error(resources.getString("ExceededMaxPings", maxPings)));
-                            clearInterval(ping);
-                        }
-                    });
-                }, pingInterval);
+                submitDeferred.resolve(buildingUrl);
             }));
 
             tgzProducingStream.on("error", function (err: Error): void {
-                deferred.reject(err);
+                submitDeferred.reject(err);
+            });
+
+            return submitDeferred.promise;
+        }).then(function (buildingUrl: string): Q.Promise<BuildInfo> {
+            // Wait for the project to finish building
+            var pingInterval: number = 5000;
+            var maxPings: number = 10;
+            var i: number = 0;
+            var buildDeferred = Q.defer<BuildInfo>();
+            var ping: NodeJS.Timer = setInterval(function (): void {
+                i++;
+                Logger.log(util.format("%d...", i));
+                // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+                request.get(<request.Options> { url: buildingUrl, agent: agent }, function (statusError: any, statusResponse: any, statusBody: any): void {
+                    if (statusError) {
+                        clearInterval(ping);
+                        buildDeferred.reject(statusError);
+                    }
+
+                    var build: BuildInfo = JSON.parse(statusBody);
+                    if (build["status"] === BuildInfo.ERROR || build["status"] === BuildInfo.DOWNLOADED || build["status"] === BuildInfo.INVALID) {
+                        clearInterval(ping);
+                        buildDeferred.reject(new Error("Build Failed: " + statusBody));
+                    } else if (build["status"] === BuildInfo.COMPLETE) {
+                        clearInterval(ping);
+
+                        if (deviceBuild) {
+                            var downloadUrl: string = util.format("%s/%s/build/%d/download", host, modMountPoint, build["buildNumber"]);
+                            var buildNumber: any = build["buildNumber"];
+                            var downloadFile: string = path.join(downloadDir, "build_" + buildNumber + "_download.zip");
+                            var writeStream: fs.WriteStream = fs.createWriteStream(downloadFile);
+                            writeStream.on("error", function (err: Error): void {
+                                buildDeferred.reject(err);
+                            });
+                            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+                            request(<request.Options> { url: downloadUrl, agent: agent }).pipe(writeStream).on("finish", function (): void {
+                                buildDeferred.resolve(build);
+                            }).on("error", function (err: Error): void {
+                                buildDeferred.reject(err);
+                            });
+                        } else {
+                            buildDeferred.resolve(build);
+                        }
+                    } else if (i > maxPings) {
+                        buildDeferred.reject(new Error(resources.getString("ExceededMaxPings", maxPings)));
+                        clearInterval(ping);
+                    }
+                });
+            }, pingInterval);
+
+            return buildDeferred.promise;
+        }).then(function (build: BuildInfo): Q.Promise<any> {
+            // Check that the project built with the plugin we added
+            var downloadUrl: string = util.format("%s/%s/files/%d/cordovaApp/plugins/ios.json", host, modMountPoint, build["buildNumber"]);
+            var deferred = Q.defer();
+            // TODO: Remove the casting once we've get some complete/up-to-date .d.ts files. See https://github.com/Microsoft/TACO/issues/18
+            request(<request.Options> { url: downloadUrl, agent: agent }, function (error: Error, response: any, body: any): void {
+                if (error) {
+                    deferred.reject(error);
+                }
+
+                try {
+                    var pluginJson = JSON.parse(body);
+                    if (pluginJson["installed_plugins"]["cordova-plugin-device"]) {
+                        deferred.resolve({});
+                    } else {
+                        deferred.reject("Did not find expected plugin in project built remotely");
+                    }
+                } catch (e) {
+                    deferred.reject(e);
+                }
             });
 
             return deferred.promise;
