@@ -26,7 +26,8 @@
   },
    "scripts" : { 
     "postinstall" : "node tools/tacoUtil.js",
-    "clean" : "node tools/tacoUtil.js"
+    "clean" : "node tools/tacoUtil.js",
+    "rebuild" : "node tools/tacoUtil.js"
   }
 }
 

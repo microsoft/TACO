@@ -1,12 +1,12 @@
-﻿/// <reference path="typings/node.d.ts" />
-/// <reference path="typings/Q.d.ts" />
-/// <reference path="typings/gulp.d.ts" />
-/// <reference path="typings/gulpExtensions.d.ts" />
-/// <reference path="typings/nopt.d.ts" />
-/// <reference path="typings/gulp-typescript.d.ts" />
-/// <reference path="typings/gulp-sourcemaps.d.ts" />
-/// <reference path="typings/run-sequence.d.ts" />
-/// <reference path="typings/buildConfig.d.ts" />
+﻿/// <reference path="../src/typings/node.d.ts" />
+/// <reference path="../src/typings/Q.d.ts" />
+/// <reference path="../src/typings/gulp.d.ts" />
+/// <reference path="../src/typings/gulpExtensions.d.ts" />
+/// <reference path="../src/typings/nopt.d.ts" />
+/// <reference path="../src/typings/gulp-typescript.d.ts" />
+/// <reference path="../src/typings/gulp-sourcemaps.d.ts" />
+/// <reference path="../src/typings/run-sequence.d.ts" />
+/// <reference path="../src/typings/buildConfig.d.ts" />
 
 import runSequence = require ("run-sequence");
 import gulp = require ("gulp");
@@ -16,13 +16,13 @@ import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
 
-import GulpUtils = require ("../tools/GulpUtils");
-import GulpCoverageUtils = require ("../tools/GulpCoverageUtils");
-import GulpPackageUtils = require ("../tools/GulpPackageUtils");
+import GulpUtils = require ("./GulpUtils");
+import GulpCoverageUtils = require ("./GulpCoverageUtils");
+import GulpPackageUtils = require ("./GulpPackageUtils");
 
 /* tslint:disable:no-var-requires */
 // var require needed to require build_config.json
-var buildConfig: BuildConfig.IBuildConfig = require("../../src/build_config.json");
+var buildConfig: BuildConfig.IBuildConfig = require("./build_config.json");
 /* tslint:enable:no-var-requires */
 
 var tacoModules: string[] = [

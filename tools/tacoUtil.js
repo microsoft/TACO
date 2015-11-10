@@ -4,17 +4,18 @@ var fs = require("fs");
 var path = require ("path");
 var util = require("util");
 
-var buildConfig = getBuildConfig();
+var buildConfig = require('./build_config.json');
 
 switch(process.env.npm_lifecycle_event){
     case "clean":
         cleanBuild();
         break;
+    case "rebuild":
     case "postinstall":
         compileBuildScripts();
         break;
     default:
-        console.error("Error: script called in unknown stage "+stage);
+        console.error("Error: script called in unknown stage "+process.env.npm_lifecycle_event);
         break;
 }
 
@@ -24,7 +25,7 @@ function compileBuildScripts(callback) {
     var gulp = require("gulp");
     var ts = require('gulp-typescript');
     var sourcemaps = require("gulp-sourcemaps");
-    gulp.src(["src/gulp*.ts", "tools/**/*.ts"])
+    gulp.src(["tools/**/*.ts"])
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
         .on("error", function(error){
@@ -33,18 +34,18 @@ function compileBuildScripts(callback) {
             }
         })
         .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(function(file){
-            return path.join(buildConfig.build, path.dirname(path.relative(".", file.path)));
-        }))
+        .pipe(gulp.dest(path.resolve(buildConfig.buildTools)))
         .on("end", function(){
             if (success){
-                console.log(greenColorFunction("Success!!! To build the project, run 'gulp' from src/ directory"));
+                // copy over build config to build\tools
+                // this is needed to make sure compile gulp scripts have same path to build_config
+                fs.writeFileSync(path.resolve(buildConfig.buildTools, "build_config.json"), JSON.stringify(buildConfig));
+                console.log(greenColorFunction("Success!!! To build the project, run 'gulp' from project root directory"));
             }
         });
 }
 
 function cleanBuild(callback) {
-    deleteFolderRecursive(buildConfig.buildSrc);
     deleteFolderRecursive(buildConfig.buildTools);
 
     var devDependencies = [];
@@ -79,16 +80,6 @@ function cleanBuild(callback) {
         }
     };
     asyncLoop(0);
-}
-
-function getBuildConfig() {
-    var buildConfig = require('../src/build_config.json');
-    Object.keys(buildConfig).forEach(function (key){
-        if (typeof buildConfig[key] === "string" && buildConfig[key][0] === "."){
-            buildConfig[key] = path.resolve("src", buildConfig[key]);
-        }
-    });
-    return buildConfig;
 }
 
 function deleteFolderRecursive (dirPath) {

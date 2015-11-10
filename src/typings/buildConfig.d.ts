@@ -12,7 +12,6 @@ declare module BuildConfig {
         templates: string;
         build: string;
         buildCoverage: string;
-        buildSrc: string;
         buildPackages: string;
         buildTools: string;
         buildTemplates: string;
