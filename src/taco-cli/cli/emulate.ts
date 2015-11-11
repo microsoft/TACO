@@ -12,20 +12,24 @@
 
 "use strict";
 
-import path = require ("path");
-import Q = require ("q");
+import path = require("path");
+import Q = require("q");
 
-import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
-import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
-import CordovaWrapper = require ("./utils/cordovaWrapper");
-import PlatformHelper = require ("./utils/platformHelper");
-import RemoteBuildClientHelper = require ("./remoteBuild/remoteBuildClientHelper");
-import resources = require ("../resources/resourceManager");
-import Settings = require ("./utils/settings");
-import TacoErrorCodes = require ("./tacoErrorCodes");
-import errorHelper = require ("./tacoErrorHelper");
-import tacoUtility = require ("taco-utils");
+import buildTelemetryHelper = require("./utils/buildTelemetryHelper");
+import RemoteBuildSettings = require("./remoteBuild/buildSettings");
+import CordovaWrapper = require("./utils/cordovaWrapper");
+import PlatformHelper = require("./utils/platformHelper");
+import RemoteBuildClientHelper = require("./remoteBuild/remoteBuildClientHelper");
+import resources = require("../resources/resourceManager");
+import Settings = require("./utils/settings");
+import TacoErrorCodes = require("./tacoErrorCodes");
+import errorHelper = require("./tacoErrorHelper");
+import tacoUtility = require("taco-utils");
+import vsEmulator = require("./utils/vsEmulator");
 
+import VSEmulator = vsEmulator.VSEmulator;
+import EmulatorDetail = vsEmulator.EmulatorDetail;
+import EmulatorProfile = vsEmulator.EmulatorProfile;
 import BuildInfo = tacoUtility.BuildInfo;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
@@ -63,7 +67,7 @@ class Emulate extends commands.TacoCommandBase {
 
     private static runRemotePlatform(platform: string, commandData: commands.ICommandData,
         telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
-        return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function (settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
+        return Q.all<any>([Settings.loadSettings(), CordovaWrapper.getCordovaVersion()]).spread<any>(function(settings: Settings.ISettings, cordovaVersion: string): Q.Promise<any> {
             var configuration: string = commandData.options["release"] ? "release" : "debug";
             var buildTarget: string = commandData.options["target"] || "";
             var language: string = settings.language || "en";
@@ -87,7 +91,7 @@ class Emulate extends commands.TacoCommandBase {
 
             // Find the build that we are supposed to run
             if (commandData.options["nobuild"]) {
-                buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function (buildInfo: BuildInfo): BuildInfo {
+                buildInfoPromise = RemoteBuildClientHelper.checkForBuildOnServer(buildSettings, buildInfoPath).then(function(buildInfo: BuildInfo): BuildInfo {
                     if (!buildInfo) {
                         // No info for the remote build: User must build first
                         var buildCommandToRun: string = "taco build" + ([commandData.options["remote"] ? " --remote" : ""].concat(commandData.remain).join(" "));
@@ -101,16 +105,16 @@ class Emulate extends commands.TacoCommandBase {
                 buildInfoPromise = RemoteBuildClientHelper.build(buildSettings, telemetryProperties);
             }
 
-            return buildInfoPromise.then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+            return buildInfoPromise.then(function(buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 return RemoteBuildClientHelper.emulate(buildInfo, remoteConfig, buildTarget);
-            }).then(function (buildInfo: BuildInfo): BuildInfo {
+            }).then(function(buildInfo: BuildInfo): BuildInfo {
                 logger.log(resources.getString("CommandRunRemoteEmulatorSuccess"));
                 return buildInfo;
-            }).then(function (buildInfo: BuildInfo): Q.Promise<BuildInfo> {
+            }).then(function(buildInfo: BuildInfo): Q.Promise<BuildInfo> {
                 if (commandData.options["debuginfo"]) {
                     // enable debugging and report connection information
                     return RemoteBuildClientHelper.debug(buildInfo, remoteConfig)
-                        .then(function (debugBuildInfo: BuildInfo): BuildInfo {
+                        .then(function(debugBuildInfo: BuildInfo): BuildInfo {
                             if (debugBuildInfo["webDebugProxyPort"]) {
                                 logger.log(JSON.stringify({ webDebugProxyPort: debugBuildInfo["webDebugProxyPort"] }));
                             }
@@ -129,11 +133,54 @@ class Emulate extends commands.TacoCommandBase {
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
+
                 return PlatformHelper.operateOnPlatforms(platforms,
-                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.emulate(commandData, localPlatforms),
+                    (localPlatforms: string[]): Q.Promise<any> =>
+                        Emulate.handleVsEmulator(commandData, localPlatforms)
+                            .then((remainingLocalPlatforms) => {
+                                if (remainingLocalPlatforms.length > 0) {
+                                    /* if we have any unhandled local platforms */
+                                    CordovaWrapper.emulate(commandData, remainingLocalPlatforms);
+                                }
+                            }),
                     (remotePlatform: string): Q.Promise<any> => Emulate.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
-                    );
+                );
             }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
+    }
+
+    private static handleVsEmulator(commandData: commands.ICommandData, platforms: string[]): Q.Promise<string[]> {
+        var deferred = Q.defer<string[]>();
+        if (platforms && platforms.indexOf("android") > -1 && commandData && commandData.options && commandData.options["vsemulator"]) {
+            VSEmulator.isReady()
+                .then(isReady => {
+                    if (isReady) {
+                        return VSEmulator.getOrLaunchEmulator()
+                            .then(emulator => {
+                                return Emulate.emulateProfile(commandData, emulator);
+                            })
+                            .then(() => {
+                                /* success, remove handled platform from array */
+                                platforms.splice(platforms.indexOf("android"), 1);
+                                deferred.resolve(platforms);
+                            });
+                    } else {
+                        /* TODO - need input from PM: no VS emulator profiles installed. Display a message?  */
+                        deferred.resolve(platforms);
+                    }}).done();
+        } else {
+            /* no android platform or vs emulator not specified - nothing to do */
+            deferred.resolve(platforms);
+        }
+
+        return deferred.promise;
+    }
+
+    /**
+     * Calls the Cordova emulate command with the given data and emulator as a target.
+     */
+    private static emulateProfile(commandData: commands.ICommandData, profile: EmulatorDetail): Q.Promise<any> {
+        commandData.options["target"] = profile.adbSerialNumber;
+        return CordovaWrapper.emulate(commandData, ["android"]);
     }
 
     /* tslint:disable:member-ordering */
