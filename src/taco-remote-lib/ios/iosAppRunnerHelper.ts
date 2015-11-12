@@ -32,9 +32,16 @@ class IosAppRunnerHelper {
             proxyInstance = null;
         }
 
-        return IosAppRunnerHelper.mountDeveloperImage().then(function (): child_process.ChildProcess {
+        return IosAppRunnerHelper.mountDeveloperImage().then(function (): Q.Promise<child_process.ChildProcess> {
+            var deferred = Q.defer<child_process.ChildProcess>();
             proxyInstance = child_process.spawn("idevicedebugserverproxy", [proxyPort.toString()]);
-            return proxyInstance;
+            proxyInstance.on("error", function (err: any): void {
+                deferred.reject(err);
+            });
+            // Allow 200ms for the spawn to error out, ~125ms isn't uncommon for some failures
+            Q.delay(200).then(() => deferred.resolve(proxyInstance));
+
+            return deferred.promise;
         });
     }
 
@@ -43,7 +50,13 @@ class IosAppRunnerHelper {
     public static startApp(packageId: string, proxyPort: number, appLaunchStepTimeout: number): Q.Promise<net.Socket> {
         // When a user has many apps installed on their device, the response from ideviceinstaller may be large (500k or more)
         // This exceeds the maximum stdout size that exec allows, so we redirect to a temp file.
-        return promiseExec("ideviceinstaller -l -o xml > /tmp/$$.ideviceinstaller && echo /tmp/$$.ideviceinstaller").spread<string>(function (stdout: string, stderr: string): string {
+        return promiseExec("ideviceinstaller -l -o xml > /tmp/$$.ideviceinstaller && echo /tmp/$$.ideviceinstaller")
+        .catch(function (err: any): any {
+            if (err.code === "ENOENT") {
+                throw new Error("IDeviceInstallerNotFound");
+            }
+            throw err;
+        }).spread<string>(function (stdout: string, stderr: string): string {
             // First find the path of the app on the device
             var filename: string = stdout.trim();
             if (!/^\/tmp\/[0-9]+\.ideviceinstaller$/.test(filename)) {
@@ -194,6 +207,9 @@ class IosAppRunnerHelper {
                 } else {
                     deferred.resolve({});
                 }
+            });
+            imagemounter.on("error", function(err: any): void {
+                deferred.reject(err);
             });
             return deferred.promise;
         });
