@@ -60,6 +60,8 @@ taco help
 * Have a question that's not a feature request or bug report? [Discuss on Stack Overflow](https://stackoverflow.com/questions/tagged/taco)
 * Read our [Blog](http://taco.tools/blog/index.html)
 * Have a feature request or find a bug? [Submit an issue](https://github.com/microsoft/taco/issues)
+* [Contribute](https://github.com/Microsoft/TACO/blob/master/Contributing.md) to TACO source
+ 
 
 ## Development
 
@@ -79,15 +81,15 @@ Install dev dependencies
 npm install
 ```
 
-### Building TACO
-TACO uses gulp based build system. To build TACO packages, simply run 
+#### Building TACO
+TACO uses gulp based build system. To build TACO packages, simply run following command from root folder 
 ```
 gulp
 ```
 Above command will build and install TACO packages.
 It will also create a globally-installed symbolic link (["npm link"](https://docs.npmjs.com/cli/link)) to TACO packages
 
-### Running TACO
+#### Running TACO
 Once TACO has been built and linked properly, you can use TACO packages from globally-installed symbolic link
 * To run taco-cli run 
 ```
@@ -97,21 +99,21 @@ taco
 ```
 remotebuild
 ```
-### Running tests
+#### Running tests
 
 Please run following to make sure all tests are passing
 ```
 gulp run-tests
 ```
 
-### Getting tests coverage
+#### Getting tests coverage
 
 To check test coverage, please run following command
 ```
 gulp coverage
 ```
 
-### Coding guidelines
+#### Coding guidelines
 TACO uses tslint rules specified in [tslint.json](https://github.com/Microsoft/TACO/blob/master/tools/tslint.json). Run following command to make sure code is tslint clean
 ```
 gulp tslint
