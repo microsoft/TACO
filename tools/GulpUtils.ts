@@ -14,19 +14,25 @@ import path = require ("path");
 import Q = require ("q");
 
 class GulpUtils {
-    private static TestCommand: string = "test";
+    private static testCommand: string = "test";
 
     public static runAllTests(modulesToTest: string[], modulesRoot: string, failTestsAtEnd: boolean, reporter: string): Q.Promise<any> {
         var args: string[] = [];
         if (reporter) {
             args = ["--reporter", reporter];
         }
-      return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.TestCommand, failTestsAtEnd, args);
+      return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.testCommand, failTestsAtEnd, args);
+    }
+
+    public static linkPackages(modulesToLink: string[], modulesRoot: string): Q.Promise<any> {
+        return GulpUtils.chainAsync<string>(modulesToLink, (moduleName: string) => {
+            return GulpUtils.runNpmCommand("link", [], path.resolve(modulesRoot, moduleName));
+        });
     }
 
     public static runNpmScript(modulesToTest: string[], modulesRoot: string, scriptName: string, failAtEnd: boolean, args: string[]): Q.Promise<any> {
         var failures: string[] = [];
-        return GulpUtils.chainAsync<string>(modulesToTest, moduleName => {
+        return GulpUtils.chainAsync<string>(modulesToTest, (moduleName: string) => {
 
             var modulePath = path.resolve(modulesRoot, moduleName);
             // check if package has any tests
@@ -35,43 +41,37 @@ class GulpUtils {
                 return Q({});
             }
 
-            var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
-            var commandArgs = ["run-script", scriptName];
-            if (args && args.length > 0){
+            var commandArgs = [scriptName];
+            if (args && args.length > 0) {
                 commandArgs.push("--");
                 commandArgs = commandArgs.concat(args);
             }
-            var testProcess = child_process.spawn(npmCommand, commandArgs, { cwd: modulePath, stdio: "inherit" });
-            var deferred = Q.defer();
-            testProcess.on("close", function(code: number): void {
-                if (code) {
+
+            return GulpUtils.runNpmCommand("run-script", commandArgs, modulePath)
+                .catch(() => {
                     if (failAtEnd) {
                         failures.push(moduleName);
-                        deferred.resolve({});
+                        return Q.resolve({});
                     } else {
-                        deferred.reject("Test failed for " + modulePath);
+                        return Q.reject("Test failed for " + modulePath);
                     }
-                } else {
-                    deferred.resolve({});
-                }
-            });
-            return deferred.promise;
+                });
         }).then(function(): Q.Promise<any> {
-            if (failures.length > 0){
-                return Q.reject("Tests Failed for "+ failures.join(", "));
+            if (failures.length > 0) {
+                return Q.reject("Tests Failed for " + failures.join(", "));
             }
             return Q.resolve({});
         });
     }
 
     public static installModules(modulesToInstall: string[], modulesRoot: string): Q.Promise<any> {
-        return GulpUtils.chainAsync<string>(modulesToInstall, moduleName => {
+        return GulpUtils.chainAsync<string>(modulesToInstall, (moduleName: string) => {
             return GulpUtils.installModule(path.resolve(modulesRoot, moduleName));
         });
     }
 
     public static uninstallModules(modulesToUninstall: string[], installRoot: string): Q.Promise<any> {
-        return GulpUtils.chainAsync<string>(modulesToUninstall, moduleName => {
+        return GulpUtils.chainAsync<string>(modulesToUninstall, (moduleName: string) => {
             return GulpUtils.uninstallModule(moduleName, installRoot);
         });
     }
@@ -103,7 +103,7 @@ class GulpUtils {
 
             var kitTemplates: string[] = GulpUtils.getChildDirectoriesSync(kitSrcPath);
 
-            kitTemplates.forEach(function(templateValue: string, index: number, array: string[]): void {
+            kitTemplates.forEach(function(templateValue: string): void {
                 // Create the template's archive
                 var templateSrcPath: string = path.resolve(kitSrcPath, templateValue);
                 var templateTargetPath: string = path.join(kitTargetPath, templateValue + ".zip");
@@ -153,6 +153,18 @@ class GulpUtils {
         }, Q({}));
     }
 
+    public static mkdirp(dir: string): void {
+        var folders = dir.split(path.sep);
+        var start = folders.shift();
+        folders.reduce(function(soFar: string, currentFolder: string): string {
+            var folder = path.join(soFar, currentFolder);
+            if (!fs.existsSync(folder)) {
+                fs.mkdirSync(folder);
+            }
+            return folder;
+        }, start + path.sep);
+    }
+
     private static installModule(modulePath: string): Q.Promise<any> {
         console.log("Installing " + modulePath);
         var deferred = Q.defer<Buffer>();
@@ -180,16 +192,19 @@ class GulpUtils {
         });
     }
 
-    public static mkdirp(dir: string): void {
-        var folders = dir.split(path.sep);
-        var start = folders.shift();
-        folders.reduce(function(soFar: string, currentFolder: string): string {
-            var folder = path.join(soFar, currentFolder);
-            if (!fs.existsSync(folder)) {
-                fs.mkdirSync(folder);
-            }
-            return folder;
-        }, start + path.sep);
+    private static runNpmCommand(command: string, commandArgs: string[], cwd?: string): Q.Promise<any> {
+        var deferred = Q.defer();
+        var npmCommand = "npm" + (os.platform() === "win32" ? ".cmd" : "");
+        commandArgs.unshift(command);
+        child_process.spawn(npmCommand, commandArgs, { cwd: cwd, stdio: "inherit" })
+            .on("close", function(code: number): void {
+                if (code) {
+                    deferred.reject("npm command " + command + "failed");
+                } else {
+                    deferred.resolve({});
+                }
+            });
+        return deferred.promise;
     }
 }
 export = GulpUtils;

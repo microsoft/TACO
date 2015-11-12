@@ -36,6 +36,11 @@ var tacoModules: string[] = [
     "taco-tests-utils",
     "taco-remote-multiplexer"
 ];
+// list of CLI TACO packages 
+var tacoCliModules: string[] = [
+    "taco-cli",
+    "remotebuild",
+];
 
 var supportedFlags: Nopt.FlagTypeMap = {
     modulesFilter: [String, Array], // Run any task for a selected module
@@ -55,6 +60,7 @@ var options: any = nopt(supportedFlags, supportedShorthands, process.argv);
 
 if (options.modulesFilter) {
     tacoModules = tacoModules.filter((tacoModule: string) => options.modulesFilter.indexOf(tacoModule) > -1);
+    tacoCliModules = tacoCliModules.filter((tacoModule: string) => options.modulesFilter.indexOf(tacoModule) > -1);
 }
 
 /* Default task for building /src folder into /bin */
@@ -100,8 +106,9 @@ gulp.task("rebuild", function (callback: gulp.TaskCallback): void {
 });
 
 /* Task to install the compiled modules */
-gulp.task("install-build", ["package"], function (): Q.Promise<any> {
-    return GulpUtils.installModules(tacoModules, buildConfig.buildPackages);
+gulp.task("install-build", ["package"], function(): Q.Promise<any> {
+    return GulpUtils.installModules(tacoModules, buildConfig.buildPackages)
+        .then(() => GulpUtils.linkPackages(tacoCliModules, buildConfig.buildPackages));
 });
 
 gulp.task("clean", function (): Q.Promise<any> {
