@@ -26,6 +26,7 @@ import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import livereloadHelper = require("./liveReloadHelper");
 
 import commands = tacoUtility.Commands;
 
@@ -171,13 +172,31 @@ class CordovaWrapper {
             }
         });
     }
-
-    public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
-        return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-            return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
-        }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
-    }
-
+    
+        public static run(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
+    	// ToDO: check whether plugin is installed when doing it via a cordova process
+    	// Test: taco run android --livereload with plugin already installed (done)
+    	// Test: taco run android --livereload with plugin NOT yet installed (done)
+    	// Test: taco run android [remote] => no plugin install
+    	// Test: taco run android [local] => no plugin install
+    	// Test: taco emulate [combinations]
+    	// Test: what if user doesn't use --livereload => never load its dependencies
+    	return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+    	    return Q({}).then(function() {
+    		if(livereloadHelper.isLiveReload(commandData)) {
+    		    livereloadHelper.setupLiveReload(cordova, {});
+    		}
+    		
+    	    }).then(function(): Q.Promise<any> {
+    		return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+    	    });
+    	}, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
+        }
+    
+        private static isLiveReloadOrDeviceSync(commandData: commands.ICommandData) {
+    	return  !!commandData.options["livereload"] || !!commandData.options["devicesync"];
+        }
+    
     /**
      * Perform an operation using either the Cordova API, or spwaning a Cordova process.
      * The first argument is a function which is given a Cordova object, and can operate on it as it wishes.
