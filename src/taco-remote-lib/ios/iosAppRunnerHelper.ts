@@ -53,7 +53,7 @@ class IosAppRunnerHelper {
         return promiseExec("ideviceinstaller -l -o xml > /tmp/$$.ideviceinstaller && echo /tmp/$$.ideviceinstaller")
         .catch(function (err: any): any {
             if (err.code === "ENOENT") {
-                throw new Error("IdeviceinstallerNotFound");
+                throw new Error("IDeviceInstallerNotFound");
             }
             throw err;
         }).spread<string>(function (stdout: string, stderr: string): string {

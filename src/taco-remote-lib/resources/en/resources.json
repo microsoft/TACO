@@ -63,8 +63,8 @@
     "_DownloadInvalid.comment": "Message reported to the user and to the console if the expected files to download are not present. {0} and {1} are paths to files",
     "ArchivePackError": "Unexpected error packing archive: {0}",
     "_ArchivePackError.comment": "Error reported to console and back to the client when packing a zip file fails. {0} is the error",
-    "IdeviceinstallerNotFound": "Unable to launch ideviceinstaller. Please ensure that homebrew is installed and try running \"brew install ideviceinstaller\".",
-    "_IdeviceinstallerNotFound.comment": "Error message printed when ideviceinstaller is not installed.",
+    "IDeviceInstallerNotFound": "Unable to launch ideviceinstaller. Please ensure that homebrew is installed and try running \"brew install ideviceinstaller\".",
+    "_IDeviceInstallerNotFound.comment": "Error message printed when ideviceinstaller is not installed.",
 
     "UnsupportedPlatform": "Unable to build: requested platform not supported",
     "_UnsupportedPlatform.comment": "Message reported to the client when a request for an unsupported platform is made",

@@ -222,7 +222,7 @@ class IOSAgent implements ITargetPlatform {
         ideviceinstaller.on("error", function (err: any): void {
             res.status(500);
             if (err.code === "ENOENT") {
-                res.send(resources.getStringForLanguage(req, "IdeviceinstallerNotFound"));
+                res.send(resources.getStringForLanguage(req, "IDeviceInstallerNotFound"));
             } else {
                 res.send(err);
             }
