@@ -61,6 +61,61 @@ taco help
 * Read our [Blog](http://taco.tools/blog/index.html)
 * Have a feature request or find a bug? [Submit an issue](https://github.com/microsoft/taco/issues)
 
+## Development
+
+In order to build the TACO packages, ensure that you have [Git](http://git-scm.com/downloads) and [Node.js](http://nodejs.org/) installed.
+
+Clone a copy of the repo:
+```
+git clone https://github.com/Microsoft/TACO.git
+```
+
+Change to TACO directory:
+```
+cd TACO
+```
+Install dev dependencies
+```
+npm install
+```
+
+### Building TACO
+TACO uses gulp based build system. To build TACO packages, simply run 
+```
+gulp
+```
+Above command will build and install TACO packages under TACO\build\packages\node_modules.
+
+### Running TACO
+Once TACO has been built, it can be run from built location.
+* To run taco-cli run 
+```
+build/packages/node_modules/taco-cli/bin/taco
+```
+* Similarly to run remotebuild run
+```
+build/packages/node_modules/remotebuild/bin/remotebuild
+```
+### Running tests
+
+Please run following to make sure all tests are passing
+```
+gulp run-tests
+```
+
+### Getting tests coverage
+
+To check test coverage, rlease run following command
+```
+gulp coverage
+```
+
+### Coding guidelines
+TACO uses tslint rules specified in [tslint.json] (https://github.com/Microsoft/TACO/blob/master/tools/tslint.json). Run following command to make sure code is tslint clean
+```
+gulp tslint
+```
+
 ## LICENSE
 
 TACO is licensed under the MIT Open Source license.
