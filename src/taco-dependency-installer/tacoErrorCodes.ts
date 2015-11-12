@@ -11,7 +11,7 @@
 "use strict";
 
 module TacoDependencyInstaller {
-    // Error Codes: 2100-2199
+    // Error Codes: 2100-2499
     export enum TacoErrorCode {
         AbstractMethod = 2101,
         CouldNotConnect = 2102,
