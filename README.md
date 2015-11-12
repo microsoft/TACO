@@ -60,7 +60,7 @@ taco help
 * Have a question that's not a feature request or bug report? [Discuss on Stack Overflow](https://stackoverflow.com/questions/tagged/taco)
 * Read our [Blog](http://taco.tools/blog/index.html)
 * Have a feature request or find a bug? [Submit an issue](https://github.com/microsoft/taco/issues)
-* [Contribute](https://github.com/Microsoft/TACO/blob/master/Contributing.md) to TACO source
+* [Contribute](https://github.com/Microsoft/TACO/blob/master/CONTRIBUTING.md) to TACO source
  
 
 ## Development
