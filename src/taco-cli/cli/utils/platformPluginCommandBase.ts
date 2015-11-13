@@ -102,6 +102,13 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     }
 
     /**
+     * Optional method to be implemented by the derived class
+     */
+    public postInvokeStep(data: commands.ICommandData): Q.Promise<any> {
+        return Q({});
+    }
+
+    /**
      * Checks the component (platform/plugin) specification to determine if the user has attempted an override.
      * Overrides can be packageSpec@<version> / packageSpec@<git-url> / packageSpec@<filepath>
      * Do not check for overrides from kit metadata if user explicitly overrides the package on command-line
@@ -144,6 +151,9 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         })
             .then(function (): Q.Promise<any> {
             return cordovaWrapper.invokePlatformPluginCommand(self.name, self.cordovaCommandParams, data);
+        })
+            .then(function (): Q.Promise<any> {
+            return self.postInvokeStep(data);
         })
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {
@@ -225,7 +235,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
 
         // Set appropriate subcommand, target and download options
         this.cordovaCommandParams = {
-            subCommand: commandData.remain[0],
+            subCommand: subCommand,
             targets: targets,
             downloadOptions: this.downloadOptions
         };
