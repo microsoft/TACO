@@ -1,5 +1,10 @@
 
 declare module TacoUtility {
+	class TacoWarning extends TacoError {
+        constructor(message: string);
+        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoWarning;
+    }
+
     class TacoError implements Error {
         public errorCode: number;
         public message: string;

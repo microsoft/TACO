@@ -52,17 +52,7 @@ module TacoUtility {
         }
 
         public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
-            var message: string = null;
-            if (optionalArgs.length > 0) {
-                assert(errorToken, "We should have an error token if we intend to use args");
-                var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
-                if (errorToken) {
-                    message = resources.getString(errorToken, args);
-                }
-            } else {
-                message = errorToken;
-            }
-
+            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
             return new TacoError(errorCode, message, innerError);
         }
 
@@ -80,6 +70,40 @@ module TacoUtility {
             // Transforms 32 to say "0032" (for fixed width = 4)
             var errorCodeString: string = (TacoError.ERROR_CODE_FIXED_WIDTH + this.errorCode).slice(-TacoError.ERROR_CODE_FIXED_WIDTH.length);
             return util.format("%s%s: %s\n%s", TacoError.DEFAULT_ERROR_PREFIX, errorCodeString, this.message, innerErrorString);
+        }
+
+        public static getMessageString(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): string {
+            var message: string = null;
+            if (optionalArgs.length > 0) {
+                assert(errorToken, "We should have an error token if we intend to use args");
+                var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
+                if (errorToken) {
+                    message = resources.getString(errorToken, args);
+                }
+            } else {
+                message = errorToken;
+            }
+
+            return message;
+        }
+    }
+
+     export class TacoWarning extends TacoUtility.TacoError {
+        /**
+         *
+         * @param {string} message user friendly localized error message
+         */
+        constructor(message: string) {
+            super(-1, message, null);
+        }
+
+        public get isTacoWarning(): boolean {
+            return true;
+        }
+
+        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoWarning {
+            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+            return new TacoWarning(message);
         }
     }
 }
