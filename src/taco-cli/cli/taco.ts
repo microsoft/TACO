@@ -88,7 +88,7 @@ class Taco {
                     // Pretty print errors
                     if (reason) {
                         if (reason.isTacoError) {
-                            if (reason.isTacoWarning) {
+                            if (reason.errorLevel === tacoUtility.TacoErrorLevel.Warning) {
                                 logger.logWarning(reason.message);
                             } else {
                                 logger.logError((<tacoUtility.TacoError> reason).toString());

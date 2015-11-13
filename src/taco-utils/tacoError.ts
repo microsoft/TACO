@@ -16,6 +16,11 @@ import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 import ResourceManager = resourceManager.ResourceManager;
 
 module TacoUtility {
+    export enum TacoErrorLevel {
+        Error,
+        Warning
+    }
+
     export class TacoError implements Error {
         private static DEFAULT_ERROR_PREFIX: string = "TACO";
         private static ERROR_CODE_FIXED_WIDTH: string = "0000";
@@ -23,6 +28,7 @@ module TacoUtility {
         public errorCode: number;
         public message: string;
         public name: string;
+        public errorLevel: TacoErrorLevel;
 
         private innerError: Error;
 
@@ -36,10 +42,19 @@ module TacoUtility {
             this.message = message;
             this.name = null;
             this.innerError = innerError;
+            this.errorLevel = TacoErrorLevel.Error;
         }
 
         public get isTacoError(): boolean {
             return true;
+        }
+
+        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
+            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+            var warning = new TacoError (-1, message);
+
+            warning.errorLevel = TacoErrorLevel.Warning;
+            return warning;
         }
 
         public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
@@ -56,22 +71,6 @@ module TacoUtility {
             return new TacoError(errorCode, message, innerError);
         }
 
-        public toString(): string {
-            var innerErrorString: string = "";
-            if (this.innerError) {
-                var stack: string = (<any> this.innerError).stack;
-                if (stack && TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
-                    innerErrorString = utilResources.getString("InnerErrorToString", stack);
-                } else if (this.innerError.message) {
-                    innerErrorString = utilResources.getString("InnerErrorToString", this.innerError.message);
-                }
-            }
-
-            // Transforms 32 to say "0032" (for fixed width = 4)
-            var errorCodeString: string = (TacoError.ERROR_CODE_FIXED_WIDTH + this.errorCode).slice(-TacoError.ERROR_CODE_FIXED_WIDTH.length);
-            return util.format("%s%s: %s\n%s", TacoError.DEFAULT_ERROR_PREFIX, errorCodeString, this.message, innerErrorString);
-        }
-
         public static getMessageString(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): string {
             var message: string = null;
             if (optionalArgs.length > 0) {
@@ -86,24 +85,21 @@ module TacoUtility {
 
             return message;
         }
-    }
 
-     export class TacoWarning extends TacoUtility.TacoError {
-        /**
-         *
-         * @param {string} message user friendly localized error message
-         */
-        constructor(message: string) {
-            super(-1, message, null);
-        }
+        public toString(): string {
+            var innerErrorString: string = "";
+            if (this.innerError) {
+                var stack: string = (<any> this.innerError).stack;
+                if (stack && TacoGlobalConfig.logLevel === LogLevel.Diagnostic) {
+                    innerErrorString = utilResources.getString("InnerErrorToString", stack);
+                } else if (this.innerError.message) {
+                    innerErrorString = utilResources.getString("InnerErrorToString", this.innerError.message);
+                }
+            }
 
-        public get isTacoWarning(): boolean {
-            return true;
-        }
-
-        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoWarning {
-            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
-            return new TacoWarning(message);
+            // Transforms 32 to say "0032" (for fixed width = 4)
+            var errorCodeString: string = (TacoError.ERROR_CODE_FIXED_WIDTH + this.errorCode).slice(-TacoError.ERROR_CODE_FIXED_WIDTH.length);
+            return util.format("%s%s: %s\n%s", TacoError.DEFAULT_ERROR_PREFIX, errorCodeString, this.message, innerErrorString);
         }
     }
 }
