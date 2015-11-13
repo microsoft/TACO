@@ -159,7 +159,7 @@
     "_CommandKitListJsonOverwritePrompt.comment": "Prompt message printed on command 'taco kit list --json <path>' when the path specified already exists",
     "ErrorOperationCancelled": "Operation cancelled",
     "_ErrorOperationCancelled.comment": "Prompt message printed when an operation is cancelled by the user",
-    "WarnProjectUpdateAborted": "Operation cancelled by the user. No changes made to the project.",
+    "WarnProjectUpdateAborted": "Operation cancelled by the user. No changes were made to the project.",
     "_WarnProjectUpdateAborted.comment": "Warning message printed when a project update operation is cancelled by the user",
     "CommandKitSelectKitPlatformVersion": "[DEFAULT]",
     "_CommandKitSelectKitPlatformVersion.comment": "Pinned platform version update indicator for CLI updates",
