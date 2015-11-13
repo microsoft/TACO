@@ -46,7 +46,7 @@ export class VSEmulator {
      * Checks if the emulator is correctly set-up and has installed platforms.
      */
     public static isReady(): Q.Promise<boolean> {
-        if (!VSEmulator.isInstalled) {
+        if (!VSEmulator.isInstalled()) {
             return Q.resolve(false);
         } else {
             return VSEmulator.getInstalledProfiles()

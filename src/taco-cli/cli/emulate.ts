@@ -164,7 +164,13 @@ class Emulate extends commands.TacoCommandBase {
                                 deferred.resolve(platforms);
                             });
                     } else {
-                        /* TODO - need input from PM: no VS emulator profiles installed. Display a message?  */
+                        if (VSEmulator.isInstalled()) {
+                            /* No VS emulator profiles installed. */
+                            logger.logError(resources.getString("CommandEmulateVsEmulatorNoProfiles"));
+                        } else {
+                            /* Emulator not installed. */
+                            logger.logError(resources.getString("CommandEmulateVsEmulatorNotInstalled"));
+                        }
                         deferred.resolve(platforms);
                     }
                 }).done();
