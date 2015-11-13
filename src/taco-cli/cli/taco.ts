@@ -88,7 +88,11 @@ class Taco {
                     // Pretty print errors
                     if (reason) {
                         if (reason.isTacoError) {
-                            logger.logError((<tacoUtility.TacoError> reason).toString());
+                            if (reason.isTacoWarning) {
+                                logger.logWarning(reason.message);
+                            } else {
+                                logger.logError((<tacoUtility.TacoError> reason).toString());
+                            }
                         } else {
                             var toPrint: string = reason.toString();
 

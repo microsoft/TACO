@@ -32,6 +32,7 @@ import readline = require ("readline");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoUtility = require ("taco-utils");
+import warningHelper = require ("./tacoWarningHelper");
 
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
@@ -110,6 +111,8 @@ class Kit extends commands.TacoCommandBase {
                 if (resources.getString("PromptResponseYes").toLowerCase().split("\n").indexOf(answer) !== -1) {
                     logger.logLine();
                     return Kit.updateProject(editParams, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
+                } else {
+                    return Q.reject(warningHelper.get("WarnProjectUpdateAborted"));
                 }
             }
         });

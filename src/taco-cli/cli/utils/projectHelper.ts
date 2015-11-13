@@ -294,7 +294,7 @@ class ProjectHelper {
         var jsonSerializer: tacoUtility.JsonSerializer = new tacoUtility.JsonSerializer();
         var formattedTacoJson: string = jsonSerializer.serialize(jsonData);
 
-        fs.writeFile(tacoJsonPath, formattedTacoJson, function (err: NodeJS.ErrnoException): void {
+        fs.writeFile(tacoJsonPath, jsonData, function (err: NodeJS.ErrnoException): void {
             if (err) {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.CommandCreateTacoJsonFileWriteError, err, tacoJsonPath));
             }
