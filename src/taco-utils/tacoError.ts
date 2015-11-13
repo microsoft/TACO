@@ -51,6 +51,8 @@ module TacoUtility {
 
         public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+
+            // We do not use an error code for Warnings
             var warning = new TacoError (-1, message);
 
             warning.errorLevel = TacoErrorLevel.Warning;
