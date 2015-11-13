@@ -399,6 +399,9 @@
             ,
             {
                 "name": "--target=TARGET", "description": "[CommandRunTargetDescription]"
+            },
+            {
+                "name":  "--list", "description": "[CommandRunListDescription]"
             }
             ]
         }
