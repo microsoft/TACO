@@ -59,9 +59,6 @@ class Run extends commands.TacoCommandBase {
         device: Boolean,
         emulator: Boolean,
         target: String,
-	
-	livereload: Boolean,
-	devicesync: Boolean,
 
         livereload: Boolean,
         devicesync: Boolean,

@@ -46,7 +46,8 @@
         "taco-utils": "file:../taco-utils",
         "wrench": "^1.5.8",
         "colors": "^1.0.3",
-        "opener": "~1.4.1"
+        "opener": "~1.4.1",
+        "validator": "^4.2.1"
     },
     "devDependencies": {
         "typescript": "~1.6.2",
