@@ -93,7 +93,10 @@ enum TacoErrorCode {
     // Errors related to install-reqs 5700-5749
     CommandInstallCordovaTooOld = 5700,
     CommandInstallNoPlatformsAdded = 5701,
-    CommandInstallNoPlatformsFolder = 5702
+    CommandInstallNoPlatformsFolder = 5702,
+
+    // Errors related to taco-simulate 5750-5799
+    CommandSimulateUnknownError = 5750
 }
 
 export = TacoErrorCode;
