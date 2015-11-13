@@ -149,6 +149,10 @@ module MockCordova {
             return notImplemented<Q.Promise<any>>();
         }
 
+        public targets(options: Cordova.ICordovaRawOptions): Q.Promise<any> {
+            return notImplemented<Q.Promise<any>>();
+        }
+
         public requirements(platforms: string[]): Q.Promise<any> {
             return notImplemented<Q.Promise<any>>();
         }

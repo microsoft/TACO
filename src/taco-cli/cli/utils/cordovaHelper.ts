@@ -159,6 +159,13 @@ class CordovaHelper {
         return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
     }
 
+    public static toCordovaTargetsArguments(commandData: commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
+        // Run, build, emulate, prepare and compile all use the same format at the moment
+        return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
+    }
+
+
+
     public static editConfigXml(projectInfo: projectHelper.IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
         return packageLoader.lazyRequire(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion)
             .then(function (cordova: typeof Cordova): Q.Promise<any> {
