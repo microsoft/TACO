@@ -64,7 +64,14 @@ if (options.modulesFilter) {
 }
 
 /* Default task for building /src folder into /bin */
-gulp.task("default", ["install-build"]);
+gulp.task("default", [], function (callback: gulp.TaskCallback): void {
+    var os = require ("os");
+    if (os.platform() === "win32") {
+        runSequence("install-build", "link", callback);
+    } else {
+        runSequence("install-build", callback);
+    }
+});
 
 /* Compiles the typescript files in the project, for fast iterative use */
 gulp.task("compile", function (): Q.Promise<any> {
@@ -107,8 +114,11 @@ gulp.task("rebuild", function (callback: gulp.TaskCallback): void {
 
 /* Task to install the compiled modules */
 gulp.task("install-build", ["package"], function(): Q.Promise<any> {
-    return GulpUtils.installModules(tacoModules, buildConfig.buildPackages)
-        .then(() => GulpUtils.linkPackages(tacoCliModules, buildConfig.buildPackages));
+    return GulpUtils.installModules(tacoModules, buildConfig.buildPackages);
+});
+
+gulp.task("link", function (): Q.Promise<any> {
+    return GulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.buildPackages));
 });
 
 gulp.task("clean", function (): Q.Promise<any> {
