@@ -118,7 +118,7 @@ gulp.task("install-build", ["package"], function(): Q.Promise<any> {
 });
 
 gulp.task("link", function (): Q.Promise<any> {
-    return GulpUtils.deleteDirectoryRecursive(path.resolve(buildConfig.buildPackages));
+    return GulpUtils.linkPackages(tacoCliModules, buildConfig.buildPackages);
 });
 
 gulp.task("clean", function (): Q.Promise<any> {
