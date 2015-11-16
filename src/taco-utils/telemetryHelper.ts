@@ -201,18 +201,6 @@ module TacoUtility {
             Telemetry.send(successEvent);
         }
 
-        public static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo {
-            var propertyInfo: ITelemetryPropertyInfo = { value: targetString, isPii: false };
-            if (packageLoader.TacoPackageLoader.GIT_URI_REGEX.test(targetString)
-                || packageLoader.TacoPackageLoader.FILE_URI_REGEX.test(targetString)) {
-                propertyInfo.isPii = true;
-            } else {
-                propertyInfo.value = targetString;
-            }
-
-            return propertyInfo;
-        }
-
         public static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void {
             if (Array.isArray(propertyValue)) {
                 TelemetryHelper.addMultiValuedTelemetryEventProperty(event, propertyName, propertyValue, isPii);
