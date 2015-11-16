@@ -53,7 +53,7 @@ module TacoUtility {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
 
             // We do not use an error code for Warnings
-            var warning = new TacoError (-1, message);
+            var warning = new TacoError (0, message);
 
             warning.errorLevel = TacoErrorLevel.Warning;
             return warning;
