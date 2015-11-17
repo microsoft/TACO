@@ -46,7 +46,7 @@ process.on("message", function (buildRequest: { buildInfo: BuildInfo; language: 
     var cordovaVersion: string = buildInfo["vcordova"];
     buildInfo.updateStatus(BuildInfo.BUILDING, "AcquiringCordova");
     process.send(buildInfo);
-    TacoPackageLoader.lazyRequire<Cordova.ICordova>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova): void {
+    TacoPackageLoader.lazyRequire<Cordova.ICordova540>("cordova", "cordova@" + cordovaVersion, buildInfo.logLevel).done(function (pkg: Cordova.ICordova540): void {
         var iosBuilder: IOSBuilder = new IOSBuilder(buildInfo, pkg);
 
         iosBuilder.build().done(function (resultBuildInfo: BuildInfo): void {
@@ -62,7 +62,7 @@ class IOSBuilder extends Builder {
     public static running: boolean = false;
     private cfg: CordovaConfig;
 
-    constructor(currentBuild: BuildInfo, cordova: Cordova.ICordova) {
+    constructor(currentBuild: BuildInfo, cordova: Cordova.ICordova540) {
         super(currentBuild, cordova);
 
         this.cfg = CordovaConfig.getCordovaConfig(currentBuild.appDir);

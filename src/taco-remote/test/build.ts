@@ -25,6 +25,7 @@ describe("taco-remote", function(): void {
     var modMountPoint: string = "Test";
 
     before(function(mocha: MochaDone): void {
+        this.timeout(10000); // the cleanup of TACO_HOME can take a while sometimes.
         process.env["TACO_UNIT_TEST"] = true;
         process.env["TACO_HOME"] = serverDir;
         rimraf.sync(UtilHelper.tacoHome);
