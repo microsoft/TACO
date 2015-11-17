@@ -278,6 +278,8 @@
     "_CommandPlatformStatusUpdating.comment": "Status message shown while updating a platform {0} added to the project",
     "CommandPlatformStatusUpdated": "<success>Success!</success> Platform(s) <highlight>{0}</highlight> updated.<br/>",
     "_CommandPlatformStatusUpdated.comment": "Status message after successfully updating platform {0}",
+    "PlatformListRemotePlatforms": "Remote platforms: {0}",
+    "_PlatformListRemotePlatforms.comment": "Message showing currently configured remote platforms as part of 'taco platform list'. {0} is a comma separated list of platform names",
 
     "CommandPluginDescription": "Manage Cordova plugins for the project",
     "_CommandPluginDescription.comment": "Description for 'taco plugin'",

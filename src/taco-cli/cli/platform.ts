@@ -21,10 +21,12 @@ import errorHelper = require ("./tacoErrorHelper");
 import kitHelper = require ("./utils/kitHelper");
 import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
+import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoUtility = require ("taco-utils");
 
 import CommandOperationStatus = commandBase.CommandOperationStatus;
+import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
 import LoggerHelper = tacoUtility.LoggerHelper;
@@ -127,11 +129,22 @@ class Platform extends commandBase.PlatformPluginCommandBase {
             break;
 
             case CommandOperationStatus.Success: {
-                logger.logLine();
                 this.printSuccessMessage(platforms, operation);
                 break;
             }
         }
+    }
+
+    public postInvokeStep(data: commands.ICommandData): Q.Promise<any> {
+        if (this.cordovaCommandParams.subCommand === "list") {
+            // The user has invoked 'taco platform list'
+            // We want to add an additional line including any remote platforms
+            return Settings.loadSettingsOrReturnEmpty().then((settings: Settings.ISettings): void => {
+                var remotePlatforms = Object.keys(settings.remotePlatforms || {}).join(", ");
+                logger.log(resources.getString("PlatformListRemotePlatforms", remotePlatforms));
+            });
+        }
+        return Q({});
     }
 
     /**
@@ -162,6 +175,7 @@ class Platform extends commandBase.PlatformPluginCommandBase {
     private printSuccessMessage(platforms: string, operation: string): void {
         switch (this.resolveAlias(operation)) {
             case "add": {
+                logger.logLine();
                 logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
 
                 // Print the onboarding experience
@@ -180,11 +194,13 @@ class Platform extends commandBase.PlatformPluginCommandBase {
            break;
 
             case "remove": {
+                logger.logLine();
                 logger.log(resources.getString("CommandPlatformStatusRemoved", platforms));
             }
             break;
 
             case "update": {
+                logger.logLine();
                 logger.log(resources.getString("CommandPlatformStatusUpdated", platforms));
                 break;
             }
