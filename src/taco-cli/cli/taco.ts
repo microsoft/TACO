@@ -104,10 +104,14 @@ class Taco {
                             logger.logError(toPrint);
                         }
 
-                        // Send command failure telemetry
-                        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                            telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
-                        });
+                        if (parsedArgs.command) {
+                            // Send command failure telemetry for valid TACO commands
+                            // Any invalid command will be routed to Cordova and 
+                            // telemetry events for such commands are sent as "routedCommand" telemetry events
+                            return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                                telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
+                            });
+                        }
                     }
                 }).finally((): any => {
                     // Make sure to leave a line after the last of our output
