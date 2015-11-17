@@ -51,6 +51,7 @@ module TacoUtility {
     export var ProcessLogger: typeof processLogger.ProcessLogger = processLogger.ProcessLogger;
     export var ResourceManager: typeof resourceManager.ResourceManager = resourceManager.ResourceManager;
     export var TacoError: typeof tacoError.TacoError = tacoError.TacoError;
+    export var TacoErrorLevel: typeof tacoError.TacoErrorLevel = tacoError.TacoErrorLevel;
     export var TacoErrorCode: typeof tacoErrorCodes.TacoErrorCode = tacoErrorCodes.TacoErrorCode;
     export var TacoGlobalConfig: typeof tacoGlobalConfig.TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
     export var TacoPackageLoader: typeof tacoPackageLoader.TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;

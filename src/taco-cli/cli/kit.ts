@@ -110,6 +110,8 @@ class Kit extends commands.TacoCommandBase {
                 if (resources.getString("PromptResponseYes").toLowerCase().split("\n").indexOf(answer) !== -1) {
                     logger.logLine();
                     return Kit.updateProject(editParams, installedPlatformVersions, installedPluginVersions, platformVersionUpdates, pluginVersionUpdates);
+                } else {
+                    return Q.reject(errorHelper.getWarning("WarnProjectUpdateAborted"));
                 }
             }
         });

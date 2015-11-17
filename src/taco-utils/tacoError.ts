@@ -16,6 +16,11 @@ import TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
 import ResourceManager = resourceManager.ResourceManager;
 
 module TacoUtility {
+    export enum TacoErrorLevel {
+        Error,
+        Warning
+    }
+
     export class TacoError implements Error {
         private static DEFAULT_ERROR_PREFIX: string = "TACO";
         private static ERROR_CODE_FIXED_WIDTH: string = "0000";
@@ -23,6 +28,7 @@ module TacoUtility {
         public errorCode: number;
         public message: string;
         public name: string;
+        public errorLevel: TacoErrorLevel;
 
         private innerError: Error;
 
@@ -36,10 +42,21 @@ module TacoUtility {
             this.message = message;
             this.name = null;
             this.innerError = innerError;
+            this.errorLevel = TacoErrorLevel.Error;
         }
 
         public get isTacoError(): boolean {
             return true;
+        }
+
+        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
+            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+
+            // We do not use an error code for Warnings
+            var warning = new TacoError (0, message);
+
+            warning.errorLevel = TacoErrorLevel.Warning;
+            return warning;
         }
 
         public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
@@ -52,6 +69,11 @@ module TacoUtility {
         }
 
         public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
+            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+            return new TacoError(errorCode, message, innerError);
+        }
+
+        public static getMessageString(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): string {
             var message: string = null;
             if (optionalArgs.length > 0) {
                 assert(errorToken, "We should have an error token if we intend to use args");
@@ -63,7 +85,7 @@ module TacoUtility {
                 message = errorToken;
             }
 
-            return new TacoError(errorCode, message, innerError);
+            return message;
         }
 
         public toString(): string {
