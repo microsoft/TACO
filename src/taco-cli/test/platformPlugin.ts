@@ -99,8 +99,8 @@ var kitPlatformOperations: ICommandAndResult[] = [
                     isTacoProject: { isPii: false, value: "true" },
                     projectType: { isPii: false, value: "JavaScript" },
                     subCommand: { isPii: false, value: "add" },
-                    target1: { isPii: false, value: "android@4.0.2" },
-                    target2: { isPii: false, value: "ios@3.8.0" }
+                    target1: { isPii: true, value: "android@4.0.2" },
+                    target2: { isPii: true, value: "ios@3.8.0" }
                 }
             },
             {
@@ -112,8 +112,8 @@ var kitPlatformOperations: ICommandAndResult[] = [
                         isTacoProject: { isPii: false, value: "true" },
                         projectType: { isPii: false, value: "JavaScript" },
                         subCommand: { isPii: false, value: "rm" },
-                        target1: { isPii: false, value: "android" },
-                        target2: { isPii: false, value: "ios" }
+                        target1: { isPii: true, value: "android" },
+                        target2: { isPii: true, value: "ios" }
                 }
             },
             {
@@ -125,8 +125,8 @@ var kitPlatformOperations: ICommandAndResult[] = [
                         isTacoProject: { isPii: false, value: "true" },
                         projectType: { isPii: false, value: "JavaScript" },
                         subCommand: { isPii: false, value: "add" },
-                        target1: { isPii: false, value: "android@4.0.1" },
-                        target2: { isPii: false, value: "ios@3.8.0" }
+                        target1: { isPii: true, value: "android@4.0.1" },
+                        target2: { isPii: true, value: "ios@3.8.0" }
             }
         }
     ];
@@ -141,8 +141,8 @@ var cliPlatformOperations: ICommandAndResult[] = [
                     isTacoProject: { isPii: false, value: "true" },
                     projectType: { isPii: false, value: "JavaScript" },
                     subCommand: { isPii: false, value: "add" },
-                    target1: { isPii: false, value: "android" },
-                    target2: { isPii: false, value: "browser" }
+                    target1: { isPii: true, value: "android" },
+                    target2: { isPii: true, value: "browser" }
             }
         },
         {
@@ -154,8 +154,8 @@ var cliPlatformOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
-                target1: { isPii: false, value: "android" },
-                target2: { isPii: false, value: "browser" }
+                target1: { isPii: true, value: "android" },
+                target2: { isPii: true, value: "browser" }
             }
         },
 
@@ -168,8 +168,8 @@ var cliPlatformOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "add" },
-                target1: { isPii: false, value: "android@4.0.1" },
-                target2: { isPii: false, value: "browser@4.0.0" }
+                target1: { isPii: true, value: "android@4.0.1" },
+                target2: { isPii: true, value: "browser@4.0.0" }
             }
         },
         {
@@ -181,8 +181,8 @@ var cliPlatformOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
-                target1: { isPii: false, value: "android" },
-                target2: { isPii: false, value: "browser" }
+                target1: { isPii: true, value: "android" },
+                target2: { isPii: true, value: "browser" }
             }
         }
     ];
@@ -197,8 +197,8 @@ var kitPluginOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "add" },
-                target1: { isPii: false, value: "cordova-plugin-camera@1.0.0" },
-                target2: { isPii: false, value: "cordova-plugin-contacts@1.0.0" }
+                target1: { isPii: true, value: "cordova-plugin-camera@1.0.0" },
+                target2: { isPii: true, value: "cordova-plugin-contacts@1.0.0" }
             }
         },
         {
@@ -210,8 +210,8 @@ var kitPluginOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "remove" },
-                target1: { isPii: false, value: "cordova-plugin-camera" },
-                target2: { isPii: false, value: "cordova-plugin-contacts" }
+                target1: { isPii: true, value: "cordova-plugin-camera" },
+                target2: { isPii: true, value: "cordova-plugin-contacts" }
             }
         }
     ];
@@ -226,8 +226,8 @@ var cliPluginOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "add" },
-                target1: { isPii: false, value: "cordova-plugin-camera@1.0.0" },
-                target2: { isPii: false, value: "cordova-plugin-contacts@1.0.0" }
+                target1: { isPii: true, value: "cordova-plugin-camera@1.0.0" },
+                target2: { isPii: true, value: "cordova-plugin-contacts@1.0.0" }
             }
         },
         {
@@ -239,8 +239,8 @@ var cliPluginOperations: ICommandAndResult[] = [
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
                 subCommand: { isPii: false, value: "rm" },
-                target1: { isPii: false, value: "cordova-plugin-camera" },
-                target2: { isPii: false, value: "cordova-plugin-contacts" }
+                target1: { isPii: true, value: "cordova-plugin-camera" },
+                target2: { isPii: true, value: "cordova-plugin-contacts" }
             }
         }
     ];
