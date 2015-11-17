@@ -178,6 +178,14 @@ class CordovaWrapper {
         }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
+    public static targets(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
+        // Note: cordova <= 5.3.3 expects the options to "targets" to include "--list". If it does not,
+        // it blindly splices off the last argument.
+        return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+            return cordova.raw.targets(CordovaHelper.toCordovaTargetsArguments(commandData, platforms));
+        }, () => ["targets"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
+    }
+
     /**
      * Perform an operation using either the Cordova API, or spwaning a Cordova process.
      * The first argument is a function which is given a Cordova object, and can operate on it as it wishes.
