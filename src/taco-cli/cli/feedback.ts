@@ -33,8 +33,7 @@ class Feedback extends commands.TacoCommandBase {
      * Prompt for telemetry consent
      */
     public run(data: commands.ICommandData): Q.Promise<any> {
-        telemetry.changeTelemetryOptInSetting();
-        return Q({});
+        return telemetry.changeTelemetryOptInSetting();
     }
 }
 

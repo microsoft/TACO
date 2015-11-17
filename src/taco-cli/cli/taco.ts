@@ -63,8 +63,9 @@ class Taco {
             logger.log(resources.getString("ThirdPartyDisclaimer"));
 
             return Settings.saveSettings({});
-        }).then(function (settings: Settings.ISettings): void {
-            telemetry.init("TACO", require("../package.json").version);
+        }).then(function (settings: Settings.ISettings): Q.Promise<any> {
+            return telemetry.init("TACO", require("../package.json").version);
+        }).then( function(): void {
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
             // We check if there is a new TACO version available, and if so, we print a message before exiting the application
