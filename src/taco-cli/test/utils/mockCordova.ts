@@ -89,7 +89,7 @@ module MockCordova {
         }
     }
 
-    export class MockCordovaRaw510 implements Cordova.ICordovaRaw510 {
+    export class MockCordovaRaw510 implements Cordova.ICordovaRaw510T<Cordova.ICordovaRawOptions> {
         public config: any = {};
         public help: any = {};
 
