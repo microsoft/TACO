@@ -308,6 +308,7 @@ describe("help for a command", function (): void {
             "      --device ........... CommandRunDeviceDescription",
             "      --emulator ......... CommandRunEmulatorDescription",
             "      --target=TARGET .... CommandRunTargetDescription",
+            "      --list ............. CommandRunListDescription",
             ""], done);
     });
 
