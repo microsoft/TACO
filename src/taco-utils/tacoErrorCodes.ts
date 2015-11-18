@@ -25,8 +25,12 @@ module TacoUtility {
         CommandBadSubcommand = 702,
         TacoUtilsExceptionListingfile = 703,
         TacoUtilsExceptionMissingcommand = 704,
+<<<<<<< HEAD
         ErrorUserJsonMissing = 705,
         ErrorUserJsonMalformed = 706
+=======
+        ErrorUserJsonMissingOrMalformed = 705
+>>>>>>> Incorporated PR feedback. parseUserJSON throws an exception if we fail to
     }
 }
 
