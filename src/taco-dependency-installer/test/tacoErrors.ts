@@ -20,7 +20,7 @@ import TacoErrorTestHelper = tacoTestUtils.TacoErrorTestHelper;
 
 describe("Taco Errors in TACO", function (): void {
     it("Verify TACO Errors in TACO", function (): void {
-        TacoErrorTestHelper.verifyTacoErrors(path.join(__dirname, "../cli/tacoErrorCodes.js"), resources, 2100, 2499);
+        TacoErrorTestHelper.verifyTacoErrors(path.join(__dirname, "../tacoErrorCodes.js"), resources, 2100, 2499);
     });
 });
 
