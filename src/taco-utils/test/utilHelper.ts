@@ -16,12 +16,18 @@
 var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 import mocha = require ("mocha");
+import fs = require("fs");
+import os = require("os");
+import mkdirp = require ("mkdirp");
+import path = require("path");
+import rimraf = require ("rimraf");
 
 import argsHelper = require ("../argsHelper");
 import commands = require ("../commands");
 import utils = require ("../utilHelper");
 
 import ArgsHelper = argsHelper.ArgsHelper;
+import UtilHelper = utils.UtilHelper;
 
 describe("UtilHelper", function (): void {
     describe("parseArguments()", function (): void {
@@ -162,5 +168,42 @@ describe("UtilHelper", function (): void {
             parsed.remain[0].should.equal("bar");
             parsed.remain[1].should.equal("foo");
         });
+    });
+
+    describe("parseUserJSON()", function (): void {
+        var testHome: string = path.join(os.tmpdir(), "taco-utils", "parseUserJSON");
+        before(function (): void {
+            process.env["TACO_HOME"] = testHome;
+            rimraf.sync(testHome);
+            mkdirp.sync(testHome);
+        });
+
+        after(function (): void {
+            rimraf(testHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+        });
+
+        it("read UTF-16 file", function (): void {
+            writeBufferAndValidate("utf16.json", (stringified: string) => new Buffer(stringified, "utf16le"));
+        });
+
+        it("read UTF-8 file", function (): void {
+            writeBufferAndValidate("utf8.json", stringified => new Buffer(stringified, "utf8"));
+        });
+
+        it("read UTF-8 with BOM", function (): void {
+            var parsedJson = UtilHelper.parseUserJSON(path.resolve(__dirname, "taco_utf8BOM.json"));
+            parsedJson["cordova-cli"].should.equal("5.3.3");
+        });
+
+        function writeBufferAndValidate(filename: string, getBuffer: (stringified: string) => Buffer) {
+            var x = { "cordova-cli": 5.8 };
+            var stringified: string = JSON.stringify(x);
+            var buffer: Buffer = getBuffer(stringified);
+
+            var filepath = path.join(testHome, filename);
+            fs.writeFileSync(filepath, buffer);
+            var parsedJson = UtilHelper.parseUserJSON(filepath);
+            JSON.stringify(parsedJson).should.equal(stringified);
+        }
     });
 });

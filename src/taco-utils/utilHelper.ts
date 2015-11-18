@@ -320,6 +320,36 @@ module TacoUtility {
         }
 
         /**
+         * parses a JSON file which could get modified by user or another tool
+         * handles different encoding
+         * @param {string} path to the json file
+         * @return {any} parsed JSON object
+         */
+        public static parseUserJSON(filePath: string): any {
+            var contents: Buffer = fs.readFileSync(filePath);
+            // try the simplest path first
+            try {
+                return JSON.parse(contents.toString());
+            } catch (ex) {
+                UtilHelper.emptyMethod();
+            }
+
+            // may be this is a UTF-8 with BOM
+            var iconv = require("iconv-lite");
+            try {
+                return JSON.parse(iconv.decode(contents, "utf8"));
+            } catch (ex) {
+                UtilHelper.emptyMethod();
+            }
+            // May be this is a UTF-16 file
+            try {
+                return JSON.parse(iconv.decode(contents, "utf16"));
+            } catch (ex) {
+                UtilHelper.emptyMethod();
+            }
+        }
+
+        /**
          * Sets the global LogLevel setting for TACO by specifically looking for the "--loglevel" string. If found, and the string after it is a valid loglevel value, the global config's loglevel
          * is set. Finally, the "--loglevel" string (and the following value, if present, whether it is valid or not) are removed from the args so that they are not passed to the command.
          *
