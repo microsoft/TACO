@@ -103,10 +103,10 @@ module TacoUtility {
             }
         };
 
-        export function init(appNameValue: string, appVersion?: string, isOptedInValue?: boolean): void {
+        export function init(appNameValue: string, appVersion?: string, isOptedInValue?: boolean): Q.Promise<any> {
             try {
                 Telemetry.appName = appNameValue;
-                TelemetryUtils.init(appVersion, isOptedInValue);
+                return TelemetryUtils.init(appVersion, isOptedInValue);
             } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
@@ -144,11 +144,11 @@ module TacoUtility {
             return TelemetryUtils.userType === TelemetryUtils.USERTYPE_INTERNAL;
         }
 
-        export function changeTelemetryOptInSetting(): void {
+        export function changeTelemetryOptInSetting(): Q.Promise<any> {
             // If user's choice was already collected during initialization
             // for this session, do not prompt again
             if (TelemetryUtils.optInCollectedForCurrentSession) {
-                return;
+                return Q({});
             }
 
             var currentOptIn: boolean = TelemetryUtils.getTelemetryOptInSetting();
@@ -159,11 +159,12 @@ module TacoUtility {
 
             var promptStringId: string = currentOptIn ? "TelemetryCurrentlyOptedInPrompt" : "TelemetryCurrentlyOptedOutPrompt";
 
-            newOptIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString(promptStringId, Telemetry.appName));
-
-            // Change and save the new setting
-            TelemetryUtils.setTelemetryOptInSetting(newOptIn);
-            Telemetry.isOptedIn = newOptIn;
+            return TelemetryUtils.getUserConsentForTelemetry(utilResources.getString(promptStringId, Telemetry.appName))
+            .then( function(userOptedIn: boolean): void {
+                newOptIn = userOptedIn;
+                TelemetryUtils.setTelemetryOptInSetting(newOptIn);
+                Telemetry.isOptedIn = newOptIn;
+            });
         }
 
         export function getSessionId(): string {
@@ -205,7 +206,7 @@ module TacoUtility {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TELEMETRY_SETTINGS_FILENAME);
             }
 
-            public static init(appVersion: string, isOptedInValue?: boolean): void {
+            public static init(appVersion: string, isOptedInValue?: boolean): Q.Promise<any> {
                 TelemetryUtils.loadSettings();
 
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
@@ -228,11 +229,19 @@ module TacoUtility {
                 TelemetryUtils.machineId = TelemetryUtils.getMachineId();
                 TelemetryUtils.sessionId = TelemetryUtils.generateGuid();
                 TelemetryUtils.userType = TelemetryUtils.getUserType();
-                Telemetry.isOptedIn = _.isUndefined(isOptedInValue) ?
-                    TelemetryUtils.getOptIn() : // If isOptedIn is undefined, we try to retrive or ask the user for the value
-                    isOptedInValue; // If it's defined, we just use it
+                
 
-                TelemetryUtils.saveSettings();
+                if (_.isUndefined(isOptedInValue)) {
+                    return TelemetryUtils.getOptIn()
+                    .then(function (optIn: boolean): void {
+                        Telemetry.isOptedIn = optIn;
+                        TelemetryUtils.saveSettings();
+                    });
+                } else {
+                    Telemetry.isOptedIn = isOptedInValue;
+                    TelemetryUtils.saveSettings();
+                    return Q({});
+                }
             }
 
             public static addCommonProperties(event: any): void {
@@ -280,29 +289,45 @@ module TacoUtility {
                 TelemetryUtils.saveSettings();
             }
 
-            public static getUserConsentForTelemetry(optinMessage: string = ""): boolean {
+            public static getUserConsentForTelemetry(optinMessage: string = ""): Q.Promise<boolean> {
                 logger.logLine();
-                var readlineSync: any = require("readline-sync");
-                return !!readlineSync.keyInYNStrict(LogFormatHelper.toFormattedString(optinMessage));
+
+                var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
+                var yesOrNoHandler = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+                yesOrNoHandler.question(LogFormatHelper.toFormattedString(optinMessage), function (answer: string): void {
+                    yesOrNoHandler.close();
+                    if (answer && utilResources.getString("PromptResponseYes").toLowerCase().split("\n").indexOf(answer.trim()) !== -1) {
+                        deferred.resolve(true);
+                    } else {
+                        deferred.resolve(false);
+                    }
+                });
+
+                return deferred.promise;
             }
 
-            private static getOptIn(): boolean {
+            private static getOptIn(): Q.Promise<boolean> {
                 var optIn: boolean = TelemetryUtils.telemetrySettings.optIn;
-                if (typeof optIn === "undefined") {
+                if (_.isUndefined(optIn)) {
                     logger.logLine();
                     logger.log(utilResources.getString("TelemetryOptInMessage"));
                     logger.logLine();
-                    optIn = TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInQuestion"));
-                    TelemetryUtils.setTelemetryOptInSetting(optIn);
+                    return TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInQuestion"))
+                    .then( function(userOptedIn: boolean) {
+                        optIn = userOptedIn;
+                        TelemetryUtils.setTelemetryOptInSetting(optIn);
+                        return Q.resolve(optIn);
+                    });
+                } else {
+                    return Q.resolve(optIn);
                 }
-
-                return optIn;
             }
 
             private static getUserType(): string {
                 var userType: string = TelemetryUtils.telemetrySettings.userType;
 
-                if (typeof userType === "undefined") {
+                if (_.isUndefined(userType)) {
                     if (process.env[TelemetryUtils.INTERNAL_USER_ENV_VAR]) {
                         userType = TelemetryUtils.USERTYPE_INTERNAL;
                     } else if (os.platform() === "win32") {

@@ -39,10 +39,10 @@ declare module TacoUtility {
             start(): void;
             end(): void;
         }
-        function init(appName: string, appVersion?: string, isOptedIn?: boolean): void;
+        function init(appName: string, appVersion?: string, isOptedIn?: boolean): Q.Promise<any>;
         function isInternal(): boolean;
         function send(event: TelemetryEvent, ignoreOptIn?: boolean): void;
-        function changeTelemetryOptInSetting(): void;
+        function changeTelemetryOptInSetting(): Q.Promise<any>;
         function sendPendingData(): Q.Promise<string>;
         function getSessionId(): string;
         function setSessionId(sessionId: string): void;
