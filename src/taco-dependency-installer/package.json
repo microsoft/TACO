@@ -26,6 +26,7 @@
     "q": "^1.1.2",
     "request": "2.36.0",
     "taco-utils": "file:../taco-utils",
+    "taco-tests-utils": "file:../taco-tests-utils",
     "toposort": "^0.2.10",
     "wrench": "^1.5.8"
   },
