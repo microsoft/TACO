@@ -160,7 +160,7 @@ module TacoUtility {
             var promptStringId: string = currentOptIn ? "TelemetryCurrentlyOptedInPrompt" : "TelemetryCurrentlyOptedOutPrompt";
 
             return TelemetryUtils.getUserConsentForTelemetry(utilResources.getString(promptStringId, Telemetry.appName))
-            .then( function(userOptedIn: boolean) {
+            .then( function(userOptedIn: boolean): void {
                 newOptIn = userOptedIn;
                 TelemetryUtils.setTelemetryOptInSetting(newOptIn);
                 Telemetry.isOptedIn = newOptIn;
@@ -233,7 +233,7 @@ module TacoUtility {
 
                 if (_.isUndefined(isOptedInValue)) {
                     return TelemetryUtils.getOptIn()
-                    .then(function (optIn: boolean) {
+                    .then(function (optIn: boolean): void {
                         Telemetry.isOptedIn = optIn;
                         TelemetryUtils.saveSettings();
                     });
@@ -309,22 +309,19 @@ module TacoUtility {
 
             private static getOptIn(): Q.Promise<boolean> {
                 var optIn: boolean = TelemetryUtils.telemetrySettings.optIn;
-                var deferred: Q.Deferred<any> = Q.defer<any>();
                 if (_.isUndefined(optIn)) {
                     logger.logLine();
                     logger.log(utilResources.getString("TelemetryOptInMessage"));
                     logger.logLine();
-                    TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInQuestion"))
+                    return TelemetryUtils.getUserConsentForTelemetry(utilResources.getString("TelemetryOptInQuestion"))
                     .then( function(userOptedIn: boolean) {
                         optIn = userOptedIn;
                         TelemetryUtils.setTelemetryOptInSetting(optIn);
-                        deferred.resolve(optIn);
+                        return Q.resolve(optIn);
                     });
                 } else {
-                    deferred.resolve(optIn);
+                    return Q.resolve(optIn);
                 }
-
-                return deferred.promise;
             }
 
             private static getUserType(): string {
