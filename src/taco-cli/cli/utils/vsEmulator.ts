@@ -34,6 +34,8 @@ export class VSEmulator {
     private static EMULATOR_PROFILE_REGEX: RegExp = /(.+)\s\|\s(.+)\s\|\s(.+)/g;
     private static LOG_FILE: string = "VSAndroidEmulator.log";
     private static INSTALLED_PROFILES: IEmulatorProfile[];
+    private static WAIT_FOR_BOOT_POLLS_MAX: number = 30;
+    private static WAIT_FOR_BOOT_POLL_INTERVAL: number = 1000;
 
     /**
      * Checks if the VS Emulator is installed on the machine. 
@@ -131,10 +133,39 @@ export class VSEmulator {
                 } else {
                     return VSEmulator.getInstalledProfiles()
                         .then((installedProfiles: IEmulatorProfile[]) => {
-                            return VSEmulator.launchEmulator(installedProfiles[0].key).then(VSEmulator.getRunningEmulator);
+                            return VSEmulator.launchEmulator(installedProfiles[0].key)
+                                .then(() => { return VSEmulator.waitForEmulatorBoot(installedProfiles[0]); })
+                                .then(VSEmulator.getRunningEmulator);
                         });
                 }
             });
+    }
+
+    /**
+     * Waits until emulator is visible in the ADB list of devices.
+     */
+    private static waitForEmulatorBoot(profile: IEmulatorProfile): Q.Promise<void> {
+        var deferred: Q.Deferred<any> = Q.defer<any>();
+        var currentPoll = VSEmulator.WAIT_FOR_BOOT_POLLS_MAX;
+
+        var waitForEmulator = (): Q.Promise<void> => {
+            return VSEmulator.GetEmulatorDetailedInfo(profile).then((emulatorDetail: IEmulatorDetail) => {
+                if (emulatorDetail && emulatorDetail.adbSerialNumber) {
+                    deferred.resolve({});
+                }
+                else {
+                    if ((currentPoll--) > 0) {
+                        setTimeout(waitForEmulator, VSEmulator.WAIT_FOR_BOOT_POLL_INTERVAL);
+                    }
+                    else {
+                        deferred.reject({});
+                    }
+                }
+            });
+        };
+
+        waitForEmulator();
+        return deferred.promise;
     }
 
     /**
