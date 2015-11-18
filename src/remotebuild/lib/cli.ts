@@ -77,7 +77,7 @@ class CliHelper {
 
     private static handleVersionFlag(args: string[]): void {
         if (UtilHelper.tryParseVersionArgs(args)) {
-            Logger.log("Copyright (C) 2014 Microsoft Corporation. All rights reserved.");
+            Logger.log("Copyright (C) 2014-2015 Microsoft Corporation. All rights reserved.");
             Logger.log(require("../package").version);
             Logger.logLine();
             process.exit(0);
