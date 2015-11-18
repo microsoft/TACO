@@ -348,11 +348,12 @@ describe("Kit command : ", function (): void {
             rimraf(cliProjectpath, function (err: Error): void { done(); }); // ignore errors
         });
 
-        it("'taco kit select --kit {Invalid-kit-ID}' should execute with expected error", function (): Q.Promise<any> {
-            return runKitCommandFailureCaseAndVerifyTacoJson<TacoKitsErrorCodes>(["select", "--kit", "InvalidKit"], tacoJsonPath, expectedCliTacoJsonKeyValues2, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit);
+        it("'taco kit select --kit {Invalid-kit-ID}' should execute with expected error", function (done: MochaDone): void {
+            runKitCommandFailureCaseAndVerifyTacoJson<TacoKitsErrorCodes>(["select", "--kit", "InvalidKit"], tacoJsonPath, expectedCliTacoJsonKeyValues2, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit)
+                .done(() => done(), done);
         });
 
-        it("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): Q.Promise<any> {
+        it("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): void {
             KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseYes");
             return addTestPluginsToProject(cliProjectpath)
             .then(function (): Q.Promise<any> {
@@ -366,7 +367,7 @@ describe("Kit command : ", function (): void {
                 telemetryParameters.should.be.eql(expected);
                 TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
                 TestProjectHelper.checkPluginVersions(expectedKitPluginVersion, cliProjectpath);
-            });
+            }).done(() => done(), done);
         });
     });
 });

@@ -51,15 +51,14 @@ describe("help for a command", function (): void {
         return help.run(data);
     }
 
-    function testHelpForCommand(command: string, expectedLines: string[], done: MochaDone): void {
-        helpRun(command).done(() => {
+    function testHelpForCommand(command: string, expectedLines: string[]): Q.Promise<any> {
+        return helpRun(command).then(() => {
             var expected: string = expectedLines.join("\n");
             var actual: string = colors.strip(memoryStdout.contentsAsText()); // The colors add extra characters
             actual = actual.replace(/ (\.+) ?\n  +/gm, " $1 "); // We undo the word-wrapping
             actual = actual.replace(/ +$/gm, ""); // Remove useless spaces at the end of a line
             actual.should.be.equal(expected);
-            done();
-        }, done);
+        });
     }
 
     before(() => {
@@ -78,8 +77,8 @@ describe("help for a command", function (): void {
         process.stdout.write = memoryStdout.writeAsFunction(); // We'll be printing into an "in-memory" console, so we can test the output
     });
 
-    it("prints the help for create", function (done: MochaDone): void {
-        testHelpForCommand("create", [
+    it("prints the help for create", function (): Q.Promise<any> {
+        return testHelpForCommand("create", [
             "",
             "CommandCreateDescription",
             "",
@@ -96,31 +95,31 @@ describe("help for a command", function (): void {
             "      --cordova <VERSION> .......... CommandCreateOptionsCordova",
             "      --copy-from|src <PATH> ....... CommandCreateOptionsCopy",
             "      --link-to <PATH> ............. CommandCreateOptionsLinkto",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for templates", function (done: MochaDone): void {
-        testHelpForCommand("templates", [
+    it("prints the help for templates", function (): Q.Promise<any> {
+        return testHelpForCommand("templates", [
             "",
             "CommandTemplatesDescription",
             "",
             "   taco templates",
             "",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for templates using the template alias", function (done: MochaDone): void {
-        testHelpForCommand("template", [
+    it("prints the help for templates using the template alias", function (): Q.Promise<any> {
+        return testHelpForCommand("template", [
             "",
             "CommandTemplatesDescription",
             "",
             "   taco templates",
             "",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for remote", function (done: MochaDone): void {
-        testHelpForCommand("remote", [
+    it("prints the help for remote", function (): Q.Promise<any> {
+        return testHelpForCommand("remote", [
             "",
             "CommandRemoteDescription",
             "",
@@ -134,11 +133,11 @@ describe("help for a command", function (): void {
             "CommandHelpUsageAliases",
             "   rm -> remove",
             "   ls -> list",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for platform", function (done: MochaDone): void {
-        testHelpForCommand("platform", [
+    it("prints the help for platform", function (): Q.Promise<any> {
+        return testHelpForCommand("platform", [
             "",
             "CommandPlatformDescription",
             "",
@@ -159,11 +158,11 @@ describe("help for a command", function (): void {
             "CommandHelpUsageAliases",
             "   rm -> remove",
             "   ls -> list",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for platform using the platforms alias", function (done: MochaDone): void {
-        testHelpForCommand("platforms", [
+    it("prints the help for platform using the platforms alias", function (): Q.Promise<any> {
+        return testHelpForCommand("platforms", [
             "",
             "CommandPlatformDescription",
             "",
@@ -184,11 +183,11 @@ describe("help for a command", function (): void {
             "CommandHelpUsageAliases",
             "   rm -> remove",
             "   ls -> list",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for plugin", function (done: MochaDone): void {
-        testHelpForCommand("plugin", [
+    it("prints the help for plugin", function (): Q.Promise<any> {
+        return testHelpForCommand("plugin", [
             "",
             "CommandPluginDescription",
             "",
@@ -208,11 +207,11 @@ describe("help for a command", function (): void {
             "CommandHelpUsageAliases",
             "   rm -> remove",
             "   ls -> list",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for plugin using the plugins alias", function (done: MochaDone): void {
-        testHelpForCommand("plugins", [
+    it("prints the help for plugin using the plugins alias", function (): Q.Promise<any> {
+        return testHelpForCommand("plugins", [
             "",
             "CommandPluginDescription",
             "",
@@ -232,11 +231,11 @@ describe("help for a command", function (): void {
             "CommandHelpUsageAliases",
             "   rm -> remove",
             "   ls -> list",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for kit", function (done: MochaDone): void {
-        testHelpForCommand("kit", [
+    it("prints the help for kit", function (): Q.Promise<any> {
+        return testHelpForCommand("kit", [
             "",
             "CommandKitDescription",
             "",
@@ -265,11 +264,11 @@ describe("help for a command", function (): void {
             "CommandHelpUsageNotes",
             "   * TacoKitNotes",
             "",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for build", function (done: MochaDone): void {
-        testHelpForCommand("build", [
+    it("prints the help for build", function (): Q.Promise<any> {
+        return testHelpForCommand("build", [
             "",
             "CommandBuildDescription",
             "",
@@ -286,11 +285,11 @@ describe("help for a command", function (): void {
             "      --device ........... CommandBuildDeviceDescription",
             "      --emulator ......... CommandBuildEmulatorDescription",
             "      --target=TARGET .... CommandBuildTargetDescription",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for run", function (done: MochaDone): void {
-        testHelpForCommand("run", [
+    it("prints the help for run", function (): Q.Promise<any> {
+        return testHelpForCommand("run", [
             "",
             "CommandRunDescription",
             "",
@@ -308,11 +307,12 @@ describe("help for a command", function (): void {
             "      --device ........... CommandRunDeviceDescription",
             "      --emulator ......... CommandRunEmulatorDescription",
             "      --target=TARGET .... CommandRunTargetDescription",
-            ""], done);
+            "      --list ............. CommandRunListDescription",
+            ""]);
     });
 
-    it("prints the help for install-reqs", function (done: MochaDone): void {
-        testHelpForCommand("install-reqs", [
+    it("prints the help for install-reqs", function (): Q.Promise<any> {
+        return testHelpForCommand("install-reqs", [
             "",
             "CommandInstallReqsDescription",
             "",
@@ -320,11 +320,11 @@ describe("help for a command", function (): void {
             "",
             "CommandHelpUsageParameters",
             "   [PLATFORM] .......... CommandInstallReqsPlatformDescription",
-            ""], done);
+            ""]);
     });
 
-    it("prints the help for emulate", function (done: MochaDone): void {
-        testHelpForCommand("emulate", [
+    it("prints the help for emulate", function (): Q.Promise<any> {
+        return testHelpForCommand("emulate", [
             "",
             "CommandEmulateDescription",
             "",
@@ -339,6 +339,6 @@ describe("help for a command", function (): void {
             "   --debug ............. CommandRunDebugDescription",
             "   --release ........... CommandRunReleaseDescription",
             "   --target=TARGET ..... CommandRunTargetDescription",
-            ""], done);
+            ""]);
     });
 });
