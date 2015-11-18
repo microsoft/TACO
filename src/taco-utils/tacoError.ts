@@ -37,10 +37,10 @@ module TacoUtility {
          * @param {number} errorCode  error code for the error say 101
          * @param {string} message user friendly localized error message
          */
-        constructor(errorCode: number, message: string, innerError?: Error) {
+        constructor(errorCode: number, name: string, message: string, innerError?: Error) {
             this.errorCode = errorCode;
             this.message = message;
-            this.name = null;
+            this.name = name;
             this.innerError = innerError;
             this.errorLevel = TacoErrorLevel.Error;
         }
@@ -53,7 +53,7 @@ module TacoUtility {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
 
             // We do not use an error code for Warnings
-            var warning = new TacoError (0, message);
+            var warning = new TacoError(0, errorToken, message);
 
             warning.errorLevel = TacoErrorLevel.Warning;
             return warning;
@@ -65,7 +65,7 @@ module TacoUtility {
 
         public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
-            return new TacoError(errorCode, message, innerError);
+            return new TacoError(errorCode, errorToken, message, innerError);
         }
 
         private static getMessageString(errorToken: string, resources: ResourceManager, args: string[]): string {

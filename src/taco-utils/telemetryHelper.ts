@@ -184,6 +184,7 @@ module TacoUtility {
 
             if (error.isTacoError) {
                 errorEvent.properties["tacoErrorCode"] = error.errorCode;
+                errorEvent.properties["tacoErrorName"] = error.name;
             } else if (error.message) {
                 errorEvent.setPiiProperty("errorMessage", error.message);
             }
