@@ -77,12 +77,20 @@ describe("Kit command : ", function (): void {
         "cordova-cli": "5.1.1"
     };
 
+    var expectedCliTacoJsonKeyValues3: IKeyValuePair<string> = {
+        "cordova-cli": "5.4.0"
+    };
+
     var expectedKitTacoJsonKeyValues: IKeyValuePair<string> = {
         kit: "5.1.1-Kit", "cordova-cli": "5.1.1"
     };
 
     var expectedKitPlatformVersion: IKeyValuePair<string> = {
         android: "4.0.2"
+    };
+
+    var expectedKitPluginVersion: IKeyValuePair<string> = {
+        "cordova-plugin-camera": "1.2.0"
     };
 
     function createProject(args: string[], projectDir: string): Q.Promise<any> {
@@ -297,13 +305,19 @@ describe("Kit command : ", function (): void {
                 .done(() => done(), done);
         });
 
-        it("'taco kit select --cordova {CLI-VERSION}' on a project with a platform added, should execute with no errors", function (done: MochaDone): void {
+        it("'taco kit select --cordova {CLI-VERSION}' and a negative response to update query should fail with a warning", function (done: MochaDone): void {
             KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseNo");
-            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "4.3.1"], tacoJsonPath, expectedCliTacoJsonKeyValues1)
+            runKitCommandFailureCaseAndVerifyTacoJson(["select", "--cordova", "4.3.1"], tacoJsonPath, expectedKitTacoJsonKeyValues, 0 /* Command should fail with a warning */)
+                .done(() => done(), done);
+        });
+
+        it("'taco kit select --cordova {CLI-VERSION}' on a project with a platform added, should execute with no errors", function (done: MochaDone): void {
+            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseYes");
+            runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--cordova", "5.4.0"], tacoJsonPath, expectedCliTacoJsonKeyValues3)
                 .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
                     var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "select" },
-                        "options.cordova": { isPii: false, value: "4.3.1" }
+                        "options.cordova": { isPii: false, value: "5.4.0" }
                     };
                     telemetryParameters.should.be.eql(expected);
                 })
@@ -340,19 +354,19 @@ describe("Kit command : ", function (): void {
         });
 
         it("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): void {
-            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseNo");
+            KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseYes");
             return addTestPluginsToProject(cliProjectpath)
             .then(function (): Q.Promise<any> {
-                return runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues)
-                .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
-                    var expected = {
-                        subCommand: { isPii: false, value: "select" },
-                        "options.kit": { isPii: false, value: "5.1.1-Kit" }
-                    };
-                    telemetryParameters.should.be.eql(expected);
-                }).then(() => {
-                    TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
-                });
+                return runKitCommandSuccessCaseAndVerifyTacoJson(["select", "--kit", "5.1.1-Kit"], tacoJsonPath, expectedKitTacoJsonKeyValues);
+            })
+            .then(function(telemetryParameters: TacoUtility.ICommandTelemetryProperties): void {
+                var expected = {
+                    subCommand: { isPii: false, value: "select" },
+                    "options.kit": { isPii: false, value: "5.1.1-Kit" }
+                };
+                telemetryParameters.should.be.eql(expected);
+                TestProjectHelper.checkPlatformVersions(expectedKitPlatformVersion, cliProjectpath);
+                TestProjectHelper.checkPluginVersions(expectedKitPluginVersion, cliProjectpath);
             }).done(() => done(), done);
         });
     });

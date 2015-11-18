@@ -63,8 +63,9 @@ class Taco {
             logger.log(resources.getString("ThirdPartyDisclaimer"));
 
             return Settings.saveSettings({});
-        }).then(function (settings: Settings.ISettings): void {
-            telemetry.init("TACO", require("../package.json").version);
+        }).then(function (settings: Settings.ISettings): Q.Promise<any> {
+            return telemetry.init("TACO", require("../package.json").version);
+        }).then( function(): void {
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
             // We check if there is a new TACO version available, and if so, we print a message before exiting the application
@@ -88,7 +89,11 @@ class Taco {
                     // Pretty print errors
                     if (reason) {
                         if (reason.isTacoError) {
-                            logger.logError((<tacoUtility.TacoError> reason).toString());
+                            if (reason.errorLevel === tacoUtility.TacoErrorLevel.Warning) {
+                                logger.logWarning(reason.message);
+                            } else {
+                                logger.logError((<tacoUtility.TacoError> reason).toString());
+                            }
                         } else {
                             var toPrint: string = reason.toString();
 
@@ -100,10 +105,14 @@ class Taco {
                             logger.logError(toPrint);
                         }
 
-                        // Send command failure telemetry
-                        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                            telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
-                        });
+                        if (parsedArgs.command) {
+                            // Send command failure telemetry for valid TACO commands
+                            // Any invalid command will be routed to Cordova and 
+                            // telemetry events for such commands are sent as "routedCommand" telemetry events
+                            return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                                telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
+                            });
+                        }
                     }
                 }).finally((): any => {
                     // Make sure to leave a line after the last of our output

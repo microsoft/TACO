@@ -1,7 +1,7 @@
 {
     "name": "taco-remote-lib",
     "description": "Cordova-specific implementation of taco-remote's build functionality",
-    "version": "1.1.2-dev",
+    "version": "1.2.1-dev",
     "author": {
       "name": "Microsoft Corporation",
       "email": "vscordovatools-admin@microsoft.com"
@@ -34,6 +34,7 @@
     "devDependencies": {
         "typescript": "~1.6.2",
         "mocha": "2.0.1",
+        "istanbul": "^0.4.0",
         "should": "4.3.0"
     },
     "optionalDependencies": {
@@ -41,7 +42,8 @@
     },
 
     "scripts": {
-        "test": "mocha"
+        "test": "mocha",
+        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "directories": {
         "lib": ".",

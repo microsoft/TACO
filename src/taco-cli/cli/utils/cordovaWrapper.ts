@@ -158,7 +158,7 @@ class CordovaWrapper {
 
     public static getGlobalCordovaVersion(): Q.Promise<string> {
         return CordovaWrapper.cli(["-v"], true).then(function (output: string): string {
-            return output.split("\n")[0];
+            return output.split("\n")[0].split(" ")[0];
         });
     }
 
@@ -176,6 +176,14 @@ class CordovaWrapper {
         return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
             return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
         }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
+    }
+
+    public static targets(commandData: commands.ICommandData, platforms: string[] = null): Q.Promise<any> {
+        // Note: cordova <= 5.3.3 expects the options to "targets" to include "--list". If it does not,
+        // it blindly splices off the last argument.
+        return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+            return cordova.raw.targets(CordovaHelper.toCordovaTargetsArguments(commandData, platforms));
+        }, () => ["targets"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
     }
 
     /**

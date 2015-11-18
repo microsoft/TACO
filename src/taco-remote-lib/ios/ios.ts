@@ -38,6 +38,7 @@ class IOSAgent implements ITargetPlatform {
     private webDebugProxyDevicePort: number;
     private webDebugProxyPortMin: number;
     private webDebugProxyPortMax: number;
+    private appLaunchStepTimeout: number;
 
     /**
      * Initialize iOS specific information from the configuration.
@@ -49,6 +50,8 @@ class IOSAgent implements ITargetPlatform {
         this.webDebugProxyDevicePort = config.get("webDebugProxyDevicePort") || 9221;
         this.webDebugProxyPortMin = config.get("webDebugProxyPortMin") || 9222;
         this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9322;
+
+        this.appLaunchStepTimeout = config.get("appLaunchStepTimeout") || 10000;
 
         if (utils.ArgsHelper.argToBool(config.get("allowsEmulate"))) {
             process.env["PATH"] = path.resolve(__dirname, path.join("..", "node_modules", ".bin")) + ":" + process.env["PATH"];
@@ -78,10 +81,11 @@ class IOSAgent implements ITargetPlatform {
         }
 
         var proxyPort: number = this.nativeDebugProxyPort;
+        var appLaunchStepTimeout = this.appLaunchStepTimeout;
         var cfg: utils.CordovaConfig = utils.CordovaConfig.getCordovaConfig(buildInfo.appDir);
         iosAppRunner.startDebugProxy(proxyPort)
             .then(function (nativeProxyProcess: child_process.ChildProcess): Q.Promise<net.Socket> {
-            return iosAppRunner.startApp(cfg.id(), proxyPort);
+            return iosAppRunner.startApp(cfg.id(), proxyPort, appLaunchStepTimeout);
         }).then(function (success: net.Socket): void {
             res.status(200).send(buildInfo.localize(req, resources));
         }, function (failure: any): void {
@@ -160,6 +164,7 @@ class IOSAgent implements ITargetPlatform {
                 
                 res.set({ "Content-Type": "application/zip" });
                 inputStream.pipe(res);
+                callback(null);
                 
                 return deferred.promise;
             })
@@ -240,6 +245,15 @@ class IOSAgent implements ITargetPlatform {
             } else {
                 buildInfo.updateStatus(utils.BuildInfo.INSTALLED, "InstallSuccess");
                 res.status(200).json(buildInfo.localize(req, resources));
+            }
+        });
+
+        ideviceinstaller.on("error", function (err: any): void {
+            res.status(500);
+            if (err.code === "ENOENT") {
+                res.send(resources.getStringForLanguage(req, "IDeviceInstallerNotFound"));
+            } else {
+                res.send(err);
             }
         });
     }

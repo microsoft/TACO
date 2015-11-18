@@ -87,8 +87,13 @@ class Create extends commands.TacoCommandBase {
 
                 var kitProject: boolean = self.isKitProject();
                 var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cordova"];
+                var tacoJsonEditParams: projectHelper.ITacoJsonEditParams = {
+                    projectPath: self.commandParameters.cordovaParameters.projectPath,
+                    isKitProject: kitProject,
+                    version: valueToSerialize
+                };
 
-                return projectHelper.createTacoJsonFile(self.commandParameters.cordovaParameters.projectPath, kitProject, valueToSerialize);
+                return projectHelper.editTacoJsonFile(tacoJsonEditParams);
             })
             .then(function (): Q.Promise<any> {
                 self.finalize(templateDisplayName);

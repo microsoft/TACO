@@ -10,6 +10,10 @@ class TacoErrorHelper {
         return tacoUtils.TacoError.getError(TacoErrorCode[tacoErrorCode], <number> tacoErrorCode, resourceManager, optionalArgs);
     }
 
+    public static getWarning(errorToken: string, ...optionalArgs: any[]): tacoUtils.TacoError {
+        return tacoUtils.TacoError.getWarning(errorToken, resourceManager, optionalArgs);
+    }
+
     public static wrap(tacoErrorCode: TacoErrorCode, innerError: Error, ...optionalArgs: any[]): tacoUtils.TacoError {
         return tacoUtils.TacoError.wrapError(innerError, TacoErrorCode[tacoErrorCode], <number> tacoErrorCode, resourceManager, optionalArgs);
     }

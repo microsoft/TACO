@@ -32,18 +32,31 @@ class IosAppRunnerHelper {
             proxyInstance = null;
         }
 
-        return IosAppRunnerHelper.mountDeveloperImage().then(function (): child_process.ChildProcess {
+        return IosAppRunnerHelper.mountDeveloperImage().then(function (): Q.Promise<child_process.ChildProcess> {
+            var deferred = Q.defer<child_process.ChildProcess>();
             proxyInstance = child_process.spawn("idevicedebugserverproxy", [proxyPort.toString()]);
-            return proxyInstance;
+            proxyInstance.on("error", function (err: any): void {
+                deferred.reject(err);
+            });
+            // Allow 200ms for the spawn to error out, ~125ms isn't uncommon for some failures
+            Q.delay(200).then(() => deferred.resolve(proxyInstance));
+
+            return deferred.promise;
         });
     }
 
     // Attempt to start the app on the device, using the debug server proxy on a given port.
     // Returns a socket speaking remote gdb protocol with the debug server proxy.
-    public static startApp(packageId: string, proxyPort: number): Q.Promise<net.Socket> {
+    public static startApp(packageId: string, proxyPort: number, appLaunchStepTimeout: number): Q.Promise<net.Socket> {
         // When a user has many apps installed on their device, the response from ideviceinstaller may be large (500k or more)
         // This exceeds the maximum stdout size that exec allows, so we redirect to a temp file.
-        return promiseExec("ideviceinstaller -l -o xml > /tmp/$$.ideviceinstaller && echo /tmp/$$.ideviceinstaller").spread<string>(function (stdout: string, stderr: string): string {
+        return promiseExec("ideviceinstaller -l -o xml > /tmp/$$.ideviceinstaller && echo /tmp/$$.ideviceinstaller")
+        .catch(function (err: any): any {
+            if (err.code === "ENOENT") {
+                throw new Error("IDeviceInstallerNotFound");
+            }
+            throw err;
+        }).spread<string>(function (stdout: string, stderr: string): string {
             // First find the path of the app on the device
             var filename: string = stdout.trim();
             if (!/^\/tmp\/[0-9]+\.ideviceinstaller$/.test(filename)) {
@@ -60,10 +73,10 @@ class IosAppRunnerHelper {
             }
 
             throw new Error("PackageNotInstalled");
-        }).then(function (path: string): Q.Promise<net.Socket> { return IosAppRunnerHelper.startAppViaDebugger(proxyPort, path); });
+        }).then(function (path: string): Q.Promise<net.Socket> { return IosAppRunnerHelper.startAppViaDebugger(proxyPort, path, appLaunchStepTimeout); });
     }
 
-    public static startAppViaDebugger(portNumber: number, packagePath: string): Q.Promise<net.Socket> {
+    public static startAppViaDebugger(portNumber: number, packagePath: string, appLaunchStepTimeout: number): Q.Promise<net.Socket> {
         var encodedPath: string = IosAppRunnerHelper.encodePath(packagePath);
 
         // We need to send 3 messages to the proxy, waiting for responses between each message:
@@ -137,13 +150,8 @@ class IosAppRunnerHelper {
             initState++;
             socket.write(cmd);
             setTimeout(function (): void {
-                if (initState === 1) {
-                    deferred1.reject("DeviceLaunchTimeout");
-                    deferred2.reject("DeviceLaunchTimeout");
-                    deferred3.reject("DeviceLaunchTimeout");
-                    socket.end();
-                }
-            }, 5000);
+                deferred1.reject("DeviceLaunchTimeout");
+            }, appLaunchStepTimeout);
         });
 
         return deferred1.promise.then(function (sock: net.Socket): Q.Promise<net.Socket> {
@@ -152,12 +160,8 @@ class IosAppRunnerHelper {
             initState++;
             sock.write(cmd);
             setTimeout(function (): void {
-                if (initState === 2) {
-                    deferred2.reject("DeviceLaunchTimeout");
-                    deferred3.reject("DeviceLaunchTimeout");
-                    socket.end();
-                }
-            }, 5000);
+                deferred2.reject("DeviceLaunchTimeout");
+            }, appLaunchStepTimeout);
             return deferred2.promise;
         }).then(function (sock: net.Socket): Q.Promise<net.Socket> {
             // Continue execution; actually start the app running.
@@ -165,11 +169,8 @@ class IosAppRunnerHelper {
             initState++;
             sock.write(cmd);
             setTimeout(function (): void {
-                if (initState === 3) {
-                    deferred3.reject("DeviceLaunchTimeout");
-                    socket.end();
-                }
-            }, 5000);
+                deferred3.reject("DeviceLaunchTimeout");
+            }, appLaunchStepTimeout);
             return deferred3.promise;
         });
     }
@@ -206,6 +207,9 @@ class IosAppRunnerHelper {
                 } else {
                     deferred.resolve({});
                 }
+            });
+            imagemounter.on("error", function(err: any): void {
+                deferred.reject(err);
             });
             return deferred.promise;
         });

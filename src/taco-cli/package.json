@@ -1,7 +1,7 @@
 {
     "name": "taco-cli",
     "description": "taco-cli is a command-line interface for rapid Apache Cordova development",
-    "version": "1.0.2-dev",
+    "version": "1.0.3-dev",
     "author": {
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
@@ -54,12 +54,14 @@
         "gulp": "^3.8.10",
         "gulp-concat": "^2.4.2",
         "mocha": "latest",
+        "istanbul": "^0.4.0",
         "should": "4.3.0"
     },
     "readmeFilename": "README.md",
     "scripts": {
         "test": "mocha",
-        "postinstall": "node cli/logo"
+        "postinstall": "node cli/logo",
+        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "license": "MIT"
 }

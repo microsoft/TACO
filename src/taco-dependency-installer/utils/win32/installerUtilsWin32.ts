@@ -104,9 +104,9 @@ class InstallerUtilsWin32 {
         variableProcess.stderr.on("data", function (data: any): void {
             errorOutput += data.toString();
         });
-        variableProcess.on("error", function (err: Error): void {
+        variableProcess.on("error", function (err: any): void {
             // Handle ENOENT if Powershell is not found
-            if (err.name === "ENOENT") {
+            if (err.code === "ENOENT") {
                 deferred.reject(new Error(resources.getString("NoPowershell")));
             } else {
                 deferred.reject(new Error(resources.getString("UnableToSetVariable", name, err.name, value)));

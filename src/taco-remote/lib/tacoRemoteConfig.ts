@@ -32,6 +32,8 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
         webDebugProxyPortMin?: number;
         webDebugProxyPortMax?: number;
 
+        appLaunchStepTimeout?: number;
+
         [key: string]: any;
     };
 
@@ -47,7 +49,8 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
             maxBuildsInQueue: 10,
             maxBuildsToKeep: 20,
             deleteBuildsOnShutdown: true,
-            allowsEmulate: true
+            allowsEmulate: true,
+            appLaunchStepTimeout: 10000
         };
         var hostDefaults: { [key: string]: any } = HostSpecifics.hostSpecifics.defaults(defaults);
         var self: TacoRemoteConfig = this;
@@ -60,7 +63,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name allowsEmulate
-     * @LOCTAG TacoRemoteConfigAllowsEmulate
      */
     public get allowsEmulate(): boolean {
         return tacoUtils.ArgsHelper.argToBool(this.tacoRemoteConf.allowsEmulate);
@@ -68,7 +70,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name deleteBuildsOnShutdown
-     * @LOCTAG TacoRemoteConfigDeleteBuildsOnShutdown
      */
     public get deleteBuildsOnShutdown(): boolean {
         return tacoUtils.ArgsHelper.argToBool(this.tacoRemoteConf.deleteBuildsOnShutdown);
@@ -76,7 +77,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name maxBuildsInQueue
-     * @LOCTAG TacoRemoteConfigMaxBuildsInQueue
      */
     public get maxBuildsInQueue(): number {
         return this.tacoRemoteConf.maxBuildsInQueue;
@@ -84,7 +84,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name maxBuildsToKeep
-     * @LOCTAG TacoRemoteConfigMaxBuildsToKeep
      */
     public get maxBuildsToKeep(): number {
         return this.tacoRemoteConf.maxBuildsToKeep;
@@ -92,7 +91,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name nativeDebugProxyPort
-     * @LOCTAG TacoRemoteConfigNativeDebugProxyPort
      */
     public get nativeDebugProxyPort(): number {
         return this.tacoRemoteConf.nativeDebugProxyPort;
@@ -100,7 +98,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name webDebugProxyDevicePort
-     * @LOCTAG TacoRemoteConfigWebDebugProxyDevicePort
      */
     public get webDebugProxyDevicePort(): number {
         return this.tacoRemoteConf.webDebugProxyDevicePort;
@@ -108,7 +105,6 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name webDebugProxyPortMin
-     * @LOCTAG TacoRemoteConfigWebDebugProxyPortMin
      */
     public get webDebugProxyPortMin(): number {
         return this.tacoRemoteConf.webDebugProxyPortMin;
@@ -116,10 +112,13 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     /**
      * @name webDebugProxyPortMax
-     * @LOCTAG TacoRemoteConfigWebDebugProxyPortMax
      */
     public get webDebugProxyPortMax(): number {
         return this.tacoRemoteConf.webDebugProxyPortMax;
+    }
+
+    public get appLaunchStepTimeout(): number {
+        return this.tacoRemoteConf.appLaunchStepTimeout;
     }
 
     // These three properties are inherited from the parent configuration; no need for separate documentation

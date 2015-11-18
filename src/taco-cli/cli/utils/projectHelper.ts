@@ -44,15 +44,15 @@ class ProjectHelper {
      *  Helper to create the taco.json file in the project root {projectPath}. Invoked by
      *  the create command handler after the actual project creation  
      */
-    public static createTacoJsonFile(projectPath: string, isKitProject: boolean, versionValue: string): Q.Promise<any> {
+    public static editTacoJsonFile(editParams: ProjectHelper.ITacoJsonEditParams): Q.Promise<any> {
         ProjectHelper.cachedProjectInfo = null;
         ProjectHelper.cachedProjectFilePath = null;
         var deferred: Q.Deferred<any> = Q.defer<any>();
-        var tacoJsonPath: string = path.resolve(projectPath, ProjectHelper.TACO_JSON_FILENAME);
+        var tacoJsonPath: string = path.resolve(editParams.projectPath, ProjectHelper.TACO_JSON_FILENAME);
         var tacoJson: ProjectHelper.ITacoJsonMetadata = fs.existsSync(tacoJsonPath) ? require (tacoJsonPath) : {};
 
-        if (isKitProject) {
-           return ProjectHelper.parseKitId(versionValue)
+        if (editParams.isKitProject) {
+           return ProjectHelper.parseKitId(editParams.version)
            .then(function (kitId: string): Q.Promise<any> {
                 tacoJson.kit = kitId;
                 return kitHelper.getValidCordovaCli(tacoJson.kit);
@@ -65,12 +65,12 @@ class ProjectHelper {
                 delete tacoJson.kit;
             }
 
-            if (!versionValue) {
+            if (!editParams.version) {
                 deferred.reject(errorHelper.get(TacoErrorCodes.CommandCreateTacoJsonFileCreationError));
                 return deferred.promise;
             }
 
-            tacoJson["cordova-cli"] = versionValue;
+            tacoJson["cordova-cli"] = editParams.version;
             return ProjectHelper.createJsonFileWithContents(tacoJsonPath, tacoJson);
         }
     }
@@ -365,6 +365,12 @@ class ProjectHelper {
 }
 
 module ProjectHelper {
+    export interface ITacoJsonEditParams {
+        projectPath: string;
+        isKitProject: boolean;
+        version: string;
+    }
+
     export interface ITacoJsonMetadata {
         kit?: string;
         "cordova-cli"?: string;

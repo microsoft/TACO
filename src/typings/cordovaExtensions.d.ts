@@ -115,6 +115,7 @@ declare module Cordova {
         run(options: ICordovaRawOptions): Q.Promise<any>;
         save(target: any, opts?: any): Q.Promise<any>;
         serve(port: number): Q.Promise<NodeJSHttp.Server>;
+        targets(options: ICordovaRawOptions): Q.Promise<any>;
     }
 
     export interface ICordovaRaw510 extends ICordovaRaw {

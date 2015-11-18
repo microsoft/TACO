@@ -1,0 +1,11 @@
+{
+    "src": "src",
+    "templates": "templates",
+    "tools": "tools",
+    "build": "build",
+    "buildCoverage": "build/coverage",
+    "buildPackages": "build/packages/node_modules",
+    "buildTools": "build/tools",
+    "buildTemplates": "build/packages/node_modules/taco-kits/templates",
+    "tsCompileOptions": { "noImplicitAny": true, "noEmitOnError": true, "target": "ES5", "module": "commonjs", "sourceMap": true, "sortOutput": true }
+}

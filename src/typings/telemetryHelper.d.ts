@@ -48,7 +48,6 @@ declare module TacoUtility {
         static sendCommandFailureTelemetry(commandName: string, error: any, properties: ICommandTelemetryProperties, args?: string[]): void;
         static addTelemetryEventProperty(event: Telemetry.TelemetryEvent, propertyName: string, propertyValue: any, isPii: boolean): void;
         static addTelemetryEventProperties(event: Telemetry.TelemetryEvent, properties: ICommandTelemetryProperties): void;
-        static sanitizeTargetStringPropertyInfo(targetString: string): ITelemetryPropertyInfo;
         static addPropertiesFromOptions(telemetryProperties: ICommandTelemetryProperties, knownOptions: Nopt.CommandData,
              commandOptions: { [flag: string]: any }, nonPiiOptions?: string[]): ICommandTelemetryProperties;
         static addObjectToTelemetry(telemetryProperties: ICommandTelemetryProperties, baseName: string, value: any, isPii: boolean): void;
