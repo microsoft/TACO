@@ -13,13 +13,13 @@
 import path = require ("path");
 
 import resources = require ("../resources/resourceManager");
-import testUtil = require ("../testUtils/testHelper");
+import tacoTestUtils = require("taco-tests-utils");
 
-import TestHelper = testUtil.TestHelper;
+import TacoErrorTestHelper = tacoTestUtils.TacoErrorTestHelper;
 
 describe("taco Errors in taco-utils", function (): void {
     it("Verify taco Errors in taco-utils", function (): void {
-        TestHelper.verifyTacoErrors(path.join(__dirname, "../tacoErrorCodes.js"), resources, 100, 999);
+        TacoErrorTestHelper.verifyTacoErrors(path.join(__dirname, "../tacoErrorCodes.js"), resources, 100, 999);
     });
 });
 

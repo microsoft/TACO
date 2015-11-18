@@ -6,14 +6,14 @@
 ﻿ *******************************************************
 ﻿ */
 
-/// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/should.d.ts" />
+/// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/should.d.ts" />
 
 "use strict";
 
 import shouldModule = require("should");
 
-export class TestHelper {
+export class TacoErrorTestHelper {
     public static verifyTacoErrors(fileName: string, resources: any, minErrorCode: number, maxErrorCode: number): void {
         var errorCodes: any = require(fileName);
         // for taco-utils, we have TacoErrorCode is nested under module
