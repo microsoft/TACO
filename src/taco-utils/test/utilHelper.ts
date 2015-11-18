@@ -25,9 +25,13 @@ import rimraf = require ("rimraf");
 import argsHelper = require ("../argsHelper");
 import commands = require ("../commands");
 import utils = require ("../utilHelper");
+import tacoError = require ("../tacoError");
+import tacoErrorCodes = require ("../tacoErrorCodes");
 
 import ArgsHelper = argsHelper.ArgsHelper;
 import UtilHelper = utils.UtilHelper;
+import TacoError = tacoError.TacoError;
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 describe("UtilHelper", function (): void {
     describe("parseArguments()", function (): void {
@@ -195,15 +199,44 @@ describe("UtilHelper", function (): void {
             parsedJson["cordova-cli"].should.equal("5.3.3");
         });
 
-        function writeBufferAndValidate(filename: string, getBuffer: (stringified: string) => Buffer) {
+        it("read file which doesn't exist", function(): void {
+            try {
+                UtilHelper.parseUserJSON(path.resolve(__dirname, "nonExistentFile.json"));
+            } catch (e) {
+                (<TacoError>e).errorCode.should.equal(TacoErrorCodes.ErrorUserJsonMissingOrMalformed);
+            }
+        });
+
+        it("read malformed file", function (): void {
+            writeBufferAndValidate("utf8.json", stringified => {
+                var buffer: Buffer = new Buffer(stringified, "utf8");
+                var malformedBuffer: Buffer = new Buffer(buffer.length + 3);
+                // add some random bytes to the malformed buffer
+                malformedBuffer.write("\u00bd\u00bc\u00be");
+                buffer.copy(malformedBuffer, malformedBuffer.length, 0);
+                return malformedBuffer;
+            }, TacoErrorCodes.ErrorUserJsonMissingOrMalformed);
+        });
+
+        function writeBufferAndValidate(filename: string, getBuffer: (stringified: string) => Buffer, expectedErrorCode?: TacoErrorCodes) {
             var x = { "cordova-cli": 5.8 };
             var stringified: string = JSON.stringify(x);
             var buffer: Buffer = getBuffer(stringified);
 
             var filepath = path.join(testHome, filename);
             fs.writeFileSync(filepath, buffer);
-            var parsedJson = UtilHelper.parseUserJSON(filepath);
-            JSON.stringify(parsedJson).should.equal(stringified);
+            try {
+                var parsedJson = UtilHelper.parseUserJSON(filepath);
+                if (!expectedErrorCode) {
+                    JSON.stringify(parsedJson).should.equal(stringified);
+                }
+            } catch (e) {
+                if (expectedErrorCode) {
+                    (<TacoError>e).errorCode.should.equal(expectedErrorCode);
+                } else {
+                    shouldModule.fail("true", "false", e);
+                }
+            }
         }
     });
 });

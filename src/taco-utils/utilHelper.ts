@@ -6,6 +6,7 @@
 ﻿ *******************************************************
 ﻿ */
 
+/// <reference path="../typings/iconv-lite.d.ts"/>
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
 /// <reference path="../typings/node.d.ts" />
@@ -24,6 +25,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
+import iconv = require("iconv-lite");
 
 import argsHelper = require ("./argsHelper");
 import commands = require ("./commands");
@@ -326,27 +328,30 @@ module TacoUtility {
          * @return {any} parsed JSON object
          */
         public static parseUserJSON(filePath: string): any {
-            var contents: Buffer = fs.readFileSync(filePath);
-            // try the simplest path first
-            try {
-                return JSON.parse(contents.toString());
-            } catch (ex) {
-                UtilHelper.emptyMethod();
+            if (fs.existsSync(filePath)) {
+                var contents: Buffer = fs.readFileSync(filePath);
+                // try the simplest path first
+                try {
+                    return JSON.parse(contents.toString());
+                } catch (ex) {
+                    UtilHelper.emptyMethod();
+                }
+
+                // may be this is a UTF-8 with BOM
+                try {
+                    return JSON.parse(iconv.decode(contents, "utf8"));
+                } catch (ex) {
+                    UtilHelper.emptyMethod();
+                }
+                // May be this is a UTF-16 file
+                try {
+                    return JSON.parse(iconv.decode(contents, "utf16"));
+                } catch (ex) {
+                    UtilHelper.emptyMethod();
+                }
             }
 
-            // may be this is a UTF-8 with BOM
-            var iconv = require("iconv-lite");
-            try {
-                return JSON.parse(iconv.decode(contents, "utf8"));
-            } catch (ex) {
-                UtilHelper.emptyMethod();
-            }
-            // May be this is a UTF-16 file
-            try {
-                return JSON.parse(iconv.decode(contents, "utf16"));
-            } catch (ex) {
-                UtilHelper.emptyMethod();
-            }
+            throw errorHelper.get(tacoErrorCodes.TacoErrorCode.ErrorUserJsonMissingOrMalformed, filePath);
         }
 
         /**
