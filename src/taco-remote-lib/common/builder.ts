@@ -30,7 +30,7 @@ import UtilHelper = utils.UtilHelper;
 
 class Builder {
     protected currentBuild: BuildInfo;
-    protected cordova: Cordova.ICordova;
+    protected cordova: Cordova.ICordova540;
 
     private static change_directory(appDir: string): void {
         process.chdir(appDir);
@@ -40,7 +40,7 @@ class Builder {
         return;
     }
 
-    constructor(currentBuild: BuildInfo, cordova: Cordova.ICordova) {
+    constructor(currentBuild: BuildInfo, cordova: Cordova.ICordova540) {
         this.currentBuild = currentBuild;
         this.cordova = cordova;
 
@@ -237,8 +237,19 @@ class Builder {
 
     private compile_platform(): Q.Promise<any> {
         Logger.log("cordova compile " + this.currentBuild.buildPlatform);
-        var configuration: string = (this.currentBuild.configuration === "debug") ? "--debug" : "--release";
-        var opts: string [] = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
+        //var opts: string [] = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
+        var opts: Cordova.ICordova540BuildOptions = {};
+        if (this.currentBuild.configuration === "debug") {
+            opts.debug = true;
+        } else {
+            opts.release = true;
+        }
+        if (this.currentBuild.options.indexOf("--device") !== -1) {
+            opts.device = true;
+        } else {
+            opts.emulator = true;
+        }
+        opts.argv = this.currentBuild.options;
         return this.cordova.raw.compile({ platforms: [this.currentBuild.buildPlatform], options: opts });
     }
 }
