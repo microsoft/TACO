@@ -6,18 +6,21 @@
 ﻿ *******************************************************
 ﻿ */
 
+/// <reference path="../typings/tacoUtils.d.ts" />
+
 "use strict";
 
-import promisesUtils = require("../taco-utils/promisesUtils");
 import Q = require("q");
-import telemetryHelper = require("../taco-utils/telemetryHelper");
-import telemetry = require("../taco-utils/telemetry");
 
-import Telemetry = telemetry.Telemetry;
+import TacoUtility = require("taco-utils");
+
+import PromisesUtils = TacoUtility.PromisesUtils;
+import telemetryHelper = TacoUtility.TelemetryGeneratorBase;
+import Telemetry = TacoUtility.Telemetry;
 
 export module TelemetryFakes {
     type Event = TacoUtility.ICommandTelemetryProperties;
-    export class Generator extends telemetryHelper.TelemetryGeneratorBase {
+    export class Generator extends TacoUtility.TelemetryGeneratorBase {
         private eventsProperties: Event[] = [];
         private allSentEvents: Q.Deferred<Event[]> = Q.defer<Event[]>();
 
@@ -52,19 +55,20 @@ export module TelemetryFakes {
             var allGeneratorPromises = this.telemetryGenerators.map((fakeGenerator: Generator) => fakeGenerator.getAllSentEvents());
             return Q.all(allGeneratorPromises)
                 .then((listOfListOfEvents: Event[][]) => {
-                    return <Event[]> Array.prototype.concat.apply([], allGeneratorPromises);
+                    return <Event[]>Array.prototype.concat.apply([], allGeneratorPromises);
                 });
         }
 
-        public generate<T>(componentName: string, codeGeneratingTelemetry: { (telemetry: TacoUtility.TelemetryGenerator): T }): T {
+        public generate<T>(componentName: string, codeGeneratingTelemetry: (telemetry: TacoUtility.TelemetryGenerator) => T): T {
             var generator: Generator;
-            return promisesUtils.PromisesUtils.wrapExecution(
+            return PromisesUtils.wrapExecution<T>(
                 () => { // Before
                     generator = new Generator(componentName);
                     this.telemetryGenerators.push(generator);
                 },
                 () => generator.time(null, () => codeGeneratingTelemetry(generator)),
-                () => generator.sendAndNotify()); // After
+                () => generator.sendAndNotify(), // After
+                () => { /* Do Nothing */ }); // failHandler
         }
 
         public clear(): void {

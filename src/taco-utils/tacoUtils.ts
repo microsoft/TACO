@@ -56,6 +56,7 @@ module TacoUtility {
     export var TacoGlobalConfig: typeof tacoGlobalConfig.TacoGlobalConfig = tacoGlobalConfig.TacoGlobalConfig;
     export var TacoPackageLoader: typeof tacoPackageLoader.TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
     export var TelemetryGenerator: typeof telemetryHelper.TelemetryGenerator = telemetryHelper.TelemetryGenerator;
+    export var TelemetryGeneratorBase: typeof telemetryHelper.TelemetryGeneratorBase = telemetryHelper.TelemetryGeneratorBase;
     export var Telemetry: typeof telemetry.Telemetry = telemetry.Telemetry;
     export var TelemetryHelper: typeof telemetryHelper.TelemetryHelper = telemetryHelper.TelemetryHelper;
     export var UtilHelper: typeof utilHelper.UtilHelper = utilHelper.UtilHelper;
