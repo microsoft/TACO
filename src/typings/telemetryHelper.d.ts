@@ -24,8 +24,9 @@ declare module TacoUtility {
     }
 
     class TelemetryGeneratorBase {
+        protected telemetryProperties: ICommandTelemetryProperties;
         public constructor(componentName: string);
-        public time<T>(name: string, codeToMeasure: { (): Q.Promise<T> }): Q.Promise<T>;
+        public time<T>(name: string, codeToMeasure: { (): T }): T;
         public step(name: string): TelemetryGeneratorBase;
         public add(baseName: string, value: any, isPii: boolean): TelemetryGeneratorBase;
         public addWithPiiEvaluator(baseName: string, value: any, piiEvaluator: { (value: string, name: string): boolean }): TelemetryGeneratorBase;
