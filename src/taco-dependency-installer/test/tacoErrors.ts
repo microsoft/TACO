@@ -10,6 +10,7 @@
 
 "use strict";
 
+import mocha = require ("mocha");
 import path = require ("path");
 
 import resources = require ("../resources/resourceManager");
@@ -17,9 +18,9 @@ import tacoTestUtils = require("taco-tests-utils");
 
 import TacoErrorTestHelper = tacoTestUtils.TacoErrorTestHelper;
 
-describe("taco Errors in taco-utils", function (): void {
-    it("Verify taco Errors in taco-utils", function (): void {
-        TacoErrorTestHelper.verifyTacoErrors(path.join(__dirname, "../tacoErrorCodes.js"), resources, 100, 999);
+describe("Taco Errors in TACO", function (): void {
+    it("Verify TACO Errors in TACO", function (): void {
+        TacoErrorTestHelper.verifyTacoErrors(path.join(__dirname, "../tacoErrorCodes.js"), resources, 2100, 2499);
     });
 });
 
