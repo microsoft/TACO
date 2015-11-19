@@ -353,7 +353,7 @@ describe("Kit command : ", function (): void {
                 .done(() => done(), done);
         });
 
-        it("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): void {
+        it.skip("'taco kit select --kit {kit-ID}' followed by a positive response to platform/plugin update query should should execute with no errors", function (done: MochaDone): void {
             KitMod.yesOrNoHandler = getMockYesOrNoHandler(done, utils.emptyMethod, "PromptResponseYes");
             return addTestPluginsToProject(cliProjectpath)
             .then(function (): Q.Promise<any> {
