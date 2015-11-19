@@ -42,7 +42,6 @@
         "rimraf": "2.2.6",
         "semver": "^4.3.6",
         "taco-dependency-installer": "file:../taco-dependency-installer",
-        "taco-tests-utils": "file:../taco-tests-utils",
         "taco-utils": "file:../taco-utils",
         "wrench": "^1.5.8",
         "colors": "^1.0.3",
@@ -56,7 +55,8 @@
         "gulp-concat": "^2.4.2",
         "mocha": "latest",
         "istanbul": "^0.4.0",
-        "should": "4.3.0"
+        "should": "4.3.0",
+        "taco-tests-utils": "file:../taco-tests-utils"
     },
     "readmeFilename": "README.md",
     "scripts": {
