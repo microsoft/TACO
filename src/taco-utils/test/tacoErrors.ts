@@ -11,13 +11,21 @@
 "use strict";
 
 import path = require ("path");
-import shouldModule = require("should");
+import should = require("should");
 
 import resources = require ("../resources/resourceManager");
+import resourceManager = require ("../resourceManager");
+import tacoError = require("../tacoError");
 
 describe("taco Errors in taco-utils", function (): void {
     it("Verify taco Errors in taco-utils", function (): void {
         verifyTacoErrors(path.join(__dirname, "../tacoErrorCodes.js"), resources, 100, 999);
+    });
+
+    it("should replace placeholders correctly", function (): void {
+        var testResourceManager = new resourceManager.ResourceManager(path.join(__dirname, "resources"), "en");
+        var testError = tacoError.TacoError.getError("MessageWithArgs", 10, testResourceManager, "foo", "bar", "baz");
+        should(testError.message).equal(testResourceManager.getString("MessageWithArgs", "foo", "bar", "baz"));
     });
 });
 
@@ -39,11 +47,11 @@ describe("taco Errors in taco-utils", function (): void {
                     errorCode + " and " + errorCodes[numericErrorCode] + " have been assigned same error code");
 
                 // Verify that error code is within range
-                shouldModule(numericErrorCode).greaterThan(minErrorCode, "error code " + errorCode + " is less than min: " + minErrorCode);
-                shouldModule(numericErrorCode).lessThan(maxErrorCode, "error code " + errorCode + " is more than max: " + maxErrorCode);
+                should(numericErrorCode).greaterThan(minErrorCode, "error code " + errorCode + " is less than min: " + minErrorCode);
+                should(numericErrorCode).lessThan(maxErrorCode, "error code " + errorCode + " is more than max: " + maxErrorCode);
 
                 // Verify we have a resource string for the error code
-                shouldModule(resources.getString(errorCode)).not.equal(null, "no resources found for error code " + errorCode);
+                should(resources.getString(errorCode)).not.equal(null, "no resources found for error code " + errorCode);
             }
         });
     }

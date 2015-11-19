@@ -13,9 +13,9 @@ declare module TacoUtility {
 
         constructor(errorCode: number, message: string, category?: string, innerError?: Error);
 
-        public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError;
-        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoError;
-        public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError;
+        public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: string[]): TacoError;
+        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: string[]): TacoError;
+        public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: string[]): TacoError;
         public toString(): string;
     }
 }

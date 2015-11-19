@@ -49,7 +49,7 @@ module TacoUtility {
             return true;
         }
 
-        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
+        public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: string[]): TacoError {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
 
             // We do not use an error code for Warnings
@@ -59,25 +59,19 @@ module TacoUtility {
             return warning;
         }
 
-        public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
-            var args: string[] = [];
-            if (optionalArgs.length > 0) {
-                args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 3);
-            }
-
-            return TacoError.wrapError(null, errorToken, errorCode, resources, args);
+        public static getError(errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: string[]): TacoError {
+            return TacoError.wrapError(null, errorToken, errorCode, resources, ...optionalArgs);
         }
 
-        public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
+        public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: string[]): TacoError {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
             return new TacoError(errorCode, message, innerError);
         }
 
-        public static getMessageString(errorToken: string, resources: ResourceManager, ...optionalArgs: any[]): string {
+        private static getMessageString(errorToken: string, resources: ResourceManager, args: string[]): string {
             var message: string = null;
-            if (optionalArgs.length > 0) {
+            if (args.length > 0) {
                 assert(errorToken, "We should have an error token if we intend to use args");
-                var args: string[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
                 if (errorToken) {
                     message = resources.getString(errorToken, args);
                 }
