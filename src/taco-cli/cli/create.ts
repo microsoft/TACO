@@ -8,8 +8,9 @@
 
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/nopt.d.ts" />
-/// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tacoKits.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
+/// <reference path="../../typings/tacoUtils.d.ts" />
 
 "use strict";
 
@@ -19,11 +20,8 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 
-import cordovaHelper = require ("./utils/cordovaHelper");
-import cordovaWrapper = require ("./utils/cordovaWrapper");
 import kit = require ("./kit");
 import kitHelper = require ("./utils/kitHelper");
-import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -32,7 +30,9 @@ import templateManager = require ("./utils/templateManager");
 import telemetryHelper = tacoUtility.TelemetryHelper;
 
 import commands = tacoUtility.Commands;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
 import logger = tacoUtility.Logger;
+import ProjectHelper = tacoUtility.ProjectHelper;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
 
@@ -87,13 +87,13 @@ class Create extends commands.TacoCommandBase {
 
                 var kitProject: boolean = self.isKitProject();
                 var valueToSerialize: string = kitProject ? self.commandParameters.data.options["kit"] : self.commandParameters.data.options["cordova"];
-                var tacoJsonEditParams: projectHelper.ITacoJsonEditParams = {
+                var tacoJsonEditParams: ITacoJsonEditParams = {
                     projectPath: self.commandParameters.cordovaParameters.projectPath,
                     isKitProject: kitProject,
                     version: valueToSerialize
                 };
 
-                return projectHelper.editTacoJsonFile(tacoJsonEditParams);
+                return kitHelper.editTacoJsonFile(tacoJsonEditParams);
             })
             .then(function (): Q.Promise<any> {
                 self.finalize(templateDisplayName);
@@ -197,7 +197,7 @@ class Create extends commands.TacoCommandBase {
             return this.printStatusMessage()
                 .then(function (): Q.Promise<any> {
                     // Use the CLI version specified as an argument to create the project "command.create.status.cliProject
-                    return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
+                    return CordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
                 });
         } else {
             return kitHelper.getValidCordovaCli(kitId).then(function (cordovaCliToUse: string): void {
@@ -227,7 +227,7 @@ class Create extends commands.TacoCommandBase {
                                 return Q.resolve(templateDisplayName);
                             });
                     } else {
-                        return cordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
+                        return CordovaWrapper.create(cordovaCli, self.commandParameters.cordovaParameters);
                     }
                 });
         }

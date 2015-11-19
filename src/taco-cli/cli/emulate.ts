@@ -17,7 +17,6 @@ import Q = require ("q");
 
 import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
-import CordovaWrapper = require ("./utils/cordovaWrapper");
 import PlatformHelper = require ("./utils/platformHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remoteBuildClientHelper");
 import resources = require ("../resources/resourceManager");
@@ -27,6 +26,7 @@ import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
 import BuildInfo = tacoUtility.BuildInfo;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
 import commands = tacoUtility.Commands;
 import logger = tacoUtility.Logger;
 

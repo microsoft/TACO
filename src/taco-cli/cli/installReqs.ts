@@ -19,7 +19,6 @@ import path = require ("path");
 import Q = require ("q");
 
 import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
-import cordovaWrapper = require ("./utils/cordovaWrapper");
 import dependencies = require ("taco-dependency-installer");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
@@ -27,6 +26,7 @@ import resources = require ("../resources/resourceManager");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
+import CordovaWrapper = tacoUtils.CordovaWrapper;
 import DependencyInstaller = dependencies.DependencyInstaller;
 import logger = tacoUtils.Logger;
 import loggerHelper = tacoUtils.LoggerHelper;
@@ -255,7 +255,7 @@ class InstallReqs extends commands.TacoCommandBase {
                     logger.log(resources.getString("CommandInstallFinalPlatforms", requestedPlatforms.join(", ")));
                     logger.logLine();
 
-                    return cordovaWrapper.requirements(requestedPlatforms)
+                    return CordovaWrapper.requirements(requestedPlatforms)
                         .then(function (result: any): Q.Promise<any> {
                             var sessionId: string = tacoUtils.Telemetry.isOptedIn ?
                                 tacoUtils.Telemetry.getSessionId() : // Valid session ID to publish telemetry

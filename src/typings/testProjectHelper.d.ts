@@ -9,9 +9,12 @@
 /// <reference path="../typings/node.d.ts" />
 
 declare module TacoTestsUtils {
-    class TacoErrorTestHelper {
-        public static verifyTacoErrors(fileName: string, resources: any, minErrorCode: number, maxErrorCode: number): void;
-        public static verifyExcludedTacoErrors(fileName: string, resources: any, excludedErrorCode: number): void;
+    interface IKeyValuePair<T> {
+        [key: string]: T;
+    }
+
+    class ProjectHelper {
+        public static checkPlatformVersions(platformsExpected: IKeyValuePair<string>, projectPath: string): Q.Promise<any>;
+        public static checkPluginVersions(pluginsExpected: IKeyValuePair<string>, projectPath: string): void;
     }
 }
-

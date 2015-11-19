@@ -18,9 +18,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 
-import cordovaWrapper = require ("./utils/cordovaWrapper");
 import kitHelper = require ("./utils/kitHelper");
-import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
@@ -30,8 +28,10 @@ import CheckForNewerVersion = require ("./utils/checkForNewerVersion");
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
 import logger = tacoUtility.Logger;
 import LogLevel = tacoUtility.LogLevel;
+import ProjectHelper = tacoUtility.ProjectHelper;
 import TacoError = tacoUtility.TacoError;
 import TacoGlobalConfig = tacoUtility.TacoGlobalConfig;
 import telemetry = tacoUtility.Telemetry;
@@ -109,7 +109,7 @@ class Taco {
                             // Send command failure telemetry for valid TACO commands
                             // Any invalid command will be routed to Cordova and 
                             // telemetry events for such commands are sent as "routedCommand" telemetry events
-                            return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                            return ProjectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
                                 telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
                             });
                         }
@@ -128,7 +128,7 @@ class Taco {
     public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<ICommandTelemetryProperties> {
         return Q({})
             .then(function (): Q.Promise<any> {
-                projectHelper.cdToProjectRoot();
+                ProjectHelper.cdToProjectRoot();
 
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
@@ -139,7 +139,7 @@ class Taco {
 
                     var routeToCordovaEvent: telemetry.TelemetryEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
                     telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
-                    return cordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
+                    return CordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
                         routeToCordovaEvent.properties["success"] = "true";
                         telemetry.send(routeToCordovaEvent);
                         return Q(output);

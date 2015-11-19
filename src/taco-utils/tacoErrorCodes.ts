@@ -20,11 +20,22 @@ module TacoUtility {
         PackageLoaderUpdateUnableToRecover = 208,
         PackageLoaderRunPackageDoesntHaveRequestedBinary = 209,
 
+        // Cordova related Errors: 300-400
+        InvalidCordovaWithNode5 = 301,
+        CordovaCommandUnhandledException = 302,
+        CordovaCmdNotFound = 303,
+        CordovaCommandFailedWithError = 304,
+        CommandInstallCordovaTooOld = 305,
+        CordovaCommandFailed = 306,
+
         // Misc Errors: 700+
         AbstractMethod = 701,
         CommandBadSubcommand = 702,
         TacoUtilsExceptionListingfile = 703,
         TacoUtilsExceptionMissingcommand = 704,
+        CommandCreateOnlyLocalCustomWww = 706,
+        CommandCreateTacoJsonFileCreationError = 707,
+        CommandCreateTacoJsonFileWriteError = 708,
     }
 }
 

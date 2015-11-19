@@ -18,18 +18,19 @@ import Q = require ("q");
 import semver = require ("semver");
 import util = require ("util");
 
-import cordovaWrapper = require ("./cordovaWrapper");
-import cordovaHelper = require ("./cordovaHelper");
 import kitHelper = require ("./kitHelper");
-import projectHelper = require ("./projectHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoKits = require ("taco-kits");
 import tacoUtility = require ("taco-utils");
+
 import commands = tacoUtility.Commands;
+import CordovaHelper = tacoUtility.CordovaHelper;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
 import logger = tacoUtility.Logger;
 import packageLoader = tacoUtility.TacoPackageLoader;
+import ProjectHelper = tacoUtility.ProjectHelper;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 import utils = tacoUtility.UtilHelper;
 
@@ -73,7 +74,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      * Abstract method to be implemented by the derived class.
      * Derived classes should override this method for kit override check functionality
      */
-    public checkForKitOverrides(kitId: projectHelper.IProjectInfo): Q.Promise<any> {
+    public checkForKitOverrides(kitId: IProjectInfo): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -89,7 +90,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      * Abstract method to be implemented by the derived class.
      * Checks if the component has a version specification in config.xml of the cordova project
      */
-    public configXmlHasVersionOverride(componentName: string, projectInfo: projectHelper.IProjectInfo): Q.Promise<boolean> {
+    public configXmlHasVersionOverride(componentName: string, projectInfo: IProjectInfo): Q.Promise<boolean> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -97,7 +98,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      * Abstract method to be implemented by the derived class.
      * Edits the version override info to config.xml of the cordova project
      */
-    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: projectHelper.IProjectInfo, add: boolean): Q.Promise<any> {
+    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: IProjectInfo, add: boolean): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -126,9 +127,9 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         }
 
         var self: PlatformPluginCommandBase = this;
-        var projectInfo: projectHelper.IProjectInfo;
+        var projectInfo: IProjectInfo;
         var specsToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
-        return projectHelper.getProjectInfo().then(function (info: projectHelper.IProjectInfo): Q.Promise<any> {
+        return ProjectHelper.getProjectInfo().then(function (info: IProjectInfo): Q.Promise<any> {
             projectInfo = info;
             return Q({});
         })
@@ -143,7 +144,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             }
         })
             .then(function (): Q.Promise<any> {
-            return cordovaWrapper.invokePlatformPluginCommand(self.name, self.cordovaCommandParams, data);
+            return CordovaWrapper.invokePlatformPluginCommand(self.name, self.cordovaCommandParams, data);
         })
             .then(function (): Q.Promise<any> {
             if (specsToPersist && specsToPersist.length > 0) {
@@ -166,7 +167,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self: PlatformPluginCommandBase = this;
-        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+        return ProjectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand);
             self.cordovaCommandParams.targets.forEach(function (target: string): void {

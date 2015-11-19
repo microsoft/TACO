@@ -8,6 +8,8 @@
 
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/Q.d.ts" />
+/// <reference path="../../../typings/tacoJsonMetadata.d.ts" />
+/// <reference path="../../../typings/tacoJsonEditParams.d.ts" />
 
 import Q = require ("q");
 import path = require ("path");
@@ -26,6 +28,7 @@ import IPlatformOverrideMetadata = TacoKits.IPlatformOverrideMetadata;
 import IPluginOverrideMetadata = TacoKits.IPluginOverrideMetadata;
 import ITemplateOverrideInfo = TacoKits.ITemplateOverrideInfo;
 import IKitTemplatesOverrideInfo = TacoKits.IKitTemplatesOverrideInfo;
+import ProjectHelper = tacoUtility.ProjectHelper;
 
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
@@ -100,6 +103,25 @@ class KitHelper {
             });
     }
 
+    public static editTacoJsonFile(editParams: ITacoJsonEditParams): Q.Promise<any> {
+        var cordovaCliVersion: string;
+        return Q({})
+            .then(function() {
+                if (editParams.isKitProject) {
+                    return KitHelper.parseKitId(editParams.version)
+                        .then(function(kitId: string): Q.Promise<any> {
+                            editParams.version = kitId;
+                            return KitHelper.getValidCordovaCli(kitId);
+                        }).then(function(cordovaCli: string): void {
+                            cordovaCliVersion = cordovaCli;
+                        });
+                };
+            })
+            .then(function() {
+                return ProjectHelper.editTacoJsonFile(editParams, cordovaCliVersion);
+            });
+    }
+
     private static acquireKitPackage(): Q.Promise<ITacoKits> {
         if (!KitHelper.kitPackagePromise) {
             KitHelper.kitPackagePromise = TacoPackageLoader.lazyTacoRequire<ITacoKits>(KitHelper.TACO_KITS_NPM_PACKAGE_NAME,
@@ -107,6 +129,13 @@ class KitHelper {
         }
 
         return KitHelper.kitPackagePromise;
+    }
+
+    private static parseKitId(versionValue: string): Q.Promise<string> {
+        if (versionValue) {
+            return Q.resolve(versionValue);
+        }
+        return KitHelper.getDefaultKit();
     }
 }
 

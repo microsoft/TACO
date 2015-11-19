@@ -29,6 +29,7 @@ import utils = tacoUtils.UtilHelper;
 
 import CommandHelper = require ("./utils/commandHelper");
 import ICommand = tacoUtils.Commands.ICommand;
+import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 
 interface ICommandOptionsAndArgsInfo {
     name: string;
@@ -116,7 +117,7 @@ describe("taco meta command tests: ", function (): void {
                 Taco.runWithArgs(optionString).then(function (): void {
                     done(new Error("Passing Invalid options to \'taco\' should have failed"));
                 }, function (err: any): void {
-                    if (err.errorCode === TacoErrorCodes.CordovaCommandFailed) {
+                    if (err.errorCode === TacoUtilsErrorCodes.CordovaCommandFailed) {
                         done();
                     } else {
                         done(new Error("Unexpected error code"));

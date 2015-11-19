@@ -10,6 +10,7 @@
 /// <reference path="../typings/telemetryFakes.d.ts" />
 /// <reference path="../typings/projectHelper.d.ts" />
 /// <reference path="../typings/memoryStream.d.ts" />
+/// <reference path="../typings/mockCordova.d.ts" />
 
 // To add more classes, make sure that they define themselves in the TacoTestsUtils namespace,
 // include a reference to the d.ts file that is generated (as above), and make sure

@@ -44,10 +44,6 @@ import ms = require ("./utils/memoryStream");
 
 import stream = require ("stream");
 
-import tacoUtils = require("taco-utils");
-
-import utils = tacoUtils.UtilHelper;
-
 export class MemoryStream extends stream.Writable {
     private stdoutWrite: { (data: any, encoding: string, callback: Function): void };
     private shouldAlsoPrintToRealStdout: boolean = true; // We turn this on for debugging purposes, on the tests, possible on the build server

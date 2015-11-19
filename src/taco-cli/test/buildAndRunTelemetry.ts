@@ -30,7 +30,6 @@ import util = require ("util");
 
 import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
-import mockCordova = require ("./utils/mockCordova");
 import Platform = require ("../cli/platform");
 import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import resources = require ("../resources/resourceManager");
@@ -39,12 +38,14 @@ import Settings = require ("../cli/utils/settings");
 import RemoteBuildClientHelper = require ("../cli/remoteBuild/remoteBuildClientHelper");
 import RemoteMock = require ("./utils/remoteMock");
 import TacoUtility = require ("taco-utils");
+import TacoTestUtils = require ("taco-tests-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
 import utils = TacoUtility.UtilHelper;
 
 import CommandHelper = require ("./utils/commandHelper");
 import ICommand = TacoUtility.Commands.ICommand;
+import MockCordova = TacoTestUtils.MockCordova;
 
 var build: ICommand = CommandHelper.getCommand("build");
 var create: ICommand = CommandHelper.getCommand("create");
@@ -98,7 +99,7 @@ module BuildAndRunTelemetryTests {
         var iosPort: number = 3001;
         var androidPort: number = 3002;
 
-        var cordova: Cordova.ICordova = mockCordova.MockCordova510.default;
+        var cordova: Cordova.ICordova = MockCordova.MockCordova510.getDefault();
         var vcordova: string = "4.0.0";
         var buildNumber: number = 12341;
         var isNotEmulate: boolean = command !== Command.Emulate;
