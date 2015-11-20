@@ -102,7 +102,7 @@ class CheckForNewerVersion {
         var installedVersion: string = require(this.packageFilePath).version;
         if (semver.gt(latestVersion, installedVersion)) {
             // We want to print this just before exiting, so we subscribe to beforeExit: https://nodejs.org/api/process.html#process_event_exit
-            process.on("beforeExit", () => {
+            process.once("beforeExit", () => {
                 logger.log(resources.getString("NewerTacoCLIVersionAvailable", installedVersion, latestVersion));
             });
         } else {
