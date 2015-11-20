@@ -8,12 +8,10 @@
 
 /// <reference path="../../../typings/node.d.ts" />
 /// <reference path="../../../typings/tacoUtils.d.ts" />
-/// <reference path="../../../typings/optimist.d.ts" />
 "use strict";
 
 import fs = require ("fs");
 import https = require ("https");
-import optimist = require ("optimist");
 import path = require ("path");
 import Q = require ("q");
 
