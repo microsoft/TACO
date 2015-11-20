@@ -377,6 +377,12 @@
     "_CommandRunTargetDescription.comment": "Description of the --target argument to 'taco run'",
     "CommandRunListDescription": "Lists available targets. Will display both device and emulator targets unless overriden by --device or --emulator",
     "_CommandRunListDescription.comment": "Description of the --list argument to 'taco run'",
+    
+    "CommandRunLiveReloadDescription": "Run the application in Livereload mode",
+    "CommandRunLiveReloadDescription.comment": "Description of the --livereload argument to 'taco run'",
+    "CommandRunDeviceSyncDescription": "Sync gestures across multiple devices",
+    "CommandRunDeviceSyncDescription.comment": "Description of the --devicesync argument to 'taco run'",
+    
     "CommandRunRemoteDeviceSuccess": "<success>Success!</success> Build running on remote attached device",
     "_CommandRunRemoteDeviceSuccess.comment": "Message printed after successfully running a build on a remote device",
     "CommandRunRemoteEmulatorSuccess": "<success>Success!</success> Build running on remote emulator",
