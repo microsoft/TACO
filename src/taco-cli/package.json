@@ -44,7 +44,7 @@
         "semver": "^4.3.6",
         "taco-dependency-installer": "file:../taco-dependency-installer",
         "taco-utils": "file:../taco-utils",
-        "tar":"^2.2.1",
+        "tar": "^2.2.1",
         "wrench": "^1.5.8"
     },
     "devDependencies": {
