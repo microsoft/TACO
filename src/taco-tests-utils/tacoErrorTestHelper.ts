@@ -35,10 +35,12 @@ export class TacoErrorTestHelper {
         });
     }
 
-    public static verifyExcludedTacoErrors(fileName: string, resources: any, excludedErrorCode: number): void {
+    public static verifyExcludedTacoErrors(fileName: string, resources: any, excludedErrorCodes: number[]): void {
         var errorCodes: any = TacoErrorTestHelper.getErrorCodes(fileName);
-        var excludedErrorCodeStr: string = errorCodes[excludedErrorCode];
-        shouldModule(excludedErrorCodeStr).equal(undefined, "Exclude error code " + excludedErrorCode + "shouldn't be present");
+        excludedErrorCodes.forEach(excludedErrorCode => {
+            shouldModule(excludedErrorCode in errorCodes).be.equal(false,
+                "Exclude error code " + excludedErrorCode + "shouldn't be present in " + fileName);
+        });
     }
 
     private static getErrorCodes(fileName: string): any {

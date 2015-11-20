@@ -4,6 +4,9 @@
 // Error Codes: 5000- 5999
 enum TacoErrorCode {
     // General errors 5000-5449
+    // CordovaCmdNotFound = 5001,
+    // CordovaCommandFailed = 5002,
+    // CordovaCommandFailedWithError = 5003,
     NotInCordovaProject = 5004,
     CommandError = 5005,
     UnimplementedAbstractMethod = 5006,
@@ -15,11 +18,15 @@ enum TacoErrorCode {
     ErrorOperationCancelled = 5012,
     ErrorInvalidVersion = 5013,
     ErrorReadingPackageVersions = 5014,
+    // CordovaCommandUnhandledException = 5015,
+    // InvalidCordovaWithNode5 = 5016,
 
     // Errors to do with Create 5450-5499
     CommandCreateGitCloneError = 5451,
     CommandCreateInvalidPath = 5452,
     CommandCreateNoGit = 5453,
+    // CommandCreateTacoJsonFileCreationError = 5454,
+    // CommandCreateTacoJsonFileWriteError = 5455,
     CommandCreateTemplatesUnavailable = 5456,
 
     // Invalid Arguments 5500 - 5599
@@ -38,6 +45,7 @@ enum TacoErrorCode {
     CommandCreateNotBothCordovaCliAndKit = 5532,
     CommandCreateNotBothTemplateAndCordovaCli = 5533,
     CommandCreateNotTemplateIfCustomWww = 5534,
+    // CommandCreateOnlyLocalCustomWww = 5535,
     CommandCreatePathNotEmpty = 5536,
 
     // Invalid arguments for kits 5550 - 5569
@@ -83,6 +91,7 @@ enum TacoErrorCode {
     ErrorPatchCreation = 5631,
 
     // Errors related to install-reqs 5700-5749
+    InstallReqsNotSupported = 5700,
     CommandInstallNoPlatformsAdded = 5701,
     CommandInstallNoPlatformsFolder = 5702
 }

@@ -17,6 +17,7 @@ import fs = require ("fs");
 import nopt = require ("nopt");
 import path = require ("path");
 import Q = require ("q");
+import util = require ("util");
 
 import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
 import dependencies = require ("taco-dependency-installer");
@@ -30,6 +31,7 @@ import CordovaWrapper = tacoUtils.CordovaWrapper;
 import DependencyInstaller = dependencies.DependencyInstaller;
 import logger = tacoUtils.Logger;
 import loggerHelper = tacoUtils.LoggerHelper;
+import TacoError = tacoUtils.TacoError;
 
 /**
  * InstallDependencies
@@ -212,7 +214,7 @@ class InstallReqs extends commands.TacoCommandBase {
             }
 
             return Q({})
-                .then(function (): Q.Promise<any> {
+                .then(function(): Q.Promise<any> {
                     logger.logLine();
 
                     // Get a list of the installed platforms
@@ -256,16 +258,27 @@ class InstallReqs extends commands.TacoCommandBase {
                     logger.logLine();
 
                     return CordovaWrapper.requirements(requestedPlatforms)
-                        .then(function (result: any): Q.Promise<any> {
+                        .then(function(result: any): Q.Promise<any> {
                             var sessionId: string = tacoUtils.Telemetry.isOptedIn ?
                                 tacoUtils.Telemetry.getSessionId() : // Valid session ID to publish telemetry
                                 "null"; // Null session ID to not publish telemetry
                             var installer: DependencyInstaller = new DependencyInstaller(sessionId);
 
                             return installer.run(result);
+                        }).catch(function(error: any) {
+                            // if requirements has failed with too old Cordova 
+                            // throw a new TACO error with more information.
+                            var tacoError: TacoError = <tacoUtils.TacoError>error;
+                            if (error.isTacoError &&
+                                tacoError.errorCode === tacoUtils.TacoErrorCode.CommandInstallCordovaTooOld) {
+                                throw errorHelper.get(TacoErrorCodes.InstallReqsNotSupported, tacoError.message);
+                                // installReqsError.message = util.format("%s %s", tacoError.message, installReqsError.message);
+                                // throw installReqsError;
+                            }
+                            throw error;
                         });
                 });
-        }).thenResolve(<TacoUtility.ICommandTelemetryProperties> {});
+        }).thenResolve(<TacoUtility.ICommandTelemetryProperties>{});
     }
 
     /**

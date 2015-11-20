@@ -33,7 +33,6 @@ import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import CordovaWrapper = tacoUtility.CordovaWrapper;
-import CordovaHelper = tacoUtility.CordovaHelper;
 import logger = tacoUtility.Logger;
 import ProjectHelper = tacoUtility.ProjectHelper;
 import UtilHelper = tacoUtility.UtilHelper;

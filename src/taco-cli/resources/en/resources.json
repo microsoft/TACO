@@ -556,5 +556,7 @@
     "ProjectCommandsTitle": "Project Commands:",
     "_ProjectCommandsTitle.comment": "This is the string used to show project commands category for taco help",
     "GeneralCommandsTitle": "General Commands:",
-    "_GeneralCommandsTitle.comment": "This is the string used to show general commands category for taco help"
+    "_GeneralCommandsTitle.comment": "This is the string used to show general commands category for taco help",
+    "InstallReqsNotSupported": "Failed Cordova minimum version requirements for 'taco install-reqs'. {0}. If your project was created using a Kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=618544.",
+    "_InstallReqsNotSupported.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than the minimum version. {0} is the Cordova version used by the current project, {1} is the minimum required Cordova version."
 }

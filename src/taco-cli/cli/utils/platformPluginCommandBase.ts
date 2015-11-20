@@ -18,6 +18,7 @@ import Q = require ("q");
 import semver = require ("semver");
 import util = require ("util");
 
+import CliTelemetryHelper = require ("./cliTelemetryHelper");
 import kitHelper = require ("./kitHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
@@ -167,7 +168,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
      */
     private generateTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
         var self: PlatformPluginCommandBase = this;
-        return ProjectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+        return CliTelemetryHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             var numericSuffix: number = 1;
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(self.cordovaCommandParams.subCommand);
             self.cordovaCommandParams.targets.forEach(function (target: string): void {

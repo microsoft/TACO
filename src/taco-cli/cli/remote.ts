@@ -27,6 +27,7 @@ import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import CliTelemetryHelper = require ("./utils/cliTelemetryHelper");
 
 import commands = tacoUtility.Commands;
 import CordovaHelper = tacoUtility.CordovaHelper;
@@ -101,7 +102,7 @@ class Remote extends commands.TacoCommandBase {
      */
     private static generateTelemetryProperties(subCommand: string, platform?: string, isSecure?: boolean): Q.Promise<ICommandTelemetryProperties> {
 
-        return ProjectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+        return CliTelemetryHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(subCommand);
 
             if (platform) {

@@ -44,7 +44,7 @@ declare module TacoUtility {
         /**
          *  public helper that returns the common telemetry properties for the current project
          */
-        public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties>;
+        public static getCurrentProjectTelemetryProperties(cliVersion: string): Q.Promise<ICommandTelemetryProperties>;
 
         /**
          *  public helper that resolves with a true value if the current project is a TACO TS project

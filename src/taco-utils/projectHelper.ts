@@ -311,7 +311,7 @@ module TacoUtility {
         /**
          *  public helper that returns the common telemetry properties for the current project
          */
-        public static getCurrentProjectTelemetryProperties(): Q.Promise<ICommandTelemetryProperties> {
+        public static getCurrentProjectTelemetryProperties(cliVersion: string): Q.Promise<ICommandTelemetryProperties> {
             var projectRoot: string = ProjectHelper.getProjectRoot();
             if (!projectRoot) {
                 return Q.resolve(<ICommandTelemetryProperties>{});
@@ -332,7 +332,7 @@ module TacoUtility {
                 }
 
                 projectTelemetryProperties["projectType"] = TelemetryHelper.telemetryProperty(isTsProject ? "TypeScript" : "JavaScript");
-                projectTelemetryProperties["cliVersion"] = TelemetryHelper.telemetryProperty(require("../../package.json").version);
+                projectTelemetryProperties["cliVersion"] = TelemetryHelper.telemetryProperty(cliVersion);
                 return Q.resolve(projectTelemetryProperties);
             });
         }

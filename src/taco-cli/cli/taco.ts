@@ -25,6 +25,7 @@ import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 import CheckForNewerVersion = require ("./utils/checkForNewerVersion");
+import CliTelemetryHelper = require ("./utils/cliTelemetryHelper");
 
 import commands = tacoUtility.Commands;
 import CommandsFactory = commands.CommandFactory;
@@ -109,7 +110,7 @@ class Taco {
                             // Send command failure telemetry for valid TACO commands
                             // Any invalid command will be routed to Cordova and 
                             // telemetry events for such commands are sent as "routedCommand" telemetry events
-                            return ProjectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                            return CliTelemetryHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
                                 telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
                             });
                         }
