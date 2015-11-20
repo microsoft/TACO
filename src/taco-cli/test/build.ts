@@ -35,7 +35,6 @@ import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
 import buildMod = require ("../cli/build");
 import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
-import mockCordova = require ("./utils/mockCordova");
 import Platform = require ("../cli/platform");
 import RemoteBuildClientHelper = require ("../cli/remoteBuild/remoteBuildClientHelper");
 import RemoteMock = require ("./utils/remoteMock");
@@ -44,6 +43,7 @@ import IRemoteServerSequence = require ("./utils/remoteServerSequence");
 import ServerMock = require ("./utils/serverMock");
 import Settings = require ("../cli/utils/settings");
 import TacoUtility = require ("taco-utils");
+import TacoTestUtils = require ("taco-tests-utils");
 
 import BuildInfo = TacoUtility.BuildInfo;
 import Command = buildAndRunTelemetry.Command;
@@ -51,6 +51,7 @@ import utils = TacoUtility.UtilHelper;
 
 import CommandHelper = require("./utils/commandHelper");
 import ICommand = TacoUtility.Commands.ICommand;
+import MockCordova = TacoTestUtils.MockCordova;
 
 var build: ICommand = CommandHelper.getCommand("build");
 var create: ICommand = CommandHelper.getCommand("create");

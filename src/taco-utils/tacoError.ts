@@ -63,7 +63,7 @@ module TacoUtility {
             return TacoError.wrapError(null, errorToken, errorCode, resources, ...optionalArgs);
         }
 
-        public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: string[]): TacoError {
+        public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
             var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
             return new TacoError(errorCode, message, innerError);
         }

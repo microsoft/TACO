@@ -17,13 +17,17 @@ import Q = require ("q");
 import should = require ("should");
 import tacoUtils = require ("taco-utils");
 
-import CordovaWrapper = require ("../cli/utils/cordovaWrapper");
-import mockCordova = require ("./utils/mockCordova");
-import ProjectHelper = require ("../cli/utils/projectHelper");
-import TacoErrorCodes = require ("../cli/tacoErrorCodes");
+import cordovaWrapper = require ("../cordovaWrapper");
+import projectHelper = require ("../projectHelper");
+import tacoErrorCodes = require ("../tacoErrorCodes");
+import TacoTestUtils = require ("taco-tests-utils");
 
 import Commands = tacoUtils.Commands;
+import CordovaWrapper = cordovaWrapper.CordovaWrapper;
+import MockCordova = TacoTestUtils.MockCordova;
+import ProjectHelper = projectHelper.ProjectHelper;
 import TacoPackageLoader = tacoUtils.TacoPackageLoader;
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 import TacoError = tacoUtils.TacoError;
 
@@ -38,7 +42,7 @@ describe("cordovaWrapper", () => {
         originalDir = process.cwd();
         process.chdir(projectHome);
         // Set up tests with mocked out Cordova implementation
-        var cordova: mockCordova.MockCordova510 = mockCordova.MockCordova510.default;
+        var cordova: MockCordova.MockCordova510 = MockCordova.MockCordova510.getDefault();
         cordova.raw.build = (): Q.Promise<any> => {
             throw new Error("Build Error thrown synchronously");
         };
@@ -54,9 +58,9 @@ describe("cordovaWrapper", () => {
         };
 
         TacoPackageLoader.mockForTests = {
-            lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel): Q.Promise<mockCordova.MockCordova510> => {
+            lazyRequire: (packageName: string, packageId: string, logLevel?: TacoUtility.InstallLogLevel): Q.Promise<MockCordova.MockCordova510> => {
                 if (packageName !== "cordova") {
-                    return Q.reject<mockCordova.MockCordova510>(new Error("Expected to load cordova package"));
+                    return Q.reject<MockCordova.MockCordova510>(new Error("Expected to load cordova package"));
                 }
                 return Q(cordova);
             },

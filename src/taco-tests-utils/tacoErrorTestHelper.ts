@@ -15,13 +15,9 @@ import shouldModule = require("should");
 
 export class TacoErrorTestHelper {
     public static verifyTacoErrors(fileName: string, resources: any, minErrorCode: number, maxErrorCode: number): void {
-        var errorCodes: any = require(fileName);
-        // for taco-utils, we have TacoErrorCode is nested under module
-        if (errorCodes.TacoErrorCode) {
-            errorCodes = errorCodes.TacoErrorCode;
-        }
+        var errorCodes: any = TacoErrorTestHelper.getErrorCodes(fileName);
 
-        Object.keys(errorCodes).forEach(function (errorCode: string): void {
+        Object.keys(errorCodes).forEach(function(errorCode: string): void {
             // Loop over all error codes, filter out numeric values
             if (isNaN(parseInt(errorCode, 10))) {
                 // Verify that we don't have 2 errors with same error code
@@ -37,5 +33,23 @@ export class TacoErrorTestHelper {
                 shouldModule(resources.getString(errorCode)).not.equal(null, "no resources found for error code " + errorCode);
             }
         });
+    }
+
+    public static verifyExcludedTacoErrors(fileName: string, resources: any, excludedErrorCodes: number[]): void {
+        var errorCodes: any = TacoErrorTestHelper.getErrorCodes(fileName);
+        excludedErrorCodes.forEach(excludedErrorCode => {
+            shouldModule(excludedErrorCode in errorCodes).be.equal(false,
+                "Exclude error code " + excludedErrorCode + "shouldn't be present in " + fileName);
+        });
+    }
+
+    private static getErrorCodes(fileName: string): any {
+        var errorCodes: any = require(fileName);
+        // for taco-utils, we have TacoErrorCode is nested under module
+        if (errorCodes.TacoErrorCode) {
+            errorCodes = errorCodes.TacoErrorCode;
+        }
+
+        return errorCodes;
     }
 }

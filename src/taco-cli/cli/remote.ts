@@ -20,19 +20,20 @@ import readline = require ("readline");
 import request = require ("request");
 import util = require ("util");
 
-import CordovaHelper = require ("./utils/cordovaHelper");
 import ConnectionSecurityHelper = require ("./remoteBuild/connectionSecurityHelper");
 import HelpModule = require ("./help");
-import projectHelper = require ("./utils/projectHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
+import CliTelemetryHelper = require ("./utils/cliTelemetryHelper");
 
 import commands = tacoUtility.Commands;
+import CordovaHelper = tacoUtility.CordovaHelper;
 import logger = tacoUtility.Logger;
 import loggerHelper = tacoUtility.LoggerHelper;
+import ProjectHelper = tacoUtility.ProjectHelper;
 import telemetryHelper = tacoUtility.TelemetryHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 
@@ -101,7 +102,7 @@ class Remote extends commands.TacoCommandBase {
      */
     private static generateTelemetryProperties(subCommand: string, platform?: string, isSecure?: boolean): Q.Promise<ICommandTelemetryProperties> {
 
-        return projectHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
+        return CliTelemetryHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
             telemetryProperties["subCommand"] = telemetryHelper.telemetryProperty(subCommand);
 
             if (platform) {
@@ -173,7 +174,7 @@ class Remote extends commands.TacoCommandBase {
     private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
         var remoteInfo: Settings.IRemoteConnectionInfo;
-        return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: CordovaHelper.IDictionary<any>): Q.Promise<any> {
+        return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: IDictionary<any>): Q.Promise<any> {
             if (supportedPlatforms && !(platform in supportedPlatforms)) {
                 throw errorHelper.get(TacoErrorCodes.RemoteBuildUnsupportedPlatform, platform);
             }

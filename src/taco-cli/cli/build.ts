@@ -22,10 +22,8 @@ import Q = require ("q");
 import rimraf = require ("rimraf");
 
 import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
-import CordovaWrapper = require ("./utils/cordovaWrapper");
 import errorHelper = require ("./tacoErrorHelper");
 import PlatformHelper = require ("./utils/platformHelper");
-import projectHelper = require ("./utils/projectHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remoteBuildClientHelper");
 import RemoteBuildSettings = require ("./remoteBuild/buildSettings");
 import resources = require ("../resources/resourceManager");
@@ -34,7 +32,9 @@ import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
 import logger = tacoUtility.Logger;
+import ProjectHelper = tacoUtility.ProjectHelper;
 import UtilHelper = tacoUtility.UtilHelper;
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
@@ -138,7 +138,7 @@ class Build extends commands.TacoCommandBase {
     }
 
     private static build(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
-        if (projectHelper.isTypeScriptProject()) {
+        if (ProjectHelper.isTypeScriptProject()) {
             logger.log(resources.getString("CommandCreateInstallGulp"));
         }
 

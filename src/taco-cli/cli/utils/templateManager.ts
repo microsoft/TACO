@@ -27,13 +27,12 @@ import rimraf = require ("rimraf");
 import util = require ("util");
 import wrench = require ("wrench");
 
-import cordovaHelper = require ("./cordovaHelper");
-import cordovaWrapper = require ("./cordovaWrapper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
 import tacoUtility = require ("taco-utils");
 
+import CordovaWrapper = tacoUtility.CordovaWrapper;
 import logger = tacoUtility.Logger;
 import loggerHelper = tacoUtility.LoggerHelper;
 import utils = tacoUtility.UtilHelper;
@@ -172,7 +171,7 @@ class TemplateManager {
     private static cordovaCreate(templatePath: string, cliVersion: string, cordovaParameters: Cordova.ICordovaCreateParameters): Q.Promise<any> {
         cordovaParameters.copyFrom = templatePath;
 
-        return cordovaWrapper.create(cliVersion, cordovaParameters);
+        return CordovaWrapper.create(cliVersion, cordovaParameters);
     }
 
     private static createUnusedFolderPath(): string {

@@ -17,7 +17,6 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 
-import CordovaHelper = require ("./cordovaHelper");
 import resources = require ("../../resources/resourceManager");
 import TacoErrorCodes = require ("../tacoErrorCodes");
 import errorHelper = require ("../tacoErrorHelper");
@@ -25,6 +24,7 @@ import Settings = require ("./settings");
 import tacoUtils = require ("taco-utils");
 
 import commands = tacoUtils.Commands;
+import CordovaHelper = tacoUtils.CordovaHelper;
 import logger = tacoUtils.Logger;
 
 /*
@@ -46,7 +46,7 @@ class PlatformHelper {
         return Q.all<any>([
             CordovaHelper.getSupportedPlatforms(),
             PlatformHelper.determinePlatformsFromOptions(options)
-        ]).spread<PlatformHelper.IPlatformWithLocation[]>(function (supportedPlatforms: CordovaHelper.IDictionary<any>,
+        ]).spread<PlatformHelper.IPlatformWithLocation[]>(function (supportedPlatforms: IDictionary<any>,
             platforms: PlatformHelper.IPlatformWithLocation[]): PlatformHelper.IPlatformWithLocation[] {
             var filteredPlatforms: PlatformHelper.IPlatformWithLocation[] = platforms.filter(function (platform: PlatformHelper.IPlatformWithLocation): boolean {
                 var supported: boolean = !supportedPlatforms || platform.platform in supportedPlatforms || platform.location === PlatformHelper.BuildLocationType.Remote;
