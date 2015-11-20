@@ -64,11 +64,7 @@ module TacoUtility {
         }
 
         public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
-            var args: string[] = [];
-            if (optionalArgs.length > 0) {
-                args = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 4);
-            }
-            var message: string = TacoError.getMessageString(errorToken, resources, args);
+            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
             return new TacoError(errorCode, message, innerError);
         }
 
