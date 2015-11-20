@@ -32,6 +32,11 @@ import logger = tacoUtility.Logger;
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
+//var livereload = require("taco-livereload");
+
+//console.log("TEST");
+//console.log(livereload);
+
 /**
  * Run
  *
@@ -48,6 +53,9 @@ class Run extends commands.TacoCommandBase {
         device: Boolean,
         emulator: Boolean,
         target: String,
+        
+        livereload: Boolean,
+        devicesync: Boolean,
 
         // Are these only for when we build as part of running?
         debug: Boolean,
@@ -87,6 +95,12 @@ class Run extends commands.TacoCommandBase {
             var remoteConfig: Settings.IRemoteConnectionInfo = settings.remotePlatforms && settings.remotePlatforms[platform];
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
+            }
+            
+            // DeviceSync/LiveReload not compatible with remote
+            var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
+            if (deviceSync) {
+                throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload/--devicesync", "--remote");
             }
 
             var buildOptions: string[] = commandData.remain.filter(function (opt: string): boolean { return opt.indexOf("--") === 0; });
@@ -223,6 +237,18 @@ class Run extends commands.TacoCommandBase {
 
         if (parsedOptions.options["debug"] && parsedOptions.options["release"]) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
+        }
+        
+        if (parsedOptions.options["livereload"] && parsedOptions.options["remote"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload", "--remote");
+        }
+
+        if (parsedOptions.options["devicesync"] && parsedOptions.options["remote"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--devicesync", "--remote");
+        }
+
+        if (parsedOptions.options["devicesync"] && parsedOptions.options["livereload"]) {
+            throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--devicesync", "--livereload");
         }
 
         return parsedOptions;
