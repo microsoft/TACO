@@ -22,24 +22,26 @@ import utils = require ("taco-utils");
 
 import UtilHelper = utils.UtilHelper;
 
-var proxyInstance: child_process.ChildProcess = null;
 var promiseExec: (...args: any[]) => Q.Promise<any> = Q.denodeify(UtilHelper.loggedExec);
 
 class IosAppRunnerHelper {
     public static startDebugProxy(proxyPort: number): Q.Promise<child_process.ChildProcess> {
-        if (proxyInstance) {
-            proxyInstance.kill("SIGHUP"); // idevicedebugserver does not exit from SIGTERM
-            proxyInstance = null;
+        if (!global.tacoRemoteLib) {
+            global.tacoRemoteLib = {};
+        }
+        if (global.tacoRemoteLib.proxyInstance) {
+            global.tacoRemoteLib.proxyInstance.kill("SIGHUP"); // idevicedebugserver does not exit from SIGTERM
+            global.tacoRemoteLib.proxyInstance = null;
         }
 
         return IosAppRunnerHelper.mountDeveloperImage().then(function (): Q.Promise<child_process.ChildProcess> {
             var deferred = Q.defer<child_process.ChildProcess>();
-            proxyInstance = child_process.spawn("idevicedebugserverproxy", [proxyPort.toString()]);
-            proxyInstance.on("error", function (err: any): void {
+            global.tacoRemoteLib.proxyInstance = child_process.spawn("idevicedebugserverproxy", [proxyPort.toString()]);
+            global.tacoRemoteLib.proxyInstance.on("error", function (err: any): void {
                 deferred.reject(err);
             });
             // Allow 200ms for the spawn to error out, ~125ms isn't uncommon for some failures
-            Q.delay(200).then(() => deferred.resolve(proxyInstance));
+            Q.delay(200).then(() => deferred.resolve(global.tacoRemoteLib.proxyInstance));
 
             return deferred.promise;
         });
