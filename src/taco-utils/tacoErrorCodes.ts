@@ -33,9 +33,11 @@ module TacoUtility {
         CommandBadSubcommand = 702,
         TacoUtilsExceptionListingfile = 703,
         TacoUtilsExceptionMissingcommand = 704,
-        CommandCreateOnlyLocalCustomWww = 706,
+        ErrorUserJsonMissing = 705,
+        ErrorUserJsonMalformed = 706,
         CommandCreateTacoJsonFileCreationError = 707,
         CommandCreateTacoJsonFileWriteError = 708,
+        CommandCreateOnlyLocalCustomWww = 709
     }
 }
 

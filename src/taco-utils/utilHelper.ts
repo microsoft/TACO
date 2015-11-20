@@ -6,6 +6,7 @@
 ﻿ *******************************************************
 ﻿ */
 
+/// <reference path="../typings/iconv-lite.d.ts"/>
 /// <reference path="../typings/mkdirp.d.ts"/>
 /// <reference path="../typings/ncp.d.ts"/>
 /// <reference path="../typings/node.d.ts" />
@@ -24,6 +25,7 @@ import os = require ("os");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
+import iconv = require("iconv-lite");
 
 import argsHelper = require ("./argsHelper");
 import commands = require ("./commands");
@@ -96,13 +98,13 @@ module TacoUtility {
             var deferred: Q.Deferred<any> = Q.defer();
             var newFile: fs.WriteStream = fs.createWriteStream(to, { encoding: encoding });
             var oldFile: fs.ReadStream = fs.createReadStream(from, { encoding: encoding });
-            newFile.on("finish", function (): void {
+            newFile.on("finish", function(): void {
                 deferred.resolve({});
             });
-            newFile.on("error", function (e: Error): void {
+            newFile.on("error", function(e: Error): void {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedFileRead, e, to));
             });
-            oldFile.on("error", function (e: Error): void {
+            oldFile.on("error", function(e: Error): void {
                 deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedFileWrite, e, from));
             });
             oldFile.pipe(newFile);
@@ -121,7 +123,7 @@ module TacoUtility {
 
             options = options ? options : {};
 
-            ncp.ncp(source, target, options, function (error: any): void {
+            ncp.ncp(source, target, options, function(error: any): void {
                 if (error) {
                     deferred.reject(errorHelper.wrap(TacoErrorCodes.FailedRecursiveCopy, error, source, target));
                 } else {
@@ -178,7 +180,7 @@ module TacoUtility {
          * @return {string[]} The forbidden characters
          */
         public static invalidAppNameCharacters(): string[] {
-            return Object.keys(UtilHelper.INVALID_APP_NAME_CHARS).map(function (c: string): string {
+            return Object.keys(UtilHelper.INVALID_APP_NAME_CHARS).map(function(c: string): string {
                 return UtilHelper.INVALID_APP_NAME_CHARS[c];
             });
         }
@@ -197,7 +199,7 @@ module TacoUtility {
          * Call exec and log the child process' stdout and stderr to stdout on failure
          */
         public static loggedExec(command: string, options: NodeJSChildProcess.IExecOptions, callback: (error: Error, stdout: Buffer, stderr: Buffer) => void): child_process.ChildProcess {
-            return child_process.exec(command, options, function (error: Error, stdout: Buffer, stderr: Buffer): void {
+            return child_process.exec(command, options, function(error: Error, stdout: Buffer, stderr: Buffer): void {
                 if (error) {
                     Logger.logError(command);
                     Logger.logError(stdout.toString());
@@ -224,7 +226,7 @@ module TacoUtility {
                 str = str.replace(/^~(?=\/|$)/, process.env.HOME);
             }
 
-            return str.replace(regex, function (substring: string, ...args: any[]): string {
+            return str.replace(regex, function(substring: string, ...args: any[]): string {
                 if (process.env[args[0]]) {
                     var newValue: string = process.env[args[0]];
 
@@ -267,7 +269,7 @@ module TacoUtility {
             var hasInvalidSegments: boolean;
 
             fs.mkdirSync(currentPath);
-            hasInvalidSegments = pathToTest.split(path.sep).some(function (segment: string, index: number): boolean {
+            hasInvalidSegments = pathToTest.split(path.sep).some(function(segment: string, index: number): boolean {
                 // Exceptions for Windows platform for the very first segment: skip drive letter
                 if (index === 0 && os.platform() === "win32" && /^[a-zA-Z]:$/.test(segment)) {
                     return false;
@@ -299,7 +301,7 @@ module TacoUtility {
          * Returns true if version was requested in args, false otherwise
          */
         public static tryParseVersionArgs(args: string[]): boolean {
-            return args.some(function (value: string): boolean { return /^(-*)(v|version)$/.test(value); });
+            return args.some(function(value: string): boolean { return /^(-*)(v|version)$/.test(value); });
         }
 
         /**
@@ -312,11 +314,46 @@ module TacoUtility {
             // for "taco cmd --help" scenarios, update commandArgs to reflect the first argument instead
             for (var i: number = 0; i < args.length; i++) {
                 if (/^(-*)(h|help)$/.test(args[i])) {
-                    return <ITacoHelpArgs> { helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
+                    return <ITacoHelpArgs>{ helpTopic: (i === 0) ? (args[1] ? args[1] : "") : args[0] };
                 }
             }
 
             return null;
+        }
+
+        /**
+         * parses a JSON file which could get modified by user or another tool
+         * handles different encoding
+         * @param {string} path to the json file
+         * @return {any} parsed JSON object
+         */
+        public static parseUserJSON(filePath: string): any {
+            if (!fs.existsSync(filePath)) {
+                throw errorHelper.get(tacoErrorCodes.TacoErrorCode.ErrorUserJsonMissing, filePath);
+            }
+
+            var contents: Buffer = fs.readFileSync(filePath);
+            // try the simplest path first
+            try {
+                return JSON.parse(contents.toString());
+            } catch (ex) {
+                UtilHelper.emptyMethod();
+            }
+
+            // may be this is a UTF-8 with BOM
+            try {
+                return JSON.parse(iconv.decode(contents, "utf8"));
+            } catch (ex) {
+                UtilHelper.emptyMethod();
+            }
+            // May be this is a UTF-16 file
+            try {
+                return JSON.parse(iconv.decode(contents, "utf16"));
+            } catch (ex) {
+                UtilHelper.emptyMethod();
+            }
+
+            throw errorHelper.get(tacoErrorCodes.TacoErrorCode.ErrorUserJsonMalformed, filePath);
         }
 
         /**

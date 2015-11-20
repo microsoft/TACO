@@ -93,5 +93,9 @@
     "InvalidCordovaWithNode5": "Incompatible configuration: Unable to use Cordova < 5.4.0 with Node >= 5.0.0. Either upgrade to a newer version of Cordova, or revert to an older version of node. See http://go.microsoft.com/fwlink/?LinkID=618471 for more details.",
     "_InvalidCordovaWithNode5.comment": "Error message printed when trying to use Cordova < 5.4.0 with Node >= 5.0.0.",
     "CommandInstallCordovaTooOld": "The current project uses Cordova version {0}. Minimum required Cordova version: {1}",
-    "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses cordova feature which is not supported in currently installed/kit cordova version."
+    "_CommandInstallCordovaTooOld.comment": "Error shown when a user uses cordova feature which is not supported in currently installed/kit cordova version.",
+    "ErrorUserJsonMissing": "Error: {0} is missing.",
+    "_ErrorUserJsonMissing.comment": "Error thrown when a user json file is missing or malformed",
+    "ErrorUserJsonMalformed": "Error: {0} is malformed.",
+    "_ErrorTacoJsonMalformed.comment": "Error thrown when a user json file is missing or malformed"
 }
