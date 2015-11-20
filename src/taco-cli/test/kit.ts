@@ -200,7 +200,7 @@ function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryPro
         });
     }
 
-describe("Kit command test setup: ", function (): void {
+describe("Kit command: ", function (): void {
     this.timeout(20000);
     before(() => {
         originalCwd = process.cwd();
@@ -216,14 +216,14 @@ describe("Kit command test setup: ", function (): void {
         rimraf.sync(runFolder);
     });
 
-    after((done: MochaDone) => {
+    after() => {
         process.env["TACO_UNIT_TEST"] = previous;
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
-        rimraf(runFolder, function (err: Error): void { done(); }); // ignore errors
+        rimraf.sync(runFolder); // ignore errors
     });
 
-    describe("Kit command : ", function (): void {
+    describe("Kit list command : ", function (): void {
         it("'taco kit' should not throw any error", function (done: MochaDone): void {
             kitRun()
                 .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
