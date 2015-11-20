@@ -178,8 +178,8 @@ describe("Check for newer version", function (): void {
     function simulateBeforeExit(): void {
         var listeners: Function[] = process.listeners("beforeExit");
         listeners.length.should.eql(1, "There should be only a single listener for the beforeExit event");
-        process.removeListener("beforeExit", listeners[0]);
-        listeners[0]();
+        listeners[0].call(process); // The listener expects "this" to be process
+        process.listeners("beforeExit").length.should.eql(0, "The beforeExit listener should clean itself up");
     }
 
     function launchFakeNPMServer(done: MochaDone): Q.Promise<http.Server> {
