@@ -75,6 +75,8 @@
     "_TelemetryCurrentlyOptedInPrompt.comment": "This is the string presented to the user before asking to opt in for telemetry when he has currently opted in.",
     "TelemetryCurrentlyOptedOutPrompt": "Would you like to allow us to collect your usage data?",
     "_TelemetryCurrentlyOptedOutPrompt.comment": "This is the string presented to the user before asking to opt in for telemetry when he has currently opted out.",
-    "ErrorUserJsonMissingOrMalformed": "Error: {0} is missing or malformed.",
-    "_ErrorTacoJsonMissingOrMalformed.comment": "Error thrown when a user json file is missing or malformed"
+    "ErrorUserJsonMissing": "Error: {0} is missing.",
+    "_ErrorUserJsonMissing.comment": "Error thrown when a user json file is missing or malformed",
+    "ErrorUserJsonMalformed": "Error: {0} is malformed.",
+    "_ErrorTacoJsonMalformed.comment": "Error thrown when a user json file is missing or malformed"
 }

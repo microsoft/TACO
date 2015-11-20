@@ -191,7 +191,7 @@ describe("UtilHelper", function (): void {
         });
 
         it("read UTF-8 file", function (): void {
-            writeBufferAndValidate("utf8.json", stringified => new Buffer(stringified, "utf8"));
+            writeBufferAndValidate("utf8.json", (stringified: string) => new Buffer(stringified, "utf8"));
         });
 
         it("read UTF-8 with BOM", function (): void {
@@ -202,8 +202,9 @@ describe("UtilHelper", function (): void {
         it("read file which doesn't exist", function(): void {
             try {
                 UtilHelper.parseUserJSON(path.resolve(__dirname, "nonExistentFile.json"));
+                shouldModule.fail(true, false, "Expected error: " + TacoErrorCodes.ErrorUserJsonMissing);
             } catch (e) {
-                (<TacoError>e).errorCode.should.equal(TacoErrorCodes.ErrorUserJsonMissingOrMalformed);
+                (<TacoError>e).errorCode.should.equal(TacoErrorCodes.ErrorUserJsonMissing);
             }
         });
 
@@ -215,7 +216,7 @@ describe("UtilHelper", function (): void {
                 malformedBuffer.write("\u00bd\u00bc\u00be");
                 buffer.copy(malformedBuffer, malformedBuffer.length, 0);
                 return malformedBuffer;
-            }, TacoErrorCodes.ErrorUserJsonMissingOrMalformed);
+            }, TacoErrorCodes.ErrorUserJsonMalformed);
         });
 
         function writeBufferAndValidate(filename: string, getBuffer: (stringified: string) => Buffer, expectedErrorCode?: TacoErrorCodes) {
@@ -227,14 +228,16 @@ describe("UtilHelper", function (): void {
             fs.writeFileSync(filepath, buffer);
             try {
                 var parsedJson = UtilHelper.parseUserJSON(filepath);
-                if (!expectedErrorCode) {
-                    JSON.stringify(parsedJson).should.equal(stringified);
+                if (expectedErrorCode) {
+                    shouldModule.fail(true, false, "Expected error: " + expectedErrorCode);
+                } else {
+                    parsedJson.should.eql(x);
                 }
             } catch (e) {
                 if (expectedErrorCode) {
                     (<TacoError>e).errorCode.should.equal(expectedErrorCode);
                 } else {
-                    shouldModule.fail("true", "false", e);
+                    shouldModule.fail(true, false, e);
                 }
             }
         }
