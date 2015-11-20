@@ -128,7 +128,7 @@ class IOSAgent implements ITargetPlatform {
                 archive.on("error", function (err: Error): void {
                     return deferred.reject(err);
                 });
-                archive.on("finish", function() {
+                archive.on("end", function() {
                     return deferred.resolve({});
                 });
                 
@@ -146,7 +146,7 @@ class IOSAgent implements ITargetPlatform {
                 archive.on("error", function (err: Error): void {
                     return deferred.reject(err);
                 });
-                archive.on("finish", function() {
+                archive.on("end", function() {
                     return deferred.resolve({});
                 });
                 
@@ -158,15 +158,13 @@ class IOSAgent implements ITargetPlatform {
                 
                 return deferred.promise;
             })
-            .then(function(): Q.Promise<any> {
+            .then(function(): void {
                 var deferred: Q.Deferred<any> = Q.defer();
                 var inputStream: fs.ReadStream = fs.createReadStream(pathToBuildZipFile);
                 
                 res.set({ "Content-Type": "application/zip" });
                 inputStream.pipe(res);
                 callback(null);
-                
-                return deferred.promise;
             })
             .catch(function(err: any): void {
                 Logger.logError(resources.getString("ArchivePackError", err.message));
