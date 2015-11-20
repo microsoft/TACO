@@ -25,6 +25,8 @@ module TacoUtility {
         CommandBadSubcommand = 702,
         TacoUtilsExceptionListingfile = 703,
         TacoUtilsExceptionMissingcommand = 704,
+        ErrorUserJsonMissing = 705,
+        ErrorUserJsonMalformed = 706
     }
 }
 

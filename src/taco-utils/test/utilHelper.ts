@@ -16,12 +16,22 @@
 var shouldModule: any = require("should");
 /* tslint:enable:no-var-requires */
 import mocha = require ("mocha");
+import fs = require("fs");
+import os = require("os");
+import mkdirp = require ("mkdirp");
+import path = require("path");
+import rimraf = require ("rimraf");
 
 import argsHelper = require ("../argsHelper");
 import commands = require ("../commands");
 import utils = require ("../utilHelper");
+import tacoError = require ("../tacoError");
+import tacoErrorCodes = require ("../tacoErrorCodes");
 
 import ArgsHelper = argsHelper.ArgsHelper;
+import UtilHelper = utils.UtilHelper;
+import TacoError = tacoError.TacoError;
+import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 describe("UtilHelper", function (): void {
     describe("parseArguments()", function (): void {
@@ -162,5 +172,74 @@ describe("UtilHelper", function (): void {
             parsed.remain[0].should.equal("bar");
             parsed.remain[1].should.equal("foo");
         });
+    });
+
+    describe("parseUserJSON()", function (): void {
+        var testHome: string = path.join(os.tmpdir(), "taco-utils", "parseUserJSON");
+        before(function (): void {
+            process.env["TACO_HOME"] = testHome;
+            rimraf.sync(testHome);
+            mkdirp.sync(testHome);
+        });
+
+        after(function (): void {
+            rimraf(testHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
+        });
+
+        it("read UTF-16 file", function (): void {
+            writeBufferAndValidate("utf16.json", (stringified: string) => new Buffer(stringified, "utf16le"));
+        });
+
+        it("read UTF-8 file", function (): void {
+            writeBufferAndValidate("utf8.json", (stringified: string) => new Buffer(stringified, "utf8"));
+        });
+
+        it("read UTF-8 with BOM", function (): void {
+            var parsedJson = UtilHelper.parseUserJSON(path.resolve(__dirname, "taco_utf8BOM.json"));
+            parsedJson["cordova-cli"].should.equal("5.3.3");
+        });
+
+        it("read file which doesn't exist", function(): void {
+            try {
+                UtilHelper.parseUserJSON(path.resolve(__dirname, "nonExistentFile.json"));
+                shouldModule.fail(true, false, "Expected error: " + TacoErrorCodes.ErrorUserJsonMissing);
+            } catch (e) {
+                (<TacoError>e).errorCode.should.equal(TacoErrorCodes.ErrorUserJsonMissing);
+            }
+        });
+
+        it("read malformed file", function (): void {
+            writeBufferAndValidate("utf8.json", stringified => {
+                var buffer: Buffer = new Buffer(stringified, "utf8");
+                var malformedBuffer: Buffer = new Buffer(buffer.length + 3);
+                // add some random bytes to the malformed buffer
+                malformedBuffer.write("\u00bd\u00bc\u00be");
+                buffer.copy(malformedBuffer, malformedBuffer.length, 0);
+                return malformedBuffer;
+            }, TacoErrorCodes.ErrorUserJsonMalformed);
+        });
+
+        function writeBufferAndValidate(filename: string, getBuffer: (stringified: string) => Buffer, expectedErrorCode?: TacoErrorCodes) {
+            var x = { "cordova-cli": 5.8 };
+            var stringified: string = JSON.stringify(x);
+            var buffer: Buffer = getBuffer(stringified);
+
+            var filepath = path.join(testHome, filename);
+            fs.writeFileSync(filepath, buffer);
+            try {
+                var parsedJson = UtilHelper.parseUserJSON(filepath);
+                if (expectedErrorCode) {
+                    shouldModule.fail(true, false, "Expected error: " + expectedErrorCode);
+                } else {
+                    parsedJson.should.eql(x);
+                }
+            } catch (e) {
+                if (expectedErrorCode) {
+                    (<TacoError>e).errorCode.should.equal(expectedErrorCode);
+                } else {
+                    shouldModule.fail(true, false, e);
+                }
+            }
+        }
     });
 });

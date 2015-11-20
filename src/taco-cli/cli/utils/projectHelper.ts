@@ -28,6 +28,7 @@ import wrench = require ("wrench");
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 import Logger = tacoUtility.Logger;
+import UtilHelper = tacoUtility.UtilHelper;
 
 /**
  *  A helper class with methods to query the project root, project info like CLI/kit version etc.
@@ -154,7 +155,7 @@ class ProjectHelper {
             }
 
             if (fs.existsSync(tacoJsonFilePath)) {
-                tacoJson = JSON.parse(fs.readFileSync(tacoJsonFilePath, "utf8"));
+                tacoJson = UtilHelper.parseUserJSON(tacoJsonFilePath);
                 ProjectHelper.cachedProjectFilePath = tacoJsonFilePath;
             } else {
                 return projectInfo;

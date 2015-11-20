@@ -107,6 +107,13 @@ declare module TacoUtility {
         public static tryParseHelpArgs(args: string[]): ITacoHelpArgs;
 
         /**
+         * parses a JSON file which could get modified by user or another tool
+         * handles different encoding
+         * @param {string} path to the json file
+         * @return {any} parsed JSON object
+         */
+        public static parseUserJSON(filepath: string): any;
+        /**
          * Sets the global LogLevel setting for TACO by specifically looking for the "--loglevel" string. If found, and the string after it is a valid loglevel value, the global config's loglevel
          * is set. Finally, the "--loglevel" string (and the following value, if present, whether it is valid or not) are removed from the args so that they are not passed to the command.
          *
