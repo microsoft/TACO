@@ -11,8 +11,8 @@
         "url": "https://github.com/Microsoft/TACO"
     },
     "bugs": {
-        "url" : "https://github.com/Microsoft/TACO/issues", 
-        "email" : "vscordovatools-admin@microsoft.com"
+        "url": "https://github.com/Microsoft/TACO/issues",
+        "email": "vscordovatools-admin@microsoft.com"
     },
     "homepage": "http://taco.tools",
     "keywords": [
@@ -42,6 +42,7 @@
         "rimraf": "2.2.6",
         "semver": "^4.3.6",
         "taco-dependency-installer": "file:../taco-dependency-installer",
+        "taco-livereload": "file:../taco-livereload",
         "taco-utils": "file:../taco-utils",
         "colors": "^1.0.3",
         "opener": "~1.4.1"

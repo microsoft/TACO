@@ -1,0 +1,14 @@
+{
+    "name": "taco-livereload",
+    "version": "1.0.0",
+    "description": "",
+    "main": "lib/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Omar Mefire <omefire@gmail.com>",
+    "license": "ISC",
+    "dependencies": {
+        "taco-utils": "file:../taco-utils"
+    }
+}
