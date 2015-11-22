@@ -32,11 +32,6 @@ import logger = tacoUtility.Logger;
 
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
-//var livereload = require("taco-livereload");
-
-//console.log("TEST");
-//console.log(livereload);
-
 /**
  * Run
  *

@@ -1,12 +1,14 @@
 <html>
+    
     <head>
         <title>CORDOVA-PLUGIN-LIVERELOAD</title>
         <style>
-            #loading, #error {
+            #error {
                 display: none;
             }
         </style>
-    </head>    
+    </head>
+    
     <body>
         <h3>CORDOVA-PLUGIN-LIVERELOAD</h3>
         <div id="error">There was an error connecting to the BrowserSync server.
@@ -36,6 +38,8 @@
                     if (req.status == 200) {
                         return requestCompletedWithSuccess();
                     }
+                    
+                    document.getElementById('loading').style.display = 'none';
                     return requestFailed();
                 }
             };
@@ -43,10 +47,7 @@
         }
         			
         function requestCompletedWithSuccess() {
-            document.getElementById('loading').style.display = 'block';
-                setTimeout(function() {
-                    window.location.href = '__SERVER_URL__';
-            }, 2000);
+            window.location.href = '__SERVER_URL__';
         }
         
         function requestFailed() {
@@ -57,4 +58,5 @@
         var SERVER_URL = '__SERVER_URL__'; 		
         connectToBrowserSyncServer(SERVER_URL);
     </script>
+
 </html>
