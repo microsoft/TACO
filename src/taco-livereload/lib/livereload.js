@@ -78,7 +78,6 @@ module.exports.start = function (projectRoot, platforms, options) {
                 match: [path.join(projectRoot, 'www', '**/*.*')],
                 fn: function (event, file) {
                 
-                    // ToDO: test error here + null obj here
                     // This is used by external clients (consumers of this npm package)
                     var externalAPI = {
                         stop: bs.stopServer,
