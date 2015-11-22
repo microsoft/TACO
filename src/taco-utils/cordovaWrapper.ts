@@ -129,9 +129,16 @@ module TacoUtility {
 
         public static emulate(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
             platforms = platforms || null;
-            return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-                return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platforms));
-            }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
+            return CordovaWrapper.cordovaApiOrProcess(
+                (cordova: Cordova.ICordova) => {
+                    return CordovaWrapper.runOrEmulateUsingCordovaApi(cordova, commandData, false, platforms);
+                },
+
+                () => {
+                    // Note: We ignore this case and don't start livereload on it because it's going to be refactored away soon
+                    return ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))
+                }
+            );
         }
 
         public static requirements(platforms: string[]): Q.Promise<any> {
@@ -188,14 +195,14 @@ module TacoUtility {
             platforms = platforms || null;
             return CordovaWrapper.cordovaApiOrProcess(
                 (cordova: Cordova.ICordova) => {
-                    return CordovaWrapper.runUsingCordovaApi(cordova, commandData, platforms);
+                    return CordovaWrapper.runOrEmulateUsingCordovaApi(cordova, commandData, true, platforms);
                 },
 
                 () => {
                     // Note: We ignore this case and don't start livereload on it because it's going to be refactored away soon
                     return ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))
                 }
-                );
+            );
         }
 
         public static targets(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
@@ -220,14 +227,14 @@ module TacoUtility {
             return CordovaHelper.tryInvokeCordova<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
         }
 
-        private static runUsingCordovaApi(cordova: Cordova.ICordova, commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
+        private static runOrEmulateUsingCordovaApi(cordova: Cordova.ICordova, commandData: Commands.ICommandData, run: boolean, platforms?: string[]): Q.Promise<any> {
             var isLiveReload = !!commandData.options["livereload"] || !!commandData.options["devicesync"];
             return Q({}).then(function() {
                 if (isLiveReload) {
                     return CordovaWrapper.startLiveReload(cordova, commandData);
                 }
             }).then(function() {
-                return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+                return run ? cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms)) : cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platforms));
             });
         }
 
