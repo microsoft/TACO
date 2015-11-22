@@ -34,7 +34,8 @@ var tacoModules: string[] = [
     "taco-remote",
     "taco-remote-lib",
     "taco-tests-utils",
-    "taco-remote-multiplexer"
+    "taco-remote-multiplexer",
+    "taco-livereload"
 ];
 // list of CLI TACO packages 
 var tacoCliModules: string[] = [
