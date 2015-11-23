@@ -1,7 +1,7 @@
 {
     "name": "taco-remote-lib",
     "description": "Cordova-specific implementation of taco-remote's build functionality",
-    "version": "2.1.1-dev",
+    "version": "1.3.0-dev",
     "author": {
       "name": "Microsoft Corporation",
       "email": "vscordovatools-admin@microsoft.com"
