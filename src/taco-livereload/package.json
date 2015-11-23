@@ -1,46 +1,47 @@
 {
-  "name": "taco-livereload",
-  "id": "taco-livereload",
-  "version": "1.0.2",
-  "main": "lib/index.js",
-  "description": "Cordova Plugin to facilitate livereload workflow",
-  "author": "Omar Mefire <omefire@gmail.com>",
-  "license": "MIT",
-  "cordova": {
-    "id": "cordova-plugin-livereload",
-    "platforms": [
-      "android",
-      "ios"
-    ]
-  },
-  "keywords": [
-    "cordova",
-    "livereload",
-    "live-reload", 
-    "live reload", 
-    "devicesync",
-    "device-sync",   
-    "ecosystem:cordova",
-    "cordova-android",
-    "cordova-ios"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/omefire/cordova-plugin-livereload.git"
-  },
-  "dependencies": {
-    "browser-sync": "2.7.13",
-    "q": "1.0.1",
-    "elementtree": "0.1.6",
-    "underscore": "1.7.0",
-    "semver": "^4.3.x",
-    "shelljs": "0.3.0",
-    "npm": "^2.10.x",
-    "properties-parser": "0.2.3",
-    "cheerio": "0.19.0",
-    "glob": "5.0.15",
-    "lodash.merge": "3.3.2",
-    "nopt": "3.0.4",
-    "plist": "1.1.0"
-  }
+    
+    "name": "taco-livereload",
+    "description": "Module for livereload and devicesync capabilities",
+    "version": "1.0.2-dev",
+    "author": {
+        "name": "Microsoft Corporation",
+        "email": "vscordovatools-admin@microsoft.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/TACO"
+    },
+    "bugs": {
+        "url" : "https://github.com/Microsoft/TACO/issues", 
+        "email" : "vscordovatools-admin@microsoft.com"
+    },
+    "homepage": "http://taco.tools",
+    "keywords": [
+        "cordova",
+        "livereload",
+        "devicesync",
+        "browsersync"
+    ],
+    "main": "lib/index.js",
+    "preferGlobal": true,
+    "dependencies": {
+        "browser-sync": "2.7.13",
+        "q": "1.0.1",
+        "elementtree": "0.1.6",
+        "underscore": "1.7.0",
+        "semver": "^4.3.x",
+        "shelljs": "0.3.0",
+        "npm": "^2.10.x",
+        "properties-parser": "0.2.3",
+        "cheerio": "0.19.0",
+        "glob": "5.0.15",
+        "lodash.merge": "3.3.2",
+        "nopt": "3.0.4",
+        "plist": "1.1.0"
+    },
+    "scripts": {
+        "test": "mocha",
+        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
+    },
+    "license": "MIT"
 }

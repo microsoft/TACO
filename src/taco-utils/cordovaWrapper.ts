@@ -22,6 +22,7 @@ import Q = require("q");
 import semver = require("semver");
 import util = require("util");
 import livereload = require("taco-livereload");
+import os = require ("os");
 
 import commands = require("./commands");
 import errorHelper = require("./tacoErrorHelper");
@@ -280,7 +281,7 @@ module TacoUtility {
                 //          among all the run command details output.
                 cordova.on("after_run", function() {
                     if (livereload.isLiveReloadActive()) {
-                        Logger.log("\n" + "TACO Live Reload started." + "\n" + "Press CTRL+C to exit");
+                        Logger.log(os.EOL + "TACO Live Reload started." + os.EOL + "Press CTRL+C to exit");
                     }
                 });
                 

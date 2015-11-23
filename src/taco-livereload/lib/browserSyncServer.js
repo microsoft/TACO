@@ -27,7 +27,7 @@ var projectRoot;
 function BrowserSyncServer(projectRoot, options) {
     this.projectRoot = projectRoot;
     this.options = options;
-    this.browserSync = require('browser-sync').create(); // If this is exposed to users, how would they handle deps install ?
+    this.browserSync = require('browser-sync').create(); 
 };
 
 
@@ -88,7 +88,7 @@ BrowserSyncServer.prototype.startServer = function () {
     return deferred.promise;
 };
 
-// reloads all the connected browsers
+// Reloads all the connected browsers
 BrowserSyncServer.prototype.reloadBrowsers = function () {
     this.browserSync.reload();
 };
