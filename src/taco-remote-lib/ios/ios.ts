@@ -33,7 +33,6 @@ import UtilHelper = utils.UtilHelper;
 
 class IOSAgent implements ITargetPlatform {
     private nativeDebugProxyPort: number;
-    private webProxyInstance: child_process.ChildProcess = null;
     private webDebugProxyDevicePort: number;
     private webDebugProxyPortMin: number;
     private webDebugProxyPortMax: number;
@@ -230,14 +229,18 @@ class IOSAgent implements ITargetPlatform {
     }
 
     public debugBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
-        if (this.webProxyInstance) {
-            this.webProxyInstance.kill();
-            this.webProxyInstance = null;
+        if (!global.tacoRemoteLib) {
+            global.tacoRemoteLib = {};
+        }
+
+        if (global.tacoRemoteLib.webProxyInstance) {
+            global.tacoRemoteLib.webProxyInstance.kill();
+            global.tacoRemoteLib.webProxyInstance = null;
         }
 
         var portRange: string = util.format("null:%d,:%d-%d", this.webDebugProxyDevicePort, this.webDebugProxyPortMin, this.webDebugProxyPortMax);
         try {
-            this.webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
+            global.tacoRemoteLib.webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
         } catch (e) {
             res.status(404).send(resources.getStringForLanguage(req, "UnableToDebug"));
             return;
