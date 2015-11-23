@@ -216,7 +216,7 @@ describe("Kit command: ", function (): void {
         rimraf.sync(runFolder);
     });
 
-    after() => {
+    after(() => {
         process.env["TACO_UNIT_TEST"] = previous;
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
@@ -224,54 +224,42 @@ describe("Kit command: ", function (): void {
     });
 
     describe("Kit list command : ", function (): void {
-        it("'taco kit' should not throw any error", function (done: MochaDone): void {
-            kitRun()
-                .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+        it("'taco kit' should not throw any error", function (): Q.Promise<any> {
+            return kitRun()
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     var expected: TacoUtility.ICommandTelemetryProperties = { subCommand: { isPii: false, value: "list" } };
                     telemetryParameters.should.be.eql(expected);
-                    done();
-                }, function (err: tacoUtils.TacoError): void {
-                    done(err);
                 });
         });
 
-        it("'taco kit list' should not throw any error", function (done: MochaDone): void {
-            kitRun(["list"])
-                .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+        it("'taco kit list' should not throw any error", function (): Q.Promise<any> {
+            return kitRun(["list"])
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     var expected: TacoUtility.ICommandTelemetryProperties = { subCommand: { isPii: false, value: "list" } };
                     telemetryParameters.should.be.eql(expected);
-                    done();
-                }, function (err: tacoUtils.TacoError): void {
-                    done(err);
                 });
         });
 
-        it("'taco kit list --kit {kit-ID}' should not throw any error", function (done: MochaDone): void {
-            kitRun(["list", "--kit", "5.1.1-Kit"])
-                .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+        it("'taco kit list --kit {kit-ID}' should not throw any error", function (): Q.Promise<any> {
+            return kitRun(["list", "--kit", "5.1.1-Kit"])
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "list" },
                         "options.kit": { isPii: false, value: "5.1.1-Kit" }
                     };
                     telemetryParameters.should.be.eql(expected);
-                    done();
-                }, function (err: tacoUtils.TacoError): void {
-                    done(err);
                 });
         });
 
-        it("'taco kit list --json {path}' should generate the JSON", function (done: MochaDone): void {
-            kitRun(["list", "--json", tempJson])
-                .done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+        it("'taco kit list --json {path}' should generate the JSON", function (): Q.Promise<any> {
+            return kitRun(["list", "--json", tempJson])
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                     fs.existsSync(tempJson).should.be.true;
                     var expected: TacoUtility.ICommandTelemetryProperties = {
                         subCommand: { isPii: false, value: "list" },
                         "options.json": { isPii: true, value: tempJson }
                     };
                     telemetryParameters.should.be.eql(expected);
-                    done();
-                }, function (err: tacoUtils.TacoError): void {
-                    done(err);
                 });
         });
     });
