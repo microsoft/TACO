@@ -23,7 +23,7 @@ var livereloadEvents = require('./utils/events');
  *  @param options.ignore - files to ignore.
  *  @param options.tunnel - use the --tunnel option to get around firewall/proxy issues.
  *  @param options.ghostMode - sync gestures (form inputs, clicks, scrolls) across multiple devices.
- *  @param options.cb - callback function to be called when .
+ *  @param options.cb - callback function to be called when a change(file modification/addition/deletion) occurs.
  */
 module.exports.start = function (projectRoot, platforms, options) {
 
@@ -100,7 +100,7 @@ module.exports.start = function (projectRoot, platforms, options) {
                 // If user specified files/folders to ignore (via `cordova run android -- --livereload --ignore=build/**/*.*`), ignore those files
                 // ... Otherwise, don't ignore any files (That's the default). The function below achieves that goal.
                 ignored: ignoreOption || function (str) {
-                    return false; // ToDO: can we use this to return either false or the files to ignore ? => cleaner code, with no external handling of ignoreOption
+                    return false; 
                 },
 
                 // Ignore the initial add events .
