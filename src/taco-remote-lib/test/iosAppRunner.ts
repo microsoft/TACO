@@ -32,9 +32,10 @@ interface IMockDebuggerProxy extends net.Server {
 // Tests for lib/darwin/darwinAppRunner.js functionality
 describe("Device functionality", function (): void {
     // Check that when the debugger behaves nicely, we do as well
-    var port: number = 12345;
     it("should complete the startup sequence when the debugger is well behaved", function (done: MochaDone): void {
+        var port: number = 12345;
         var appPath: string = "/private/var/mobile/Applications/042F57CA-9717-4655-8349-532093FFCF44/BlankCordovaApp1.app";
+
         var encodedAppPath: string = "2F707269766174652F7661722F6D6F62696C652F4170706C69636174696F6E732F30343246353743412D393731372D343635352D383334392D3533323039334646434634342F426C616E6B436F72646F7661417070312E617070";
         encodedAppPath.should.equal(runner.encodePath(appPath));
 
@@ -101,11 +102,15 @@ describe("Device functionality", function (): void {
             Logger.log("MockDebuggerProxy listening");
         });
 
-        Q.timeout(runner.startAppViaDebugger(port, appPath, 5000), 1000).done(() => done(), done);
+        Q.timeout(runner.startAppViaDebugger(port, appPath, 5000), 1000)
+            .done(function (): void {
+            done();
+        }, done);
     });
 
     // Check that when the debugger reports an error, we notice it
     it("should report an error if the debugger fails for some reason", function (done: MochaDone): void {
+        var port: number = 12345;
         var appPath: string = "/private/var/mobile/Applications/042F57CA-9717-4655-8349-532093FFCF44/BlankCordovaApp1.app";
 
         var encodedAppPath: string = "2F707269766174652F7661722F6D6F62696C652F4170706C69636174696F6E732F30343246353743412D393731372D343635352D383334392D3533323039334646434634342F426C616E6B436F72646F7661417070312E617070";
@@ -174,10 +179,11 @@ describe("Device functionality", function (): void {
             Logger.log("MockDebuggerProxy listening");
         });
 
-        Q.timeout(runner.startAppViaDebugger(port, appPath, 5000), 1000).then(function (): void {
-            throw new Error("Starting the app should have failed!");
+        Q.timeout(runner.startAppViaDebugger(port, appPath, 5000), 1000).done(function (): void {
+            done(new Error("Starting the app should have failed!"));
         }, function (err: any): void {
-            err.should.equal("UnableToLaunchApp");
-        }).done(() => done(), done);
+                err.should.equal("UnableToLaunchApp");
+                done();
+            });
     });
 });
