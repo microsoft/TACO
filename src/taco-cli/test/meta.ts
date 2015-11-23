@@ -46,7 +46,6 @@ interface ICommandInfo {
     };
 }
 
-describe("taco meta command tests: ", function (): void {
     // Command list
     var commandsJsonPath: string = path.resolve(__dirname, "..", "cli", "commands.json");
     fs.existsSync(commandsJsonPath).should.be.true;
@@ -88,22 +87,22 @@ describe("taco meta command tests: ", function (): void {
         return version.run(commandData);
     };
 
+describe("taco meta command tests: ", function (): void {
+
     // Run help for a cordova command not overriden by taco - ex, "info"
-    describe("taco", function (): void {
-        it("help info executes with no error", function (done: MochaDone): void {
+   it("taco help info executes with no error", function (done: MochaDone): void {
             runHelp("info").then(function (): void {
                 done();
             }, function (err: tacoUtils.TacoError): void {
                 done(err);
             });
-        });
     });
 
     // Run taco command with valid and invalid options
     describe("taco command", function (): void {
-        this.timeout(10000);
         tacoValidArgs.forEach(function (optionString: string[]): void {
             it("with options " + optionString + " executes with no error", function (done: MochaDone): void {
+                this.timeout(10000);
                 Taco.runWithArgs(optionString).then(function (): void {
                     done();
                 }, function (err: tacoUtils.TacoError): void {
@@ -114,6 +113,7 @@ describe("taco meta command tests: ", function (): void {
 
         tacoInvalidArgs.forEach(function (optionString: string[]): void {
             it("with invalid options " + optionString + " executes with expected error", function (done: MochaDone): void {
+                this.timeout(10000);
                 Taco.runWithArgs(optionString).then(function (): void {
                     done(new Error("Passing Invalid options to \'taco\' should have failed"));
                 }, function (err: any): void {
@@ -128,13 +128,11 @@ describe("taco meta command tests: ", function (): void {
     });
 
     // Run taco version command
-    describe("taco version command", function (): void {
-        it("should execute without an error", function (done: MochaDone): void {
+    it("taco version command should execute without an error", function (done: MochaDone): void {
             runVersion().then(function (): void {
                 done();
             }, function (err: tacoUtils.TacoError): void {
                 done(err);
             });
         });
-    });
 });
