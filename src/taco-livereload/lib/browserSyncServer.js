@@ -96,7 +96,7 @@ BrowserSyncServer.prototype.reloadBrowsers = function () {
 // Either reloads the whole file (e.g: html)
 // ... or injects changes into the file (e.g: css)
 // ... the strategy used depends on the file type
-BrowserSyncServer.prototype.reloadFile = function (file) {
+BrowserSyncServer.prototype.tryReloadingFile = function (file) {
     this.browserSync.reload(file);
 };
 

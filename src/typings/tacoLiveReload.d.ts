@@ -38,7 +38,10 @@ declare module TacoLiveReload {
     //   - Reload all connected browsers
     //   - Reload a changed file (if possible, otherwise it reloads all connected browsers)
     export interface LiveReloadHandle {
-        reloadFile(file?: string): Q.Promise<any>;
+        
+        // Tries to reload only this file if possible (e.g: .css)
+        // ... Otherwise, it will reload the whole application (e.g: .html)
+        tryReloadingFile(file?: string): Q.Promise<any>;
         stop(): void;
         reloadBrowsers(): Q.Promise<any>;
     }
