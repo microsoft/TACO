@@ -128,7 +128,7 @@ class IOSAgent implements ITargetPlatform {
                 archive.on("error", function (err: Error): void {
                     return deferred.reject(err);
                 });
-                archive.on("end", function() {
+                outputStream.on("finish", function() {
                     return deferred.resolve({});
                 });
                 
@@ -146,7 +146,7 @@ class IOSAgent implements ITargetPlatform {
                 archive.on("error", function (err: Error): void {
                     return deferred.reject(err);
                 });
-                archive.on("end", function() {
+                outputStream.on("finish", function() {
                     return deferred.resolve({});
                 });
                 
