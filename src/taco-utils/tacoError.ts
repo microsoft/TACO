@@ -50,7 +50,7 @@ module TacoUtility {
         }
 
         public static getWarning(errorToken: string, resources: ResourceManager, ...optionalArgs: string[]): TacoError {
-            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+            var message: string = resources.getString(errorToken, ...optionalArgs);
 
             // We do not use an error code for Warnings
             var warning = new TacoError(0, errorToken, message);
@@ -64,22 +64,8 @@ module TacoUtility {
         }
 
         public static wrapError(innerError: Error, errorToken: string, errorCode: number, resources: ResourceManager, ...optionalArgs: any[]): TacoError {
-            var message: string = TacoError.getMessageString(errorToken, resources, optionalArgs);
+            var message: string = resources.getString(errorToken, ...optionalArgs);
             return new TacoError(errorCode, errorToken, message, innerError);
-        }
-
-        private static getMessageString(errorToken: string, resources: ResourceManager, args: string[]): string {
-            var message: string = null;
-            if (args.length > 0) {
-                assert(errorToken, "We should have an error token if we intend to use args");
-                if (errorToken) {
-                    message = resources.getString(errorToken, args);
-                }
-            } else {
-                message = resources.getString(errorToken);
-            }
-
-            return message;
         }
 
         public toString(): string {
