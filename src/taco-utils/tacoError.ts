@@ -76,7 +76,7 @@ module TacoUtility {
                     message = resources.getString(errorToken, args);
                 }
             } else {
-                message = errorToken;
+                message = resources.getString(errorToken);
             }
 
             return message;
