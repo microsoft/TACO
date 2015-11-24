@@ -82,7 +82,7 @@ module.exports.start = function (projectRoot, platforms, options) {
                     var externalAPI = {
                         stop: bs.stopServer,
                         reloadBrowsers: bs.reloadBrowsers,
-                        reloadFile: bs.reloadFile,
+                        tryReloadingFile: bs.tryReloadingFile,
                         browserSync: bs.browserSync
                     };
 
