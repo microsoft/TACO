@@ -11,7 +11,7 @@
 var livereload = require('./livereload');
 var helpers = require('./utils/helpers');
 
-module.exports = require('./livereload');
+module.exports = livereload;
 module.exports.Patcher = require('./utils/Patcher');
 module.exports.on = function () {
 	var livereloadEvents = require('./utils/events');
