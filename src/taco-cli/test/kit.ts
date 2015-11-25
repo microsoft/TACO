@@ -262,6 +262,23 @@ describe("Kit command: ", function (): void {
                     telemetryParameters.should.be.eql(expected);
                 });
         });
+
+        it("'taco kit list should work for a project UTF16 taco.json", function (): Q.Promise<any> {
+            var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
+            var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
+            // Create a kit project, modify taco.json encoding and run taco kit list
+            return createKitProject("5.1.1-Kit")
+                .then(function(): Q.Promise<any> {
+                    // change the encoding to UTF 16
+                    var tacoJsonContents: string = fs.readFileSync(tacoJsonPath).toString();
+                    fs.writeFileSync(tacoJsonPath, new Buffer(tacoJsonContents, "utf16le"));
+                    return kitRun(["list"]);
+                })
+                .then((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+                    var expected: TacoUtility.ICommandTelemetryProperties = { subCommand: { isPii: false, value: "list" } };
+                    telemetryParameters.should.be.eql(expected);
+                });
+        });
     });
 
     describe("Kit project to a cli project: ", function (): void {
