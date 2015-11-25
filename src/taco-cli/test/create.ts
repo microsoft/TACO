@@ -46,7 +46,6 @@ import TemplateManager = require ("../cli/utils/templateManager");
 import tacoTestsUtils = require ("taco-tests-utils");
 
 import IKeyValuePair = tacoTestUtils.IKeyValuePair;
-import TacoKitsErrorCodes = TacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 import MemoryStream = tacoTestsUtils.MemoryStream;
@@ -351,14 +350,14 @@ describe("taco create", function (): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit).done(() => done(), done);
+            runFailureScenario<TacoKits.TacoErrorCode>(scenario, TacoKits.TacoErrorCode.TacoKitsExceptionInvalidKit).done(() => done(), done);
         });
 
         it("Failure scenario 2 [path, template (unknown value)]", function (done: MochaDone): void {
             // If a template is not found, create command should fail with an appropriate message
             var scenario: number = 2;
 
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidTemplate).done(() => done(), done);
+            runFailureScenario<TacoKits.TacoErrorCode>(scenario, TacoKits.TacoErrorCode.TacoKitsExceptionInvalidTemplate).done(() => done(), done);
         });
 
         it("Failure scenario 3 [path, kit, template, copy-from]", function (done: MochaDone): void {
