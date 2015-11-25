@@ -39,7 +39,6 @@ import wrench = require ("wrench");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
-import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 import tacoTestUtils = require ("taco-tests-utils");
 
@@ -47,7 +46,7 @@ import TemplateManager = require ("../cli/utils/templateManager");
 import tacoTestsUtils = require ("taco-tests-utils");
 
 import IKeyValuePair = tacoTestUtils.IKeyValuePair;
-import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
+import TacoKitsErrorCodes = TacoKits.TacoErrorCode;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 import MemoryStream = tacoTestsUtils.MemoryStream;
