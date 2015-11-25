@@ -27,6 +27,21 @@ describe("taco Errors in taco-utils", function (): void {
         var testError = tacoError.TacoError.getError("MessageWithArgs", 10, testResourceManager, "foo", "bar", "baz");
         should(testError.message).equal(testResourceManager.getString("MessageWithArgs", "foo", "bar", "baz"));
     });
+
+    it("getError() should return an error with the correct message for errors that have no placeholders", function (): void {
+        var testResourceManager = new resourceManager.ResourceManager(path.join(__dirname, "resources"), "en");
+        var testError = tacoError.TacoError.getError("SimpleMessage", 10, testResourceManager);
+        should(testError.message).equal(testResourceManager.getString("SimpleMessage"));
+    });
+
+    it("wrapError() should return an error and inner error with the correct messages for errors that have no placeholders", function (): void {
+        var innerErrorString: string = "Inner error";
+        var testResourceManager = new resourceManager.ResourceManager(path.join(__dirname, "resources"), "en");
+        var innerError: Error = new Error(innerErrorString);
+        var testError = tacoError.TacoError.wrapError(innerError, "SimpleMessage", 10, testResourceManager);
+        should(testError.message).equal(testResourceManager.getString("SimpleMessage"));
+        should((<any>testError).innerError.message).equal(innerErrorString);
+    });
 });
 
     // FOLLOWING CODE IS COPIED FROM taco-tests-utils\tacoErrorTestHelper
