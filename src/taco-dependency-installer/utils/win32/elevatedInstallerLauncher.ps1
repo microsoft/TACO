@@ -4,7 +4,7 @@ $pinfo.FileName = "node.exe"
 $pinfo.UseShellExecute = $true
 $pinfo.WindowStyle = "Hidden"
 $pinfo.Verb = "RunAs"
-$pinfo.Arguments = "$args
+$pinfo.Arguments = "$args"
 
 $p = New-Object System.Diagnostics.Process
 $p.StartInfo = $pinfo
