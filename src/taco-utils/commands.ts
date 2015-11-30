@@ -50,14 +50,19 @@ module TacoUtility {
          */
         export interface ICommand {
             name: String;
-            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+            run(args: string[]): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
+        }
+
+        export interface ISubCommand<T extends ICommand> {
+            name: String;
+            canHandleArgs?(command: ICommand, data: ICommandData): boolean;
+            run(command: ICommand, data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
         }
 
         export class TacoCommandBase implements ICommand {
             public name: string;
-            public executedSubcommand: ICommand;
-            public subcommands: ICommand[];
+            public subcommands: ISubCommand<TacoCommandBase>[];
             public info: ICommandInfo;
             public data: ICommandData;
 
@@ -77,36 +82,49 @@ module TacoUtility {
                 throw errorHelper.get(TacoErrorCodes.AbstractMethod);
             }
 
+            public run(args: string[]): Q.Promise<ICommandTelemetryProperties> {
+                try {
+                    this.data = this.parseArgs(args);
+                    return this.runCommand(this.data);
+                } catch (err) {
+                    return Q.reject<ICommandTelemetryProperties>(err);
+                }
+            }
+
             /**
              * Concrete implementation of ICommand's run
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
-            public run(data: ICommandData): Q.Promise<any> {
-                var deferred: Q.Deferred<any> = Q.defer();
-                this.data = this.parseArgs(data.original);
-
+            protected runCommand(data: ICommandData): Q.Promise<ICommandTelemetryProperties> {
                 // Determine which subcommand we are executing
-                this.executedSubcommand = this.getSubCommand(this.data);
-                if (this.executedSubcommand) {
-                    return this.executedSubcommand.run(this.data).then((telemetryProperties: telemetryHelper.ICommandTelemetryProperties) => {
-                        telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(this.executedSubcommand.name, /*isPii*/ false);
-                        return telemetryProperties;
-                    });
-                } else {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
+                var subCommand = this.getSubCommand(this.data);
+                if (subCommand) {
+                    return subCommand.run(this, this.data)
+                        .then((telemetryProperties: telemetryHelper.ICommandTelemetryProperties) => {
+                            telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(subCommand.name, /*isPii*/ false);
+                            return telemetryProperties;
+                        });
                 }
-
-                return deferred.promise;
+                return Q.reject<ICommandTelemetryProperties>(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
             }
 
             public resolveAlias(subCommand: string): string {
                 return (this.info.aliases && this.info.aliases[subCommand]) ? this.info.aliases[subCommand] : subCommand;
             }
 
-            private getSubCommand(options: ICommandData): ICommand {
+            private getSubCommand(options: ICommandData): ISubCommand<ICommand> {
+                // first do a simple name match
                 for (var i: number = 0; i < this.subcommands.length; ++i) {
-                    var subCommand: ICommand = this.subcommands[i];
-                    if (subCommand.canHandleArgs(options)) {
+                    var name: string = options.remain[0];
+                    if (name && this.resolveAlias(name) === this.subcommands[i].name) {
+                        return this.subcommands[i];
+                    }
+                }
+                // if subcommand has specified a canHandleArgs, check if there is a subcommand
+                // which can handle the args
+                for (var i: number = 0; i < this.subcommands.length; ++i) {
+                    var subCommand: ISubCommand<ICommand> = this.subcommands[i];
+                    if (subCommand.canHandleArgs && subCommand.canHandleArgs(this, options)) {
                         return subCommand;
                     }
                 }
@@ -166,9 +184,8 @@ module TacoUtility {
                 var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
                 if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
                     return moduleInstance;
-                } else {
-                    return null;
                 }
+                return null;
             }
         }
     }

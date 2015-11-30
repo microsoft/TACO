@@ -137,16 +137,9 @@ describe("taco create", function (): void {
         return path.join(runFolder, suitePrefix + scenario);
     }
 
-    function makeICommandData(scenario: number, scenarioList: IScenarioList): tacoUtils.Commands.ICommandData {
-        // Get the scenario's command line
-        var args: string[] = scenarioList[scenario].split(" ");
-
-        // Build and return the ICommandData object
-        return {
-            options: {},
-            original: args,
-            remain: []
-        };
+    function createProject(scenario: number, scenarioList: IScenarioList): Q.Promise<any> {
+        var create: ICommand = CommandHelper.getCommand("create");
+        return create.run(scenarioList[scenario].split(" "));
     }
 
     function countProjectItemsRecursive(projectPath: string): number {
@@ -172,9 +165,7 @@ describe("taco create", function (): void {
     }
 
     function runScenarioWithExpectedFileCount(scenario: number, expectedFileCount: number, tacoJsonFileContents?: IKeyValuePair<string>): Q.Promise<any> {
-        var create: ICommand = CommandHelper.getCommand("create");
-
-        return create.run(makeICommandData(scenario, successScenarios))
+        return createProject(scenario, successScenarios)
             .then(function (): void {
                 var projectPath: string = getProjectPath(successPrefix, scenario);
                 var fileCount: number = countProjectItemsRecursive(projectPath);
@@ -197,9 +188,7 @@ describe("taco create", function (): void {
     }
 
     function runFailureScenario<T>(scenario: number, expectedErrorCode?: T): Q.Promise<any> {
-        var create: ICommand = CommandHelper.getCommand("create");
-
-        return create.run(makeICommandData(scenario, failureScenarios))
+        return createProject(scenario, failureScenarios)
             .then(function (): Q.Promise<any> {
                 throw new Error("Scenario succeeded when it should have failed");
             }, function (err: tacoUtils.TacoError): Q.Promise<any> {
@@ -466,13 +455,8 @@ describe("taco create", function (): void {
             // Some messages are only printed the first time something is executed. When we run all the tests
             // all those messages don't get printed, but if we only run the onboarding tests, they are the first
             // tests to run, so they do get printed. We accept both options and we validate we got one of them
-            var commandData: tacoUtils.Commands.ICommandData = {
-                options: {},
-                original: createCommandLineArguments,
-                remain: createCommandLineArguments.slice()
-            };
             var create: ICommand = CommandHelper.getCommand("create");
-            create.run(commandData).done(() => {
+            create.run(createCommandLineArguments).done(() => {
                 var expected : string = expectedMessages.join("\n");
 
                 var actual: string = colors.strip(memoryStdout.contentsAsText()); // We don't want to compare the colors
@@ -643,14 +627,9 @@ describe("taco create", function (): void {
 
         function createProjectAndVerifyTelemetryProps(args: string[], expectedProperties: TacoUtility.ICommandTelemetryProperties, done: MochaDone): void {
             var create: ICommand = CommandHelper.getCommand("create");
-            var commandData: tacoUtils.Commands.ICommandData = {
-                options: {},
-                original: args,
-                remain: args.slice()
-            };
 
             // Create a dummy test project with no platforms added
-            create.run(commandData).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
+            create.run(args).done((telemetryParameters: TacoUtility.ICommandTelemetryProperties) => {
                 telemetryParameters.should.be.eql(expectedProperties);
                 done();
             }, done);

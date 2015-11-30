@@ -29,10 +29,14 @@ class Version extends commands.TacoCommandBase {
         return true;
     }
 
+    public parseArgs(args: string[]): commands.ICommandData {
+        return { options: {}, original: [], remain: [] };
+    }
+
     /**
      * entry point for printing version
      */
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(data: commands.ICommandData): Q.Promise<any> {
         this.printTacoVersion();
         return Q({});
     }

@@ -46,13 +46,7 @@ describe("help for remotebuild", function (): void {
     var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
-        var data: ICommandData = {
-            options: {},
-            original: [command],
-            remain: [command]
-        };
-
-        return help.run(data);
+        return help.run([command]);
     };
 
     function testHelpForCommand(command: string, expectedLines: string[], done: MochaDone): void {

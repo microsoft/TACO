@@ -49,13 +49,7 @@ import TestProjectHelper = TacoTestUtility.ProjectHelper;
 
 function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
         var kit: ICommand = CommandHelper.getCommand("kit");
-        var data: commands = {
-            options: {},
-            original: args,
-            remain: args
-        };
-
-        return kit.run(data);
+        return kit.run(args);
     }
 
     var previous: boolean;
@@ -96,11 +90,7 @@ function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryPro
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         return Q.denodeify(del)(projectDir).then(function (): Q.Promise<any> {
-            return create.run({
-                options: {},
-                original: args,
-                remain: args
-            });
+            return create.run(args);
         }).then(function (): void {
             var projectPath: string = path.join(tacoHome, projectDir);
             process.chdir(projectPath);
@@ -117,20 +107,12 @@ function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryPro
 
     function platformRun(args: string[]): Q.Promise<any> {
         var platform: ICommand = CommandHelper.getCommand("platform");
-        return platform.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return platform.run(args);
     }
 
     function pluginRun(args: string[]): Q.Promise<any> {
         var plugin: ICommand = CommandHelper.getCommand("plugin");
-        return plugin.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return plugin.run(args);
     }
 
     function addPlatformToProject(platfromName: string, projectPath: string): Q.Promise<any> {

@@ -73,16 +73,13 @@ class Taco {
             new CheckForNewerVersion().showOnExitAndIgnoreFailures();
 
             var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
-            var commandProperties: ICommandTelemetryProperties = {};
 
             Taco.runWithParsedArgs(parsedArgs)
                 .then(function (telemetryProperties: ICommandTelemetryProperties): void {
                     if (parsedArgs.command) {
-                        commandProperties = telemetryProperties;
+                        // Send command success telemetry
+                        telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, telemetryProperties, parsedArgs.args);
                     }
-                }).then(function (): void {
-                    // Send command success telemetry
-                    telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
                 }, function (reason: any): any {
                     // set exit code to report error
                     process.on("exit", function (): void { process.exit(1); });
@@ -128,28 +125,27 @@ class Taco {
      */
     public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<ICommandTelemetryProperties> {
         return Q({})
-            .then(function (): Q.Promise<any> {
+            .then(function(): Q.Promise<any> {
                 ProjectHelper.cdToProjectRoot();
 
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
-                    var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
-                    return parsedArgs.command.run(commandData);
-                } else {
-                    logger.logWarning(resources.getString("TacoCommandPassthrough"));
-
-                    var routeToCordovaEvent: telemetry.TelemetryEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
-                    telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
-                    return CordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
-                        routeToCordovaEvent.properties["success"] = "true";
-                        telemetry.send(routeToCordovaEvent);
-                        return Q(output);
-                    }, function (reason: any): any {
-                        routeToCordovaEvent.properties["success"] = "false";
-                        telemetry.send(routeToCordovaEvent);
-                        return Q.reject(reason);
-                    });
+                    return parsedArgs.command.run(parsedArgs.args);
                 }
+
+                logger.logWarning(resources.getString("TacoCommandPassthrough"));
+                var routeToCordovaEvent: telemetry.TelemetryEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
+                telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
+                return CordovaWrapper.cli(parsedArgs.args).then(function(output: any): any {
+                    routeToCordovaEvent.properties["success"] = "true";
+                    telemetry.send(routeToCordovaEvent);
+                    return Q(output);
+                }, function(reason: any): any {
+                    routeToCordovaEvent.properties["success"] = "false";
+                    telemetry.send(routeToCordovaEvent);
+                    return Q.reject(reason);
+                });
+
             });
     }
 

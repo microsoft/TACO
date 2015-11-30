@@ -721,7 +721,7 @@ class Kit extends commands.TacoCommandBase {
         });
     }
 
-    private static select(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private select(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var kitId: string = commandData.options["kit"];
         var cli: string = commandData.options["cordova"];
         var projectInfo: IProjectInfo;
@@ -760,7 +760,7 @@ class Kit extends commands.TacoCommandBase {
         }).then(() => Kit.generateTelemetryProperties(commandData));
     }
 
-    private static list(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private list(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         logger.logLine();
         var kitId: string = commandData.options["kit"];
         var jsonPath: any = commandData.options["json"];
@@ -779,22 +779,20 @@ class Kit extends commands.TacoCommandBase {
 
     /* tslint:disable:member-ordering */
     // tslint doesn't handle this case and considers subcommands as member function
-    public subcommands: commands.ICommand[] = [
+    public subcommands: commands.ISubCommand<Kit>[] = [
         {
             // List kits
             name: "list",
-            run: Kit.list,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "list";
+            run: (command, commandData) => command.list(commandData),
+            canHandleArgs: (command, commandData) => {
+                var subCommand: string = commandData.remain[0];
+                return !subCommand || command.resolveAlias(subCommand) === this.name;
             }
         },
         {
             // Change kit or CLI
             name: "select",
-            run: Kit.select,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
-                return !commandData.remain[0] || commandData.remain[0] && commandData.remain[0].toLowerCase() === "select";
-            }
+            run: (command, commandData) => command.select(commandData)
         },
     ];
     /* tslint:enable:member-ordering */

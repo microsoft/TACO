@@ -53,17 +53,13 @@ describe("taco emulate", function (): void {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
-        return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
+        return Q.denodeify(del)("example").then(function(): Q.Promise<any> {
             var args: string[] = ["example", "--cordova", vcordova];
-            return create.run({
-                options: {},
-                original: args,
-                remain: args
-            });
+            return create.run(args);
         })
-            .then(function (): void {
-            process.chdir(path.join(tacoHome, "example"));
-        });
+            .then(function(): void {
+                process.chdir(path.join(tacoHome, "example"));
+            });
     }
 
     before(function (mocha: MochaDone): void {
@@ -110,11 +106,7 @@ describe("taco emulate", function (): void {
 
     var emulateRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
         var emulate: ICommand = CommandHelper.getCommand("emulate");
-        return emulate.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return emulate.run(args);
     };
 
     describe("telemetry", () => {

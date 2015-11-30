@@ -63,11 +63,11 @@ class Run extends commands.TacoCommandBase {
         return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Run.KNOWN_OPTIONS, commandData);
     }
 
-    private static targets(commandData: commands.ICommandData): Q.Promise<any> {
+    private targets(commandData: commands.ICommandData): Q.Promise<any> {
         return CordovaWrapper.targets(commandData);
     }
 
-    private static remote(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private remote(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
@@ -157,12 +157,12 @@ class Run extends commands.TacoCommandBase {
         });
     }
 
-    private static local(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private local(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         return CordovaWrapper.run(commandData)
             .then(() => Run.generateTelemetryProperties({}, commandData));
     }
 
-    private static fallback(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private fallback(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
@@ -177,36 +177,36 @@ class Run extends commands.TacoCommandBase {
 
     /* tslint:disable:member-ordering */
     // tslint doesn't handle this case and considers subcommands as member function
-    public subcommands: commands.ICommand[] = [
+    public subcommands: commands.ISubCommand<Run>[] = [
         {
             // --list = targets
             name: "targets",
-            run: Run.targets,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
+            run: (command, commandData) => command.targets(commandData),
+            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
                 return !!commandData.options["list"];
             }
         },
         {
             // Remote Run
             name: "remote",
-            run: Run.remote,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
+            run: (command, commandData) => command.remote(commandData),
+            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
                 return !!commandData.options["remote"];
             }
         },
         {
             // Local Run
             name: "local",
-            run: Run.local,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
+            run: (command, commandData) => command.local(commandData),
+            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
                 return !!commandData.options["local"];
             }
         },
         {
             // Fallback
             name: "fallback",
-            run: Run.fallback,
-            canHandleArgs(commandData: commands.ICommandData): boolean {
+            run: (command, commandData) => command.fallback(commandData),
+            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
                 return true;
             }
         }

@@ -70,13 +70,26 @@ class Create extends commands.TacoCommandBase {
 
     private commandParameters: ICreateParameters;
 
-    public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        try {
-            this.parseArguments(data);
-            this.verifyArguments();
-        } catch (err) {
-            return Q.reject<ICommandTelemetryProperties>(err);
-        }
+    public parseArgs(args: string[]): commands.ICommandData {
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KNOWN_OPTIONS, Create.SHORT_HANDS, args, 0);
+        var cordovaParams: Cordova.ICordovaCreateParameters = {
+            projectPath: commandData.remain[0],
+            appId: commandData.remain[1] ? commandData.remain[1] : Create.DEFAULT_APP_ID,
+            appName: commandData.remain[2] ? commandData.remain[2] : Create.DEFAULT_APP_NAME,
+            cordovaConfig: commandData.remain[3],
+            copyFrom: commandData.options["copy-from"],
+            linkTo: commandData.options["link-to"]
+        };
+
+        this.commandParameters = {
+            cordovaParameters: cordovaParams,
+            data: commandData
+        };
+        this.verifyArguments();
+        return commandData;
+    }
+
+    protected runCommand(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
 
         var self: Create = this;
         var templateDisplayName: string;
@@ -128,23 +141,6 @@ class Create extends commands.TacoCommandBase {
 
             return Q.resolve(telemetryHelper.addPropertiesFromOptions(telemetryProperties, Create.KNOWN_OPTIONS, self.commandParameters.data.options, ["cordova", "kit", "template"]));
         });
-    }
-
-    private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Create.KNOWN_OPTIONS, Create.SHORT_HANDS, args.original, 0);
-        var cordovaParams: Cordova.ICordovaCreateParameters = {
-            projectPath: commandData.remain[0],
-            appId: commandData.remain[1] ? commandData.remain[1] : Create.DEFAULT_APP_ID,
-            appName: commandData.remain[2] ? commandData.remain[2] : Create.DEFAULT_APP_NAME,
-            cordovaConfig: commandData.remain[3],
-            copyFrom: commandData.options["copy-from"],
-            linkTo: commandData.options["link-to"]
-        };
-
-        this.commandParameters = {
-            cordovaParameters: cordovaParams,
-            data: commandData
-        };
     }
 
     /**

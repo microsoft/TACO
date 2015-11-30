@@ -37,7 +37,7 @@ class Help extends HelpCommandBase {
         this.remotebuildConf = remotebuildConf;
     }
 
-    public run(data: ICommandData): Q.Promise<any> {
+    public run(args: string[]): Q.Promise<any> {
         var baseRun: any = super.run.bind(this);
         var self: Help = this;
 
@@ -45,9 +45,9 @@ class Help extends HelpCommandBase {
         return Q({})
             .then(function (): Q.Promise<void> {
                 var commands: any = require("./commands.json").commands;
-                var topic: string = data.remain[0];
+                var topic: string = args[0];
                 if (!topic || commands[topic]) {
-                    return baseRun(data);
+                    return baseRun(args);
                 }
 
                 var moduleConfig: RemoteBuild.IServerModuleConfiguration = self.remotebuildConf.moduleConfig(topic);
