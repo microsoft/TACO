@@ -175,8 +175,6 @@ class Run extends commands.TacoCommandBase {
         }).then(() => Run.generateTelemetryProperties(telemetryProperties, commandData));
     }
 
-    /* tslint:disable:member-ordering */
-    // tslint doesn't handle this case and considers subcommands as member function
     public subcommands: commands.ISubCommand[] = [
         {
             // --list = targets
@@ -203,7 +201,6 @@ class Run extends commands.TacoCommandBase {
             canHandleArgs: commandData => true
         }
     ];
-    /* tslint:enable:member-ordering */
 
     /**
      * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI

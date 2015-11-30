@@ -777,8 +777,6 @@ class Kit extends commands.TacoCommandBase {
         return result.then(() => Kit.generateTelemetryProperties(commandData));
     }
 
-    /* tslint:disable:member-ordering */
-    // tslint doesn't handle this case and considers subcommands as member function
     public subcommands: commands.ISubCommand[] = [
         {
             // Change kit or CLI
@@ -792,7 +790,6 @@ class Kit extends commands.TacoCommandBase {
             canHandleArgs: commandData => true
         }
    ];
-    /* tslint:enable:member-ordering */
 
     public parseArgs(args: string[]): commands.ICommandData {
         var parsedOptions: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Kit.KNOWN_OPTIONS, Kit.SHORT_HANDS, args, 0);
