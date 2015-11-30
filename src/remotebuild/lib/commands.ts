@@ -53,7 +53,7 @@ class Commands {
                 Logger.logError(resources.getString("UnknownCommand", subCommand));
                 var topic: string = "certificates";
                 var help: Help = new Help(config);
-                return help.run({ options: {}, original: [topic], remain: [topic] });
+                return help.run([topic]);
             }
         },
         saveconfig: {

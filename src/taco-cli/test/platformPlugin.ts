@@ -257,11 +257,7 @@ describe("taco platform for kit", function(): void {
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         return Q.denodeify(del)(projectDir).then(function(): Q.Promise<any> {
-            return createCommand.run({
-                options: {},
-                original: args,
-                remain: args
-            });
+            return createCommand.run(args);
         }).then(function(): void {
             var projectPath: string = path.join(tacoHome, projectDir);
             process.chdir(projectPath);
@@ -278,19 +274,11 @@ describe("taco platform for kit", function(): void {
     }
 
     function platformRun(args: string[]): Q.Promise<any> {
-        return platformCommand.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return platformCommand.run(args);
     }
 
     function pluginRun(args: string[]): Q.Promise<any> {
-        return pluginCommand.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return pluginCommand.run(args);
     }
 
     function sleep(milliseconds: number): Q.Promise<any> {

@@ -123,11 +123,7 @@ describe("taco PlatformHelper", function (): void {
         utils.createDirectoryIfNecessary(tacoHome);
         process.chdir(tacoHome);
         Q.denodeify(del)("example").then(function (): Q.Promise<any> {
-            return create.run({
-                options: {},
-                original: ["example"],
-                remain: []
-            });
+            return create.run(["example"]);
         }).then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
             fs.mkdirSync(path.join("platforms", "android"));

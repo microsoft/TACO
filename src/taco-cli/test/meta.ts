@@ -59,32 +59,12 @@ interface ICommandInfo {
 
     function runHelp(command: string): Q.Promise<any> {
         var help: ICommand = CommandHelper.getCommand("help");
-
-        // Construct CommandData and pass it as argument
-        var original: string[] = [];
-        var remain: string[] = [];
-
-        original.push(command);
-        remain.push(command);
-
-        var commandData: tacoUtils.Commands.ICommandData = {
-            options: {},
-            original: original,
-            remain: remain
-        };
-
-        return help.run(commandData);
+        return help.run([command]);
     };
 
     function runVersion(): Q.Promise<any> {
         var version: Version = new Version();
-
-        var commandData: tacoUtils.Commands.ICommandData = {
-            options: {},
-            original: [],
-            remain: []
-        };
-        return version.run(commandData);
+        return version.run([]);
     };
 
 describe("taco meta command tests: ", function (): void {

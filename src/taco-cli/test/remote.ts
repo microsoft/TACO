@@ -81,7 +81,7 @@ describe("taco remote", function(): void {
     });
 
     var remoteRun: (args: string[]) => Q.Promise<any> = function(args: string[]): Q.Promise<any> {
-        return remote.run(makeICommandData(args));
+        return remote.run(args);
     };
 
     it("should save in the expected format", function(mocha: MochaDone): void {

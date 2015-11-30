@@ -291,7 +291,8 @@ module BuildAndRunTelemetryTests {
             (typeof telemetryProperties === "undefined").should.be.equal(false);
             validateGzipedSize(telemetryProperties, "ios", iosExpectedGzipedSize);
             validateGzipedSize(telemetryProperties, "android", androidGzipSize);
-            telemetryProperties.should.eql(expected); // We are comparing the objects, after overriding the sizes with the expected values
+
+            telemetryProperties.should.containEql(expected); // We are comparing the objects, after overriding the sizes with the expected values
         }
 
         beforeEach((done: MochaDone) => {
@@ -325,8 +326,7 @@ module BuildAndRunTelemetryTests {
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "options.local": { isPii: false, value: "true" },
                 "options.release": { isPii: false, value: "true" },
-                "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
-                subCommand: { isPii: false, value: commandSwitch("build", "local", "emulate") }
+                "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" }
             };
 
             if ((command === Command.Build)) {
@@ -365,7 +365,6 @@ module BuildAndRunTelemetryTests {
                 "options.target": { isPii: false, value: "ipad 2" },
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "ios" },
-                subCommand: { isPii: false, value: commandSwitch("build", "remote", "emulate") },
                 "platforms.remote.ios.is_secure": { isPii: false, value: "false" },
                 "remoteBuild.ios.filesChangedCount": { isPii: false, value: 8 },
                 "remoteBuild.ios.wasIncremental": { isPii: false, value: "true" },
@@ -392,7 +391,6 @@ module BuildAndRunTelemetryTests {
                 "platforms.actuallyBuilt.remote2": { isPii: false, value: "ios" },
                 "platforms.requestedViaCommandLine.remote1": { isPii: false, value: "android" },
                 "platforms.requestedViaCommandLine.remote2": { isPii: false, value: "ios" },
-                subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") },
                 "platforms.remote.android.is_secure": { isPii: false, value: "false" },
                 "platforms.remote.ios.is_secure": { isPii: false, value: "false" },
                 "remoteBuild.android.filesChangedCount": { isPii: false, value: 8 },
@@ -422,8 +420,7 @@ module BuildAndRunTelemetryTests {
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.actuallyBuilt.local1": { isPii: false, value: "windows" },
-                "platforms.actuallyBuilt.local2": { isPii: false, value: "wp8" },
-                subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
+                "platforms.actuallyBuilt.local2": { isPii: false, value: "wp8" }
             };
 
             var args: string[] = [];
@@ -443,7 +440,6 @@ module BuildAndRunTelemetryTests {
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.requestedViaCommandLine.local1": { isPii: true, value: "unknown_platform" },
                 "platforms.actuallyBuilt.local1": { isPii: true, value: "unknown_platform" },
-                subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") },
                 "unknownOption1.name": { isPii: true, value: "uknown_option" },
                 "unknownOption1.value": { isPii: true, value: "unknown_value" }
             };
@@ -461,8 +457,7 @@ module BuildAndRunTelemetryTests {
                     "options.nobuild": { isPii: false, value: "true" },
                     "options.debuginfo": { isPii: false, value: "true" },
                     "platforms.actuallyBuilt.local1": { isPii: false, value: "android" },
-                    "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" },
-                    subCommand: { isPii: false, value: commandSwitch("build", "fallback", "emulate") }
+                    "platforms.requestedViaCommandLine.local1": { isPii: false, value: "android" }
                 };
 
                 runCommand(args)

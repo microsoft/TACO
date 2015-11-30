@@ -29,10 +29,14 @@ class Feedback extends commands.TacoCommandBase {
         return true;
     }
 
+    public parseArgs(args: string[]): commands.ICommandData {
+        return { options: {}, original: [], remain: [] };
+    }
+
     /**
      * Prompt for telemetry consent
      */
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(data: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         return telemetry.changeTelemetryOptInSetting();
     }
 }

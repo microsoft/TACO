@@ -58,11 +58,7 @@ describe("taco run", function (): void {
         process.chdir(tacoHome);
         return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
             var args: string[] = ["example", "--cordova", vcordova];
-            return create.run({
-                options: {},
-                original: args,
-                remain: args
-            });
+            return create.run(args);
         })
             .then(function (): void {
             process.chdir(path.join(tacoHome, "example"));
@@ -111,11 +107,7 @@ describe("taco run", function (): void {
 
     var runRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
         var run: ICommand = CommandHelper.getCommand("run");
-        return run.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return run.run(args);
     };
 
     it("should make the correct sequence of calls for 'taco run --remote test --device'", function (mocha: MochaDone): void {
