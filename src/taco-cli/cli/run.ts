@@ -177,38 +177,30 @@ class Run extends commands.TacoCommandBase {
 
     /* tslint:disable:member-ordering */
     // tslint doesn't handle this case and considers subcommands as member function
-    public subcommands: commands.ISubCommand<Run>[] = [
+    public subcommands: commands.ISubCommand[] = [
         {
             // --list = targets
             name: "targets",
-            run: (command, commandData) => command.targets(commandData),
-            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
-                return !!commandData.options["list"];
-            }
+            run: commandData => this.targets(commandData),
+            canHandleArgs: commandData => !!commandData.options["list"]
         },
         {
             // Remote Run
             name: "remote",
-            run: (command, commandData) => command.remote(commandData),
-            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
-                return !!commandData.options["remote"];
-            }
+            run: commandData => this.remote(commandData),
+            canHandleArgs: commandData => !!commandData.options["remote"]
         },
         {
             // Local Run
             name: "local",
-            run: (command, commandData) => command.local(commandData),
-            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
-                return !!commandData.options["local"];
-            }
+            run: commandData => this.local(commandData),
+            canHandleArgs: commandData => !!commandData.options["local"]
         },
         {
             // Fallback
             name: "fallback",
-            run: (command, commandData) => command.fallback(commandData),
-            canHandleArgs(command: commands.ICommand, commandData: commands.ICommandData): boolean {
-                return true;
-            }
+            run: commandData => this.fallback(commandData),
+            canHandleArgs: commandData => true
         }
     ];
     /* tslint:enable:member-ordering */

@@ -54,15 +54,15 @@ module TacoUtility {
             canHandleArgs(data: ICommandData): boolean;
         }
 
-        export interface ISubCommand<T extends ICommand> {
+        export interface ISubCommand {
             name: String;
-            canHandleArgs?(command: ICommand, data: ICommandData): boolean;
-            run(command: ICommand, data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+            canHandleArgs?(data: ICommandData): boolean;
+            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
         }
 
         export class TacoCommandBase implements ICommand {
             public name: string;
-            public subcommands: ISubCommand<TacoCommandBase>[];
+            public subcommands: ISubCommand[];
             public info: ICommandInfo;
             public data: ICommandData;
 
@@ -99,7 +99,7 @@ module TacoUtility {
                 // Determine which subcommand we are executing
                 var subCommand = this.getSubCommand(this.data);
                 if (subCommand) {
-                    return subCommand.run(this, this.data)
+                    return subCommand.run(this.data)
                         .then((telemetryProperties: telemetryHelper.ICommandTelemetryProperties) => {
                             telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(subCommand.name, /*isPii*/ false);
                             return telemetryProperties;
@@ -112,19 +112,20 @@ module TacoUtility {
                 return (this.info.aliases && this.info.aliases[subCommand]) ? this.info.aliases[subCommand] : subCommand;
             }
 
-            private getSubCommand(options: ICommandData): ISubCommand<ICommand> {
+            private getSubCommand(options: ICommandData): ISubCommand {
                 // first do a simple name match
+                var name: string = options.remain[0];
+                name = name ? this.resolveAlias(name) : name;
                 for (var i: number = 0; i < this.subcommands.length; ++i) {
-                    var name: string = options.remain[0];
-                    if (name && this.resolveAlias(name) === this.subcommands[i].name) {
+                    if (name === this.subcommands[i].name) {
                         return this.subcommands[i];
                     }
                 }
                 // if subcommand has specified a canHandleArgs, check if there is a subcommand
                 // which can handle the args
                 for (var i: number = 0; i < this.subcommands.length; ++i) {
-                    var subCommand: ISubCommand<ICommand> = this.subcommands[i];
-                    if (subCommand.canHandleArgs && subCommand.canHandleArgs(this, options)) {
+                    var subCommand: ISubCommand = this.subcommands[i];
+                    if (subCommand.canHandleArgs && subCommand.canHandleArgs(options)) {
                         return subCommand;
                     }
                 }

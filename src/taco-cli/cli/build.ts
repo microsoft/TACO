@@ -137,7 +137,7 @@ class Build extends commands.TacoCommandBase {
         });
     }
 
-     protected runCommand(commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    protected runCommand(commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         if (ProjectHelper.isTypeScriptProject()) {
             logger.log(resources.getString("CommandCreateInstallGulp"));
         }

@@ -42,10 +42,10 @@ declare module TacoUtility {
         /**
          * interface used by sub-commands defined by ICommand implementations
          */
-        interface ISubCommand<T extends TacoCommandBase> {
+        interface ISubCommand {
             name: String;
-            canHandleArgs?(command: T, data: ICommandData): boolean;
-            run(command: T, data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+            canHandleArgs?(data: ICommandData): boolean;
+            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
         }
 
         /**
@@ -66,7 +66,7 @@ declare module TacoUtility {
         class TacoCommandBase implements ICommand {
             public name: string;
             public executedSubcommand: ICommand;
-            public subcommands: ISubCommand<TacoCommandBase>[];
+            public subcommands: ISubCommand[];
             public info: ICommandInfo;
             public data: ICommandData;
 

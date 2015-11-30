@@ -292,11 +292,7 @@ module BuildAndRunTelemetryTests {
             validateGzipedSize(telemetryProperties, "ios", iosExpectedGzipedSize);
             validateGzipedSize(telemetryProperties, "android", androidGzipSize);
 
-            // validated that each of the expected telemetry properties are present
-            for (var key in expected) {
-                console.log(key);
-                telemetryProperties[key].should.eql(expected[key]); // We are comparing the objects, after overriding the sizes with the expected values
-            }
+            telemetryProperties.should.containEql(expected); // We are comparing the objects, after overriding the sizes with the expected values
         }
 
         beforeEach((done: MochaDone) => {

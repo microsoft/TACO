@@ -59,27 +59,27 @@ class Remote extends commands.TacoCommandBase {
     private static KNOWN_OPTIONS: Nopt.CommandData = {};
     private static SHORT_HANDS: Nopt.ShortFlags = {};
 
-    public subcommands: commands.ISubCommand<Remote>[] = [
+    public subcommands: commands.ISubCommand[] = [
         {
             // taco remote remove <platform>
             name: "remove",
-            run: (command, commandData) => command.remove(commandData)
+            run: commandData => this.remove(commandData)
         },
         {
             // taco remote list
             name: "list",
-            run:(command, commandData) => command.list(commandData)
+            run:commandData => this.list(commandData)
         },
         {
             // taco remote add [platform]
             name: "add",
-            run: (command, commandData) => command.add(commandData)
+            run: commandData => this.add(commandData)
         },
         {
             // taco remote [unknown]
             name: "help",
-            run: (command, commandData) => command.help(commandData),
-            canHandleArgs: (command, commanData) => true
+            run: commandData => this.help(commandData),
+            canHandleArgs: commandData => true
         }
     ];
 

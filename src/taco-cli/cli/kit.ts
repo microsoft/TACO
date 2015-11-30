@@ -779,22 +779,19 @@ class Kit extends commands.TacoCommandBase {
 
     /* tslint:disable:member-ordering */
     // tslint doesn't handle this case and considers subcommands as member function
-    public subcommands: commands.ISubCommand<Kit>[] = [
-        {
-            // List kits
-            name: "list",
-            run: (command, commandData) => command.list(commandData),
-            canHandleArgs: (command, commandData) => {
-                var subCommand: string = commandData.remain[0];
-                return !subCommand || command.resolveAlias(subCommand) === this.name;
-            }
-        },
+    public subcommands: commands.ISubCommand[] = [
         {
             // Change kit or CLI
             name: "select",
-            run: (command, commandData) => command.select(commandData)
+            run: commandData => this.select(commandData)
         },
-    ];
+        {
+            // List kits
+            name: "list",
+            run: commandData => this.list(commandData),
+            canHandleArgs: commandData => true
+        }
+   ];
     /* tslint:enable:member-ordering */
 
     public parseArgs(args: string[]): commands.ICommandData {
