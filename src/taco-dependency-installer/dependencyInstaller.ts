@@ -110,6 +110,10 @@ module TacoDependencyInstaller {
                 telemetry.step("promptUserBeforeInstall");
                 return this.promptUserBeforeInstall()
                     .then(function (acceptedPrompt: boolean): Q.Promise<number> {
+                        logger.logLine();
+                        loggerHelper.logSeparatorLine();
+                        logger.logLine();
+
                         if (acceptedPrompt) {
                             telemetry.step("spawnElevatedInstaller");
 
@@ -380,10 +384,6 @@ module TacoDependencyInstaller {
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
                     if (answer.toLocaleLowerCase() === resources.getString("YesString")) {
-                        logger.logLine();
-                        loggerHelper.logSeparatorLine();
-                        logger.logLine();
-
                         return Q.resolve(true);
                     } else {
                         return Q.resolve(false);
@@ -517,7 +517,8 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         self.parentSessionId,
-                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.socketPath)
+                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.socketPath),
+                        TacoGlobalConfig.acceptPrompts ? "true" : "false"
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 
