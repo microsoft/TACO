@@ -37,6 +37,7 @@ import IDependency = DependencyInstallerInterfaces.IDependency;
 import logger = tacoUtils.Logger;
 import loggerHelper = tacoUtils.LoggerHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import utilHelper = tacoUtils.UtilHelper;
 
 module TacoDependencyInstaller {
@@ -367,6 +368,11 @@ module TacoDependencyInstaller {
 
             if (needsLicenseAgreement) {
                 logger.log(resources.getString("LicenseAgreement"));
+            }
+
+            // If we accept prompts automatically, then return immediately
+            if (TacoGlobalConfig.acceptPrompts) {
+                return Q.resolve(true);
             }
 
             logger.log(resources.getString("InstallationProceedQuestion"));

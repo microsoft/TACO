@@ -31,6 +31,7 @@ import resources = require ("../resources/resourceManager");
 import installerDataType = InstallerProtocol.DataType;
 import ILogger = InstallerProtocol.ILogger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import utils = tacoUtils.UtilHelper;
 
 module InstallerUtils {
@@ -173,8 +174,13 @@ class InstallerUtils {
      * @return {Q.Promise<string>} A promise resolved with a string containing the user's response to the prompt
      */
     public static promptForEnvVariableOverwrite(name: string, socket: NodeJSNet.Socket): Q.Promise<string> {
-        var deferred: Q.Deferred<string> = Q.defer<string>();
+        // If we auto-accept prompts, return with the YesString
+        if (TacoGlobalConfig.acceptPrompts) {
+            return Q.resolve(resources.getString("YesString"));
+        }
 
+        // Otherwise, we prompt the user
+        var deferred: Q.Deferred<string> = Q.defer<string>();
         var dataListener: (data: Buffer) => void = function (data: Buffer): void {
             var stringData: string = data.toString();
 

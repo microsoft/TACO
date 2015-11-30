@@ -121,7 +121,14 @@ declare module TacoUtility {
          * @return {string[]} The args where --loglevel and its value have been removed
          */
         public static initializeLogLevel(args: string[]): string[];
-
+        /**
+         * Sets the global acceptPrompts setting for TACO by specifically looking for the "--accept" string in the given command args. If found, the "--accept" string is removed from the args so that
+         * it is not passed to the command.
+         *
+         * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
+         * @return {string[]} The args where --loglevel and its value have been removed
+         */
+        public static initializeAcceptPrompts(args: string[]): string[];
         /**
          * An explicit helper empty method, which can be used in scenarios like
          * silent callbacks, catch all exceptions do nothing etc.
