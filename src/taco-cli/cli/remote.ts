@@ -59,38 +59,27 @@ class Remote extends commands.TacoCommandBase {
     private static KNOWN_OPTIONS: Nopt.CommandData = {};
     private static SHORT_HANDS: Nopt.ShortFlags = {};
 
-    public subcommands: commands.ICommand[] = [
+    public subcommands: commands.ISubCommand[] = [
         {
             // taco remote remove <platform>
             name: "remove",
-            run: Remote.remove,
-            canHandleArgs: function (remoteData: commands.ICommandData): boolean {
-                return remoteData.remain[0] && /^(remove|rm)$/i.test(remoteData.remain[0]);
-            }
+            run: commandData => this.remove(commandData)
         },
         {
             // taco remote list
             name: "list",
-            run: Remote.list,
-            canHandleArgs: function (remoteData: commands.ICommandData): boolean {
-                return remoteData.remain[0] && /^(list|ls)$/i.test(remoteData.remain[0]);
-            }
+            run:commandData => this.list(commandData)
         },
         {
             // taco remote add [platform]
             name: "add",
-            run: Remote.add,
-            canHandleArgs: function (remoteData: commands.ICommandData): boolean {
-                return remoteData.remain[0] && /^add$/i.test(remoteData.remain[0]);
-            }
+            run: commandData => this.add(commandData)
         },
         {
             // taco remote [unknown]
             name: "help",
-            run: Remote.help,
-            canHandleArgs: function (remoteData: commands.ICommandData): boolean {
-                return true;
-            }
+            run: commandData => this.help(commandData),
+            canHandleArgs: commandData => true
         }
     ];
 
@@ -117,7 +106,7 @@ class Remote extends commands.TacoCommandBase {
         });
     }
 
-    private static remove(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    private remove(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         if (remoteData.remain.length < 2) {
             throw errorHelper.get(TacoErrorCodes.CommandRemoteDeleteNeedsPlatform);
         }
@@ -142,7 +131,7 @@ class Remote extends commands.TacoCommandBase {
         });
     }
 
-    private static list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    private list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
@@ -171,7 +160,7 @@ class Remote extends commands.TacoCommandBase {
         });
     }
 
-    private static add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    private add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
         var remoteInfo: Settings.IRemoteConnectionInfo;
         return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: IDictionary<any>): Q.Promise<any> {
@@ -363,10 +352,8 @@ class Remote extends commands.TacoCommandBase {
         }
     }
 
-    private static help(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        remoteData.original.unshift("remote");
-        remoteData.remain.unshift("remote");
-        return new HelpModule().run(remoteData).then(function (): Q.Promise<ICommandTelemetryProperties> {
+    private help(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+        return new HelpModule().run(["remote"]).then(function (): Q.Promise<ICommandTelemetryProperties> {
             return Q(<ICommandTelemetryProperties> {});
         });
     }
@@ -380,9 +367,7 @@ class Remote extends commands.TacoCommandBase {
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
-        var parsedOptions: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Remote.KNOWN_OPTIONS, Remote.SHORT_HANDS, args, 0);
-
-        return parsedOptions;
+        return tacoUtility.ArgsHelper.parseArguments(Remote.KNOWN_OPTIONS, Remote.SHORT_HANDS, args, 0);
     }
 }
 

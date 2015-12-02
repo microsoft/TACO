@@ -32,7 +32,7 @@ import rimraf = require ("rimraf");
 import util = require ("util");
 
 import buildAndRunTelemetry = require ("./buildAndRunTelemetry");
-import buildMod = require ("../cli/build");
+import Build = require ("../cli/build");
 import IHttpServerFunction = require ("./utils/httpServerFunction");
 import kitHelper = require ("../cli/utils/kitHelper");
 import Platform = require ("../cli/platform");
@@ -69,11 +69,7 @@ describe("taco build", function (): void {
         process.chdir(tacoHome);
         return Q.denodeify(del)("example").then(function (): Q.Promise<any> {
             var args: string[] = ["example", "--cordova", vcordova];
-            return create.run({
-                options: {},
-                original: args,
-                remain: args
-            });
+            return create.run(args);
         }).then(function (): void {
             process.chdir(projectPath);
         });
@@ -94,7 +90,7 @@ describe("taco build", function (): void {
         testHttpServer.listen(port);
 
         // Reduce the delay when polling for a change in status
-        buildMod.remoteBuild.PING_INTERVAL = 10;
+        Build.remoteBuild.PING_INTERVAL = 10;
 
         // Configure a dummy platform "test" to use the mocked out remote server
         RemoteMock.saveConfig("test", remoteServerConfiguration).done(() => mocha(), mocha);
@@ -122,12 +118,7 @@ describe("taco build", function (): void {
     });
 
     var buildRun: (args: string[]) => Q.Promise<TacoUtility.ICommandTelemetryProperties> = function (args: string[]): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
-        var command: ICommand = CommandHelper.getCommand("build");
-        return command.run({
-            options: {},
-            original: args,
-            remain: args
-        });
+        return build.run(args);
     };
 
     it("should make the correct sequence of calls for 'taco build --remote test'", function (mocha: MochaDone): void {

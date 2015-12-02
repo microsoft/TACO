@@ -30,6 +30,6 @@ declare module TacoUtility {
          * Concrete implementation of ICommand's run
          * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
          */
-        public run(data: TacoUtility.Commands.ICommandData): Q.Promise<any>;
+        protected runCommand(data: TacoUtility.Commands.ICommandData): Q.Promise<any>;
     }
 }

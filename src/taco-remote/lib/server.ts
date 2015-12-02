@@ -53,7 +53,7 @@ class ServerModuleFactory implements RemoteBuild.IServerModuleFactory {
         var tacoRemoteConf: TacoRemoteConfig = new TacoRemoteConfig(conf, modConfig);
         var resources: utils.ResourceManager = new utils.ResourceManager(path.join(__dirname, "..", "resources"), conf.lang);
         var help: Help = new Help();
-        help.run({ options: {}, original: ["taco-remote"], remain: ["taco-remote"] }).done();
+        help.run(["taco-remote"]).done();
     }
 
     public getConfig(conf: RemoteBuild.IRemoteBuildConfiguration, modConfig: RemoteBuild.IServerModuleConfiguration): RemoteBuild.IServerModuleConfiguration {

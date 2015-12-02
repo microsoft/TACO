@@ -98,7 +98,7 @@ class CliHelper {
 
     private static printHelp(remotebuildConf: RemoteBuildConf, topic?: string): Q.Promise<void> {
         var help: Help = new Help(remotebuildConf);
-        return help.run({ options: {}, original: [topic], remain: [topic] });
+        return help.run([topic]);
     }
 }
 

@@ -37,13 +37,7 @@ describe("templates", function (): void {
 
     function templatesRun(): Q.Promise<any> {
         var templates: Templates = new Templates();
-        var data: commands = {
-            options: {},
-            original: [],
-            remain: []
-        };
-
-        return templates.run(data);
+        return templates.run([]);
     }
 
     var previous: boolean;

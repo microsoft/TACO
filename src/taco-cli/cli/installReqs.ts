@@ -198,20 +198,13 @@ class InstallReqs extends commands.TacoCommandBase {
         return result;
     }
 
-    private static parseArguments(args: commands.ICommandData): commands.ICommandData {
-        return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KNOWN_OPTIONS, {}, args.original, 0);
+    public parseArgs(args: string[]): commands.ICommandData {
+        return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KNOWN_OPTIONS, {}, args, 0);
     }
 
-    public run(data: commands.ICommandData): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+    protected runCommand(data: commands.ICommandData): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
         return tacoUtils.TelemetryHelper.generate("InstallReqs", (telemetry: tacoUtils.TelemetryGenerator): Q.Promise<any> => {
             var self: InstallReqs = this;
-            var parsed: commands.ICommandData = null;
-
-            try {
-                parsed = InstallReqs.parseArguments(data);
-            } catch (err) {
-                return Q.reject(err);
-            }
 
             return Q({})
                 .then(function(): Q.Promise<any> {
@@ -225,11 +218,11 @@ class InstallReqs extends commands.TacoCommandBase {
                     }
 
                     telemetry
-                        .addWithPiiEvaluator("requestedPlatformsViaCommandLine", parsed.remain, buildTelemetryHelper.getIsPlatformPii())
+                        .addWithPiiEvaluator("requestedPlatformsViaCommandLine", data.remain, buildTelemetryHelper.getIsPlatformPii())
                         .addWithPiiEvaluator("installedPlatforms", installedPlatforms, buildTelemetryHelper.getIsPlatformPii());
 
                     // Get a list of the requested platforms (either what is specified by the user, or all the installed platforms if nothing is specified)
-                    var requestedPlatforms: string[] = parsed.remain.length > 0 ? parsed.remain : installedPlatforms.slice();   // Using slice() to clone the array
+                    var requestedPlatforms: string[] = data.remain.length > 0 ? data.remain : installedPlatforms.slice();   // Using slice() to clone the array
 
                     requestedPlatforms = InstallReqs.removeDuplicates(requestedPlatforms);
 

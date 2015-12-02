@@ -27,7 +27,7 @@ import commands = tacoUtility.Commands;
 class Documentation extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(data: commands.ICommandData): Q.Promise<any> {
         // This implementation is based on "npm docs": https://github.com/npm/npm/blob/master/lib/docs.js
         var link: string = resources.getString("TacoDocumentationLink");
         opener(link);
@@ -39,6 +39,10 @@ class Documentation extends commands.TacoCommandBase {
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
         return true;
+    }
+
+    public parseArgs(args: string[]): commands.ICommandData {
+        return { options: {}, original: [], remain: [] };
     }
 }
 
