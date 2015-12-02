@@ -39,7 +39,6 @@ import wrench = require ("wrench");
 import kitHelper = require ("../cli/utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import TacoErrorCodes = require ("../cli/tacoErrorCodes");
-import tacoKits = require ("taco-kits");
 import tacoUtils = require ("taco-utils");
 import tacoTestUtils = require ("taco-tests-utils");
 
@@ -47,7 +46,7 @@ import TemplateManager = require ("../cli/utils/templateManager");
 import tacoTestsUtils = require ("taco-tests-utils");
 
 import IKeyValuePair = tacoTestUtils.IKeyValuePair;
-import TacoKitsErrorCodes = tacoKits.TacoErrorCode;
+import tacoPackageLoader = tacoUtils.TacoPackageLoader;
 import TacoUtilsErrorCodes = tacoUtils.TacoErrorCode;
 import utils = tacoUtils.UtilHelper;
 import MemoryStream = tacoTestsUtils.MemoryStream;
@@ -84,8 +83,9 @@ describe("taco create", function (): void {
         "5.1.1" : { "cordova-cli": "5.1.1" }
     };
 
-    // Persistent TemplateManager to count template entries
+    // Shared test variables
     var templateManager: TemplateManager;
+    var tacoKitsErrors: typeof TacoKits.TacoErrorCode;
 
     // Project info
     var testAppId: string = "testId";
@@ -216,14 +216,15 @@ describe("taco create", function (): void {
         templateManager = new TemplateManager(kitHelper);
 
         // Delete existing run folder if necessary
-        rimraf(runFolder, function (err: Error): void {
-            if (err) {
-                done(err);
-            } else {
-                // Create the run folder for our tests
-                wrench.mkdirSyncRecursive(runFolder, 511); // 511 decimal is 0777 octal
-                done();
-            }
+        rimraf.sync(runFolder);
+
+        // Create the run folder for our tests
+        wrench.mkdirSyncRecursive(runFolder, 511); // 511 decimal is 0777 octal
+
+        // Load taco-kits error codes
+        tacoPackageLoader.lazyRequire("taco-kits", "taco-kits").then((tacoKits: typeof TacoKits) => {
+            tacoKitsErrors = tacoKits.TacoErrorCode;
+            done();
         });
     });
 
@@ -341,14 +342,14 @@ describe("taco create", function (): void {
             // Create command should fail if --kit was specified with an unknown value
             var scenario: number = 1;
 
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidKit).done(() => done(), done);
+            runFailureScenario<TacoKits.TacoErrorCode>(scenario, tacoKitsErrors.TacoKitsExceptionInvalidKit).done(() => done(), done);
         });
 
         it("Failure scenario 2 [path, template (unknown value)]", function (done: MochaDone): void {
             // If a template is not found, create command should fail with an appropriate message
             var scenario: number = 2;
 
-            runFailureScenario<TacoKitsErrorCodes>(scenario, TacoKitsErrorCodes.TacoKitsExceptionInvalidTemplate).done(() => done(), done);
+            runFailureScenario<TacoKits.TacoErrorCode>(scenario, tacoKitsErrors.TacoKitsExceptionInvalidTemplate).done(() => done(), done);
         });
 
         it("Failure scenario 3 [path, kit, template, copy-from]", function (done: MochaDone): void {
