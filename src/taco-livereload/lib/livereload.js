@@ -66,13 +66,12 @@ module.exports.start = function (projectRoot, platforms, options) {
         //      `cordova run android -- --livereload --ignore, // with no path to ignore
         //      `cordova run android -- --livereload --ignore= css, // with space after the '=' sign
         //      etc...
-        // ToDO: ignore whitespaces surrounding the --ignore option or at least display a warning message to user
+        // ToDO: https://github.com/Microsoft/TACO/issues/190 : ignore whitespaces surrounding the --ignore option or at least display a warning message to user
         var ignoreOption = undefined;
         if (options.ignore) {
             ignoreOption = path.join(projectRoot, 'www', options.ignore);
         }
  
-        // ToDO: What if user specifies custom option that clutters watchOptions ? tunnel ? files ? other options ?
         var bs = new BrowserSyncServer(projectRoot, {
             files: [{
                 match: [path.join(projectRoot, 'www', '**/*.*')],

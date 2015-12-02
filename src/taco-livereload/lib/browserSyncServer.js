@@ -42,7 +42,7 @@ BrowserSyncServer.prototype.startServer = function () {
         },
         open: false,
 
-        // ToDO: Document that if fn is overriden by another option, multi-device scenario 
+        // Note: Do not override 'fn'. If fn is overriden by another option, multi-device scenario 
         // ... will be lost due to 'monkey patching' going away
         snippetOptions: {
             rule: {
