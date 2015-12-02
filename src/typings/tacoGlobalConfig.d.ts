@@ -10,6 +10,6 @@ declare module TacoUtility {
     class TacoGlobalConfig {
         public static lang: string;
         public static logLevel: LogLevel;
-        public static acceptPrompts: boolean;
+        public static noPrompt: boolean;
     }
 }

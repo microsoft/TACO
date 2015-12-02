@@ -128,7 +128,7 @@ declare module TacoUtility {
          * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
          * @return {string[]} The args where --loglevel and its value have been removed
          */
-        public static initializeAcceptPrompts(args: string[]): string[];
+        public static initializeNoPrompt(args: string[]): string[];
         /**
          * An explicit helper empty method, which can be used in scenarios like
          * silent callbacks, catch all exceptions do nothing etc.

@@ -175,7 +175,7 @@ class InstallerUtils {
      */
     public static promptForEnvVariableOverwrite(name: string, socket: NodeJSNet.Socket): Q.Promise<string> {
         // If we auto-accept prompts, return with the YesString
-        if (TacoGlobalConfig.acceptPrompts) {
+        if (TacoGlobalConfig.noPrompt) {
             return Q.resolve(resources.getString("YesString"));
         }
 

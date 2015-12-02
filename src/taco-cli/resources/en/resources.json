@@ -393,7 +393,7 @@
     "CommandInstallReqsPlatformDescription": "A platform for which to install third-party dependencies",
     "_CommandInstallReqsPlatformDescription.comment": "Description for the [PLATFORM] option of 'taco install-reqs'",
     "CommandInstallReqsAcceptDescription": "Automatically accept all prompts (confirmation, license agreement and system variables overwrite)",
-    "_CommandInstallReqsAcceptDescription.comment": "Description for the [--accept] option of 'taco install-reqs'",
+    "_CommandInstallReqsAcceptDescription.comment": "Description for the [--no-prompt] option of 'taco install-reqs'",
 
     "CommandInstallNoPlatformsAdded": "Error: No platforms added to your project. To install the dependencies for a given platform, please add it to your project first.",
     "_CommandInstallNoPlatformsAdded.comment": "Error shown when a user uses 'taco install-reqs' but there are no platforms added to the current project.",

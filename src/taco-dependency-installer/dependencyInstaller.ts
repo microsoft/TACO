@@ -375,7 +375,7 @@ module TacoDependencyInstaller {
             }
 
             // If we accept prompts automatically, then return immediately
-            if (TacoGlobalConfig.acceptPrompts) {
+            if (TacoGlobalConfig.noPrompt) {
                 return Q.resolve(true);
             }
 
@@ -518,7 +518,7 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         self.parentSessionId,
                         utilHelper.quotesAroundIfNecessary(DependencyInstaller.socketPath),
-                        TacoGlobalConfig.acceptPrompts ? "true" : "false"   // When launching a child process inside PowerShell, the environment is not preserved, so we need to pass this value on the command line
+                        TacoGlobalConfig.noPrompt ? "true" : "false"   // When launching a child process inside PowerShell, the environment is not preserved, so we need to pass this value on the command line
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 

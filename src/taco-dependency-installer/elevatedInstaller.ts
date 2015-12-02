@@ -108,7 +108,7 @@ class ElevatedInstaller {
         // Deal with auto-accept prompts; we need to reset this value, because on Windows we launch the elevated installer through PowerShell, and doing it that way does not carry over the env of the
         // parent node.js process
         if (process.argv[5] === "true") {
-            TacoGlobalConfig.acceptPrompts = true;
+            TacoGlobalConfig.noPrompt = true;
         }
     }
 
