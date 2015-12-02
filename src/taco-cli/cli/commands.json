@@ -275,7 +275,7 @@
             ],
             "options": [
             {
-                "name": "--no-prompt", "description": "[CommandInstallReqsAcceptDescription]"
+                "name": "--no-prompt", "description": "[CommandInstallReqsNoPromptDescription]"
             }
             ]
         }
