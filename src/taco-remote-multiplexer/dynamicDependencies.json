@@ -6,7 +6,7 @@
   },
   "preCordova540TacoRemoteLib": {
     "packageName": "taco-remote-lib",
-    "packageId": "taco-remote-lib@1.2.1"
+    "packageId": "taco-remote-lib@1.2.2"
   },
 
   "samplePackageInNpm": {
