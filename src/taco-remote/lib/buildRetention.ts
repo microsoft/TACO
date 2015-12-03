@@ -60,9 +60,7 @@ class BuildRetention {
         var eligibleBuilds: utils.BuildInfo[] = [];
         for (var i: number = 0; i < buildNumbers.length; i++) {
             var buildInfo: utils.BuildInfo = builds[buildNumbers[i]];
-            if (buildInfo.status === utils.BuildInfo.COMPLETE || buildInfo.status === utils.BuildInfo.DOWNLOADED ||
-                buildInfo.status === utils.BuildInfo.ERROR || buildInfo.status === utils.BuildInfo.EMULATED ||
-                buildInfo.status === utils.BuildInfo.INVALID) {
+            if ([utils.BuildInfo.BUILDING, utils.BuildInfo.EXTRACTED, utils.BuildInfo.UPLOADING, utils.BuildInfo.UPLOADED].indexOf(buildInfo.status) !== -1) {
                 eligibleBuilds.push(buildInfo);
             }
         };
