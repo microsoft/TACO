@@ -42,7 +42,13 @@ describe("help for a command", function (): void {
     var previous: boolean;
 
     function helpRun(command: string): Q.Promise<any> {
-        return help.run([command]);
+        var data: ICommandData = {
+            options: {},
+            original: [command],
+            remain: [command]
+        };
+
+        return help.run(data);
     }
 
     function testHelpForCommand(command: string, expectedLines: string[]): Q.Promise<any> {
@@ -310,7 +316,7 @@ describe("help for a command", function (): void {
             "",
             "CommandInstallReqsDescription",
             "",
-            "   taco install-reqs [PLATFORM]",
+            "   taco install-reqs [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
             "   [PLATFORM] .......... CommandInstallReqsPlatformDescription",
