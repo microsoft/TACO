@@ -51,6 +51,7 @@ describe("templates", function (): void {
     });
 
     it("'taco templates' should not throw any error", function (done: MochaDone): void {
+        this.timeout(50000);
         templatesRun().then(done, done);
     });
 
@@ -71,6 +72,7 @@ describe("templates", function (): void {
         });
 
         it("templates prints the onboarding experience", function (done: MochaDone): void {
+            this.timeout(50000);
             templatesRun().done(() => {
                 var expected = [
                     "CommandTemplatesHeader",

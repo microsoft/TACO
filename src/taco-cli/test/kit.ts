@@ -247,6 +247,7 @@ describe("Kit command: ", function (): void {
     });
 
     it("'taco kit list should work for a project UTF16 taco.json", function (): Q.Promise<any> {
+        this.timeout(50000);
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
         // Create a kit project, modify taco.json encoding and run taco kit list
