@@ -381,6 +381,8 @@
     "CommandEmulateVsEmulatorNoProfiles.comment": "Message displayed if there are no device profiles installed.",
     "CommandEmulateVsEmulatorBootingUp": "Starting emulator. Please wait, this might take some time ...",
     "CommandEmulateVsEmulatorBootingUp.comment": "Message displayed while the emulator is booting up.",
+    "CommandEmulateVSEmulatorDescription": "Run the application on the Visual Studio Emulator for Android",
+    "CommandEmulateVSEmulatorDescription.comment": "Description of --vsemulator argument for 'taco emulate'",
     "CommandRunPlatformDescription": "The platform that you wish to run or emulate",
     "_CommandRunPlatformDescription.comment": "Description of the PLATFORM argument to 'taco run'",
     "CommandRunRemoteDescription": "Force a remote build",

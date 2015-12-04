@@ -457,6 +457,10 @@
             {
                 "name": "--target=TARGET", "description": "[CommandRunTargetDescription]"
             }
+            ,
+            {
+                "name": "--vsemulator", "description": "[CommandEmulateVSEmulatorDescription]"
+            }
             ]
         }
         ,
