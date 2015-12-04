@@ -33,7 +33,7 @@ import telemetryHelper = tacoUtility.TelemetryHelper;
 class Templates extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
-    public run(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(data: commands.ICommandData): Q.Promise<any> {
         var self: Templates = this;
 
         return this.getTemplatesToPrint()
@@ -53,6 +53,10 @@ class Templates extends commands.TacoCommandBase {
      */
     public canHandleArgs(data: commands.ICommandData): boolean {
         return true;
+    }
+
+    public parseArgs(args: string[]): commands.ICommandData {
+        return { options: {}, original: [], remain: [] };
     }
 
     private getTemplatesToPrint(): Q.Promise<templateManager.ITemplateList> {

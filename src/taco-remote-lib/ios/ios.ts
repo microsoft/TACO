@@ -7,7 +7,6 @@
 ﻿ */
 
 /// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/zip-stream.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
@@ -19,11 +18,13 @@ import child_process = require ("child_process");
 import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
+import Q = require ("q");
 import util = require ("util");
 import Packer = require ("zip-stream");
 
 import iosAppRunner = require ("./iosAppRunnerHelper");
 import resources = require ("../resources/resourceManager");
+import sharedState = require ("./sharedState");
 import utils = require ("taco-utils");
 
 import BuildInfo = utils.BuildInfo;
@@ -33,7 +34,6 @@ import UtilHelper = utils.UtilHelper;
 
 class IOSAgent implements ITargetPlatform {
     private nativeDebugProxyPort: number;
-    private webProxyInstance: child_process.ChildProcess = null;
     private webDebugProxyDevicePort: number;
     private webDebugProxyPortMin: number;
     private webDebugProxyPortMax: number;
@@ -230,22 +230,28 @@ class IOSAgent implements ITargetPlatform {
     }
 
     public debugBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
-        if (this.webProxyInstance) {
-            this.webProxyInstance.kill();
-            this.webProxyInstance = null;
+        if (sharedState.webProxyInstance) {
+            sharedState.webProxyInstance.kill();
+            sharedState.webProxyInstance = null;
         }
 
         var portRange: string = util.format("null:%d,:%d-%d", this.webDebugProxyDevicePort, this.webDebugProxyPortMin, this.webDebugProxyPortMax);
-        try {
-            this.webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
-        } catch (e) {
-            res.status(404).send(resources.getStringForLanguage(req, "UnableToDebug"));
-            return;
-        }
 
-        buildInfo["webDebugProxyPort"] = this.webDebugProxyDevicePort;
-        buildInfo.updateStatus(utils.BuildInfo.DEBUGGING, "DebugSuccess");
-        res.status(200).send(buildInfo.localize(req, resources));
+        var deferred = Q.defer();
+        sharedState.webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
+        sharedState.webProxyInstance.on("error", function (err: Error) {
+            deferred.reject(new Error(resources.getStringForLanguage(req, "UnableToDebug")));
+        });
+        // Allow some time for the spawned process to error out
+        Q.delay(250).then(() => deferred.resolve({}));
+
+        deferred.promise.then(() => {
+            buildInfo["webDebugProxyPort"] = this.webDebugProxyDevicePort;
+            buildInfo.updateStatus(utils.BuildInfo.DEBUGGING, "DebugSuccess");
+            res.status(200).send(buildInfo.localize(req, resources));
+        }, (err: Error) => {
+            res.status(500).send(err.message);
+        });
     }
 
     public createBuildProcess(): child_process.ChildProcess {

@@ -24,6 +24,7 @@ import jsonSerializer = require ("./jsonSerializer");
 import logger = require ("./logger");
 import tacoErrorCodes = require ("./tacoErrorCodes");
 import telemetryHelper = require ("./telemetryHelper");
+import utilHelper = require ("./utilHelper");
 
 import CordovaHelper = cordovaHelper.CordovaHelper;
 import ICommandTelemetryProperties = telemetryHelper.ICommandTelemetryProperties;
@@ -31,6 +32,7 @@ import JsonSerializer = jsonSerializer.JsonSerializer;
 import Logger = logger.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import TelemetryHelper = telemetryHelper.TelemetryHelper;
+import UtilHelper = utilHelper.UtilHelper;
 
 module TacoUtility {
     interface IPluginFetchInfo {
@@ -162,7 +164,7 @@ module TacoUtility {
                 }
 
                 if (fs.existsSync(tacoJsonFilePath)) {
-                    tacoJson = JSON.parse(fs.readFileSync(tacoJsonFilePath, "utf8"));
+                    tacoJson = UtilHelper.parseUserJSON(tacoJsonFilePath);
                     ProjectHelper.cachedProjectFilePath = tacoJsonFilePath;
                 } else {
                     return projectInfo;

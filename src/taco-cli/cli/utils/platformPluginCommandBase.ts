@@ -120,13 +120,7 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
         return true;
     }
 
-    public run(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        try {
-            this.parseArguments(data);
-        } catch (err) {
-            return Q.reject<ICommandTelemetryProperties>(err);
-        }
-
+    protected runCommand(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
         var self: PlatformPluginCommandBase = this;
         var projectInfo: IProjectInfo;
         var specsToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
@@ -187,8 +181,8 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
     /**
      * Parse the arguments and construct the command parameters.
      */
-    private parseArguments(args: commands.ICommandData): void {
-        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KNOWN_OPTIONS, PlatformPluginCommandBase.SHORT_HANDS, args.original, 0);
+    public parseArgs(args: string[]): commands.ICommandData {
+        var commandData: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(PlatformPluginCommandBase.KNOWN_OPTIONS, PlatformPluginCommandBase.SHORT_HANDS, args, 0);
         var subCommand: string = commandData.remain[0];
         var targets: string[] = commandData.remain.slice(1);
 
@@ -223,13 +217,13 @@ export class PlatformPluginCommandBase extends commands.TacoCommandBase {
             });
         }
 
-        this.data = commandData;
-
         // Set appropriate subcommand, target and download options
         this.cordovaCommandParams = {
             subCommand: commandData.remain[0],
             targets: targets,
             downloadOptions: this.downloadOptions
         };
+
+        return commandData;
     }
 }

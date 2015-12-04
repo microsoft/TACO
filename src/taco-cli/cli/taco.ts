@@ -56,7 +56,7 @@ class Taco {
      * Runs taco with command line args
      */
     public static run(): void {
-        Settings.loadSettings().fail(function (err: any): Q.Promise<Settings.ISettings> {
+        Settings.loadSettings().fail(function(err: any): Q.Promise<Settings.ISettings> {
             // This is the first time TACO is invoked, so print the logo. Logo gets printed as a side effect of the require. Require caching will make sure we don't execute it twice in the one session.
             require("./logo");
 
@@ -64,28 +64,20 @@ class Taco {
             logger.log(resources.getString("ThirdPartyDisclaimer"));
 
             return Settings.saveSettings({});
-        }).then(function (settings: Settings.ISettings): Q.Promise<any> {
+        }).then(function(settings: Settings.ISettings): Q.Promise<any> {
             return telemetry.init("TACO", require("../package.json").version);
-        }).then( function(): void {
+        }).then(function(): void {
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
             // We check if there is a new TACO version available, and if so, we print a message before exiting the application
             new CheckForNewerVersion().showOnExitAndIgnoreFailures();
 
             var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
-            var commandProperties: ICommandTelemetryProperties = {};
 
             Taco.runWithParsedArgs(parsedArgs)
-                .then(function (telemetryProperties: ICommandTelemetryProperties): void {
-                    if (parsedArgs.command) {
-                        commandProperties = telemetryProperties;
-                    }
-                }).then(function (): void {
-                    // Send command success telemetry
-                    telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, commandProperties, parsedArgs.args);
-                }, function (reason: any): any {
+                .catch(function(reason: any): any {
                     // set exit code to report error
-                    process.on("exit", function (): void { process.exit(1); });
+                    process.on("exit", function(): void { process.exit(1); });
 
                     // Pretty print errors
                     if (reason) {
@@ -93,7 +85,7 @@ class Taco {
                             if (reason.errorLevel === tacoUtility.TacoErrorLevel.Warning) {
                                 logger.logWarning(reason.message);
                             } else {
-                                logger.logError((<tacoUtility.TacoError> reason).toString());
+                                logger.logError((<tacoUtility.TacoError>reason).toString());
                             }
                         } else {
                             var toPrint: string = reason.toString();
@@ -110,7 +102,7 @@ class Taco {
                             // Send command failure telemetry for valid TACO commands
                             // Any invalid command will be routed to Cordova and 
                             // telemetry events for such commands are sent as "routedCommand" telemetry events
-                            return CliTelemetryHelper.getCurrentProjectTelemetryProperties().then(function (telemetryProperties: ICommandTelemetryProperties): void {
+                            return CliTelemetryHelper.getCurrentProjectTelemetryProperties().then(function(telemetryProperties: ICommandTelemetryProperties): void {
                                 telemetryHelper.sendCommandFailureTelemetry(parsedArgs.commandName, reason, telemetryProperties, parsedArgs.args);
                             });
                         }
@@ -126,30 +118,32 @@ class Taco {
     /**
      * runs taco with parsed args ensuring proper initialization
      */
-    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<ICommandTelemetryProperties> {
+    public static runWithParsedArgs(parsedArgs: IParsedArgs): Q.Promise<any> {
         return Q({})
-            .then(function (): Q.Promise<any> {
+            .then(function(): Q.Promise<any> {
                 ProjectHelper.cdToProjectRoot();
 
                 // if no command found that can handle these args, route args directly to Cordova
                 if (parsedArgs.command) {
-                    var commandData: tacoUtility.Commands.ICommandData = { options: {}, original: parsedArgs.args, remain: parsedArgs.args };
-                    return parsedArgs.command.run(commandData);
-                } else {
-                    logger.logWarning(resources.getString("TacoCommandPassthrough"));
-
-                    var routeToCordovaEvent: telemetry.TelemetryEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
-                    telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
-                    return CordovaWrapper.cli(parsedArgs.args).then(function (output: any): any {
-                        routeToCordovaEvent.properties["success"] = "true";
-                        telemetry.send(routeToCordovaEvent);
-                        return Q(output);
-                    }, function (reason: any): any {
-                        routeToCordovaEvent.properties["success"] = "false";
-                        telemetry.send(routeToCordovaEvent);
-                        return Q.reject(reason);
-                    });
+                    return parsedArgs.command.run(parsedArgs.args)
+                        .then(function(telemetryProperties: ICommandTelemetryProperties) {
+                            // Send command success telemetry
+                            telemetryHelper.sendCommandSuccessTelemetry(parsedArgs.commandName, telemetryProperties, parsedArgs.args);
+                        });
                 }
+
+                logger.logWarning(resources.getString("TacoCommandPassthrough"));
+                var routeToCordovaEvent: telemetry.TelemetryEvent = new telemetry.TelemetryEvent(telemetry.appName + "/routedcommand");
+                telemetryHelper.addTelemetryEventProperty(routeToCordovaEvent, "argument", parsedArgs.args, true);
+                return CordovaWrapper.cli(parsedArgs.args).then(function(output: any): any {
+                    routeToCordovaEvent.properties["success"] = "true";
+                    telemetry.send(routeToCordovaEvent);
+                    return Q(output);
+                }, function(reason: any): any {
+                    routeToCordovaEvent.properties["success"] = "false";
+                    telemetry.send(routeToCordovaEvent);
+                    return Q.reject(reason);
+                });
             });
     }
 

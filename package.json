@@ -12,7 +12,7 @@
     "gulp": "latest",
     "gulp-json-editor": "latest",
     "gulp-sourcemaps": "latest",
-    "gulp-tslint": "latest",
+    "gulp-tslint": "^3.6.0",
     "gulp-typescript": "~2.9.2",
     "jsdoc-parse": "latest",
     "mocha-teamcity-reporter": "latest",

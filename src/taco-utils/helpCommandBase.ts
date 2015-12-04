@@ -66,10 +66,14 @@ module TacoUtility {
             return this.commandExists(data.original[0]);
         }
 
+        public parseArgs(args: string[]): ICommandData {
+            return { options: {}, original: args, remain: args };
+        }
+
         /**
          * entry point for printing helper
          */
-        public run(data: ICommandData): Q.Promise<any> {
+        protected runCommand(data: ICommandData): Q.Promise<any> {
             if (data.original && data.original.length > 0 && this.commandExists(data.original[0])) {
                 this.printCommandUsage(data.original[0]);
             } else {

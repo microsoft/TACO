@@ -35,10 +35,19 @@ declare module TacoUtility {
          */
         interface ICommand {
             name: string;
-            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+            run(args: string[]): Q.Promise<ICommandTelemetryProperties>;
             canHandleArgs(data: ICommandData): boolean;
         }
-        
+
+        /**
+         * interface used by sub-commands defined by ICommand implementations
+         */
+        interface ISubCommand {
+            name: String;
+            canHandleArgs?(data: ICommandData): boolean;
+            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+        }
+
         /**
          * Factory to create new Commands classes
          */
@@ -57,7 +66,7 @@ declare module TacoUtility {
         class TacoCommandBase implements ICommand {
             public name: string;
             public executedSubcommand: ICommand;
-            public subcommands: ICommand[];
+            public subcommands: ISubCommand[];
             public info: ICommandInfo;
             public data: ICommandData;
 
@@ -75,8 +84,8 @@ declare module TacoUtility {
              * Concrete implementation of ICommand's run
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
-            public run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
-
+            public run(args: string[]): Q.Promise<ICommandTelemetryProperties>;
+            protected runCommand(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
             public resolveAlias(subCommand: string): string;
         }
     }
