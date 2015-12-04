@@ -29,6 +29,7 @@
         "mkdirp": "0.5.0",
         "ncp": "0.5.1",
         "nopt": "^3.0.1",
+        "taco-livereload": "file:../taco-livereload",
         "q": "^1.1.2",
         "rimraf": "2.2.6",
         "semver": "2.3.1",
