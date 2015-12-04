@@ -30,6 +30,7 @@ import tacoUtils = require ("taco-utils");
 
 import installerDataType = protocol.DataType;
 import protocolExitCode = protocol.ExitCode;
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import tacoLogger = tacoUtils.Logger;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
@@ -103,6 +104,12 @@ class ElevatedInstaller {
         this.configFile = process.argv[2];
         this.parentSessionId = process.argv[3];
         this.socketPath = process.argv[4];
+
+        // Deal with auto-accept prompts; we need to reset this value, because on Windows we launch the elevated installer through PowerShell, and doing it that way does not carry over the env of the
+        // parent node.js process
+        if (process.argv[5] === "true") {
+            TacoGlobalConfig.noPrompt = true;
+        }
     }
 
     public run(): void {

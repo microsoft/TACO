@@ -18,6 +18,7 @@ module TacoUtility {
     export class TacoGlobalConfig {
         private static LANG_NAME: string = "TACO_LANG";
         private static LOG_LEVEL_NAME: string = "TACO_LOG_LEVEL";
+        private static NO_PROMPT_NAME: string = "TACO_NO_PROMPT";
 
         public static get lang(): string {
             return process.env[TacoGlobalConfig.LANG_NAME];
@@ -41,6 +42,14 @@ module TacoUtility {
 
             // Save the string name of the enum value to process.env
             process.env[TacoGlobalConfig.LOG_LEVEL_NAME] = LogLevel[level];
+        }
+
+        public static get noPrompt(): boolean {
+            return process.env[TacoGlobalConfig.NO_PROMPT_NAME] === "true";
+        }
+
+        public static set noPrompt(accept: boolean) {
+            process.env[TacoGlobalConfig.NO_PROMPT_NAME] = accept;
         }
     }
 }

@@ -155,8 +155,9 @@ class Taco {
     }
 
     private static parseArgs(args: string[]): IParsedArgs {
-        // Set the loglevel global setting
+        // Initialize global settings
         args = UtilHelper.initializeLogLevel(args);
+        args = UtilHelper.initializeNoPrompt(args);
 
         var commandName: string = null;
         var commandArgs: string[] = null;

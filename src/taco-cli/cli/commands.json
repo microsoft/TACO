@@ -264,13 +264,18 @@
         ,
         "install-reqs":
         {
-            "synopsis": "<synopsis>[PLATFORM]</synopsis>",
+            "synopsis": "<synopsis>[PLATFORM] [--OPTIONS]</synopsis>",
             "categoryTitle": "[ProjectCommandsTitle]",
             "modulePath": "./installReqs",
             "description": "<helptitle>[CommandInstallReqsDescription]</helptitle>",
             "args": [
             {
                 "name": "[PLATFORM]", "description": "[CommandInstallReqsPlatformDescription]"
+            }
+            ],
+            "options": [
+            {
+                "name": "--no-prompt", "description": "[CommandInstallReqsNoPromptDescription]"
             }
             ]
         }

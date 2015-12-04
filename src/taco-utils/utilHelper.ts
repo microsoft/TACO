@@ -368,7 +368,7 @@ module TacoUtility {
                 return args;
             }
 
-            // Note: Not using nopt to look for "--loglevel", because the autocmplete feature would catch things like "-l", when these may be intended for the command itself (not for taco loglevel).
+            // Note: Not using nopt to look for "--loglevel", because the autocomplete feature would catch things like "-l", when these may be intended for the command itself (not for taco loglevel).
             var logLevelTag: string = "--loglevel";
             var logLevelTagIndex: number = args.indexOf(logLevelTag);
 
@@ -393,6 +393,32 @@ module TacoUtility {
 
             // Clean up the --loglevel tag and its value, if present, from the args
             args.splice(logLevelTagIndex, 1 + (logLevelValueIndex === -1 ? 0 : 1));
+
+            return args;
+        }
+
+        /**
+         * Sets the global acceptPrompts setting for TACO by specifically looking for the "--accept" string in the given command args. If found, the "--accept" string is removed from the args so that
+         * it is not passed to the command.
+         *
+         * @param {string[]} args The command line args to parse in order to find the --loglevel parameter
+         * @return {string[]} The args where --loglevel and its value have been removed
+         */
+        public static initializeNoPrompt(args: string[]): string[] {
+            if (!args) {
+                return args;
+            }
+
+            // Note: Not using nopt to look for "--accept", because the autocomplete feature would catch things like "-a", when these may be intended for the command itself (not for taco acceptPrompts).
+            var acceptTag: string = "--no-prompt";
+            var acceptTagIndex: number = args.indexOf(acceptTag);
+
+            if (acceptTagIndex === -1) {
+                return args;
+            }
+
+            TacoGlobalConfig.noPrompt = true;
+            args.splice(acceptTagIndex, 1);
 
             return args;
         }

@@ -37,6 +37,7 @@ import IDependency = DependencyInstallerInterfaces.IDependency;
 import logger = tacoUtils.Logger;
 import loggerHelper = tacoUtils.LoggerHelper;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
+import TacoGlobalConfig = tacoUtils.TacoGlobalConfig;
 import utilHelper = tacoUtils.UtilHelper;
 
 module TacoDependencyInstaller {
@@ -109,6 +110,10 @@ module TacoDependencyInstaller {
                 telemetry.step("promptUserBeforeInstall");
                 return this.promptUserBeforeInstall()
                     .then(function (acceptedPrompt: boolean): Q.Promise<number> {
+                        logger.logLine();
+                        loggerHelper.logSeparatorLine();
+                        logger.logLine();
+
                         if (acceptedPrompt) {
                             telemetry.step("spawnElevatedInstaller");
 
@@ -369,15 +374,16 @@ module TacoDependencyInstaller {
                 logger.log(resources.getString("LicenseAgreement"));
             }
 
+            // If we accept prompts automatically, then return immediately
+            if (TacoGlobalConfig.noPrompt) {
+                return Q.resolve(true);
+            }
+
             logger.log(resources.getString("InstallationProceedQuestion"));
 
             return installerUtils.promptUser(resources.getString("YesExampleString"))
                 .then(function (answer: string): Q.Promise<any> {
                     if (answer.toLocaleLowerCase() === resources.getString("YesString")) {
-                        logger.logLine();
-                        loggerHelper.logSeparatorLine();
-                        logger.logLine();
-
                         return Q.resolve(true);
                     } else {
                         return Q.resolve(false);
@@ -511,7 +517,8 @@ module TacoDependencyInstaller {
                         utilHelper.quotesAroundIfNecessary(elevatedInstallerPath),
                         utilHelper.quotesAroundIfNecessary(self.installConfigFilePath),
                         self.parentSessionId,
-                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.socketPath)
+                        utilHelper.quotesAroundIfNecessary(DependencyInstaller.socketPath),
+                        TacoGlobalConfig.noPrompt ? "true" : "false"   // When launching a child process inside PowerShell, the environment is not preserved, so we need to pass this value on the command line
                     ];
                     var cp: childProcess.ChildProcess = childProcess.spawn(command, args, { stdio: "ignore" }); // Note: To workaround a Powershell hang on Windows 7, we set the stdio to ignore, otherwise Powershell never returns
 
