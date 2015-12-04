@@ -310,10 +310,12 @@ describe("help for a command", function (): void {
             "",
             "CommandInstallReqsDescription",
             "",
-            "   taco install-reqs [PLATFORM]",
+            "   taco install-reqs [PLATFORM] [--OPTIONS]",
             "",
             "CommandHelpUsageParameters",
             "   [PLATFORM] .......... CommandInstallReqsPlatformDescription",
+            "CommandHelpUsageOptions",
+            "      --no-prompt ...... CommandInstallReqsNoPromptDescription",
             ""]);
     });
 
