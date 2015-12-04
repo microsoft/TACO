@@ -36,7 +36,6 @@
         "plist": "^1.1.0"
     },
     "scripts": {
-        "test": "mocha",
         "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "license": "MIT"
