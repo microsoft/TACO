@@ -20,6 +20,7 @@ import utils = require ("taco-utils");
 import Logger = utils.Logger;
 
 class BuildRetention {
+    private static statesToNotDelete = [utils.BuildInfo.BUILDING, utils.BuildInfo.EXTRACTED, utils.BuildInfo.UPLOADING, utils.BuildInfo.UPLOADED];
     private maxBuildsToKeep: number;
 
     constructor(baseBuildDir: string, config: TacoRemoteConfig) {
@@ -60,7 +61,7 @@ class BuildRetention {
         var eligibleBuilds: utils.BuildInfo[] = [];
         for (var i: number = 0; i < buildNumbers.length; i++) {
             var buildInfo: utils.BuildInfo = builds[buildNumbers[i]];
-            if ([utils.BuildInfo.BUILDING, utils.BuildInfo.EXTRACTED, utils.BuildInfo.UPLOADING, utils.BuildInfo.UPLOADED].indexOf(buildInfo.status) !== -1) {
+            if (BuildRetention.statesToNotDelete.indexOf(buildInfo.status) === -1) {
                 eligibleBuilds.push(buildInfo);
             }
         };
