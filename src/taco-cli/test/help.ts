@@ -320,6 +320,8 @@ describe("help for a command", function (): void {
             "",
             "CommandHelpUsageParameters",
             "   [PLATFORM] .......... CommandInstallReqsPlatformDescription",
+            "CommandHelpUsageOptions",
+            "      --no-prompt ...... CommandInstallReqsNoPromptDescription",
             ""]);
     });
 
