@@ -7,7 +7,6 @@
 ﻿ */
 
 /// <reference path="../../typings/node.d.ts" />
-/// <reference path="../../typings/Q.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/zip-stream.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
@@ -19,6 +18,7 @@ import child_process = require ("child_process");
 import fs = require ("fs");
 import net = require ("net");
 import path = require ("path");
+import Q = require ("q");
 import util = require ("util");
 import Packer = require ("zip-stream");
 
