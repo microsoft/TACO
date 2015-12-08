@@ -48,7 +48,7 @@ module TacoUtility {
                 return soFar.then(function(valueSoFar: U): Q.Promise<U> {
                     return func(val, valueSoFar);
                 });
-            }, Q(initialValue || <U>{}));
+            }, Q(initialValue));
         }
 
         /**
@@ -68,7 +68,7 @@ module TacoUtility {
          *  @returns: resolves to true if both the promises resolve to true, false otherwise
          */
         public static and(...conditions: PromiseFuncOrValue<boolean>[]): Q.Promise<boolean> {
-            return PromisesUtils.logicalOp(true, ...conditions);
+            return PromisesUtils.logicalOp(false, ...conditions);
         }
 
         /**
