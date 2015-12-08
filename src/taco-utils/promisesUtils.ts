@@ -82,7 +82,6 @@ module TacoUtility {
             promiseFalse: (() => Q.Promise<T>) | T): Q.Promise<T> {
 
             var _promiseTrue: () => Q.Promise<T>  = PromisesUtils.getPromiseFunc(promiseTrue);
-
             var _promiseFalse: () => Q.Promise<T> = PromisesUtils.getPromiseFunc(promiseFalse);
 
             if (typeof condition === "boolean") {
@@ -102,18 +101,13 @@ module TacoUtility {
          *  @returns: resolves to true if either of the promises resolve to true, false otherwise
          */
         private static logicalOp(exitValue: boolean, ...conditions: PromiseFuncOrValue<boolean>[]): Q.Promise<boolean> {
-
-            var args: ((() => Q.Promise<boolean>) | boolean)[] = ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            var _args: (() => Q.Promise<boolean>)[] = args.map((arg) => PromisesUtils.getPromiseFunc(arg));
-
-            var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
-
-            return _args.reduce(function(soFar: Q.Promise<boolean>, arg: () => Q.Promise<boolean>): Q.Promise<boolean> {
+            var args: PromiseFuncOrValue<boolean>[] = <PromiseFuncOrValue<boolean>[]>ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
+            return args.reduce(function(soFar: Q.Promise<boolean>, arg: () => Q.Promise<boolean>): Q.Promise<boolean> {
                 return soFar.then(function(valueSoFar: boolean): Q.Promise<boolean> {
                     if (valueSoFar === exitValue) {
                         return Q(exitValue);
                     }
-                    return arg();
+                    return PromisesUtils.getPromiseFunc(arg)();
                 });
             }, Q(!exitValue));
         }
