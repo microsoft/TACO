@@ -53,8 +53,6 @@ describe("Check for newer version", function (): void {
 
     var expectedRequestAndResponse: { expectedUrl: string; statusCode: number; head: any; response: any; waitForPayload?: boolean, responseDelay?: number };
 
-    // We should be able to remove the next line, after this fix gets released: https://github.com/mochajs/mocha/issues/779
-    this.timeout(15000);
     var tacoCliLatestInformation: any;
 
     var fakeServer: string = "http://localhost:8080";
@@ -254,14 +252,10 @@ describe("Check for newer version", function (): void {
     }
 
     it("shows message when there is an update available and it's the first time we've ever checked", (done: MochaDone) => {
-        this.timeout(10000);
-
         testCheckForNewerVersion(MessageExpectation.WillBeShown, done).done(() => done(), done);
     });
 
     it("doesn't run the check if we've checked 3 hours ago", (done: MochaDone) => {
-        this.timeout(10000);
-
         var lastCheckForNewerVersionTimestamp: number;
         setCheckedTimestampToHoursAgo(3)
             .then((storedNumber: number) => lastCheckForNewerVersionTimestamp = storedNumber)
@@ -280,45 +274,34 @@ describe("Check for newer version", function (): void {
     });
 
     it("does run the check if we've checked 5 hours ago", (done: MochaDone) => {
-        this.timeout(10000);
-
         setCheckedTimestampToHoursAgo(5)
             .then(() => testCheckForNewerVersion(MessageExpectation.WillBeShown, done))
             .done(() => done(), done);
     });
 
     it("doesn't show a message when there is not an update available", (done: MochaDone) => {
-        this.timeout(10000);
         setLatestReleasedVersion("1.0.0");
 
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("doesn't show any errors if the http request times out", (done: MochaDone) => {
-        this.timeout(15000);
-
         expectedRequestAndResponse.responseDelay = 10 * 1000; // 10 seconds
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("doesn't show any errors if the http request fails with 4xx", (done: MochaDone) => {
-        this.timeout(10000);
-
         expectedRequestAndResponse.statusCode = 401;
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("doesn't show any errors if the http request fails", (done: MochaDone) => {
-        this.timeout(10000);
-
         expectedRequestAndResponse.statusCode = 500;
         expectedRequestAndResponse.response = "There was a fake internal error"; // The body.version property doesn't exist with this response. It's also not JSON
         testCheckForNewerVersion(MessageExpectation.WontBeShown, done).done(() => done(), done);
     });
 
     it("works if the settings file is empty", (done: MochaDone) => {
-        this.timeout(10000);
-
         // Create an empty settings file
         Settings.saveSettings({});
 

@@ -33,8 +33,6 @@ import commands = tacoUtils.Commands.ICommandData;
 import MemoryStream = tacoTestsUtils.MemoryStream;
 
 describe("templates", function (): void {
-    this.timeout(20000);
-
     function templatesRun(): Q.Promise<any> {
         var templates: Templates = new Templates();
         return templates.run([]);
@@ -51,7 +49,6 @@ describe("templates", function (): void {
     });
 
     it("'taco templates' should not throw any error", function (done: MochaDone): void {
-        this.timeout(50000);
         templatesRun().then(done, done);
     });
 
@@ -72,7 +69,6 @@ describe("templates", function (): void {
         });
 
         it("templates prints the onboarding experience", function (done: MochaDone): void {
-            this.timeout(50000);
             templatesRun().done(() => {
                 var expected = [
                     "CommandTemplatesHeader",

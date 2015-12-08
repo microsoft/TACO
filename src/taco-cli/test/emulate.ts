@@ -83,7 +83,6 @@ describe("taco emulate", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(30000);
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         testHttpServer.close();
@@ -91,7 +90,6 @@ describe("taco emulate", function (): void {
     });
 
     beforeEach(function (mocha: MochaDone): void {
-        this.timeout(50000);
         Q.fcall(createCleanProject).done(function (): void {
             mocha();
         }, function (err: any): void {
