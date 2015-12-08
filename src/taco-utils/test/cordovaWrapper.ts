@@ -100,7 +100,6 @@ describe("cordovaWrapper", () => {
     });
 
     it("should handle problems launching cordova via the command line", function(done: MochaDone): void {
-        this.timeout(120000); // Installing Cordova for the passthrough can take some time
         CordovaWrapper.cli(["fakeCommand"]).then((): Q.Promise<any> => {
             throw new Error("Should have failed");
         }, (err: TacoError): void => {

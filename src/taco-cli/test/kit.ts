@@ -183,7 +183,6 @@ function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryPro
     }
 
 describe("Kit command: ", function (): void {
-    this.timeout(20000);
     before(() => {
         originalCwd = process.cwd();
 
@@ -247,7 +246,6 @@ describe("Kit command: ", function (): void {
     });
 
     it("'taco kit list should work for a project UTF16 taco.json", function (): Q.Promise<any> {
-        this.timeout(50000);
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
         // Create a kit project, modify taco.json encoding and run taco kit list
@@ -267,8 +265,6 @@ describe("Kit command: ", function (): void {
     describe("Kit project to a cli project: ", function (): void {
         var kitProjectpath: string = path.join(tacoHome, kitProjectDir);
         var tacoJsonPath: string = path.resolve(kitProjectpath, "taco.json");
-
-        this.timeout(180000);
 
         before(function (done: MochaDone): void {
             createKitProject("5.1.1-Kit")
@@ -316,8 +312,6 @@ describe("Kit command: ", function (): void {
         var cliProjectpath: string = path.join(tacoHome, cliProjectDir);
         var tacoJsonPath: string = path.resolve(cliProjectpath, "taco.json");
 
-        this.timeout(180000);
-        
         before(function (done: MochaDone): void {
             createCliProject("5.1.1")
             .then(function (): Q.Promise<any> {

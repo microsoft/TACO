@@ -82,7 +82,6 @@ describe("taco meta command tests: ", function (): void {
     describe("taco command", function (): void {
         tacoValidArgs.forEach(function (optionString: string[]): void {
             it("with options " + optionString + " executes with no error", function (done: MochaDone): void {
-                this.timeout(10000);
                 Taco.runWithArgs(optionString).then(function (): void {
                     done();
                 }, function (err: tacoUtils.TacoError): void {
@@ -93,7 +92,6 @@ describe("taco meta command tests: ", function (): void {
 
         tacoInvalidArgs.forEach(function (optionString: string[]): void {
             it("with invalid options " + optionString + " executes with expected error", function (done: MochaDone): void {
-                this.timeout(10000);
                 Taco.runWithArgs(optionString).then(function (): void {
                     done(new Error("Passing Invalid options to \'taco\' should have failed"));
                 }, function (err: any): void {

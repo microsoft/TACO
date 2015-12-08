@@ -56,7 +56,6 @@ describe("taco PlatformHelper", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(50000);
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         rimraf(tacoHome, done);
@@ -113,7 +112,6 @@ describe("taco PlatformHelper", function (): void {
     });
 
     it("should correctly report build locations when no platforms are specified", function (mocha: MochaDone): void {
-        this.timeout(70000);
         var data: TacoUtility.Commands.ICommandData = {
             options: {
             },

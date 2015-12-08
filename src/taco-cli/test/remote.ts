@@ -160,7 +160,6 @@ describe("taco remote", function(): void {
     });
 
     it("should be able to configure secure connections", function(mocha: MochaDone): void {
-        this.timeout(20000);
         var mockServer: https.Server = ServerMock.createSecureTestServer();
         var desiredState = {
             host: "localhost",
@@ -255,7 +254,6 @@ describe("taco remote", function(): void {
         // Here you can write to the console with logger.log(...) and then you'll be able to 
         //    retrieve the contents from the memory stream
         it("prints the onboarding experience when adding a new remote", function(done: MochaDone): void {
-            this.timeout(5000);
             var desiredState = {
                 host: "localhost",
                 port: 3000,

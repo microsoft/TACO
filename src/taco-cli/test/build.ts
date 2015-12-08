@@ -97,7 +97,6 @@ describe("taco build", function (): void {
     });
 
     after(function (done: MochaDone): void {
-        this.timeout(10000);
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         testHttpServer.close();
@@ -105,8 +104,6 @@ describe("taco build", function (): void {
     });
 
     beforeEach(function (mocha: MochaDone): void {
-        // Start each test with a pristine cordova project
-        this.timeout(50000);
         Q.fcall(createCleanProject)
             .done(() => mocha(), mocha);
     });
