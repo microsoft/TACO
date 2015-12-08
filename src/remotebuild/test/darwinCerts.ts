@@ -54,9 +54,6 @@ macOnly("Certs", function(): void {
         nconf.use("memory");
     });
 
-    // These tests can take a fair amount of time
-    this.timeout(10000);
-
     // Test that initializing server certificates creates new certificates
     it("InitializeServerCerts", function(done: MochaDone): void {
         rmdir.sync(certsDir);

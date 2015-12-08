@@ -34,9 +34,6 @@ describe("TacoPackageLoader", function (): void {
         rimraf(testHome, function (err: Error): void {/* ignored */ }); // Not sync, and ignore errors
     });
 
-    // Downloading packages from the internet can take a while.
-    this.timeout(10000);
-
     it("should load packages from npm", function (done: MochaDone): void {
         // is-empty is an arbitrarily chosen fairly small package with no dependencies
         var packageJsonFile: string = path.join(testHome, "node_modules", "is-empty", "0.0.1", "node_modules", "is-empty", "package.json");

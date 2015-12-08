@@ -46,7 +46,6 @@ import ICommand = TacoUtility.Commands.ICommand;
 var create: ICommand = CommandHelper.getCommand("create");
 
 describe("taco run", function (): void {
-    this.timeout(60000); // The remote tests sometimes take some time to run
     var testHttpServer: http.Server;
     var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "run");
     var originalCwd: string;

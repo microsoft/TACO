@@ -147,7 +147,12 @@ gulp.task("copy", function (): Q.Promise<any> {
         "/**/dynamicDependencies.json"
     ].map((val: string): string => val[0] === "!" ? "!" + path.join(buildConfig.src, val.substring(1)) : path.join(buildConfig.src, val));
 
-    return GulpUtils.copyFiles(filesToCopy, buildConfig.buildPackages);
+    return GulpUtils.copyFiles(filesToCopy, buildConfig.buildPackages).then(() => {
+        var from: string = path.resolve(buildConfig.src, "mocha.opts");
+        GulpUtils.chainAsync(tacoModules, pkg => {
+            return GulpUtils.streamToPromise(gulp.src(from).pipe(gulp.dest(path.resolve(buildConfig.buildPackages, pkg, "test"))));
+        });
+    });
 });
 
 /* Task to run typescript linter on source code (excluding typings) */

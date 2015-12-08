@@ -296,7 +296,6 @@ describe("taco platform for kit", function(): void {
         // Force KitHelper to fetch the package fresh
         kitHelper.kitPackagePromise = null;
 
-        this.timeout(100000);
         rimraf.sync(tacoHome);
         createKitProject("5.1.1-Kit")
             .done(function(): void {
@@ -305,7 +304,6 @@ describe("taco platform for kit", function(): void {
     });
 
     after(function(done: MochaDone): void {
-        this.timeout(30000);
         process.chdir(originalCwd);
         kitHelper.kitPackagePromise = null;
         rimraf(tacoHome, function(err: Error): void { done(); }); // ignore errors
@@ -313,7 +311,6 @@ describe("taco platform for kit", function(): void {
 
     describe("taco platform/plugin operation for a kit project with platform/plugin overrides execute with no errors", function(): void {
         var kitProjectpath: string;
-        this.timeout(50000);
 
         before(function(): void {
             kitProjectpath = path.join(tacoHome, kitProjectDir);
@@ -321,7 +318,6 @@ describe("taco platform for kit", function(): void {
         });
 
         after(function(done: MochaDone): void {
-            this.timeout(30000);
             process.chdir(tacoHome);
             rimraf(kitProjectpath, function(err: Error): void { done(); }); // ignore errors
         });
@@ -370,7 +366,6 @@ describe("taco platform for kit", function(): void {
 
     describe("taco platform/plugin operation for a CLI project with no platform/plugin overrides execute with no errors", function(): void {
         var cliProjectPath: string;
-        this.timeout(70000);
         before(function(mocha: MochaDone): void {
             createCliProject("5.0.0")
                 .then(function(): void {
@@ -433,8 +428,6 @@ describe("taco platform for kit", function(): void {
         var memoryStdout: MemoryStream;
 
         beforeEach(function(done: MochaDone): void {
-            this.timeout(60000); // Instaling the node packages during create can take a long time
-
             // We create a taco project outside of the test
             Q.fcall(createCliProject, "5.0.0").done(() => {
                 // After the taco project is created, we initialize the console, so we won't get the creation messages in the console
@@ -471,8 +464,6 @@ describe("taco platform for kit", function(): void {
         }
 
         it("prints the onboarding experience when adding a platform", function(done: MochaDone): void {
-            this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
-
             var firstPart: string[] = ["CommandPlatformStatusAdding"];
             var lastPart: string[] = [
                 "CommandPlatformStatusAdded",
@@ -494,8 +485,6 @@ describe("taco platform for kit", function(): void {
         });
 
         it("prints the onboarding experience when adding a plugin", function(done: MochaDone): void {
-            this.timeout(10000); // Instaling the android platform can take several seconds. Setting the timeout on the test-suit is not working
-
             var firstPart: string[] = [
                 "CommandPluginTestedPlatforms",
                 "CommandPluginStatusAdding"];

@@ -25,7 +25,6 @@ describe("taco-remote", function(): void {
     var modMountPoint: string = "Test";
 
     before(function(mocha: MochaDone): void {
-        this.timeout(10000); // the cleanup of TACO_HOME can take a while sometimes.
         process.env["TACO_UNIT_TEST"] = true;
         process.env["TACO_HOME"] = serverDir;
         rimraf.sync(UtilHelper.tacoHome);
@@ -69,8 +68,6 @@ describe("taco-remote", function(): void {
     });
 
     macOnlyIt("should successfully build the sample project", function(mocha: MochaDone): void {
-        // Building can take a while
-        this.timeout(90000);
         var serverUrl: string = "http://" + os.hostname() + ":3000";
         selftest.test(serverUrl, modMountPoint, downloadDir, false, null).done(function(): void {
             mocha();
@@ -79,8 +76,6 @@ describe("taco-remote", function(): void {
 
     // Note: This test will fail unless it is run from a GUI login, or the user running the test has jumped through some hoops to allow the "codesign" program access to the keychain
     it.skip("should successfully build the sample project for device", function(mocha: MochaDone): void {
-        // Building can take a while
-        this.timeout(90000);
         var serverUrl: string = "http://" + os.hostname() + ":3000";
         selftest.test(serverUrl, modMountPoint, downloadDir, true, null).done(function(): void {
             mocha();
