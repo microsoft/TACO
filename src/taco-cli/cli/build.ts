@@ -70,31 +70,26 @@ class Build extends commands.TacoCommandBase {
     }
 
     private static cleanPlatform(platform: PlatformHelper.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
-        var promise: Q.Promise<any> = Q({});
         switch (platform.location) {
-        case PlatformHelper.BuildLocationType.Local:
-            // To clean locally, try and run the clean script
-            var cleanScriptPath: string = path.join("platforms", platform.platform, "cordova", "clean");
-            if (fs.existsSync(cleanScriptPath)) {
-                promise = promise.then(function (): Q.Promise<any> {
-                    return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function (err: any): void {
+            case PlatformHelper.BuildLocationType.Local:
+                // To clean locally, try and run the clean script
+                var cleanScriptPath: string = path.join("platforms", platform.platform, "cordova", "clean");
+                if (fs.existsSync(cleanScriptPath)) {
+                    return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function(err: any): void {
                         // If we can't run the script, then show a warning but continue
                         logger.logWarning(err.toString());
                     });
-                });
-            }
+                }
+                break;
+            case PlatformHelper.BuildLocationType.Remote:
+                if (!(commandData.options["release"] || commandData.options["debug"])) {
+                    // If neither --debug nor --release is specified, then clean both
+                    commandData.options["release"] = commandData.options["debug"] = true;
+                }
 
-            break;
-        case PlatformHelper.BuildLocationType.Remote:
-            if (!(commandData.options["release"] || commandData.options["debug"])) {
-                // If neither --debug nor --release is specified, then clean both
-                commandData.options["release"] = commandData.options["debug"] = true;
-            }
-
-            var remotePlatform: string = path.resolve(".", "remote", platform.platform);
-            var configurations: string[] = ["release", "debug"];
-            promise = configurations.reduce(function (soFar: Q.Promise<any>, configuration: string): Q.Promise<any> {
-                return soFar.then(function (): void {
+                var remotePlatform: string = path.resolve(".", "remote", platform.platform);
+                var configurations: string[] = ["release", "debug"];
+                return tacoUtility.PromisesUtils.chain(configurations, (configuration: string) => {
                     if (commandData.options[configuration]) {
                         var remotePlatformConfig: string = path.join(remotePlatform, configuration);
                         if (fs.existsSync(remotePlatformConfig)) {
@@ -102,15 +97,13 @@ class Build extends commands.TacoCommandBase {
                             rimraf.sync(remotePlatformConfig);
                         }
                     }
+                    return Q({});
                 });
-            }, promise);
-
-            break;
-        default:
-            throw errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform);
+            default:
+                throw errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform);
         }
 
-        return promise;
+        return Q({});
     }
 
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData, telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {

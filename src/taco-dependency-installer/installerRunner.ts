@@ -52,15 +52,15 @@ class InstallerRunner {
         return tacoUtils.TelemetryHelper.generate("InstallerRunner", (telemetry: tacoUtils.TelemetryGenerator) => {
             var self: InstallerRunner = this;
             return Q({})
-                .then(function (): void {
+                .then(function(): void {
                     telemetry.step("parseInstallConfig");
                     self.parseInstallConfig(telemetry);
                 })
-                .then(function (): Q.Promise<any> {
+                .then(function(): Q.Promise<any> {
                     telemetry.step("runInstallers");
                     return self.runInstallers();
                 })
-                .then(function (): number {
+                .then(function(): number {
                     // If we reach this point, it means we ran the installers. Verify if there was an installation error and return appropriately.
                     telemetry.step("runInstallersFinished").add("installerErrorFlag", self.installerErrorFlag, /*isPii*/ false);
                     if (self.installerErrorFlag) {
@@ -69,7 +69,7 @@ class InstallerRunner {
 
                     return ExitCode.Success;
                 })
-                .catch(function (err: Error): number {
+                .catch(function(err: Error): number {
                     // If we reach this point, it either means we had an unknown error or a config file validation error. Both cases have a return code of FatalError.
                     telemetry.step("catch").add("errorMessage", err.message, /*isPii*/ false);
                     self.logger.logError(err.message);
@@ -100,7 +100,7 @@ class InstallerRunner {
         var installPaths: { path: string; displayName: string; }[] = [];
 
         this.missingDependencies = [];
-        parsedData.dependencies.forEach(function (value: DependencyInstallerInterfaces.IDependency): void {
+        parsedData.dependencies.forEach(function(value: DependencyInstallerInterfaces.IDependency): void {
             // Verify the dependency id exists
             if (!self.dependenciesDataWrapper.dependencyExists(value.id)) {
                 throw new Error(resources.getString("UnknownDependency", value.id));
@@ -134,7 +134,7 @@ class InstallerRunner {
 
                 // Verify that this path is not already used by another dependency
                 var dependencyWithSamePath: string;
-                var isPathUnique: boolean = !installPaths.some(function (previousInstallPath: { path: string; displayName: string; }): boolean {
+                var isPathUnique: boolean = !installPaths.some(function(previousInstallPath: { path: string; displayName: string; }): boolean {
                     var path1: string = path.resolve(previousInstallPath.path);
                     var path2: string = path.resolve(value.installDestination);
 
@@ -189,26 +189,24 @@ class InstallerRunner {
 
     private runInstallers(): Q.Promise<any> {
         var self: InstallerRunner = this;
+        var baseHeaderString: string = "";
 
-        return this.missingDependencies.reduce(function (previous: Q.Promise<any>, value: IDependencyWrapper, currentIndex: number): Q.Promise<any> {
-            return previous
-                .then(function (): Q.Promise<any> {
-                    var baseHeaderString: string = currentIndex === 0 ? "" : "<br/>";
+        return tacoUtils.PromisesUtils.chain(this.missingDependencies, (value: IDependencyWrapper) => {
+            self.logger.log(baseHeaderString + "<highlight>" + value.dependency.displayName + "</highlight>");
+            // we need a newline after printing entry
+            if (!baseHeaderString) {
+                baseHeaderString = "<br/>"
+            }
 
-                    self.logger.log(baseHeaderString + "<highlight>" + value.dependency.displayName + "</highlight>");
-
-                    return value.installer.run();
-                })
-                .catch(function (err: Error): void {
-                    self.errorHandler(err);
+            return Q({})
+                .then(() => value.installer.run())
+                .catch(function(err: Error): void {
+                    self.installerErrorFlag = true;
+                    self.logger.logError(err.message);
                 });
-        }, Q({}));
+        });
     }
 
-    private errorHandler(err: Error): void {
-        this.installerErrorFlag = true;
-        this.logger.logError(err.message);
-    }
 }
 
 export = InstallerRunner;

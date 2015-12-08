@@ -193,8 +193,7 @@ class Server {
     }
 
     private static eachServerModule(conf: RemoteBuildConf, eachFunc: (modGen: RemoteBuild.IServerModuleFactory, mod: string, modConfig: { mountPath: string }) => Q.Promise<any>): Q.Promise<any> {
-        var serverMods: string[] = conf.modules;
-        return serverMods.reduce<Q.Promise<any>>(function (promise: Q.Promise<any>, mod: string): Q.Promise<any> {
+        return TacoUtility.PromisesUtils.chain(conf.modules, mod => {
             try {
                 var requirePath: string = conf.moduleConfig(mod).requirePath || mod;
                 var modGen: RemoteBuild.IServerModuleFactory = require(requirePath);
@@ -202,11 +201,8 @@ class Server {
                 Logger.logError(resources.getString("UnableToLoadModule", mod));
                 return Q.reject(e);
             }
-
-            return promise.then(function (): Q.Promise<any> {
-                return eachFunc(modGen, mod, conf.moduleConfig(mod));
-            });
-        }, Q({}));
+            return eachFunc(modGen, mod, conf.moduleConfig(mod));
+        });
     }
 
     private static startupServer(conf: RemoteBuildConf, app: express.Application): Q.Promise<{ close(callback: Function): void }> {

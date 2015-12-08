@@ -139,37 +139,20 @@ class Builder {
             return Q.resolve({});
         }
 
-        var newAndModifiedPlugins: string[] = fs.readdirSync(remotePluginsPath).filter(function (entry: string): boolean {
+        var newAndModifiedPlugins: string[] = fs.readdirSync(remotePluginsPath).filter(function(entry: string): boolean {
             return fs.statSync(path.join(remotePluginsPath, entry)).isDirectory();
         });
         var pluginNameRegex: RegExp = new RegExp("plugins#([^#]*)#plugin.xml$".replace(/#/g, path.sep === "\\" ? "\\\\" : path.sep));
         var deletedPlugins: string[] = [];
         if (this.currentBuild.changeList && this.currentBuild.changeList.deletedFiles) {
-            deletedPlugins = this.currentBuild.changeList.deletedFiles.filter(function (file: string): boolean {
+            deletedPlugins = this.currentBuild.changeList.deletedFiles.filter(function(file: string): boolean {
                 // file paths have been pre-normalised to use this platform's slashes
                 // A plugin is deleted if its plugin.xml is deleted
                 return !!file.match(pluginNameRegex);
-            }).map(function (file: string): string {
+            }).map(function(file: string): string {
                 return file.match(pluginNameRegex)[1];
             });
         }
-
-        var deleteOldPlugins: Q.Promise<any> = deletedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
-                if (fs.existsSync(path.join("plugins", plugin))) {
-                    return self.cordova.raw.plugin("remove", plugin).catch(function (err: any): void {
-                        // In the case of an error, don't stop the whole thing; report the error to the log and attempt to continue.
-                        // The plugin may have other plugins depending on it. If so, we are probably going to remove those later on,
-                        // which will then also remove this plugin
-                        Logger.logError(err);
-                    });
-                } else {
-                    // If the file doesn't exist any more, it may have been a dependent plugin that was removed
-                    // along with another plugin. It's not there any more at least, so lets assume it worked.
-                    return Q.resolve({});
-                }
-            });
-        }, Q({}));
 
         var fetchJson: Cordova.IFetchJson = {};
         var fetchJsonPath: string = path.join(remotePluginsPath, "fetch.json");
@@ -182,35 +165,49 @@ class Builder {
                 // and report exactly what variables were required.
             }
         }
-
-        return newAndModifiedPlugins.reduce(function (soFar: Q.Promise<any>, plugin: string): Q.Promise<any> {
-            return soFar.then(function (): Q.Promise<any> {
-                var newFolder: string = path.join(remotePluginsPath, plugin);
-                var installedFolder: string = path.join("plugins", plugin);
-                if (fs.existsSync(installedFolder)) {
+        // Delete old plugins and then update new/modified plugins
+        return utils.PromisesUtils.chain<string, any>(deletedPlugins, (plugin: string) => {
+            // If the file doesn't exist any more, it may have been a dependent plugin that was removed
+            // along with another plugin. It's not there any more at least, so lets assume it worked.
+            if (!fs.existsSync(path.join("plugins", plugin))) {
+                return Q.resolve({});
+            }
+            return self.cordova.raw.plugin("remove", plugin)
+                // In the case of an error, don't stop the whole thing; report the error to the log and attempt to continue.
+                // The plugin may have other plugins depending on it. If so, we are probably going to remove those later on,
+                // which will then also remove this plugin
+                .catch(function(err: any): void {
+                    Logger.logError(err);
+                });
+            })
+            .then(function(): Q.Promise<any> {
+                return utils.PromisesUtils.chain(newAndModifiedPlugins, (plugin: string) => {
+                    var newFolder: string = path.join(remotePluginsPath, plugin);
+                    var installedFolder: string = path.join("plugins", plugin);
                     // The plugin is already installed; overwrite it
                     // Note that the plugin may have been installed by another plugin that depended on it;
                     // I don't know what version will have been installed then, but hopefully by
                     // overwriting it with the one that we have, we'll end up in the correct state.
-                    return UtilHelper.copyRecursive(newFolder, installedFolder);
-                } else {
+                    if (fs.existsSync(installedFolder)) {
+                        return UtilHelper.copyRecursive(newFolder, installedFolder);
+                    }
                     // The plugin is not installed; install it
                     var cliVariables: Cordova.IKeyValueStore<string> = {};
 
                     // Check to see if the plugin is mentioned in fetch.json and has variables
                     if (plugin in fetchJson && fetchJson[plugin].variables) {
-                        Object.keys(fetchJson[plugin].variables).forEach(function (key: string): void {
+                        Object.keys(fetchJson[plugin].variables).forEach(function(key: string): void {
                             cliVariables[key] = fetchJson[plugin].variables[key];
                         });
                     }
 
                     return self.cordova.raw.plugin("add", newFolder, { cli_variables: cliVariables });
-                }
+                });
+            })
+            .finally(function(): void {
+                // Always clean up after ourselves; we don't want to get confused the next time we do a build.
+                rimraf.sync(remotePluginsPath);
             });
-        }, deleteOldPlugins).finally(function (): void {
-            // Always clean up after ourselves; we don't want to get confused the next time we do a build.
-            rimraf.sync(remotePluginsPath);
-        });
     }
 
     private update_platform(): Q.Promise<any> {
