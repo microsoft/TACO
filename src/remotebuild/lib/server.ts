@@ -193,7 +193,7 @@ class Server {
     }
 
     private static eachServerModule(conf: RemoteBuildConf, eachFunc: (modGen: RemoteBuild.IServerModuleFactory, mod: string, modConfig: { mountPath: string }) => Q.Promise<any>): Q.Promise<any> {
-        return TacoUtility.PromisesUtils.chain(conf.modules, mod => {
+        return utils.PromisesUtils.chain(conf.modules, mod => {
             try {
                 var requirePath: string = conf.moduleConfig(mod).requirePath || mod;
                 var modGen: RemoteBuild.IServerModuleFactory = require(requirePath);
