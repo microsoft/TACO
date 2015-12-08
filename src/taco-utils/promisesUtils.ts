@@ -78,18 +78,12 @@ module TacoUtility {
          *  @promiseFalse: then promise if condition resolves to "false"
          */
         public static condition<T>(condition: Q.Promise<boolean> | boolean,
-            promiseTrue: (() => Q.Promise<T>) | T,
-            promiseFalse: (() => Q.Promise<T>) | T): Q.Promise<T> {
+            promiseTrue: PromiseFuncOrValue<T>,
+            promiseFalse: PromiseFuncOrValue<T>): Q.Promise<T> {
 
-            var _promiseTrue: () => Q.Promise<T>  = PromisesUtils.getPromiseFunc(promiseTrue);
-            var _promiseFalse: () => Q.Promise<T> = PromisesUtils.getPromiseFunc(promiseFalse);
-
-            if (typeof condition === "boolean") {
-                return condition ? _promiseTrue() : _promiseFalse();
-            }
-            return (<Q.Promise<boolean>>condition)
+            return Q(condition)
                 .then(function(result: boolean): Q.Promise<T> {
-                    return result ? _promiseTrue() : _promiseFalse();
+                    return result ? PromisesUtils.getPromiseFunc(promiseTrue)() : PromisesUtils.getPromiseFunc(promiseFalse)();
                 });
         }
 
@@ -101,15 +95,18 @@ module TacoUtility {
          *  @returns: resolves to true if either of the promises resolve to true, false otherwise
          */
         private static logicalOp(exitValue: boolean, ...conditions: PromiseFuncOrValue<boolean>[]): Q.Promise<boolean> {
-            var args: PromiseFuncOrValue<boolean>[] = <PromiseFuncOrValue<boolean>[]>ArgsHelper.getOptionalArgsArrayFromFunctionCall(arguments, 1);
-            return args.reduce(function(soFar: Q.Promise<boolean>, arg: () => Q.Promise<boolean>): Q.Promise<boolean> {
-                return soFar.then(function(valueSoFar: boolean): Q.Promise<boolean> {
-                    if (valueSoFar === exitValue) {
-                        return Q(exitValue);
-                    }
-                    return PromisesUtils.getPromiseFunc(arg)();
-                });
-            }, Q(!exitValue));
+            var stepFunction = (soFar: boolean, nextIndex: number): Q.Promise<boolean> => {
+                if (soFar === exitValue) {
+                    return Q(exitValue);
+                }
+
+                if (nextIndex < conditions.length) {
+                    return PromisesUtils.getPromiseFunc(conditions[nextIndex])()
+                        .then((result) => stepFunction(result, nextIndex + 1));
+                }
+                return Q(soFar);
+            };
+            return stepFunction(!exitValue, 0);
         }
 
         private static getPromiseFunc<T>(promiseFuncOrVal: PromiseFuncOrValue<T>): () => Q.Promise<T> {
@@ -118,7 +115,6 @@ module TacoUtility {
             }
             return () => Q(<T>promiseFuncOrVal);
         }
-
     }
 }
 
