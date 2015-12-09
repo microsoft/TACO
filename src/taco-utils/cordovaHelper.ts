@@ -34,7 +34,7 @@ import TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 
 module TacoUtility {
-    export class CordovaHelper {        
+    export class CordovaHelper {
         // Cordova's known parameters
         private static CORDOVA_BOOLEAN_PARAMETERS: any =
         {
@@ -381,7 +381,7 @@ module TacoUtility {
         }
 
         private static editConfigXml(projectInfo: IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
-            return TacoPackageLoader.lazyRequire(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion)
+            return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
                 .then(function(cordova: typeof Cordova): Q.Promise<any> {
                     var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
                     editFunc(configParser);
@@ -391,7 +391,7 @@ module TacoUtility {
         }
 
         private static getTargetVersionSpec(projectInfo: IProjectInfo, readFunc: (configParser: ConfigParser) => string): Q.Promise<string> {
-            return TacoPackageLoader.lazyRequire(CordovaHelper.CORDOVA_NPM_PACKAGE_NAME, CordovaHelper.CORDOVA_NPM_PACKAGE_NAME + "@" + projectInfo.cordovaCliVersion)
+            return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
                 .then(function(cordova: typeof Cordova): string {
                     var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
                     return readFunc(configParser);
