@@ -430,16 +430,15 @@ class Kit extends commands.TacoCommandBase {
 
         // Remove all the updatable plugins and re-add them
         return Kit.invokeComponentCommandSilent(command, "remove", Object.keys(components), downloadOptions)
-        .then(function (): Q.Promise<any> {
-           return Object.keys(components).reduce<Q.Promise<any>>(function (soFar: Q.Promise<any>, componentName: string): Q.Promise<any> {
-                return soFar.then(function (): Q.Promise<any> {
+            .then(function(): Q.Promise<any> {
+                return tacoUtility.PromisesUtils.chain(Object.keys(components), (componentName: string) => {
                     // No override on the case of CLI project update - Cordova CLI gets its pinned version
                     var componentOverride: string = editParams.isKitProject ? componentName + "@" + components[componentName] : componentName;
                     // Do not save in the case of updating to CLI project
                     downloadOptions.save = editParams.isKitProject;
                     return Kit.invokeComponentCommandSilent(command, "add", [componentOverride], downloadOptions);
-                });
-            }, Q({}));
+
+            });
         });
     }
 

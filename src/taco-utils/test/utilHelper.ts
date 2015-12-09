@@ -212,9 +212,12 @@ describe("UtilHelper", function (): void {
             writeBufferAndValidate("utf8.json", stringified => {
                 var buffer: Buffer = new Buffer(stringified, "utf8");
                 var malformedBuffer: Buffer = new Buffer(buffer.length + 3);
+
                 // add some random bytes to the malformed buffer
-                malformedBuffer.write("\u00bd\u00bc\u00be");
-                buffer.copy(malformedBuffer, malformedBuffer.length, 0);
+                var badString: string = "\u00bd\u00bc\u00be";
+                malformedBuffer.write(badString);
+                buffer.copy(malformedBuffer, badString.length, 0);
+
                 return malformedBuffer;
             }, TacoErrorCodes.ErrorUserJsonMalformed);
         });

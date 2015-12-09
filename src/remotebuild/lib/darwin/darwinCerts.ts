@@ -30,6 +30,7 @@ import tacoUtils = require ("taco-utils");
 
 import utils = tacoUtils.UtilHelper;
 import logger = tacoUtils.Logger;
+import PromisesUtils = tacoUtils.PromisesUtils;
 
 class Certs {
     private static debug: boolean = false;
@@ -113,45 +114,35 @@ class Certs {
 
         var certsExist: boolean = fs.existsSync(certPaths.caCertPath) && fs.existsSync(certPaths.serverKeyPath) && fs.existsSync(certPaths.serverCertPath);
         certPaths.newCerts = !certsExist;
-        var promise: Q.Promise<any>;
-        if (certsExist) {
-            promise = Certs.isExpired(certPaths.caCertPath).
-                then(function (hasExpired: boolean): Q.Promise<boolean> {
-                    if (hasExpired) {
-                        return Q(true);
-                    }
 
-                    return Certs.isExpired(certPaths.serverCertPath);
-                });
-        } else {
-            promise = Q(true); // do not exist, so true -> need making
-        }
+        // should create certs if they don't exist or if caSertpath or serverCertPath has expired
+        var shouldCreateCerts: Q.Promise<boolean> = PromisesUtils.or(
+            !certsExist,
+            () => Certs.isExpired(certPaths.caCertPath),
+            () => Certs.isExpired(certPaths.serverCertPath));
+        
 
-        promise = promise.then(function (shouldMake: boolean): Q.Promise<any> {
-            if (!shouldMake) {
-                return Q({});
-            }
-
+        return PromisesUtils.condition<any>(shouldCreateCerts, () => {
             utils.createDirectoryIfNecessary(certsDir);
             fs.chmodSync(certsDir, 448); // 0700, user read/write/executable, no other permissions
             var options: Certs.ICertOptions = Certs.certOptionsFromConf(conf);
             return Certs.makeSelfSigningCACert(certPaths.caKeyPath, certPaths.caCertPath, options).
-                then(function (): Q.Promise<void> {
-                return Certs.makeSelfSignedCert(certPaths.caKeyPath, certPaths.caCertPath, certPaths.serverKeyPath, certPaths.serverCertPath, options, conf);
+                then(function(): Q.Promise<void> {
+                    return Certs.makeSelfSignedCert(certPaths.caKeyPath, certPaths.caCertPath, certPaths.serverKeyPath, certPaths.serverCertPath, options, conf);
                 }).
-                then(function (): void {
+                then(function(): void {
                     certPaths.newCerts = true;
                 });
-        }).then(function (): HostSpecifics.ICertStore {
-            Certs.certStore = {
-                newCerts: certPaths.newCerts,
-                getKey: function (): Buffer { return fs.readFileSync(certPaths.serverKeyPath); },
-                getCert: function (): Buffer { return fs.readFileSync(certPaths.serverCertPath); },
-                getCA: function (): Buffer { return fs.readFileSync(certPaths.caCertPath); }
-            };
-            return Certs.certStore;
+        }, {})
+            .then(function(): HostSpecifics.ICertStore {
+                Certs.certStore = {
+                    newCerts: certPaths.newCerts,
+                    getKey: function(): Buffer { return fs.readFileSync(certPaths.serverKeyPath); },
+                    getCert: function(): Buffer { return fs.readFileSync(certPaths.serverCertPath); },
+                    getCA: function(): Buffer { return fs.readFileSync(certPaths.caCertPath); }
+                };
+                return Certs.certStore;
             });
-        return promise;
     }
 
     public static getServerCerts(): Q.Promise<HostSpecifics.ICertStore> {
