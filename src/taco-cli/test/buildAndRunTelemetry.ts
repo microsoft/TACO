@@ -356,7 +356,7 @@ module BuildAndRunTelemetryTests {
             fs.writeFileSync(buildInfoFile, "{\"buildNumber\": " + buildNumber + "}");
         }
 
-        it("2. ios remote debug target non_secure_server incremental", (done: MochaDone) => {
+        it("2. TestCordovaExempt ios remote debug target non_secure_server incremental", (done: MochaDone) => {
             var args: string[] = ["--remote", "--debug", "--target=ipad 2", "ios"];
 
             var expected: TacoUtility.ICommandTelemetryProperties = {
@@ -384,7 +384,7 @@ module BuildAndRunTelemetryTests {
                 }).done(() => done(), done);
         });
 
-        it("3. android ios unsecure_server not_incremental", (done: MochaDone) => {
+        it("3. TestCordovaExempt android ios unsecure_server not_incremental", (done: MochaDone) => {
             var args: string[] = ["android", "ios"];
             var expected: TacoUtility.ICommandTelemetryProperties = {
                 "platforms.actuallyBuilt.remote1": { isPii: false, value: "android" },
