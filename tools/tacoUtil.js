@@ -19,9 +19,8 @@ switch(process.env.npm_lifecycle_event){
         break;
 }
 
-function compileBuildScripts(callback) {
-    console.log("Compiling build tools...");
-    var success = true;
+function compileBuildScripts() {
+    console.log("Compiling TACO build tools...\n");
     var gulp = require("gulp");
     var ts = require('gulp-typescript');
     var sourcemaps = require("gulp-sourcemaps");
@@ -29,23 +28,22 @@ function compileBuildScripts(callback) {
         .pipe(sourcemaps.init())
         .pipe(ts(buildConfig.tsCompileOptions))
         .on("error", function(error){
-            if (error){
-                success = false;
+            if (error) {
+                console.error("Failed: Compilation of TACO build tools failed.");
+                process.exit(1);
             }
         })
         .pipe(sourcemaps.write("."))
         .pipe(gulp.dest(path.resolve(buildConfig.buildTools)))
         .on("end", function(){
-            if (success){
-                // copy over build config to build\tools
-                // this is needed to make sure compile gulp scripts have same path to build_config
-                fs.writeFileSync(path.resolve(buildConfig.buildTools, "build_config.json"), JSON.stringify(buildConfig));
-                console.log(greenColorFunction("Success!!! To build the project, run 'gulp' from project root directory"));
-            }
+            // copy over build config to build\tools
+            // this is needed to make sure compile gulp scripts have same path to build_config
+            fs.writeFileSync(path.resolve(buildConfig.buildTools, "build_config.json"), JSON.stringify(buildConfig));
+            console.log(greenColorFunction("Success!!! To build the project, run 'gulp' from TACO root directory"));
         });
 }
 
-function cleanBuild(callback) {
+function cleanBuild() {
     deleteFolderRecursive(buildConfig.buildTools);
 
     var devDependencies = [];
@@ -67,16 +65,10 @@ function cleanBuild(callback) {
                 else {
                     if (error){
                         console.error(util.format("Failed: 'npm uninstall %s'. Error: error", pkg, error));
-                        if (callback){
-                            callback(error);
-                        }
+                        process.exit(1);
                     }
                 }
             });
-        } else {
-            if (callback){
-                callback();
-            }
         }
     };
     asyncLoop(0);
