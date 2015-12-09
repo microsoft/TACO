@@ -10,6 +10,7 @@
 
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/applicationinsights.d.ts" />
+/// <reference path="../typings/winreg.d.ts" />
 
 import appInsights = require ("applicationinsights");
 import crypto = require ("crypto");
@@ -24,6 +25,7 @@ import Q = require ("q");
 import readline = require ("readline");
 import sender = require ("applicationinsights/Library/Sender");
 import telemetryLogger = require ("applicationinsights/Library/Logging");
+import winreg = require("winreg");
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
 
@@ -195,9 +197,8 @@ module TacoUtility {
             private static telemetrySettings: ITelemetrySettings = null;
             private static TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
             private static APPINSIGHTS_INSTRUMENTATIONKEY: string = "10baf391-c2e3-4651-a726-e9b25d8470fd";
-            private static REGISTRY_USERID_KEY: string = "HKCU\\SOFTWARE\\Microsoft\\SQMClient";
+            private static REGISTRY_SQMCLIENT_NODE: string = "\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE: string = "UserId";
-            private static REGISTRY_MACHINEID_KEY: string = "HKLM\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_MACHINEID_VALUE: string = "MachineId";
             private static INTERNAL_DOMAIN_SUFFIX: string = "microsoft.com";
             private static INTERNAL_USER_ENV_VAR: string = "TACOINTERNAL";
@@ -225,23 +226,25 @@ module TacoUtility {
                     context.tags[context.keys.applicationVersion] = appVersion;
                 }
 
-                TelemetryUtils.userId = TelemetryUtils.getUserId();
-                TelemetryUtils.machineId = TelemetryUtils.getMachineId();
-                TelemetryUtils.sessionId = TelemetryUtils.generateGuid();
-                TelemetryUtils.userType = TelemetryUtils.getUserType();
-                
-
-                if (_.isUndefined(isOptedInValue)) {
-                    return TelemetryUtils.getOptIn()
-                    .then(function (optIn: boolean): void {
-                        Telemetry.isOptedIn = optIn;
+                return Q.all([TelemetryUtils.getUserId(), TelemetryUtils.getMachineId()])
+                .spread<any>(function (userId: string, machineId: string): void {
+                    TelemetryUtils.userId = userId;
+                    TelemetryUtils.machineId = machineId;
+                    TelemetryUtils.sessionId = TelemetryUtils.generateGuid();
+                    TelemetryUtils.userType = TelemetryUtils.getUserType();
+                }).then(function() : Q.Promise<any> {
+                    if (_.isUndefined(isOptedInValue)) {
+                        return TelemetryUtils.getOptIn()
+                        .then(function (optIn: boolean): void {
+                            Telemetry.isOptedIn = optIn;
+                            TelemetryUtils.saveSettings();
+                        });
+                    } else {
+                        Telemetry.isOptedIn = isOptedInValue;
                         TelemetryUtils.saveSettings();
-                    });
-                } else {
-                    Telemetry.isOptedIn = isOptedInValue;
-                    TelemetryUtils.saveSettings();
-                    return Q({});
-                }
+                        return Q({});
+                    }
+                });
             }
 
             public static addCommonProperties(event: any): void {
@@ -293,7 +296,7 @@ module TacoUtility {
                 logger.logLine();
 
                 var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
-                var yesOrNoHandler = readline.createInterface({ input: process.stdin, output: process.stdout });
+                var yesOrNoHandler = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
 
                 yesOrNoHandler.question(LogFormatHelper.toFormattedString(optinMessage), function (answer: string): void {
                     yesOrNoHandler.close();
@@ -344,17 +347,20 @@ module TacoUtility {
                 return userType;
             }
 
-            private static getRegistryValue(key: string, value: string): string {
-                // TODO: Task 1186340:TACO cli telemetry: Update to use winreg package instead of windows-no-runnable
-                var windows: any = require("windows-no-runnable");
-                try {
-                    var regKey: {[key: string]: {value: string}} = windows.registry(key);
-                    if (regKey && regKey[value] && regKey[value].value) {
-                        return regKey[value].value;
-                    }
-                } catch (e) {
-                    return null;
-                }
+            private static getRegistryValue(key: string, value: string, hive: winreg.Hive): Q.Promise<string> {
+                var deferred: Q.Deferred<string> = Q.defer<string>();
+                var regKey = new winreg({
+                                        hive: hive,                                          // HKEY_CURRENT_USER
+                                        key:  key // key containing autostart programs
+                                });
+                regKey.get(value, function (err: any, itemValue: winreg.WinregValue) {
+                    if (err)
+                        deferred.reject(err);
+                    else
+                        deferred.resolve(itemValue.value);
+                });
+
+                return deferred.promise;
             }
 
             /*
@@ -379,15 +385,45 @@ module TacoUtility {
                 fs.writeFileSync(TelemetryUtils.telemetrySettingsFile, JSON.stringify(TelemetryUtils.telemetrySettings));
             }
 
-            private static getMachineId(): string {
+            private static getUniqueId(regValue: string, regHive: winreg.Hive, fallback: () => string): Q.Promise<any> {
+                var uniqueId: string;
+                var deferred: Q.Deferred<string> = Q.defer<string>();
+                if (os.platform() === "win32") {
+                    TelemetryUtils.getRegistryValue(TelemetryUtils.REGISTRY_SQMCLIENT_NODE, regValue, regHive)
+                    .then(function(id: string): void {
+                        if (id) {
+                            uniqueId = id.replace(/[{}]/g, "");
+                        } else {
+                            uniqueId = fallback();
+                        }
+
+                        deferred.resolve(id);
+                    });
+                } else {
+                    uniqueId = fallback();
+                    deferred.resolve(uniqueId);
+                }
+                
+                return deferred.promise;
+            }
+
+            private static generateMachineId(): string {
+                var macAddress: string = TelemetryUtils.getMacAddress();
+                return crypto.createHash("sha256").update(macAddress, "utf8").digest("hex");
+            }
+
+            private static getMachineId(): Q.Promise<string> {
                 var machineId: string = TelemetryUtils.telemetrySettings.machineId;
                 if (!machineId) {
-                    var macAddress: string = TelemetryUtils.getMacAddress();
-                    machineId = crypto.createHash("sha256").update(macAddress, "utf8").digest("hex");
+                    return TelemetryUtils.getUniqueId(TelemetryUtils.REGISTRY_MACHINEID_VALUE, winreg.HKLM, TelemetryUtils.generateMachineId)
+                    .then(function(id: string): Q.Promise<string> {      
+                        TelemetryUtils.telemetrySettings.machineId = id;
+                        return Q.resolve(id);
+                    });
+                } else {
                     TelemetryUtils.telemetrySettings.machineId = machineId;
+                    return Q.resolve(machineId);
                 }
-
-                return machineId;
             }
 
             private static getMacAddress(): string {
@@ -406,19 +442,18 @@ module TacoUtility {
                 return macAddress;
             }
 
-            private static getUserId(): string {
+            private static getUserId(): Q.Promise<string> {
                 var userId: string = TelemetryUtils.telemetrySettings.userId;
                 if (!userId) {
-                    if (os.platform() === "win32") {
-                        userId = TelemetryUtils.getRegistryValue(TelemetryUtils.REGISTRY_USERID_KEY, TelemetryUtils.REGISTRY_USERID_VALUE);
-                    }
-
-                    userId = userId ? userId.replace(/[{}]/g, "") : TelemetryUtils.generateGuid();
-
+                    return TelemetryUtils.getUniqueId(TelemetryUtils.REGISTRY_USERID_VALUE, winreg.HKCU, TelemetryUtils.generateGuid)
+                    .then(function(id: string): Q.Promise<string> {
+                        TelemetryUtils.telemetrySettings.userId = id;
+                        return Q.resolve(id);
+                    });
+                } else {
                     TelemetryUtils.telemetrySettings.userId = userId;
+                    return Q.resolve(userId);
                 }
-
-                return userId;
             }
         };
     };
