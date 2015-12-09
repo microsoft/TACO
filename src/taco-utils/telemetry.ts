@@ -26,6 +26,7 @@ import readline = require ("readline");
 import sender = require ("applicationinsights/Library/Sender");
 import telemetryLogger = require ("applicationinsights/Library/Logging");
 import winreg = require("winreg");
+
 import utilHelper = require ("./utilHelper");
 import utilResources = require ("./resources/resourceManager");
 
@@ -350,14 +351,16 @@ module TacoUtility {
             private static getRegistryValue(key: string, value: string, hive: winreg.Hive): Q.Promise<string> {
                 var deferred: Q.Deferred<string> = Q.defer<string>();
                 var regKey = new winreg({
-                                        hive: hive,                                          // HKEY_CURRENT_USER
-                                        key:  key // key containing autostart programs
+                                        hive: hive,
+                                        key:  key
                                 });
                 regKey.get(value, function (err: any, itemValue: winreg.WinregValue) {
-                    if (err)
+                    if (err) {
                         deferred.reject(err);
-                    else
+                    }
+                    else {
                         deferred.resolve(itemValue.value);
+                    }
                 });
 
                 return deferred.promise;
@@ -389,22 +392,18 @@ module TacoUtility {
                 var uniqueId: string;
                 var deferred: Q.Deferred<string> = Q.defer<string>();
                 if (os.platform() === "win32") {
-                    TelemetryUtils.getRegistryValue(TelemetryUtils.REGISTRY_SQMCLIENT_NODE, regValue, regHive)
-                    .then(function(id: string): void {
+                    return TelemetryUtils.getRegistryValue(TelemetryUtils.REGISTRY_SQMCLIENT_NODE, regValue, regHive)
+                    .then(function(id: string): Q.Promise<string> {
                         if (id) {
                             uniqueId = id.replace(/[{}]/g, "");
+                            return Q.resolve(uniqueId);
                         } else {
-                            uniqueId = fallback();
+                            return Q.resolve(fallback());
                         }
-
-                        deferred.resolve(id);
                     });
                 } else {
-                    uniqueId = fallback();
-                    deferred.resolve(uniqueId);
+                    return Q.resolve(fallback());
                 }
-                
-                return deferred.promise;
             }
 
             private static generateMachineId(): string {
