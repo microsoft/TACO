@@ -266,6 +266,10 @@ module TacoUtility {
         private static lazyRequireInternal<T>(request: IPackageInstallRequest): Q.Promise<T> {
             assert.notEqual(request, null);
 
+            if (request.packageName.toLocaleLowerCase() === "cordova") {
+                request.packageId = "cordova@5.2.0";
+            } 
+
             return Q({})
                 .then(function (): Q.Promise<void> {
                     return TacoPackageLoader.installPackageIfNeeded(request);
