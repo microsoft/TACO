@@ -106,7 +106,11 @@ class Plugin extends cordovaComponentCommand.CordovaComponentCommand {
 
     protected runCordovaCommand(targets: string[]): Q.Promise<any> {
         var commandData: IPluginCommandData = <IPluginCommandData>this.data;
+<<<<<<< HEAD
         return CordovaWrapper.plugin(commandData.subCommand, commandData, targets, commandData.commandOptions);
+=======
+        return CordovaWrapper.plugin(commandData.subCommand, commandData, commandData.targets, commandData.commandOptions);
+>>>>>>> Modifying platform/plugin command to support subCommands.
     }
 
     protected getConfigXmlVersionSpec(targetName: string, projectInfo: IProjectInfo): Q.Promise<string> {
