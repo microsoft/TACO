@@ -99,11 +99,7 @@ module TacoUtility {
                 // Determine which subcommand we are executing
                 var subCommand = this.getSubCommand(this.data);
                 if (subCommand) {
-                    return subCommand.run(this.data)
-                        .then((telemetryProperties: telemetryHelper.ICommandTelemetryProperties) => {
-                            telemetryProperties["subCommand"] = telemetryHelper.TelemetryHelper.telemetryProperty(subCommand.name, /*isPii*/ false);
-                            return telemetryProperties;
-                        });
+                    return subCommand.run(this.data);
                 }
                 return Q.reject<ICommandTelemetryProperties>(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
             }

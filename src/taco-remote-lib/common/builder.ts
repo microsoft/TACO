@@ -192,7 +192,7 @@ class Builder {
                         return UtilHelper.copyRecursive(newFolder, installedFolder);
                     }
                     // The plugin is not installed; install it
-                    var cliVariables: Cordova.IKeyValueStore<string> = {};
+                    var cliVariables: IDictionary<string> = {};
 
                     // Check to see if the plugin is mentioned in fetch.json and has variables
                     if (plugin in fetchJson && fetchJson[plugin].variables) {

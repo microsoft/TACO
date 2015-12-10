@@ -11,7 +11,7 @@
                     "version": "3.8.0"
                 },
                 "windows": {
-                    "src": "4.0.0"
+                    "version": "4.0.0"
                 },
                 "wp8": {
                     "version": "3.8.1"
@@ -59,13 +59,13 @@
             "default": true,
             "platforms": {
                 "android": {
-                    "version": "4.1.1"
+                    "version": "4.1.2"
                 },
                 "ios": {
                     "version": "3.9.1"
                 },
                 "windows": {
-                    "src": "4.0.0"
+                    "version": "4.0.0"
                 },
                 "wp8": {
                     "version": "3.8.1"

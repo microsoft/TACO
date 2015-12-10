@@ -104,28 +104,43 @@ module TacoUtility {
         }
 
         /**
-         * Static method to invoke a cordova command. Used to invoke the 'platform' or 'plugin' command
+         * Static method to invoke cordova platform command
          *
-         * @param {string} The name of the cordova command to be invoked
-         * @param {string} The version of the cordova CLI to use
-         * @param {ICordovaCommandParameters} The cordova command parameters
+         * @param {string} The name of the platform sub-command to be invoked
+         * @param {ICommandData} wrapping commandData object
+         * @param {string} list of platforms to add/remove
+         * @param {ICordovaPlatformOptions} platform options if any
          *
          * @return {Q.Promise<any>} An empty promise
          */
-        public static invokePlatformPluginCommand(command: string, platformCmdParameters: Cordova.ICordovaCommandParameters, data: Commands.ICommandData = null, isSilent?: boolean): Q.Promise<any> {
+        public static platform(subCommand: string, commandData: Commands.ICommandData, platforms?: string[], options?: Cordova.ICordovaPlatformOptions, isSilent?: boolean): Q.Promise<any> {
             isSilent = isSilent || false;
             return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
-                if (command === "platform") {
-                    return cordova.raw.platform(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
-                } else if (command === "plugin") {
-                    return cordova.raw.plugin(platformCmdParameters.subCommand, platformCmdParameters.targets, platformCmdParameters.downloadOptions);
-                } else {
-                    return Q.reject(errorHelper.get(TacoErrorCodes.CordovaCmdNotFound));
-                }
+                    return cordova.raw.platform(subCommand, platforms, options);
             }, () => {
-                    assert(data);
-                    return [command].concat(CordovaHelper.toCordovaCliArguments(data));
-                }, { logLevel: InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
+                assert(commandData);
+                return ["platform"].concat(CordovaHelper.toCordovaCliArguments(commandData));
+            }, { logLevel: InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
+        }
+
+        /**
+         * Static method to invoke cordova plugin command
+         *
+         * @param {string} The name of the plugin sub-command to be invoked
+         * @param {string} list of plugins to add/remove
+         * @param {ICordovaPluginOptions} plugin options if any
+         * @param {ICommandData} wrapping commandData object
+         *
+         * @return {Q.Promise<any>} An empty promise
+         */
+        public static plugin(subCommand: string, commandData: Commands.ICommandData, plugins?: string[], options?: Cordova.ICordovaPluginOptions, isSilent?: boolean): Q.Promise<any> {
+            isSilent = isSilent || false;
+            return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+                    return cordova.raw.plugin(subCommand, plugins, options);
+            }, () => {
+                assert(commandData);
+                return ["plugin"].concat(CordovaHelper.toCordovaCliArguments(commandData));
+            }, { logLevel: InstallLogLevel.warn, isSilent: isSilent }); // Subscribe to event listeners only if we are not in silent mode
         }
 
         public static emulate(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
