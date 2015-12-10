@@ -266,8 +266,8 @@ module TacoUtility {
         private static lazyRequireInternal<T>(request: IPackageInstallRequest): Q.Promise<T> {
             assert.notEqual(request, null);
 
-            if (request.packageName.toLocaleLowerCase() === "cordova") {
-                request.packageId = "cordova@5.4.1";
+            if (process.env.testCordovaVersion && request.packageName.toLocaleLowerCase() === "cordova") {
+                request.packageId = "cordova@" + process.env.testCordovaVersion;
             } 
 
             return Q({})
