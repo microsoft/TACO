@@ -1,4 +1,10 @@
-
+/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 var exec = require("child_process").exec;
 var fs = require("fs");
 var path = require ("path");
