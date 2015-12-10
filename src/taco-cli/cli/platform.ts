@@ -29,6 +29,7 @@ import IKitComponentInfo = kitComponentCommand.IKitComponentInfo;
 import KitComponentCommand = kitComponentCommand.KitComponentCommand;
 import Logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
+
 type IPlatformCommandData = kitComponentCommand.IKitComponentCommandData<Cordova.ICordovaPlatformOptions>;
 
 /**
