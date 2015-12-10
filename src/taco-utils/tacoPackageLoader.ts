@@ -267,7 +267,7 @@ module TacoUtility {
             assert.notEqual(request, null);
 
             if (request.packageName.toLocaleLowerCase() === "cordova") {
-                request.packageId = "cordova@5.2.0";
+                request.packageId = "cordova@5.4.1";
             } 
 
             return Q({})
