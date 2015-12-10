@@ -1,4 +1,11 @@
-﻿/// <reference path="../src/typings/node.d.ts" />
+﻿/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
+/// <reference path="../src/typings/node.d.ts" />
 /// <reference path="../src/typings/Q.d.ts" />
 /// <reference path="../src/typings/gulp.d.ts" />
 /// <reference path="../src/typings/gulpExtensions.d.ts" />
