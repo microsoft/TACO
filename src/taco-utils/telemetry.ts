@@ -356,7 +356,8 @@ module TacoUtility {
                                 });
                 regKey.get(value, function (err: any, itemValue: winreg.WinregValue) {
                     if (err) {
-                        deferred.reject(err);
+                        // Fail gracefully by returning null if there was an error.
+                        deferred.resolve(null);
                     }
                     else {
                         deferred.resolve(itemValue.value);
