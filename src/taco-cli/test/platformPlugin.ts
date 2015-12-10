@@ -111,7 +111,7 @@ var kitPlatformOperations: ICommandAndResult[] = [
                         cliVersion: { isPii: false, value: cliVersion },
                         isTacoProject: { isPii: false, value: "true" },
                         projectType: { isPii: false, value: "JavaScript" },
-                        subCommand: { isPii: false, value: "rm" },
+                        subCommand: { isPii: false, value: "remove" },
                         target1: { isPii: true, value: "android" },
                         target2: { isPii: true, value: "ios" }
                 }
@@ -238,7 +238,7 @@ var cliPluginOperations: ICommandAndResult[] = [
                 cliVersion: { isPii: false, value: cliVersion },
                 isTacoProject: { isPii: false, value: "true" },
                 projectType: { isPii: false, value: "JavaScript" },
-                subCommand: { isPii: false, value: "rm" },
+                subCommand: { isPii: false, value: "remove" },
                 target1: { isPii: true, value: "cordova-plugin-camera" },
                 target2: { isPii: true, value: "cordova-plugin-contacts" }
             }

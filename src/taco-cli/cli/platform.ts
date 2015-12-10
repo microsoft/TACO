@@ -14,142 +14,123 @@
 
 import Q = require ("q");
 
-import commandBase = require ("./utils/platformPluginCommandBase");
-import errorHelper = require ("./tacoErrorHelper");
-import kitHelper = require ("./utils/kitHelper");
+import KitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import TacoErrorCodes = require ("./tacoErrorCodes");
+import kitComponentCommand = require("./utils/kitComponentCommand");
 import tacoUtility = require ("taco-utils");
 
-import CommandOperationStatus = commandBase.CommandOperationStatus;
+import commands = tacoUtility.Commands;
 import CordovaHelper = tacoUtility.CordovaHelper;
-import logger = tacoUtility.Logger;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
+import IKitComponentCommandData = kitComponentCommand.IKitComponentCommandData;
+import IKitComponentInfo = kitComponentCommand.IKitComponentInfo;
+import KitComponentCommand = kitComponentCommand.KitComponentCommand;
+import Logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
-import packageLoader = tacoUtility.TacoPackageLoader;
-import ProjectHelper = tacoUtility.ProjectHelper;
+
+type IPlatformCommandData = kitComponentCommand.IKitComponentCommandData<Cordova.ICordovaPlatformOptions>;
 
 /**
  * Platform
  * 
  * Handles "taco platform"
  */
-class Platform extends commandBase.PlatformPluginCommandBase {
+class Platform extends KitComponentCommand {
     public name: string = "platform";
 
-    /**
-     * Checks for kit overrides for the targets and massages the command targets 
-     * parameter to be consumed by the "platform" command
-     */
-    public checkForKitOverrides(projectInfo: IProjectInfo): Q.Promise<any> {
-        var targets: string[] = [];
-        var platformInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
-        var self: Platform = this;
+    private static KNOWN_OPTIONS: Nopt.CommandData = {
+        usegit: String,
+        link: Boolean,
+        save: Boolean,
+    };
 
-        var subCommand: string = this.resolveAlias(this.cordovaCommandParams.subCommand);
+    private static SHORT_HANDS: Nopt.ShortFlags = {};
+    private static KNOWN_SUBCOMMANDS: string[] = ["add", "remove", "list", "update", "check"];
+    private static KNOWN_TARGETS_SUBCOMMANDS: string[] = ["add", "remove", "update"];
 
-        if (subCommand !== "add" && subCommand !== "remove") {
-            return Q({});
-        }
+    public subcommands: commands.ISubCommand[] = [
+        {
+            // taco plaform add <platform>
+            name: "add",
+            run: commandData => this.add()
+        },
+        {
+            // taco plaform remote/update/check <platform>
+            name: "fallback",
+            run: commandData => this.passthrough(),
+            canHandleArgs: commandData => true
+        },
+    ];
 
-        return kitHelper.getPlatformOverridesForKit(projectInfo.tacoKitId)
-            .then(function (platformOverrides: TacoKits.IPlatformOverrideMetadata): Q.Promise<any> {
-            // For each of the platforms specified at command-line, check for overrides in the current kit
-            return self.cordovaCommandParams.targets.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, platformName: string): Q.Promise<any> {
-                return earlierPromise.then(function (): Q.Promise<any> {
-                    var platformInfo: Cordova.ICordovaPlatformPluginInfo = { name: platformName, spec: "" };
-                    // Proceed only if the version has not already been overridden on the command line 
-                    // i.e, proceed only if user did not do "taco platform <subcommand> platform@<verion|src>"
-                    if (!self.cliParamHasVersionOverride(platformName)) {
-                        return self.configXmlHasVersionOverride(platformName, projectInfo)
-                            .then(function (versionOverridden: boolean): void {
-                            // Use kit overrides only if platform has not already been overridden in config.xml
-                            if (!versionOverridden && platformOverrides && platformOverrides[platformName]) {
-                                platformInfo.spec = platformOverrides[platformName].version ? platformOverrides[platformName].version : platformOverrides[platformName].src;
-                                platformInfoToPersist.push(platformInfo);
-                            } else if (versionOverridden && subCommand === "remove") {
-                                platformInfoToPersist.push(platformInfo);
-                            }
-
-                            var target: string = platformInfo.spec.length > 0 ? platformName + "@" + platformInfo.spec : platformName;
-                            targets.push(target);
-                        });
-                    } else {
-                        targets.push(platformName);
-                    }
-
-                    return Q.resolve(targets);
-                });
-            }, Q({}));
-        }).then(function (): Q.Promise<any> {
-            // Set target and print status message
-           self.printStatusMessage(targets, self.cordovaCommandParams.subCommand, CommandOperationStatus.InProgress);
-           self.cordovaCommandParams.targets = targets;
-           return Q.resolve(platformInfoToPersist);
-        });
+    protected get knownOptions(): Nopt.CommandData {
+        return Platform.KNOWN_OPTIONS;
     }
 
-    /**
-     * Checks if the platform has a version specification in config.xml of the cordova project
-     */
-    public configXmlHasVersionOverride(platformName: string, projectInfo: IProjectInfo): Q.Promise<boolean> {
-        var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
-        CordovaHelper.getEngineVersionSpec(platformName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion).then(function (versionSpec: string): void {
-            deferred.resolve(versionSpec !== "");
-        });
-        return deferred.promise;
+    protected get knownSubCommands(): string[] {
+        return Platform.KNOWN_SUBCOMMANDS;
     }
 
-    /**
-     * Edits the version override info to config.xml of the cordova project
-     */
-    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: IProjectInfo, add: boolean): Q.Promise<any> {
-        return CordovaHelper.editConfigXml(projectInfo, function (parser: Cordova.cordova_lib.configparser): void {
-            CordovaHelper.editEngineVersionSpecs(specs, parser, add);
-        });
+    protected get shortFlags(): Nopt.ShortFlags {
+        return Platform.SHORT_HANDS;
     }
 
-    /**
-     * Prints the platform addition/removal status message
-     */
-    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
-        // Parse the target string for platform names and print success message
-        var platforms: string = "";
+    protected get knownTargetsSubCommands(): string[] {
+        return Platform.KNOWN_TARGETS_SUBCOMMANDS;
+    }
 
-        if (!(targets.length === 1 && targets[0].indexOf("@") !== 0 && packageLoader.GIT_URI_REGEX.test(targets[0]) && packageLoader.FILE_URI_REGEX.test(targets[0]))) {
-            platforms = targets.join(", ");
-        }
+    protected getCommandOptions(commandData: commands.ICommandData): Cordova.ICordovaPlatformOptions {
+        return <Cordova.ICordovaPlatformOptions>{
+            usegit: commandData.options["usegit"],
+            link: commandData.options["link"],
+            save: commandData.options["save"],
+        };
+    }
 
-        switch (status) {
-            case CommandOperationStatus.InProgress: {
-                this.printInProgressMessage(platforms, operation);
-            }
-            break;
+    protected runCordovaCommand(targets: string[]): Q.Promise<any> {
+        var commandData: IPlatformCommandData = <IPlatformCommandData>this.data;
+        return CordovaWrapper.platform(commandData.subCommand, commandData, commandData.targets, commandData.commandOptions);
+    }
 
-            case CommandOperationStatus.Success: {
-                logger.logLine();
-                this.printSuccessMessage(platforms, operation);
-                break;
-            }
-        }
+    protected getConfigXmlVersionSpec(targetName: string, projectInfo: IProjectInfo): Q.Promise<string> {
+        return CordovaHelper.getEngineVersionSpec(targetName, projectInfo);
+    }
+
+    protected editVersionOverrideInfo(platformInfos: IKitComponentInfo[], projectInfo: IProjectInfo): Q.Promise<any> {
+        var infos: Cordova.ICordovaPlatformInfo[] = platformInfos.map(info => <Cordova.ICordovaPlatformInfo>{ name: info.name, spec: info.spec });
+        return CordovaHelper.editEngineVersionSpecs(infos, projectInfo);
+    }
+
+    protected getKitOverride(platformName: string, kitId: string): Q.Promise<IKitComponentInfo> {
+        return KitHelper.getPlatformOverridesForKit(kitId)
+            .then(kitOverrides => {
+                var version: string = "";
+                var src: string = "";
+                if (kitOverrides && kitOverrides[platformName]) {
+                    version = kitOverrides[platformName].version;
+                    src = kitOverrides[platformName].src;
+                }
+                return KitComponentCommand.makeKitComponentInfo(platformName, version, src);
+            });
     }
 
     /**
      * Prints the platform addition/removal operation progress message
      */
-    private printInProgressMessage(platforms: string, operation: string): void {
-       switch (this.resolveAlias(operation)) {
+    protected printInProgressMessage(platforms: string): void {
+        var commandData: IPlatformCommandData = <IPlatformCommandData>this.data;
+        switch (commandData.subCommand) {
             case "add": {
-               logger.log(resources.getString("CommandPlatformStatusAdding", platforms));
+                Logger.log(resources.getString("CommandPlatformStatusAdding", platforms));
             }
-           break;
+                break;
 
             case "remove": {
-                logger.log(resources.getString("CommandPlatformStatusRemoving", platforms));
+                Logger.log(resources.getString("CommandPlatformStatusRemoving", platforms));
             }
-            break;
+                break;
 
             case "update": {
-                logger.log(resources.getString("CommandPlatformStatusUpdating", platforms));
+                Logger.log(resources.getString("CommandPlatformStatusUpdating", platforms));
                 break;
             }
         }
@@ -158,13 +139,14 @@ class Platform extends commandBase.PlatformPluginCommandBase {
     /**
      * Prints the platform addition/removal operation success message
      */
-    private printSuccessMessage(platforms: string, operation: string): void {
-        switch (this.resolveAlias(operation)) {
+    protected printSuccessMessage(platforms: string): void {
+        var commandData: IPlatformCommandData = <IPlatformCommandData>this.data;
+        switch (commandData.subCommand) {
             case "add": {
-                logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
+                Logger.log(resources.getString("CommandPlatformStatusAdded", platforms));
 
                 // Print the onboarding experience
-                logger.log(resources.getString("OnboardingExperienceTitle"));
+                Logger.log(resources.getString("OnboardingExperienceTitle"));
                 LoggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
                     "HowToUseCommandAddPlugin",
                     "HowToUseCommandSetupRemote",
@@ -174,19 +156,19 @@ class Platform extends commandBase.PlatformPluginCommandBase {
 
                 ["",
                     "HowToUseCommandHelp",
-                    "HowToUseCommandDocs"].forEach((msg: string) => logger.log(resources.getString(msg)));
-            }
-           break;
-
-            case "remove": {
-                logger.log(resources.getString("CommandPlatformStatusRemoved", platforms));
-            }
-            break;
-
-            case "update": {
-                logger.log(resources.getString("CommandPlatformStatusUpdated", platforms));
+                    "HowToUseCommandDocs"].forEach((msg: string) => Logger.log(resources.getString(msg)));
                 break;
             }
+
+            case "remove":
+                Logger.log(resources.getString("CommandPlatformStatusRemoved", platforms));
+
+                break;
+
+            case "update":
+                Logger.log(resources.getString("CommandPlatformStatusUpdated", platforms));
+                break;
+
         }
     }
 }
