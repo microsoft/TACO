@@ -382,11 +382,10 @@ module TacoUtility {
 
         private static editConfigXml(projectInfo: IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
             return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
-                .then(function(cordova: typeof Cordova): Q.Promise<any> {
+                .then(function(cordova: typeof Cordova): void {
                     var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
                     editFunc(configParser);
                     configParser.write();
-                    return Q.resolve({});
                 });
         }
 
