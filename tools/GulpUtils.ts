@@ -22,13 +22,31 @@ import Q = require ("q");
 
 class GulpUtils {
     private static testCommand: string = "test";
+    private static testDir: string = "test"; // test directory
+    private static mochaOptFile: string = "mocha.opts"; // mocha config file
+    private static testCordovaExemptText: string = "TestCordovaExempt"; // test exempt string
+    private static mochaTestInvert: string = "--invert --grep"; // inverts --grep matches
 
-    public static runAllTests(modulesToTest: string[], modulesRoot: string, failTestsAtEnd: boolean, reporter: string): Q.Promise<any> {
+    public static runAllTests(modulesToTest: string[], modulesRoot: string, failTestsAtEnd: boolean, reporter: string, testCordova: string): Q.Promise<any> {
         var args: string[] = [];
         if (reporter) {
             args = ["--reporter", reporter];
         }
-      return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.testCommand, failTestsAtEnd, args);
+
+        if (testCordova) {
+            process.env.testCordovaVersion = testCordova;
+        }
+
+        return GulpUtils.chainAsync<string>(modulesToTest, (moduleName: string) => {            
+            if (testCordova) {
+                var mochaOptFile: string = path.resolve(modulesRoot, moduleName, GulpUtils.testDir, GulpUtils.mochaOptFile);
+                return Q.denodeify(fs.appendFile)(mochaOptFile, " " + GulpUtils.mochaTestInvert + " " + GulpUtils.testCordovaExemptText); // i.e. run all tests except for TestCordovaExempt                                    
+            }
+
+            return Q({});
+        }).then(function (): Q.Promise<string> {
+            return GulpUtils.runNpmScript(modulesToTest, modulesRoot, GulpUtils.testCommand, failTestsAtEnd, args);
+        });
     }
 
     public static linkPackages(modulesToLink: string[], modulesRoot: string): Q.Promise<any> {
