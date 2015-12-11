@@ -8,7 +8,7 @@ body {
 }
 
 .app {
-    background: url(../img/cordova.png) no-repeat center top; 
+    background: url(../images/cordova.png) no-repeat center top; 
     background-size: contain;
     position: absolute;             
     left: 50%;
