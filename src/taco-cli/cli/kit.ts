@@ -725,7 +725,8 @@ class Kit extends commands.TacoCommandBase {
         });
     }
 
-    private select(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private select(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         var kitId: string = commandData.options["kit"];
         var cli: string = commandData.options["cordova"];
         var projectInfo: IProjectInfo;
@@ -764,7 +765,8 @@ class Kit extends commands.TacoCommandBase {
         }).then(() => Kit.generateTelemetryProperties(commandData, "select"));
     }
 
-    private list(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private list(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         logger.logLine();
         var kitId: string = commandData.options["kit"];
         var jsonPath: any = commandData.options["json"];
@@ -785,13 +787,13 @@ class Kit extends commands.TacoCommandBase {
         {
             // Change kit or CLI
             name: "select",
-            run: commandData => this.select(commandData)
+            run: () => this.select()
         },
         {
             // List kits
             name: "list",
-            run: commandData => this.list(commandData),
-            canHandleArgs: commandData => true
+            run: () => this.list(),
+            canHandleArgs: () => true
         }
    ];
 
@@ -812,13 +814,6 @@ class Kit extends commands.TacoCommandBase {
         }
 
         return parsedOptions;
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 }
 

@@ -58,14 +58,6 @@ module TacoUtility {
             this.cliResources = resources;
         }
 
-        public canHandleArgs(data: ICommandData): boolean {
-            if (!data.original || data.original.length === 0) {
-                return true;
-            }
-
-            return this.commandExists(data.original[0]);
-        }
-
         public parseArgs(args: string[]): ICommandData {
             return { options: {}, original: args, remain: args };
         }
@@ -73,9 +65,9 @@ module TacoUtility {
         /**
          * entry point for printing helper
          */
-        protected runCommand(data: ICommandData): Q.Promise<any> {
-            if (data.original && data.original.length > 0 && this.commandExists(data.original[0])) {
-                this.printCommandUsage(data.original[0]);
+        protected runCommand(): Q.Promise<any> {
+            if (this.data.original && this.data.original.length > 0 && this.commandExists(this.data.original[0])) {
+                this.printCommandUsage(this.data.original[0]);
             } else {
                 this.printGeneralUsage();
             }

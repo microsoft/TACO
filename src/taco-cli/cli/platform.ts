@@ -52,13 +52,13 @@ class Platform extends KitComponentCommand {
         {
             // taco plaform add <platform>
             name: "add",
-            run: commandData => this.add()
+            run: () => this.add()
         },
         {
             // taco plaform remote/update/check <platform>
             name: "fallback",
-            run: commandData => this.passthrough(),
-            canHandleArgs: commandData => true
+            run: () => this.passthrough(),
+            canHandleArgs: () => true
         },
     ];
 

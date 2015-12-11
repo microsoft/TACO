@@ -77,7 +77,7 @@ class Create extends commands.TacoCommandBase {
         return commandData;
     }
 
-    protected runCommand(data: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    protected runCommand(): Q.Promise<ICommandTelemetryProperties> {
 
         var self: Create = this;
         var templateDisplayName: string;
@@ -103,13 +103,6 @@ class Create extends commands.TacoCommandBase {
             }).then(function (): Q.Promise<ICommandTelemetryProperties> {
                 return self.generateTelemetryProperties();
             });
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 
     /**

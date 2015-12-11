@@ -33,7 +33,7 @@ import telemetryHelper = tacoUtility.TelemetryHelper;
 class Templates extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
-    protected runCommand(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(): Q.Promise<any> {
         var self: Templates = this;
 
         return this.getTemplatesToPrint()
@@ -47,14 +47,7 @@ class Templates extends commands.TacoCommandBase {
                 logger.log(resources.getString("HowToUseCreateProjectWithTemplate"));
             });
     }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
-    }
-
+    
     public parseArgs(args: string[]): commands.ICommandData {
         return { options: {}, original: [], remain: [] };
     }
