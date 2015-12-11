@@ -95,7 +95,7 @@ class Platform extends KitComponentCommand {
 
     protected runCordovaCommand(targets: string[]): Q.Promise<any> {
         var commandData: IPlatformCommandData = <IPlatformCommandData>this.data;
-        return CordovaWrapper.platform(commandData.subCommand, commandData, commandData.targets, commandData.commandOptions);
+        return CordovaWrapper.platform(commandData.subCommand, commandData, targets, commandData.commandOptions);
     }
 
     protected getConfigXmlVersionSpec(targetName: string, projectInfo: IProjectInfo): Q.Promise<string> {
