@@ -78,8 +78,8 @@
     </platform>
 
     <platform name="wp8">
-    <icon src="res/icons/wp8/ApplicationIcon.png" width="62" height="62" />
-    <icon src="res/icons/wp8/Background.png" width="173" height="173" />
+    <icon src="res/icons/wp8/ApplicationIcon.png" width="99" height="99" />
+    <icon src="res/icons/wp8/Background.png" width="159" height="159" />
     </platform>
 
     <platform name="android">
