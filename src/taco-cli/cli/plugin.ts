@@ -84,10 +84,19 @@ class Plugin extends kitComponentCommand.KitComponentCommand {
     }
 
     protected getCommandOptions(commandData: commands.ICommandData): Cordova.ICordovaPluginOptions {
+
+        // Sanitize the --variable option flags
+        var variables: string[] = commandData.options["variable"] || [];
+        var cli_variables: Cordova.IKeyValueStore<string> = {}
+        variables.forEach(function(variable: string): void {
+            var keyval: any[] = variable.split("=");
+            cli_variables[keyval[0].toUpperCase()] = keyval[1];
+        });
+
         return <Cordova.ICordovaPluginOptions>{
             searchpath: commandData.options["searchpath"],
             noregistry: commandData.options["noregistry"],
-            cli_variables: commandData.options["cli_variables"],
+            cli_variables: cli_variables,
             browserify: commandData.options["browserify"],
             link: commandData.options["link"],
             save: commandData.options["save"],
