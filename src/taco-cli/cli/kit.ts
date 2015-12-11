@@ -674,10 +674,7 @@ class Kit extends commands.TacoCommandBase {
 
         CordovaHelper.ensureCordovaVersionAcceptable(version);
         
-        Q({})
-            .then(function(): any {
-                return NpmHelper.view(["cordova", "versions"], ".");
-            })
+        NpmHelper.view("cordova", ["versions"])
             .then(function(result: any) {
                 var versions: any[] = [];
                 if (result) {

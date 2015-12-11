@@ -350,13 +350,8 @@ module TacoUtility {
 
             return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
                 var cwd: string = path.resolve(request.targetPath, "..", "..");
-                var args = [request.packageId];
                 
-                if (request.commandFlags) {
-                    args.concat(request.commandFlags);
-                }
-                
-                return NpmHelper.install(args, cwd, request.logLevel).then(function (): void {
+                return NpmHelper.install(request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
                     if (request.logLevel >= InstallLogLevel.taco) {
                         logger.logLine();
                         logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId));
