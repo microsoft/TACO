@@ -31,7 +31,8 @@ import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoError = require ("./tacoError");
 import globalConfig = require ("./tacoGlobalConfig");
-import UtilHelper = require ("./utilHelper");
+import UtilHelper = require("./utilHelper");
+import npmHelper = require("./npmHelper");
 
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 import logger = loggerUtil.Logger;
@@ -40,6 +41,7 @@ import TacoError = tacoError.TacoError;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import TacoGlobalConfig = globalConfig.TacoGlobalConfig;
 import utils = UtilHelper.UtilHelper;
+import NpmHelper = npmHelper.NpmHelper;
 
 module TacoUtility {
     export enum PackageSpecType {
@@ -403,39 +405,6 @@ module TacoUtility {
             return null;
         }
 
-        private static runNpmCommand(npmCommand: string, packageId: string, cwd: string, flags: string[], logLevel?: InstallLogLevel): Q.Promise<number> {
-            var deferred: Q.Deferred<number> = Q.defer<number>();
-            var args: string[] = [npmCommand, packageId];
-
-            if (logLevel && logLevel !== InstallLogLevel.taco) {
-                // Ignore logLevel if it is undefined, InstallLogLevel.undefined = 0 or InstallLogLevel.taco
-                args.push("--loglevel", InstallLogLevel[logLevel]);
-            }
-
-            if (flags) {
-                args = args.concat(flags);
-            }
-            var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
-
-            var stdio: any = logLevel === InstallLogLevel.error // On the default error message level, we don't want to show npm output messages
-                ? [/*stdin*/ "ignore", /*stdout*/ "ignore", /*stderr*/ process.stderr] // So we inherit stderr but we ignore stdin and stdout
-                : "inherit"; // For silent everything is ignored, so it doesn't matter, for everything else we just let npm inherit all our streams
-
-            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: stdio });
-            npmProcess.on("error", function (error: Error): void {
-                deferred.reject(error);
-            });
-            npmProcess.on("exit", function (exitCode: number): void {
-                if (exitCode === 0) {
-                    deferred.resolve(0);
-                } else {
-                    deferred.reject(exitCode);
-                }
-            });
-
-            return deferred.promise;
-        }
-
         private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
             if (request.logLevel >= InstallLogLevel.taco) {
                 logger.logLine();
@@ -444,7 +413,8 @@ module TacoUtility {
 
             return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
                 var cwd: string = path.resolve(request.targetPath, "..", "..");
-                return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
+                
+                return NpmHelper.install(request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
                     if (request.logLevel >= InstallLogLevel.taco) {
                         logger.logLine();
                         logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId));
@@ -471,24 +441,6 @@ module TacoUtility {
                     });
                     return deferred.promise;
                 });
-            });
-        }
-
-        private static updatePackageViaNPM(packageName: string, targetPath: string, logLevel?: InstallLogLevel): Q.Promise<any> {
-            var cwd: string = path.resolve(targetPath, "..", "..");
-            return TacoPackageLoader.runNpmCommand("update", packageName, cwd, null /* commandFlags */, logLevel)
-                .catch(function (err: any): Q.Promise<void> {
-                    var deferred: Q.Deferred<void> = Q.defer<void>();
-                    rimraf(targetPath, function (): void {
-                        if (isFinite(err)) {
-                            // error code reported when npm fails due to EACCES
-                            var errorCode: TacoErrorCodes = (err === 243) ? TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess : TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode;
-                            deferred.reject(errorHelper.get(errorCode, packageName, err));
-                        } else {
-                            deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName));
-                        }
-                    });
-                    return deferred.promise;
             });
         }
 

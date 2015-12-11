@@ -34,6 +34,7 @@ import telemetryHelper = require ("./telemetryHelper");
 import utilHelper = require ("./utilHelper");
 import logFormatHelper = require("./logFormatHelper");
 import processUtils = require("./processUtils");
+import npmHelper = require("./npmHelper");
 
 module TacoUtility {
     /* tslint:disable:variable-name */
@@ -69,6 +70,7 @@ module TacoUtility {
     export var LogFormatHelper: typeof logFormatHelper.LogFormatHelper = logFormatHelper.LogFormatHelper;
     export var PromisesUtils: typeof promisesUtils.PromisesUtils = promisesUtils.PromisesUtils;
     export var ProcessUtils: typeof processUtils.ProcessUtils = processUtils.ProcessUtils;
+    export var NpmHelper: typeof npmHelper.NpmHelper = npmHelper.NpmHelper;
     /* tslint:enable:variable-name */
 }
 
