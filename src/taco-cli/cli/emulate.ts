@@ -71,12 +71,6 @@ class Emulate extends commands.TacoCommandBase {
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
-            
-            // DeviceSync/LiveReload not compatible with remote
-            var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
-            if (deviceSync) {
-                throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload/--devicesync", "--remote");
-            }
 
             var buildInfoPath: string = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
