@@ -18,7 +18,7 @@ import KitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import Settings = require ("./utils/settings");
 import cordovaComponentCommand = require("./utils/cordovaComponentCommand");
-
+import Settings = require ("./utils/settings");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
