@@ -28,62 +28,61 @@ import installLogLevel = require("./installLogLevel");
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 
 module TacoUtility {
-	export class NpmHelper {
-		private static runNpmCommand(npmCommand: string, args: string[], workingDirectory: string, commandFlags?: string[], logLevel?: InstallLogLevel, optionalArgs?: any): Q.Promise<any> {
-			var conf: any = {};
-			if (commandFlags) {
-				conf = nopt(types, shorthands, commandFlags, 0);
-			}
-			
-			if (logLevel && logLevel > 0) {
-				conf["logLevel"] = InstallLogLevel[logLevel];
-			}
-			
-			var propertiesToSet: string[] = Object.keys(conf);
-			if (propertiesToSet.indexOf("argv") !== -1) {
-				propertiesToSet.splice(propertiesToSet.indexOf("argv"), 1);
-			}
-			
-			var oldValues: any = {};
-			return Q.nfcall(npm.load, {}).then(function() {
-				for (var i: number = 0; i < propertiesToSet.length; i++) {
-					// Record current value
-					oldValues[propertiesToSet[i]] = Object.keys(npm.config.list[0]).indexOf(propertiesToSet[i]) === -1 ? undefined : npm.config.list[0][propertiesToSet[i]];
-					// Set new value from config object
-					npm.config.list[0][propertiesToSet[i]] = conf[propertiesToSet[i]];
-				}
+    export class NpmHelper {
+        private static runNpmCommand(npmCommand: string, args: string[], workingDirectory: string, commandFlags?: string[], logLevel?: InstallLogLevel, optionalArgs?: any): Q.Promise<any> {
+            var conf: any = {};
+            if (commandFlags) {
+                conf = nopt(types, shorthands, commandFlags, 0);
+            }
 
-				npm.prefix = workingDirectory || ".";
+            if (logLevel && logLevel > 0) {
+                conf["logLevel"] = InstallLogLevel[logLevel];
+            }
 
-				if (optionalArgs !== undefined) {
-					return Q.ninvoke(npm.commands, npmCommand, args, optionalArgs);
-				}
-				else {
-					return Q.ninvoke(npm.commands, npmCommand, args);
-				}
-			})
-			.finally(function(){
-				for (var i: number = 0; i < propertiesToSet.length; i++) {
-					// Restore previous value
-					npm.config.list[0][propertiesToSet[i]] = oldValues[propertiesToSet[i]];
+            var propertiesToSet: string[] = Object.keys(conf);
+            if (propertiesToSet.indexOf("argv") !== -1) {
+                propertiesToSet.splice(propertiesToSet.indexOf("argv"), 1);
+            }
 
-					// Delete property if previous value was undefined
-					if (npm.config.list[0][propertiesToSet[i]] === undefined) {
-						delete npm.config.list[0][propertiesToSet[i]];
-					}
-				}
-			});
-		}
-		
-		public static install(packageId: string, workingDirectory?: string, commandFlags?: string[], logLevel?: InstallLogLevel): Q.Promise<any> {
-			return NpmHelper.runNpmCommand("install", [packageId], workingDirectory, commandFlags, logLevel);
-		}
-		
-		public static view(packageId: string, fields?: string[], workingDirectory?: string, commandFlags?: string[], logLevel?: InstallLogLevel): Q.Promise<any> {
-			var args = [packageId].concat(fields);
-			return NpmHelper.runNpmCommand("view", args, workingDirectory, commandFlags, logLevel, /*silent=*/true);
-		}
-	}
+            var oldValues: any = {};
+            return Q.nfcall(npm.load, {}).then(function() {
+                var configList = npm.config.list[0];
+
+                propertiesToSet.forEach(prop => {
+                    oldValues[prop] = configList[prop];
+                    configList[prop] = conf[prop];
+                });
+
+                npm.prefix = workingDirectory || ".";
+
+                if (optionalArgs !== undefined) {
+                    return Q.ninvoke(npm.commands, npmCommand, args, optionalArgs);
+                }
+
+                return Q.ninvoke(npm.commands, npmCommand, args);
+            })
+            .finally(function(){
+                var configList = npm.config.list[0];
+
+                propertiesToSet.forEach(prop => {
+                    if (oldValues[prop] !== undefined) {
+                        configList[prop] = oldValues[prop];
+                    } else {
+                        delete configList[prop];
+                    }
+                });
+            });
+        }
+
+        public static install(packageId: string, workingDirectory?: string, commandFlags?: string[], logLevel?: InstallLogLevel): Q.Promise<any> {
+            return NpmHelper.runNpmCommand("install", [packageId], workingDirectory, commandFlags, logLevel);
+        }
+
+        public static view(packageId: string, fields?: string[], workingDirectory?: string, commandFlags?: string[], logLevel?: InstallLogLevel): Q.Promise<any> {
+            var args = [packageId].concat(fields);
+            return NpmHelper.runNpmCommand("view", args, workingDirectory, commandFlags, logLevel, /*silent=*/true);
+        }
+    }
 }
 
 export = TacoUtility;
