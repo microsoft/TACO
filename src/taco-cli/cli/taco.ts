@@ -66,7 +66,7 @@ class Taco {
             return Settings.saveSettings({});
         }).then(function(settings: Settings.ISettings): Q.Promise<any> {
             return telemetry.init("TACO", require("../package.json").version);
-        }).then(function(): void {
+        }).then(function(): Q.Promise<any> {
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 
             // We check if there is a new TACO version available, and if so, we print a message before exiting the application
@@ -74,7 +74,7 @@ class Taco {
 
             var parsedArgs: IParsedArgs = Taco.parseArgs(process.argv.slice(2));
 
-            Taco.runWithParsedArgs(parsedArgs)
+            return Taco.runWithParsedArgs(parsedArgs)
                 .catch(function(reason: any): any {
                     // set exit code to report error
                     process.on("exit", function(): void { process.exit(1); });
@@ -107,12 +107,12 @@ class Taco {
                             });
                         }
                     }
-                }).finally((): any => {
-                    // Make sure to leave a line after the last of our output
-                    logger.logLine();
-                    telemetry.sendPendingData();
-                }).done();
-        });
+                });
+        }).finally((): any => {
+            // Make sure to leave a line after the last of our output
+            logger.logLine();
+            telemetry.sendPendingData();
+        }).done();
     }
 
     /**

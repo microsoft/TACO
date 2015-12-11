@@ -1,3 +1,10 @@
+/**
+﻿ *******************************************************
+﻿ *                                                     *
+﻿ *   Copyright (C) Microsoft. All rights reserved.     *
+﻿ *                                                     *
+﻿ *******************************************************
+﻿ */
 /// <reference path="../src/typings/node.d.ts" />
 /// <reference path="../src/typings/Q.d.ts" />
 /// <disable code="SA1301" justification="it is more standard to use 'Q'" />
