@@ -179,18 +179,12 @@ class Platform extends KitComponentCommand {
 
     }
     private list(): Q.Promise<ICommandTelemetryProperties> {
-        return this.passthrough()
-            .then(function(telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
-                // The user has invoked 'taco platform list'
-                // We want to add an additional line including any remote platforms
-                return Settings.loadSettingsOrReturnEmpty()
-                    .then((settings: Settings.ISettings): void => {
-                        var remotePlatforms: string[] = Object.keys(settings.remotePlatforms || {});
-                        if (remotePlatforms.length > 0) {
-                            Logger.log(resources.getString("PlatformListRemotePlatforms", remotePlatforms.join(",")));
-                        }
-                    })
-                    .then(() => telemetryProperties);
+        // platform list should include remotely configured platforms as well
+        return Q.all<any>([this.passthrough(), Settings.loadSettingsOrReturnEmpty()])
+            .spread((telemetryProperties, settings) => {
+                var remotePlatforms: string[] = Object.keys(settings.remotePlatforms || {});
+                Logger.log(resources.getString("PlatformListRemotePlatforms", remotePlatforms.join(",")));
+                return telemetryProperties;
             });
     }
 }
