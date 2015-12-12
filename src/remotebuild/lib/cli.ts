@@ -23,6 +23,7 @@ import hostSpecifics = require ("./hostSpecifics");
 import RemoteBuildConf = require ("./remoteBuildConf");
 import resources = require ("../resources/resourceManager");
 import utils = require ("taco-utils");
+import telemetry = utils.Telemetry;
 
 import HostSpecifics = hostSpecifics.hostSpecifics;
 import Logger = utils.Logger;
@@ -38,6 +39,9 @@ class CliHelper {
             .then(function (): void {
                 // if version flag found, show version and exit
                 CliHelper.handleVersionFlag(args);
+            })
+            .then(function(): Q.Promise<any> {
+                return telemetry.init("REMOTE_BUILD", require("../package.json").version);
             })
             .then(function (): Q.Promise<void> {
                 remotebuildConf = CliHelper.parseRemoteBuildConf();

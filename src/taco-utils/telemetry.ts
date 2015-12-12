@@ -197,6 +197,7 @@ module TacoUtility {
             private static machineId: string;
             private static telemetrySettings: ITelemetrySettings = null;
             private static TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
+            private static REMOTEBUILD_TELEMETRY_SETTINGS_FILENAME: string = "RemotebuildTelemetrySettings.json";
             private static APPINSIGHTS_INSTRUMENTATIONKEY: string = "10baf391-c2e3-4651-a726-e9b25d8470fd";
             private static REGISTRY_SQMCLIENT_NODE: string = "\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE: string = "UserId";
@@ -205,6 +206,10 @@ module TacoUtility {
             private static INTERNAL_USER_ENV_VAR: string = "TACOINTERNAL";
 
             private static get telemetrySettingsFile(): string {
+                if (Telemetry.appName === "REMOTE_BUILD") {
+                    return path.join(UtilHelper.tacoHome, TelemetryUtils.REMOTEBUILD_TELEMETRY_SETTINGS_FILENAME); 
+                }
+                
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.TELEMETRY_SETTINGS_FILENAME);
             }
 
