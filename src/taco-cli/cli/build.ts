@@ -82,21 +82,31 @@ class Build extends commands.TacoCommandBase {
                 }
                 break;
             case PlatformHelper.BuildLocationType.Remote:
+                var mustResetFlags: boolean = false;
+
                 if (!(commandData.options["release"] || commandData.options["debug"])) {
                     // If neither --debug nor --release is specified, then clean both
                     commandData.options["release"] = commandData.options["debug"] = true;
+                    mustResetFlags = true;
                 }
 
                 var remotePlatform: string = path.resolve(".", "remote", platform.platform);
                 var configurations: string[] = ["release", "debug"];
+
                 return tacoUtility.PromisesUtils.chain(configurations, (configuration: string) => {
                     if (commandData.options[configuration]) {
                         var remotePlatformConfig: string = path.join(remotePlatform, configuration);
+
                         if (fs.existsSync(remotePlatformConfig)) {
                             logger.log(resources.getString("CleaningRemoteResources", platform.platform, configuration));
                             rimraf.sync(remotePlatformConfig);
                         }
                     }
+
+                    if (mustResetFlags) {
+                        commandData.options["release"] = commandData.options["debug"] = false;
+                    }
+
                     return Q({});
                 });
             default:
