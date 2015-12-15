@@ -145,16 +145,9 @@ module TacoUtility {
 
         public static emulate(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
             platforms = platforms || null;
-            return CordovaWrapper.cordovaApiOrProcess(
-                (cordova: Cordova.ICordova) => {
-                    return CordovaWrapper.runOrEmulateUsingCordovaApi(cordova, commandData, false, platforms);
-                },
-
-                () => {
-                    // Note: We ignore this case and don't start livereload on it because it's going to be refactored away soon
-                    return ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))
-                }
-            );
+            return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+                return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+            }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
         }
 
         public static requirements(platforms: string[]): Q.Promise<any> {
@@ -209,16 +202,9 @@ module TacoUtility {
 
         public static run(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
             platforms = platforms || null;
-            return CordovaWrapper.cordovaApiOrProcess(
-                (cordova: Cordova.ICordova) => {
-                    return CordovaWrapper.runOrEmulateUsingCordovaApi(cordova, commandData, true, platforms);
-                },
-
-                () => {
-                    // Note: We ignore this case and don't start livereload on it because it's going to be refactored away soon
-                    return ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms))
-                }
-            );
+            return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordova) => {
+                return cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms));
+            }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
         }
 
         public static targets(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
@@ -241,71 +227,6 @@ module TacoUtility {
         private static cordovaApiOrProcess<T>(apiFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, processArgs: () => string[],
             options: { logLevel?: InstallLogLevel, isSilent?: boolean, captureOutput?: boolean } = {}): Q.Promise<T | string> {
             return CordovaHelper.tryInvokeCordova<T | string>(apiFunction, () => CordovaWrapper.cli(processArgs(), options.captureOutput), options);
-        }
-
-        private static runOrEmulateUsingCordovaApi(cordova: Cordova.ICordova, commandData: Commands.ICommandData, run: boolean, platforms?: string[]): Q.Promise<any> {
-            var isLiveReload = !!commandData.options["livereload"] || !!commandData.options["devicesync"];
-            return Q({}).then(function() {
-                if (isLiveReload) {
-                    return CordovaWrapper.startLiveReload(cordova, commandData);
-                }
-            }).then(function() {
-                return run ? cordova.raw.run(CordovaHelper.toCordovaRunArguments(commandData, platforms)) : cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(commandData, platforms));
-            });
-        }
-
-        private static startLiveReload(cordova: Cordova.ICordova, commandData: Commands.ICommandData): Q.Promise<any> {
-            var projectRoot = ProjectHelper.getProjectRoot();
-
-            return ProjectHelper.getInstalledComponents(projectRoot, "platforms").then(function(platforms) {
-
-                var options: livereload.LiveReloadOptions = {
-                    ghostMode: !!commandData.options["devicesync"],
-                    ignore: commandData.options["ignore"], 
-                
-                    cb: function(event: string, file: string, lrHandle: livereload.LiveReloadHandle) {
-                        
-                        // After a file changes, first run `cordova prepare`, then reload.
-                        return cordova.raw.prepare().then(function() {
-                            var patcher = new livereload.Patcher(projectRoot, platforms);
-                            return patcher.removeCSP();
-                        }).then(function() {
-                            if (event === 'change') {
-                                return lrHandle.tryReloadingFile(file);
-                            }
-                        
-                            // If new files got added or deleted, reload the whole app instead of specific files only
-                            // e.g: index.html references a logo file 'img/logo.png'
-                            // deleting the 'img/logo.png' file will trigger a reload that will remove it from the rendered app
-                            // likewise, adding the 'img/logo.png' file will trigger it to be shown on the app
-                            return lrHandle.reloadBrowsers();
-                        }).fail(function(err) {
-                            var msg = ' - An error occurred: ' + err;
-                            Logger.log(msg);
-                            lrHandle.stop();
-                        });
-                    }
-                };
-
-                livereload.on("livereload:error", function(err) {
-                    Logger.log("TACO Livereload Error occured: - " + err);
-                });
-            
-                // Display prompt to the user letting them know that livereload has started
-                // Note: we do it this way because doing it after `lr.start()`, it would get lost
-                //          among all the run command details output.
-                cordova.on("after_run", function() {
-                    if (livereload.isLiveReloadActive()) {
-                        Logger.log(os.EOL + "TACO Live Reload started." + os.EOL + "Press CTRL+C to exit");
-                    }
-                });
-                
-                cordova.on("after_prepare", function() {
-                    if (!livereload.isLiveReloadActive()) {
-                        return livereload.start(projectRoot, platforms, options);
-                    }
-                });
-            });
         }
     }
 }
