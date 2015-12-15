@@ -25,7 +25,7 @@ import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 module TacoKits {
     export interface IKitHelper {
-        getKitMetadata?: (force?: boolean) => Q.Promise<ITacoKitMetadata>;
+        getKitMetadata?: (reparse?: boolean) => Q.Promise<ITacoKitMetadata>;
         getKitInfo?: (kitId: string) => Q.Promise<IKitInfo>;
         getDefaultKit?: () => Q.Promise<string>;
         getValidCordovaCli?: (kitId: string) => Q.Promise<string>;
@@ -131,11 +131,11 @@ module TacoKits {
          *   @param {boolean} if true, discards the cached kit metadata
          */
 
-        public getKitMetadata(force?: boolean): Q.Promise<ITacoKitMetadata> {
+        public getKitMetadata(reparse?: boolean): Q.Promise<ITacoKitMetadata> {
             var metadataFileName: string = path.resolve(__dirname, KitHelper.KIT_FILENAME);
-            force = force || false;
+            reparse = reparse || false;
 
-            if (!force && KitHelper.kitMetadata) {
+            if (!reparse && KitHelper.kitMetadata) {
                 return Q(KitHelper.kitMetadata);
             }
 
