@@ -9,154 +9,157 @@
 /// <reference path="../../typings/tacoUtils.d.ts" />
 /// <reference path="../../typings/tacoKits.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/dictionary.d.ts" />
 
 "use strict";
 
 import Q = require ("q");
 
-import commandBase = require ("./utils/platformPluginCommandBase");
-import errorHelper = require ("./tacoErrorHelper");
-import kitHelper = require ("./utils/kitHelper");
+import KitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import TacoErrorCodes = require ("./tacoErrorCodes");
-import tacoKits = require ("taco-kits");
+import cordovaComponentCommand = require("./utils/cordovaComponentCommand");
 import tacoUtility = require ("taco-utils");
 
-import CommandOperationStatus = commandBase.CommandOperationStatus;
+import commands = tacoUtility.Commands;
 import CordovaHelper = tacoUtility.CordovaHelper;
-import logger = tacoUtility.Logger;
+import CordovaWrapper = tacoUtility.CordovaWrapper;
+import ICordovaComponentCommandData = cordovaComponentCommand.ICordovaComponentCommandData;
+import ICordovaComponentInfo = cordovaComponentCommand.ICordovaComponentInfo;
+import CordovaComponentCommand = cordovaComponentCommand.CordovaComponentCommand;
+import Logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
-import packageLoader = tacoUtility.TacoPackageLoader;
-import ProjectHelper = tacoUtility.ProjectHelper;
+
+type IPluginCommandData = cordovaComponentCommand.ICordovaComponentCommandData<Cordova.ICordovaPluginOptions>;
 
 /**
  * Plugin
  * 
  * Handles "taco plugin"
  */
-class Plugin extends commandBase.PlatformPluginCommandBase {
-    public name: string = "plugin";
+class Plugin extends cordovaComponentCommand.CordovaComponentCommand {
+    public name: string = "platform";
 
-     /**
-      * Checks for kit overrides for the targets and massages the command targets 
-      * parameter to be consumed by the "plugin" command
-      */
-    public checkForKitOverrides(projectInfo: IProjectInfo): Q.Promise<any> {
-        var targets: string[] = [];
-        var self: Plugin = this;
-        var pluginInfoToPersist: Cordova.ICordovaPlatformPluginInfo[] = [];
+    private static KNOWN_OPTIONS: Nopt.CommandData = {
+        searchpath: String,
+        noregistry: String,
+        variable: Array,
+        browserify: Boolean,
+        link: Boolean,
+        save: Boolean,
+        shrinkwrap: Boolean
+    };
 
-        var subCommand: string = this.resolveAlias(this.cordovaCommandParams.subCommand);
+    private static SHORT_HANDS: Nopt.ShortFlags = {};
+    private static KNOWN_SUBCOMMANDS: string[] = ["add", "remove", "list", "search", "check"];
+    // list of subcommands which require a target (for e.g. a platform name or plugin id)
+    private static KNOWN_TARGETS_SUBCOMMANDS: string[] = ["add", "remove", "update"];
 
-        if (subCommand !== "add" && subCommand !== "remove") {
-            return Q({});
-        }
+    public subcommands: commands.ISubCommand[] = [
+        {
+            // taco plaform add <platform>
+            name: "add",
+            run: commandData => this.add()
+        },
+        {
+            // taco plaform remote/update/check <platform>
+            name: "fallback",
+            run: commandData => this.passthrough(),
+            canHandleArgs: commandData => true
+        },
+    ];
 
-        return kitHelper.getPluginOverridesForKit(projectInfo.tacoKitId)
-            .then(function (pluginOverrides: TacoKits.IPluginOverrideMetadata): Q.Promise<any> {
-            // For each of the plugins specified at command-line, check for overrides in the current kit
-            return self.cordovaCommandParams.targets.reduce<Q.Promise<any>>(function (earlierPromise: Q.Promise<any>, pluginName: string): Q.Promise<any> {
-                return earlierPromise.then(function (): Q.Promise<any> {
-                    var pluginInfo: Cordova.ICordovaPlatformPluginInfo = { name: pluginName, spec: "", pluginVariables: [] };
-                    // Proceed only if the version has not already been overridden on
-                    // command line i.e, proceed only if user did not add plugin@<verion|src>
-                    if (!self.cliParamHasVersionOverride(pluginName)) {
-                        return self.configXmlHasVersionOverride(pluginName, projectInfo)
-                            .then(function (versionOverridden: boolean): void {
-                            var target: string = pluginName;
-                            // Use kit overrides only if plugin has not already been overridden in config.xml
-                            if (!versionOverridden && pluginOverrides && pluginOverrides[pluginName]) {
-                                var pluginOverrideData: TacoKits.IPluginOverrideInfo = pluginOverrides[pluginName];
-                                if (pluginOverrideData.version) {
-                                    pluginInfo.spec = pluginOverrideData.version;
-                                    target = pluginName + "@" + pluginInfo.spec;
-                                } else if (pluginOverrideData.src) {
-                                    target = pluginInfo.spec = pluginOverrideData.src;
-                                }
+    protected get knownOptions(): Nopt.CommandData {
+        return Plugin.KNOWN_OPTIONS;
+    }
 
-                                // Push the target to list of values to be persisted in config.xml
-                                pluginInfoToPersist.push(pluginInfo);
-                                if (pluginOverrideData["supported-platforms"]) {
-                                    self.printSupportedPlatformsMessage(target, pluginOverrideData["supported-platforms"], self.cordovaCommandParams.subCommand);
-                                }
-                            } else if (versionOverridden && subCommand === "remove") {
-                                pluginInfoToPersist.push(pluginInfo);
-                            }
+    protected get knownSubCommands(): string[] {
+        return Plugin.KNOWN_SUBCOMMANDS;
+    }
 
-                            targets.push(target);
-                        });
-                    } else {
-                        targets.push(pluginName);
+    protected get shortFlags(): Nopt.ShortFlags {
+        return Plugin.SHORT_HANDS;
+    }
+
+    protected get knownTargetsSubCommands(): string[] {
+        return Plugin.KNOWN_TARGETS_SUBCOMMANDS;
+    }
+
+    protected getCommandOptions(commandData: commands.ICommandData): Cordova.ICordovaPluginOptions {
+        // Sanitize the --variable option flags
+        var variables: string[] = commandData.options["variable"] || [];
+        var cli_variables: Cordova.IKeyValueStore<string> = {}
+        variables.forEach(function(variable: string): void {
+            var keyval: any[] = variable.split("=");
+            cli_variables[keyval[0].toUpperCase()] = keyval[1];
+        });
+
+        return <Cordova.ICordovaPluginOptions>{
+            searchpath: commandData.options["searchpath"],
+            noregistry: commandData.options["noregistry"],
+            cli_variables: cli_variables,
+            browserify: commandData.options["browserify"],
+            link: commandData.options["link"],
+            save: commandData.options["save"],
+            shrinkwrap: commandData.options["shrinkwrap"]
+        };
+    }
+
+    protected runCordovaCommand(targets: string[]): Q.Promise<any> {
+        var commandData: IPluginCommandData = <IPluginCommandData>this.data;
+        return CordovaWrapper.plugin(commandData.subCommand, commandData, targets, commandData.commandOptions);
+    }
+
+    protected getConfigXmlVersionSpec(targetName: string, projectInfo: IProjectInfo): Q.Promise<string> {
+        return CordovaHelper.getPluginVersionSpec(targetName, projectInfo);
+    }
+
+    protected editVersionOverrideInfo(pluginInfos: ICordovaComponentInfo[], projectInfo: IProjectInfo): Q.Promise<any> {
+        var commandData: IPluginCommandData = <IPluginCommandData>this.data;
+        var infos: Cordova.ICordovaPluginInfo[] = pluginInfos.map(pluginInfo => {
+            return <Cordova.ICordovaPluginInfo>{
+                name: pluginInfo.name,
+                spec: pluginInfo.spec,
+                pluginVariables: commandData.commandOptions.cli_variables
+            };
+        })
+        return CordovaHelper.editEngineVersionSpecs(infos, projectInfo);
+    }
+
+    protected getKitOverride(pluginId: string, kitId: string): Q.Promise<ICordovaComponentInfo> {
+        return KitHelper.getPluginOverridesForKit(kitId)
+            .then(kitOverrides => {
+                var version: string = "";
+                var src: string = "";
+                if (kitOverrides && kitOverrides[pluginId]) {
+                    version = kitOverrides[pluginId].version;
+                    src = kitOverrides[pluginId].src;
+
+                    if (kitOverrides[pluginId]["supported-platforms"]) {
+                        Logger.log(resources.getString("CommandPluginTestedPlatforms", pluginId, kitOverrides[pluginId]["supported-platforms"]));
                     }
-
-                    return Q.resolve(targets);
-                });
-            }, Q({}));
-        }).then(function (): Q.Promise<any> {
-            self.cordovaCommandParams.targets = targets;
-            return Q.resolve(pluginInfoToPersist);
-        });
+                }
+                return CordovaComponentCommand.makeCordovaComponentInfo(pluginId, version, src);
+            });
     }
 
     /**
-     * Checks if the plugin has a version specification in config.xml of the cordova project
+     * Prints the platform addition/removal operation progress message
      */
-    public configXmlHasVersionOverride(pluginName: string, projectInfo: IProjectInfo): Q.Promise<boolean> {
-        var deferred: Q.Deferred<boolean> = Q.defer<boolean>();
-        CordovaHelper.getPluginVersionSpec(pluginName, projectInfo.configXmlPath, projectInfo.cordovaCliVersion).then(function (versionSpec: string): void {
-            deferred.resolve(versionSpec !== "");
-        });
-        return deferred.promise;
+    protected printInProgressMessage(plugins: string): void {
+        // no progress shown for plugin operations
     }
 
     /**
-     * Edits the version override info to config.xml of the cordova project
+     * Prints the plugin operations success message
      */
-    public editVersionOverrideInfo(specs: Cordova.ICordovaPlatformPluginInfo[], projectInfo: IProjectInfo, add: boolean): Q.Promise<any> {
-        return CordovaHelper.editConfigXml(projectInfo, function (parser: Cordova.cordova_lib.configparser): void {
-            CordovaHelper.editPluginVersionSpecs(specs, parser, add);
-        });
-    }
-
-    /**
-     * Prints the supported platforms information regarding a plugin
-     */
-    public printSupportedPlatformsMessage(pluginId: string, supportedPlatforms: string, operation: string): void {
-        if (operation === "add") {
-            logger.log(resources.getString("CommandPluginTestedPlatforms", pluginId, supportedPlatforms));
-        }
-    }
-
-    /**
-     * Prints the plugin addition/removal status message
-     */
-    public printStatusMessage(targets: string[], operation: string, status: CommandOperationStatus): void {
-        // Parse the target string for plugin names and print success message
-        var plugins: string = "";
-
-        if (!(targets.length === 1 && targets[0].indexOf("@") !== 0 && packageLoader.GIT_URI_REGEX.test(targets[0]) && packageLoader.FILE_URI_REGEX.test(targets[0]))) {
-            plugins = targets.join(", ");
-        }
-
-        switch (status) {
-            case CommandOperationStatus.Success: {
-                logger.logLine();
-                this.printSuccessMessage(plugins, operation);
-            }
-            break;
-        }
-    }
-
-    /**
-     * Prints the plugin addition/removal operation success message
-     */
-    private printSuccessMessage(plugins: string, operation: string): void {
-        switch (this.resolveAlias(operation)) {
+    protected printSuccessMessage(plugins: string): void {
+        var commandData: IPluginCommandData = <IPluginCommandData>this.data;
+        switch (commandData.subCommand) {
             case "add": {
-                logger.log(resources.getString("CommandPluginWithIdStatusAdded", plugins));
+                Logger.log(resources.getString("CommandPluginWithIdStatusAdded", plugins));
 
                 // Print the onboarding experience
-                logger.log(resources.getString("OnboardingExperienceTitle"));
+                Logger.log(resources.getString("OnboardingExperienceTitle"));
                 LoggerHelper.logList(["HowToUseCommandInstallReqsPlugin",
                     "HowToUseCommandSetupRemote",
                     "HowToUseCommandBuildPlatform",
@@ -165,19 +168,19 @@ class Plugin extends commandBase.PlatformPluginCommandBase {
 
                 ["",
                     "HowToUseCommandHelp",
-                    "HowToUseCommandDocs"].forEach((msg: string) => logger.log(resources.getString(msg)));
+                    "HowToUseCommandDocs"].forEach((msg: string) => Logger.log(resources.getString(msg)));
+                break;
             }
-            break;
 
             case "remove": {
-                logger.log(resources.getString("CommandPluginStatusRemoved", plugins));
+                Logger.log(resources.getString("CommandPluginStatusRemoved", plugins));
+                break;
             }
-            break;
 
             case "update": {
-                logger.log(resources.getString("CommandPluginStatusUpdated", plugins));
+                Logger.log(resources.getString("CommandPluginStatusUpdated", plugins));
+                break;
             }
-            break;
         }
     }
 }
