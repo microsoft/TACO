@@ -427,7 +427,7 @@ class Kit extends commands.TacoCommandBase {
             logger.log(resources.getString("CommandKitSelectStatusUpdatingPlugins"));
         }
 
-        var downloadOptions: Cordova.ICordovaDownloadOptions = { searchpath: "", noregistry: false, usegit: false, cli_variables: {}, browserify: "", link: "", save: true, shrinkwrap: false };
+        var downloadOptions: Cordova.ICordovaDownloadOptions = { searchpath: undefined, noregistry: undefined, usegit: undefined, cli_variables: {}, browserify: undefined, link: undefined, save: true, shrinkwrap: undefined };
         var command: string = (componentType === ProjectComponentType.Platform) ? "platform" : "plugin";
 
         // Remove all the updatable plugins and re-add them
