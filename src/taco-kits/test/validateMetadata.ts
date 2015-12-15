@@ -41,7 +41,7 @@ var platformNpmPackageMap: IDictionary<string> = {
 
 describe("KitMetadata", function(): void {
     it("validate Kit Metadata is correct", function(): Q.Promise<any> {
-        return KitHelper.getKitMetadata()
+        return KitHelper.getKitMetadata(true)
             .then(kitMetadata => {
                 return PromiseUtils.chain(Object.keys(kitMetadata.kits), (kitId, valueSoFar) => {
                     return Q.all<any>([validatePlatform(kitId), validatePlugin(kitId)]);
