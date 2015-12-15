@@ -85,8 +85,6 @@ class Plugin extends cordovaComponentCommand.CordovaComponentCommand {
     }
 
     protected getCommandOptions(commandData: commands.ICommandData): Cordova.ICordovaPluginOptions {
-<<<<<<< HEAD
-
         // Sanitize the --variable option flags
         var variables: string[] = commandData.options["variable"] || [];
         var cli_variables: Cordova.IKeyValueStore<string> = {}
