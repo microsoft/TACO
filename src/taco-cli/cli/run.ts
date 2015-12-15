@@ -164,7 +164,7 @@ class Run extends commands.TacoCommandBase {
     private runLocal(localPlatforms?: string[]): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         if (this.data.options["livereload"] || this.data.options["devicesync"]) {
             // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
-            return require("./liveReload").startLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"]);
+            return require("./liveReload").startLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms);
         }
         return CordovaWrapper.run(this.data, localPlatforms);
     }

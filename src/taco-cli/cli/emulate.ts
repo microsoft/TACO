@@ -127,11 +127,12 @@ class Emulate extends commands.TacoCommandBase {
     protected runCommand(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var commandData: commands.ICommandData = this.data;
         var telemetryProperties: ICommandTelemetryProperties = {};
+        var self = this;
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
                 return PlatformHelper.operateOnPlatforms(platforms,
-                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.emulate(commandData, localPlatforms),
+                    (localPlatforms: string[]): Q.Promise<any> => self.runLocalEmulate(localPlatforms),
                     (remotePlatform: string): Q.Promise<any> => Emulate.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
                     );
             }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
@@ -166,6 +167,14 @@ class Emulate extends commands.TacoCommandBase {
         }
 
         return parsedOptions;
+    }
+
+    private runLocalEmulate(localPlatforms: string[]): Q.Promise<any> {
+        if (this.data.options["livereload"] || this.data.options["devicesync"]) {
+            // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
+            return require("./liveReload").startLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms);
+        }
+        return CordovaWrapper.emulate(this.data, localPlatforms);
     }
 
 }
