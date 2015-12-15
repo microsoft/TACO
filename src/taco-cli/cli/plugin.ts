@@ -17,26 +17,26 @@ import Q = require ("q");
 
 import KitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import kitComponentCommand = require("./utils/kitComponentCommand");
+import cordovaComponentCommand = require("./utils/cordovaComponentCommand");
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import CordovaHelper = tacoUtility.CordovaHelper;
 import CordovaWrapper = tacoUtility.CordovaWrapper;
-import IKitComponentCommandData = kitComponentCommand.IKitComponentCommandData;
-import IKitComponentInfo = kitComponentCommand.IKitComponentInfo;
-import KitComponentCommand = kitComponentCommand.KitComponentCommand;
+import ICordovaComponentCommandData = cordovaComponentCommand.ICordovaComponentCommandData;
+import ICordovaComponentInfo = cordovaComponentCommand.ICordovaComponentInfo;
+import CordovaComponentCommand = cordovaComponentCommand.CordovaComponentCommand;
 import Logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 
-type IPluginCommandData = kitComponentCommand.IKitComponentCommandData<Cordova.ICordovaPluginOptions>;
+type IPluginCommandData = cordovaComponentCommand.ICordovaComponentCommandData<Cordova.ICordovaPluginOptions>;
 
 /**
  * Plugin
  * 
  * Handles "taco plugin"
  */
-class Plugin extends kitComponentCommand.KitComponentCommand {
+class Plugin extends cordovaComponentCommand.CordovaComponentCommand {
     public name: string = "platform";
 
     private static KNOWN_OPTIONS: Nopt.CommandData = {
@@ -51,6 +51,7 @@ class Plugin extends kitComponentCommand.KitComponentCommand {
 
     private static SHORT_HANDS: Nopt.ShortFlags = {};
     private static KNOWN_SUBCOMMANDS: string[] = ["add", "remove", "list", "search", "check"];
+    // list of subcommands which require a target (for e.g. a platform name or plugin id)
     private static KNOWN_TARGETS_SUBCOMMANDS: string[] = ["add", "remove", "update"];
 
     public subcommands: commands.ISubCommand[] = [
@@ -113,7 +114,7 @@ class Plugin extends kitComponentCommand.KitComponentCommand {
         return CordovaHelper.getPluginVersionSpec(targetName, projectInfo);
     }
 
-    protected editVersionOverrideInfo(pluginInfos: IKitComponentInfo[], projectInfo: IProjectInfo): Q.Promise<any> {
+    protected editVersionOverrideInfo(pluginInfos: ICordovaComponentInfo[], projectInfo: IProjectInfo): Q.Promise<any> {
         var commandData: IPluginCommandData = <IPluginCommandData>this.data;
         var infos: Cordova.ICordovaPluginInfo[] = pluginInfos.map(pluginInfo => {
             return <Cordova.ICordovaPluginInfo>{
@@ -125,7 +126,7 @@ class Plugin extends kitComponentCommand.KitComponentCommand {
         return CordovaHelper.editEngineVersionSpecs(infos, projectInfo);
     }
 
-    protected getKitOverride(pluginId: string, kitId: string): Q.Promise<IKitComponentInfo> {
+    protected getKitOverride(pluginId: string, kitId: string): Q.Promise<ICordovaComponentInfo> {
         return KitHelper.getPluginOverridesForKit(kitId)
             .then(kitOverrides => {
                 var version: string = "";
@@ -138,7 +139,7 @@ class Plugin extends kitComponentCommand.KitComponentCommand {
                         Logger.log(resources.getString("CommandPluginTestedPlatforms", pluginId, kitOverrides[pluginId]["supported-platforms"]));
                     }
                 }
-                return KitComponentCommand.makeKitComponentInfo(pluginId, version, src);
+                return CordovaComponentCommand.makeCordovaComponentInfo(pluginId, version, src);
             });
     }
 

@@ -298,7 +298,7 @@
     "_CommandPluginLinkDescription.comment": "Description of the --link argument to 'taco Plugin add'",
     "CommandPluginShrinkwrapDescription": "Used together with --save, saves the installed version number to config.xml",
     "_CommandPluginShrinkwrapDescription.comment": "Description of the --shrinkwrap argument to 'taco plugin add'",
-    "CommandPluginBrowserifyDescription": "Plugins javascript gets loaded at build time instead of runtime using browserify, Replace cordovajs file with one that included the JS of the installed plugins.",
+    "CommandPluginBrowserifyDescription": "Plugins javascript gets loaded at build time instead of runtime using browserify, Replace cordovajs file with one that included the JS of the installed plugins. <key>(experimental)</key>",
     "_CommandPluginBrowserifyDescription.comment": "Description of the <path> argument in the syntax description",
     "CommandPluginStatusAdded": "<success>Success!</success> Plugin added.<br/>",
     "_CommandPluginStatusAdded.comment": "Status message after successfully adding a plugin",
