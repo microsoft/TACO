@@ -36,7 +36,6 @@
     "rimraf": "2.2.6",
     "should": "4.3.0",
     "taco-tests-utils": "file:../taco-tests-utils",
-    "typescript": "~1.6.2",
     "mockery": "~1.4.0",
     "mock-fs": "^3.4.0"
   },

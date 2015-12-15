@@ -40,7 +40,6 @@
         "npm": "^2.14.7"
     },
     "devDependencies": {
-        "typescript": "~1.6.2",
         "mocha": "2.0.1",
         "istanbul": "^0.4.0",
         "should": "4.3.0"
