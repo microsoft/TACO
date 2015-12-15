@@ -110,7 +110,7 @@ describe("KitHelper", function (): void {
 
     after(function (): void {
         // Reset ResourcesManager back to production mode
-        process.env["TACO_UNIT_TEST"] = false;
+        delete process.env["TACO_UNIT_TEST"];
     });
 
     describe("getKitMetadata()", function (): void {
