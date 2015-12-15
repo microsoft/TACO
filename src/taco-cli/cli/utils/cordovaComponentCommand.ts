@@ -38,37 +38,37 @@ import utils = tacoUtility.UtilHelper;
 import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 
 
-interface IKitComponentCommandDataBase extends commands.ICommandData {
+interface ICordovaComponentCommandDataBase extends commands.ICommandData {
     subCommand: string,
     targets: string[];
 };
 
 /**
- * IKitComponentCommandData
+ * ICordovaComponentCommandData
  *
  * commandOptions for a kit component command
  */
-export interface IKitComponentCommandData<T> extends IKitComponentCommandDataBase {
+export interface ICordovaComponentCommandData<T> extends ICordovaComponentCommandDataBase {
     commandOptions: T;
 };
 
 /**
- * IKitComponentInfo
+ * ICordovaComponentInfo
  *
  * Represent the info for a kit component target which can be passed on to cordova
  */
-export interface IKitComponentInfo {
+export interface ICordovaComponentInfo {
     name?: string;
     spec?: string;
     targetId: string;
 }
 
 /**
- * KitComponentCommand
+ * CordovaComponentCommand
  *
  * Base class to handle add/remove operations for cordova components (platforms, plugins)
  */
-export class KitComponentCommand extends commands.TacoCommandBase {
+export class CordovaComponentCommand extends commands.TacoCommandBase {
 
     protected get knownOptions(): Nopt.CommandData {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
@@ -103,7 +103,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
     /**
      * Edits the version override info to config.xml of the cordova project
      */
-    protected editVersionOverrideInfo(componentInfo: IKitComponentInfo[], projectInfo: IProjectInfo): Q.Promise<any> {
+    protected editVersionOverrideInfo(componentInfo: ICordovaComponentInfo[], projectInfo: IProjectInfo): Q.Promise<any> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -112,7 +112,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
      * returns the overriden version/src values
      * returns null if target is not overridden for the given kit
      */
-    protected getKitOverride(targetName: string, kitId: string): Q.Promise<IKitComponentInfo> {
+    protected getKitOverride(targetName: string, kitId: string): Q.Promise<ICordovaComponentInfo> {
         throw errorHelper.get(TacoErrorCodes.UnimplementedAbstractMethod);
     }
 
@@ -159,7 +159,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
             throw errorHelper.get(TacoErrorCodes.ErrorNoPluginOrPlatformSpecified, this.name, subCommand);
         }
 
-        return <IKitComponentCommandDataBase>{
+        return <ICordovaComponentCommandDataBase>{
             remain: commandData.remain,
             options: commandData.options,
             original: commandData.original,
@@ -173,7 +173,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
      * Performs add operation for a kit component
      */
     protected add(): Q.Promise<ICommandTelemetryProperties> {
-        var commandData: IKitComponentCommandDataBase = <IKitComponentCommandDataBase>this.data;
+        var commandData: ICordovaComponentCommandDataBase = <ICordovaComponentCommandDataBase>this.data;
         var self = this;
 
         return ProjectHelper.getProjectInfo()
@@ -186,10 +186,10 @@ export class KitComponentCommand extends commands.TacoCommandBase {
                 }
 
                 return self.applyKitOverridesIfApplicable(projectInfo)
-                    .then(function(componentInfos: IKitComponentInfo[]): Q.Promise<any> {
+                    .then(function(componentInfos: ICordovaComponentInfo[]): Q.Promise<any> {
 
                         // Print status message
-                        self.printInProgressMessage(KitComponentCommand.getTargetsForStatus(commandData.targets));
+                        self.printInProgressMessage(CordovaComponentCommand.getTargetsForStatus(commandData.targets));
 
                         var targets: string[] = componentInfos.map(t => t.targetId);
                         return self.runCordovaCommand(targets)
@@ -208,7 +208,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
      * Passthrough method which calls into cordova to perform the required operation for a kit component
      */
     protected passthrough(): Q.Promise<ICommandTelemetryProperties> {
-        var commandData: IKitComponentCommandDataBase = <IKitComponentCommandDataBase>this.data;
+        var commandData: ICordovaComponentCommandDataBase = <ICordovaComponentCommandDataBase>this.data;
         var self = this;
 
         return this.runCordovaCommand(commandData.targets)
@@ -221,13 +221,13 @@ export class KitComponentCommand extends commands.TacoCommandBase {
      * Checks for kit overrides for the targets and massages the command targets 
      * parameter to be consumed by the "platform" command
      */
-    private applyKitOverridesIfApplicable(projectInfo: IProjectInfo): Q.Promise<IKitComponentInfo[]> {
-        var commandData: IKitComponentCommandDataBase = <IKitComponentCommandDataBase>this.data;
+    private applyKitOverridesIfApplicable(projectInfo: IProjectInfo): Q.Promise<ICordovaComponentInfo[]> {
+        var commandData: ICordovaComponentCommandDataBase = <ICordovaComponentCommandDataBase>this.data;
         var self = this;
 
         // For each of the platforms specified at command-line, check for overrides in the current kit
-        return PromiseUtils.chain<string, IKitComponentInfo[]>(commandData.targets, (targetId, targetSpecs) => {
-            return self.getKitComponentInfo(targetId, projectInfo)
+        return PromiseUtils.chain<string, ICordovaComponentInfo[]>(commandData.targets, (targetId, targetSpecs) => {
+            return self.getCordovaComponentInfo(targetId, projectInfo)
                 .then(spec => {
                     targetSpecs.push(spec)
                     return targetSpecs;
@@ -235,7 +235,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
         }, [] /* initial value */);
     }
 
-    private getKitComponentInfo(targetId: string, projectInfo: IProjectInfo): Q.Promise<IKitComponentInfo> {
+    private getCordovaComponentInfo(targetId: string, projectInfo: IProjectInfo): Q.Promise<ICordovaComponentInfo> {
         var self = this;
         // Proceed only if the version has not already been overridden on the command line or config.xml
         // i.e, proceed only if user did not do "taco platform <subcommand> platform@<verion|src>"
@@ -246,7 +246,7 @@ export class KitComponentCommand extends commands.TacoCommandBase {
             () => self.getKitOverride(targetId.split("@")[0], projectInfo.tacoKitId));
     }
 
-    public static makeKitComponentInfo(targetName: string, version: string, src: string): IKitComponentInfo {
+    public static makeCordovaComponentInfo(targetName: string, version: string, src: string): ICordovaComponentInfo {
         if (version) {
             return { name: targetName, spec: version, targetId: targetName + "@" + version };
         }
@@ -262,14 +262,14 @@ export class KitComponentCommand extends commands.TacoCommandBase {
      */
     private generateTelemetryProperties(targets?: string[]): Q.Promise<ICommandTelemetryProperties> {
 
-        var commandData: IKitComponentCommandDataBase = <IKitComponentCommandDataBase>this.data;
+        var commandData: ICordovaComponentCommandDataBase = <ICordovaComponentCommandDataBase>this.data;
         if (!targets) {
             targets = commandData.targets;
         }
 
-        this.printSuccessMessage(KitComponentCommand.getTargetsForStatus(commandData.targets));
+        this.printSuccessMessage(CordovaComponentCommand.getTargetsForStatus(commandData.targets));
 
-        var self: KitComponentCommand = this;
+        var self: CordovaComponentCommand = this;
         return CliTelemetryHelper.getCurrentProjectTelemetryProperties()
             .then(function(telemetryProperties: ICommandTelemetryProperties): Q.Promise<ICommandTelemetryProperties> {
 
