@@ -92,7 +92,7 @@ class Run extends commands.TacoCommandBase {
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
-            
+
             // DeviceSync/LiveReload not compatible with remote
             var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
             if (deviceSync) {
@@ -167,21 +167,34 @@ class Run extends commands.TacoCommandBase {
         });
     }
 
+    private runLocal(localPlatforms?: string[]): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var self = this;
+        if (this.data.options["livereload"] || this.data.options["devicesync"]) {
+            // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
+            var liveReload = require("./liveReload");
+            return liveReload.hookLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms)
+                .then(() => CordovaWrapper.run(self.data, localPlatforms));
+        }
+        return CordovaWrapper.run(this.data, localPlatforms);
+    }
+
     private local(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var commandData: commands.ICommandData = this.data;
-        return CordovaWrapper.run(commandData)
+        return this.runLocal()
             .then(() => Run.generateTelemetryProperties({}, commandData));
     }
 
     private fallback(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         var commandData: commands.ICommandData = this.data;
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
+
+        var self = this;
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
 
                 return PlatformHelper.operateOnPlatforms(platforms,
-                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.run(commandData, localPlatforms),
+                    (localPlatforms: string[]): Q.Promise<any> => self.runLocal(localPlatforms),
                     (remotePlatform: string): Q.Promise<any> => Run.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
                     );
         }).then(() => Run.generateTelemetryProperties(telemetryProperties, commandData));
