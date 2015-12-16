@@ -19,7 +19,8 @@ import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
-import semver = require ("semver");
+import semver = require("semver");
+import util = require("util");
 
 import resources = require("../resources/resourceManager");
 import utils = require("taco-utils");
@@ -128,8 +129,87 @@ class Builder {
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
             return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
         } else {
-            return this.update_platform();
+            // If the client-side project has changed Cordova version or saved a new version for this platform in config.xml, then re-add the platform
+            return this.reAddPlatformIfNecessary().then((reAddedPlatform) => {
+                if (reAddedPlatform) {
+                    // Platform already prepared
+                    return Q({});
+                }
+
+                return this.update_platform();
+            });
         }
+    }
+
+    /**
+     * Removes and add the platform if necessary (Cordova version changed, or config.xml has a saved platform version that differs from the installed one). Returns true if the platform was added,
+     * false if not.
+     */
+    private reAddPlatformIfNecessary(): Q.Promise<boolean> {
+        var xmlVersion: string = this.getConfigXmlPlatformVersion();
+
+        return this.getCurrentPlatformVersion().then((installedVersion: string) => {
+            if (xmlVersion) {
+                if (semver.neq(xmlVersion, installedVersion)) {
+                    // There is a version of the platform specified in xonfig.xml, and it differs from the installed version
+                    return true;
+                } else {
+                    // The version specified in config.xml is already installed, we don't need to re-add the platform
+                    return false;
+                }
+            } else {
+                // Look whether the Cordova version has changed
+                if (semver.neq(this.currentBuild["vcordova"], this.currentBuild["previousCordova"])) {
+                    // Cordova version has changed
+                    return true;
+                }
+
+                // Cordova version hasn't changed
+                return false;
+            }
+        }, (err) => {
+            // If we couldn't extract the platform's version, then remove and re-add it anyway, to be safe
+            return true;
+        }).then((mustReAdd: boolean) => {
+            if (!mustReAdd) {
+                return Q(false);
+            } else {
+                return this.cordova.raw.platform("remove", this.currentBuild.buildPlatform).then(() => {
+                    return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
+                }).then(() => {
+                    return Q(true);
+                });
+            }
+        });
+    }
+
+    private getConfigXmlPlatformVersion(): string {
+        var engines: {[key: string]: string} = utils.CordovaConfig.getCordovaConfig(this.currentBuild.appDir).engines();
+
+        if (engines[this.currentBuild.buildPlatform]) {
+            return engines[this.currentBuild.buildPlatform];
+        }
+
+        return "";
+    }
+
+    private getCurrentPlatformVersion(): Q.Promise<string> {
+        var deferred: Q.Deferred<string> = Q.defer<string>();
+
+        var resolvePlatformOutput: Function = (output: string) => {
+            var versionRegexp: RegExp = new RegExp(util.format("%s (.*?)(?:,|$)", this.currentBuild.buildPlatform), "m");
+            var installedPlatformVersion: string = versionRegexp.exec(output)[1];
+
+            this.cordova.off("result", resolvePlatformOutput);
+            deferred.resolve(installedPlatformVersion);
+        }
+
+        this.cordova.on("result", resolvePlatformOutput);
+        this.cordova.raw.platform("list").catch((err) => {
+            deferred.reject(err);
+        });
+
+        return deferred.promise;
     }
 
     private update_plugins(): Q.Promise<any> {
