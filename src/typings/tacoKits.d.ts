@@ -13,8 +13,9 @@ declare module TacoKits {
         /**
          *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
          *   or resolved with the parsed metadata
+         *   @param {boolean} if true, discards the cached kit metadata
          */
-        getKitMetadata?: () => Q.Promise<ITacoKitMetadata>;
+        getKitMetadata?: (force?: boolean) => Q.Promise<ITacoKitMetadata>;
 
         /**
          *   Returns a promise which is either rejected with a failure to find the specified kit

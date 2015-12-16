@@ -235,6 +235,10 @@
                 {
                     "name": "[--shrinkwrap]", "description": "[CommandPluginShrinkwrapDescription]"
                 }
+                ,
+                {
+                    "name": "[--browserify]", "description": "[CommandPluginBrowserifyDescription]"
+                }
                 ]
             }
             ,

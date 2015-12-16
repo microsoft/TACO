@@ -40,7 +40,6 @@
         "taco-remote": "file:../taco-remote"
     },
     "devDependencies": {
-        "typescript": "~1.6.2",
         "mocha": "2.0.1",
         "istanbul": "^0.4.0",
         "mkdirp": "0.3.5",
