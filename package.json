@@ -12,8 +12,8 @@
     "gulp": "latest",
     "gulp-json-editor": "latest",
     "gulp-sourcemaps": "latest",
-    "gulp-tslint": "^3.6.0",
-    "gulp-typescript": "~2.9.2",
+    "gulp-tslint": "latest",
+    "gulp-typescript": "latest",
     "jsdoc-parse": "latest",
     "mocha-teamcity-reporter": "latest",
     "ncp": "latest",
@@ -22,7 +22,7 @@
     "remap-istanbul": "^0.3.1",
     "replace": "latest",
     "run-sequence": "latest",
-    "typescript": "~1.6.2"
+    "typescript": "latest"
   },
    "scripts" : { 
     "postinstall" : "node tools/tacoUtil.js",

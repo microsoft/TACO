@@ -118,7 +118,7 @@ module TacoTestsUtils {
                 return notImplemented<Q.Promise<any>>();
             }
 
-            public platforms(command: any, targets?: any, opts?: any): Q.Promise<any> {
+            public platforms(command: any, targets?: any, opts?: Cordova.ICordovaPlatformOptions): Q.Promise<any> {
                 return notImplemented<Q.Promise<any>>();
             }
 

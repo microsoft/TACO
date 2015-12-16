@@ -18,13 +18,13 @@ declare module Cordova {
     export module cordova_lib {
         export class configparser {
             constructor(configXmlPath: string);
-            getPlugin(id: string): any;
+            getPlugin(id: string): Cordova.ICordovaPluginInfo;
             removePlugin(id: string): void;
-            addPlugin(attributes: Cordova.ICordovaPlatformPluginInfo , variables: Cordova.ICordovaVariable[]): any;
-            getEngines(): Cordova.ICordovaPlatformPluginInfo [];
+            addPlugin(attributes: Cordova.ICordovaPluginInfo , variables: IDictionary<string>): void;
+            getEngines(): Cordova.ICordovaPlatformInfo [];
             removeEngine(name: string): void;
-            addEngine(name: string, spec: string): any;
-            write(): any;
+            addEngine(name: string, spec: string): void;
+            write(): void;
         }
 
         export var cordova_platforms: { [platform: string]: any };
@@ -86,36 +86,31 @@ declare module Cordova {
         linkTo?: string;
     }
 
-    export interface ICordovaDownloadOptions {
-        searchpath: string;
-        noregistry: boolean;
-        usegit: boolean;
-        cli_variables: IKeyValueStore<string>;
-        browserify: string;
-        link: string;
-        save: boolean;
-        shrinkwrap: boolean;
+    export interface ICordovaPluginOptions {
+        searchpath?: string;
+        noregistry?: boolean;
+        cli_variables?: IDictionary<string>;
+        browserify?: string;
+        link?: string;
+        save?: boolean;
+        shrinkwrap?: boolean;
     }
 
-    export interface ICordovaCommandParameters {
-        subCommand: string;
-        targets: string[];
-        downloadOptions: ICordovaDownloadOptions;
+    export interface ICordovaPlatformOptions {
+        usegit?: boolean;
+        link?: string;
+        save?: boolean;
     }
 
-    export interface ICordovaPlatformPluginInfo  {
+    export interface ICordovaPluginInfo  {
         name: string;
         spec: string;
-        pluginVariables?: ICordovaVariable[];
+        pluginVariables?: IDictionary<string>;
     }
 
-    export interface ICordovaVariable {
+    export interface ICordovaPlatformInfo  {
         name: string;
-        value: string;
-    }
-
-    export interface ICordovaPluginOptions {
-        cli_variables?: IKeyValueStore<string>;
+        spec: string;
     }
 
     export interface ICordovaRawT<OptionType> {
@@ -127,7 +122,7 @@ declare module Cordova {
         help: any;
         info(): Q.Promise<any[]>;
         platform(command: any, targets?: any, opts?: any): Q.Promise<any>;
-        platforms(command: any, targets?: any, opts?: any): Q.Promise<any>;
+        platforms(command: any, targets?: any, opts?: ICordovaPlatformOptions): Q.Promise<any>;
         plugin(command: any, targets?: any, opts?: ICordovaPluginOptions): Q.Promise<any>;
         plugins(command: any, targets?: any, opts?: any): Q.Promise<any>;
         prepare(options?: OptionType): Q.Promise<any>;

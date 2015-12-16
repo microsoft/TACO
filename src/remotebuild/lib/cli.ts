@@ -70,6 +70,9 @@ class CliHelper {
         // Default to using TACO_HOME/RemoteBuild.config
         // If that file doesn't exist, then this will be equivalent to nconf.use("memory") as long as we don't try to save it out
         var configFile: string = nconf.get("config") || path.join(UtilHelper.tacoHome, "RemoteBuild.config");
+        var configDir: string = path.dirname(configFile);
+
+        UtilHelper.createDirectoryIfNecessary(configDir);
         nconf.file({ file: configFile });
 
         return new RemoteBuildConf(nconf);
@@ -98,7 +101,7 @@ class CliHelper {
 
     private static printHelp(remotebuildConf: RemoteBuildConf, topic?: string): Q.Promise<void> {
         var help: Help = new Help(remotebuildConf);
-        return help.run([topic]);
+        return help.run(topic ? [topic] : []);
     }
 }
 

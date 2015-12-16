@@ -37,6 +37,8 @@ import CordovaHelper = tacoUtility.CordovaHelper;
 import logger = tacoUtility.Logger;
 import LoggerHelper = tacoUtility.LoggerHelper;
 import ProjectHelper = tacoUtility.ProjectHelper;
+import PromisesUtils = tacoUtility.PromisesUtils;
+import TelemetryHelper = tacoUtility.TelemetryHelper;
 import utils = tacoUtility.UtilHelper;
 import NpmHelper = tacoUtility.NpmHelper;
 
@@ -131,10 +133,10 @@ class Kit extends commands.TacoCommandBase {
         return name;
     }
 
-    private static generateTelemetryProperties(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
-        return Q.when(tacoUtility.TelemetryHelper.addPropertiesFromOptions({}, Kit.KNOWN_OPTIONS, commandData.options, ["kit", "cordova"]));
+    private static generateTelemetryProperties(commandData: commands.ICommandData, subCommand: string): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        return Q.when(TelemetryHelper.addPropertiesFromOptions({ subCommand: TelemetryHelper.telemetryProperty(subCommand) }, Kit.KNOWN_OPTIONS, commandData.options, ["kit", "cordova"]));
     }
-
+    
     /**
      * Get kit description
      */
@@ -403,15 +405,6 @@ class Kit extends commands.TacoCommandBase {
         });
     }
 
-    private static invokeComponentCommandSilent(component: string, subCommand: string, targets: string[], options: Cordova.ICordovaDownloadOptions): Q.Promise<any> {
-        var commandParams: Cordova.ICordovaCommandParameters = {
-            subCommand: subCommand,
-            targets: targets,
-            downloadOptions: options
-        };
-        return CordovaWrapper.invokePlatformPluginCommand(component, commandParams, null, true);
-    }
-
     /**
      * Updates the project compoenents - plugins/platforms added to the project - Removes and adds platforms
      */
@@ -423,25 +416,37 @@ class Kit extends commands.TacoCommandBase {
 
         if (componentType === ProjectComponentType.Platform) {
             logger.log(resources.getString("CommandKitSelectStatusUpdatingPlatforms"));
+
+            var platformOpts: Cordova.ICordovaPlatformOptions = { usegit: false, link: "", save: true };
+
+            // Remove all the updatable platforms and re-add them
+            return CordovaWrapper.platform("remove", null, Object.keys(components), platformOpts)
+                .then(function(): Q.Promise<any> {
+                    // Do not save in the case of updating to CLI project
+                    platformOpts.save = editParams.isKitProject;
+                    return tacoUtility.PromisesUtils.chain(Object.keys(components), (componentName: string) => {
+                        // No override on the case of CLI project update - Cordova CLI gets its pinned version
+                        var componentOverride: string = editParams.isKitProject ? componentName + "@" + components[componentName] : componentName;
+                        return CordovaWrapper.platform("add", null, [componentOverride], platformOpts);
+                    });
+                });
         } else {
             logger.log(resources.getString("CommandKitSelectStatusUpdatingPlugins"));
-        }
 
-        var downloadOptions: Cordova.ICordovaDownloadOptions = { searchpath: undefined, noregistry: undefined, usegit: undefined, cli_variables: {}, browserify: undefined, link: undefined, save: true, shrinkwrap: undefined };
-        var command: string = (componentType === ProjectComponentType.Platform) ? "platform" : "plugin";
-
-        // Remove all the updatable plugins and re-add them
-        return Kit.invokeComponentCommandSilent(command, "remove", Object.keys(components), downloadOptions)
-            .then(function(): Q.Promise<any> {
-                return tacoUtility.PromisesUtils.chain(Object.keys(components), (componentName: string) => {
-                    // No override on the case of CLI project update - Cordova CLI gets its pinned version
-                    var componentOverride: string = editParams.isKitProject ? componentName + "@" + components[componentName] : componentName;
+            // Remove all the updatable plugins and re-add them
+            var pluginOpts: Cordova.ICordovaPluginOptions = { save: true };
+            return CordovaWrapper.plugin("remove", null, Object.keys(components))
+                .then(function(): Q.Promise<any> {
                     // Do not save in the case of updating to CLI project
-                    downloadOptions.save = editParams.isKitProject;
-                    return Kit.invokeComponentCommandSilent(command, "add", [componentOverride], downloadOptions);
+                    pluginOpts.save = editParams.isKitProject;
+                    return tacoUtility.PromisesUtils.chain(Object.keys(components), (componentName: string) => {
+                        // No override on the case of CLI project update - Cordova CLI gets its pinned version
+                        var componentOverride: string = editParams.isKitProject ? componentName + "@" + components[componentName] : componentName;
+                        return CordovaWrapper.plugin("add", null, [componentOverride], pluginOpts);
+                    });
+                });
 
-            });
-        });
+        }
     }
 
     /**
@@ -718,7 +723,8 @@ class Kit extends commands.TacoCommandBase {
         });
     }
 
-    private select(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private select(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         var kitId: string = commandData.options["kit"];
         var cli: string = commandData.options["cordova"];
         var projectInfo: IProjectInfo;
@@ -754,10 +760,11 @@ class Kit extends commands.TacoCommandBase {
             }
         }).then(function (): void {
             logger.log(resources.getString("CommandKitSelectStatusSuccess"));
-        }).then(() => Kit.generateTelemetryProperties(commandData));
+        }).then(() => Kit.generateTelemetryProperties(commandData, "select"));
     }
 
-    private list(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private list(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         logger.logLine();
         var kitId: string = commandData.options["kit"];
         var jsonPath: any = commandData.options["json"];
@@ -771,20 +778,20 @@ class Kit extends commands.TacoCommandBase {
             result = (kitId ? Kit.printKit(kitId) : Kit.printAllKits());
         }
 
-        return result.then(() => Kit.generateTelemetryProperties(commandData));
+        return result.then(() => Kit.generateTelemetryProperties(commandData, "list"));
     }
 
     public subcommands: commands.ISubCommand[] = [
         {
             // Change kit or CLI
             name: "select",
-            run: commandData => this.select(commandData)
+            run: () => this.select()
         },
         {
             // List kits
             name: "list",
-            run: commandData => this.list(commandData),
-            canHandleArgs: commandData => true
+            run: () => this.list(),
+            canHandleArgs: () => true
         }
    ];
 
@@ -805,13 +812,6 @@ class Kit extends commands.TacoCommandBase {
         }
 
         return parsedOptions;
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 }
 

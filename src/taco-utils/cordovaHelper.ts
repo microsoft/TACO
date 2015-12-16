@@ -34,7 +34,7 @@ import TacoPackageLoader = tacoPackageLoader.TacoPackageLoader;
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 
 module TacoUtility {
-    export class CordovaHelper {        
+    export class CordovaHelper {
         // Cordova's known parameters
         private static CORDOVA_BOOLEAN_PARAMETERS: any =
         {
@@ -141,12 +141,12 @@ module TacoUtility {
          */
         public static toCordovaCliArguments(commandData: Commands.ICommandData, platforms: string[] = null): string[] {
             var cordovaArgs: string[] = platforms ? platforms : commandData.remain;
-            Object.keys(CordovaHelper.CORDOVA_BOOLEAN_PARAMETERS).forEach(function (key: string): void {
+            Object.keys(CordovaHelper.CORDOVA_BOOLEAN_PARAMETERS).forEach(function(key: string): void {
                 if (commandData.options[key]) {
                     cordovaArgs.push("--" + key);
                 }
             });
-            Object.keys(CordovaHelper.CORDOVA_VALUE_PARAMETERS).forEach(function (key: string): void {
+            Object.keys(CordovaHelper.CORDOVA_VALUE_PARAMETERS).forEach(function(key: string): void {
                 if (commandData.options[key]) {
                     cordovaArgs.push("--" + key);
                     cordovaArgs.push(commandData.options[key]);
@@ -173,18 +173,6 @@ module TacoUtility {
             return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
         }
 
-
-
-        public static editConfigXml(projectInfo: IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
-            return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
-                .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
-                editFunc(configParser);
-                configParser.write();
-                return Q.resolve({});
-            });
-        }
-
         /**
          * Static method to get the plugin version specification from the config.xml file
          *
@@ -194,13 +182,10 @@ module TacoUtility {
          *
          * @return {Q.Promise<string>} A promise with the version specification as a string
          */
-        public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
-            return TacoPackageLoader.lazyCordovaRequire(cordovaCliVersion)
-                .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
-                var pluginEntry: Cordova.ICordovaPlatformPluginInfo = configParser.getPlugin(pluginId);
-                var versionSpec: string = pluginEntry ? pluginEntry.spec : "";
-                return Q.resolve(versionSpec);
+        public static getPluginVersionSpec(pluginId: string, projectInfo: IProjectInfo): Q.Promise<string> {
+            return CordovaHelper.getTargetVersionSpec(projectInfo, configParser => {
+                var pluginEntry: Cordova.ICordovaPluginInfo = configParser.getPlugin(pluginId);
+                return pluginEntry ? pluginEntry.spec : "";
             });
         }
 
@@ -213,36 +198,34 @@ module TacoUtility {
          *
          * @return {Q.Promise<string>} An empty promise
          */
-        public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean): void {
-            infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
-                configParser.removePlugin(info.name);
-                if (addSpec) {
-                    configParser.addPlugin({ name: info.name, spec: info.spec }, info.pluginVariables);
-                }
+        public static editPluginVersionSpecs(targetSpecs: Cordova.ICordovaPluginInfo[], projectInfo: IProjectInfo, addSpec: boolean): Q.Promise<any> {
+            return CordovaHelper.editConfigXml(projectInfo, function(configParser: Cordova.cordova_lib.configparser): void {
+                targetSpecs.forEach(function(targetSpec: Cordova.ICordovaPluginInfo): void {
+                    configParser.removePlugin(targetSpec.name);
+                    if (addSpec) {
+                        configParser.addPlugin({ name: targetSpec.name, spec: targetSpec.spec }, targetSpec.pluginVariables);
+                    }
+                });
             });
         }
 
-            /**
-             * Static method to get the engine specification from the config.xml file
-             *
-             * @param {string} The platform name
-             * @param {string} The path to config.xml of the project
-             * @param {string} The cordova CLI version
-             *
-             * @return {Q.Promise<string>} A promise with the version specification as a string
-             */
-        public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string> {
-            return TacoPackageLoader.lazyCordovaRequire(cordovaCliVersion)
-                .then(function (cordova: typeof Cordova): Q.Promise<any> {
-                var configParser: ConfigParser = new cordova.cordova_lib.configparser(configXmlPath);
-                var engineSpec: string = "";
-                var engines: Cordova.ICordovaPlatformPluginInfo[] = configParser.getEngines();
-                engines.forEach(function (engineInfo: Cordova.ICordovaPlatformPluginInfo ): void {
-                    if (engineInfo.name.toLowerCase() === platform.toLowerCase()) {
-                        engineSpec = engineInfo.spec;
+        /**
+         * Static method to get the engine specification from the config.xml file
+         *
+         * @param {string} The platform name
+         * @param {string} The path to config.xml of the project
+         * @param {string} The cordova CLI version
+         *
+         * @return {Q.Promise<string>} A promise with the version specification as a string
+         */
+        public static getEngineVersionSpec(platformName: string, projectInfo: IProjectInfo): Q.Promise<string> {
+            return CordovaHelper.getTargetVersionSpec(projectInfo, configParser => {
+                configParser.getEngines().forEach(function(engineInfo: Cordova.ICordovaPlatformInfo): string {
+                    if (engineInfo.name.toLowerCase() === platformName.toLowerCase()) {
+                        return engineInfo.spec;
                     }
                 });
-                return Q.resolve(engineSpec);
+                return "";
             });
         }
 
@@ -256,12 +239,14 @@ module TacoUtility {
          *
          * @return {Q.Promise<string>} An empty promise
          */
-        public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: ConfigParser, addSpec: boolean): void {
-            infoList.forEach(function (info: Cordova.ICordovaPlatformPluginInfo ): void {
-                configParser.removeEngine(info.name);
-                if (addSpec) {
-                    configParser.addEngine(info.name, info.spec);
-                }
+        public static editEngineVersionSpecs(targetSpecs: Cordova.ICordovaPlatformInfo[], projectInfo: IProjectInfo, addSpec: boolean): Q.Promise<any> {
+            return CordovaHelper.editConfigXml(projectInfo, function(configParser: Cordova.cordova_lib.configparser): void {
+                targetSpecs.forEach(function(targetSpec: Cordova.ICordovaPlatformInfo): void {
+                    configParser.removeEngine(targetSpec.name);
+                    if (addSpec) {
+                        configParser.addEngine(targetSpec.name, targetSpec.spec);
+                    }
+                });
             });
         }
 
@@ -288,7 +273,7 @@ module TacoUtility {
          */
         public static tryInvokeCordova<T>(cordovaFunction: (cordova: Cordova.ICordova) => T | Q.Promise<T>, otherFunction: () => T | Q.Promise<T>,
             options: { logLevel?: InstallLogLevel, isSilent?: boolean } = {}): Q.Promise<T> {
-            return ProjectHelper.getProjectInfo().then(function (projectInfo: IProjectInfo): T | Q.Promise<T> {
+            return ProjectHelper.getProjectInfo().then(function(projectInfo: IProjectInfo): T | Q.Promise<T> {
                 if (projectInfo.cordovaCliVersion) {
                     return CordovaHelper.wrapCordovaInvocation<T>(projectInfo.cordovaCliVersion, cordovaFunction, options.logLevel || InstallLogLevel.taco, options.isSilent);
                 } else {
@@ -322,12 +307,12 @@ module TacoUtility {
                     var dom: domain.Domain = domain.create();
                     var deferred: Q.Deferred<T> = Q.defer<T>();
 
-                    dom.on("error", function (err: any): void {
+                    dom.on("error", function(err: any): void {
                         deferred.reject(errorHelper.wrap(TacoErrorCodes.CordovaCommandUnhandledException, err));
                         // Note: At this point the state can be arbitrarily bad, so we really shouldn't try to recover much from here
                     });
 
-                    dom.run(function (): void {
+                    dom.run(function(): void {
                         Q(func(cordova)).done((result: T) => deferred.resolve(result), (err: any) => deferred.reject(err));
                     });
 
@@ -344,14 +329,14 @@ module TacoUtility {
 
         public static getCordovaExecutable(): Q.Promise<string> {
             return ProjectHelper.getProjectInfo()
-                .then(function (projectInfo: IProjectInfo): string | Q.Promise<string> {
+                .then(function(projectInfo: IProjectInfo): string | Q.Promise<string> {
                     if (projectInfo.cordovaCliVersion) {
                         return TacoPackageLoader.lazyCordovaRun(projectInfo.cordovaCliVersion);
                     } else {
                         return CordovaHelper.globalCordovaCommandName;
                     }
                 })
-                .catch(function (err: string): string{
+                .catch(function(err: string): string {
                     return CordovaHelper.globalCordovaCommandName;
                 });
         }
@@ -374,7 +359,7 @@ module TacoUtility {
             // on the parsed args object.
             var downstreamArgs: string[] = [];
             var argNames: string[] = ["debug", "release", "device", "emulator", "nobuild", "list"];
-            argNames.forEach(function (flag: string): void {
+            argNames.forEach(function(flag: string): void {
                 if (commandData.options[flag]) {
                     downstreamArgs.push("--" + flag);
                 }
@@ -393,6 +378,23 @@ module TacoUtility {
             opts.options = downstreamArgs.concat(additionalArguments);
 
             return opts;
+        }
+
+        private static editConfigXml(projectInfo: IProjectInfo, editFunc: (configParser: ConfigParser) => void): Q.Promise<void> {
+            return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
+                .then(function(cordova: typeof Cordova): void {
+                    var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
+                    editFunc(configParser);
+                    configParser.write();
+                });
+        }
+
+        private static getTargetVersionSpec(projectInfo: IProjectInfo, readFunc: (configParser: ConfigParser) => string): Q.Promise<string> {
+            return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
+                .then(function(cordova: typeof Cordova): string {
+                    var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
+                    return readFunc(configParser);
+                });
         }
     }
 }

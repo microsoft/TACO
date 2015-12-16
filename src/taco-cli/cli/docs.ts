@@ -27,18 +27,11 @@ import commands = tacoUtility.Commands;
 class Documentation extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
-    protected runCommand(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(): Q.Promise<any> {
         // This implementation is based on "npm docs": https://github.com/npm/npm/blob/master/lib/docs.js
         var link: string = resources.getString("TacoDocumentationLink");
         opener(link);
         return Q.resolve({});
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {

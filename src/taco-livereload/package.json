@@ -28,15 +28,11 @@
         "browser-sync": "^2.7.13",
         "q": "1.0.1",
         "elementtree": "^0.1.6",
-        "npm": "^2.10.x",
         "cheerio": "^0.19.0",
         "glob": "^5.0.15",
         "lodash.merge": "^3.3.2",
         "nopt": "^3.0.4",
         "plist": "^1.1.0"
-    },
-    "scripts": {
-        "coverage": "istanbul cover --report json node_modules/mocha/bin/_mocha -- --reporter spec"
     },
     "license": "MIT"
 }
