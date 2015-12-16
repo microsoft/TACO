@@ -81,7 +81,7 @@ function kitRun(args: string[] = []): Q.Promise<TacoUtility.ICommandTelemetryPro
     };
 
     var expectedKitPluginVersion: IKeyValuePair<string> = {
-        "cordova-plugin-camera": "1.2.0"
+        "cordova-plugin-camera": "1.1.0"
     };
 
     function createProject(args: string[], projectDir: string): Q.Promise<any> {
