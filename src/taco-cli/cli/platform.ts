@@ -16,9 +16,9 @@ import Q = require ("q");
 
 import KitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
-import Settings = require ("./utils/settings");
 import cordovaComponentCommand = require("./utils/cordovaComponentCommand");
 import Settings = require ("./utils/settings");
+
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
@@ -56,7 +56,7 @@ class Platform extends CordovaComponentCommand {
         {
             // taco plaform add <platform>
             name: "add",
-            run: commandData => this.add()
+            run: () => this.add()
         },
         {
             // taco plaform list
@@ -66,8 +66,8 @@ class Platform extends CordovaComponentCommand {
         {
             // taco plaform remote/update/check <platform>
             name: "fallback",
-            run: commandData => this.passthrough(),
-            canHandleArgs: commandData => true
+            run: () => this.passthrough(),
+            canHandleArgs: () => true
         },
     ];
 
