@@ -20,6 +20,7 @@ import Q = require ("q");
 import util = require ("util");
 
 import commands = require ("./commands");
+import cordovaWrapper = require ("./cordovaWrapper");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
 import resourceManager = require ("./resourceManager");
@@ -27,6 +28,7 @@ import resources = require ("./resources/resourceManager");
 import telemetryHelper = require ("./telemetryHelper");
 
 import CommandsFactory = commands.Commands.CommandFactory;
+import CordovaWrapper = cordovaWrapper.CordovaWrapper;
 import ICommandData = commands.Commands.ICommandData;
 import ICommandInfo = commands.Commands.ICommandInfo;
 import TacoCommandBase = commands.Commands.TacoCommandBase;
@@ -66,8 +68,14 @@ module TacoUtility {
          * entry point for printing helper
          */
         protected runCommand(): Q.Promise<any> {
-            if (this.data.original && this.data.original.length > 0 && this.commandExists(this.data.original[0])) {
-                this.printCommandUsage(this.data.original[0]);
+            if (this.data.original && this.data.original.length > 0) {
+                if (this.commandExists(this.data.original[0])) {
+                    this.printCommandUsage(this.data.original[0]);
+                } else {
+                    var args = this.data.original;
+                    args.unshift("help");
+                    CordovaWrapper.cli(args);
+                }
             } else {
                 this.printGeneralUsage();
             }
