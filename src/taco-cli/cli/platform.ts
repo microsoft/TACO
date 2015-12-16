@@ -61,7 +61,7 @@ class Platform extends CordovaComponentCommand {
         {
             // taco plaform list
             name: "list",
-            run: commandData => this.list()
+            run: () => this.list()
         },
         {
             // taco plaform remote/update/check <platform>
