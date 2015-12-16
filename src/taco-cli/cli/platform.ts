@@ -17,11 +17,14 @@ import Q = require ("q");
 import KitHelper = require ("./utils/kitHelper");
 import resources = require ("../resources/resourceManager");
 import cordovaComponentCommand = require("./utils/cordovaComponentCommand");
+import Settings = require ("./utils/settings");
+
 import tacoUtility = require ("taco-utils");
 
 import commands = tacoUtility.Commands;
 import CordovaHelper = tacoUtility.CordovaHelper;
 import CordovaWrapper = tacoUtility.CordovaWrapper;
+import ICommandTelemetryProperties = tacoUtility.ICommandTelemetryProperties;
 import ICordovaComponentCommandData = cordovaComponentCommand.ICordovaComponentCommandData;
 import ICordovaComponentInfo = cordovaComponentCommand.ICordovaComponentInfo;
 import CordovaComponentCommand = cordovaComponentCommand.CordovaComponentCommand;
@@ -54,6 +57,11 @@ class Platform extends CordovaComponentCommand {
             // taco plaform add <platform>
             name: "add",
             run: commandData => this.add()
+        },
+        {
+            // taco plaform list
+            name: "list",
+            run: commandData => this.list()
         },
         {
             // taco plaform remote/update/check <platform>
@@ -171,6 +179,16 @@ class Platform extends CordovaComponentCommand {
                 break;
 
         }
+
+    }
+    private list(): Q.Promise<ICommandTelemetryProperties> {
+        // platform list should include remotely configured platforms as well
+        return Q.all<any>([this.passthrough(), Settings.loadSettingsOrReturnEmpty()])
+            .spread((telemetryProperties, settings) => {
+                var remotePlatforms: string[] = Object.keys(settings.remotePlatforms || {});
+                Logger.log(resources.getString("PlatformListRemotePlatforms", remotePlatforms.join(",")));
+                return telemetryProperties;
+            });
     }
 }
 

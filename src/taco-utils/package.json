@@ -37,7 +37,9 @@
         "windows-no-runnable": "0.0.6",
 		"npm": "^2.14.7",
         "winreg": "0.0.13",
-        "wrench": "^1.5.8"
+        "wrench": "^1.5.8",
+        "lodash": "^3.10.1",
+        "npm": "^2.14.7"
     },
     "devDependencies": {
         "mocha": "2.0.1",
