@@ -159,6 +159,20 @@ class BuildManager {
                 if (err) {
                     deferred.reject(err);
                 } else {
+                    
+                    utils.TelemetryHelper.generate("Server",
+                    (telemetry: utils.TelemetryGenerator) => {
+                        telemetry
+                            .add("remoteBuild.server.build.cordovaVersion", buildInfo["vcordova"], false)
+                            /*.add("remoteBuild.server.build.wasBuildSuccessful", "", false)*/
+                            .add("remoteBuild.server.build.locale", buildInfo.buildLang, false)
+                            /*.add("remoteBuild.server.build.iosVersion", "", false)*/
+                            .add("remoteBuild.server.build.buildSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
+                            .add("remoteBuild.server.build.queueSize", self.queuedBuilds.length, false)
+                            /*.add("remoteBuild.server.build.maintainedBuildsSize", "", false)*/
+                            .add("remoteBuild.server.build.isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false);
+                    });
+                    
                     deferred.resolve(buildInfo);
                     self.beginBuild(req, buildInfo);
                 }
