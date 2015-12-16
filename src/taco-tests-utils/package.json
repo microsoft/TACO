@@ -23,8 +23,5 @@
     "taco-utils": "file:../taco-utils",
     "should": "4.3.0"
   },
-  "devDependencies": {
-    "typescript": "~1.6.2"
-  },
   "license": "MIT"
 }

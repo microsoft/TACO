@@ -31,7 +31,8 @@ import tacoErrorCodes = require ("./tacoErrorCodes");
 import errorHelper = require ("./tacoErrorHelper");
 import tacoError = require ("./tacoError");
 import globalConfig = require ("./tacoGlobalConfig");
-import UtilHelper = require ("./utilHelper");
+import UtilHelper = require("./utilHelper");
+import npmHelper = require("./npmHelper");
 
 import InstallLogLevel = installLogLevel.InstallLogLevel;
 import logger = loggerUtil.Logger;
@@ -40,6 +41,7 @@ import TacoError = tacoError.TacoError;
 import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 import TacoGlobalConfig = globalConfig.TacoGlobalConfig;
 import utils = UtilHelper.UtilHelper;
+import NpmHelper = npmHelper.NpmHelper;
 
 module TacoUtility {
     export enum PackageSpecType {
@@ -88,15 +90,17 @@ module TacoUtility {
     };
 
     export interface ITacoPackageLoader {
+        lazyCordovaRequire<T>(cordovaCliVersion: string, logLevel?: InstallLogLevel): Q.Promise<T>;
         lazyRequire<T>(packageName: string, packageId: string, logLevel?: InstallLogLevel): Q.Promise<T>;
-        lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;
+        lazyCordovaRun(cordovaCliVersion: string, logLevel?: InstallLogLevel): Q.Promise<string>;
+        lazyRun(packageName: string, packageId: string, commandName: string, logLevel?: InstallLogLevel): Q.Promise<string>;        
     }
 
     export class TacoPackageLoader {
         /* tslint:disable:member-ordering */
         // Need to declare FILE_REGEX_PREFIX before FILE_URI_REGEX, but don't want to expose it outside the class
         private static FILE_REGEX_PREFIX: string = "file://";
-
+        private static CORDOVA_NPM_PACKAGE_NAME: string = "cordova";
         public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
         public static FILE_URI_REGEX: RegExp = new RegExp("^" + TacoPackageLoader.FILE_REGEX_PREFIX + ".*");
 
@@ -117,27 +121,24 @@ module TacoUtility {
          */
         public static lazyRun(packageName: string, packageId: string, commandName: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<string> {
             var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel);
+            return TacoPackageLoader.installAndGetExecutable(packageName, commandName, request); 
+        }
 
-            return Q({})
-                .then(function (): Q.Promise<void> {
-                    return TacoPackageLoader.installPackageIfNeeded(request);
-                })
-                .then(function (): Q.Promise<string> {
-                    var packageJsonFilePath = path.join(request.targetPath, "package.json");
-                    var packageJson = JSON.parse(fs.readFileSync(packageJsonFilePath, "utf8"));
-
-                    if (packageJson.bin && packageJson.bin[commandName]) {
-                        var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
-                        if (os.platform() === "win32") {
-                            commandFilePath += ".cmd";
-                        }
-                        if (fs.existsSync(commandFilePath)) {
-                            return Q.resolve(commandFilePath);
-                        }
-                    }
-
-                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
-                });
+        /**
+         * Returns a path to the specified command exported from the specified Cordova package. If the package is not already downloaded,
+         * then first download and cache it locally.
+         *
+         * @param {string} packageName The name of the package to load
+         * @param {string} packageId The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} commandName The name of the binary to find
+         * @param {LogLevel} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "pretty" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
+         * @returns {Q.Promise<string>} A promise which is either rejected with a failure to find the local the binary or resolved with a path to the binary
+         */
+        public static lazyCordovaRun(cordovaCliVersion: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<string> {
+            var request: IPackageInstallRequest = TacoPackageLoader.createCordovaPackageInstallRequest(cordovaCliVersion, logLevel);
+            return TacoPackageLoader.installAndGetExecutable(TacoPackageLoader.CORDOVA_NPM_PACKAGE_NAME, "cordova", request);
         }
 
         /**
@@ -161,6 +162,34 @@ module TacoUtility {
                 return TacoPackageLoader.lazyRequireInternal<T>(TacoPackageLoader.createPackageInstallRequest(packageName, packageId, logLevel));
             } else {
                 return this.mockForTests.lazyRequire<T>(packageName, packageId, logLevel);
+            }
+        }
+
+        /**
+         * Load a Cordova package with specified version. If the package is not already downloaded,
+         * then first download the package and cache it locally for future loads. The loaded package is cast to type T
+         *
+         * This method is resilient against interrupted downloads, but is not safe under concurrency.
+         * Until that changes, we should not allow multiple builds at once.
+         *
+         * @param {string} packageVersion The version of the package to load. Either a version number such that "npm install package@version" works, or a git url to clone
+         * @param {string} logLevel Optional parameter which determines how much output from npm is filtered out. 
+         *                  Follows the npm syntax: silent, warn, info, verbose, silly
+         *                  loglevel can also be used as "taco" in which case, only formatted taco messages like Downloading cordova@5.0 are shown
+         * 
+         *
+         * @returns {Q.Promise<T>} A promise which is either rejected with a failure to install, or resolved with the require()'d package
+         */
+        public static lazyCordovaRequire<T>(cordovaCliVersion: string, logLevel: InstallLogLevel = InstallLogLevel.warn): Q.Promise<T> {
+            if (!this.mockForTests) {
+                var request: IPackageInstallRequest = TacoPackageLoader.createCordovaPackageInstallRequest(cordovaCliVersion, logLevel);
+
+                return TacoPackageLoader.lazyRequireInternal<T>(request);
+            } else {
+                return this.mockForTests.lazyRequire<T>(
+                    TacoPackageLoader.CORDOVA_NPM_PACKAGE_NAME,
+                    TacoPackageLoader.CORDOVA_NPM_PACKAGE_NAME + "@" + cordovaCliVersion,
+                    logLevel);
             }
         }
 
@@ -322,6 +351,42 @@ module TacoUtility {
             }
         }
 
+        private static createCordovaPackageInstallRequest(cordovaCliVersion: string, logLevel: InstallLogLevel): IPackageInstallRequest {
+            var request: IPackageInstallRequest = TacoPackageLoader.createPackageInstallRequest(
+                TacoPackageLoader.CORDOVA_NPM_PACKAGE_NAME,
+                TacoPackageLoader.CORDOVA_NPM_PACKAGE_NAME + "@" + cordovaCliVersion,
+                logLevel);
+
+            if (process.env.testCordovaVersion) {
+                request.packageId = "cordova@" + process.env.testCordovaVersion;
+            }
+
+            return request;
+        }
+
+        private static installAndGetExecutable(packageName: string, commandName: string, request: IPackageInstallRequest): Q.Promise<string> {
+            return Q({})
+                .then(function (): Q.Promise<void> {
+                    return TacoPackageLoader.installPackageIfNeeded(request);
+                })
+                .then(function (): Q.Promise<string> {
+                    var packageJsonFilePath = path.join(request.targetPath, "package.json");
+                    var packageJson = JSON.parse(fs.readFileSync(packageJsonFilePath, "utf8"));
+
+                    if (packageJson.bin && packageJson.bin[commandName]) {
+                        var commandFilePath = path.join(request.targetPath, "..", ".bin", commandName);
+                        if (os.platform() === "win32") {
+                            commandFilePath += ".cmd";
+                        }
+                        if (fs.existsSync(commandFilePath)) {
+                            return Q.resolve(commandFilePath);
+                        }
+                    }
+
+                    return Q.reject<string>(errorHelper.get(TacoErrorCodes.PackageLoaderRunPackageDoesntHaveRequestedBinary, packageName, commandName));
+                });
+        }
+
         private static createTacoPackageInstallRequest(packageKey: string, dependencyConfigPath: string, logLevel: InstallLogLevel): IPackageInstallRequest {
             if (fs.existsSync(dependencyConfigPath)) {
                 try {
@@ -340,39 +405,6 @@ module TacoUtility {
             return null;
         }
 
-        private static runNpmCommand(npmCommand: string, packageId: string, cwd: string, flags: string[], logLevel?: InstallLogLevel): Q.Promise<number> {
-            var deferred: Q.Deferred<number> = Q.defer<number>();
-            var args: string[] = [npmCommand, packageId];
-
-            if (logLevel && logLevel !== InstallLogLevel.taco) {
-                // Ignore logLevel if it is undefined, InstallLogLevel.undefined = 0 or InstallLogLevel.taco
-                args.push("--loglevel", InstallLogLevel[logLevel]);
-            }
-
-            if (flags) {
-                args = args.concat(flags);
-            }
-            var npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
-
-            var stdio: any = logLevel === InstallLogLevel.error // On the default error message level, we don't want to show npm output messages
-                ? [/*stdin*/ "ignore", /*stdout*/ "ignore", /*stderr*/ process.stderr] // So we inherit stderr but we ignore stdin and stdout
-                : "inherit"; // For silent everything is ignored, so it doesn't matter, for everything else we just let npm inherit all our streams
-
-            var npmProcess = child_process.spawn(npmExecutable, args, { cwd: cwd, stdio: stdio });
-            npmProcess.on("error", function (error: Error): void {
-                deferred.reject(error);
-            });
-            npmProcess.on("exit", function (exitCode: number): void {
-                if (exitCode === 0) {
-                    deferred.resolve(0);
-                } else {
-                    deferred.reject(exitCode);
-                }
-            });
-
-            return deferred.promise;
-        }
-
         private static installPackageViaNPM(request: IPackageInstallRequest): Q.Promise<void> {
             if (request.logLevel >= InstallLogLevel.taco) {
                 logger.logLine();
@@ -381,7 +413,8 @@ module TacoUtility {
 
             return Q.denodeify(mkdirp)(request.targetPath).then(function (): Q.Promise<any> {
                 var cwd: string = path.resolve(request.targetPath, "..", "..");
-                return TacoPackageLoader.runNpmCommand("install", request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
+                
+                return NpmHelper.install(request.packageId, cwd, request.commandFlags, request.logLevel).then(function (): void {
                     if (request.logLevel >= InstallLogLevel.taco) {
                         logger.logLine();
                         logger.log(resources.getString("PackageLoaderDownloadCompletedMessage", request.packageId));
@@ -408,24 +441,6 @@ module TacoUtility {
                     });
                     return deferred.promise;
                 });
-            });
-        }
-
-        private static updatePackageViaNPM(packageName: string, targetPath: string, logLevel?: InstallLogLevel): Q.Promise<any> {
-            var cwd: string = path.resolve(targetPath, "..", "..");
-            return TacoPackageLoader.runNpmCommand("update", packageName, cwd, null /* commandFlags */, logLevel)
-                .catch(function (err: any): Q.Promise<void> {
-                    var deferred: Q.Deferred<void> = Q.defer<void>();
-                    rimraf(targetPath, function (): void {
-                        if (isFinite(err)) {
-                            // error code reported when npm fails due to EACCES
-                            var errorCode: TacoErrorCodes = (err === 243) ? TacoErrorCodes.PackageLoaderNpmUpdateFailedEaccess : TacoErrorCodes.PackageLoaderNpmUpdateFailedWithCode;
-                            deferred.reject(errorHelper.get(errorCode, packageName, err));
-                        } else {
-                            deferred.reject(errorHelper.wrap(TacoErrorCodes.PackageLoaderNpmUpdateErrorMessage, err, packageName));
-                        }
-                    });
-                    return deferred.promise;
             });
         }
 

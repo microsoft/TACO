@@ -298,7 +298,7 @@
     "_CommandPluginLinkDescription.comment": "Description of the --link argument to 'taco Plugin add'",
     "CommandPluginShrinkwrapDescription": "Used together with --save, saves the installed version number to config.xml",
     "_CommandPluginShrinkwrapDescription.comment": "Description of the --shrinkwrap argument to 'taco plugin add'",
-    "CommandPluginBrowserifyDescription": "Plugins javascript gets loaded at build time instead of runtime using browserify, Replace cordovajs file with one that included the JS of the installed plugins.",
+    "CommandPluginBrowserifyDescription": "Plugins javascript gets loaded at build time instead of runtime using browserify, Replace cordovajs file with one that included the JS of the installed plugins. <key>(experimental)</key>",
     "_CommandPluginBrowserifyDescription.comment": "Description of the <path> argument in the syntax description",
     "CommandPluginStatusAdded": "<success>Success!</success> Plugin added.<br/>",
     "_CommandPluginStatusAdded.comment": "Status message after successfully adding a plugin",
@@ -566,5 +566,7 @@
     "GeneralCommandsTitle": "General Commands:",
     "_GeneralCommandsTitle.comment": "This is the string used to show general commands category for taco help",
     "InstallReqsNotSupported": "Failed Cordova minimum version requirements for 'taco install-reqs'. {0}. If your project was created using a Kit, consider moving to a kit that has a more recent version of Cordova. If your project was created using Cordova directly, consider updating the installation of Cordova. For more information, please refer to http://go.microsoft.com/fwlink/?LinkId=618544.",
-    "_InstallReqsNotSupported.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than the minimum version. {0} is the Cordova version used by the current project, {1} is the minimum required Cordova version."
+    "_InstallReqsNotSupported.comment": "Error shown when a user uses 'taco install-reqs' with a Cordova version older than the minimum version. {0} is the Cordova version used by the current project, {1} is the minimum required Cordova version.",
+    "PlatformListRemotePlatforms": "Remote platforms: {0}",
+    "_PlatformListRemotePlatforms.comment": "Message showing currently configured remote platforms as part of 'taco platform list'. {0} is a comma separated list of platform names"
 }

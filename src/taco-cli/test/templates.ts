@@ -25,6 +25,9 @@ var shouldModule: any = require("should");
 var colors: any = require("colors/safe");
 /* tslint:enable:no-var-requires */
 
+import os = require ("os");
+import path = require ("path");
+
 import tacoUtils = require ("taco-utils");
 import Templates = require ("../cli/templates");
 import tacoTestsUtils = require ("taco-tests-utils");
@@ -42,6 +45,10 @@ describe("templates", function (): void {
     before(() => {
         previous = process.env["TACO_UNIT_TEST"];
         process.env["TACO_UNIT_TEST"] = true;
+        
+        var tacoHome: string = path.join(os.tmpdir(), "taco-cli", "templates");
+        // Use a dummy home location so we don't trash any real configurations
+        process.env["TACO_HOME"] = tacoHome;
     });
 
     after(() => {

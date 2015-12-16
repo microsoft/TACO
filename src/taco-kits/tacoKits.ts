@@ -25,7 +25,7 @@ import TacoErrorCodes = tacoErrorCodes.TacoErrorCode;
 
 module TacoKits {
     export interface IKitHelper {
-        getKitMetadata?: () => Q.Promise<ITacoKitMetadata>;
+        getKitMetadata?: (reparse?: boolean) => Q.Promise<ITacoKitMetadata>;
         getKitInfo?: (kitId: string) => Q.Promise<IKitInfo>;
         getDefaultKit?: () => Q.Promise<string>;
         getValidCordovaCli?: (kitId: string) => Q.Promise<string>;
@@ -128,12 +128,14 @@ module TacoKits {
         /**
          *   Returns a promise which is either rejected with a failure to parse or find kits metadata file
          *   or resolved with the parsed metadata
+         *   @param {boolean} if true, discards the cached kit metadata
          */
 
-        public getKitMetadata(): Q.Promise<ITacoKitMetadata> {
+        public getKitMetadata(reparse?: boolean): Q.Promise<ITacoKitMetadata> {
             var metadataFileName: string = path.resolve(__dirname, KitHelper.KIT_FILENAME);
+            reparse = reparse || false;
 
-            if (KitHelper.kitMetadata) {
+            if (!reparse && KitHelper.kitMetadata) {
                 return Q(KitHelper.kitMetadata);
             }
 
