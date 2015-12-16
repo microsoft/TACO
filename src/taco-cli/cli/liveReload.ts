@@ -28,14 +28,14 @@ import CordovaHelper = tacoUtility.CordovaHelper;
  * handles "taco run"
  */
 class LiveReload {
-    public static startLiveReload(liveReloadEnabled: boolean, devicesync: boolean, platforms?: string[], ignore?: string): Q.Promise<any> {
+    public static startLiveReload(liveReloadEnabled: boolean, deviceSyncEnabled: boolean, platforms?: string[], ignore?: string): Q.Promise<any> {
         var projectRoot = ProjectHelper.getProjectRoot();
         return LiveReload.getTargetPlatforms(projectRoot, platforms)
             .then(targetPlatforms => {
                 return CordovaHelper.tryInvokeCordova((cordova) => {
 
                     var options: liveReload.LiveReloadOptions = {
-                        ghostMode: devicesync,
+                        ghostMode: deviceSyncEnabled,
                         ignore: ignore,
 
                         cb: function(event: string, file: string, lrHandle: liveReload.LiveReloadHandle) {
