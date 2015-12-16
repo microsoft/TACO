@@ -28,7 +28,8 @@ import CordovaHelper = tacoUtility.CordovaHelper;
  * handles "taco run"
  */
 class LiveReload {
-    public static startLiveReload(liveReloadEnabled: boolean, deviceSyncEnabled: boolean, platforms?: string[], ignore?: string): Q.Promise<any> {
+
+    private static hookLiveReload(liveReloadEnabled: boolean, deviceSyncEnabled: boolean, platforms: string[], ignore?: string): Q.Promise<any> {
         var projectRoot = ProjectHelper.getProjectRoot();
         return LiveReload.getTargetPlatforms(projectRoot, platforms)
             .then(targetPlatforms => {
@@ -83,7 +84,10 @@ class LiveReload {
                             return liveReload.start(projectRoot, targetPlatforms, options);
                         }
                     });
-                }, () => Logger.log("Unsupported for non-taco projects "), {});
+                    return Q({});
+                }, () => {
+                    return Q.reject(new Error("live-reload is not supported for project without taco.json "));
+                }, {});
             });
     }
 
