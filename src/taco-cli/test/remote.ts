@@ -73,13 +73,6 @@ describe("taco remote", function(): void {
         };
     }
 
-    it("should handle arguments", function(): void {
-        remote.canHandleArgs(makeICommandData(["remote", "ios"])).should.be.true;
-        // Even bad arguments should return true because we don't want to pass through to cordova
-        remote.canHandleArgs(makeICommandData(["foo"])).should.be.true;
-        remote.canHandleArgs(makeICommandData([])).should.be.true;
-    });
-
     var remoteRun: (args: string[]) => Q.Promise<any> = function(args: string[]): Q.Promise<any> {
         return remote.run(args);
     };

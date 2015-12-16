@@ -50,14 +50,14 @@ module TacoUtility {
          */
         export interface ICommand {
             name: String;
+            info: ICommandInfo;
             run(args: string[]): Q.Promise<ICommandTelemetryProperties>;
-            canHandleArgs(data: ICommandData): boolean;
         }
 
         export interface ISubCommand {
             name: String;
-            canHandleArgs?(data: ICommandData): boolean;
-            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+            canHandleArgs?(): boolean;
+            run(): Q.Promise<ICommandTelemetryProperties>;
         }
 
         export class TacoCommandBase implements ICommand {
@@ -74,18 +74,10 @@ module TacoUtility {
                 throw errorHelper.get(TacoErrorCodes.AbstractMethod);
             }
 
-            /**
-             * Abstract method to be implemented by derived class.
-             * Sanity check on arguments to determine whether to pass through to cordova
-             */
-            public canHandleArgs(data: ICommandData): boolean {
-                throw errorHelper.get(TacoErrorCodes.AbstractMethod);
-            }
-
             public run(args: string[]): Q.Promise<ICommandTelemetryProperties> {
                 try {
                     this.data = this.parseArgs(args);
-                    return this.runCommand(this.data);
+                    return this.runCommand();
                 } catch (err) {
                     return Q.reject<ICommandTelemetryProperties>(err);
                 }
@@ -95,22 +87,22 @@ module TacoUtility {
              * Concrete implementation of ICommand's run
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
-            protected runCommand(data: ICommandData): Q.Promise<ICommandTelemetryProperties> {
+            protected runCommand(): Q.Promise<ICommandTelemetryProperties> {
                 // Determine which subcommand we are executing
-                var subCommand = this.getSubCommand(this.data);
+                var subCommand = this.getSubCommand();
                 if (subCommand) {
-                    return subCommand.run(this.data);
+                    return subCommand.run();
                 }
                 return Q.reject<ICommandTelemetryProperties>(errorHelper.get(TacoErrorCodes.CommandBadSubcommand, this.name, this.data.original.toString()));
             }
 
-            public resolveAlias(subCommand: string): string {
-                return (this.info.aliases && this.info.aliases[subCommand]) ? this.info.aliases[subCommand] : subCommand;
+            public resolveAlias(token: string): string {
+                return (this.info.aliases && this.info.aliases[token]) ? this.info.aliases[token] : token;
             }
 
-            private getSubCommand(options: ICommandData): ISubCommand {
+            private getSubCommand(): ISubCommand {
                 // first do a simple name match
-                var name: string = options.remain[0];
+                var name: string = this.data.remain[0];
                 name = name ? this.resolveAlias(name) : name;
                 for (var i: number = 0; i < this.subcommands.length; ++i) {
                     if (name === this.subcommands[i].name) {
@@ -121,7 +113,7 @@ module TacoUtility {
                 // which can handle the args
                 for (var i: number = 0; i < this.subcommands.length; ++i) {
                     var subCommand: ISubCommand = this.subcommands[i];
-                    if (subCommand.canHandleArgs && subCommand.canHandleArgs(options)) {
+                    if (subCommand.canHandleArgs && subCommand.canHandleArgs()) {
                         return subCommand;
                     }
                 }
@@ -153,7 +145,7 @@ module TacoUtility {
             /**
              * get specific task object, given task name
              */
-            public getTask(name: string, inputArgs: string[], commandsModulePath: string): TacoCommandBase {
+            public getTask(name: string, inputArgs: string[], commandsModulePath: string): ICommand {
                 if (!name || !this.listings) {
                     throw errorHelper.get(TacoErrorCodes.TacoUtilsExceptionListingfile);
                 }
@@ -175,14 +167,9 @@ module TacoUtility {
                 }
 
                 var commandMod: any = require(modulePath);
-                var moduleInstance: any = new commandMod();
+                var moduleInstance: ICommand = new commandMod();
                 moduleInstance.info = moduleInfo;
-
-                var commandData: ICommandData = { options: {}, original: inputArgs, remain: inputArgs };
-                if (moduleInstance && moduleInstance.canHandleArgs(commandData)) {
-                    return moduleInstance;
-                }
-                return null;
+                return moduleInstance;
             }
         }
     }

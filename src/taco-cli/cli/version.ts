@@ -25,10 +25,6 @@ import telemetryHelper = tacoUtility.TelemetryHelper;
 class Version extends commands.TacoCommandBase {
     public info: commands.ICommandInfo;
 
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
-    }
-
     public parseArgs(args: string[]): commands.ICommandData {
         return { options: {}, original: [], remain: [] };
     }
@@ -36,7 +32,7 @@ class Version extends commands.TacoCommandBase {
     /**
      * entry point for printing version
      */
-    protected runCommand(data: commands.ICommandData): Q.Promise<any> {
+    protected runCommand(): Q.Promise<any> {
         this.printTacoVersion();
         return Q({});
     }

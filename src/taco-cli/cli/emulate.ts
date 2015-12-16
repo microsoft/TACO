@@ -130,7 +130,8 @@ class Emulate extends commands.TacoCommandBase {
         });
     }
 
-    protected runCommand(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    protected runCommand(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         var telemetryProperties: ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
@@ -140,13 +141,6 @@ class Emulate extends commands.TacoCommandBase {
                     (remotePlatform: string): Q.Promise<any> => Emulate.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
                     );
             }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {

@@ -63,23 +63,23 @@ class Remote extends commands.TacoCommandBase {
         {
             // taco remote remove <platform>
             name: "remove",
-            run: commandData => this.remove(commandData)
+            run: () => this.remove()
         },
         {
             // taco remote list
             name: "list",
-            run:commandData => this.list(commandData)
+            run:() => this.list()
         },
         {
             // taco remote add [platform]
             name: "add",
-            run: commandData => this.add(commandData)
+            run: () => this.add()
         },
         {
             // taco remote [unknown]
             name: "help",
-            run: commandData => this.help(commandData),
-            canHandleArgs: commandData => true
+            run: () => this.help(),
+            canHandleArgs: () => true
         }
     ];
 
@@ -106,12 +106,12 @@ class Remote extends commands.TacoCommandBase {
         });
     }
 
-    private remove(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        if (remoteData.remain.length < 2) {
+    private remove(): Q.Promise<ICommandTelemetryProperties> {
+        if (this.data.remain.length < 2) {
             throw errorHelper.get(TacoErrorCodes.CommandRemoteDeleteNeedsPlatform);
         }
 
-        var platform: string = (remoteData.remain[1]).toLowerCase();
+        var platform: string = (this.data.remain[1]).toLowerCase();
         var telemetryProperties: ICommandTelemetryProperties = {};
 
         return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
@@ -131,7 +131,7 @@ class Remote extends commands.TacoCommandBase {
         });
     }
 
-    private list(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    private list(): Q.Promise<ICommandTelemetryProperties> {
         return Settings.loadSettings().catch<Settings.ISettings>(function (err: any): Settings.ISettings {
             // No settings or the settings were corrupted: start from scratch
             return {};
@@ -160,8 +160,8 @@ class Remote extends commands.TacoCommandBase {
         });
     }
 
-    private add(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
-        var platform: string = (remoteData.remain[1] || "ios").toLowerCase();
+    private add(): Q.Promise<ICommandTelemetryProperties> {
+        var platform: string = (this.data.remain[1] || "ios").toLowerCase();
         var remoteInfo: Settings.IRemoteConnectionInfo;
         return CordovaHelper.getSupportedPlatforms().then(function (supportedPlatforms: IDictionary<any>): Q.Promise<any> {
             if (supportedPlatforms && !(platform in supportedPlatforms)) {
@@ -352,18 +352,10 @@ class Remote extends commands.TacoCommandBase {
         }
     }
 
-    private help(remoteData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    private help(): Q.Promise<ICommandTelemetryProperties> {
         return new HelpModule().run(["remote"]).then(function (): Q.Promise<ICommandTelemetryProperties> {
             return Q(<ICommandTelemetryProperties> {});
         });
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        // remote is a custom command so we should always try and handle it
-        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {

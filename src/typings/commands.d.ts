@@ -36,7 +36,6 @@ declare module TacoUtility {
         interface ICommand {
             name: string;
             run(args: string[]): Q.Promise<ICommandTelemetryProperties>;
-            canHandleArgs(data: ICommandData): boolean;
         }
 
         /**
@@ -44,8 +43,8 @@ declare module TacoUtility {
          */
         interface ISubCommand {
             name: String;
-            canHandleArgs?(data: ICommandData): boolean;
-            run(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
+            canHandleArgs?(): boolean;
+            run(): Q.Promise<ICommandTelemetryProperties>;
         }
 
         /**
@@ -75,18 +74,14 @@ declare module TacoUtility {
              * Convert command line arguments into an appropriate format to determine what action to take
              */
             public parseArgs(args: string[]): ICommandData
-            /**
-             * Abstract method to be implemented by derived class.
-             * Sanity check on arguments to determine whether to pass through to cordova
-             */
-            public canHandleArgs(data: ICommandData): boolean;
+
             /**
              * Concrete implementation of ICommand's run
              * Parse the arguments using overridden parseArgs, and then select the most appropriate subcommand to run
              */
             public run(args: string[]): Q.Promise<ICommandTelemetryProperties>;
-            protected runCommand(data: ICommandData): Q.Promise<ICommandTelemetryProperties>;
-            public resolveAlias(subCommand: string): string;
+            protected runCommand(): Q.Promise<ICommandTelemetryProperties>;
+            public resolveAlias(token: string): string;
         }
     }
 }
