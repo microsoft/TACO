@@ -73,14 +73,12 @@ class Server {
         app.get("/certs/:pin", HostSpecifics.hostSpecifics.downloadClientCerts);
         app.get("/modules/:module", Server.getModuleMount);
 
-        return utils.TelemetryHelper.generate("Server",
+        return utils.TelemetryHelper.generate("start",
                     (telemetry: utils.TelemetryGenerator) => {
                         telemetry
-                            .add("remoteBuild.server.OS.platform", os.platform(), false)
-                            .add("remoteBuild.server.OS.version", os.release(), false)
-                            .add("remoteBuild.server.isSecure", conf.secure, false)
-                            .add("remoteBuild.server.nodeVersion", process.version, false);
-                            /*.add("remoteBuild.server.npmVersion", "", false);*/
+                            .add("remotebuildVersion", require("../package.json").version, false)
+                            .add("isSecure", conf.secure, false)
+                            .add("nodeVersion", process.version.indexOf("v") === 0 ? process.version.slice(1) : process.version, false);
                             
                     return Server.initializeServerCapabilities(conf).then(function (serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
                         return Server.loadServerModules(conf, app, serverCapabilities);

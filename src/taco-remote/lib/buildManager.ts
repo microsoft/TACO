@@ -161,17 +161,15 @@ class BuildManager {
                     deferred.reject(err);
                 } else {
                     
-                    utils.TelemetryHelper.generate("Server",
+                    utils.TelemetryHelper.generate("build",
                     (telemetry: utils.TelemetryGenerator) => {
                         self.telemetry = telemetry;
                         self.telemetry
-                            .add("remoteBuild.server.build.cordovaVersion", buildInfo["vcordova"], false)
-                            .add("remoteBuild.server.build.locale", buildInfo.buildLang, false)
-                            /*.add("remoteBuild.server.build.iosVersion", "", false)*/
-                            .add("remoteBuild.server.build.buildSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
-                            .add("remoteBuild.server.build.queueSize", self.queuedBuilds.length, false)
-                            /*.add("remoteBuild.server.build.maintainedBuildsSize", "", false)*/
-                            .add("remoteBuild.server.build.isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false);
+                            .add("cordovaVersion", buildInfo["vcordova"], false)
+                            .add("locale", buildInfo.buildLang, false)
+                            .add("zippedFileSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
+                            .add("queueSize", self.queuedBuilds.length, false)
+                            .add("isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false);
                             
                             deferred.resolve(buildInfo);
                             self.beginBuild(req, buildInfo);
@@ -447,7 +445,7 @@ class BuildManager {
                     self.buildMetrics.failed++;
                 }
                 
-                self.telemetry.add("remoteBuild.server.build.wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
+                self.telemetry.add("wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
 
                 self.dequeueNextBuild();
             });
