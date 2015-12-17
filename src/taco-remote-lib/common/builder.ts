@@ -21,7 +21,6 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 import semver = require("semver");
-import util = require("util");
 
 import resources = require("../resources/resourceManager");
 import utils = require("taco-utils");
