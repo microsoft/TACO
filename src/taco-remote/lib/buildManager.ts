@@ -147,7 +147,14 @@ class BuildManager {
             params.buildNumber = buildNumber;
             params.options = options;
             params.logLevel = logLevel;
+
+            // Save the Cordova version that was used for the previous build, if any
+            if (self.builds[buildNumber] && self.builds[buildNumber].hasOwnProperty("vcordova")) {
+                params["previousvcordova"] = self.builds[buildNumber]["vcordova"];
+            }
+
             var buildInfo: BuildInfo = new BuildInfo(params);
+
             // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
             Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
             buildInfo["pkg"] = pkg;

@@ -124,28 +124,30 @@ class Builder {
             fs.mkdirSync("platforms");
         }
 
-        if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
-            Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
-            // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
-            return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
-        } else {
-            // If the client-side project has changed Cordova version or saved a new version for this platform in config.xml, then re-add the platform
-            return this.reAddPlatformIfNecessary().then((reAddedPlatform) => {
-                if (reAddedPlatform) {
-                    // Platform already prepared
-                    return Q({});
-                }
+        return this.ensurePlatformAdded().then((addedPlatform) => {
+            if (addedPlatform) {
+                // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
+                return Q({});
+            }
 
-                return this.update_platform();
-            });
-        }
+            return this.update_platform();
+        });
     }
 
     /**
-     * Removes and add the platform if necessary (Cordova version changed, or config.xml has a saved platform version that differs from the installed one). Returns true if the platform was added,
-     * false if not.
+     * Adds the platform if it isn't already present, or removes and re-adds it if the project Cordova version changed, or config.xml has a saved platform version that differs from the installed one.
+     * Returns true if the platform was added, false if not.
      */
-    private reAddPlatformIfNecessary(): Q.Promise<boolean> {
+    private ensurePlatformAdded(): Q.Promise<boolean> {
+        if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
+            Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
+
+            // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
+            return this.cordova.raw.platform("add", this.currentBuild.buildPlatform).then(() => {
+                return Q(true);
+            });
+        }
+
         var xmlVersion: string = this.getConfigXmlPlatformVersion();
 
         return this.getCurrentPlatformVersion().then((installedVersion: string) => {
@@ -158,8 +160,8 @@ class Builder {
                     return false;
                 }
             } else {
-                // Look whether the Cordova version has changed
-                if (semver.neq(this.currentBuild["vcordova"], this.currentBuild["previousCordova"])) {
+                // Check if the Cordova version has changed
+                if (this.currentBuild["previousvcordova"] && semver.neq(this.currentBuild["vcordova"], this.currentBuild["previousvcordova"])) {
                     // Cordova version has changed
                     return true;
                 }
@@ -174,7 +176,11 @@ class Builder {
             if (!mustReAdd) {
                 return Q(false);
             } else {
+                Logger.log("cordova platform remove " + this.currentBuild.buildPlatform);
+
                 return this.cordova.raw.platform("remove", this.currentBuild.buildPlatform).then(() => {
+                    Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
+
                     return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
                 }).then(() => {
                     return Q(true);
