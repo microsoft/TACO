@@ -15,6 +15,7 @@
 
 "use strict";
 
+import child_process = require("child_process");
 import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
@@ -149,30 +150,29 @@ class Builder {
         }
 
         var xmlVersion: string = this.getConfigXmlPlatformVersion();
+        var mustReAddPromise: Q.Promise<boolean>;
 
-        return this.getCurrentPlatformVersion().then((installedVersion: string) => {
-            if (xmlVersion) {
-                if (semver.neq(xmlVersion, installedVersion)) {
+        if (xmlVersion) {
+            mustReAddPromise = this.getCurrentPlatformVersion().then((currentVersion: string) => {
+                if (!semver.satisfies(currentVersion, xmlVersion)) {
                     // There is a version of the platform specified in xonfig.xml, and it differs from the installed version
                     return true;
                 } else {
                     // The version specified in config.xml is already installed, we don't need to re-add the platform
                     return false;
                 }
-            } else {
-                // Check if the Cordova version has changed
-                if (this.currentBuild["previousvcordova"] && semver.neq(this.currentBuild["vcordova"], this.currentBuild["previousvcordova"])) {
-                    // Cordova version has changed
-                    return true;
-                }
+            }, (err) => {
+                // If we couldn't extract the platform's version, then remove and re-add it anyway, to be safe
+                return true;
+            });
+        } else {
+            // Check if the Cordova version has changed; if it has, then we must re-add the platform
+            var cordovaChanged: boolean = !!this.currentBuild["previousvcordova"] && semver.neq(this.currentBuild["vcordova"], this.currentBuild["previousvcordova"]);
 
-                // Cordova version hasn't changed
-                return false;
-            }
-        }, (err) => {
-            // If we couldn't extract the platform's version, then remove and re-add it anyway, to be safe
-            return true;
-        }).then((mustReAdd: boolean) => {
+            mustReAddPromise = Q(cordovaChanged);
+        }
+
+        return mustReAddPromise.then((mustReAdd: boolean) => {
             if (!mustReAdd) {
                 return Q(false);
             } else {
@@ -190,7 +190,7 @@ class Builder {
     }
 
     private getConfigXmlPlatformVersion(): string {
-        var engines: {[key: string]: string} = utils.CordovaConfig.getCordovaConfig(this.currentBuild.appDir).engines();
+        var engines = utils.CordovaConfig.getCordovaConfig(this.currentBuild.appDir).engines();
 
         if (engines[this.currentBuild.buildPlatform]) {
             return engines[this.currentBuild.buildPlatform];
@@ -202,17 +202,12 @@ class Builder {
     private getCurrentPlatformVersion(): Q.Promise<string> {
         var deferred: Q.Deferred<string> = Q.defer<string>();
 
-        var resolvePlatformOutput: Function = (output: string) => {
-            var versionRegexp: RegExp = new RegExp(util.format("%s (.*?)(?:,|$)", this.currentBuild.buildPlatform), "m");
-            var installedPlatformVersion: string = versionRegexp.exec(output)[1];
-
-            this.cordova.off("result", resolvePlatformOutput);
-            deferred.resolve(installedPlatformVersion);
-        }
-
-        this.cordova.on("result", resolvePlatformOutput);
-        this.cordova.raw.platform("list").catch((err) => {
-            deferred.reject(err);
+        child_process.exec(path.join("platforms", this.currentBuild.buildPlatform, "cordova", "version"), (err: Error, stdout: Buffer, stderr: Buffer) => {
+            if (err) {
+                deferred.reject(err);
+            } else {
+                deferred.resolve(stdout.toString());
+            }
         });
 
         return deferred.promise;
