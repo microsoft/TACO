@@ -54,6 +54,7 @@ class BuildManager {
     private requestRedirector: TacoRemoteLib.IRequestRedirector;
     private serverConf: TacoRemoteConfig;
     private buildRetention: BuildRetention;
+    private telemetry: utils.TelemetryGenerator;
 
     constructor(conf: TacoRemoteConfig) {
         this.serverConf = conf;
@@ -162,19 +163,19 @@ class BuildManager {
                     
                     utils.TelemetryHelper.generate("Server",
                     (telemetry: utils.TelemetryGenerator) => {
-                        telemetry
+                        self.telemetry = telemetry;
+                        self.telemetry
                             .add("remoteBuild.server.build.cordovaVersion", buildInfo["vcordova"], false)
-                            /*.add("remoteBuild.server.build.wasBuildSuccessful", "", false)*/
                             .add("remoteBuild.server.build.locale", buildInfo.buildLang, false)
                             /*.add("remoteBuild.server.build.iosVersion", "", false)*/
                             .add("remoteBuild.server.build.buildSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
                             .add("remoteBuild.server.build.queueSize", self.queuedBuilds.length, false)
                             /*.add("remoteBuild.server.build.maintainedBuildsSize", "", false)*/
                             .add("remoteBuild.server.build.isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false);
+                            
+                            deferred.resolve(buildInfo);
+                            self.beginBuild(req, buildInfo);
                     });
-                    
-                    deferred.resolve(buildInfo);
-                    self.beginBuild(req, buildInfo);
                 }
             });
             return deferred.promise;
@@ -445,6 +446,8 @@ class BuildManager {
                 } else {
                     self.buildMetrics.failed++;
                 }
+                
+                self.telemetry.add("remoteBuild.server.build.wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
 
                 self.dequeueNextBuild();
             });
