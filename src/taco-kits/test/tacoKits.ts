@@ -86,6 +86,9 @@ describe("KitHelper", function (): void {
         "cordova-plugin-console": {
             version: "1.0.1"
         },
+        "cordova-plugin-camera": {
+            version: "1.1.0"
+        },
         "cordova-plugin-device": {
             version: "1.0.1"
         },
@@ -110,7 +113,7 @@ describe("KitHelper", function (): void {
 
     after(function (): void {
         // Reset ResourcesManager back to production mode
-        process.env["TACO_UNIT_TEST"] = false;
+        delete process.env["TACO_UNIT_TEST"];
     });
 
     describe("getKitMetadata()", function (): void {

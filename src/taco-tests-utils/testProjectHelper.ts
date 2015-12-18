@@ -78,7 +78,8 @@ module TacoTestsUtils {
         private static getInstalledPluginVersion(plugin: string, projectPath: string): string {
             var pluginPackgeJson: string = path.join(projectPath, "plugins", plugin, "package.json");
             if (fs.existsSync(pluginPackgeJson)) {
-                var pluginInfo: any = require(pluginPackgeJson);
+                var pluginPackageContents = fs.readFileSync(pluginPackgeJson).toString();
+                var pluginInfo = JSON.parse(pluginPackageContents);
                 if (pluginInfo) {
                     return pluginInfo["version"];
                 }

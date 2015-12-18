@@ -71,7 +71,7 @@ class Emulate extends commands.TacoCommandBase {
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
-            
+
             // DeviceSync/LiveReload not compatible with remote
             var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
             if (deviceSync) {
@@ -130,23 +130,18 @@ class Emulate extends commands.TacoCommandBase {
         });
     }
 
-    protected runCommand(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    protected runCommand(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         var telemetryProperties: ICommandTelemetryProperties = {};
+        var self = this;
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
                 return PlatformHelper.operateOnPlatforms(platforms,
-                    (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.emulate(commandData, localPlatforms),
+                    (localPlatforms: string[]): Q.Promise<any> => self.runLocalEmulate(localPlatforms),
                     (remotePlatform: string): Q.Promise<any> => Emulate.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
                     );
             }).then(() => Emulate.generateTelemetryProperties(telemetryProperties, commandData));
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {
@@ -178,6 +173,17 @@ class Emulate extends commands.TacoCommandBase {
         }
 
         return parsedOptions;
+    }
+
+    private runLocalEmulate(localPlatforms: string[]): Q.Promise<any> {
+        var self = this;
+        if (this.data.options["livereload"] || this.data.options["devicesync"]) {
+            // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
+            var liveReload = require("./liveReload");
+            return liveReload.hookLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms)
+                .then(() => CordovaWrapper.emulate(self.data, localPlatforms));
+        }
+        return CordovaWrapper.emulate(this.data, localPlatforms);
     }
 
 }

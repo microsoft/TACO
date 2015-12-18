@@ -202,7 +202,8 @@ class InstallReqs extends commands.TacoCommandBase {
         return tacoUtils.ArgsHelper.parseArguments(InstallReqs.KNOWN_OPTIONS, {}, args, 0);
     }
 
-    protected runCommand(data: commands.ICommandData): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+    protected runCommand(): Q.Promise<TacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         return tacoUtils.TelemetryHelper.generate("InstallReqs", (telemetry: tacoUtils.TelemetryGenerator): Q.Promise<any> => {
             var self: InstallReqs = this;
 
@@ -218,11 +219,11 @@ class InstallReqs extends commands.TacoCommandBase {
                     }
 
                     telemetry
-                        .addWithPiiEvaluator("requestedPlatformsViaCommandLine", data.remain, buildTelemetryHelper.getIsPlatformPii())
+                        .addWithPiiEvaluator("requestedPlatformsViaCommandLine", commandData.remain, buildTelemetryHelper.getIsPlatformPii())
                         .addWithPiiEvaluator("installedPlatforms", installedPlatforms, buildTelemetryHelper.getIsPlatformPii());
 
                     // Get a list of the requested platforms (either what is specified by the user, or all the installed platforms if nothing is specified)
-                    var requestedPlatforms: string[] = data.remain.length > 0 ? data.remain : installedPlatforms.slice();   // Using slice() to clone the array
+                    var requestedPlatforms: string[] = commandData.remain.length > 0 ? commandData.remain : installedPlatforms.slice();   // Using slice() to clone the array
 
                     requestedPlatforms = InstallReqs.removeDuplicates(requestedPlatforms);
 
@@ -272,13 +273,6 @@ class InstallReqs extends commands.TacoCommandBase {
                         });
                 });
         }).thenResolve(<TacoUtility.ICommandTelemetryProperties>{});
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 }
 

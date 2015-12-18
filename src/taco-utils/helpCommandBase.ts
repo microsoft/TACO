@@ -20,6 +20,7 @@ import Q = require ("q");
 import util = require ("util");
 
 import commands = require ("./commands");
+import cordovaWrapper = require ("./cordovaWrapper");
 import logger = require ("./logger");
 import loggerHelper = require ("./loggerHelper");
 import resourceManager = require ("./resourceManager");
@@ -27,6 +28,7 @@ import resources = require ("./resources/resourceManager");
 import telemetryHelper = require ("./telemetryHelper");
 
 import CommandsFactory = commands.Commands.CommandFactory;
+import CordovaWrapper = cordovaWrapper.CordovaWrapper;
 import ICommandData = commands.Commands.ICommandData;
 import ICommandInfo = commands.Commands.ICommandInfo;
 import TacoCommandBase = commands.Commands.TacoCommandBase;
@@ -58,14 +60,6 @@ module TacoUtility {
             this.cliResources = resources;
         }
 
-        public canHandleArgs(data: ICommandData): boolean {
-            if (!data.original || data.original.length === 0) {
-                return true;
-            }
-
-            return this.commandExists(data.original[0]);
-        }
-
         public parseArgs(args: string[]): ICommandData {
             return { options: {}, original: args, remain: args };
         }
@@ -73,9 +67,15 @@ module TacoUtility {
         /**
          * entry point for printing helper
          */
-        protected runCommand(data: ICommandData): Q.Promise<any> {
-            if (data.original && data.original.length > 0 && this.commandExists(data.original[0])) {
-                this.printCommandUsage(data.original[0]);
+        protected runCommand(): Q.Promise<any> {
+            if (this.data.original && this.data.original.length > 0) {
+                if (this.commandExists(this.data.original[0])) {
+                    this.printCommandUsage(this.data.original[0]);
+                } else {
+                    var args = this.data.original;
+                    args.unshift("help");
+                    CordovaWrapper.cli(args);
+                }
             } else {
                 this.printGeneralUsage();
             }

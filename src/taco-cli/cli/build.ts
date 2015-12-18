@@ -95,10 +95,12 @@ class Build extends commands.TacoCommandBase {
         });
     }
 
-    protected runCommand(commandData: commands.ICommandData): Q.Promise<ICommandTelemetryProperties> {
+    protected runCommand(): Q.Promise<ICommandTelemetryProperties> {
         if (ProjectHelper.isTypeScriptProject()) {
             logger.log(resources.getString("CommandCreateInstallGulp"));
         }
+
+        var commandData: commands.ICommandData = this.data;
 
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
@@ -116,13 +118,6 @@ class Build extends commands.TacoCommandBase {
                     );
             });
         }).then(() => Build.generateTelemetryProperties(telemetryProperties, commandData));
-    }
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
     }
 
     public parseArgs(args: string[]): commands.ICommandData {

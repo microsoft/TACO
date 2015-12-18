@@ -33,46 +33,41 @@ declare module TacoUtility {
          * Static method to get the plugin version specification from the config.xml file
          *
          * @param {string} The name(id) of the cordova plugin
-         * @param {string} The path to config.xml of the project
-         * @param {string} The cordova CLI version
+         * @param {IProjectInfo} projectInfo for the project
          *
          * @return {Q.Promise<string>} A promise with the version specification as a string
          */
-        public static getPluginVersionSpec(pluginId: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string>;
+        public static getPluginVersionSpec(pluginId: string, projectInfo: IProjectInfo): Q.Promise<string>;
 
         /**
          * Static method to add the plugin specification to config.xml file
          *
-         * @param {ICordovaPlatformPluginInfo } The plugin info
-         * @param {string} The path to config.xml of the project
-         * @param {string} The cordova CLI version
+         * @param {ICordovaPluginInfo } The plugin info for plugins to be added/modified
+         * @param {IProjectInfo} projectInfo for the project
          *
          * @return {Q.Promise<string>} An empty promise
          */
-        public static editPluginVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: Cordova.cordova_lib.configparser, addSpec: boolean): void;
+        public static editPluginVersionSpecs(targetSpecs: Cordova.ICordovaPluginInfo[], projectInfo: IProjectInfo): Q.Promise<any>;
 
         /**
          * Static method to get the engine specification from the config.xml file
          *
          * @param {string} The platform name
-         * @param {string} The path to config.xml of the project
-         * @param {string} The cordova CLI version
+         * @param {IProjectInfo} projectInfo for the project
          *
          * @return {Q.Promise<string>} A promise with the version specification as a string
          */
-        public static getEngineVersionSpec(platform: string, configXmlPath: string, cordovaCliVersion: string): Q.Promise<string>;
+        public static getEngineVersionSpec(platformName: string, projectInfo: IProjectInfo): Q.Promise<string>;
 
         /**
          * Static method to add the platform specification to config.xml file
          *
-         * @param {string} The platform name
-         * @param {string} The version specification for the platform
-         * @param {string} The path to config.xml of the project
-         * @param {string} The cordova CLI version
+         * @param {ICordovaPluginInfo } The platform info for platforms to be added/modified
+         * @param {IProjectInfo} projectInfo for the project
          *
          * @return {Q.Promise<string>} An empty promise
          */
-        public static editEngineVersionSpecs(infoList: Cordova.ICordovaPlatformPluginInfo[], configParser: Cordova.cordova_lib.configparser, addSpec: boolean): void;
+        public static editEngineVersionSpecs(targetSpecs: Cordova.ICordovaPlatformInfo[], projectInfo: IProjectInfo): Q.Promise<any>;
 
         /**
          * Return a dictionary where the keys are supported platforms, or "null" if the answer is unknown.

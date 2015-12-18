@@ -69,11 +69,12 @@ class Run extends commands.TacoCommandBase {
         return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Run.KNOWN_OPTIONS, commandData);
     }
 
-    private targets(commandData: commands.ICommandData): Q.Promise<any> {
-        return CordovaWrapper.targets(commandData);
+    private targets(): Q.Promise<any> {
+        return CordovaWrapper.targets(this.data);
     }
 
-    private remote(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private remote(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings) => {
@@ -97,7 +98,7 @@ class Run extends commands.TacoCommandBase {
             if (!remoteConfig) {
                 throw errorHelper.get(TacoErrorCodes.CommandRemotePlatformNotKnown, platform);
             }
-            
+
             // DeviceSync/LiveReload not compatible with remote
             var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
             if (deviceSync) {
@@ -172,6 +173,23 @@ class Run extends commands.TacoCommandBase {
         });
     }
 
+    private runLocal(localPlatforms?: string[]): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var self = this;
+        if (this.data.options["livereload"] || this.data.options["devicesync"]) {
+            // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
+            var liveReload = require("./liveReload");
+            return liveReload.hookLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms)
+                .then(() => CordovaWrapper.run(self.data, localPlatforms));
+        }
+        return CordovaWrapper.run(this.data, localPlatforms);
+    }
+
+    private local(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
+        return this.runLocal()
+            .then(() => Run.generateTelemetryProperties({}, commandData));
+    }
+
     private static cleanPlatformsIfNecessary(platforms: PlatformHelper.IPlatformWithLocation[], commandData: commands.ICommandData): Q.Promise<any> {
         if (commandData.options["clean"]) {
             return CleanHelper.cleanPlatforms(platforms, commandData);
@@ -180,23 +198,18 @@ class Run extends commands.TacoCommandBase {
         return Q({});
     }
 
-    private local(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
-        return PlatformHelper.determinePlatform(commandData).then((platforms: PlatformHelper.IPlatformWithLocation[]) => {
-            return Run.cleanPlatformsIfNecessary(platforms, commandData);
-        }).then(() => {
-            return CordovaWrapper.run(commandData);
-        }).then(() => Run.generateTelemetryProperties({}, commandData));
-    }
-
-    private fallback(commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    private fallback(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+        var commandData: commands.ICommandData = this.data;
         var telemetryProperties: tacoUtility.ICommandTelemetryProperties = {};
+
+        var self = this;
         return Q.all<any>([PlatformHelper.determinePlatform(commandData), Settings.loadSettingsOrReturnEmpty()])
             .spread((platforms: PlatformHelper.IPlatformWithLocation[], settings: Settings.ISettings): Q.Promise<any> => {
                 buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
 
                 return Run.cleanPlatformsIfNecessary(platforms, commandData).then(() => {
                     return PlatformHelper.operateOnPlatforms(platforms,
-                        (localPlatforms: string[]): Q.Promise<any> => CordovaWrapper.run(commandData, localPlatforms),
+                        (localPlatforms: string[]): Q.Promise<any> => self.runLocal(commandData, localPlatforms),
                         (remotePlatform: string): Q.Promise<any> => Run.runRemotePlatform(remotePlatform, commandData, telemetryProperties)
                     );
                 });
@@ -207,35 +220,28 @@ class Run extends commands.TacoCommandBase {
         {
             // --list = targets
             name: "targets",
-            run: commandData => this.targets(commandData),
-            canHandleArgs: commandData => !!commandData.options["list"]
+            run: () => this.targets(),
+            canHandleArgs: () => !!this.data.options["list"]
         },
         {
             // Remote Run
             name: "remote",
-            run: commandData => this.remote(commandData),
-            canHandleArgs: commandData => !!commandData.options["remote"]
+            run: () => this.remote(),
+            canHandleArgs: () => !!this.data.options["remote"]
         },
         {
             // Local Run
             name: "local",
-            run: commandData => this.local(commandData),
-            canHandleArgs: commandData => !!commandData.options["local"]
+            run: () => this.local(),
+            canHandleArgs: () => !!this.data.options["local"]
         },
         {
             // Fallback
             name: "fallback",
-            run: commandData => this.fallback(commandData),
-            canHandleArgs: commandData => true
+            run: () => this.fallback(),
+            canHandleArgs: () => true
         }
     ];
-
-    /**
-     * specific handling for whether this command can handle the args given, otherwise falls through to Cordova CLI
-     */
-    public canHandleArgs(data: commands.ICommandData): boolean {
-       return true;
-    }
 
     public parseArgs(args: string[]): commands.ICommandData {
         var parsedOptions: commands.ICommandData = tacoUtility.ArgsHelper.parseArguments(Run.KNOWN_OPTIONS, Run.SHORT_HANDS, args, 0);

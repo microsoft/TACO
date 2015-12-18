@@ -25,10 +25,6 @@ class Feedback extends commands.TacoCommandBase {
 
     public name: string = "feedback";
 
-    public canHandleArgs(data: commands.ICommandData): boolean {
-        return true;
-    }
-
     public parseArgs(args: string[]): commands.ICommandData {
         return { options: {}, original: [], remain: [] };
     }
@@ -36,7 +32,7 @@ class Feedback extends commands.TacoCommandBase {
     /**
      * Prompt for telemetry consent
      */
-    protected runCommand(data: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
+    protected runCommand(): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         return telemetry.changeTelemetryOptInSetting();
     }
 }
