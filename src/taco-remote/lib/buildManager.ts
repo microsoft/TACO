@@ -160,20 +160,8 @@ class BuildManager {
                 if (err) {
                     deferred.reject(err);
                 } else {
-                    
-                    utils.TelemetryHelper.generate("build",
-                    (telemetry: utils.TelemetryGenerator) => {
-                        self.telemetry = telemetry;
-                        self.telemetry
-                            .add("cordovaVersion", buildInfo["vcordova"], false)
-                            .add("locale", buildInfo.buildLang, false)
-                            .add("zippedFileSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
-                            .add("queueSize", self.queuedBuilds.length, false)
-                            .add("isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false);
-                            
-                            deferred.resolve(buildInfo);
-                            self.beginBuild(req, buildInfo);
-                    });
+                    deferred.resolve(buildInfo);
+                    self.beginBuild(req, buildInfo);
                 }
             });
             return deferred.promise;
@@ -445,7 +433,16 @@ class BuildManager {
                     self.buildMetrics.failed++;
                 }
                 
-                self.telemetry.add("wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
+                utils.TelemetryHelper.generate("build",
+                    (telemetry: utils.TelemetryGenerator) => {
+                        telemetry
+                            .add("cordovaVersion", buildInfo["vcordova"], false)
+                            .add("locale", buildInfo.buildLang, false)
+                            .add("zippedFileSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
+                            .add("queueSize", self.queuedBuilds.length, false)
+                            .add("isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false)
+                            .add("wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
+                    });
 
                 self.dequeueNextBuild();
             });
