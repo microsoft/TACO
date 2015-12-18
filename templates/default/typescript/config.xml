@@ -10,7 +10,7 @@
     <preference name="windows-phone-target-version" value="8.1" />
     
     <!-- Support for Cordova 5.0.0 plugin system -->
-    <plugin name="cordova-plugin-whitelist" version="1.0.0" />
+    <plugin name="cordova-plugin-whitelist" spec="1" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />

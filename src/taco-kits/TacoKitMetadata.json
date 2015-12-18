@@ -293,6 +293,26 @@
                 "name": "TypescriptTemplateName",
                 "url": "templates/default/typescript.zip"
             }
+        },
+        "tacokit@1.0.0": {
+            "blank": {
+                "name": "BlankTemplateName",
+                "url": "templates/fixed-whitelist/blank.zip"
+            },
+            "typescript": {
+                "name": "TypescriptTemplateName",
+                "url": "templates/fixed-whitelist/typescript.zip"
+            }
+        },
+        "tacokit@2.0.0": {
+            "blank": {
+                "name": "BlankTemplateName",
+                "url": "templates/fixed-whitelist/blank.zip"
+            },
+            "typescript": {
+                "name": "TypescriptTemplateName",
+                "url": "templates/fixed-whitelist/typescript.zip"
+            }
         }
     }
 }
