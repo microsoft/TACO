@@ -341,6 +341,14 @@ module TacoUtility {
                 });
         }
 
+        public static getSavedPlugins(projectInfo: IProjectInfo): Q.Promise<Cordova.ICordovaPluginInfo[]> {
+            return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
+                .then((cordova: typeof Cordova): Cordova.ICordovaPluginInfo[] => {
+                    var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
+                    return configParser.getPlugins();
+                });
+        }
+
         /**
          * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
          */
@@ -391,7 +399,7 @@ module TacoUtility {
 
         private static getTargetVersionSpec(projectInfo: IProjectInfo, readFunc: (configParser: ConfigParser) => string): Q.Promise<string> {
             return TacoPackageLoader.lazyCordovaRequire(projectInfo.cordovaCliVersion)
-                .then(function(cordova: typeof Cordova): string {
+                .then(function (cordova: typeof Cordova): string {
                     var configParser: ConfigParser = new cordova.cordova_lib.configparser(projectInfo.configXmlPath);
                     return readFunc(configParser);
                 });
