@@ -106,10 +106,10 @@ module TacoUtility {
             }
         };
 
-        export function init(appNameValue: string, appVersion?: string, isOptedInValue?: boolean): Q.Promise<any> {
+        export function init(appNameValue: string, appVersion?: string, isOptedInValue?: boolean, telemetrySettingsFileName?: string): Q.Promise<any> {
             try {
                 Telemetry.appName = appNameValue;
-                return TelemetryUtils.init(appVersion, isOptedInValue);
+                return TelemetryUtils.init(appVersion, isOptedInValue, telemetrySettingsFileName);
             } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
@@ -196,8 +196,8 @@ module TacoUtility {
             private static userId: string;
             private static machineId: string;
             private static telemetrySettings: ITelemetrySettings = null;
-            private static TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
-            private static REMOTEBUILD_TELEMETRY_SETTINGS_FILENAME: string = "RemotebuildTelemetrySettings.json";
+            private static telemetrySettingsFileName: string;
+            private static DEFAULT_TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
             private static APPINSIGHTS_INSTRUMENTATIONKEY: string = "10baf391-c2e3-4651-a726-e9b25d8470fd";
             private static REGISTRY_SQMCLIENT_NODE: string = "\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE: string = "UserId";
@@ -206,14 +206,12 @@ module TacoUtility {
             private static INTERNAL_USER_ENV_VAR: string = "TACOINTERNAL";
 
             private static get telemetrySettingsFile(): string {
-                if (Telemetry.appName === "REMOTE_BUILD") {
-                    return path.join(UtilHelper.tacoHome, TelemetryUtils.REMOTEBUILD_TELEMETRY_SETTINGS_FILENAME); 
-                }
-                
-                return path.join(UtilHelper.tacoHome, TelemetryUtils.TELEMETRY_SETTINGS_FILENAME);
+                return path.join(UtilHelper.tacoHome, TelemetryUtils.telemetrySettingsFileName);
             }
 
-            public static init(appVersion: string, isOptedInValue?: boolean): Q.Promise<any> {
+            public static init(appVersion: string, isOptedInValue?: boolean, telemetrySettingsFileName?: string): Q.Promise<any> {
+                TelemetryUtils.telemetrySettingsFileName = telemetrySettingsFileName || TelemetryUtils.DEFAULT_TELEMETRY_SETTINGS_FILENAME;
+                
                 TelemetryUtils.loadSettings();
 
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)

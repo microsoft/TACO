@@ -76,7 +76,6 @@ class Server {
         return utils.TelemetryHelper.generate("start",
                     (telemetry: utils.TelemetryGenerator) => {
                         telemetry
-                            .add("remotebuildVersion", require("../package.json").version, false)
                             .add("isSecure", conf.secure, false)
                             .add("nodeVersion", process.version.indexOf("v") === 0 ? process.version.slice(1) : process.version, false);
                             
