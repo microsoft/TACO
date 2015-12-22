@@ -22,7 +22,8 @@
     },
     "dependencies": {
         "q": "^1.1.2",
-        "taco-utils": "file:../taco-utils"
+        "taco-utils": "file:../taco-utils",
+        "lodash": "~3.10.1"
     },
     "devDependencies": {
         "mocha": "2.0.1",

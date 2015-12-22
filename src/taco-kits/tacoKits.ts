@@ -11,7 +11,8 @@
 /// <reference path="../typings/tacoKits.d.ts" />
 
 "use strict";
-import fs = require ("fs");
+import _ = require("lodash");
+import fs = require("fs");
 import path = require ("path");
 import Q = require ("q");
 
@@ -119,6 +120,7 @@ module TacoKits {
         private static kitMetadata: ITacoKitMetadata;
         private static defaultKitId: string;
         private static KIT_FILENAME: string = "TacoKitMetadata.json";
+        private static CUSTOM_KIT_EXTENSIONS_FILENAME: string = "TacoKitExtensionsMetadata.json";
         private static testMetadataFilePath: string = path.resolve(__dirname, "test", "test-data", "test-kit-metadata.json");
         private static KIT_DESCRIPTION_SUFFIX: string = "-desc";
         private static DEFAULT_TEMPLATE_KIT_OVERRIDE: string = "default";
@@ -133,6 +135,7 @@ module TacoKits {
 
         public getKitMetadata(reparse?: boolean): Q.Promise<ITacoKitMetadata> {
             var metadataFileName: string = path.resolve(__dirname, KitHelper.KIT_FILENAME);
+            var extensionsMetadataFileName: string = path.resolve(tacoUtility.ProjectHelper.getProjectRoot(), KitHelper.CUSTOM_KIT_EXTENSIONS_FILENAME);
             reparse = reparse || false;
 
             if (!reparse && KitHelper.kitMetadata) {
@@ -149,6 +152,17 @@ module TacoKits {
                 }
 
                 KitHelper.kitMetadata = require(metadataFileName);
+
+                try {
+                    if (fs.existsSync(extensionsMetadataFileName)) {
+                        var kitExtensions = require(extensionsMetadataFileName);
+                        KitHelper.kitMetadata = <ITacoKitMetadata> _.merge({}, KitHelper.kitMetadata, kitExtensions);
+                    }
+                } catch (e) {
+                    // If the custom kit extensions fail, we just load the standard kits
+                    console.log("Warning: Failed to load custom kit extensions" + e);
+                }
+
                 return Q(KitHelper.kitMetadata);
             } catch (e) {
                 return Q.reject<ITacoKitMetadata>(errorHelper.get(TacoErrorCodes.TacoKitsExceptionKitMetadataFileMalformed));
