@@ -65,7 +65,7 @@ class Taco {
 
             return Settings.saveSettings({});
         }).then(function(settings: Settings.ISettings): Q.Promise<any> {
-            return telemetry.init("TACO", require("../package.json").version, {});
+            return telemetry.init("TACO", require("../package.json").version);
         }).then(function(): Q.Promise<any> {
             TacoGlobalConfig.lang = "en"; // Disable localization for now so we don't get partially localized content.
 

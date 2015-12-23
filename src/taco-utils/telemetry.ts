@@ -111,7 +111,7 @@ module TacoUtility {
             }
         };
 
-        export function init(appNameValue: string, appVersion: string, telemetryOptions: ITelemetryOptions): Q.Promise<any> {
+        export function init(appNameValue: string, appVersion: string, telemetryOptions: ITelemetryOptions = {}): Q.Promise<any> {
             try {
                 Telemetry.appName = appNameValue;
                 return TelemetryUtils.init(appVersion, telemetryOptions);
