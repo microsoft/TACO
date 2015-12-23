@@ -41,7 +41,7 @@ class CliHelper {
                 CliHelper.handleVersionFlag(args);
             })
             .then(function(): Q.Promise<any> {
-                return telemetry.init("REMOTEBUILD", require("../package.json").version, undefined ,"RemotebuildTelemetrySettings.json");
+                return telemetry.init("REMOTEBUILD", require("../package.json").version, {settingsFileName: "RemotebuildTelemetrySettings.json"});
             })
             .then(function (): Q.Promise<void> {
                 remotebuildConf = CliHelper.parseRemoteBuildConf();

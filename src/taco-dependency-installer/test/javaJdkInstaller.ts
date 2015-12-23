@@ -68,7 +68,7 @@ describe("JavaJdkInstaller telemetry", () => {
         mockery.registerMock("./processUtils", fakeProcessUtilsModule); // TelemetryHelper and Resources loads ./processUtils
         var tacoUtilsWithFakes: typeof TacoUtility = require("taco-utils"); // Reload taco utils with mocks
 
-        tacoUtilsWithFakes.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
+        tacoUtilsWithFakes.Telemetry.init("TACO/dependencyInstaller", "1.2.3", {isOptedIn: false});
 
         // Register mocks. child_process and taco-utils mocks needs to be registered before 
         // javaJdkInstaller is required for the mocking to work

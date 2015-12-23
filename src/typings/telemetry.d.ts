@@ -16,6 +16,11 @@ declare module TacoUtility {
         interface ITelemetryProperties {
             [propertyName: string]: any;
         }
+        
+        interface ITelemetryOptions {
+            isOptedIn?: boolean;
+            settingsFileName?: string;  
+        }
         /**
          * TelemetryEvent represents a basic telemetry data point
          */
@@ -39,7 +44,7 @@ declare module TacoUtility {
             start(): void;
             end(): void;
         }
-        function init(appName: string, appVersion?: string, isOptedIn?: boolean, telemetrySettingsFileName?: string): Q.Promise<any>;
+        function init(appName: string, appVersion: string, telemetryOptions: ITelemetryOptions): Q.Promise<any>;
         function isInternal(): boolean;
         function send(event: TelemetryEvent, ignoreOptIn?: boolean): void;
         function changeTelemetryOptInSetting(): Q.Promise<any>;

@@ -49,6 +49,11 @@ module TacoUtility {
         export interface ITelemetryProperties {
             [propertyName: string]: any;
         };
+        
+        export interface ITelemetryOptions {
+            isOptedIn?: boolean;
+            settingsFileName?: string;  
+        };
 
         /**
          * TelemetryEvent represents a basic telemetry data point
@@ -106,10 +111,10 @@ module TacoUtility {
             }
         };
 
-        export function init(appNameValue: string, appVersion?: string, isOptedInValue?: boolean, telemetrySettingsFileName?: string): Q.Promise<any> {
+        export function init(appNameValue: string, appVersion: string, telemetryOptions: ITelemetryOptions): Q.Promise<any> {
             try {
                 Telemetry.appName = appNameValue;
-                return TelemetryUtils.init(appVersion, isOptedInValue, telemetrySettingsFileName);
+                return TelemetryUtils.init(appVersion, telemetryOptions);
             } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
@@ -209,8 +214,8 @@ module TacoUtility {
                 return path.join(UtilHelper.tacoHome, TelemetryUtils.telemetrySettingsFileName);
             }
 
-            public static init(appVersion: string, isOptedInValue?: boolean, telemetrySettingsFileName?: string): Q.Promise<any> {
-                TelemetryUtils.telemetrySettingsFileName = telemetrySettingsFileName || TelemetryUtils.DEFAULT_TELEMETRY_SETTINGS_FILENAME;
+            public static init(appVersion: string, telemetryOptions: ITelemetryOptions): Q.Promise<any> {
+                TelemetryUtils.telemetrySettingsFileName = telemetryOptions.settingsFileName || TelemetryUtils.DEFAULT_TELEMETRY_SETTINGS_FILENAME;
                 
                 TelemetryUtils.loadSettings();
 
@@ -237,14 +242,14 @@ module TacoUtility {
                     TelemetryUtils.sessionId = TelemetryUtils.generateGuid();
                     TelemetryUtils.userType = TelemetryUtils.getUserType();
                 }).then(function() : Q.Promise<any> {
-                    if (_.isUndefined(isOptedInValue)) {
+                    if (_.isUndefined(telemetryOptions.isOptedIn)) {
                         return TelemetryUtils.getOptIn()
                         .then(function (optIn: boolean): void {
                             Telemetry.isOptedIn = optIn;
                             TelemetryUtils.saveSettings();
                         });
                     } else {
-                        Telemetry.isOptedIn = isOptedInValue;
+                        Telemetry.isOptedIn = telemetryOptions.isOptedIn;
                         TelemetryUtils.saveSettings();
                         return Q({});
                     }
