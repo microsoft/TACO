@@ -111,9 +111,9 @@ module.exports.start = function (projectRoot, platforms, options) {
             ghostMode: options.ghostMode || true
         });
         
-        return bs.startServer().then(function (serverUrl) {
+        return bs.startServer().then(function (serverUrls) {
             var patcher = new Patcher(projectRoot, platforms);
-            return patcher.patch(serverUrl);
+            return patcher.patch(serverUrls);
         }).then(function () {
             // LiveReload is up and running
             return helpers.setLiveReloadToActive();

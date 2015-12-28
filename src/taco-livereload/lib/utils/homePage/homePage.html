@@ -1,0 +1,103 @@
+<html>
+    
+    <head>
+        <title>CORDOVA-PLUGIN-LIVERELOAD</title>
+        <style>
+            #error {
+                display: none;
+            }
+        </style>
+        <script src="bower_components/q/q.js"></script>
+        <script src="bower_components/underscore/underscore-min.js"></script>
+    </head>
+    
+    <body>
+        <h3>CORDOVA-PLUGIN-LIVERELOAD</h3>
+        <div id="error">There was an error connecting to the BrowserSync server.
+            <br />
+            <br />Try using the<b><a>'tunnel'</a></b>option as in:
+            <br />
+            <b>`cordova run android -- --livereload --tunnel`</b>
+            <br />
+            <br />For more information,
+            <b>
+                <a href="https://github.com/omefire/cordova-plugin-livereload#options">check the documentation</a>
+            </b>
+            <br />
+            <br />
+        </div>
+        <div id="loading">...Loading your app, Please wait...</div>
+    </body>
+    <script type="text/javascript">
+        
+        /**
+         * Make an AJAX request:
+         *   - url: the url to make the AJAX request to
+         *   - success: the function to call in case the AJAX call succeeds
+         *   - fail: the function to call in case the AJAX call fails
+         */
+        function ajaxCall(url, success, fail) {
+            var req = new XMLHttpRequest();			
+        			
+            // Use `Math.random()` to prevent the caching of the server_url by the browser
+            req.open('GET', url + '?' + Math.random());        			
+            req.onreadystatechange = function(aEvt) {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        return success();
+                    }
+                    return fail();
+                }
+            };
+            req.send();
+        }
+        
+        /**
+         * Checks if a particular server can be connected from this page
+         */
+        function isServerAccessible(server_url) {
+            if(!server_url) {
+                return Q(false);
+            }
+                        
+            var deferred = Q.defer();            
+            ajaxCall(
+                server_url, 
+                function() {
+                    deferred.resolve(true);
+                }, 
+                function() {
+                    deferred.resolve(false);
+                }
+            );            
+            return deferred.promise;
+        }
+        		
+        // Note: __SERVERS__ gets replaced by real server urls right before this file gets deployed to a device/emulator
+        var SERVERS = JSON.parse('__SERVERS__');
+        
+        // Note: These are the kinds of servers we are interested in. (e.g: we don't care about 'ui' and 'ui-external')
+        var serverTypes = ['local', 'external', 'tunnel'];
+        
+        var areServersAccessiblePromises = serverTypes.map(function(serverType) {
+            return isServerAccessible(SERVERS[serverType]);
+        });
+        
+        Q.all(areServersAccessiblePromises).then(function(areServersAccessible) {
+            for(var i = 0; i < areServersAccessible.length; i++) {
+                if(areServersAccessible[i]) {
+                    return SERVERS[serverTypes[i]];
+                }
+            }
+            return false;
+        }).then(function(accessibleServer) {
+            if(!accessibleServer) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            } else {
+                window.location.href = accessibleServer;
+            }            
+        });
+    </script>
+
+</html>

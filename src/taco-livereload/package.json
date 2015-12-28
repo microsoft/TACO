@@ -32,7 +32,8 @@
         "glob": "^5.0.15",
         "lodash.merge": "^3.3.2",
         "nopt": "^3.0.4",
-        "plist": "^1.1.0"
+        "plist": "^1.1.0",
+        "ncp": "2.0.x"
     },
     "license": "MIT"
 }
