@@ -30,6 +30,7 @@ import CordovaHelper = tacoUtility.CordovaHelper;
 class LiveReload {
 
     private static hookLiveReload(liveReloadEnabled: boolean, deviceSyncEnabled: boolean, platforms: string[], ignore?: string): Q.Promise<any> {
+        Logger.log("Setting up livereload ...");
         var projectRoot = ProjectHelper.getProjectRoot();
         return LiveReload.getTargetPlatforms(projectRoot, platforms)
             .then(targetPlatforms => {
