@@ -67,8 +67,7 @@ class RemoteBuildClientHelper {
 
         var changeTimeFile: string = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
         var lastChangeTime: { [file: string]: number } = {};
-        var buildLog: string = path.join(settings.platformConfigurationBldDir, "build.log");
-
+        var buildLog: string = RemoteBuildClientHelper.buildLogPath(settings);
         var promise: Q.Promise<any> = RemoteBuildClientHelper.checkForBuildOnServer(settings, buildInfoFilePath)
             .then(function (buildInfo: BuildInfo): void {
                 settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
@@ -570,7 +569,7 @@ class RemoteBuildClientHelper {
         var buildNumber: number = buildInfo.buildNumber;
         var downloadUrl: string = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
-            var logPath: string = path.join(settings.platformConfigurationBldDir, "build.log");
+            var logPath: string = RemoteBuildClientHelper.buildLogPath(settings);
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
             var endOfFile: number = 0;
             if (offset > 0 && fs.existsSync(logPath)) {
@@ -698,6 +697,13 @@ class RemoteBuildClientHelper {
             }
         });
         return deferred.promise;
+    }
+
+    /**
+     * Returns the path to the local build log.
+     */
+    private static buildLogPath(settings: BuildSettings): string {
+        return path.join(settings.platformConfigurationBldDir, "build.log");
     }
 }
 
