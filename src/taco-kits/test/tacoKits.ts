@@ -86,6 +86,9 @@ describe("KitHelper", function (): void {
         "cordova-plugin-console": {
             version: "1.0.1"
         },
+        "cordova-plugin-camera": {
+            version: "1.1.0"
+        },
         "cordova-plugin-device": {
             version: "1.0.1"
         },
