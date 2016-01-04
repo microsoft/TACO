@@ -15,11 +15,12 @@
 
 "use strict";
 
+import child_process = require("child_process");
 import fs = require ("fs");
 import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
-import semver = require ("semver");
+import semver = require("semver");
 
 import resources = require("../resources/resourceManager");
 import utils = require("taco-utils");
@@ -123,13 +124,92 @@ class Builder {
             fs.mkdirSync("platforms");
         }
 
+        return this.ensurePlatformAdded().then((addedPlatform) => {
+            if (addedPlatform) {
+                // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
+                return Q({});
+            }
+
+            return this.update_platform();
+        });
+    }
+
+    /**
+     * Adds the platform if it isn't already present, or removes and re-adds it if the project Cordova version changed, or config.xml has a saved platform version that differs from the installed one.
+     * Returns true if the platform was added, false if not.
+     */
+    private ensurePlatformAdded(): Q.Promise<boolean> {
         if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
             Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
+
             // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
-            return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
-        } else {
-            return this.update_platform();
+            return this.cordova.raw.platform("add", this.currentBuild.buildPlatform).then(() => {
+                return Q(true);
+            });
         }
+
+        var xmlVersion: string = this.getConfigXmlPlatformVersion();
+        var mustReAddPromise: Q.Promise<boolean>;
+
+        if (xmlVersion) {
+            mustReAddPromise = this.getCurrentPlatformVersion().then((currentVersion: string) => {
+                if (!semver.satisfies(currentVersion, xmlVersion)) {
+                    // There is a version of the platform specified in xonfig.xml, and it differs from the installed version
+                    return true;
+                } else {
+                    // The version specified in config.xml is already installed, we don't need to re-add the platform
+                    return false;
+                }
+            }, (err) => {
+                // If we couldn't extract the platform's version, then remove and re-add it anyway, to be safe
+                return true;
+            });
+        } else {
+            // Check if the Cordova version has changed; if it has, then we must re-add the platform
+            var cordovaChanged: boolean = !!this.currentBuild["previousvcordova"] && semver.neq(this.currentBuild["vcordova"], this.currentBuild["previousvcordova"]);
+
+            mustReAddPromise = Q(cordovaChanged);
+        }
+
+        return mustReAddPromise.then((mustReAdd: boolean) => {
+            if (!mustReAdd) {
+                return Q(false);
+            } else {
+                Logger.log("cordova platform remove " + this.currentBuild.buildPlatform);
+
+                return this.cordova.raw.platform("remove", this.currentBuild.buildPlatform).then(() => {
+                    Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
+
+                    return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
+                }).then(() => {
+                    return Q(true);
+                });
+            }
+        });
+    }
+
+    private getConfigXmlPlatformVersion(): string {
+        var engines = utils.CordovaConfig.getCordovaConfig(this.currentBuild.appDir).engines();
+
+        if (engines[this.currentBuild.buildPlatform]) {
+            return engines[this.currentBuild.buildPlatform];
+        }
+
+        return "";
+    }
+
+    private getCurrentPlatformVersion(): Q.Promise<string> {
+        var deferred: Q.Deferred<string> = Q.defer<string>();
+
+        child_process.exec(path.join("platforms", this.currentBuild.buildPlatform, "cordova", "version"), (err: Error, stdout: Buffer, stderr: Buffer) => {
+            if (err) {
+                deferred.reject(err);
+            } else {
+                deferred.resolve(stdout.toString());
+            }
+        });
+
+        return deferred.promise;
     }
 
     private update_plugins(): Q.Promise<any> {

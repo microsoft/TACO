@@ -21,7 +21,8 @@ import path = require ("path");
 import Q = require ("q");
 import rimraf = require ("rimraf");
 
-import buildTelemetryHelper = require ("./utils/buildTelemetryHelper");
+import buildTelemetryHelper = require("./utils/buildTelemetryHelper");
+import CleanHelperModule = require("./utils/cleanHelper");
 import errorHelper = require ("./tacoErrorHelper");
 import PlatformHelper = require ("./utils/platformHelper");
 import RemoteBuildClientHelper = require ("./remoteBuild/remoteBuildClientHelper");
@@ -31,6 +32,7 @@ import Settings = require ("./utils/settings");
 import TacoErrorCodes = require ("./tacoErrorCodes");
 import tacoUtility = require ("taco-utils");
 
+import CleanHelper = CleanHelperModule.CleanHelper;
 import commands = tacoUtility.Commands;
 import CordovaWrapper = tacoUtility.CordovaWrapper;
 import logger = tacoUtility.Logger;
@@ -67,43 +69,6 @@ class Build extends commands.TacoCommandBase {
     private static generateTelemetryProperties(telemetryProperties: tacoUtility.ICommandTelemetryProperties,
         commandData: commands.ICommandData): Q.Promise<tacoUtility.ICommandTelemetryProperties> {
         return buildTelemetryHelper.addCommandLineBasedPropertiesForBuildAndRun(telemetryProperties, Build.KNOWN_OPTIONS, commandData);
-    }
-
-    private static cleanPlatform(platform: PlatformHelper.IPlatformWithLocation, commandData: commands.ICommandData): Q.Promise<any> {
-        switch (platform.location) {
-            case PlatformHelper.BuildLocationType.Local:
-                // To clean locally, try and run the clean script
-                var cleanScriptPath: string = path.join("platforms", platform.platform, "cordova", "clean");
-                if (fs.existsSync(cleanScriptPath)) {
-                    return Q.denodeify(UtilHelper.loggedExec)(cleanScriptPath).fail(function(err: any): void {
-                        // If we can't run the script, then show a warning but continue
-                        logger.logWarning(err.toString());
-                    });
-                }
-                break;
-            case PlatformHelper.BuildLocationType.Remote:
-                if (!(commandData.options["release"] || commandData.options["debug"])) {
-                    // If neither --debug nor --release is specified, then clean both
-                    commandData.options["release"] = commandData.options["debug"] = true;
-                }
-
-                var remotePlatform: string = path.resolve(".", "remote", platform.platform);
-                var configurations: string[] = ["release", "debug"];
-                return tacoUtility.PromisesUtils.chain(configurations, (configuration: string) => {
-                    if (commandData.options[configuration]) {
-                        var remotePlatformConfig: string = path.join(remotePlatform, configuration);
-                        if (fs.existsSync(remotePlatformConfig)) {
-                            logger.log(resources.getString("CleaningRemoteResources", platform.platform, configuration));
-                            rimraf.sync(remotePlatformConfig);
-                        }
-                    }
-                    return Q({});
-                });
-            default:
-                throw errorHelper.get(TacoErrorCodes.CommandBuildInvalidPlatformLocation, platform.platform);
-        }
-
-        return Q({});
     }
 
     private static buildRemotePlatform(platform: string, commandData: commands.ICommandData, telemetryProperties: ICommandTelemetryProperties): Q.Promise<any> {
@@ -143,9 +108,7 @@ class Build extends commands.TacoCommandBase {
             buildTelemetryHelper.storePlatforms(telemetryProperties, "actuallyBuilt", platforms, settings);
             var cleanPromise: Q.Promise<any> = Q({});
             if (commandData.options["clean"]) {
-                cleanPromise = Q.all(platforms.map((platform: PlatformHelper.IPlatformWithLocation): Q.Promise<any> => {
-                    return Build.cleanPlatform(platform, commandData);
-                }));
+                cleanPromise = CleanHelper.cleanPlatforms(platforms, commandData);
             }
 
             return cleanPromise.then((): Q.Promise<any> => {
