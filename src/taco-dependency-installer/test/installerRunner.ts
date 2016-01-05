@@ -380,7 +380,7 @@ describe("InstallerRunner", function (): void {
 
             mockery.registerMock("./processUtils", fakeProcessUtilsModule); // TelemetryHelper loads ./processUtils
             var tacoUtils: typeof TacoUtility = require("taco-utils");
-            tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", false);
+            tacoUtils.Telemetry.init("TACO/dependencyInstaller", "1.2.3", {isOptedIn: false});
 
             // Register mocks. child_process and taco-utils mocks needs to be registered before 
             // AndroidSdkInstaller is required for the mocking to work

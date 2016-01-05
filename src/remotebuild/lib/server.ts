@@ -28,6 +28,7 @@ import path = require ("path");
 import Q = require ("q");
 import semver = require ("semver");
 import util = require ("util");
+import os = require("os");
 
 import HostSpecifics = require ("./hostSpecifics");
 import RemoteBuildConf = require ("./remoteBuildConf");
@@ -72,21 +73,28 @@ class Server {
         app.get("/certs/:pin", HostSpecifics.hostSpecifics.downloadClientCerts);
         app.get("/modules/:module", Server.getModuleMount);
 
-        return Server.initializeServerCapabilities(conf).then(function (serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
-            return Server.loadServerModules(conf, app, serverCapabilities);
-        }).then(function (): Q.Promise<any> {
-            return Server.startupServer(conf, app);
-        }).then(Server.registerShutdownHooks).then(function (): void {
-            Logger.log(resources.getString("CheckSettingsForInfo", conf.configFileLocation));
-        })
-          .fail(function (err: any): void {
-            Logger.logError(resources.getString("ServerStartFailed", err));
-            if (err.stack) {
-                Logger.logError(err.stack);
-            }
-
-            throw err;
-        });
+        return utils.TelemetryHelper.generate("start",
+                    (telemetry: utils.TelemetryGenerator) => {
+                        telemetry
+                            .add("isSecure", conf.secure, false)
+                            .add("nodeVersion", process.version.indexOf("v") === 0 ? process.version.slice(1) : process.version, false);
+                            
+                    return Server.initializeServerCapabilities(conf).then(function (serverCapabilities: RemoteBuild.IServerCapabilities): Q.Promise<any> {
+                        return Server.loadServerModules(conf, app, serverCapabilities);
+                    }).then(function (): Q.Promise<any> {
+                        return Server.startupServer(conf, app);
+                    }).then(Server.registerShutdownHooks).then(function (): void {
+                        Logger.log(resources.getString("CheckSettingsForInfo", conf.configFileLocation));
+                    })
+                    .fail(function (err: any): void {
+                        Logger.logError(resources.getString("ServerStartFailed", err));
+                        if (err.stack) {
+                            Logger.logError(err.stack);
+                        }
+            
+                        throw err;
+                    });
+            });
     }
 
     public static stop(callback?: Function): void {

@@ -54,6 +54,7 @@ class BuildManager {
     private requestRedirector: TacoRemoteLib.IRequestRedirector;
     private serverConf: TacoRemoteConfig;
     private buildRetention: BuildRetention;
+    private telemetry: utils.TelemetryGenerator;
 
     constructor(conf: TacoRemoteConfig) {
         this.serverConf = conf;
@@ -438,6 +439,17 @@ class BuildManager {
                 } else {
                     self.buildMetrics.failed++;
                 }
+                
+                utils.TelemetryHelper.generate("build",
+                    (telemetry: utils.TelemetryGenerator) => {
+                        telemetry
+                            .add("cordovaVersion", buildInfo["vcordova"], false)
+                            .add("locale", buildInfo.buildLang, false)
+                            .add("zippedFileSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
+                            .add("queueSize", self.queuedBuilds.length, false)
+                            .add("isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false)
+                            .add("wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
+                    });
 
                 self.dequeueNextBuild();
             });

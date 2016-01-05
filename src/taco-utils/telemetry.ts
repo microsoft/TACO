@@ -49,6 +49,11 @@ module TacoUtility {
         export interface ITelemetryProperties {
             [propertyName: string]: any;
         };
+        
+        export interface ITelemetryOptions {
+            isOptedIn?: boolean;
+            settingsFileName?: string;  
+        };
 
         /**
          * TelemetryEvent represents a basic telemetry data point
@@ -106,10 +111,10 @@ module TacoUtility {
             }
         };
 
-        export function init(appNameValue: string, appVersion?: string, isOptedInValue?: boolean): Q.Promise<any> {
+        export function init(appNameValue: string, appVersion: string, telemetryOptions: ITelemetryOptions = {}): Q.Promise<any> {
             try {
                 Telemetry.appName = appNameValue;
-                return TelemetryUtils.init(appVersion, isOptedInValue);
+                return TelemetryUtils.init(appVersion, telemetryOptions);
             } catch (err) {
                 if (TacoGlobalConfig.logLevel === LogLevel.Diagnostic && err) {
                     logger.logError(err);
@@ -196,7 +201,8 @@ module TacoUtility {
             private static userId: string;
             private static machineId: string;
             private static telemetrySettings: ITelemetrySettings = null;
-            private static TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
+            private static telemetrySettingsFileName: string;
+            private static DEFAULT_TELEMETRY_SETTINGS_FILENAME: string = "TelemetrySettings.json";
             private static APPINSIGHTS_INSTRUMENTATIONKEY: string = "10baf391-c2e3-4651-a726-e9b25d8470fd";
             private static REGISTRY_SQMCLIENT_NODE: string = "\\SOFTWARE\\Microsoft\\SQMClient";
             private static REGISTRY_USERID_VALUE: string = "UserId";
@@ -205,10 +211,12 @@ module TacoUtility {
             private static INTERNAL_USER_ENV_VAR: string = "TACOINTERNAL";
 
             private static get telemetrySettingsFile(): string {
-                return path.join(UtilHelper.tacoHome, TelemetryUtils.TELEMETRY_SETTINGS_FILENAME);
+                return path.join(UtilHelper.tacoHome, TelemetryUtils.telemetrySettingsFileName);
             }
 
-            public static init(appVersion: string, isOptedInValue?: boolean): Q.Promise<any> {
+            public static init(appVersion: string, telemetryOptions: ITelemetryOptions): Q.Promise<any> {
+                TelemetryUtils.telemetrySettingsFileName = telemetryOptions.settingsFileName || TelemetryUtils.DEFAULT_TELEMETRY_SETTINGS_FILENAME;
+                
                 TelemetryUtils.loadSettings();
 
                 appInsights.setup(TelemetryUtils.APPINSIGHTS_INSTRUMENTATIONKEY)
@@ -234,14 +242,14 @@ module TacoUtility {
                     TelemetryUtils.sessionId = TelemetryUtils.generateGuid();
                     TelemetryUtils.userType = TelemetryUtils.getUserType();
                 }).then(function() : Q.Promise<any> {
-                    if (_.isUndefined(isOptedInValue)) {
+                    if (_.isUndefined(telemetryOptions.isOptedIn)) {
                         return TelemetryUtils.getOptIn()
                         .then(function (optIn: boolean): void {
                             Telemetry.isOptedIn = optIn;
                             TelemetryUtils.saveSettings();
                         });
                     } else {
-                        Telemetry.isOptedIn = isOptedInValue;
+                        Telemetry.isOptedIn = telemetryOptions.isOptedIn;
                         TelemetryUtils.saveSettings();
                         return Q({});
                     }
