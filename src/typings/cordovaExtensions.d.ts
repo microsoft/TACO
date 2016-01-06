@@ -19,6 +19,7 @@ declare module Cordova {
         export class configparser {
             constructor(configXmlPath: string);
             getPlugin(id: string): Cordova.ICordovaPluginInfo;
+            getPlugins(): Cordova.ICordovaPluginInfo[];
             removePlugin(id: string): void;
             addPlugin(attributes: Cordova.ICordovaPluginInfo , variables: IDictionary<string>): void;
             getEngines(): Cordova.ICordovaPlatformInfo [];

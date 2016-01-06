@@ -95,5 +95,11 @@ declare module TacoUtility {
 
         public static getCordovaExecutable(): Q.Promise<string>;
 
+        /**
+         * 
+         * @param projectInfo information of the project to use to choose the cli and path to the config.xml
+         * Returns the list of plugins saved in the config.xml of the project
+         */
+        public static getSavedPlugins(projectInfo: IProjectInfo): Q.Promise<Cordova.ICordovaPluginInfo[]>;
     }
 }
