@@ -21,7 +21,6 @@ import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
 import archiver = require ("archiver");
-import Q = require("q");
 
 import iosAppRunner = require ("./iosAppRunnerHelper");
 import resources = require ("../resources/resourceManager");
