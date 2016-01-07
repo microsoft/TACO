@@ -10,7 +10,6 @@
 /// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/Q.d.ts" />
 /// <reference path="../typings/semver.d.ts" />
-/// <reference path="../typings/tacoLiveReload.d.ts" />
 
 
 "use strict";
@@ -21,7 +20,6 @@ import path = require("path");
 import Q = require("q");
 import semver = require("semver");
 import util = require("util");
-import livereload = require("taco-livereload");
 import os = require ("os");
 
 import commands = require("./commands");
