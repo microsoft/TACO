@@ -304,8 +304,6 @@ describe("help for a command", function (): void {
             "      --emulator ......... CommandRunEmulatorDescription",
             "      --target=TARGET .... CommandRunTargetDescription",
             "      --list ............. CommandRunListDescription",
-            "      --livereload ....... CommandRunLiveReloadDescription",
-            "      --devicesync ....... CommandRunDeviceSyncDescription",
             ""]);
     });
 
@@ -339,8 +337,6 @@ describe("help for a command", function (): void {
             "   --debug ............. CommandRunDebugDescription",
             "   --release ........... CommandRunReleaseDescription",
             "   --target=TARGET ..... CommandRunTargetDescription",
-            "   --livereload ........ CommandRunLiveReloadDescription",
-            "   --devicesync ........ CommandRunDeviceSyncDescription",
             ""]);
     });
 });
