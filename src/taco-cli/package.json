@@ -1,7 +1,7 @@
 {
     "name": "taco-cli",
     "description": "taco-cli is a command-line interface for rapid Apache Cordova development",
-    "version": "1.1.1-dev",
+    "version": "1.1.2-dev",
     "author": {
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
