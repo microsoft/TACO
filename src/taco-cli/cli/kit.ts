@@ -434,7 +434,7 @@ class Kit extends commands.TacoCommandBase {
             logger.log(resources.getString("CommandKitSelectStatusUpdatingPlugins"));
 
             // Remove all the updatable plugins and re-add them
-            var pluginOpts: Cordova.ICordovaPluginOptions = { searchpath: "", noregistry: false, cli_variables: null, browserify: "", link: "", save: true, shrinkwrap: false };
+            var pluginOpts: Cordova.ICordovaPluginOptions = { save: true };
             return CordovaWrapper.plugin("remove", null, Object.keys(components))
                 .then(function(): Q.Promise<any> {
                     // Do not save in the case of updating to CLI project

@@ -54,6 +54,7 @@ class BuildManager {
     private requestRedirector: TacoRemoteLib.IRequestRedirector;
     private serverConf: TacoRemoteConfig;
     private buildRetention: BuildRetention;
+    private telemetry: utils.TelemetryGenerator;
 
     constructor(conf: TacoRemoteConfig) {
         this.serverConf = conf;
@@ -147,7 +148,14 @@ class BuildManager {
             params.buildNumber = buildNumber;
             params.options = options;
             params.logLevel = logLevel;
+
+            // Save the Cordova version that was used for the previous build, if any
+            if (self.builds[buildNumber] && self.builds[buildNumber].hasOwnProperty("vcordova")) {
+                params["previousvcordova"] = self.builds[buildNumber]["vcordova"];
+            }
+
             var buildInfo: BuildInfo = new BuildInfo(params);
+
             // Associate the buildInfo object with the package used to service it, but without changing the JSON representation;
             Object.defineProperty(buildInfo, "pkg", { enumerable: false, writable: true, configurable: true });
             buildInfo["pkg"] = pkg;
@@ -431,6 +439,17 @@ class BuildManager {
                 } else {
                     self.buildMetrics.failed++;
                 }
+                
+                utils.TelemetryHelper.generate("build",
+                    (telemetry: utils.TelemetryGenerator) => {
+                        telemetry
+                            .add("cordovaVersion", buildInfo["vcordova"], false)
+                            .add("locale", buildInfo.buildLang, false)
+                            .add("zippedFileSize", fs.statSync(buildInfo.tgzFilePath)["size"], false)
+                            .add("queueSize", self.queuedBuilds.length, false)
+                            .add("isDeviceBuild", self.currentBuild.options.indexOf("--device") !== -1, false)
+                            .add("wasBuildSuccessful", buildInfo.status === BuildInfo.COMPLETE, false);
+                    });
 
                 self.dequeueNextBuild();
             });

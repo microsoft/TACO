@@ -41,5 +41,11 @@ declare module TacoUtility {
         preferences(): {
             [key: string]: string;
         };
+        /**
+         * Get the engines specified in the config
+         *
+         * @returns {[key: string]: string} A dictionary mapping engine keys to spec values
+         */
+        public engines(): { [key: string]: string };
     }
 }

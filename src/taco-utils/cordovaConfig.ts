@@ -81,6 +81,21 @@ module TacoUtility {
 
             return data;
         }
+
+        /**
+         * Get the engines specified in the config
+         *
+         * @returns {[key: string]: string} A dictionary mapping engine keys to spec values
+         */
+        public engines(): { [key: string]: string } {
+            var data: { [key: string]: string } = {};
+            var engines: et.XMLElement[] = this.doc.findall("engine");
+            engines.forEach(function (engine: et.XMLElement): void {
+                data[engine.attrib["name"]] = engine.attrib["spec"];
+            });
+
+            return data;
+        }
     }
 }
 

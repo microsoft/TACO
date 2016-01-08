@@ -67,7 +67,7 @@ class RemoteBuildClientHelper {
 
         var changeTimeFile: string = path.join(settings.platformConfigurationBldDir, "lastChangeTime.json");
         var lastChangeTime: { [file: string]: number } = {};
-
+        var buildLog: string = RemoteBuildClientHelper.buildLogPath(settings);
         var promise: Q.Promise<any> = RemoteBuildClientHelper.checkForBuildOnServer(settings, buildInfoFilePath)
             .then(function (buildInfo: BuildInfo): void {
                 settings.incrementalBuild = buildInfo ? buildInfo.buildNumber : null;
@@ -76,6 +76,15 @@ class RemoteBuildClientHelper {
                 if (!settings.incrementalBuild) {
                     try {
                         fs.unlinkSync(changeTimeFile);
+                    } catch (e) {
+                        // File didn't exist, or other error we can't do much about
+                    }
+                }
+
+                // Clear build log if it exists
+                if (fs.existsSync(buildLog)) {
+                    try {
+                        fs.unlinkSync(buildLog);
                     } catch (e) {
                         // File didn't exist, or other error we can't do much about
                     }
@@ -560,7 +569,7 @@ class RemoteBuildClientHelper {
         var buildNumber: number = buildInfo.buildNumber;
         var downloadUrl: string = util.format("%s/build/tasks/%d/log?offset=%d", serverUrl, buildNumber, offset);
         return RemoteBuildClientHelper.httpOptions(downloadUrl, settings).then(request).then(function (req: request.Request): Q.Promise<BuildInfo> {
-            var logPath: string = path.join(settings.platformConfigurationBldDir, "build.log");
+            var logPath: string = RemoteBuildClientHelper.buildLogPath(settings);
             UtilHelper.createDirectoryIfNecessary(settings.platformConfigurationBldDir);
             var endOfFile: number = 0;
             if (offset > 0 && fs.existsSync(logPath)) {
@@ -578,7 +587,13 @@ class RemoteBuildClientHelper {
             req.on("end", function (): void {
                 buildInfo["logOffset"] = offset + countStream.count;
                 deferred.resolve(buildInfo);
-            }).pipe(countStream).pipe(newlineNormalizerStream).pipe(logStream);
+            }).pipe(countStream).pipe(newlineNormalizerStream);
+            
+            // Output to build log
+            newlineNormalizerStream.pipe(logStream);
+
+            // Output to stdout
+            newlineNormalizerStream.pipe(process.stdout);
             return deferred.promise;
         });
     }
@@ -682,6 +697,13 @@ class RemoteBuildClientHelper {
             }
         });
         return deferred.promise;
+    }
+
+    /**
+     * Returns the path to the local build log.
+     */
+    private static buildLogPath(settings: BuildSettings): string {
+        return path.join(settings.platformConfigurationBldDir, "build.log");
     }
 }
 
