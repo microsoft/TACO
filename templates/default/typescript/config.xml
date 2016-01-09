@@ -114,6 +114,6 @@
     </platform>
 
     <platform name="wp8">
-        <splash src="res/screens/wp8/SplashScreenImage.png" width="480" height="800"/>
+        <splash src="res/screens/wp8/SplashScreenImage.png" width="768" height="1280"/>
     </platform>
 </widget>
