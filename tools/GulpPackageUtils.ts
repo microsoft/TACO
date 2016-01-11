@@ -25,6 +25,7 @@ interface IPackageJson {
     version: string;
     dependencies: { [key: string]: string };
     optionalDependencies: { [key: string]: string };
+    devDependencies: { [key: string]: string };
 }
 
 interface IDynamicDependenicesJson {
@@ -62,6 +63,11 @@ class GulpPackageUtils {
                     Object.keys(json.optionalDependencies || {}).forEach(function(packageKey: string): void {
                         if (tacoModules.indexOf(packageKey) >= 0) {
                             json.optionalDependencies[packageKey] = GulpPackageUtils.getDependencyValue(packageKey, srcPath, buildType, destPath);
+                        }
+                    });
+                    Object.keys(json.devDependencies || {}).forEach(function(packageKey: string): void {
+                        if (tacoModules.indexOf(packageKey) >= 0) {
+                            json.devDependencies[packageKey] = GulpPackageUtils.getDependencyValue(packageKey, srcPath, buildType, destPath);
                         }
                     });
                     return json;

@@ -288,7 +288,7 @@ class Run extends commands.TacoCommandBase {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--devicesync", "--livereload");
         }
         */
-        
+      
         if (parsedOptions.options["nobuild"] && parsedOptions.options["clean"]) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--nobuild", "--clean");
         }
