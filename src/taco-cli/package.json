@@ -43,6 +43,7 @@
         "rimraf": "2.2.6",
         "semver": "^4.3.6",
         "taco-dependency-installer": "file:../taco-dependency-installer",
+        "taco-livereload": "file:../taco-livereload",
         "taco-utils": "file:../taco-utils",
         "tar": "^2.2.1",
         "wrench": "^1.5.8"

@@ -73,12 +73,10 @@ class Emulate extends commands.TacoCommandBase {
             }
 
             // DeviceSync/LiveReload not compatible with remote
-            /*
             var deviceSync = commandData.options["livereload"] || commandData.options["devicesync"];
             if (deviceSync) {
                 throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload/--devicesync", "--remote");
             }
-            */
 
             var buildInfoPath: string = path.resolve(".", "remote", platform, configuration, "buildInfo.json");
             var buildInfoPromise: Q.Promise<BuildInfo>;
@@ -162,7 +160,6 @@ class Emulate extends commands.TacoCommandBase {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--debug", "--release");
         }
         
-        /*
         if (parsedOptions.options["livereload"] && parsedOptions.options["remote"]) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--livereload", "--remote");
         }
@@ -174,21 +171,20 @@ class Emulate extends commands.TacoCommandBase {
         if (parsedOptions.options["devicesync"] && parsedOptions.options["livereload"]) {
             throw errorHelper.get(TacoErrorCodes.ErrorIncompatibleOptions, "--devicesync", "--livereload");
         }
-        */
 
         return parsedOptions;
     }
 
     private runLocalEmulate(localPlatforms: string[]): Q.Promise<any> {
         var self = this;
-        /*
+
         if (this.data.options["livereload"] || this.data.options["devicesync"]) {
             // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
             var liveReload = require("./liveReload");
             return liveReload.hookLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms)
                 .then(() => CordovaWrapper.emulate(self.data, localPlatforms));
         }
-        */
+
         return CordovaWrapper.emulate(this.data, localPlatforms);
     }
 
