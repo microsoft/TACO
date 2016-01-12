@@ -10,6 +10,7 @@
 /// <reference path="../../typings/expressExtensions.d.ts" />
 /// <reference path="../../typings/fstream.d.ts" />
 /// <reference path="../../typings/node.d.ts" />
+/// <reference path="../../typings/rimraf.d.ts" />
 /// <reference path="../../typings/tacoRemote.d.ts" />
 /// <reference path="../../typings/tacoRemoteLib.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
@@ -21,7 +22,8 @@ import child_process = require ("child_process");
 import express = require ("express");
 import fs = require ("fs");
 import path = require ("path");
-import Q = require ("q");
+import Q = require("q");
+import rimraf = require("rimraf");
 import tar = require ("tar");
 import zlib = require ("zlib");
 
@@ -43,6 +45,8 @@ interface IBuildMetrics {
 };
 
 class BuildManager {
+    private static BUILD_LOG_FILE: string = "build.log";
+
     private baseBuildDir: string;
     private maxBuildsInQueue: number;
     private nextBuildNumber: number;
@@ -133,6 +137,9 @@ class BuildManager {
             var buildDir: string = path.join(self.baseBuildDir, "" + buildNumber);
             if (!fs.existsSync(buildDir)) {
                 fs.mkdirSync(buildDir);
+            } else {
+                // Delete the previous build log if it exists
+                rimraf.sync(path.join(buildDir, BuildManager.BUILD_LOG_FILE));
             }
 
             Logger.log(resources.getString("BuildManagerDirInit", buildDir));
@@ -186,7 +193,7 @@ class BuildManager {
             return;
         }
 
-        var buildLog: string = path.join(buildInfo.buildDir, "build.log");
+        var buildLog: string = path.join(buildInfo.buildDir, BuildManager.BUILD_LOG_FILE);
         if (!fs.existsSync(buildLog)) {
             res.end();
             return;
