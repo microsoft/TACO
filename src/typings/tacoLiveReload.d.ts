@@ -53,6 +53,7 @@ declare module TacoLiveReload {
     export interface LiveReloadOptions {
         ignore: string,
         ghostMode: boolean,
+        tunnel: boolean,
         cb(event: string, file: string, lrHandle: LiveReloadHandle): Q.Promise<any>;
     }
 }
