@@ -160,27 +160,18 @@ module TacoUtility {
         }
 
         public static toCordovaRunArguments(cordovaVersion: string, commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions {
-            if (semver.gte(cordovaVersion, CordovaHelper.RAW_API_540_VERSION)) {
-                return CordovaHelper.toCordovaRaw540Arguments(commandData, platforms);
-            }
-
-            return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
+            // Run, build, emulate, prepare and compile all use the same format at the moment
+            return CordovaHelper.toCordovaArgumentsInternal(cordovaVersion, commandData, platforms);
         }
 
         public static toCordovaBuildArguments(cordovaVersion: string, commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions {
-            if (semver.gte(cordovaVersion, CordovaHelper.RAW_API_540_VERSION)) {
-                return CordovaHelper.toCordovaRaw540Arguments(commandData, platforms);
-            }
-
-            return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
+            // Run, build, emulate, prepare and compile all use the same format at the moment
+            return CordovaHelper.toCordovaArgumentsInternal(cordovaVersion, commandData, platforms);
         }
 
         public static toCordovaTargetsArguments(cordovaVersion: string, commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions {
-            if (semver.gte(cordovaVersion, CordovaHelper.RAW_API_540_VERSION)) {
-                return CordovaHelper.toCordovaRaw540Arguments(commandData, platforms);
-            }
-
-            return CordovaHelper.toCordovaArgumentsInternal(commandData, platforms);
+            // Run, build, emulate, prepare and compile all use the same format at the moment
+            return CordovaHelper.toCordovaArgumentsInternal(cordovaVersion, commandData, platforms);
         }
 
         /**
@@ -354,7 +345,18 @@ module TacoUtility {
         /**
          * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X
          */
-        private static toCordovaArgumentsInternal(commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
+        private static toCordovaArgumentsInternal(cordovaVersion: string, commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions {
+            if (semver.gte(cordovaVersion, CordovaHelper.RAW_API_540_VERSION)) {
+                return CordovaHelper.toCordovaRaw540Arguments(commandData, platforms);
+            }
+
+            return CordovaHelper.toCordovaRawArguments(commandData, platforms);
+        }
+
+        /**
+         * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X, for the raw API of Cordova < 5.4.0
+         */
+        private static toCordovaRawArguments(commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordovaRawOptions {
             var opts: Cordova.ICordovaRawOptions = {
                 platforms: platforms ? platforms : commandData.remain,
                 options: [],
