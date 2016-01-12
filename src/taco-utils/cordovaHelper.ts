@@ -394,31 +394,24 @@ module TacoUtility {
          * Construct the options for programatically calling emulate, build, prepare, compile, or run via cordova.raw.X, for the raw API of Cordova >= 5.4.0
          */
         private static toCordovaRaw540Arguments(commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordova540RawOptions {
+            var buildOpts: Cordova.ICordova540BuildOptions = {
+                archs: commandData.options["archs"] || null,
+                argv: commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : null,
+                buildconfig: commandData.options["buildconfig"] || null,
+                debug: commandData.options["debug"] || false,
+                device: commandData.options["device"] || false,
+                emulator: commandData.options["emulator"] || false,
+                nobuild: commandData.options["nobuild"] || false,
+                release: commandData.options["release"] || false,
+                target: commandData.options["target"] || null,
+            };
             var cordovaArgs: Cordova.ICordova540RawOptions = {
                 platforms: platforms ? platforms : commandData.remain,
+                options: buildOpts,
                 verbose: commandData.options["verbose"] || false,
                 silent: commandData.options["silent"] || false,
                 browserify: commandData.options["browserify"] || false
             };
-            var buildOpts: Cordova.ICordova540BuildOptions = {};
-
-            // Reconstruct the args to be passed along to platform scripts.
-            var argNames: string[] = ["archs", "buildconfig", "debug", "device", "emulator", "nobuild", "release", "target"];
-
-            argNames.forEach(function (flag: string): void {
-                if (commandData.options[flag]) {
-                    buildOpts[flag] = commandData.options[flag];
-                }
-            });
-
-            // Include all arguments after, but not including, a lone "--"
-            var additionalArguments: string[] = commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : [];
-
-            if (additionalArguments.length) {
-                buildOpts.argv = additionalArguments;
-            }
-
-            cordovaArgs.options = buildOpts;
 
             return cordovaArgs;
         }
