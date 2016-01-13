@@ -97,7 +97,7 @@ module TacoUtility {
         public static build(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
             platforms = platforms || null;
 
-            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string) => {
+            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string): Q.Promise<any> => {
                 return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordovaT<Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions>) => {
                     return cordova.raw.build(CordovaHelper.toCordovaBuildArguments(cordovaVersion, commandData, platforms));
                 }, () => ["build"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
@@ -146,8 +146,8 @@ module TacoUtility {
 
         public static emulate(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
             platforms = platforms || null;
-            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string) => {
-                CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordovaT<Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions>) => {
+            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string): Q.Promise<any> => {
+                return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordovaT<Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions>) => {
                     return cordova.raw.emulate(CordovaHelper.toCordovaRunArguments(cordovaVersion, commandData, platforms));
                 }, () => ["emulate"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
             });
@@ -206,7 +206,7 @@ module TacoUtility {
         public static run(commandData: Commands.ICommandData, platforms?: string[]): Q.Promise<any> {
             platforms = platforms || null;
 
-            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string) => {
+            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string): Q.Promise<any> => {
                 return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordovaT<Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions>) => {
                     return cordova.raw.run(CordovaHelper.toCordovaRunArguments(cordovaVersion, commandData, platforms));
                 }, () => ["run"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
@@ -218,7 +218,7 @@ module TacoUtility {
 
             // Note: cordova <= 5.3.3 expects the options to "targets" to include "--list". If it does not,
             // it blindly splices off the last argument.
-            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string) => {
+            return CordovaWrapper.getCordovaVersion().then((cordovaVersion: string): Q.Promise<any> => {
                 return CordovaWrapper.cordovaApiOrProcess((cordova: Cordova.ICordovaT<Cordova.ICordovaRawOptions | Cordova.ICordova540RawOptions>) => {
                     return cordova.raw.targets(CordovaHelper.toCordovaTargetsArguments(cordovaVersion, commandData, platforms));
                 }, () => ["targets"].concat(CordovaHelper.toCordovaCliArguments(commandData, platforms)));
