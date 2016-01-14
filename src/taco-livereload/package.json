@@ -2,7 +2,7 @@
     
     "name": "taco-livereload",
     "description": "Module for livereload and devicesync capabilities",
-    "version": "1.0.2-dev",
+    "version": "1.0.3-dev",
     "author": {
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"

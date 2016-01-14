@@ -413,11 +413,10 @@
                 "name":  "--list", "description": "[CommandRunListDescription]"
             },
             {
-                 "name": "--livereload", "description": "[CommandRunLiveReloadDescription]"
-            }
-            ,
+                "name":  "--livereload", "description": "[CommandRunLiveReloadDescription]"
+            },
             {
-                "name": "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+                "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
             }
             ]
         }
@@ -459,14 +458,12 @@
             ,
             {
                 "name": "--target=TARGET", "description": "[CommandRunTargetDescription]"
-            }
-            ,
+            },
             {
-                 "name": "--livereload", "description": "[CommandRunLiveReloadDescription]"
-            }
-            ,
+                "name":  "--livereload", "description": "[CommandRunLiveReloadDescription]"
+            },
             {
-                "name": "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+                "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
             }
             ]
         }

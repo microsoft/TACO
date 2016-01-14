@@ -177,12 +177,14 @@ class Emulate extends commands.TacoCommandBase {
 
     private runLocalEmulate(localPlatforms: string[]): Q.Promise<any> {
         var self = this;
+
         if (this.data.options["livereload"] || this.data.options["devicesync"]) {
             // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
             var liveReload = require("./liveReload");
             return liveReload.hookLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms)
                 .then(() => CordovaWrapper.emulate(self.data, localPlatforms));
         }
+
         return CordovaWrapper.emulate(this.data, localPlatforms);
     }
 

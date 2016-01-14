@@ -1,19 +1,39 @@
-﻿/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
+﻿// Type definitions for archiver v0.15.0
+// Project: https://github.com/archiverjs/node-archiver
+// Definitions by: Esri <https://github.com/archiverjs/node-archiver>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-// Extremely minimal type definition for archiver package
+/* =================== USAGE ===================
+    import Archiver = require('archiver);
+    var archiver = Archiver.create('zip');
+    archiver.pipe(FS.createWriteStream('xxx'));
+    archiver.append(FS.createReadStream('xxx'));
+    archiver.finalize();
+ =============================================== */
 
-declare module Archiver {
-    // TODO improve typings for better intellisense
-    function archiver(format: string, options?: any): any;
-}
-
+/// <reference path="./node.d.ts" />
 declare module "archiver" {
-    import archiverFunc = Archiver.archiver;
-    export = archiverFunc;
+    import * as FS from 'fs';
+    
+    interface nameInterface {
+        name?: string;
+    }
+        
+    interface Archiver {
+        pipe(writeStream: FS.WriteStream): void;
+        append(readStream: FS.ReadStream, name: nameInterface): void;
+        finalize(): void;
+    }
+    
+    interface Options {
+        
+    }
+    
+    function archiver(format: string, options?: Options): Archiver;
+    
+    namespace archiver {
+        function create(format: string, options?: Options): Archiver;
+    }
+    
+    export = archiver;
 }

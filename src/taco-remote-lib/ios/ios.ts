@@ -8,8 +8,8 @@
 
 /// <reference path="../../typings/node.d.ts" />
 /// <reference path="../../typings/tacoUtils.d.ts" />
-/// <reference path="../../typings/zip-stream.d.ts" />
 /// <reference path="../../typings/express.d.ts" />
+/// <reference path="../../typings/archiver.d.ts" />
 /// <reference path="../ITargetPlatform.d.ts" />
 
 "use strict";
@@ -20,7 +20,7 @@ import net = require ("net");
 import path = require ("path");
 import Q = require ("q");
 import util = require ("util");
-import Packer = require ("zip-stream");
+import archiver = require ("archiver");
 
 import iosAppRunner = require ("./iosAppRunnerHelper");
 import resources = require ("../resources/resourceManager");
@@ -106,6 +106,10 @@ class IOSAgent implements ITargetPlatform {
         var iosOutputDir: string = path.join(buildInfo.appDir, "platforms", "ios", "build", "device");
         var pathToPlistFile: string = path.join(iosOutputDir, buildInfo["appName"] + ".plist");
         var pathToIpaFile: string = path.join(iosOutputDir, buildInfo["appName"] + ".ipa");
+        var pathToDsymDirectory: string = path.join(iosOutputDir, buildInfo["appName"] + ".app.dSYM");
+        var pathToDsymZipFile: string = path.join(iosOutputDir, buildInfo["appName"] + ".app.dSYM.zip");
+        var pathToBuildZipFile: string = path.join(iosOutputDir, buildInfo["appName"] + ".zip");
+        
         if (!fs.existsSync(pathToPlistFile) || !fs.existsSync(pathToIpaFile)) {
             var msg: string = resources.getString("DownloadInvalid", pathToPlistFile, pathToIpaFile);
             Logger.log(msg);
@@ -113,37 +117,59 @@ class IOSAgent implements ITargetPlatform {
             callback(msg);
             return;
         }
-
-        var archive: Packer = new Packer();
-        archive.on("error", function (err: Error): void {
-            Logger.logError(resources.getString("ArchivePackError", err.message));
-            callback(err);
-            res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
-        });
-        res.set({ "Content-Type": "application/zip" });
-        archive.pipe(res);
-        archive.entry(fs.createReadStream(pathToPlistFile), { name: buildInfo["appName"] + ".plist" },
-            function (pListEntryError: Error, pListEntry: any): void {
-            if (pListEntryError) {
-                Logger.logError(resources.getString("ArchivePackError", pListEntryError.message));
-                callback(pListEntryError);
-                res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", pListEntryError.message));
-                return;
-            }
-
-            archive.entry(fs.createReadStream(pathToIpaFile), { name: buildInfo["appName"] + ".ipa" },
-                function (ipaEntryError: Error, ipaEntry: any): void {
-                if (ipaEntryError) {
-                    Logger.logError(resources.getString("ArchivePackError", ipaEntryError.message));
-                    callback(ipaEntryError);
-                    res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", ipaEntryError.message));
-                    return;
-                }
-
+        
+        Q({})
+            .then(function(): Q.Promise<any> {
+                var deferred: Q.Deferred<any> = Q.defer();
+                
+                var outputStream = fs.createWriteStream(pathToDsymZipFile);
+                var archive: any = archiver("zip");
+                archive.on("error", function (err: Error): void {
+                    return deferred.reject(err);
+                });
+                outputStream.on("finish", function() {
+                    return deferred.resolve({});
+                });
+                
+                archive.pipe(outputStream);
+                archive.directory(pathToDsymDirectory, buildInfo["appName"] + ".app.dSYM");
                 archive.finalize();
+                
+                return deferred.promise;
+            })
+            .then(function(): Q.Promise<any> {
+                var deferred: Q.Deferred<any> = Q.defer();
+                
+                var outputStream: fs.WriteStream = fs.createWriteStream(pathToBuildZipFile);
+                var archive: any = archiver("zip");
+                archive.on("error", function (err: Error): void {
+                    return deferred.reject(err);
+                });
+                outputStream.on("finish", function() {
+                    return deferred.resolve({});
+                });
+                
+                archive.pipe(outputStream);
+                archive.file(pathToPlistFile, { name: buildInfo["appName"] + ".plist" });
+                archive.file(pathToIpaFile, { name: buildInfo["appName"] + ".ipa" });
+                archive.file(pathToDsymZipFile, { name: buildInfo["appName"] + ".app.dSYM.zip"});
+                archive.finalize();
+                
+                return deferred.promise;
+            })
+            .then(function(): void {
+                var deferred: Q.Deferred<any> = Q.defer();
+                var inputStream: fs.ReadStream = fs.createReadStream(pathToBuildZipFile);
+                
+                res.set({ "Content-Type": "application/zip" });
+                inputStream.pipe(res);
                 callback(null);
+            })
+            .catch(function(err: any): void {
+                Logger.logError(resources.getString("ArchivePackError", err.message));
+                callback(err);
+                res.status(404).send(resources.getStringForLanguage(req, "ArchivePackError", err.message));
             });
-        });
     }
 
     public emulateBuild(buildInfo: utils.BuildInfo, req: Express.Request, res: Express.Response): void {
