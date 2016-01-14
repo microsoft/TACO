@@ -13,7 +13,6 @@
 "use strict";
 
 import mocha = require ("mocha");
-import os = require ("os");
 import should = require ("should");
 
 import logger = require ("../logger");
@@ -36,16 +35,15 @@ describe("logger", function (): void {
     it("should support null strings", function (): void {
         verifyScenario(null);
     });
+    it("should support empty strings", function (): void {
+        verifyScenario("");
+    });
 });
 
 function verifyScenario(input: string): void {
-    try {
+    should(function() {
         Logger.log(input);
         Logger.logError(input);
         Logger.logWarning(input);
-        should(true).be.ok;
-    } catch (err) {
-        console.log(err);
-        should(true).not.be.ok;
-    }
+    }).not.throw();
 }
