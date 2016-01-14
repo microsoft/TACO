@@ -15,8 +15,9 @@ var promiseUtils = require('./promise-util');
 var ATSRemover = require('./ATSRemover');
 var CSPRemover = require('./CSPRemover');
 var multiPlatforms = require('./platforms');
-var ncp = require('ncp').ncp;
 var Q = require('q');
+
+var utils = require("taco-utils").UtilHelper;
 
 var fs = require('fs');
 
@@ -87,8 +88,7 @@ function copyHomePage(projectRoot, platform, platformIndexUrls) {
     // ... so that it doesn't clash with potential user-defined 'homePage' folders 
     var homePageDir = 'homePage_' + Math.random();
     var homePageDirFullPath = path.join(projectRoot, multiPlatforms.getPlatformWWWFolder(platform), homePageDir);
-    return Q.nfcall(ncp, pluginHomePageDir, homePageDirFullPath).then(function() {
-        
+    return utils.copyRecursive(pluginHomePageDir, homePageDirFullPath).then(function () {
         // 2- replace '__SERVER_URLs__' by the appropriate string
         var src = path.join(homePageDirFullPath, 'homePage.html');        
         var srcContent = fs.readFileSync(src, 'utf-8');
