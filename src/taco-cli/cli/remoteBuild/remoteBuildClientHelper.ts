@@ -583,10 +583,10 @@ class RemoteBuildClientHelper {
             var newlineNormalizerStream: NewlineNormalizerStream = new NewlineNormalizerStream();
             logStream.on("finish", function (): void {
                 Logger.log(resources.getString("BuildLogWrittenTo", logPath));
+                deferred.resolve(buildInfo);
             });
             req.on("end", function (): void {
                 buildInfo["logOffset"] = offset + countStream.count;
-                deferred.resolve(buildInfo);
             }).pipe(countStream).pipe(newlineNormalizerStream);
             
             // Output to build log
@@ -594,6 +594,7 @@ class RemoteBuildClientHelper {
 
             // Output to stdout
             newlineNormalizerStream.pipe(process.stdout);
+
             return deferred.promise;
         });
     }
