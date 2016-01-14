@@ -49,6 +49,7 @@ declare module TacoLiveReload {
     // Options we might want to start the BrowserSync server with:
     //   - ignore: specifies what folders/files whose changes to ignore when livereloading
     //   - ghostMode: specifies whether we want to sync gestures(clicks, form inputs, scrolls) across connected devices
+    //   - tunnel: specifies whether to use ip tunneling or not
     //   - cb: function that gets called whenever a change in the watched folders/files occurs
     export interface LiveReloadOptions {
         ignore: string,

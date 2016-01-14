@@ -29,7 +29,7 @@ import CordovaHelper = tacoUtility.CordovaHelper;
  */
 class LiveReload {
 
-    private static hookLiveReload(options: any, platforms: string[], ignore?: string): Q.Promise<any> {
+    private static hookLiveReload(options: any, platforms: string[]): Q.Promise<any> {
         Logger.log("Setting up livereload ...");
         var projectRoot = ProjectHelper.getProjectRoot();
         return LiveReload.getTargetPlatforms(projectRoot, platforms)
@@ -39,7 +39,7 @@ class LiveReload {
                     var startOptions: liveReload.LiveReloadOptions = {
                         ghostMode: !!options.devicesync,
                         tunnel: !!options.tunnel,
-                        ignore: ignore,
+                        ignore: options.ignore,
 
                         cb: function(event: string, file: string, lrHandle: liveReload.LiveReloadHandle) {
                         
