@@ -417,6 +417,12 @@
             },
             {
                 "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+            },
+            {
+                "name": "--ignore=FILES", "description": "[CommandRunIgnoreDescription]"
+            },
+            {
+                "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
             }
             ]
         }
@@ -464,6 +470,12 @@
             },
             {
                 "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+            },
+            {
+                "name": "--ignore=FILES", "description": "[CommandRunIgnoreDescription]"
+            },
+            {
+                "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
             }
             ]
         }
