@@ -117,6 +117,9 @@ module TacoUtility {
         }
 
         public getStringForLocale(locale: string, id: string, ...optionalArgs: any[]): string {
+            if (id === "") {
+                return "";
+            }
             var resourceSet: ResourceSet = this.getOrCreateResourceSet(locale);
             assert.notEqual(resourceSet, null, "We should get a non-null resource set");
 
