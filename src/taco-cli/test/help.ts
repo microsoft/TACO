@@ -306,6 +306,8 @@ describe("help for a command", function (): void {
             "      --list ............. CommandRunListDescription",
             "      --livereload ....... CommandRunLiveReloadDescription",
             "      --devicesync ....... CommandRunDeviceSyncDescription",
+            "      --ignore=FILES ..... CommandRunIgnoreDescription",
+            "      --tunnel ........... CommandRunTunnelDescription",
             ""]);
     });
 
@@ -341,6 +343,8 @@ describe("help for a command", function (): void {
             "   --target=TARGET ..... CommandRunTargetDescription",
             "   --livereload ........ CommandRunLiveReloadDescription",
             "   --devicesync ........ CommandRunDeviceSyncDescription",
+            "   --ignore=FILES ...... CommandRunIgnoreDescription",
+            "   --tunnel ............ CommandRunTunnelDescription",
             ""]);
     });
 });
