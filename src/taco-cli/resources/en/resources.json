@@ -383,9 +383,14 @@
     "CommandRunDeviceSyncDescription": "Sync gestures across multiple devices <key>(beta)</key>",
     "CommandRunDeviceSyncDescription.comment": "Description of the --devicesync argument to 'taco run'",
     "CommandRunTunnelDescription": "Use IP tunneling for --livereload or --devicesync. Allows communication between two networks <key>(beta)</key>",
-    "CommandRunTunneDescription.comment": "Description of the --tunnel argument to 'taco run --livereload'",
-    "CommandRunIgnoreDescription": "Types of files to ignore for --livereload <key>(beta)</key>",
-    "CommandRunIgnoreDescription.comment": "Description of the --ignore argument to 'taco run --livereload'",
+    "CommandRunTunneDescription.comment": "Description of the --tunnel argument to 'taco run --livereload --tunnel'",
+    "CommandRunIgnoreDescription": "Ignores valid anymatch matches relative to www directory for --livereload <key>(beta)</key>",
+    "CommandRunIgnoreDescription.comment": "Description of the --ignore argument to 'taco run --livereload --ignore'",
+    
+    "TacoRunLivereloadExample1": "Runs the application in Livereload mode and ignores changes to CSS files",
+    "TacoRunLivereloadExample1.comment": "Text shown in examples section when a user invokes taco emulate --livereload --ignore=CSS",
+    "TacoRunLivereloadExample2": "Runs the application in Livereload mode using IP tunneling",
+    "TacoRunLivereloadExample2.comment": "Text shown in examples section when a user invokes taco run --livereload --tunnel",
     
     "CommandRunRemoteDeviceSuccess": "<success>Success!</success> Build running on remote attached device",
     "_CommandRunRemoteDeviceSuccess.comment": "Message printed after successfully running a build on a remote device",

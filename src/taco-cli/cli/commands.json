@@ -419,11 +419,15 @@
                 "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
             },
             {
-                "name": "--ignore=FILES", "description": "[CommandRunIgnoreDescription]"
+                "name": "--ignore=PATTERN", "description": "[CommandRunIgnoreDescription]"
             },
             {
                 "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
             }
+            ],
+            "examples": [
+                { "example": "taco run --livereload --ignore=/**/*.css", "description": "[TacoRunLivereloadExample1]" },
+                { "example": "taco run --livereload --tunnel" , "description": "[TacoRunLivereloadExample2]" }
             ]
         }
         ,
@@ -472,11 +476,11 @@
                 "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
             },
             {
-                "name": "--ignore=FILES", "description": "[CommandRunIgnoreDescription]"
-            },
-            {
-                "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
+                "name": "--ignore=PATTERN", "description": "[CommandRunIgnoreDescription]"
             }
+            ],
+            "examples": [
+                { "example": "taco emulate --livereload --ignore=/**/*.css", "description": "[TacoRunLivereloadExample1]" }
             ]
         }
         ,

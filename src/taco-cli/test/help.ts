@@ -308,6 +308,15 @@ describe("help for a command", function (): void {
             "      --devicesync ....... CommandRunDeviceSyncDescription",
             "      --ignore=FILES ..... CommandRunIgnoreDescription",
             "      --tunnel ........... CommandRunTunnelDescription",
+             "CommandHelpUsageExamples",
+            "   * TacoRunLivereloadExample1",
+            "",
+            "        taco run --livereload --ignore=/**/*.css",
+            "",
+            "   * TacoRunLivereloadExample2",
+            "",
+            "        taco run --livereload --tunnel",
+            "",
             ""]);
     });
 
@@ -345,6 +354,11 @@ describe("help for a command", function (): void {
             "   --devicesync ........ CommandRunDeviceSyncDescription",
             "   --ignore=FILES ...... CommandRunIgnoreDescription",
             "   --tunnel ............ CommandRunTunnelDescription",
+            "CommandHelpUsageExamples",
+            "   * TacoRunLivereloadExample1",
+            "",
+            "        taco emulate --livereload --ignore=/**/*.css",
+            "",
             ""]);
     });
 });
