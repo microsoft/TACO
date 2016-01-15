@@ -24,7 +24,7 @@ module TacoUtility {
          * if using any kind of formatting, make sure that it is well formatted
          */
         public static log(message: string): void {
-            if (message) {
+            if (message || message === "") {
                 Logger.stdout(LogFormatHelper.toFormattedString(message));
             }
         }
@@ -34,7 +34,7 @@ module TacoUtility {
          * input string can only have <br/> tags
          */
         public static logError(message: string): void {
-            if (message) {
+            if (message || message === "") {
                 Logger.stderr(LogFormatHelper.toError(message));
             }
         }
@@ -44,7 +44,7 @@ module TacoUtility {
          * input string can only have <br/> tags
          */
         public static logWarning(message: string): void {
-            if (message) {
+            if (message || message === "") {
                 Logger.stderr(LogFormatHelper.toWarning(message));
             }
         }
