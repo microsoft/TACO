@@ -116,7 +116,7 @@
         },
         "tacokit@1.1.0": {
             "cordova-cli": "5.1.1",
-            "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=623759",
+            "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=722537",
             "platforms": {
                 "android": {
                     "version": "4.0.2"
@@ -195,13 +195,11 @@
                 "cordova-plugin-legacy-whitelist": {
                     "version": "1.1.0"
                 }
-
             }
         },
         "tacokit@2.1.0": {
             "cordova-cli": "5.2.0",
-            "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=623759",
-            "default": true,
+            "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=722537",
             "platforms": {
                 "android": {
                     "version": "4.1.1"
@@ -279,6 +277,90 @@
                 },
                 "cordova-plugin-legacy-whitelist": {
                     "version": "1.1.0"
+                }
+            }
+        },
+        "tacokit@3.0.0": {
+            "cordova-cli": "5.4.1",
+            "releaseNotesUri": "http://go.microsoft.com/fwlink/?LinkId=722537",
+            "default": true,
+            "platforms": {
+                "android": {
+                    "version": "4.1.1"
+                },
+                "ios": {
+                    "version": "3.9.2"
+                },
+                "windows": {
+                    "version": "4.1.0"
+                },
+                "wp8": {
+                    "version": "3.8.2"
+                }
+            },
+            "plugins": {
+                "cordova-plugin-console": {
+                    "version": "1.0.2"
+                },
+                "cordova-plugin-device": {
+                    "version": "1.1.0"
+                },
+                "cordova-plugin-file": {
+                    "version": "3.0.0"
+                },
+                "cordova-plugin-inappbrowser": {
+                    "version": "1.1.0"
+                },
+                "cordova-plugin-splashscreen": {
+                    "version": "3.0.0"
+                },
+                "cordova-plugin-network-information": {
+                    "version": "1.1.0"
+                },
+                "cordova-plugin-dialogs": {
+                    "version": "1.2.0"
+                },
+                "cordova-plugin-geolocation": {
+                    "version": "1.0.1"
+                },
+                "cordova-plugin-media": {
+                    "version": "1.0.1"
+                },
+                "cordova-plugin-device-orientation": {
+                    "version": "1.0.2"
+                },
+                "cordova-plugin-battery-status": {
+                    "version": "1.1.1"
+                },
+                "cordova-plugin-camera": {
+                    "version": "1.2.0"
+                },
+                "cordova-plugin-contacts": {
+                    "version": "1.1.0"
+                },
+                "cordova-plugin-device-motion": {
+                    "version": "1.2.0"
+                },
+                "cordova-plugin-file-transfer": {
+                    "version": "1.4.0"
+                },
+                "cordova-plugin-globalization": {
+                    "version": "1.0.2"
+                },
+                "cordova-plugin-media-capture": {
+                    "version": "1.1.0"
+                },
+                "cordova-plugin-vibration": {
+                    "version": "2.0.0"
+                },
+                "cordova-plugin-statusbar": {
+                    "version": "2.0.0"
+                },
+                "cordova-plugin-whitelist": {
+                    "version": "1.2.0"
+                },
+                "cordova-plugin-legacy-whitelist": {
+                    "version": "1.1.1"
                 }
             }
         }

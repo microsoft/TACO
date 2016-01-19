@@ -382,9 +382,9 @@
     "CommandRunLiveReloadDescription.comment": "Description of the --livereload argument to 'taco run'",
     "CommandRunDeviceSyncDescription": "Sync gestures across multiple devices <key>(beta)</key>",
     "CommandRunDeviceSyncDescription.comment": "Description of the --devicesync argument to 'taco run'",
-    "CommandRunTunnelDescription": "Use IP tunneling for --livereload or --devicesync. Allows communication between two networks <key>(beta)</key>",
+    "CommandRunTunnelDescription": "Allows communication between two networks",
     "CommandRunTunneDescription.comment": "Description of the --tunnel argument to 'taco run --livereload --tunnel'",
-    "CommandRunIgnoreDescription": "Ignores valid anymatch matches relative to www directory for --livereload <key>(beta)</key>",
+    "CommandRunIgnoreDescription": "Ignores valid anymatch matches relative to www directory",
     "CommandRunIgnoreDescription.comment": "Description of the --ignore argument to 'taco run --livereload --ignore'",
     
     "TacoRunLivereloadExample1": "Runs the application in Livereload mode and ignores changes to CSS files",

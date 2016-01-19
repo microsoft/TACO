@@ -128,33 +128,12 @@ module TacoUtility {
                 return;
             }
 
-            // Prepare a flattened list of name/description values of args and options for each of the args.
-            // The list will contain <arg1>, <arg2.options>, <arg2>, <arg2.options>, <arg3>, <arg3.options>
-            var argList: INameDescription[] = [];
-            var args: any[] = this.commandsFactory.listings[command].args;
             var list: ICommandInfo = this.commandsFactory.listings[command];
+
             this.printCommandHeader(this.cliName, command, list.synopsis, list.description);
-            var optionsLeftIndent: string = LoggerHelper.repeat(" ", HelpCommandBase.OPTIONS_INDENT);
-            if (args) {
-                args.forEach((arg: any) => {
-                    // Push the arg first
-                    argList.push({
-                        name: arg.name,
-                        description: arg.description
-                    });
-                    if (arg.options) {
-                        var options: INameDescription[] = <INameDescription[]> arg.options;
-                        options.forEach((nvp: INameDescription) => {
-                            nvp.name = optionsLeftIndent + nvp.name;
-                            argList.push({
-                                name: nvp.name,
-                                description: nvp.description
-                            });
-                        });
-                    }
-                });
-                list.args = argList;
-            }
+
+            list.args = HelpCommandBase.flattenNameValues(list.args);
+            list.options = HelpCommandBase.flattenNameValues(list.options);
 
             // if both needs to be printed we need to calculate an indent ourselves
             // to make sure args.values have same indenation as options.values
@@ -268,6 +247,31 @@ module TacoUtility {
          */
         private commandExists(command: string): boolean {
             return command in this.commandsFactory.listings || (this.commandsFactory.aliases && command in this.commandsFactory.aliases);
+        }
+
+        /**
+         * Prepares a flattened list of name/description values of args and options for each of the args.
+         */
+        private static flattenNameValues(args: any[]): INameDescription[] {
+            if (!args) {
+                return undefined;
+            }
+        
+            var optionsLeftIndent: string = LoggerHelper.repeat(" ", HelpCommandBase.OPTIONS_INDENT);
+
+            var argList: INameDescription[] = [];
+            args.forEach((arg: any) => {
+                // Push the arg first
+                argList.push({name: arg.name, description: arg.description});
+
+                if (arg.options) {
+                    var options: INameDescription[] = <INameDescription[]> arg.options;
+                    options.forEach((nvp: INameDescription) => {
+                        argList.push({name: optionsLeftIndent + nvp.name, description: nvp.description});
+                    });
+                }
+            });
+            return argList;
         }
     }
 }
