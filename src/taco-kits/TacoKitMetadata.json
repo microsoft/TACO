@@ -195,6 +195,7 @@
                 "cordova-plugin-legacy-whitelist": {
                     "version": "1.1.0"
                 }
+                
             }
         },
         "tacokit@2.1.0": {
