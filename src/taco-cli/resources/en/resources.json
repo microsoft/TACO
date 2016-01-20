@@ -378,10 +378,19 @@
     "CommandRunListDescription": "Lists available targets. Will display both device and emulator targets unless overriden by --device or --emulator",
     "_CommandRunListDescription.comment": "Description of the --list argument to 'taco run'",
     
-    "CommandRunLiveReloadDescription": "Run the application in Livereload mode <key>(beta)</key>",
+    "CommandRunLiveReloadDescription": "Run the application in Livereload mode <highlight>(beta)</highlight>",
     "CommandRunLiveReloadDescription.comment": "Description of the --livereload argument to 'taco run'",
-    "CommandRunDeviceSyncDescription": "Sync gestures across multiple devices <key>(beta)</key>",
+    "CommandRunDeviceSyncDescription": "Sync gestures across multiple devices in Livereload mode <highlight>(beta)</highlight>",
     "CommandRunDeviceSyncDescription.comment": "Description of the --devicesync argument to 'taco run'",
+    "CommandRunTunnelDescription": "Allows communication between two networks",
+    "CommandRunTunneDescription.comment": "Description of the --tunnel argument to 'taco run --livereload --tunnel'",
+    "CommandRunIgnoreDescription": "Ignores valid anymatch matches relative to www directory",
+    "CommandRunIgnoreDescription.comment": "Description of the --ignore argument to 'taco run --livereload --ignore'",
+    
+    "TacoRunLivereloadExample1": "Runs the application in Livereload mode and ignores changes to CSS files",
+    "TacoRunLivereloadExample1.comment": "Text shown in examples section when a user invokes taco emulate --livereload --ignore=CSS",
+    "TacoRunLivereloadExample2": "Runs the application in Livereload mode using IP tunneling",
+    "TacoRunLivereloadExample2.comment": "Text shown in examples section when a user invokes taco run --livereload --tunnel",
     
     "CommandRunRemoteDeviceSuccess": "<success>Success!</success> Build running on remote attached device",
     "_CommandRunRemoteDeviceSuccess.comment": "Message printed after successfully running a build on a remote device",

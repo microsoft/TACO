@@ -413,11 +413,31 @@
                 "name":  "--list", "description": "[CommandRunListDescription]"
             },
             {
-                "name":  "--livereload", "description": "[CommandRunLiveReloadDescription]"
+                "name":  "--livereload", "description": "[CommandRunLiveReloadDescription]",
+                "options": [
+                {
+                    "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
+                },
+                {
+                    "name": "--ignore=PATTERN", "description": "[CommandRunIgnoreDescription]"
+                }
+                ]
             },
             {
-                "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+                "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]",
+                "options": [
+                {
+                    "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
+                },
+                {
+                    "name": "--ignore=PATTERN", "description": "[CommandRunIgnoreDescription]"
+                }
+                ]
             }
+            ],
+            "examples": [
+                { "example": "taco run --livereload --ignore=/**/*.css", "description": "[TacoRunLivereloadExample1]" },
+                { "example": "taco run --livereload --tunnel" , "description": "[TacoRunLivereloadExample2]" }
             ]
         }
         ,
@@ -431,7 +451,8 @@
             {
                 "name": "PLATFORM", "description": "[CommandRunPlatformDescription]"
             }
-            ,
+            ],
+            "options": [
             {
                 "name": "--remote", "description": "[CommandRunRemoteDescription]"
             }
@@ -460,11 +481,31 @@
                 "name": "--target=TARGET", "description": "[CommandRunTargetDescription]"
             },
             {
-                "name":  "--livereload", "description": "[CommandRunLiveReloadDescription]"
+                "name":  "--livereload", "description": "[CommandRunLiveReloadDescription]",
+                "options": [
+                {
+                    "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
+                },
+                {
+                    "name": "--ignore=PATTERN", "description": "[CommandRunIgnoreDescription]"
+                }
+                ]
             },
             {
-                "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]"
+                "name":  "--devicesync", "description": "[CommandRunDeviceSyncDescription]",
+                "options": [
+                {
+                    "name": "--tunnel", "description": "[CommandRunTunnelDescription]"
+                },
+                {
+                    "name": "--ignore=PATTERN", "description": "[CommandRunIgnoreDescription]"
+                }
+                ]
             }
+            ],
+            "examples": [
+                { "example": "taco emulate --livereload --ignore=/**/*.css", "description": "[TacoRunLivereloadExample1]" },
+                { "example": "taco emulate --livereload --tunnel" , "description": "[TacoRunLivereloadExample2]" }
             ]
         }
         ,

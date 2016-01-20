@@ -181,7 +181,7 @@ class Emulate extends commands.TacoCommandBase {
         if (this.data.options["livereload"] || this.data.options["devicesync"]) {
             // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
             var liveReload = require("./liveReload");
-            return liveReload.hookLiveReload(!!this.data.options["livereload"], !!this.data.options["devicesync"], localPlatforms)
+            return liveReload.hookLiveReload(this.data.options, localPlatforms)
                 .then(() => CordovaWrapper.emulate(self.data, localPlatforms));
         }
 
