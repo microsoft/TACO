@@ -1,7 +1,7 @@
 {
     "name": "taco-remote",
     "description": "Module for the remotebuild package to build, run, and debug iOS apps created using Apache Cordova.",
-    "version": "1.3.3-dev",
+    "version": "1.3.4-dev",
     "author": {
         "name": "Microsoft Corporation",
         "email": "vscordovatools-admin@microsoft.com"
