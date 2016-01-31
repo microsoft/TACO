@@ -8,14 +8,16 @@
 
 var WWW_FOLDER = {
     android: 'platforms/android/assets/www',
-    ios: 'platforms/ios/www'
+    ios: 'platforms/ios/www',
+    browser: 'platforms/browser/www'
 };
 
 // config.xml locations,
 // These are relative to the platform folder. e.g: for Android, it's '/home/omefire/Projects/cordovaApp/platforms/android/res/xml'
 var CONFIG_LOCATION = {
     android: 'res/xml',
-    ios: '.'
+    ios: '.',
+    browser: '.'
 };
 
 

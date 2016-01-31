@@ -180,10 +180,19 @@ class Run extends commands.TacoCommandBase {
             if (this.data.options["livereload"] || this.data.options["devicesync"]) {
                 // intentionally delay-requiring it since liveReload fetches whole bunch of stuff
                 var liveReload = require("./liveReload");
-                return liveReload.hookLiveReload(this.data.options, localPlatforms)
-                    .then(() => CordovaWrapper.run(self.data, localPlatforms));
+                return liveReload.hookLiveReload(self.data.options, localPlatforms)
+                    .then(() => {
+                        
+                        var devicePlatforms = localPlatforms.filter(platform => platform !== "browser");                        
+                        return Q.all([
+                            tacoUtility.PromisesUtils.condition<any>(localPlatforms.indexOf("browser") === -1,
+                                Q({}), 
+                                () =>  require("./browser").run(self.data)),
+                            tacoUtility.PromisesUtils.condition(devicePlatforms.length == 0, 
+                                Q({}),
+                                () => CordovaWrapper.run(self.data, devicePlatforms))]);                    
+                    });
             }
-
             return CordovaWrapper.run(this.data, localPlatforms);
         });
     }

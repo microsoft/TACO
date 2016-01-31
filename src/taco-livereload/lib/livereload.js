@@ -107,10 +107,18 @@ module.exports.start = function (projectRoot, platforms, options) {
                 // Only do it on subsequent ones
                 ignoreInitial: true
             },
+            middleware: function (req, res, next) {
+                if (platforms.indexOf("browser") >=0 ) {
+                    console.log('Adding CORS header for ' + req.method + ': ' + req.url);
+                    res.setHeader('Access-Control-Allow-Origin', '*');
+                }
+                next();
+            },
             tunnel: options.tunnel || false,
             ghostMode: options.ghostMode || true
         });
         
+
         return bs.startServer().then(function (serverUrl) {
             var patcher = new Patcher(projectRoot, platforms);
             return patcher.patch(serverUrl);
