@@ -36,7 +36,7 @@
         "should": "4.3.0"
     },
     "optionalDependencies": {
-        "ios-sim": "^5.0.2"
+        "ios-sim": "5.0.4"
     },
 
     "scripts": {
