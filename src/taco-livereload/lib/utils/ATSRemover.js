@@ -17,7 +17,7 @@ module.exports = function(projectRoot, platform) {
     var self = this;
     this.Remove = function() {
         var configFolder = path.join(projectRoot, 'platforms', platform, multiPlatforms.getConfigFolder(platform));
-        glob.sync('**/*Info.plist', {
+        glob.sync('*/*Info.plist', {
             cwd: configFolder,
             ignore: '*build/**'
         }).forEach(function(filename) {
