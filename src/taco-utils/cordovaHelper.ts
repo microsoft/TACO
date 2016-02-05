@@ -398,7 +398,7 @@ module TacoUtility {
         private static toCordovaRaw540Arguments(commandData: Commands.ICommandData, platforms: string[] = null): Cordova.ICordova540RawOptions {
             var buildOpts: Cordova.ICordova540BuildOptions = {
                 archs: commandData.options["archs"] || null,
-                argv: commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : null,
+                argv: commandData.original.indexOf("--") >= 0 ? commandData.original.slice(commandData.original.indexOf("--") + 1) : [],
                 buildconfig: commandData.options["buildconfig"] || null,
                 debug: commandData.options["debug"] || false,
                 device: commandData.options["device"] || false,
