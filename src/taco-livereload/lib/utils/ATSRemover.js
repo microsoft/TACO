@@ -17,7 +17,6 @@ module.exports = function(projectRoot, platform) {
     var self = this;
     this.Remove = function() {
         var configFolder = path.join(projectRoot, 'platforms', platform, multiPlatforms.getConfigFolder(platform));
-        // We only want to modify a single plist file, not all of them.
         glob.sync('*/*Info.plist', {
             cwd: configFolder,
             ignore: '*build/**'
