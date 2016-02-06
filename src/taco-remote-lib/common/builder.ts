@@ -91,9 +91,17 @@ class Builder {
                 Logger.log(resources.getString("DoneBuilding", self.currentBuild.buildNumber));
                 self.currentBuild.updateStatus(BuildInfo.COMPLETE);
             })
-            .catch(function (err: Error): void {
-                Logger.log(resources.getString("ErrorBuilding", self.currentBuild.buildNumber, err.message));
-                self.currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", err.message);
+            .catch(function (err: Error | string): void {
+                var errorMessage: string;
+
+                if (typeof err === "string") {
+                    errorMessage = err;
+                } else {
+                    errorMessage = err.message;
+                }
+
+                Logger.log(resources.getString("ErrorBuilding", self.currentBuild.buildNumber, errorMessage));
+                self.currentBuild.updateStatus(BuildInfo.ERROR, "BuildFailedWithError", errorMessage);
             }).then(function (): BuildInfo {
                 return self.currentBuild;
             });
