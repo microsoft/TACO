@@ -75,7 +75,7 @@ class IOSEmulateHelper {
         // When run via SSH / without a GUI, ios-sim can hang indefinitely. A cold launch can take on the order of 5 seconds.
         var emulatorTimeout: NodeJS.Timer = setTimeout(function (): void {
             emulatorProcess.kill();
-            deferred.reject({ status: "error", messageId: "EmulateFailedTimeout" });
+            deferred.reject({ status: BuildInfo.ERROR, messageId: "EmulateFailedTimeout" });
         }, 10000);
 
         return deferred.promise.finally(function (): void {
