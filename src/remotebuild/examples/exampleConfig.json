@@ -23,7 +23,8 @@ This is an example configuration file with comments describing the meaning. Sinc
             "nativeDebugProxyPort": 3001, // What port should we attempt to open a debug channel to iOS devices on?
             "webDebugProxyDevicePort": 9221, // What port should we expose ios-webkit-debug-proxy on
             "webDebugProxyPortMin": 9222, // What port range should ios-webkit-debug-proxy assign devices and the simulator to
-            "webDebugProxyPortMax": 9322
+            "webDebugProxyPortMax": 9322,
+            "emulatorLaunchTimeout": 20000 // Maximum time in milliseconds to wait for an iOS emulator to launch
         }
     }
 }
