@@ -17,7 +17,7 @@ var nopt = require('nopt');
 // Checks whether a command is compatible with livereload
 // Currently, Only the following commands are compatible with LiveReload : `* (run|emulate) android -- --livereload`, `* (run|emulate) android --livereload`
 //   Examples:
-//     - `cordova run android -- --livereload` 
+//     - `cordova run android -- --livereload`
 //     - `phonegap run android -- --livereload`
 //     - `cordova run android --livereload`
 //     - `cordova emulate android -- --livereload`
@@ -26,7 +26,7 @@ var nopt = require('nopt');
 //     - `phonegap emulate android --livereload`
 module.exports.IsCmdLiveReloadCompatible = function (context) {
 
-    // There is a bug in cordova-lib upto at least version 5.3.x that prevents the `cordova emulate` command 
+    // There is a bug in cordova-lib upto at least version 5.3.x that prevents the `cordova emulate` command
     // ... from passing context object of plugins from passing the -- --livereload flag correctly.
     // ... using `isLiveReloadActive` allows us to circumvent that issue.
     var livereloadOptions = parseOptions();
@@ -52,6 +52,13 @@ module.exports.GetStartPage = function (projectRoot) {
     return startPage;
 };
 
+// Retrieve the start page for a cordova project, given the project's root directory
+module.exports.GetProjectName = function (projectRoot) {
+    var configXML = GetConfigXMLFile(projectRoot);
+    var nameTag = configParser.GetProjectName(configXML);
+    return nameTag;
+};
+
 module.exports.ChangeStartPage = function (projectRoot, plat, platformIndexUrl) {
     var configXmlFolder = path.join(projectRoot, 'platforms', plat, multiPlatforms.getConfigFolder(plat));
     glob.sync('**/config.xml', {
@@ -70,7 +77,7 @@ module.exports.parseOptions = parseOptions = function () {
     // e.g: `cordova run android -- --livereload` is the same as `cordova run android -- --devicesync`
     // Making them be the same is necessary because of two reasons:
     //    1- From TACO, we have to be able to run either `taco run ios android --devicesync` or `taco run android --livereload`
-    //    2- Due to a bug in cordova-lib, we have to parse process.args and not the context. What this means is that when parsing process.args, 
+    //    2- Due to a bug in cordova-lib, we have to parse process.args and not the context. What this means is that when parsing process.args,
     //         ... we'll see --devicesync and not --livereload. otherwise, we could have just passed the '--livereload' flag through the plugin's context from TACO.
     var knownOpts = {
         'livereload': Boolean,
