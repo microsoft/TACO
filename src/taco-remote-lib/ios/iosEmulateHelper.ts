@@ -22,8 +22,10 @@ import tacoUtils = require ("taco-utils");
 import utils = tacoUtils.UtilHelper;
 import BuildInfo = tacoUtils.BuildInfo;
 
+interface IEmulateRequest { appDir: string; appName: string; target: string, version: string, timeout: number };
+
 // Note: this file is not intended to be loaded as a module, but rather in a separate process.
-process.on("message", function (emulateRequest: { appDir: string; appName: string; target: string, version: string }): void {
+process.on("message", function (emulateRequest: IEmulateRequest): void {
     Q(IOSEmulateHelper.emulate(emulateRequest))
         .then(function (result: { status: string; messageId: string; messageArgs?: any }): void {
         process.send(result);
@@ -44,7 +46,7 @@ class IOSEmulateHelper {
         "ipad retina": "iPad-Retina"
     };
 
-    public static emulate(emulateRequest: { appDir: string; appName: string; target: string, version: string }): Q.Promise<{ status: string; messageId: string; messageArgs?: any }> {
+    public static emulate(emulateRequest: IEmulateRequest): Q.Promise<{ status: string; messageId: string; messageArgs?: any }> {
         return Q.fcall(IOSEmulateHelper.cdToAppDir, emulateRequest.appDir)
         .then(function (): Q.Promise<{}> { return IOSEmulateHelper.cordovaEmulate(emulateRequest); })
         .then(function success(): { status: string; messageId: string; messageArgs?: any } {
@@ -62,7 +64,7 @@ class IOSEmulateHelper {
         process.chdir(appDir);
     }
 
-    private static cordovaEmulate(emulateRequest: { appDir: string; appName: string; target: string, version: string }): Q.Promise<{}> {
+    private static cordovaEmulate(emulateRequest: IEmulateRequest): Q.Promise<{}> {
         var deferred: Q.Deferred<any> = Q.defer();
         var emulatorAppPath: string = utils.quotesAroundIfNecessary(path.join(emulateRequest.appDir, "platforms", "ios", "build", "emulator", emulateRequest.appName + ".app"));
         var emulatorProcess: child_process.ChildProcess = utils.loggedExec(util.format("ios-sim launch %s %s --exit", emulatorAppPath, IOSEmulateHelper.iosSimTarget(emulateRequest.target, emulateRequest.version)), {}, function (error: Error, stdout: Buffer, stderr: Buffer): void {
@@ -75,8 +77,8 @@ class IOSEmulateHelper {
         // When run via SSH / without a GUI, ios-sim can hang indefinitely. A cold launch can take on the order of 5 seconds.
         var emulatorTimeout: NodeJS.Timer = setTimeout(function (): void {
             emulatorProcess.kill();
-            deferred.reject({ status: "error", messageId: "EmulateFailedTimeout" });
-        }, 10000);
+            deferred.reject({ status: BuildInfo.ERROR, messageId: "EmulateFailedTimeout" });
+        }, emulateRequest.timeout);
 
         return deferred.promise.finally(function (): void {
             clearTimeout(emulatorTimeout);

@@ -33,6 +33,7 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
         webDebugProxyPortMax?: number;
 
         appLaunchStepTimeout?: number;
+        emulatorLaunchTimeout?: number;
 
         [key: string]: any;
     };
@@ -50,7 +51,8 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
             maxBuildsToKeep: 20,
             deleteBuildsOnShutdown: true,
             allowsEmulate: true,
-            appLaunchStepTimeout: 10000
+            appLaunchStepTimeout: 10000,
+            emulatorLaunchTimeout: 20000
         };
         var hostDefaults: { [key: string]: any } = HostSpecifics.hostSpecifics.defaults(defaults);
         var self: TacoRemoteConfig = this;
@@ -119,6 +121,10 @@ class TacoRemoteConfig implements RemoteBuild.IReadOnlyDictionary {
 
     public get appLaunchStepTimeout(): number {
         return this.tacoRemoteConf.appLaunchStepTimeout;
+    }
+
+    public get emulatorLaunchTimeout(): number {
+        return this.tacoRemoteConf.emulatorLaunchTimeout;
     }
 
     // These three properties are inherited from the parent configuration; no need for separate documentation

@@ -38,6 +38,7 @@ class IOSAgent implements ITargetPlatform {
     private webDebugProxyPortMin: number;
     private webDebugProxyPortMax: number;
     private appLaunchStepTimeout: number;
+    private emulatorLaunchTimeout: number;
 
     /**
      * Initialize iOS specific information from the configuration.
@@ -51,6 +52,7 @@ class IOSAgent implements ITargetPlatform {
         this.webDebugProxyPortMax = config.get("webDebugProxyPortMax") || 9322;
 
         this.appLaunchStepTimeout = config.get("appLaunchStepTimeout") || 10000;
+        this.emulatorLaunchTimeout = config.get("emulatorLaunchTimeout") || 20000;
 
         if (utils.ArgsHelper.argToBool(config.get("allowsEmulate"))) {
             process.env["PATH"] = path.resolve(__dirname, path.join("..", "node_modules", ".bin")) + ":" + process.env["PATH"];
@@ -188,7 +190,7 @@ class IOSAgent implements ITargetPlatform {
         var emulateProcess: child_process.ChildProcess = child_process.fork(path.join(__dirname, "iosEmulateHelper.js"), [], { silent: true });
         var emulateLogger: ProcessLogger = new ProcessLogger();
         emulateLogger.begin(buildInfo.buildDir, "emulate.log", buildInfo.buildLang, emulateProcess);
-        emulateProcess.send({ appDir: buildInfo.appDir, appName: cfg.id(), target: req.query.target, version: req.query.iOSVersion }, null);
+        emulateProcess.send({ appDir: buildInfo.appDir, appName: cfg.id(), target: req.query.target, version: req.query.iOSVersion, timeout: this.emulatorLaunchTimeout }, null);
 
         emulateProcess.on("message", function (result: { status: string; messageId: string; messageArgs?: any }): void {
             buildInfo.updateStatus(result.status, result.messageId, result.messageArgs);
