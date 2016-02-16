@@ -46,7 +46,7 @@ Patcher.prototype.patch = function (serverUrl) {
             browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
         var platformIndexUrl = url.resolve(serverUrl, path.join(multiPlatforms.getPlatformWWWFolder(plat), self.startPage));
         copyHomePage(self.projectRoot, plat, platformIndexUrl).then(function (homePage) {
-            return helpers.ChangeStartPage(self.projectRoot, plat, homePage);
+            browserSyncPrimitives.updateConfigXml(self.projectRoot, plat, helpers.GetProjectName(), homePage);
         });
     });
 };

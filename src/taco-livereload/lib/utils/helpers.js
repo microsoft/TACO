@@ -10,7 +10,6 @@
 var path = require('path');
 var configParser = require('./configParser');
 var glob = require('glob');
-var multiPlatforms = require('./platforms');
 var fs = require('fs');
 var nopt = require('nopt');
 
@@ -57,17 +56,6 @@ module.exports.GetProjectName = function (projectRoot) {
     var configXML = GetConfigXMLFile(projectRoot);
     var nameTag = configParser.GetProjectName(configXML);
     return nameTag;
-};
-
-module.exports.ChangeStartPage = function (projectRoot, plat, platformIndexUrl) {
-    var configXmlFolder = path.join(projectRoot, 'platforms', plat, multiPlatforms.getConfigFolder(plat));
-    glob.sync('**/config.xml', {
-        cwd: configXmlFolder,
-        ignore: '*build/**'
-    }).forEach(function (filename) {
-        var configXML = path.join(configXmlFolder, filename);
-        configParser.ChangeStartPage(platformIndexUrl, configXML);
-    });
 };
 
 // Parses LiveReload options off of process.argv
