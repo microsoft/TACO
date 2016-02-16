@@ -13,7 +13,6 @@ var url = require('url');
 var path = require('path');
 var promiseUtils = require('./promise-util');
 var browserSyncPrimitives = require('cordova-browsersync-primitives');
-var CSPRemover = require('./CSPRemover');
 var multiPlatforms = require('./platforms');
 
 var fs = require('fs');
@@ -42,31 +41,13 @@ Patcher.prototype.patch = function (serverUrl) {
     return promiseUtils.Q_chainmap(self.platforms, function (plat) {
         var platWWWFolder = multiPlatforms.getPlatformWWWFolder(plat);
         var platformIndexLocal = path.join(self.projectRoot, platWWWFolder, self.startPage);
-        var cspRemover = new CSPRemover(platformIndexLocal);
-        return cspRemover.Remove().then(function () {
-            if (plat == 'ios')
-                browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
-        }).then(function () {
-            var platformIndexUrl = url.resolve(serverUrl, path.join(multiPlatforms.getPlatformWWWFolder(plat), self.startPage));
-            return copyHomePage(self.projectRoot, plat, platformIndexUrl);
-        }).then(function (homePage) {
+        browserSyncPrimitives.addCSP(platformIndexLocal);
+        if (plat == 'ios')
+            browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
+        var platformIndexUrl = url.resolve(serverUrl, path.join(multiPlatforms.getPlatformWWWFolder(plat), self.startPage));
+        copyHomePage(self.projectRoot, plat, platformIndexUrl).then(function (homePage) {
             return helpers.ChangeStartPage(self.projectRoot, plat, homePage);
         });
-    });
-};
-
-Patcher.prototype.removeCSP = function () {
-    var self = this;
-    var startPage = helpers.GetStartPage(self.projectRoot);
-
-    var platformWwws = self.platforms.map(function (plat) {
-        return path.join(self.projectRoot, multiPlatforms.getPlatformWWWFolder(plat));
-    });
-
-    return platformWwws.forEach(function (platWWWDir) {
-        var platformIndexLocal = path.join(platWWWDir, startPage);
-        var remover = new CSPRemover(platformIndexLocal);
-        remover.Remove();
     });
 };
 
