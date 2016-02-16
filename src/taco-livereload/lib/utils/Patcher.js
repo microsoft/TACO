@@ -8,12 +8,10 @@
  */
 
 var helpers = require('./helpers');
-var multiPlatforms = require('./platforms');
 var url = require('url');
 var path = require('path');
 var promiseUtils = require('./promise-util');
 var browserSyncPrimitives = require('cordova-browsersync-primitives');
-var multiPlatforms = require('./platforms');
 
 var fs = require('fs');
 
@@ -39,12 +37,12 @@ function Patcher(projectRoot, platforms) {
 Patcher.prototype.patch = function (serverUrl) {
     var self = this;
     return promiseUtils.Q_chainmap(self.platforms, function (plat) {
-        var platWWWFolder = multiPlatforms.getPlatformWWWFolder(plat);
+        var platWWWFolder = browserSyncPrimitives.getWWWFolder(plat);
         var platformIndexLocal = path.join(self.projectRoot, platWWWFolder, self.startPage);
         browserSyncPrimitives.addCSP(platformIndexLocal);
         if (plat == 'ios')
             browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
-        var platformIndexUrl = url.resolve(serverUrl, path.join(multiPlatforms.getPlatformWWWFolder(plat), self.startPage));
+        var platformIndexUrl = url.resolve(serverUrl, path.join(browserSyncPrimitives.getWWWFolder(plat), self.startPage));
         copyHomePage(self.projectRoot, plat, platformIndexUrl).then(function (homePage) {
             browserSyncPrimitives.updateConfigXml(self.projectRoot, plat, helpers.GetProjectName(), homePage);
         });
@@ -58,7 +56,7 @@ function copyHomePage(projectRoot, platform, platformIndexUrl) {
 
     var src = path.join(__dirname, HOME_PAGE);
 
-    var dest = path.join(projectRoot, multiPlatforms.getPlatformWWWFolder(platform), HOME_PAGE);
+    var dest = path.join(projectRoot, browserSyncPrimitives.getWWWFolder(platform), HOME_PAGE);
 
     // Append random string to the homePage.html filename being copied into the platforms folder
     // ... so that it doesn't clash with potential user-defined homePage.html files
