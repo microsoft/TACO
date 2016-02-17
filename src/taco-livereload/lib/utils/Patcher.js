@@ -36,10 +36,8 @@ function Patcher(projectRoot, platforms) {
  */
 Patcher.prototype.patch = function (serverUrl) {
     var self = this;
+    self.removeCSP();
     return promiseUtils.Q_chainmap(self.platforms, function (plat) {
-        var platWWWFolder = browserSyncPrimitives.getWWWFolder(plat);
-        var platformIndexLocal = path.join(self.projectRoot, platWWWFolder, self.startPage);
-        browserSyncPrimitives.addCSP(platformIndexLocal);
         if (plat == 'ios')
             browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
         var platformIndexUrl = url.resolve(serverUrl, path.join(browserSyncPrimitives.getWWWFolder(plat), self.startPage));
@@ -47,6 +45,14 @@ Patcher.prototype.patch = function (serverUrl) {
         browserSyncPrimitives.updateConfigXml(self.projectRoot, plat, helpers.GetProjectName(self.projectRoot), homePage);
     });
 };
+
+Patcher.prototype.removeCSP = function () {
+    this.platforms.forEach(function(plat) {
+        var platWWWFolder = browserSyncPrimitives.getWWWFolder(plat);
+        var platformIndexLocal = path.join(this.projectRoot, platWWWFolder, this.startPage);
+        browserSyncPrimitives.addCSP(platformIndexLocal);
+    }.bind(this));
+}
 
 // Copy the homePage.html that comes with livereload into the platform's folder
 function copyHomePage(projectRoot, platform, platformIndexUrl) {
