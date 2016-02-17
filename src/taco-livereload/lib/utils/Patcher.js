@@ -43,9 +43,8 @@ Patcher.prototype.patch = function (serverUrl) {
         if (plat == 'ios')
             browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
         var platformIndexUrl = url.resolve(serverUrl, path.join(browserSyncPrimitives.getWWWFolder(plat), self.startPage));
-        copyHomePage(self.projectRoot, plat, platformIndexUrl).then(function (homePage) {
-            browserSyncPrimitives.updateConfigXml(self.projectRoot, plat, helpers.GetProjectName(), homePage);
-        });
+        var homePage = copyHomePage(self.projectRoot, plat, platformIndexUrl);
+        browserSyncPrimitives.updateConfigXml(self.projectRoot, plat, helpers.GetProjectName(self.projectRoot), homePage);
     });
 };
 
