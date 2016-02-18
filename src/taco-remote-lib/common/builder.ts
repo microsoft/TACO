@@ -132,28 +132,20 @@ class Builder {
             fs.mkdirSync("platforms");
         }
 
-        return this.ensurePlatformAdded().then((addedPlatform) => {
-            if (addedPlatform) {
-                // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
-                return Q({});
-            }
-
+        return this.ensurePlatformAdded().then(() => {
             return this.update_platform();
         });
     }
 
     /**
      * Adds the platform if it isn't already present, or removes and re-adds it if the project Cordova version changed, or config.xml has a saved platform version that differs from the installed one.
-     * Returns true if the platform was added, false if not.
+     * Prepares the platform afterwards.
      */
-    private ensurePlatformAdded(): Q.Promise<boolean> {
+    private ensurePlatformAdded(): Q.Promise<any> {
         if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
             Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
 
-            // Note that "cordova platform add" eventually calls "cordova prepare" internally, which is why we don't invoke prepare ourselves when we add the platform.
-            return this.cordova.raw.platform("add", this.currentBuild.buildPlatform).then(() => {
-                return Q(true);
-            });
+            return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
         }
 
         var xmlVersion: string = this.getConfigXmlPlatformVersion();
@@ -162,7 +154,7 @@ class Builder {
         if (xmlVersion) {
             mustReAddPromise = this.getCurrentPlatformVersion().then((currentVersion: string) => {
                 if (!semver.satisfies(currentVersion, xmlVersion)) {
-                    // There is a version of the platform specified in xonfig.xml, and it differs from the installed version
+                    // There is a version of the platform specified in config.xml, and it differs from the installed version
                     return true;
                 } else {
                     // The version specified in config.xml is already installed, we don't need to re-add the platform
@@ -180,17 +172,13 @@ class Builder {
         }
 
         return mustReAddPromise.then((mustReAdd: boolean) => {
-            if (!mustReAdd) {
-                return Q(false);
-            } else {
+            if (mustReAdd) {
                 Logger.log("cordova platform remove " + this.currentBuild.buildPlatform);
 
                 return this.cordova.raw.platform("remove", this.currentBuild.buildPlatform).then(() => {
                     Logger.log("cordova platform add " + this.currentBuild.buildPlatform);
 
                     return this.cordova.raw.platform("add", this.currentBuild.buildPlatform);
-                }).then(() => {
-                    return Q(true);
                 });
             }
         });
