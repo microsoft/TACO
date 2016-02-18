@@ -139,7 +139,6 @@ class Builder {
 
     /**
      * Adds the platform if it isn't already present, or removes and re-adds it if the project Cordova version changed, or config.xml has a saved platform version that differs from the installed one.
-     * Prepares the platform afterwards.
      */
     private ensurePlatformAdded(): Q.Promise<any> {
         if (!fs.existsSync(path.join("platforms", this.currentBuild.buildPlatform))) {
