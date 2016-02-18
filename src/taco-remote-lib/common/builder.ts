@@ -77,7 +77,7 @@ class Builder {
             .then(function (): Q.Promise<any> { return self.update_plugins(); })
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingPlatform", self.currentBuild.buildPlatform); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return self.beforePrepare(); })
-            .then(function (): Q.Promise<any> { return self.addOrPreparePlatform(); })
+            .then(function (): Q.Promise<any> { return self.addAndPreparePlatform(); })
             .then(function (): Q.Promise<any> { return self.afterPrepare(); })
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return self.prepareNativeOverrides(); })
@@ -127,7 +127,7 @@ class Builder {
         return Q({});
     }
 
-    private addOrPreparePlatform(): Q.Promise<any> {
+    private addAndPreparePlatform(): Q.Promise<any> {
         if (!fs.existsSync("platforms")) {
             fs.mkdirSync("platforms");
         }
