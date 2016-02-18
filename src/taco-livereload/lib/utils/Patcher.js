@@ -38,7 +38,7 @@ Patcher.prototype.patch = function (serverUrl) {
     var self = this;
     self.removeCSP();
     return promiseUtils.Q_chainmap(self.platforms, function (plat) {
-        if (plat == 'ios')
+        if (plat === 'ios')
             browserSyncPrimitives.fixATS(self.projectRoot, helpers.GetProjectName(self.projectRoot));
         var platformIndexUrl = url.resolve(serverUrl, path.join(browserSyncPrimitives.getWWWFolder(plat), self.startPage));
         var homePage = copyHomePage(self.projectRoot, plat, platformIndexUrl);
