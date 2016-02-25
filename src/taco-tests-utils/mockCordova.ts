@@ -31,7 +31,7 @@ module TacoTestsUtils {
             }
         }
 
-        function notImplemented<T>(): T | any {
+        function notImplemented<T>(): T {
             /* tslint:disable no-arg */
             // Very specific case to access caller for test purposes
             var caller = arguments.callee.caller;

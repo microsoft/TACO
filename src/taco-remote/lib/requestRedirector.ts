@@ -35,7 +35,7 @@ class RequestRedirector implements TacoRemoteLib.IRequestRedirector {
                 var packageSpec: IPackageSpec = mux.getPackageSpecForQuery(req.query);
                 return TacoPackageLoader.lazyTacoRequire<IRemoteLib>(packageSpec.packageKey, packageSpec.dependencyConfigPath);
             })
-            .catch(function (err: any): IRemoteLib | any {
+            .catch(function (err: any): IRemoteLib {
                 err.code = 500;
                 throw err;
             });
