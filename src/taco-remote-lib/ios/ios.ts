@@ -266,12 +266,32 @@ class IOSAgent implements ITargetPlatform {
         var portRange: string = util.format("null:%d,:%d-%d", this.webDebugProxyDevicePort, this.webDebugProxyPortMin, this.webDebugProxyPortMax);
 
         var deferred = Q.defer();
-        sharedState.webProxyInstance = child_process.spawn("ios_webkit_debug_proxy", ["-c", portRange]);
+	// Since we want to read the (very sparse) output interactively,
+	// we must make sure to the output of ios_webkit_debug_proxy is not buffered.
+	// The OSX command "script" provides one way to do that
+        sharedState.webProxyInstance = child_process.spawn("script", ["-q", "/dev/null", "ios_webkit_debug_proxy", "-c", portRange], { stdio: "pipe" });
         sharedState.webProxyInstance.on("error", function (err: Error) {
             deferred.reject(new Error(resources.getStringForLanguage(req, "UnableToDebug")));
         });
-        // Allow some time for the spawned process to error out
-        Q.delay(250).then(() => deferred.resolve({}));
+
+        if (buildInfo.options.indexOf("--device" !== -1)) {
+            // This is enabling debugging for a device build: make sure that a device is attached
+	    sharedState.webProxyInstance.stdout.on("data", function (data: Buffer) {
+		var dataStr = data.toString();
+                if (dataStr.match(/Unable to connect to/)) {
+		    var error = new Error(resources.getStringForLanguage(req, "WebInspectorDisabled"));
+		    deferred.reject(error);
+		}
+		if (dataStr.match(/Connected :[0-9]+ to/)) {
+		    deferred.resolve();
+		}
+            });
+	    // Allow time to discover devices to register.
+	    Q.delay(10000).then(() => deferred.reject(new Error(resources.getStringForLanguage(req, "NoDevicesFound"))));
+        } else {
+            // Allow some time for the spawned process to error out
+            Q.delay(250).then(() => deferred.resolve({}));
+        }
 
         deferred.promise.then(() => {
             buildInfo["webDebugProxyPort"] = this.webDebugProxyDevicePort;
