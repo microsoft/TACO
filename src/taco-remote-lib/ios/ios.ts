@@ -274,7 +274,7 @@ class IOSAgent implements ITargetPlatform {
             deferred.reject(new Error(resources.getStringForLanguage(req, "UnableToDebug")));
         });
 
-        if (buildInfo.options.indexOf("--device" !== -1)) {
+        if (buildInfo.options.indexOf("--device") !== -1) {
             // This is enabling debugging for a device build: make sure that a device is attached
 	    sharedState.webProxyInstance.stdout.on("data", function (data: Buffer) {
 		var dataStr = data.toString();
@@ -282,8 +282,8 @@ class IOSAgent implements ITargetPlatform {
 		    var error = new Error(resources.getStringForLanguage(req, "WebInspectorDisabled"));
 		    deferred.reject(error);
 		}
-		if (dataStr.match(/Connected :[0-9]+ to/)) {
-		    deferred.resolve();
+		if (dataStr.match(/Connected :[0-9]+ to/) && dataStr.indexOf("SIMULATOR") === -1) {
+		    deferred.resolve({});
 		}
             });
 	    // Allow time to discover devices to register.
