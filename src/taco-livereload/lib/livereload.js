@@ -8,10 +8,10 @@
 
 var Q = require('q');
 var path = require('path');
-var multiPlatforms = require('./utils/platforms');
 var helpers = require('./utils/helpers');
 var Patcher = require('./utils/Patcher');
 var livereloadEvents = require('./utils/events');
+var browserSyncPrimitives = require('cordova-browsersync-primitives');
 
 /** This file is exposed externally */
 
@@ -29,7 +29,7 @@ module.exports.start = function (projectRoot, platforms, options) {
 
     return Q().then(function () {
 
-        // Check if all the platforms we are trying to livereload have been added to the project        
+        // Check if all the platforms we are trying to livereload have been added to the project
         var areAllPlatformsAddedToProject = platforms.every(function (plat) {
             return helpers.isPlatformAddedToProject(projectRoot, plat);
         });
@@ -39,11 +39,11 @@ module.exports.start = function (projectRoot, platforms, options) {
             livereloadEvents.emit('livereload:error', msg);
             return Q.reject(msg);
         }
-    
+
         // Validate whether all platforms are currently supported
         // If a platform is not supported by the plugin, display an error message and don't process it any further
         platforms.forEach(function (plat, index, platforms) {
-            if (!multiPlatforms.isPlatformSupported(plat)) {
+            if (!browserSyncPrimitives.isPlatformSupported(plat)) {
                 var msg = 'The "' + plat + '" platform is not supported.';
                 livereloadEvents.emit('livereload:warning', msg);
                 platforms.splice(index, 1);
@@ -58,11 +58,11 @@ module.exports.start = function (projectRoot, platforms, options) {
         }
 
         var BrowserSyncServer = require('./browserSyncServer');
-        
-        // If user has entered whitespaces surrounding '--ignore', 
+
+        // If user has entered whitespaces surrounding '--ignore',
         // ... we end up having helpers.parseOptions() return 'ignore' with value true instead of a string,
         // ... which can't be used as a string. So, Let's check for those cases
-        // e.g of error cases: 
+        // e.g of error cases:
         //      `cordova run android -- --livereload --ignore, // with no path to ignore
         //      `cordova run android -- --livereload --ignore= css, // with space after the '=' sign
         //      etc...
@@ -71,12 +71,12 @@ module.exports.start = function (projectRoot, platforms, options) {
         if (options.ignore) {
             ignoreOption = path.join(projectRoot, 'www', options.ignore);
         }
- 
+
         var bs = new BrowserSyncServer(projectRoot, {
             files: [{
                 match: [path.join(projectRoot, 'www', '**/*.*')],
                 fn: function (event, file) {
-                
+
                     // This is used by external clients (consumers of this npm package)
                     var externalAPI = {
                         stop: bs.stopServer,
@@ -99,7 +99,7 @@ module.exports.start = function (projectRoot, platforms, options) {
                 // If user specified files/folders to ignore (via `cordova run android -- --livereload --ignore=build/**/*.*`), ignore those files
                 // ... Otherwise, don't ignore any files (That's the default). The function below achieves that goal.
                 ignored: ignoreOption || function (str) {
-                    return false; 
+                    return false;
                 },
 
                 // Ignore the initial add events .
@@ -110,7 +110,7 @@ module.exports.start = function (projectRoot, platforms, options) {
             tunnel: options.tunnel || false,
             ghostMode: options.ghostMode || true
         });
-        
+
         return bs.startServer().then(function (serverUrl) {
             var patcher = new Patcher(projectRoot, platforms);
             return patcher.patch(serverUrl);

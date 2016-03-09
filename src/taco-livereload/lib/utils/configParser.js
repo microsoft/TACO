@@ -23,23 +23,14 @@ function parseXml(filename) {
 
 //module.exports.getStartPage = getStartPage;
 
-module.exports.ChangeStartPage = function(hostedPage, configXML) {
-    var xml = parseXml(configXML);
-    var contentTag = xml.find('content[@src]');
-    if (contentTag) {
-        contentTag.attrib.src = hostedPage;
-    }
-    // Also add allow nav in case of 
-    var allowNavTag = et.SubElement(xml.find('.'), 'allow-navigation');
-    allowNavTag.set('href', '*');
-    fs.writeFileSync(configXML, xml.write({
-        indent: 4
-    }), "utf-8");
-    return configXML;
-};
-
 module.exports.GetStartPage = function(configXML) {
     var parsedConfigXML = parseXml(configXML);
     var contentTag = parsedConfigXML.find('content[@src]');
     return contentTag.attrib.src;
+};
+
+module.exports.GetProjectName = function(configXML) {
+    var parsedConfigXML = parseXml(configXML);
+    var nameTag = parsedConfigXML.find('name');
+    return nameTag.text;
 };
