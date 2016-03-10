@@ -1,4 +1,7 @@
-﻿/// <reference path="../../../typings/node.d.ts" />
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
+/// <reference path="../../../typings/node.d.ts" />
 import fs = require ("fs");
 import http = require ("http");
 import https = require ("https");

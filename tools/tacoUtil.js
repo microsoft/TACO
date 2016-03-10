@@ -1,10 +1,6 @@
-/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
 var exec = require("child_process").exec;
 var fs = require("fs");
 var path = require ("path");

@@ -1,4 +1,7 @@
-﻿/// <reference path="../../cli/utils/settings.ts" />
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
+/// <reference path="../../cli/utils/settings.ts" />
 
 import Settings = require ("../../cli/utils/settings");
 
