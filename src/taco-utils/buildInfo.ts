@@ -18,6 +18,8 @@ module TacoUtility {
         public static COMPLETE: string = "Complete";
         public static EMULATED: string = "Emulated";
         public static RUNNING: string = "Running";
+        public static CRASHED: string = "Crashed";
+        public static TERMINATED: string = "Terminated";
         public static INSTALLED: string = "Installed";
         public static DEBUGGING: string = "Debugging";
         public static DOWNLOADED: string = "Downloaded";
