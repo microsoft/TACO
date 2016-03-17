@@ -1,10 +1,6 @@
-/**
- *******************************************************
- *                                                     *
- *   Copyright (C) Microsoft. All rights reserved.     *
- *                                                     *
- *******************************************************
- */
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
 // NOTE: This file is intended to run on-require, and print the logo, only once.
 // We avoid using logger.log and other package dependencies because this is required in
 // a couple of places including post-install, and we don't want to drag in all the infrastructure
