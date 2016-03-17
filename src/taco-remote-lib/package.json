@@ -28,7 +28,8 @@
         "plist-with-patches": "0.5.1",
         "taco-utils": "file:../taco-utils",
         "semver": "^4.3.6",
-        "archiver": "^0.16.0"
+        "archiver": "^0.16.0",
+	"idevice-app-launcher": "^0.1.0"
     },
     "devDependencies": {
         "mocha": "2.0.1",

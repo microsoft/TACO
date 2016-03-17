@@ -17,10 +17,12 @@ import Q = require ("q");
 import util = require ("util");
 import archiver = require ("archiver");
 
-import iosAppRunner = require ("./iosAppRunnerHelper");
+import ideviceAppLauncher = require ("idevice-app-launcher");
 import resources = require ("../resources/resourceManager");
 import sharedState = require ("./sharedState");
 import utils = require ("taco-utils");
+
+import iosAppRunner = ideviceAppLauncher.raw;
 
 import BuildInfo = utils.BuildInfo;
 import Logger = utils.Logger;
