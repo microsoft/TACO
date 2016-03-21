@@ -96,7 +96,7 @@ module TacoUtility {
         // Need to declare FILE_REGEX_PREFIX before FILE_URI_REGEX, but don't want to expose it outside the class
         private static FILE_REGEX_PREFIX: string = "file://";
         private static CORDOVA_NPM_PACKAGE_NAME: string = "cordova";
-        public static GIT_URI_REGEX: RegExp = /^http(s?)\\:\/\/.*|.*\.git$/;
+        public static GIT_URI_REGEX: RegExp = /(^http(s?):\/\/.*)|(.*\.git(#.*)?$)/;
         public static FILE_URI_REGEX: RegExp = new RegExp("^" + TacoPackageLoader.FILE_REGEX_PREFIX + ".*");
 
         public static mockForTests: TacoUtility.ITacoPackageLoader;

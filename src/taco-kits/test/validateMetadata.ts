@@ -79,8 +79,7 @@ function validateComponent(packageName: string, version: string, src: string): Q
     // validate that version is correct
     if (version) {
         return NpmHelper.view(packageName, ["versions"])
-            .then(result => {
-                var versions = result[Object.keys(result)[0]].versions;
+            .then(versions => {
                 if (versions.indexOf(version) <= -1){
                     console.log(packageName + "@" + version);
                 }
