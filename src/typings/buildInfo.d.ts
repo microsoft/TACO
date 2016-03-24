@@ -17,6 +17,8 @@ declare module TacoUtility {
         static COMPLETE: string;
         static EMULATED: string;
         static RUNNING: string;
+        static CRASHED: string;
+        static TERMINATED: string;
         static INSTALLED: string;
         static DEBUGGING: string;
         static DOWNLOADED: string;
