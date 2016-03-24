@@ -49,6 +49,8 @@ module TacoUtility {
             npmProcess.on("exit", (code: number, signal: string) => {
                 if (code === 0) {
                     deferred.resolve([stdout, stderr]);
+                } else {
+                    deferred.reject(code);
                 }
             });
 
