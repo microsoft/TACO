@@ -1,10 +1,5 @@
-﻿/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
 
 /// <reference path="../../typings/cordovaExtensions.d.ts" />
 /// <reference path="../../typings/nameDescription.d.ts" />
@@ -666,30 +661,20 @@ class Kit extends commands.TacoCommandBase {
      * Validates whether the version string passed is a valid Cordova version
      */
     private static validateCliVersion(version: string): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer<any>();
-
         if (!semver.valid(version)) {
             return Q.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
         }
 
         CordovaHelper.ensureCordovaVersionAcceptable(version);
         
-        NpmHelper.view("cordova", ["versions"])
-            .then(function(result) {
-                var versions: any[] = [];
-                if (result) {
-                    var cordovaVersion = Object.keys(result)[0];
-                    versions = result[cordovaVersion].versions;
-                }
-
+        return NpmHelper.view("cordova", ["versions"])
+            .then(function(versions: string[]) {
                 if (versions.indexOf(version) !== -1) {
-                    deferred.resolve(version);
+                    return version;
                 } else {
-                    deferred.reject(errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova"));
+                    throw errorHelper.get(TacoErrorCodes.ErrorInvalidVersion, version, "cordova");
                 }
             });
-
-        return deferred.promise;
     }
 
     /**

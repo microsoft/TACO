@@ -1,10 +1,5 @@
-/**
-﻿ *******************************************************
-﻿ *                                                     *
-﻿ *   Copyright (C) Microsoft. All rights reserved.     *
-﻿ *                                                     *
-﻿ *******************************************************
-﻿ */
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
 
 /// <reference path="../../typings/mocha.d.ts"/>
 /// <reference path="../../typings/should.d.ts"/>
@@ -84,8 +79,7 @@ function validateComponent(packageName: string, version: string, src: string): Q
     // validate that version is correct
     if (version) {
         return NpmHelper.view(packageName, ["versions"])
-            .then(result => {
-                var versions = result[Object.keys(result)[0]].versions;
+            .then(versions => {
                 if (versions.indexOf(version) <= -1){
                     console.log(packageName + "@" + version);
                 }

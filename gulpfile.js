@@ -1,4 +1,7 @@
-﻿/* placeholder gulpfile, allows calling gulpmain tasks */
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
+/* placeholder gulpfile, allows calling gulpmain tasks */
 var fs = require("fs"),
     path = require('path'),
     gulp = require("gulp"),
