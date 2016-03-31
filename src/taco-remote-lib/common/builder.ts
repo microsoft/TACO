@@ -40,24 +40,11 @@ class Builder {
         this.currentBuild = currentBuild;
         this.cordova = cordova;
 
-        function beforePrepare(data: any): void {
-            // Instead of a build, we call prepare and then compile
-            // trigger the before_build in case users expect it
-            cordova.emit("before_build", data);
-        }
-
-        function afterCompile(data: any): void {
-            // Instead of a build, we call prepare and then compile
-            // trigger the after_build in case users expect it
-            cordova.emit("after_build", data);
-        }
         cordova.on("results", Logger.log);
         cordova.on("log", Logger.log);
         cordova.on("warn", Logger.logWarning);
         cordova.on("error", Logger.logError);
         cordova.on("verbose", Logger.log);
-        cordova.on("before_prepare", beforePrepare);
-        cordova.on("after_compile", afterCompile);
     }
 
     public build(): Q.Promise<BuildInfo> {
@@ -72,13 +59,8 @@ class Builder {
             .then(function (): Q.Promise<any> { return self.update_plugins(); })
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingPlatform", self.currentBuild.buildPlatform); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return self.beforePrepare(); })
-            .then(function (): Q.Promise<any> { return self.addAndPreparePlatform(); })
-            .then(function (): Q.Promise<any> { return self.afterPrepare(); })
-            .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "CopyingNativeOverrides"); process.send(self.currentBuild); })
-            .then(function (): Q.Promise<any> { return self.prepareNativeOverrides(); })
-            .then(function (): Q.Promise<any> { return self.beforeCompile(); })
-            .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "CordovaCompiling"); process.send(self.currentBuild); })
-            .then(function (): Q.Promise<any> { return self.compile_platform(); })
+            .then(function (): Q.Promise<any> { return self.addPlatform(); })
+            .then(function (): Q.Promise<any> { return self.build_platform(); })
             .then(function (): Q.Promise<any> { return self.afterCompile(); })
             .then(function (): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(self.currentBuild); })
             .then(function (): Q.Promise<any> { return isDeviceBuild ? self.package() : Q({}); })
@@ -106,14 +88,6 @@ class Builder {
         return Q({});
     }
 
-    protected afterPrepare(): Q.Promise<any> {
-        return Q({});
-    }
-
-    protected beforeCompile(): Q.Promise<any> {
-        return Q({});
-    }
-
     protected afterCompile(): Q.Promise<any> {
         return Q({});
     }
@@ -122,14 +96,12 @@ class Builder {
         return Q({});
     }
 
-    private addAndPreparePlatform(): Q.Promise<any> {
+    private addPlatform(): Q.Promise<any> {
         if (!fs.existsSync("platforms")) {
             fs.mkdirSync("platforms");
         }
 
-        return this.ensurePlatformAdded().then(() => {
-            return this.update_platform();
-        });
+        return this.ensurePlatformAdded();
     }
 
     /**
@@ -277,33 +249,15 @@ class Builder {
             .finally(function(): void {
                 // Always clean up after ourselves; we don't want to get confused the next time we do a build.
                 rimraf.sync(remotePluginsPath);
+            })
+            .then(() => {
+                // Ensure that we have cordova-plugin-vs-taco-support installed
+                return self.cordova.raw.plugin("add", "cordova-plugin-vs-taco-support");
             });
     }
 
-    private update_platform(): Q.Promise<any> {
-        // This step is what will push updated files from www/ to platforms/ios/www
-        // It will also clobber any changes to some platform specific files such as platforms/ios/config.xml
-        return this.cordova.raw.prepare({ platforms: [this.currentBuild.buildPlatform] });
-    }
-
-    private prepareNativeOverrides(): Q.Promise<any> {
-        var resFrom: string = path.join("res", "native", this.currentBuild.buildPlatform);
-        if (!fs.existsSync(resFrom)) {
-            // If res -> native folder isn't here then it could be a project that was created when
-            // the res -> cert folder still existed, so check for that location as well.
-            resFrom = path.join("res", "cert", this.currentBuild.buildPlatform);
-        }
-
-        if (fs.existsSync(resFrom)) {
-            var resTo: string = path.join("platforms", this.currentBuild.buildPlatform);
-            return UtilHelper.copyRecursive(resFrom, resTo);
-        }
-
-        return Q({});
-    }
-
-    private compile_platform(): Q.Promise<any> {
-        Logger.log("cordova compile " + this.currentBuild.buildPlatform);
+    private build_platform(): Q.Promise<any> {
+        Logger.log("cordova build " + this.currentBuild.buildPlatform);
         //var opts: string [] = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
         var opts: Cordova.ICordova540BuildOptions = {};
         if (this.currentBuild.configuration === "debug") {
@@ -317,7 +271,7 @@ class Builder {
             opts.emulator = true;
         }
         opts.argv = this.currentBuild.options;
-        return this.cordova.raw.compile({ platforms: [this.currentBuild.buildPlatform], options: opts });
+        return this.cordova.raw.build({ platforms: [this.currentBuild.buildPlatform], options: opts });
     }
 }
 
