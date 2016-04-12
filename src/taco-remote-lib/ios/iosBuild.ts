@@ -73,14 +73,6 @@ class IOSBuilder extends Builder {
         return Q({});
     }
 
-    protected afterPrepare(): Q.Promise<any> {
-        return this.applyPreferencesToBuildConfig(this.cfg);
-    }
-
-    protected beforeCompile(): Q.Promise<any> {
-        return this.updateAppPlistBuildNumber();
-    }
-
     protected afterCompile(): Q.Promise<any> {
         return this.renameApp();
     }
@@ -110,69 +102,6 @@ class IOSBuilder extends Builder {
             });
 
         return deferred.promise;
-    }
-
-    // Public for unit tests
-    public applyPreferencesToBuildConfig(config: CordovaConfig): Q.Promise<any> {
-        var promise: Q.Promise<any> = Q({});
-        var self: IOSBuilder = this;
-
-        var preferences: { [key: string]: string } = config.preferences();
-
-        // Always put the targeted device into the build config.
-        // If a valid overriding device is not given, use 'universal'
-        var deviceToAdd: string = "1,2";
-        var validOverridingTargetDevices: { [device: string]: string } = {};
-        validOverridingTargetDevices["handset"] = "1";
-        validOverridingTargetDevices["tablet"] = "2";
-
-        var targetDevice: string = preferences["target-device"];
-        if (targetDevice && validOverridingTargetDevices[targetDevice]) {
-            deviceToAdd = validOverridingTargetDevices[targetDevice];
-        }
-
-        promise = promise.then(function (): Q.Promise<any> {
-            return self.appendToBuildConfig("TARGETED_DEVICE_FAMILY = " + deviceToAdd);
-        });
-
-        var deploymentTarget: string = preferences["deployment-target"];
-        if (deploymentTarget) {
-            promise = promise.then(function (): Q.Promise<any> {
-                return self.appendToBuildConfig("IPHONEOS_DEPLOYMENT_TARGET = " + deploymentTarget);
-            });
-        }
-
-        // Ensure we end the line so the config file is in a good state if we try to append things later.
-        promise = promise.then(function (): Q.Promise<any> {
-            return self.appendToBuildConfig("");
-        });
-
-        return promise;
-    }
-
-    private appendToBuildConfig(data: string): Q.Promise<any> {
-        var deferred: Q.Deferred<any> = Q.defer();
-
-        var buildConfigDir: string = path.join("platforms", "ios", "cordova");
-        if (!fs.existsSync(buildConfigDir)) {
-            deferred.reject(new Error(resources.getString("ErrorXcconfigDirNotFound")));
-        } else {
-            fs.appendFile(path.join(buildConfigDir, "build.xcconfig"), "\n" + data, function (err: any): void {
-                if (err) {
-                    deferred.reject(new Error(err));
-                } else {
-                    deferred.resolve({});
-                }
-            });
-        }
-
-        return deferred.promise;
-    }
-
-    private updateAppPlistBuildNumber(): Q.Promise<any> {
-        var appPlistFile: string = path.join("platforms", "ios", this.currentBuild["appName"], this.currentBuild["appName"] + "-Info.plist");
-        plist.updateAppBundleVersion(appPlistFile, this.currentBuild.buildNumber);
-        return Q({});
     }
 
     private renameApp(): Q.Promise<any> {
