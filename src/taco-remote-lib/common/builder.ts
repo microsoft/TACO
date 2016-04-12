@@ -60,7 +60,7 @@ class Builder {
             .then(function(): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "UpdatingPlatform", self.currentBuild.buildPlatform); process.send(self.currentBuild); })
             .then(function(): Q.Promise<any> { return self.beforePrepare(); })
             .then(function(): Q.Promise<any> { return self.addPlatform(); })
-            .then(function(): Q.Promise<any> { return self.build_platform(); })
+            .then(function(): Q.Promise<any> { return self.buildPlatform(); })
             .then(function(): Q.Promise<any> { return self.afterCompile(); })
             .then(function(): void { self.currentBuild.updateStatus(BuildInfo.BUILDING, "PackagingNativeApp"); process.send(self.currentBuild); })
             .then(function(): Q.Promise<any> { return isDeviceBuild ? self.package() : Q({}); })
@@ -261,7 +261,7 @@ class Builder {
             });
     }
 
-    private build_platform(): Q.Promise<any> {
+    private buildPlatform(): Q.Promise<any> {
         Logger.log("cordova build " + this.currentBuild.buildPlatform);
         var configuration: string = (this.currentBuild.configuration === "debug") ? "--debug" : "--release";
         var opts: string[] = (this.currentBuild.options.length > 0) ? [this.currentBuild.options, configuration] : [configuration];
