@@ -216,6 +216,9 @@ class Server {
         return Q(http.createServer(app)).
             then(function (svr: http.Server): Q.Promise<http.Server> {
                 var deferred: Q.Deferred<http.Server> = Q.defer<http.Server>();
+		// Increase the timeout to work around disconnects on larger uploads
+		// https://blog.cloudflare.com/the-curious-case-of-slow-downloads/
+		svr.setTimeout(5*60*1000);
                 svr.on("error", function (err: any): void {
                     deferred.reject(Server.friendlyServerListenError(err, conf));
                 });
@@ -288,6 +291,9 @@ class Server {
             }).
             then(function (svr: https.Server): Q.Promise<https.Server> {
                 var deferred: Q.Deferred<https.Server> = Q.defer<https.Server>();
+		// Increase the timeout to work around disconnects on larger uploads
+		// https://blog.cloudflare.com/the-curious-case-of-slow-downloads/
+		svr.setTimeout(5*60*1000);
                 svr.on("error", function (err: any): void {
                     if (generatedNewCerts) {
                         HostSpecifics.hostSpecifics.removeAllCertsSync(conf);
