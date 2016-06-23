@@ -63,19 +63,8 @@ BrowserSyncServer.prototype.startServer = function () {
             return;
         }
 
-        // If the user specified the '--tunnel' option, use a localtunnel.me address
-        var serverUrl = self.options.tunnel ? bs.options.getIn(['urls', 'tunnel']) : bs.options.getIn(['urls', 'external']);
-
-        // In case there is no external url
-        // e.g: When the machine is not connected to any network
-        if (!serverUrl) {
-            // Usually, this err msg ends up being null in this case.
-            var error = new Error('No External URLs available. Make sure your computer is connected to a network.' + (err ? err.msg : ''));
-            deferred.reject(error);
-            return;
-        }
-
-        deferred.resolve(serverUrl);
+        var serverUrls = bs.options.getIn(['urls']);
+        deferred.resolve(serverUrls.toJS());
         return;
     });
 
