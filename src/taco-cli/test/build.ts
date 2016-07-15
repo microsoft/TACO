@@ -58,7 +58,7 @@ describe("taco build", function (): void {
     var originalCwd: string;
     var vcordova: string = "4.0.0";
     var projectPath: string = path.join(tacoHome, "example");
-
+    this.timeout(50000);
     function createCleanProject(): Q.Promise<any> {
         // Create a dummy test project with no platforms added
         utils.createDirectoryIfNecessary(tacoHome);
