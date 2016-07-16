@@ -13,7 +13,7 @@ due to an issue with the [npm package 'ios-sim'](https://www.npmjs.com/package/i
 Livereload doesn't work with projects created with an Ionic Base Template (via `taco create foo --template https://github.com/driftyco/ionic-app-base`).
 This is due to the fact that the `cordova-plugin-whitelist` plugin isn't part of the template's config.xml.
 To resolve it, do the following:
-    - `taco platform add cordova-plugin-whitelist --save`
+    - `taco plugin add cordova-plugin-whitelist --save`
     - `taco run <platform> --livereload`
 
 
