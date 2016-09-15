@@ -1,7 +1,0 @@
-﻿some text
-$projectname$
-$appid$
-$appID$
-$randomToken$$$$
-more text
-<xml_node xml_attribute="$projectname$">$appid$</xml_node>
